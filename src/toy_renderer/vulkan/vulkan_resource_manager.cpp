@@ -5,12 +5,10 @@ using namespace ToyRenderer;
 VulkanResourceManager::VulkanResourceManager()
     : ResourceManager()
 {
-    
 }
 
 VulkanResourceManager::~VulkanResourceManager()
 {
-    
 }
 
 Handle<BindGroup> VulkanResourceManager::createBindGroup(BindGroupDescription desc)
@@ -21,5 +19,4 @@ Handle<BindGroup> VulkanResourceManager::createBindGroup(BindGroupDescription de
 
 void VulkanResourceManager::deleteBindGroup(Handle<BindGroup> handle)
 {
-    
 }

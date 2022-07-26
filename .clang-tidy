@@ -1,0 +1,23 @@
+---
+Checks:          'clang-diagnostic-*,clang-analyzer-*,-clang-analyzer-alpha*,*,-google-*,-cppcoreguidelines-*,-readability-else-after-return,-readability-implicit-bool-cast,-llvmlibc-*,-llvm-include-order,-readability-named-parameter,-readabilty-namespace-comments,-llvm-namespace-comment,-clang-analyzer-alpha.core.CastToStruct,-modernize-use-override,-modernize-use-bool-literals,-clang-analyzer-cplusplus.NewDeleteLeaks,-clang-analyzer-alpha.deadcode.UnreachableCode,-modernize-use-default,-clang-analyzer-core.CallAndMessage,-modernize-pass-by-value,-clang-analyzer-core.NonNullParamChecker,-modernize-raw-string-literal,-modernize-use-using,-modernize-loop-convert,-modernize-use-emplace,-modernize-return-braced-init-list,-modernize-use-default-member-init,-modernize-use-equals-default,-fuchsia-*,-hicpp-*,-readability-implicit-bool-conversioni,-altera-unroll-loops'
+WarningsAsErrors: ''
+HeaderFilterRegex: ''
+AnalyzeTemporaryDtors: false
+CheckOptions:
+  - key:             cert-oop11-cpp.UseCERTSemantics
+    value:           '1'
+  - key:             modernize-loop-convert.MaxCopySize
+    value:           '16'
+  - key:             modernize-loop-convert.MinConfidence
+    value:           reasonable
+  - key:             modernize-loop-convert.NamingStyle
+    value:           CamelCase
+  - key:             modernize-pass-by-value.IncludeStyle
+    value:           llvm
+  - key:             modernize-replace-auto-ptr.IncludeStyle
+    value:           llvm
+  - key:             modernize-use-nullptr.NullMacros
+    value:           'NULL'
+  - key:             readability-braces-around-statements.ShortStatementLines
+    value:           '3'
+...

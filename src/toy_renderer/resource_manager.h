@@ -5,7 +5,7 @@
 #include <toy_renderer/handle.h>
 
 namespace ToyRenderer {
-    
+
 class BindGroup;
 
 class TOY_RENDERER_EXPORT ResourceManager
@@ -13,7 +13,7 @@ class TOY_RENDERER_EXPORT ResourceManager
 public:
     ResourceManager();
     virtual ~ResourceManager();
-    
+
     // virtual Handle<Shader> createShader(ShaderDescription desc) = 0;
     virtual Handle<BindGroup> createBindGroup(BindGroupDescription desc) = 0;
     // virtual Handle<Texture> createTexture(TextureDescription desc) = 0;
@@ -25,4 +25,4 @@ public:
     // virtual void deleteBuffer(Handle<Buffer> handle) = 0;
 };
 
-}
+} // namespace ToyRenderer
