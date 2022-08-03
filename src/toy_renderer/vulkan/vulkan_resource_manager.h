@@ -9,7 +9,7 @@ class TOY_RENDERER_EXPORT VulkanResourceManager : public ResourceManager
 public:
     VulkanResourceManager();
     ~VulkanResourceManager() override;
-    
+
     // Handle<Shader> createShader(ShaderDescription desc) override;
     Handle<BindGroup> createBindGroup(BindGroupDescription desc) override;
     // Handle<Texture> createTexture(TextureDescription desc) override;
@@ -21,4 +21,4 @@ public:
     // void deleteBuffer(Handle<Buffer> handle) override;
 };
 
-}
+} // namespace ToyRenderer
