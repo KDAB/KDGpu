@@ -50,7 +50,8 @@ Handle<Instance_t> VulkanResourceManager::createInstance(const InstanceOptions &
         throw std::runtime_error("Failed to create Vulkan instance!");
     }
 
-    return {};
+    auto h = m_instances.emplace(instance);
+    return h;
 }
 
 void VulkanResourceManager::deleteInstance(Handle<Instance_t> handle)

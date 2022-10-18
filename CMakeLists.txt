@@ -8,16 +8,17 @@ project(ToyRenderer VERSION 0.0.1)
 
 set(BUILD_SHARED_LIBS ON)
 add_definitions(-DASSET_PATH="${CMAKE_CURRENT_BINARY_DIR}/assets")
-if (TOY_RENDERER_LARGE_ASSETS)
+
+if(TOY_RENDERER_LARGE_ASSETS)
     add_definitions(-DLARGE_ASSET_PATH="${CMAKE_CURRENT_BINARY_DIR}/assets/large-assets")
 endif()
 
 # Add a DEBUG define on DEBUG builds
 add_compile_options("$<$<CONFIG:DEBUG>:-DDEBUG>")
 
-if ((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT APPLE) OR
-        (CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND NOT APPLE) OR
-        (CMAKE_CXX_COMPILER_ID STREQUAL "Intel" AND NOT WIN32))
+if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT APPLE) OR
+    (CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND NOT APPLE) OR
+    (CMAKE_CXX_COMPILER_ID STREQUAL "Intel" AND NOT WIN32))
     # Linker warnings should be treated as errors
     set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--fatal-warnings ${CMAKE_SHARED_LINKER_FLAGS}")
     set(CMAKE_MODULE_LINKER_FLAGS "-Wl,--fatal-warnings ${CMAKE_MODULE_LINKER_FLAGS}")
@@ -30,6 +31,7 @@ endif()
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|AppleClang|GNU")
     add_compile_options(-Wimplicit-fallthrough)
 endif()
+
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # Silences a warning on raspberry pi gcc. See:
     # https://stackoverflow.com/questions/48149323/what-does-the-gcc-warning-project-parameter-passing-for-x-changed-in-gcc-7-1-m
@@ -52,27 +54,31 @@ include(dependencies)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     option(TOY_RENDERER_CODE_COVERAGE "Code Coverage" OFF)
-    if (TOY_RENDERER_CODE_COVERAGE)
+
+    if(TOY_RENDERER_CODE_COVERAGE)
         include(cmake/CodeCoverage.cmake)
     endif()
 endif()
 
 add_subdirectory(src)
-# add_subdirectory(assets)
 
-# option(TOY_RENDERER_BUILD_TESTS "Build tests" OFF)
-# if (TOY_RENDERER_BUILD_TESTS)
-#     enable_testing()
-#     add_subdirectory(tests)
-# endif()
+# add_subdirectory(assets)
+option(TOY_RENDERER_BUILD_TESTS "Build tests" ON)
+
+if(TOY_RENDERER_BUILD_TESTS)
+    add_feature_info(ToyRenderer-Tests ON "Build Tests")
+    enable_testing()
+    add_subdirectory(tests)
+endif()
 
 option(TOY_RENDERER_BUILD_EXAMPLES "Build examples" ON)
-if (TOY_RENDERER_BUILD_EXAMPLES)
+
+if(TOY_RENDERER_BUILD_EXAMPLES)
     add_feature_info(ToyRenderer-Examples ON "Build Examples")
     add_subdirectory(examples)
 endif()
 
 feature_summary(WHAT PACKAGES_FOUND ENABLED_FEATURES PACKAGES_NOT_FOUND DISABLED_FEATURES
-                INCLUDE_QUIET_PACKAGES)
+    INCLUDE_QUIET_PACKAGES)

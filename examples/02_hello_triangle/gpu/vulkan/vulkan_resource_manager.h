@@ -28,7 +28,7 @@ public:
     // virtual void deleteBuffer(Handle<Buffer> handle) = 0;
 
 private:
-    Pool<VkInstance, Instance_t> m_instances;
+    Pool<VkInstance, Instance_t> m_instances{ 1 };
 };
 
 } // namespace Gpu

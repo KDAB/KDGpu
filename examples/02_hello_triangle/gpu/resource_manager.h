@@ -1,6 +1,7 @@
 #include "instance.h"
 
 #include <toy_renderer/handle.h>
+#include <toy_renderer/pool.h>
 
 namespace Gpu {
 
