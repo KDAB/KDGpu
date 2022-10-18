@@ -93,7 +93,7 @@ public:
     template<typename... Args>
     Handle<H> emplace(Args &&...args)
     {
-        if (m_data.size() >= m_capacity)
+        if (size() >= m_capacity)
             growCapacity();
 
         if (m_freeIndices.size() > 0) {
@@ -152,7 +152,7 @@ public:
     // Convert an entry index into a Handle<H>, if possible otherwise returns an invalid handle
     Handle<H> handleForIndex(uint32_t entryIndex) const
     {
-        if (entryIndex >= capacity() || m_generations[entryIndex].isAlive == false)
+        if (entryIndex >= m_generations.size() || m_generations[entryIndex].isAlive == false)
             return {};
         return Handle<H>{ entryIndex, m_generations[entryIndex].generation };
     }
