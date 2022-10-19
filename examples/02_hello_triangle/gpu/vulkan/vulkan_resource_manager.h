@@ -17,6 +17,10 @@ public:
     Handle<Instance_t> createInstance(const InstanceOptions &options) final;
     void deleteInstance(Handle<Instance_t> handle) final;
 
+    // Should we refactor this into more smaller classes like the platform integration?
+    uint32_t adapterCount(const Handle<Instance_t> &instance) const final;
+    Handle<Adapter_t> getAdapter(const Handle<Instance_t> &instance, uint32_t index) final;
+
     // virtual Handle<Shader> createShader(ShaderDescription desc) = 0;
     // virtual Handle<BindGroup> createBindGroup(BindGroupDescription desc) = 0;
     // virtual Handle<Texture> createTexture(TextureDescription desc) = 0;
@@ -29,6 +33,7 @@ public:
 
 private:
     Pool<VkInstance, Instance_t> m_instances{ 1 };
+    Pool<VkPhysicalDevice, Adapter_t> m_adapters{ 1 };
 };
 
 } // namespace Gpu

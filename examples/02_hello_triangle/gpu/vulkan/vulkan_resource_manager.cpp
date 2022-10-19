@@ -58,4 +58,35 @@ void VulkanResourceManager::deleteInstance(Handle<Instance_t> handle)
 {
 }
 
+uint32_t VulkanResourceManager::adapterCount(const Handle<Instance_t> &instance) const
+{
+    VkInstance vkInstance = *m_instances.get(instance);
+    uint32_t deviceCount = 0;
+    vkEnumeratePhysicalDevices(vkInstance, &deviceCount, nullptr);
+    return deviceCount;
+}
+
+Handle<Adapter_t> VulkanResourceManager::getAdapter(const Handle<Instance_t> &instance, uint32_t index)
+{
+    // TODO: This is not ideal, we should only do this once rather than deviceCount times
+    VkInstance vkInstance = *m_instances.get(instance);
+    uint32_t deviceCount = 0;
+    vkEnumeratePhysicalDevices(vkInstance, &deviceCount, nullptr);
+    std::vector<VkPhysicalDevice> devices(deviceCount);
+    vkEnumeratePhysicalDevices(vkInstance, &deviceCount, devices.data());
+    auto h = m_adapters.emplace(devices.at(index));
+    return h;
+}
+
+// Handle<Adapter_t> VulkanResourceManager::createAdapter(
+//         const Handle<Instance_t> &instance,
+//         const AdapterOptions &options)
+// {
+//     return {};
+// }
+
+// void VulkanResourceManager::deleteAdapter(Handle<Adapter_t> handle)
+// {
+// }
+
 } // namespace Gpu

@@ -1,4 +1,5 @@
 #include "instance.h"
+#include "adapter.h"
 
 #include <toy_renderer/handle.h>
 #include <toy_renderer/pool.h>
@@ -14,6 +15,9 @@ public:
 
     virtual Handle<Instance_t> createInstance(const InstanceOptions &options) = 0;
     virtual void deleteInstance(Handle<Instance_t> handle) = 0;
+
+    virtual uint32_t adapterCount(const Handle<Instance_t> &instance) const = 0;
+    virtual Handle<Adapter_t> getAdapter(const Handle<Instance_t> &instance, uint32_t index) = 0;
 
     // virtual Handle<Shader> createShader(ShaderDescription desc) = 0;
     // virtual Handle<BindGroup> createBindGroup(BindGroupDescription desc) = 0;

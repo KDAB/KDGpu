@@ -21,7 +21,9 @@ int main()
     };
     Gpu::Instance instance(options);
 
-    Gpu::Adapter adapter = instance.requestAdapter();
+    auto adapters = instance.adapters();
+
+    // Gpu::Adapter adapter = instance.requestAdapter();
     // Device device = adapter.requestDevice();
 
     return 0;

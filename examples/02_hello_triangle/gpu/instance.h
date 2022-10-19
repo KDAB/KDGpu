@@ -5,6 +5,7 @@
 
 #include <toy_renderer/handle.h>
 
+#include <span>
 #include <string>
 #include <vector>
 
@@ -26,12 +27,13 @@ public:
     Instance(const InstanceOptions &options);
     ~Instance();
 
-    bool isValid() const { return m_handle.isValid(); }
+    bool isValid() const { return m_instance.isValid(); }
 
-    Adapter requestAdapter(const AdapterSettings &settings = AdapterSettings());
+    std::span<Adapter> adapters();
 
 private:
-    Handle<Instance_t> m_handle;
+    Handle<Instance_t> m_instance;
+    std::vector<Adapter> m_adapters;
 };
 
 } // namespace Gpu

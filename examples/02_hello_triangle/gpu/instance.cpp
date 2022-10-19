@@ -1,4 +1,5 @@
 #include "instance.h"
+
 #include "resource_manager.h"
 
 namespace Gpu {
@@ -10,8 +11,8 @@ Instance::Instance()
 
 Instance::Instance(const InstanceOptions &options)
 {
-    // TODO: Create an instance using the underlying API
-    m_handle = ResourceManager::instance()->createInstance(options);
+    // Create an instance using the underlying API
+    m_instance = ResourceManager::instance()->createInstance(options);
 }
 
 Instance::~Instance()
@@ -19,10 +20,17 @@ Instance::~Instance()
     // TODO: Destroy the instance using the underlying API
 }
 
-Adapter Instance::requestAdapter(const AdapterSettings &settings)
+std::span<Adapter> Instance::adapters()
 {
-    // TODO: Create an adapter using the underlying API
-    return Adapter();
+    if (!m_adapters.empty())
+        return std::span{ m_adapters };
+
+    const auto adapterCount = ResourceManager::instance()->adapterCount(m_instance);
+    m_adapters.reserve(adapterCount);
+    for (auto adapterIndex = 0; adapterIndex < adapterCount; ++adapterIndex)
+        m_adapters.emplace_back(Adapter(m_instance, adapterIndex));
+
+    return std::span{ m_adapters };
 }
 
 } // namespace Gpu
