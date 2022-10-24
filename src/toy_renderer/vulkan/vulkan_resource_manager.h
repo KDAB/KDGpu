@@ -41,6 +41,7 @@ public:
 
     Handle<Adapter_t> insertAdapter(VkPhysicalDevice physicalDevice);
     void removeAdapter(Handle<Adapter_t> handle) final;
+    VkPhysicalDevice *getAdapter(const Handle<Adapter_t> &handle) { return m_adapters.get(handle); }
 
     // virtual Handle<Shader> createShader(ShaderDescription desc) = 0;
     Handle<BindGroup> createBindGroup(BindGroupDescription desc) final;

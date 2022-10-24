@@ -1,5 +1,7 @@
 #include "vulkan_graphics_api.h"
 
+#include <toy_renderer/vulkan/vulkan_enums.h>
+
 namespace ToyRenderer {
 
 VulkanGraphicsApi::VulkanGraphicsApi()
@@ -31,6 +33,23 @@ std::vector<Handle<Adapter_t>> VulkanGraphicsApi::queryAdapters(const Handle<Ins
         adapterHandles.emplace_back(m_vulkanResourceManager->insertAdapter(physicalDevices[adapterIndex]));
 
     return adapterHandles;
+}
+
+AdapterProperties VulkanGraphicsApi::queryAdapterProperties(const Handle<Adapter_t> &adapterHandle)
+{
+    VkPhysicalDevice physicalDevice = *m_vulkanResourceManager->getAdapter(adapterHandle);
+    VkPhysicalDeviceProperties deviceProperties;
+    vkGetPhysicalDeviceProperties(physicalDevice, &deviceProperties);
+
+    AdapterProperties properties = {
+        .apiVersion = deviceProperties.apiVersion,
+        .driverVersion = deviceProperties.driverVersion,
+        .vendorID = deviceProperties.vendorID,
+        .deviceID = deviceProperties.deviceID,
+        .deviceType = vkPhysicalDeviceTypeToAdapterDeviceType(deviceProperties.deviceType),
+        .deviceName = deviceProperties.deviceName
+    };
+    return properties;
 }
 
 } // namespace ToyRenderer

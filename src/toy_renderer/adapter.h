@@ -24,15 +24,20 @@ struct AdapterOptions {
 class TOY_RENDERER_EXPORT Adapter
 {
 public:
+    Adapter();
     ~Adapter();
 
     bool isValid() const { return m_adapter.isValid(); }
+
+    const AdapterProperties &properties() const noexcept;
 
 private:
     explicit Adapter(GraphicsApi *api, const Handle<Adapter_t> &adapter);
 
     GraphicsApi *m_api{ nullptr };
     Handle<Adapter_t> m_adapter;
+    mutable AdapterProperties m_properties;
+    mutable bool m_propertiesQueried{ false };
 
     friend class Instance;
 };

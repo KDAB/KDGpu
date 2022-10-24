@@ -17,6 +17,7 @@ public:
     const ResourceManager *resourceManager() const noexcept { return m_resourceManager; }
 
     virtual std::vector<Handle<Adapter_t>> queryAdapters(const Handle<Instance_t> &instanceHandle) = 0;
+    virtual AdapterProperties queryAdapterProperties(const Handle<Adapter_t> &adapterHandle) = 0;
 
 protected:
     GraphicsApi();

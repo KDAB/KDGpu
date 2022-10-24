@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <string>
 
 #pragma once
 
@@ -35,5 +36,28 @@ enum class AdapterDeviceType {
     Cpu = 4,
     MaxEnum = 0x7FFFFFFF
 };
+
+inline std::string adapterDeviceTypeToString(AdapterDeviceType deviceType)
+{
+    switch (deviceType) {
+    case ToyRenderer::AdapterDeviceType::Other:
+        return "Other Device Type";
+
+    case ToyRenderer::AdapterDeviceType::IntegratedGpu:
+        return "Integrated GPU";
+
+    case ToyRenderer::AdapterDeviceType::DiscreteGpu:
+        return "Discrete GPU";
+
+    case ToyRenderer::AdapterDeviceType::VirtualGpu:
+        return "Virtual GPU";
+
+    case ToyRenderer::AdapterDeviceType::Cpu:
+        return "CPU";
+
+    default:
+        return "Unknown device type";
+    }
+}
 
 } // namespace ToyRenderer

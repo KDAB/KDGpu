@@ -3,6 +3,7 @@
 #include <toy_renderer/gpu_core.h>
 
 #include <stdint.h>
+#include <string>
 
 namespace ToyRenderer {
 
@@ -129,7 +130,7 @@ struct AdapterProperties {
     uint32_t vendorID;
     uint32_t deviceID;
     AdapterDeviceType deviceType;
-    char deviceName[maxAdapterNameSize];
+    std::string deviceName;
     uint8_t pipelineCacheUUID[UuidSize];
     AdapterLimits limits;
     AdapterSparseProperties sparseProperties;
