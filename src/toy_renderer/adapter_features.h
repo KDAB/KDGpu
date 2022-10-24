@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Gpu {
+namespace ToyRenderer {
 
 struct AdapterFeatures {
     bool robustBufferAccess;
@@ -60,4 +60,4 @@ struct AdapterFeatures {
     bool inheritedQueries;
 };
 
-} // namespace Gpu
+} // namespace ToyRenderer

@@ -1,30 +1,37 @@
-#include "gpu/instance.h"
-#include "gpu/serenity_gpu_global.h"
-#include "gpu/vulkan/vulkan_resource_manager.h"
+#include <toy_renderer/instance.h>
+#include <toy_renderer/gpu_core.h>
+#include <toy_renderer/vulkan/vulkan_graphics_api.h>
+
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
 
 #include <iostream>
 #include <map>
+#include <memory>
 #include <span>
 #include <vector>
 
+using namespace ToyRenderer;
+
 int main()
 {
-    // Somewhere we must decide which underlying graphics API we are using.
-    // This could be done via build-time or run-time configuration of Serenity.
-    // Here in this prototype we will simply hard-wire the selection.
-    // Once this is created, we can access it via ResourceManager::instance().
-    Gpu::VulkanResourceManager vk;
+    std::unique_ptr<GraphicsApi> api = std::make_unique<VulkanGraphicsApi>();
+    // OR
+    // std::unique_ptr<GraphicsApi> api = std::make_unique<MetalGraphicsApi>();
+    // std::unique_ptr<GraphicsApi> api = std::make_unique<DX12GraphicsApi>();
 
-    Gpu::InstanceOptions options = {
+    InstanceOptions instanceOptions = {
         .applicationName = "02_hello_triangle",
         .applicationVersion = SERENITY_MAKE_API_VERSION(0, 1, 0, 0)
     };
-    Gpu::Instance instance(options);
+    auto instance = api->createInstance(instanceOptions);
 
     auto adapters = instance.adapters();
+    for (auto &adapter : adapters) {
+        spdlog::critical("Hello Adapter!");
 
-    // Gpu::Adapter adapter = instance.requestAdapter();
-    // Device device = adapter.requestDevice();
+        // TODO: Get adapter features, properties and limits
+    }
 
     return 0;
 }

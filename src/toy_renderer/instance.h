@@ -1,16 +1,18 @@
 #pragma once
 
-#include "adapter.h"
-#include "serenity_gpu_global.h"
-
+#include <toy_renderer/adapter.h>
+#include <toy_renderer/gpu_core.h>
 #include <toy_renderer/handle.h>
+
+#include <toy_renderer/toy_renderer_export.h>
 
 #include <span>
 #include <string>
 #include <vector>
 
-namespace Gpu {
+namespace ToyRenderer {
 
+class GraphicsApi;
 struct Instance_t;
 
 struct InstanceOptions {
@@ -20,20 +22,29 @@ struct InstanceOptions {
     std::vector<std::string> extensions;
 };
 
-class Instance
+class TOY_RENDERER_EXPORT Instance
 {
 public:
-    Instance();
-    Instance(const InstanceOptions &options);
     ~Instance();
+
+    Instance(Instance const &other) = delete;
+    Instance &operator=(Instance const &other) = delete;
+
+    Instance(Instance &&other) = default;
+    Instance &operator=(Instance &&other) = default;
 
     bool isValid() const { return m_instance.isValid(); }
 
     std::span<Adapter> adapters();
 
 private:
+    Instance(GraphicsApi *api, const InstanceOptions &options);
+
+    GraphicsApi *m_api{ nullptr };
     Handle<Instance_t> m_instance;
     std::vector<Adapter> m_adapters;
+
+    friend class GraphicsApi;
 };
 
-} // namespace Gpu
+} // namespace ToyRenderer

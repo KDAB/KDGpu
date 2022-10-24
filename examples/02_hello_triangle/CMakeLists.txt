@@ -5,15 +5,10 @@ find_package(Vulkan REQUIRED)
 add_executable(
     ${PROJECT_NAME}
     main.cpp
-    gpu/adapter.cpp
-    gpu/instance.cpp
-    gpu/resource_manager.cpp
-    gpu/vulkan/vulkan_resource_manager.cpp
 )
 
 target_link_libraries(
     ${PROJECT_NAME}
-    Vulkan::Vulkan
     toy-renderer
 )
 

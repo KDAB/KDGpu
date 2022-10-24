@@ -1,13 +1,13 @@
 #include "resource_manager.h"
 
-using namespace ToyRenderer;
+namespace ToyRenderer {
 
 ResourceManager::ResourceManager()
 {
-    
 }
 
 ResourceManager::~ResourceManager()
 {
-
 }
+
+} // namespace ToyRenderer

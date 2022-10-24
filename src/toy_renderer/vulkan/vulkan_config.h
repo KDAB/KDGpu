@@ -4,7 +4,7 @@
 
 #include <array>
 
-namespace Gpu {
+namespace ToyRenderer {
 
 //
 // Instance Config
@@ -60,4 +60,4 @@ constexpr std::array<const char *, 1> requestedDeviceExtensions = {
 
 constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
-} // namespace Gpu
+} // namespace ToyRenderer

@@ -1,10 +1,10 @@
 #pragma once
 
-#include "gpu_core.h"
+#include <toy_renderer/gpu_core.h>
 
 #include <stdint.h>
 
-namespace Gpu {
+namespace ToyRenderer {
 
 struct AdapterLimits {
     uint32_t maxImageDimension1D;
@@ -135,4 +135,4 @@ struct AdapterProperties {
     AdapterSparseProperties sparseProperties;
 };
 
-} // namespace Gpu
+} // namespace ToyRenderer

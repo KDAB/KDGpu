@@ -1,14 +1,25 @@
 find_package(Vulkan REQUIRED)
 
 set(SOURCES
+    adapter.cpp
+    graphics_api.cpp
+    instance.cpp
     resource_manager.cpp
+    vulkan/vulkan_graphics_api.cpp
     vulkan/vulkan_resource_manager.cpp
 )
 
 set(HEADERS
+    adapter_features.h
+    adapter_properties.h
+    adapter.h
+    graphics_api.h
+    gpu_core.h
+    instance.h
     bind_group_description.h
     handle.h
     resource_manager.h
+    vulkan/vulkan_graphics_api.h
     vulkan/vulkan_resource_manager.h
 )
 
@@ -19,15 +30,18 @@ add_library(toy-renderer SHARED
 )
 add_library(Toy::Renderer ALIAS toy-renderer)
 
-# set(TOY_RENDERER_GUI_PUBLIC_LIBS
-#     Serenity::Core
-#     Serenity::Gui
-# )
+set(TOY_RENDERER_GUI_PUBLIC_LIBS
+    Vulkan::Vulkan
+    spdlog::spdlog
 
-# target_link_libraries(toy-renderer
-#     PUBLIC
-#     ${TOY_RENDERER_GUI_PUBLIC_LIBS}
-# )
+    # Serenity::Core
+    # Serenity::Gui
+)
+
+target_link_libraries(toy-renderer
+    PUBLIC
+    ${TOY_RENDERER_GUI_PUBLIC_LIBS}
+)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     target_compile_definitions(toy-renderer PRIVATE PLATFORM_LINUX)

@@ -2,23 +2,59 @@
 
 #include <toy_renderer/resource_manager.h>
 
+#include <toy_renderer/pool.h>
+
+#include <toy_renderer/toy_renderer_export.h>
+
+#include <vulkan/vulkan.h>
+
+// Should we refactor this into more smaller classes like the platform integration? For example,
+// should we have PlatformInstance to backend Instance and that class has the functionality to
+// query/enumerate VkPhysicalDevices? As opposed to storing a plain VkInstance as we do now.
+// Could look something like this:
+//
+// struct PlatformInstance {
+//     VkInstance instance;
+//     std::vector<VkPhysicalDevice> queryPhysicalDevices()
+//     {
+//         vkEnumeratePhysicalDevices(...);
+//         ...;
+//     }
+// };
+//
+// That would avoid having too much logic directly in the VulkanGraphicsApi class and this
+// class.
+//
+// TODO: Try the above to see how it looks once we have something working.
+
 namespace ToyRenderer {
 
 class TOY_RENDERER_EXPORT VulkanResourceManager : public ResourceManager
 {
 public:
     VulkanResourceManager();
-    ~VulkanResourceManager() override;
+    ~VulkanResourceManager() final;
 
-    // Handle<Shader> createShader(ShaderDescription desc) override;
-    Handle<BindGroup> createBindGroup(BindGroupDescription desc) override;
-    // Handle<Texture> createTexture(TextureDescription desc) override;
-    // Handle<Buffer> createBuffer(BufferDescription desc) override;
+    Handle<Instance_t> createInstance(const InstanceOptions &options) final;
+    void deleteInstance(Handle<Instance_t> handle) final;
+    VkInstance *getInstance(const Handle<Instance_t> &handle) { return m_instances.get(handle); }
 
-    // void deleteShader(Handle<Shader> handle) override;
-    void deleteBindGroup(Handle<BindGroup> handle) override;
-    // void deleteTexture(Handle<Texture> handle) override;
-    // void deleteBuffer(Handle<Buffer> handle) override;
+    Handle<Adapter_t> insertAdapter(VkPhysicalDevice physicalDevice);
+    void removeAdapter(Handle<Adapter_t> handle) final;
+
+    // virtual Handle<Shader> createShader(ShaderDescription desc) = 0;
+    Handle<BindGroup> createBindGroup(BindGroupDescription desc) final;
+    // virtual Handle<Texture> createTexture(TextureDescription desc) = 0;
+    // virtual Handle<Buffer> createBuffer(BufferDescription desc) = 0;
+
+    // virtual void deleteShader(Handle<Shader> handle) = 0;
+    void deleteBindGroup(Handle<BindGroup> handle) final;
+    // virtual void deleteTexture(Handle<Texture> handle) = 0;
+    // virtual void deleteBuffer(Handle<Buffer> handle) = 0;
+
+private:
+    Pool<VkInstance, Instance_t> m_instances{ 1 };
+    Pool<VkPhysicalDevice, Adapter_t> m_adapters{ 1 };
 };
 
 } // namespace ToyRenderer
