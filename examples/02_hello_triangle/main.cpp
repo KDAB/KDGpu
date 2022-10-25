@@ -47,5 +47,9 @@ int main()
         return -1;
     }
 
+    // We can easily query the adapter for various features, properties and limits.
+    spdlog::critical("maxBoundDescriptorSets = {}", selectedAdapter.properties().limits.maxBoundDescriptorSets);
+    spdlog::critical("multiDrawIndirect = {}", selectedAdapter.features().multiDrawIndirect);
+
     return 0;
 }

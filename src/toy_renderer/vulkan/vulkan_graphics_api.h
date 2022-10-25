@@ -16,6 +16,7 @@ public:
 
     std::vector<Handle<Adapter_t>> queryAdapters(const Handle<Instance_t> &instanceHandle) final;
     AdapterProperties queryAdapterProperties(const Handle<Adapter_t> &adapterHandle) final;
+    AdapterFeatures queryAdapterFeatures(const Handle<Adapter_t> &adapterHandle) final;
 
 private:
     std::unique_ptr<VulkanResourceManager> m_vulkanResourceManager;

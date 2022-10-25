@@ -30,14 +30,19 @@ public:
     bool isValid() const { return m_adapter.isValid(); }
 
     const AdapterProperties &properties() const noexcept;
+    const AdapterFeatures &features() const noexcept;
 
 private:
     explicit Adapter(GraphicsApi *api, const Handle<Adapter_t> &adapter);
 
     GraphicsApi *m_api{ nullptr };
     Handle<Adapter_t> m_adapter;
+
     mutable AdapterProperties m_properties;
     mutable bool m_propertiesQueried{ false };
+
+    mutable AdapterFeatures m_features;
+    mutable bool m_featuresQueried{ false };
 
     friend class Instance;
 };

@@ -29,4 +29,14 @@ const AdapterProperties &Adapter::properties() const noexcept
     return m_properties;
 }
 
+const AdapterFeatures &Adapter::features() const noexcept
+{
+    if (!m_featuresQueried) {
+        m_features = m_api->queryAdapterFeatures(m_adapter);
+        m_featuresQueried = true;
+    }
+
+    return m_features;
+}
+
 } // namespace ToyRenderer
