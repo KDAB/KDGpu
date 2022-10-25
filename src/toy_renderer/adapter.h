@@ -2,6 +2,7 @@
 
 #include <toy_renderer/adapter_features.h>
 #include <toy_renderer/adapter_properties.h>
+#include <toy_renderer/device.h>
 #include <toy_renderer/handle.h>
 
 #include <toy_renderer/toy_renderer_export.h>
@@ -31,6 +32,8 @@ public:
 
     const AdapterProperties &properties() const noexcept;
     const AdapterFeatures &features() const noexcept;
+
+    Device createDevice(const DeviceOptions &options = DeviceOptions());
 
 private:
     explicit Adapter(GraphicsApi *api, const Handle<Adapter_t> &adapter);

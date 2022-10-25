@@ -39,4 +39,9 @@ const AdapterFeatures &Adapter::features() const noexcept
     return m_features;
 }
 
+Device Adapter::createDevice(const DeviceOptions &options)
+{
+    return Device(m_api, options);
+}
+
 } // namespace ToyRenderer

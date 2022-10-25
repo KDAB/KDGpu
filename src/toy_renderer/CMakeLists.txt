@@ -2,6 +2,7 @@ find_package(Vulkan REQUIRED)
 
 set(SOURCES
     adapter.cpp
+    device.cpp
     graphics_api.cpp
     instance.cpp
     resource_manager.cpp
@@ -14,6 +15,7 @@ set(HEADERS
     adapter_features.h
     adapter_properties.h
     adapter.h
+    device.h
     graphics_api.h
     gpu_core.h
     instance.h

@@ -51,5 +51,8 @@ int main()
     spdlog::critical("maxBoundDescriptorSets = {}", selectedAdapter.properties().limits.maxBoundDescriptorSets);
     spdlog::critical("multiDrawIndirect = {}", selectedAdapter.features().multiDrawIndirect);
 
+    // Now we can create a device from the selected adapter that we can then use to interact with the GPU.
+    auto device = selectedAdapter.createDevice();
+
     return 0;
 }
