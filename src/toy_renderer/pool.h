@@ -3,7 +3,7 @@
 #include "handle.h"
 
 #include <assert.h>
-#include <limits.h>
+#include <limits>
 #include <vector>
 
 /*
@@ -35,7 +35,7 @@ public:
     {
     }
 
-    explicit Pool(std::uint32_t size)
+    explicit Pool(uint32_t size)
         : m_data(), m_generations(), m_freeIndices(), m_capacity(size)
     {
         m_data.reserve(size);

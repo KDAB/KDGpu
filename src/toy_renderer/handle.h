@@ -27,6 +27,6 @@ private:
     uint32_t m_index;
     uint32_t m_generation;
 
-    template<typename U, typename T>
+    template<typename U, typename V>
     friend class Pool;
 };
