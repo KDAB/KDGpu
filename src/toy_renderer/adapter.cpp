@@ -3,6 +3,8 @@
 #include <toy_renderer/graphics_api.h>
 #include <toy_renderer/resource_manager.h>
 
+#include <toy_renderer/api/api_adapter.h>
+
 namespace ToyRenderer {
 
 Adapter::Adapter()
@@ -22,7 +24,8 @@ Adapter::~Adapter()
 const AdapterProperties &Adapter::properties() const noexcept
 {
     if (!m_propertiesQueried) {
-        m_properties = m_api->queryAdapterProperties(m_adapter);
+        auto apiAdapter = m_api->resourceManager()->getAdapter(m_adapter);
+        m_properties = apiAdapter->queryAdapterProperties();
         m_propertiesQueried = true;
     }
 

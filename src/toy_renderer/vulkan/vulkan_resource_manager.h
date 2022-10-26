@@ -3,6 +3,7 @@
 #include <toy_renderer/resource_manager.h>
 
 #include <toy_renderer/pool.h>
+#include <toy_renderer/vulkan/vulkan_adapter.h>
 
 #include <toy_renderer/toy_renderer_export.h>
 
@@ -39,9 +40,10 @@ public:
     void deleteInstance(Handle<Instance_t> handle) final;
     VkInstance *getInstance(const Handle<Instance_t> &handle) { return m_instances.get(handle); }
 
-    Handle<Adapter_t> insertAdapter(VkPhysicalDevice physicalDevice);
+    Handle<Adapter_t> insertAdapter(const VulkanAdapter &vulkanAdapter);
     void removeAdapter(Handle<Adapter_t> handle) final;
-    VkPhysicalDevice *getAdapter(const Handle<Adapter_t> &handle) { return m_adapters.get(handle); }
+    // VulkanAdapter *getAdapter(const Handle<Adapter_t> &handle) { return m_adapters.get(handle); }
+    ApiAdapter *getAdapter(const Handle<Adapter_t> &handle) final { return m_adapters.get(handle); }
 
     // virtual Handle<Shader> createShader(ShaderDescription desc) = 0;
     Handle<BindGroup> createBindGroup(BindGroupDescription desc) final;
@@ -55,7 +57,7 @@ public:
 
 private:
     Pool<VkInstance, Instance_t> m_instances{ 1 };
-    Pool<VkPhysicalDevice, Adapter_t> m_adapters{ 1 };
+    Pool<VulkanAdapter, Adapter_t> m_adapters{ 1 };
 };
 
 } // namespace ToyRenderer

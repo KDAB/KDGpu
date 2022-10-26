@@ -57,7 +57,7 @@ void VulkanResourceManager::deleteInstance(Handle<Instance_t> handle)
 {
 }
 
-Handle<Adapter_t> VulkanResourceManager::insertAdapter(VkPhysicalDevice physicalDevice)
+Handle<Adapter_t> VulkanResourceManager::insertAdapter(const VulkanAdapter &physicalDevice)
 {
     return m_adapters.emplace(physicalDevice);
 }

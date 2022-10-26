@@ -10,6 +10,7 @@
 
 namespace ToyRenderer {
 
+class ApiAdapter;
 class BindGroup;
 class TOY_RENDERER_EXPORT ResourceManager
 {
@@ -22,6 +23,7 @@ public:
     // Adapters are not created, they are queried from the instance. It is up to
     // the concrete subclasses as to how they insert whatever they need.
     virtual void removeAdapter(Handle<Adapter_t> handle) = 0;
+    virtual ApiAdapter *getAdapter(const Handle<Adapter_t> &handle) = 0;
 
     // virtual Handle<Shader> createShader(ShaderDescription desc) = 0;
     virtual Handle<BindGroup> createBindGroup(BindGroupDescription desc) = 0;
