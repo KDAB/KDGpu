@@ -35,7 +35,8 @@ const AdapterProperties &Adapter::properties() const noexcept
 const AdapterFeatures &Adapter::features() const noexcept
 {
     if (!m_featuresQueried) {
-        m_features = m_api->queryAdapterFeatures(m_adapter);
+        auto apiAdapter = m_api->resourceManager()->getAdapter(m_adapter);
+        m_features = apiAdapter->queryAdapterFeatures();
         m_featuresQueried = true;
     }
 

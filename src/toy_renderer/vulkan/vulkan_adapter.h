@@ -10,6 +10,7 @@ struct VulkanAdapter : public ApiAdapter {
     explicit VulkanAdapter(VkPhysicalDevice _physicalDevice);
 
     AdapterProperties queryAdapterProperties() final;
+    AdapterFeatures queryAdapterFeatures() final;
 
     // TODO: Handle<Device_t>
     void createDevice(const DeviceOptions &options) final;
