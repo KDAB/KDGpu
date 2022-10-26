@@ -14,8 +14,6 @@ public:
     VulkanGraphicsApi();
     ~VulkanGraphicsApi() final;
 
-    std::vector<Handle<Adapter_t>> queryAdapters(const Handle<Instance_t> &instanceHandle) final;
-
 private:
     std::unique_ptr<VulkanResourceManager> m_vulkanResourceManager;
 };

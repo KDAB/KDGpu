@@ -4,6 +4,7 @@
 
 #include <toy_renderer/pool.h>
 #include <toy_renderer/vulkan/vulkan_adapter.h>
+#include <toy_renderer/vulkan/vulkan_instance.h>
 
 #include <toy_renderer/toy_renderer_export.h>
 
@@ -38,12 +39,11 @@ public:
 
     Handle<Instance_t> createInstance(const InstanceOptions &options) final;
     void deleteInstance(Handle<Instance_t> handle) final;
-    VkInstance *getInstance(const Handle<Instance_t> &handle) { return m_instances.get(handle); }
+    VulkanInstance *getInstance(const Handle<Instance_t> &handle) { return m_instances.get(handle); }
 
     Handle<Adapter_t> insertAdapter(const VulkanAdapter &vulkanAdapter);
     void removeAdapter(Handle<Adapter_t> handle) final;
-    // VulkanAdapter *getAdapter(const Handle<Adapter_t> &handle) { return m_adapters.get(handle); }
-    ApiAdapter *getAdapter(const Handle<Adapter_t> &handle) final { return m_adapters.get(handle); }
+    VulkanAdapter *getAdapter(const Handle<Adapter_t> &handle) final { return m_adapters.get(handle); }
 
     // virtual Handle<Shader> createShader(ShaderDescription desc) = 0;
     Handle<BindGroup> createBindGroup(BindGroupDescription desc) final;
@@ -56,7 +56,7 @@ public:
     // virtual void deleteBuffer(Handle<Buffer> handle) = 0;
 
 private:
-    Pool<VkInstance, Instance_t> m_instances{ 1 };
+    Pool<VulkanInstance, Instance_t> m_instances{ 1 };
     Pool<VulkanAdapter, Adapter_t> m_adapters{ 1 };
 };
 

@@ -12,8 +12,7 @@ GraphicsApi::~GraphicsApi()
 
 Instance GraphicsApi::createInstance(const InstanceOptions &options)
 {
-    auto instance = Instance(this, options);
-    return std::move(instance);
+    return Instance(this, options);
 }
 
 } // namespace ToyRenderer

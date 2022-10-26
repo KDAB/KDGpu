@@ -9,6 +9,7 @@ set(SOURCES
     vulkan/vulkan_adapter.cpp
     vulkan/vulkan_enums.cpp
     vulkan/vulkan_graphics_api.cpp
+    vulkan/vulkan_instance.cpp
     vulkan/vulkan_resource_manager.cpp
 )
 
@@ -24,9 +25,11 @@ set(HEADERS
     handle.h
     resource_manager.h
     api/api_adapter.h
+    api/api_instance.h
     vulkan/vulkan_adapter.h
     vulkan/vulkan_enums.h
     vulkan/vulkan_graphics_api.h
+    vulkan/vulkan_instance.h
     vulkan/vulkan_resource_manager.h
 )
 

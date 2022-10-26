@@ -20,6 +20,7 @@ int main()
     // OR
     // std::unique_ptr<GraphicsApi> api = std::make_unique<MetalGraphicsApi>();
     // std::unique_ptr<GraphicsApi> api = std::make_unique<DX12GraphicsApi>();
+    // std::unique_ptr<GraphicsApi> api = std::make_unique<WebGpuApi>();
 
     // Request an instance of the api with whatever layers and extensions we wish to request.
     InstanceOptions instanceOptions = {
@@ -51,7 +52,7 @@ int main()
     spdlog::critical("maxBoundDescriptorSets = {}", selectedAdapter.properties().limits.maxBoundDescriptorSets);
     spdlog::critical("multiDrawIndirect = {}", selectedAdapter.features().multiDrawIndirect);
 
-    // Now we can create a device from the selected adapter that we can then use to interact with the GPU.
+    // TODO: Now we can create a device from the selected adapter that we can then use to interact with the GPU.
     auto device = selectedAdapter.createDevice();
 
     return 0;

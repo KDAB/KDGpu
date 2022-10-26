@@ -19,12 +19,7 @@ public:
 protected:
     GraphicsApi();
 
-    virtual std::vector<Handle<Adapter_t>> queryAdapters(const Handle<Instance_t> &instanceHandle) = 0;
-
     ResourceManager *m_resourceManager{ nullptr };
-
-    friend class Instance;
-    friend class Adapter;
 };
 
 } // namespace ToyRenderer

@@ -1,5 +1,6 @@
 #include "vulkan_resource_manager.h"
-#include "vulkan_config.h"
+
+#include <toy_renderer/vulkan/vulkan_config.h>
 
 #include <assert.h>
 #include <stdexcept>
@@ -49,7 +50,8 @@ Handle<Instance_t> VulkanResourceManager::createInstance(const InstanceOptions &
         throw std::runtime_error("Failed to create Vulkan instance!");
     }
 
-    auto h = m_instances.emplace(instance);
+    VulkanInstance vulkanInstance(this, instance);
+    auto h = m_instances.emplace(vulkanInstance);
     return h;
 }
 

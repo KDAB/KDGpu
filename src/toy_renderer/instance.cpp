@@ -2,6 +2,7 @@
 
 #include <toy_renderer/graphics_api.h>
 #include <toy_renderer/resource_manager.h>
+#include <toy_renderer/api/api_instance.h>
 
 namespace ToyRenderer {
 
@@ -20,7 +21,8 @@ Instance::~Instance()
 std::span<Adapter> Instance::adapters()
 {
     if (m_adapters.empty()) {
-        auto adapterHandles = m_api->queryAdapters(m_instance);
+        auto apiInstance = m_api->resourceManager()->getInstance(m_instance);
+        auto adapterHandles = apiInstance->queryAdapters();
         const auto adapterCount = static_cast<uint32_t>(adapterHandles.size());
         m_adapters.reserve(adapterCount);
         for (uint32_t adapterIndex = 0; adapterIndex < adapterCount; ++adapterIndex)

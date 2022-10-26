@@ -10,7 +10,8 @@
 
 namespace ToyRenderer {
 
-class ApiAdapter;
+struct ApiAdapter;
+struct ApiInstance;
 class BindGroup;
 class TOY_RENDERER_EXPORT ResourceManager
 {
@@ -19,6 +20,7 @@ public:
 
     virtual Handle<Instance_t> createInstance(const InstanceOptions &options) = 0;
     virtual void deleteInstance(Handle<Instance_t> handle) = 0;
+    virtual ApiInstance *getInstance(const Handle<Instance_t> &handle) = 0;
 
     // Adapters are not created, they are queried from the instance. It is up to
     // the concrete subclasses as to how they insert whatever they need.

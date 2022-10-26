@@ -27,12 +27,6 @@ class TOY_RENDERER_EXPORT Instance
 public:
     ~Instance();
 
-    Instance(Instance const &other) = delete;
-    Instance &operator=(Instance const &other) = delete;
-
-    Instance(Instance &&other) = default;
-    Instance &operator=(Instance &&other) = default;
-
     bool isValid() const { return m_instance.isValid(); }
 
     std::span<Adapter> adapters();
