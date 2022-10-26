@@ -16,14 +16,17 @@ public:
     ResourceManager *resourceManager() noexcept { return m_resourceManager; }
     const ResourceManager *resourceManager() const noexcept { return m_resourceManager; }
 
+protected:
+    GraphicsApi();
+    
     virtual std::vector<Handle<Adapter_t>> queryAdapters(const Handle<Instance_t> &instanceHandle) = 0;
     virtual AdapterProperties queryAdapterProperties(const Handle<Adapter_t> &adapterHandle) = 0;
     virtual AdapterFeatures queryAdapterFeatures(const Handle<Adapter_t> &adapterHandle) = 0;
 
-protected:
-    GraphicsApi();
-
     ResourceManager *m_resourceManager{ nullptr };
+    
+    friend class Instance;
+    friend class Adapter;
 };
 
 } // namespace ToyRenderer
