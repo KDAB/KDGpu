@@ -4,30 +4,12 @@
 
 #include <toy_renderer/pool.h>
 #include <toy_renderer/vulkan/vulkan_adapter.h>
+#include <toy_renderer/vulkan/vulkan_device.h>
 #include <toy_renderer/vulkan/vulkan_instance.h>
 
 #include <toy_renderer/toy_renderer_export.h>
 
 #include <vulkan/vulkan.h>
-
-// Should we refactor this into more smaller classes like the platform integration? For example,
-// should we have PlatformInstance to backend Instance and that class has the functionality to
-// query/enumerate VkPhysicalDevices? As opposed to storing a plain VkInstance as we do now.
-// Could look something like this:
-//
-// struct PlatformInstance {
-//     VkInstance instance;
-//     std::vector<VkPhysicalDevice> queryPhysicalDevices()
-//     {
-//         vkEnumeratePhysicalDevices(...);
-//         ...;
-//     }
-// };
-//
-// That would avoid having too much logic directly in the VulkanGraphicsApi class and this
-// class.
-//
-// TODO: Try the above to see how it looks once we have something working.
 
 namespace ToyRenderer {
 
@@ -45,6 +27,10 @@ public:
     void removeAdapter(Handle<Adapter_t> handle) final;
     VulkanAdapter *getAdapter(const Handle<Adapter_t> &handle) final { return m_adapters.get(handle); }
 
+    Handle<Device_t> createDevice(const DeviceOptions &options) final;
+    void deleteDevice(Handle<Device_t> handle) final;
+    ApiDevice *getDevice(const Handle<Device_t> &handle) final { return m_devices.get(handle); };
+
     // virtual Handle<Shader> createShader(ShaderDescription desc) = 0;
     Handle<BindGroup> createBindGroup(BindGroupDescription desc) final;
     // virtual Handle<Texture> createTexture(TextureDescription desc) = 0;
@@ -58,6 +44,7 @@ public:
 private:
     Pool<VulkanInstance, Instance_t> m_instances{ 1 };
     Pool<VulkanAdapter, Adapter_t> m_adapters{ 1 };
+    Pool<VulkanDevice, Device_t> m_devices{ 1 };
 };
 
 } // namespace ToyRenderer

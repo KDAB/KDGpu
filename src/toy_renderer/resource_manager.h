@@ -3,7 +3,6 @@
 #include <toy_renderer/adapter.h>
 #include <toy_renderer/bind_group_description.h>
 #include <toy_renderer/handle.h>
-#include <toy_renderer/instance.h>
 #include <toy_renderer/pool.h>
 
 #include <toy_renderer/toy_renderer_export.h>
@@ -11,8 +10,13 @@
 namespace ToyRenderer {
 
 struct ApiAdapter;
+struct ApiDevice;
 struct ApiInstance;
 class BindGroup;
+
+struct InstanceOptions;
+struct DeviceOptions;
+
 class TOY_RENDERER_EXPORT ResourceManager
 {
 public:
@@ -26,6 +30,10 @@ public:
     // the concrete subclasses as to how they insert whatever they need.
     virtual void removeAdapter(Handle<Adapter_t> handle) = 0;
     virtual ApiAdapter *getAdapter(const Handle<Adapter_t> &handle) = 0;
+
+    virtual Handle<Device_t> createDevice(const DeviceOptions &options) = 0;
+    virtual void deleteDevice(Handle<Device_t> handle) = 0;
+    virtual ApiDevice *getDevice(const Handle<Device_t> &handle) = 0;
 
     // virtual Handle<Shader> createShader(ShaderDescription desc) = 0;
     virtual Handle<BindGroup> createBindGroup(BindGroupDescription desc) = 0;

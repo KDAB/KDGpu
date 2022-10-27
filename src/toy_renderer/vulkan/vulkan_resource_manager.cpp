@@ -1,5 +1,6 @@
 #include "vulkan_resource_manager.h"
 
+#include <toy_renderer/instance.h>
 #include <toy_renderer/vulkan/vulkan_config.h>
 
 #include <assert.h>
@@ -57,6 +58,7 @@ Handle<Instance_t> VulkanResourceManager::createInstance(const InstanceOptions &
 
 void VulkanResourceManager::deleteInstance(Handle<Instance_t> handle)
 {
+    // TODO: Implement me!
 }
 
 Handle<Adapter_t> VulkanResourceManager::insertAdapter(const VulkanAdapter &physicalDevice)
@@ -69,6 +71,17 @@ void VulkanResourceManager::removeAdapter(Handle<Adapter_t> handle)
     m_adapters.remove(handle);
 }
 
+Handle<Device_t> VulkanResourceManager::createDevice(const DeviceOptions &options)
+{
+    // TODO: Implement me!
+    return {};
+}
+
+void VulkanResourceManager::deleteDevice(Handle<Device_t> handle)
+{
+    // TODO: Implement me!
+}
+
 Handle<BindGroup> VulkanResourceManager::createBindGroup(BindGroupDescription desc)
 {
     // TODO: This is where we will call vkAllocateDescriptorSets
@@ -77,6 +90,7 @@ Handle<BindGroup> VulkanResourceManager::createBindGroup(BindGroupDescription de
 
 void VulkanResourceManager::deleteBindGroup(Handle<BindGroup> handle)
 {
+    // TODO: Implement me!
 }
 
 } // namespace ToyRenderer
