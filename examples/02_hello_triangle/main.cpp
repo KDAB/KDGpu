@@ -52,6 +52,10 @@ int main()
     spdlog::critical("maxBoundDescriptorSets = {}", selectedAdapter.properties().limits.maxBoundDescriptorSets);
     spdlog::critical("multiDrawIndirect = {}", selectedAdapter.features().multiDrawIndirect);
 
+    auto queueTypes = selectedAdapter.queueTypes();
+    const bool hasGraphicsAndCompute = queueTypes[0].supportsFeature(QueueFlags(QueueFlagBits::GraphicsBit) | QueueFlags(QueueFlagBits::ComputeBit));
+    spdlog::critical("Queue family 0 graphics and compute support: {}", hasGraphicsAndCompute);
+
     // TODO: Now we can create a device from the selected adapter that we can then use to interact with the GPU.
     auto device = selectedAdapter.createDevice();
 

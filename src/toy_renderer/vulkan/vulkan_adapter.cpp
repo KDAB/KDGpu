@@ -249,6 +249,34 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
     return features;
 }
 
+std::vector<AdapterQueueType> VulkanAdapter::queryQueueTypes()
+{
+    uint32_t queueFamilyCount = 0;
+    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, nullptr);
+    std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, queueFamilies.data());
+    
+    std::vector<AdapterQueueType> queueTypes;
+    queueTypes.reserve(queueFamilyCount);
+    for (uint32_t i = 0; i < queueFamilyCount; ++i) {
+        const auto &queueFamily = queueFamilies[i];
+        queueTypes.emplace_back(
+            AdapterQueueType {
+                .flags = queueFamily.queueFlags,
+                .availableQueues = queueFamily.queueCount,
+                .timestampValidBits = queueFamily.timestampValidBits,
+                .minImageTransferGranularity = {
+                    .width = queueFamily.minImageTransferGranularity.width,
+                    .height = queueFamily.minImageTransferGranularity.height,
+                    .depth = queueFamily.minImageTransferGranularity.depth
+                }
+            }
+        );
+    }
+    
+    return queueTypes;
+}
+
 void VulkanAdapter::createDevice(const DeviceOptions &options)
 {
     // return VK_NULL_HANDLE;

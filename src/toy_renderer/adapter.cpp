@@ -43,6 +43,17 @@ const AdapterFeatures &Adapter::features() const noexcept
     return m_features;
 }
 
+std::span<AdapterQueueType> Adapter::queueTypes()
+{
+    if (m_queueTypes.empty()) {
+        // TODO: query queue type information
+        auto apiAdapter = m_api->resourceManager()->getAdapter(m_adapter);
+        m_queueTypes = apiAdapter->queryQueueTypes();
+    }
+
+    return m_queueTypes;
+}
+
 Device Adapter::createDevice(const DeviceOptions &options)
 {
     return Device(m_api, options);

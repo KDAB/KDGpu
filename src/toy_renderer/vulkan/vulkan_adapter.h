@@ -11,6 +11,7 @@ struct VulkanAdapter : public ApiAdapter {
 
     AdapterProperties queryAdapterProperties() final;
     AdapterFeatures queryAdapterFeatures() final;
+    std::vector<AdapterQueueType> queryQueueTypes() final;
 
     // TODO: Handle<Device_t>
     void createDevice(const DeviceOptions &options) final;

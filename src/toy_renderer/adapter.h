@@ -2,11 +2,13 @@
 
 #include <toy_renderer/adapter_features.h>
 #include <toy_renderer/adapter_properties.h>
+#include <toy_renderer/adapter_queue_type.h>
 #include <toy_renderer/device.h>
 #include <toy_renderer/handle.h>
 
 #include <toy_renderer/toy_renderer_export.h>
 
+#include <span>
 #include <string>
 #include <vector>
 
@@ -32,6 +34,7 @@ public:
 
     const AdapterProperties &properties() const noexcept;
     const AdapterFeatures &features() const noexcept;
+    std::span<AdapterQueueType> queueTypes();
 
     Device createDevice(const DeviceOptions &options = DeviceOptions());
 
@@ -46,6 +49,8 @@ private:
 
     mutable AdapterFeatures m_features;
     mutable bool m_featuresQueried{ false };
+
+    mutable std::vector<AdapterQueueType> m_queueTypes;
 
     friend class Instance;
 };

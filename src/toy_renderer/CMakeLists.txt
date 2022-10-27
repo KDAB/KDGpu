@@ -17,6 +17,7 @@ set(SOURCES
 set(HEADERS
     adapter_features.h
     adapter_properties.h
+    adapter_queue_type.h
     adapter.h
     device.h
     graphics_api.h
