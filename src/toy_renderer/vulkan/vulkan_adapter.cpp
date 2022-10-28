@@ -277,9 +277,4 @@ std::vector<AdapterQueueType> VulkanAdapter::queryQueueTypes()
     return queueTypes;
 }
 
-void VulkanAdapter::createDevice(const DeviceOptions &options)
-{
-    // return VK_NULL_HANDLE;
-}
-
 } // namespace ToyRenderer

@@ -8,15 +8,10 @@
 
 namespace ToyRenderer {
 
-struct DeviceOptions;
-
 struct ApiAdapter {
     virtual AdapterProperties queryAdapterProperties() = 0;
     virtual AdapterFeatures queryAdapterFeatures() = 0;
     virtual std::vector<AdapterQueueType> queryQueueTypes() = 0;
-
-    // TODO: Handle<Device_t>
-    virtual void createDevice(const DeviceOptions &options) = 0;
 };
 
 } // namespace ToyRenderer

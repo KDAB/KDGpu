@@ -31,7 +31,7 @@ public:
     virtual void removeAdapter(Handle<Adapter_t> handle) = 0;
     virtual ApiAdapter *getAdapter(const Handle<Adapter_t> &handle) = 0;
 
-    virtual Handle<Device_t> createDevice(const DeviceOptions &options) = 0;
+    virtual Handle<Device_t> createDevice(const Handle<Adapter_t> &adapterHandle, const DeviceOptions &options) = 0;
     virtual void deleteDevice(Handle<Device_t> handle) = 0;
     virtual ApiDevice *getDevice(const Handle<Device_t> &handle) = 0;
 

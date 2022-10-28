@@ -27,7 +27,7 @@ public:
     void removeAdapter(Handle<Adapter_t> handle) final;
     VulkanAdapter *getAdapter(const Handle<Adapter_t> &handle) final { return m_adapters.get(handle); }
 
-    Handle<Device_t> createDevice(const DeviceOptions &options) final;
+    Handle<Device_t> createDevice(const Handle<Adapter_t> &adapterHandle, const DeviceOptions &options) final;
     void deleteDevice(Handle<Device_t> handle) final;
     ApiDevice *getDevice(const Handle<Device_t> &handle) final { return m_devices.get(handle); };
 

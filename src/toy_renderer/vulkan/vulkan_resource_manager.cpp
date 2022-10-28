@@ -71,9 +71,13 @@ void VulkanResourceManager::removeAdapter(Handle<Adapter_t> handle)
     m_adapters.remove(handle);
 }
 
-Handle<Device_t> VulkanResourceManager::createDevice(const DeviceOptions &options)
+/*
+ * Create a VkDevice (logical device) from the provided adapter (physical device) and requested options.
+ * If no options are specified we request a single queue capable of graphics processing.
+ */
+Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &adapterHandle, const DeviceOptions &options)
 {
-    // TODO: Implement me!
+    
     return {};
 }
 
