@@ -1,5 +1,6 @@
 #pragma once
 
+#include <toy_renderer/adapter_features.h>
 #include <toy_renderer/handle.h>
 
 #include <toy_renderer/toy_renderer_export.h>
@@ -23,6 +24,7 @@ struct DeviceOptions {
     std::vector<std::string> layers;
     std::vector<std::string> extensions;
     std::vector<QueueRequest> queues;
+    AdapterFeatures requestedFeatures;
 };
 
 class TOY_RENDERER_EXPORT Device
