@@ -6,6 +6,7 @@
 #include <toy_renderer/vulkan/vulkan_adapter.h>
 #include <toy_renderer/vulkan/vulkan_device.h>
 #include <toy_renderer/vulkan/vulkan_instance.h>
+#include <toy_renderer/vulkan/vulkan_queue.h>
 
 #include <toy_renderer/toy_renderer_export.h>
 
@@ -27,9 +28,13 @@ public:
     void removeAdapter(Handle<Adapter_t> handle) final;
     VulkanAdapter *getAdapter(const Handle<Adapter_t> &handle) final { return m_adapters.get(handle); }
 
-    Handle<Device_t> createDevice(const Handle<Adapter_t> &adapterHandle, const DeviceOptions &options) final;
+    Handle<Device_t> createDevice(const Handle<Adapter_t> &adapterHandle, const DeviceOptions &options, std::vector<QueueRequest> &queueRequests) final;
     void deleteDevice(Handle<Device_t> handle) final;
     ApiDevice *getDevice(const Handle<Device_t> &handle) final { return m_devices.get(handle); };
+
+    Handle<Queue_t> insertQueue(const VulkanQueue &vulkanQueue);
+    void removeQueue(Handle<Queue_t> handle) final;
+    VulkanQueue *getQueue(const Handle<Queue_t> &handle) final { return m_queues.get(handle); }
 
     // virtual Handle<Shader> createShader(ShaderDescription desc) = 0;
     Handle<BindGroup> createBindGroup(BindGroupDescription desc) final;
@@ -45,6 +50,7 @@ private:
     Pool<VulkanInstance, Instance_t> m_instances{ 1 };
     Pool<VulkanAdapter, Adapter_t> m_adapters{ 1 };
     Pool<VulkanDevice, Device_t> m_devices{ 1 };
+    Pool<VulkanQueue, Queue_t> m_queues{ 4 };
 };
 
 } // namespace ToyRenderer

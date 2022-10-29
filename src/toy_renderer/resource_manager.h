@@ -12,6 +12,8 @@ namespace ToyRenderer {
 struct ApiAdapter;
 struct ApiDevice;
 struct ApiInstance;
+struct ApiQueue;
+
 class BindGroup;
 
 struct InstanceOptions;
@@ -31,9 +33,14 @@ public:
     virtual void removeAdapter(Handle<Adapter_t> handle) = 0;
     virtual ApiAdapter *getAdapter(const Handle<Adapter_t> &handle) = 0;
 
-    virtual Handle<Device_t> createDevice(const Handle<Adapter_t> &adapterHandle, const DeviceOptions &options) = 0;
+    virtual Handle<Device_t> createDevice(const Handle<Adapter_t> &adapterHandle, const DeviceOptions &options, std::vector<QueueRequest> &queueRequests) = 0;
     virtual void deleteDevice(Handle<Device_t> handle) = 0;
     virtual ApiDevice *getDevice(const Handle<Device_t> &handle) = 0;
+
+    // Queue are not created, they are queried from the device. It is up to
+    // the concrete subclasses as to how they insert whatever they need.
+    virtual void removeQueue(Handle<Queue_t> handle) = 0;
+    virtual ApiQueue *getQueue(const Handle<Queue_t> &queue) = 0;
 
     // virtual Handle<Shader> createShader(ShaderDescription desc) = 0;
     virtual Handle<BindGroup> createBindGroup(BindGroupDescription desc) = 0;

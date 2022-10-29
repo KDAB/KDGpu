@@ -58,6 +58,7 @@ int main()
 
     // TODO: Now we can create a device from the selected adapter that we can then use to interact with the GPU.
     auto device = selectedAdapter.createDevice();
+    auto queue = device.queues()[0];
 
     return 0;
 }

@@ -75,9 +75,9 @@ void VulkanResourceManager::removeAdapter(Handle<Adapter_t> handle)
  * Create a VkDevice (logical device) from the provided adapter (physical device) and requested options.
  * If no options are specified we request a single queue from the first family (usually graphics capable).
  */
-Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &adapterHandle, const DeviceOptions &options)
+Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &adapterHandle, const DeviceOptions &options, std::vector<QueueRequest> &queueRequests)
 {
-    std::vector<QueueRequest> queueRequests = options.queues;
+    queueRequests = options.queues;
     if (queueRequests.empty()) {
         QueueRequest queueRequest = {
             .familyIndex = 0,
@@ -86,25 +86,25 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
         };
         queueRequests.emplace_back(queueRequest);
     }
-    
+
     uint32_t queueRequestCount = queueRequests.size();
     std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
     queueCreateInfos.reserve(queueRequestCount);
     for (uint32_t i = 0; i < queueRequestCount; ++i) {
         const auto &queueRequest = queueRequests[i];
-        
+
         VkDeviceQueueCreateInfo queueCreateInfo = {};
         queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
         queueCreateInfo.queueFamilyIndex = queueRequest.familyIndex;
         queueCreateInfo.queueCount = queueRequest.count;
         queueCreateInfo.pQueuePriorities = queueRequest.priorities.data();
-        
+
         queueCreateInfos.push_back(queueCreateInfo);
     }
-    
+
     // TODO: Obey requested adapter features (e.g. geometry shaders)
     // TODO: Obey requested device extensions and layers
-    
+
     VkDeviceCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     createInfo.pNext = nullptr; // TODO: Use VkPhysicalDeviceFeatures2
@@ -116,21 +116,31 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     createInfo.enabledExtensionCount = 0;
     createInfo.ppEnabledExtensionNames = nullptr;
 
-    VkDevice vkDevice { VK_NULL_HANDLE };
+    VkDevice vkDevice{ VK_NULL_HANDLE };
     VulkanAdapter vulkanAdapter = *getAdapter(adapterHandle);
     if (vkCreateDevice(vulkanAdapter.physicalDevice, &createInfo, nullptr, &vkDevice) != VK_SUCCESS)
         throw std::runtime_error("Failed to create a logical device!");
-        
+
     const auto deviceHandle = m_devices.emplace(vkDevice);
-        
+
     // TODO: Get the queues
-    
+
     return deviceHandle;
 }
 
 void VulkanResourceManager::deleteDevice(Handle<Device_t> handle)
 {
     // TODO: Implement me!
+}
+
+Handle<Queue_t> VulkanResourceManager::insertQueue(const VulkanQueue &vulkanQueue)
+{
+    return m_queues.emplace(vulkanQueue);
+}
+
+void VulkanResourceManager::removeQueue(Handle<Queue_t> handle)
+{
+    m_queues.remove(handle);
 }
 
 Handle<BindGroup> VulkanResourceManager::createBindGroup(BindGroupDescription desc)

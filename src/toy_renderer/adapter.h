@@ -30,7 +30,8 @@ public:
     Adapter();
     ~Adapter();
 
-    bool isValid() const { return m_adapter.isValid(); }
+    Handle<Adapter_t> handle() const noexcept { return m_adapter; }
+    bool isValid() const noexcept { return m_adapter.isValid(); }
 
     const AdapterProperties &properties() const noexcept;
     const AdapterFeatures &features() const noexcept;

@@ -1,42 +1,35 @@
 #pragma once
 
-#include <toy_renderer/adapter_features.h>
+#include <toy_renderer/device_options.h>
 #include <toy_renderer/handle.h>
+#include <toy_renderer/queue.h>
 
 #include <toy_renderer/toy_renderer_export.h>
 
+#include <span>
 #include <string>
 #include <vector>
 
 namespace ToyRenderer {
 
+class Adapter;
 class GraphicsApi;
 struct Adapter_t;
 struct Device_t;
-
-struct QueueRequest {
-    uint32_t familyIndex;
-    uint32_t count;
-    std::vector<float> priorities;
-};
-
-struct DeviceOptions {
-    std::vector<std::string> layers;
-    std::vector<std::string> extensions;
-    std::vector<QueueRequest> queues;
-    AdapterFeatures requestedFeatures;
-};
 
 class TOY_RENDERER_EXPORT Device
 {
 public:
     ~Device();
 
+    std::span<Queue> queues() { return m_queues; }
+
 private:
-    Device(GraphicsApi *api, const Handle<Adapter_t> &adapterHandle, const DeviceOptions &options);
+    Device(Adapter *adapter, GraphicsApi *api, const DeviceOptions &options);
 
     GraphicsApi *m_api{ nullptr };
     Handle<Device_t> m_device;
+    std::vector<Queue> m_queues;
 
     friend class Adapter;
 };

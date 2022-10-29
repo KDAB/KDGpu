@@ -56,7 +56,7 @@ std::span<AdapterQueueType> Adapter::queueTypes()
 
 Device Adapter::createDevice(const DeviceOptions &options)
 {
-    return Device(m_api, m_adapter, options);
+    return Device(this, m_api, options);
 }
 
 } // namespace ToyRenderer

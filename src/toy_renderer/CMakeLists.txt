@@ -6,12 +6,14 @@ set(SOURCES
     graphics_api.cpp
     instance.cpp
     resource_manager.cpp
+    queue.cpp
     vulkan/vulkan_adapter.cpp
     vulkan/vulkan_device.cpp
     vulkan/vulkan_enums.cpp
     vulkan/vulkan_graphics_api.cpp
     vulkan/vulkan_instance.cpp
     vulkan/vulkan_resource_manager.cpp
+    vulkan/vulkan_queue.cpp
 )
 
 set(HEADERS
@@ -20,11 +22,14 @@ set(HEADERS
     adapter_queue_type.h
     adapter.h
     device.h
+    device_options.h
     graphics_api.h
     gpu_core.h
     instance.h
     bind_group_description.h
     handle.h
+    queue.h
+    queue_description.h
     resource_manager.h
     api/api_adapter.h
     api/api_device.h
@@ -35,6 +40,7 @@ set(HEADERS
     vulkan/vulkan_graphics_api.h
     vulkan/vulkan_instance.h
     vulkan/vulkan_resource_manager.h
+    vulkan/vulkan_queue.h
 )
 
 add_library(toy-renderer SHARED
