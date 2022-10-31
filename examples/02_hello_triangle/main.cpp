@@ -60,5 +60,28 @@ int main()
     auto device = selectedAdapter.createDevice();
     auto queue = device.queues()[0];
 
+    // TODO: Create a swapchain for the window
+
+    // TODO: Create a buffer to hold triangle vertex data
+
+    // TODO: Create a vertex shader and fragment shader (spir-v only for now)
+
+    // TODO: Create a pipeline layout (array of bind group layouts)
+
+    // TODO: Create a pipeline
+
+    // TODO:    Implement the render loop {
+    //              Create a command encoder/recorder
+    //              Begin render pass
+    //              Bind pipeline
+    //              Bind vertex buffer
+    //              Bind any resources (bind groups (descriptor sets))
+    //              Issue draw command
+    //              End render pass
+    //              End recording
+    //              Submit command buffer to queue
+    //              Present and request next frame
+    //          }
+
     return 0;
 }
