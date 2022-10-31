@@ -3,6 +3,9 @@
 #include <toy_renderer/gpu_core.h>
 #include <toy_renderer/vulkan/vulkan_graphics_api.h>
 
+#include <Serenity/gui/gui_application.h>
+#include <Serenity/gui/window.h>
+
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 
@@ -12,10 +15,13 @@
 #include <span>
 #include <vector>
 
+using namespace Serenity;
 using namespace ToyRenderer;
 
 int main()
 {
+    GuiApplication app;
+
     std::unique_ptr<GraphicsApi> api = std::make_unique<VulkanGraphicsApi>();
     // OR
     // std::unique_ptr<GraphicsApi> api = std::make_unique<MetalGraphicsApi>();
@@ -61,6 +67,14 @@ int main()
     auto queue = device.queues()[0];
 
     // TODO: Create a swapchain for the window
+    Window window;
+    window.width = 1920;
+    window.height = 1080;
+    window.visible = true;
+    window.visible.valueChanged().connect([&app](const bool &visible) {
+        if (visible == false)
+            app.quit();
+    });
 
     // TODO: Create a buffer to hold triangle vertex data
 
@@ -83,5 +97,5 @@ int main()
     //              Present and request next frame
     //          }
 
-    return 0;
+    return app.exec();
 }

@@ -7,10 +7,10 @@ cmake_policy(SET CMP0117 NEW) # Do not add /GR to CMAKE_CXX_FLAGS
 project(ToyRenderer VERSION 0.0.1)
 
 set(BUILD_SHARED_LIBS ON)
-add_definitions(-DASSET_PATH="${CMAKE_CURRENT_BINARY_DIR}/assets")
+add_definitions(-DTOY_RENDERER_ASSET_PATH="${CMAKE_CURRENT_BINARY_DIR}/assets")
 
 if(TOY_RENDERER_LARGE_ASSETS)
-    add_definitions(-DLARGE_ASSET_PATH="${CMAKE_CURRENT_BINARY_DIR}/assets/large-assets")
+    add_definitions(-DTOY_RENDERER_LARGE_ASSET_PATH="${CMAKE_CURRENT_BINARY_DIR}/assets/large-assets")
 endif()
 
 # Add a DEBUG define on DEBUG builds
@@ -50,7 +50,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
-include(dependencies)
+add_subdirectory(dependencies)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 

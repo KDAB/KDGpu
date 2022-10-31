@@ -4,18 +4,20 @@ include(FetchContent)
 # if it contains a CMakeLists.txt, otherwise it does nothing.
 # ${package_SOURCE_DIR} ${package_BINARY_DIR} are made available by
 # MakeAvailable or Populate
-
 message(STATUS "Checking/updating dependencies. This may take a little while...
     Set the FETCHCONTENT_QUIET option to OFF to get verbose output.
 ")
 
 # spdlog Logging Library
-include(cmake/dependencies/spdlog.cmake)
+add_subdirectory(spdlog)
 
-if (TOYRENDERER_BUILD_TESTS)
+# serenity
+add_subdirectory(serenity)
+
+if(TOYRENDERER_BUILD_TESTS)
     # doctest
-    include(cmake/dependencies/doctest.cmake)
+    add_subdirectory(doctest)
 
     # trompeloeil
-    include(cmake/dependencies/trompeloeil.cmake)
+    add_subdirectory(trompeloeil)
 endif()
