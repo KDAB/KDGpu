@@ -2,8 +2,11 @@
 
 #include <toy_renderer/adapter.h>
 #include <toy_renderer/bind_group_description.h>
+#include <toy_renderer/device.h>
 #include <toy_renderer/handle.h>
 #include <toy_renderer/pool.h>
+#include <toy_renderer/queue.h>
+#include <toy_renderer/swapchain.h>
 
 #include <toy_renderer/toy_renderer_export.h>
 
@@ -13,6 +16,7 @@ struct ApiAdapter;
 struct ApiDevice;
 struct ApiInstance;
 struct ApiQueue;
+struct ApiSwapchain;
 
 class BindGroup;
 
@@ -41,6 +45,10 @@ public:
     // the concrete subclasses as to how they insert whatever they need.
     virtual void removeQueue(Handle<Queue_t> handle) = 0;
     virtual ApiQueue *getQueue(const Handle<Queue_t> &queue) = 0;
+
+    virtual Handle<Swapchain_t> createSwapchain() = 0;
+    virtual void deleteSwapchain(Handle<Swapchain_t> handle) = 0;
+    virtual ApiSwapchain *getSwapchain(const Handle<Swapchain_t> &handle) = 0;
 
     // virtual Handle<Shader> createShader(ShaderDescription desc) = 0;
     virtual Handle<BindGroup> createBindGroup(BindGroupDescription desc) = 0;

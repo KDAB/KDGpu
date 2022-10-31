@@ -7,6 +7,7 @@
 #include <toy_renderer/vulkan/vulkan_device.h>
 #include <toy_renderer/vulkan/vulkan_instance.h>
 #include <toy_renderer/vulkan/vulkan_queue.h>
+#include <toy_renderer/vulkan/vulkan_swapchain.h>
 
 #include <toy_renderer/toy_renderer_export.h>
 
@@ -36,6 +37,10 @@ public:
     void removeQueue(Handle<Queue_t> handle) final;
     VulkanQueue *getQueue(const Handle<Queue_t> &handle) final { return m_queues.get(handle); }
 
+    Handle<Swapchain_t> createSwapchain() final;
+    void deleteSwapchain(Handle<Swapchain_t> handle) final;
+    VulkanSwapchain *getSwapchain(const Handle<Swapchain_t> &handle) final { return m_swapchains.get(handle); };
+
     // virtual Handle<Shader> createShader(ShaderDescription desc) = 0;
     Handle<BindGroup> createBindGroup(BindGroupDescription desc) final;
     // virtual Handle<Texture> createTexture(TextureDescription desc) = 0;
@@ -51,6 +56,7 @@ private:
     Pool<VulkanAdapter, Adapter_t> m_adapters{ 1 };
     Pool<VulkanDevice, Device_t> m_devices{ 1 };
     Pool<VulkanQueue, Queue_t> m_queues{ 4 };
+    Pool<VulkanSwapchain, Swapchain_t> m_swapchains{ 1 };
 };
 
 } // namespace ToyRenderer

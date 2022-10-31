@@ -143,6 +143,15 @@ void VulkanResourceManager::removeQueue(Handle<Queue_t> handle)
     m_queues.remove(handle);
 }
 
+Handle<Swapchain_t> VulkanResourceManager::createSwapchain()
+{
+    return {};
+}
+
+void VulkanResourceManager::deleteSwapchain(Handle<Swapchain_t> handle)
+{
+}
+
 Handle<BindGroup> VulkanResourceManager::createBindGroup(BindGroupDescription desc)
 {
     // TODO: This is where we will call vkAllocateDescriptorSets
