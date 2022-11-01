@@ -152,6 +152,16 @@ void VulkanResourceManager::deleteSwapchain(Handle<Swapchain_t> handle)
 {
 }
 
+Handle<Surface_t> VulkanResourceManager::createSurface()
+{
+    return {};
+}
+
+void VulkanResourceManager::deleteSurface(Handle<Surface_t> handle)
+{
+    // TODO: Implement me!
+}
+
 Handle<BindGroup> VulkanResourceManager::createBindGroup(BindGroupDescription desc)
 {
     // TODO: This is where we will call vkAllocateDescriptorSets

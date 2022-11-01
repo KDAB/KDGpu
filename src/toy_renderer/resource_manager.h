@@ -7,6 +7,7 @@
 #include <toy_renderer/pool.h>
 #include <toy_renderer/queue.h>
 #include <toy_renderer/swapchain.h>
+#include <toy_renderer/surface.h>
 
 #include <toy_renderer/toy_renderer_export.h>
 
@@ -17,6 +18,7 @@ struct ApiDevice;
 struct ApiInstance;
 struct ApiQueue;
 struct ApiSwapchain;
+struct ApiSurface;
 
 class BindGroup;
 
@@ -45,6 +47,10 @@ public:
     // the concrete subclasses as to how they insert whatever they need.
     virtual void removeQueue(Handle<Queue_t> handle) = 0;
     virtual ApiQueue *getQueue(const Handle<Queue_t> &queue) = 0;
+
+    virtual Handle<Surface_t> createSurface() = 0;
+    virtual void deleteSurface(Handle<Surface_t> handle) = 0;
+    virtual ApiSurface *getSurface(const Handle<Surface_t> &handle) = 0;
 
     virtual Handle<Swapchain_t> createSwapchain() = 0;
     virtual void deleteSwapchain(Handle<Swapchain_t> handle) = 0;

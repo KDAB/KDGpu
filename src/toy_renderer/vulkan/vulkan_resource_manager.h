@@ -8,6 +8,7 @@
 #include <toy_renderer/vulkan/vulkan_instance.h>
 #include <toy_renderer/vulkan/vulkan_queue.h>
 #include <toy_renderer/vulkan/vulkan_swapchain.h>
+#include <toy_renderer/vulkan/vulkan_surface.h>
 
 #include <toy_renderer/toy_renderer_export.h>
 
@@ -31,7 +32,7 @@ public:
 
     Handle<Device_t> createDevice(const Handle<Adapter_t> &adapterHandle, const DeviceOptions &options, std::vector<QueueRequest> &queueRequests) final;
     void deleteDevice(Handle<Device_t> handle) final;
-    ApiDevice *getDevice(const Handle<Device_t> &handle) final { return m_devices.get(handle); };
+    ApiDevice *getDevice(const Handle<Device_t> &handle) final { return m_devices.get(handle); }
 
     Handle<Queue_t> insertQueue(const VulkanQueue &vulkanQueue);
     void removeQueue(Handle<Queue_t> handle) final;
@@ -39,7 +40,11 @@ public:
 
     Handle<Swapchain_t> createSwapchain() final;
     void deleteSwapchain(Handle<Swapchain_t> handle) final;
-    VulkanSwapchain *getSwapchain(const Handle<Swapchain_t> &handle) final { return m_swapchains.get(handle); };
+    VulkanSwapchain *getSwapchain(const Handle<Swapchain_t> &handle) final { return m_swapchains.get(handle); }
+
+    Handle<Surface_t> createSurface() final;
+    void deleteSurface(Handle<Surface_t> handle) final;
+    VulkanSurface *getSurface(const Handle<Surface_t> &handle) final { return m_surfaces.get(handle); }
 
     // virtual Handle<Shader> createShader(ShaderDescription desc) = 0;
     Handle<BindGroup> createBindGroup(BindGroupDescription desc) final;
@@ -56,6 +61,7 @@ private:
     Pool<VulkanAdapter, Adapter_t> m_adapters{ 1 };
     Pool<VulkanDevice, Device_t> m_devices{ 1 };
     Pool<VulkanQueue, Queue_t> m_queues{ 4 };
+    Pool<VulkanSurface, Surface_t> m_surfaces{ 1 };
     Pool<VulkanSwapchain, Swapchain_t> m_swapchains{ 1 };
 };
 

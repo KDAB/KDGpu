@@ -31,4 +31,26 @@ std::span<Adapter> Instance::adapters()
     return std::span{ m_adapters };
 }
 
+#if defined(TOY_RENDERER_PLATFORM_WIN32)
+Handle<Surface_t> Instance::createSurface(HINSTANCE hInstance, HWND hWnd)
+{
+    return {};
+}
+#endif
+
+#if defined(TOY_RENDERER_PLATFORM_LINUX)
+Handle<Surface_t> Instance::createSurface(xcb_connection_t *connection, xcb_window_t window);
+#endif
+
+#if defined(TOY_RENDERER_PLATFORM_MACOS)
+Handle<Surface_t> Instance::createSurface(CAMetalLayer *layer);
+#endif
+
+#if defined(TOY_RENDERER_PLATFORM_SERENITY)
+Handle<Surface_t> Instance::createSurface(Serenity::Window *window)
+{
+    return {};
+}
+#endif
+
 } // namespace ToyRenderer

@@ -54,6 +54,11 @@ std::span<AdapterQueueType> Adapter::queueTypes()
     return m_queueTypes;
 }
 
+AdapterSwapchainProperties Adapter::swapchainProperties(const Surface &surface) const
+{
+    return {};
+}
+
 Device Adapter::createDevice(const DeviceOptions &options)
 {
     return Device(this, m_api, options);

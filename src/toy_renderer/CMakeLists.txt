@@ -8,6 +8,7 @@ set(SOURCES
     queue.cpp
     resource_manager.cpp
     swapchain.cpp
+    surface.cpp
     vulkan/vulkan_adapter.cpp
     vulkan/vulkan_device.cpp
     vulkan/vulkan_enums.cpp
@@ -16,12 +17,14 @@ set(SOURCES
     vulkan/vulkan_resource_manager.cpp
     vulkan/vulkan_queue.cpp
     vulkan/vulkan_swapchain.cpp
+    vulkan/vulkan_surface.cpp
 )
 
 set(HEADERS
     adapter_features.h
     adapter_properties.h
     adapter_queue_type.h
+    adapter_swapchain_properties.h
     adapter.h
     device.h
     device_options.h
@@ -34,10 +37,12 @@ set(HEADERS
     queue_description.h
     resource_manager.h
     swapchain.h
+    surface.h
     api/api_adapter.h
     api/api_device.h
     api/api_instance.h
     api/api_swapchain.h
+    api/api_surface.h
     vulkan/vulkan_adapter.h
     vulkan/vulkan_device.h
     vulkan/vulkan_enums.h
@@ -46,6 +51,7 @@ set(HEADERS
     vulkan/vulkan_resource_manager.h
     vulkan/vulkan_queue.h
     vulkan/vulkan_swapchain.h
+    vulkan/vulkan_surface.h
 )
 
 add_library(toy-renderer SHARED
@@ -69,10 +75,12 @@ target_link_libraries(toy-renderer
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    target_compile_definitions(toy-renderer PUBLIC TOY_RENDERER_PLATFORM_LINUX)
     target_compile_definitions(toy-renderer PRIVATE PLATFORM_LINUX)
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    target_compile_definitions(toy-renderer PUBLIC TOY_RENDERER_PLATFORM_WIN32)
     target_compile_definitions(toy-renderer PRIVATE PLATFORM_WIN32)
     target_compile_definitions(toy-renderer PRIVATE UNICODE)
     target_compile_definitions(toy-renderer PRIVATE "VMA_CALL_PRE=__declspec(dllexport)")
@@ -81,6 +89,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    target_compile_definitions(toy-renderer PUBLIC TOY_RENDERER_PLATFORM_MACOS)
     target_compile_definitions(toy-renderer PRIVATE PLATFORM_MACOS)
 endif()
 

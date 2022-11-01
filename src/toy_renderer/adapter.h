@@ -3,6 +3,7 @@
 #include <toy_renderer/adapter_features.h>
 #include <toy_renderer/adapter_properties.h>
 #include <toy_renderer/adapter_queue_type.h>
+#include <toy_renderer/adapter_swapchain_properties.h>
 #include <toy_renderer/device.h>
 #include <toy_renderer/handle.h>
 
@@ -15,6 +16,7 @@
 namespace ToyRenderer {
 
 class GraphicsApi;
+class Surface;
 
 struct Adapter_t;
 struct Instance_t;
@@ -36,6 +38,9 @@ public:
     const AdapterProperties &properties() const noexcept;
     const AdapterFeatures &features() const noexcept;
     std::span<AdapterQueueType> queueTypes();
+
+    // TODO: Need an api-agnostic way to pass in a surface
+    AdapterSwapchainProperties swapchainProperties(const Surface &surface) const;
 
     Device createDevice(const DeviceOptions &options = DeviceOptions());
 
