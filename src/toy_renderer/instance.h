@@ -4,6 +4,7 @@
 #include <toy_renderer/gpu_core.h>
 #include <toy_renderer/handle.h>
 #include <toy_renderer/surface.h>
+#include <toy_renderer/surface_options.h>
 
 #include <toy_renderer/toy_renderer_export.h>
 
@@ -46,29 +47,13 @@ public:
 
     std::span<Adapter> adapters();
 
-    // TODO: We could optionally compile and link ToyRenderer against Serenity to get access
-    // to its platform independent Window class. That way this library could be used either with
-    // platform-specific code like below, or with platform-independent code like Serenity (or Qt
-    // or SDL or glfw).
+    // TODO: Support Serenity::Window, QWindow etc
     //
-    // Alternatively, we could provide a tiny library that links to both Serenity and ToyRenderer
+    // We could provide a tiny library that links to both Serenity and ToyRenderer
     // and exposed SerenityVulkanGraphicsApi which creates a SerenityInstance class that inherits
     // Instance and which creates a Surface from a Serenity::Window. This approach would keep
     // ToyRenderer separate from Serenity/Qt.
-    //
-    // For now we will proceed with the platform-specific approach.
-#if defined(TOY_RENDERER_PLATFORM_WIN32)
-    Surface createSurface(HWND hWnd);
-#endif
-#if defined(TOY_RENDERER_PLATFORM_LINUX)
-    Surface createSurface(xcb_connection_t *connection, xcb_window_t window);
-#endif
-#if defined(TOY_RENDERER_PLATFORM_MACOS)
-    Surface createSurface(CAMetalLayer *layer);
-#endif
-#if defined(TOY_RENDERER_PLATFORM_SERENITY)
-    Surface createSurface(Serenity::Window *window);
-#endif
+    Surface createSurface(const SurfaceOptions &options);
 
 private:
     Instance(GraphicsApi *api, const InstanceOptions &options);

@@ -38,6 +38,7 @@ set(HEADERS
     resource_manager.h
     swapchain.h
     surface.h
+    surface_options.h
     api/api_adapter.h
     api/api_device.h
     api/api_instance.h

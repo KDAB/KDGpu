@@ -1,6 +1,7 @@
 #pragma once
 
 #include <toy_renderer/handle.h>
+#include <toy_renderer/surface_options.h>
 
 #include <vector>
 
@@ -26,18 +27,7 @@ struct Surface_t;
 struct ApiInstance {
     virtual std::vector<Handle<Adapter_t>> queryAdapters() = 0;
 
-#if defined(TOY_RENDERER_PLATFORM_WIN32)
-    virtual Handle<Surface_t> createSurface(HWND hWnd) = 0;
-#endif
-#if defined(TOY_RENDERER_PLATFORM_LINUX)
-    virtual Handle<Surface_t> createSurface(xcb_connection_t *connection, xcb_window_t window) = 0;
-#endif
-#if defined(TOY_RENDERER_PLATFORM_MACOS)
-    virtual Handle<Surface_t> createSurface(CAMetalLayer *layer) = 0;
-#endif
-#if defined(TOY_RENDERER_PLATFORM_SERENITY)
-    virtual Handle<Surface_t> createSurface(Serenity::Window *window) = 0;
-#endif
+    virtual Handle<Surface_t> createSurface(const SurfaceOptions &options) = 0;
 };
 
 } // namespace ToyRenderer

@@ -84,15 +84,19 @@ int main()
 
 #if defined(TOY_RENDERER_PLATFORM_WIN32)
     auto win32Window = dynamic_cast<Win32PlatformWindow *>(window.platformWindow());
-    HWND hWnd = win32Window->handle();
-    Surface surface = instance.createSurface(hWnd);
+    SurfaceOptions surfaceOptions = {
+        .hWnd = win32Window->handle()
+    };
 #endif
 
 #if defined(TOY_RENDERER_PLATFORM_LINUX)
     auto xcbWindow = dynamic_cast<LinuxXcbPlatformWindow *>(window.platformWindow());
-    xcb_window windowHandle = xcbWindow->handle();
-    Surface surface = instance.createSurface(windowHandle);
+    SurfaceOptions surfaceOptions = {
+        .xcb_connection = xcbWindow->connection(),
+        .xcb_window = xcbWindow->handle()
+    };
 #endif
+    Surface surface = instance.createSurface(surfaceOptions);
 
     // TODO: Create a buffer to hold triangle vertex data
 
