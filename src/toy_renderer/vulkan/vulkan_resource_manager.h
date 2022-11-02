@@ -42,7 +42,7 @@ public:
     void deleteSwapchain(Handle<Swapchain_t> handle) final;
     VulkanSwapchain *getSwapchain(const Handle<Swapchain_t> &handle) final { return m_swapchains.get(handle); }
 
-    Handle<Surface_t> createSurface() final;
+    Handle<Surface_t> insertSurface(const VulkanSurface &surface);
     void deleteSurface(Handle<Surface_t> handle) final;
     VulkanSurface *getSurface(const Handle<Surface_t> &handle) final { return m_surfaces.get(handle); }
 

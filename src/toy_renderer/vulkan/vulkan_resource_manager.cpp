@@ -152,14 +152,17 @@ void VulkanResourceManager::deleteSwapchain(Handle<Swapchain_t> handle)
 {
 }
 
-Handle<Surface_t> VulkanResourceManager::createSurface()
+Handle<Surface_t> VulkanResourceManager::insertSurface(const VulkanSurface &vulkanSurface)
 {
-    return {};
+    return m_surfaces.emplace(vulkanSurface);
 }
 
 void VulkanResourceManager::deleteSurface(Handle<Surface_t> handle)
 {
-    // TODO: Implement me!
+    VulkanSurface *vulkanSurface = m_surfaces.get(handle);
+    if (vulkanSurface == nullptr)
+        return;
+    vkDestroySurfaceKHR(vulkanSurface->instance, vulkanSurface->surface, nullptr);
 }
 
 Handle<BindGroup> VulkanResourceManager::createBindGroup(BindGroupDescription desc)

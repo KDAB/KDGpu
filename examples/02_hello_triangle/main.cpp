@@ -5,6 +5,12 @@
 
 #include <Serenity/gui/gui_application.h>
 #include <Serenity/gui/window.h>
+#if defined(TOY_RENDERER_PLATFORM_WIN32)
+#include <Serenity/gui/platform/win32/win32_platform_window.h>
+#endif
+#if defined(TOY_RENDERER_PLATFORM_LINUX)
+#include <Serenity/gui/platform/linux/xcb/linux_xcb_platform_window.h>
+#endif
 
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
@@ -75,6 +81,18 @@ int main()
         if (visible == false)
             app.quit();
     });
+
+#if defined(TOY_RENDERER_PLATFORM_WIN32)
+    auto win32Window = dynamic_cast<Win32PlatformWindow *>(window.platformWindow());
+    HWND hWnd = win32Window->handle();
+    Surface surface = instance.createSurface(hWnd);
+#endif
+
+#if defined(TOY_RENDERER_PLATFORM_LINUX)
+    auto xcbWindow = dynamic_cast<LinuxXcbPlatformWindow *>(window.platformWindow());
+    xcb_window windowHandle = xcbWindow->handle();
+    Surface surface = instance.createSurface(windowHandle);
+#endif
 
     // TODO: Create a buffer to hold triangle vertex data
 

@@ -32,22 +32,23 @@ std::span<Adapter> Instance::adapters()
 }
 
 #if defined(TOY_RENDERER_PLATFORM_WIN32)
-Handle<Surface_t> Instance::createSurface(HINSTANCE hInstance, HWND hWnd)
+Surface Instance::createSurface(HWND hWnd)
 {
-    return {};
+    auto apiInstance = m_api->resourceManager()->getInstance(m_instance);
+    return Surface(apiInstance->createSurface(hWnd));
 }
 #endif
 
 #if defined(TOY_RENDERER_PLATFORM_LINUX)
-Handle<Surface_t> Instance::createSurface(xcb_connection_t *connection, xcb_window_t window);
+Surface Instance::createSurface(xcb_connection_t *connection, xcb_window_t window);
 #endif
 
 #if defined(TOY_RENDERER_PLATFORM_MACOS)
-Handle<Surface_t> Instance::createSurface(CAMetalLayer *layer);
+Surface Instance::createSurface(CAMetalLayer *layer);
 #endif
 
 #if defined(TOY_RENDERER_PLATFORM_SERENITY)
-Handle<Surface_t> Instance::createSurface(Serenity::Window *window)
+Surface Instance::createSurface(Serenity::Window *window)
 {
     return {};
 }

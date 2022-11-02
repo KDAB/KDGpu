@@ -2,9 +2,10 @@
 
 namespace ToyRenderer {
 
-VulkanSurface::VulkanSurface(VkSurfaceKHR _surface)
+VulkanSurface::VulkanSurface(VkSurfaceKHR _surface, VkInstance _instance)
     : ApiSurface()
     , surface(_surface)
+    , instance(_instance)
 {
 }
 

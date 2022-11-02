@@ -48,7 +48,14 @@ public:
     virtual void removeQueue(Handle<Queue_t> handle) = 0;
     virtual ApiQueue *getQueue(const Handle<Queue_t> &queue) = 0;
 
-    virtual Handle<Surface_t> createSurface() = 0;
+    // Surfaces are created by the api instance and inserted into the resource
+    // manager by way of custom api on the api-specific resource manager concrete
+    // classes.
+    // TODO: Should we move the per-platform API here instead of on ApiInstance?
+    // Or perhaps we should wrap up the per-platform options into a SurfaceOptions struct?
+    // Then we could have something like:
+    //
+    // virtual Handle<Surface_t> createSurface(const Handle<Instance_t> &instanceHandle, const SurfaceOptions &options) = 0;
     virtual void deleteSurface(Handle<Surface_t> handle) = 0;
     virtual ApiSurface *getSurface(const Handle<Surface_t> &handle) = 0;
 

@@ -3,6 +3,10 @@
 #include <toy_renderer/vulkan/vulkan_adapter.h>
 #include <toy_renderer/vulkan/vulkan_resource_manager.h>
 
+#if defined(TOY_RENDERER_PLATFORM_WIN32)
+#include <vulkan/vulkan_win32.h>
+#endif
+
 namespace ToyRenderer {
 
 VulkanInstance::VulkanInstance(VulkanResourceManager *_vulkanResourceManager, VkInstance _instance)
@@ -31,5 +35,49 @@ std::vector<Handle<Adapter_t>> VulkanInstance::queryAdapters()
 
     return adapterHandles;
 }
+
+#if defined(TOY_RENDERER_PLATFORM_WIN32)
+Handle<Surface_t> VulkanInstance::createSurface(HWND hWnd)
+{
+    PFN_vkCreateWin32SurfaceKHR vkCreateWin32SurfaceKHR{ nullptr };
+    vkCreateWin32SurfaceKHR = reinterpret_cast<PFN_vkCreateWin32SurfaceKHR>(vkGetInstanceProcAddr(instance, "vkCreateWin32SurfaceKHR"));
+    if (!vkCreateWin32SurfaceKHR)
+        return {};
+
+    VkWin32SurfaceCreateInfoKHR createInfo = {};
+    createInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+    createInfo.hinstance = GetModuleHandle(nullptr);
+    createInfo.hwnd = hWnd;
+
+    VkSurfaceKHR vkSurface{ VK_NULL_HANDLE };
+    if (vkCreateWin32SurfaceKHR(instance, &createInfo, nullptr, &vkSurface) != VK_SUCCESS)
+        return {};
+
+    VulkanSurface vulkanSurface{ vkSurface, instance };
+    auto surfaceHandle = vulkanResourceManager->insertSurface(vulkanSurface);
+    return surfaceHandle;
+}
+#endif
+
+#if defined(TOY_RENDERER_PLATFORM_LINUX)
+Handle<Surface_t> VulkanInstance::createSurface(xcb_connection_t *connection, xcb_window_t window)
+{
+    // TODO: Implement me!
+}
+#endif
+
+#if defined(TOY_RENDERER_PLATFORM_MACOS)
+Handle<Surface_t> VulkanInstance::createSurface(CAMetalLayer *layer)
+{
+    // TODO: Implement me!
+}
+#endif
+
+#if defined(TOY_RENDERER_PLATFORM_SERENITY)
+Handle<Surface_t> VulkanInstance::createSurface(Serenity::Window *window)
+{
+    // TODO: Implement me!
+}
+#endif
 
 } // namespace ToyRenderer

@@ -58,16 +58,16 @@ public:
     //
     // For now we will proceed with the platform-specific approach.
 #if defined(TOY_RENDERER_PLATFORM_WIN32)
-    Handle<Surface_t> createSurface(HINSTANCE hInstance, HWND hWnd);
+    Surface createSurface(HWND hWnd);
 #endif
 #if defined(TOY_RENDERER_PLATFORM_LINUX)
-    Handle<Surface_t> createSurface(xcb_connection_t *connection, xcb_window_t window);
+    Surface createSurface(xcb_connection_t *connection, xcb_window_t window);
 #endif
 #if defined(TOY_RENDERER_PLATFORM_MACOS)
-    Handle<Surface_t> createSurface(CAMetalLayer *layer);
+    Surface createSurface(CAMetalLayer *layer);
 #endif
 #if defined(TOY_RENDERER_PLATFORM_SERENITY)
-    Handle<Surface_t> createSurface(Serenity::Window *window);
+    Surface createSurface(Serenity::Window *window);
 #endif
 
 private:
