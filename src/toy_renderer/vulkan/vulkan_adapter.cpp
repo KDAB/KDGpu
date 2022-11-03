@@ -267,7 +267,11 @@ AdapterSwapchainProperties VulkanAdapter::querySwapchainProperties(const Handle<
         .currentExtent = { capabilities.currentExtent.width, capabilities.currentExtent.height },
         .minImageExtent = { capabilities.minImageExtent.width, capabilities.minImageExtent.height },
         .maxImageExtent = { capabilities.maxImageExtent.width, capabilities.maxImageExtent.height },
-        .maxImageArrayLayers = capabilities.maxImageArrayLayers
+        .maxImageArrayLayers = capabilities.maxImageArrayLayers,
+        .supportedTransforms = capabilities.supportedTransforms,
+        .currentTransform = vkSurfaceTransformFlagBitsKHRToSurfaceTransformFlagBits(capabilities.currentTransform),
+        .supportedCompositeAlpha = capabilities.supportedCompositeAlpha,
+        .supportedUsageFlags = capabilities.supportedUsageFlags
     };
     
     // Get the supported formats and colorspaces

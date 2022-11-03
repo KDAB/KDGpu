@@ -383,4 +383,49 @@ enum class Format {
     MAX_ENUM = 0x7FFFFFFF
 };
 
+enum class SurfaceTransformFlagBits {
+    IdentityBit = 0x00000001,
+    Rotate90Bit = 0x00000002,
+    Rotate180Bit = 0x00000004,
+    Rotate270Bit = 0x00000008,
+    HorizontalMirrorBit = 0x00000010,
+    HorizontalMirrorRotate90Bit = 0x00000020,
+    HorizontalMirrorRotate180Bit = 0x00000040,
+    HorizontalMirrorRotate270Bit = 0x00000080,
+    InheritBit = 0x00000100,
+    MaxEnum = 0x7fffffff
+};
+using SurfaceTransformFlags = Flags;
+
+enum class CompositeAlphaFlagBits {
+    OpaqueBit = 0x00000001,
+    PreMultipliedBit = 0x00000002,
+    PostMultipliedBit = 0x00000004,
+    InheritBit = 0x00000008,
+    MaxEnum = 0x7FFFFFFF
+};
+using CompositeAlphaFlags = Flags;
+
+enum class ImageUsageFlagBits {
+    TransferSrcBit = 0x00000001,
+    TransferDstBit = 0x00000002,
+    SampledBit = 0x00000004,
+    StorageBit = 0x00000008,
+    ColorAttachmentBit = 0x00000010,
+    DepthStencilAttachmentBit = 0x00000020,
+    TransientAttachmentBit = 0x00000040,
+    InputAttachmentBit = 0x00000080,
+    VideoDecodeDstBit = 0x00000400,
+    VideoDecodeSrcBit = 0x00000800,
+    VideoDecodeDpbBit = 0x00001000,
+    FragmentDensityMapBit = 0x00000200,
+    FragmentShadingRateAttachmentBit = 0x00000100,
+    VideoEncodeDstBit = 0x00002000,
+    VideoEncodeSrcBit = 0x00004000,
+    VideoEncodeDpbBit = 0x00008000,
+    InvocationMaskBit = 0x00040000,
+    MaxEnum = 0x7fffffff
+};
+using ImageUsageFlags = Flags;
+
 } // namespace ToyRenderer

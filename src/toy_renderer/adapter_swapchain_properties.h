@@ -13,10 +13,10 @@ struct SurfaceCapabilities {
     Extent2D minImageExtent;
     Extent2D maxImageExtent;
     uint32_t maxImageArrayLayers;
-    // SurfaceTransformFlagsKHR       supportedTransforms;
-    // SurfaceTransformFlagBitsKHR    currentTransform;
-    // CompositeAlphaFlagsKHR         supportedCompositeAlpha;
-    // ImageUsageFlags                supportedUsageFlags;
+    SurfaceTransformFlags supportedTransforms;
+    SurfaceTransformFlagBits currentTransform;
+    CompositeAlphaFlags supportedCompositeAlpha;
+    ImageUsageFlags supportedUsageFlags;
 };
 
 struct SurfaceFormat {

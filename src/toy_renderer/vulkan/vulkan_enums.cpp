@@ -43,4 +43,9 @@ PresentMode vkPresentModeKHRToPresentMode(VkPresentModeKHR presentMode)
     return static_cast<PresentMode>(static_cast<uint32_t>(presentMode));
 }
 
+SurfaceTransformFlagBits vkSurfaceTransformFlagBitsKHRToSurfaceTransformFlagBits(VkSurfaceTransformFlagBitsKHR transform)
+{
+    return static_cast<SurfaceTransformFlagBits>(static_cast<uint32_t>(transform));
+}
+
 } // namespace ToyRenderer

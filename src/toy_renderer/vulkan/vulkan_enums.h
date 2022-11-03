@@ -14,4 +14,6 @@ ColorSpace vkColorSpaceKHRToColorSpace(VkColorSpaceKHR colorSpace);
 
 PresentMode vkPresentModeKHRToPresentMode(VkPresentModeKHR presentMode);
 
+SurfaceTransformFlagBits vkSurfaceTransformFlagBitsKHRToSurfaceTransformFlagBits(VkSurfaceTransformFlagBitsKHR transform);
+
 } // namespace ToyRenderer
