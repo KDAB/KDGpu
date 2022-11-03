@@ -33,7 +33,7 @@ std::vector<Handle<Adapter_t>> VulkanInstance::queryAdapters()
     std::vector<Handle<Adapter_t>> adapterHandles;
     adapterHandles.reserve(adapterCount);
     for (uint32_t adapterIndex = 0; adapterIndex < adapterCount; ++adapterIndex) {
-        VulkanAdapter vulkanAdapter{ physicalDevices[adapterIndex] };
+        VulkanAdapter vulkanAdapter{ physicalDevices[adapterIndex], vulkanResourceManager };
         adapterHandles.emplace_back(vulkanResourceManager->insertAdapter(vulkanAdapter));
     }
 

@@ -28,4 +28,19 @@ AdapterDeviceType vkPhysicalDeviceTypeToAdapterDeviceType(VkPhysicalDeviceType d
     }
 }
 
+Format vkFormatToFormat(VkFormat format)
+{
+    return static_cast<Format>(static_cast<uint32_t>(format));
+}
+
+ColorSpace vkColorSpaceKHRToColorSpace(VkColorSpaceKHR colorSpace)
+{
+    return static_cast<ColorSpace>(static_cast<uint32_t>(colorSpace));
+}
+
+PresentMode vkPresentModeKHRToPresentMode(VkPresentModeKHR presentMode)
+{
+    return static_cast<PresentMode>(static_cast<uint32_t>(presentMode));
+}
+
 } // namespace ToyRenderer

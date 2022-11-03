@@ -12,6 +12,8 @@ class TOY_RENDERER_EXPORT Surface
 public:
     ~Surface();
 
+    Handle<Surface_t> handle() const noexcept { return m_surface; }
+
 private:
     Surface(const Handle<Surface_t> &surface);
 

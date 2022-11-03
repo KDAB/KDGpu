@@ -68,11 +68,7 @@ int main()
     const bool hasGraphicsAndCompute = queueTypes[0].supportsFeature(QueueFlags(QueueFlagBits::GraphicsBit) | QueueFlags(QueueFlagBits::ComputeBit));
     spdlog::critical("Queue family 0 graphics and compute support: {}", hasGraphicsAndCompute);
 
-    // TODO: Now we can create a device from the selected adapter that we can then use to interact with the GPU.
-    auto device = selectedAdapter.createDevice();
-    auto queue = device.queues()[0];
-
-    // TODO: Create a swapchain for the window
+    // Create a window and platform surface from it suitable for use with our chosen graphics API.
     Window window;
     window.width = 1920;
     window.height = 1080;
@@ -97,6 +93,13 @@ int main()
     };
 #endif
     Surface surface = instance.createSurface(surfaceOptions);
+
+    // We are now able to query the adapter for presentation support with the window surface
+    const auto swapchainProperties = selectedAdapter.swapchainProperties(surface);
+
+    // Now we can create a device from the selected adapter that we can then use to interact with the GPU.
+    auto device = selectedAdapter.createDevice();
+    auto queue = device.queues()[0];
 
     // TODO: Create a buffer to hold triangle vertex data
 

@@ -1,12 +1,15 @@
 #include "vulkan_adapter.h"
 
 #include <toy_renderer/vulkan/vulkan_enums.h>
+#include <toy_renderer/vulkan/vulkan_resource_manager.h>
+#include <toy_renderer/vulkan/vulkan_surface.h>
 
 namespace ToyRenderer {
 
-VulkanAdapter::VulkanAdapter(VkPhysicalDevice _physicalDevice)
+VulkanAdapter::VulkanAdapter(VkPhysicalDevice _physicalDevice, VulkanResourceManager *_vulkanResourceManager)
     : ApiAdapter()
     , physicalDevice(_physicalDevice)
+    , vulkanResourceManager(_vulkanResourceManager)
 {
 }
 
@@ -247,6 +250,61 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
         .inheritedQueries = static_cast<bool>(deviceFeatures.inheritedQueries)
     };
     return features;
+}
+
+AdapterSwapchainProperties VulkanAdapter::querySwapchainProperties(const Handle<Surface_t> &surfaceHandle)
+{
+    AdapterSwapchainProperties properties = {};
+    
+    // Get the capabilities
+    VulkanSurface surface = *vulkanResourceManager->getSurface(surfaceHandle);
+    VkSurfaceCapabilitiesKHR capabilities;
+    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface.surface, &capabilities);
+    
+    properties.capabilities = {
+        .minImageCount = capabilities.minImageCount,
+        .maxImageCount = capabilities.maxImageCount,
+        .currentExtent = { capabilities.currentExtent.width, capabilities.currentExtent.height },
+        .minImageExtent = { capabilities.minImageExtent.width, capabilities.minImageExtent.height },
+        .maxImageExtent = { capabilities.maxImageExtent.width, capabilities.maxImageExtent.height },
+        .maxImageArrayLayers = capabilities.maxImageArrayLayers
+    };
+    
+    // Get the supported formats and colorspaces
+    uint32_t formatCount;
+    std::vector<VkSurfaceFormatKHR> vkFormats;
+    vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface.surface, &formatCount, nullptr);
+    if (formatCount != 0) {
+        vkFormats.resize(formatCount);
+        vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface.surface, &formatCount, vkFormats.data());
+    }
+    
+    std::vector<SurfaceFormat> formats;
+    formats.reserve(formatCount);
+    for (uint32_t i = 0; i < formatCount; ++i) {
+        formats.emplace_back(SurfaceFormat { 
+            vkFormatToFormat(vkFormats[i].format),
+            vkColorSpaceKHRToColorSpace(vkFormats[i].colorSpace)
+        });
+    }
+    properties.formats = std::move(formats);
+    
+    // Get the supported present modes
+    uint32_t presentModeCount;
+    std::vector<VkPresentModeKHR> vkPresentModes;
+    vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface.surface, &presentModeCount, nullptr);
+    if (presentModeCount != 0) {
+        vkPresentModes.resize(presentModeCount);
+        vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface.surface, &presentModeCount, vkPresentModes.data());
+    }
+    
+    std::vector<PresentMode> presentModes;
+    presentModes.reserve(presentModeCount);
+    for (uint32_t i = 0; i < presentModeCount; ++i)
+        presentModes.emplace_back(vkPresentModeKHRToPresentMode(vkPresentModes[i]));
+    properties.presentModes = std::move(presentModes);
+    
+    return properties;
 }
 
 std::vector<AdapterQueueType> VulkanAdapter::queryQueueTypes()

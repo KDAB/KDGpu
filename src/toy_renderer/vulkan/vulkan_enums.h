@@ -8,4 +8,10 @@ namespace ToyRenderer {
 
 AdapterDeviceType vkPhysicalDeviceTypeToAdapterDeviceType(VkPhysicalDeviceType deviceType);
 
-}
+Format vkFormatToFormat(VkFormat format);
+
+ColorSpace vkColorSpaceKHRToColorSpace(VkColorSpaceKHR colorSpace);
+
+PresentMode vkPresentModeKHRToPresentMode(VkPresentModeKHR presentMode);
+
+} // namespace ToyRenderer
