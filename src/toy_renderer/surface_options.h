@@ -6,6 +6,7 @@
 #endif
 
 #if defined(TOY_RENDERER_PLATFORM_LINUX)
+#include <xcb/xproto.h>
 #endif
 
 #if defined(TOY_RENDERER_PLATFORM_MACOS)

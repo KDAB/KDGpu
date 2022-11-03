@@ -7,6 +7,10 @@
 #include <vulkan/vulkan_win32.h>
 #endif
 
+#if defined(TOY_RENDERER_PLATFORM_LINUX)
+#include <vulkan/vulkan_xcb.h>
+#endif
+
 namespace ToyRenderer {
 
 VulkanInstance::VulkanInstance(VulkanResourceManager *_vulkanResourceManager, VkInstance _instance)
@@ -55,6 +59,18 @@ Handle<Surface_t> VulkanInstance::createSurface(const SurfaceOptions &options)
 #endif
 
 #if defined(TOY_RENDERER_PLATFORM_LINUX)
+    PFN_vkCreateXcbSurfaceKHR vkCreateXcbSurfaceKHR{ nullptr };
+    vkCreateXcbSurfaceKHR = (PFN_vkCreateXcbSurfaceKHR)vkGetInstanceProcAddr(instance, "vkCreateXcbSurfaceKHR");
+    if (!vkCreateXcbSurfaceKHR)
+        return {};
+
+    VkXcbSurfaceCreateInfoKHR createInfo = {};
+    createInfo.sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
+    createInfo.connection = options.connection;
+    createInfo.window = options.window;
+
+    if (vkCreateXcbSurfaceKHR(instance, &createInfo, nullptr, &vkSurface) != VK_SUCCESS)
+        return {};
 #endif
 
 #if defined(TOY_RENDERER_PLATFORM_MACOS)

@@ -92,8 +92,8 @@ int main()
 #if defined(TOY_RENDERER_PLATFORM_LINUX)
     auto xcbWindow = dynamic_cast<LinuxXcbPlatformWindow *>(window.platformWindow());
     SurfaceOptions surfaceOptions = {
-        .xcb_connection = xcbWindow->connection(),
-        .xcb_window = xcbWindow->handle()
+        .connection = xcbWindow->connection(),
+        .window = xcbWindow->handle()
     };
 #endif
     Surface surface = instance.createSurface(surfaceOptions);
