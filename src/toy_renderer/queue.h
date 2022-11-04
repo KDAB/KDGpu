@@ -8,6 +8,11 @@
 
 namespace ToyRenderer {
 
+class GraphicsApi;
+class Surface;
+
+struct Adapter_t;
+
 class TOY_RENDERER_EXPORT Queue
 {
 public:
@@ -20,14 +25,18 @@ public:
     QueueFlags flags() const noexcept { return m_flags; }
     uint32_t timestampValidBits() const noexcept { return m_timestampValidBits; }
     Extent3D minImageTransferGranularity() const noexcept { return m_minImageTransferGranularity; }
+    uint32_t queueTypeIndex() const noexcept { return m_queueTypeIndex; }
 
 private:
-    Queue(const QueueDescription &queueDescription);
+    Queue(GraphicsApi *api, const QueueDescription &queueDescription);
+
+    GraphicsApi *m_api{ nullptr };
 
     Handle<Queue_t> m_queue;
     QueueFlags m_flags;
     uint32_t m_timestampValidBits;
     Extent3D m_minImageTransferGranularity;
+    uint32_t m_queueTypeIndex;
 
     friend class Device;
 };

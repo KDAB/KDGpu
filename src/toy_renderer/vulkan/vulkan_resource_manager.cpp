@@ -80,7 +80,7 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     queueRequests = options.queues;
     if (queueRequests.empty()) {
         QueueRequest queueRequest = {
-            .familyIndex = 0,
+            .queueTypeIndex = 0,
             .count = 1,
             .priorities = { 1.0f }
         };
@@ -95,7 +95,7 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
 
         VkDeviceQueueCreateInfo queueCreateInfo = {};
         queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-        queueCreateInfo.queueFamilyIndex = queueRequest.familyIndex;
+        queueCreateInfo.queueFamilyIndex = queueRequest.queueTypeIndex;
         queueCreateInfo.queueCount = queueRequest.count;
         queueCreateInfo.pQueuePriorities = queueRequest.priorities.data();
 

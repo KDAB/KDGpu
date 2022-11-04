@@ -17,6 +17,7 @@ struct ApiAdapter {
     virtual AdapterFeatures queryAdapterFeatures() = 0;
     virtual AdapterSwapchainProperties querySwapchainProperties(const Handle<Surface_t> &surfaceHandle) = 0;
     virtual std::vector<AdapterQueueType> queryQueueTypes() = 0;
+    virtual bool supportsPresentation(const Handle<Surface_t> surfaceHandle, uint32_t queueTypeIndex) = 0;
 };
 
 } // namespace ToyRenderer

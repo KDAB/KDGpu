@@ -12,6 +12,7 @@ struct QueueDescription {
     QueueFlags flags;
     uint32_t timestampValidBits;
     Extent3D minImageTransferGranularity;
+    uint32_t queueTypeIndex;
 };
 
 } // namespace ToyRenderer

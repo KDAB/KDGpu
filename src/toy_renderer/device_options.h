@@ -9,7 +9,7 @@
 namespace ToyRenderer {
 
 struct QueueRequest {
-    uint32_t familyIndex;
+    uint32_t queueTypeIndex;
     uint32_t count;
     std::vector<float> priorities;
 };

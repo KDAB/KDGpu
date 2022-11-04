@@ -60,6 +60,12 @@ AdapterSwapchainProperties Adapter::swapchainProperties(const Surface &surface) 
     return apiAdapter->querySwapchainProperties(surface.handle());
 }
 
+bool Adapter::supportsPresentation(const Surface &surface, uint32_t queueTypeIndex) const noexcept
+{
+    auto apiAdapter = m_api->resourceManager()->getAdapter(m_adapter);
+    return apiAdapter->supportsPresentation(surface.handle(), queueTypeIndex);
+}
+
 Device Adapter::createDevice(const DeviceOptions &options)
 {
     return Device(this, m_api, options);

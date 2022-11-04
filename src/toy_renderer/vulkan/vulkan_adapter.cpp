@@ -339,4 +339,12 @@ std::vector<AdapterQueueType> VulkanAdapter::queryQueueTypes()
     return queueTypes;
 }
 
+bool VulkanAdapter::supportsPresentation(const Handle<Surface_t> surfaceHandle, uint32_t queueTypeIndex)
+{
+    VulkanSurface vulkanSurface = *vulkanResourceManager->getSurface(surfaceHandle);
+    VkBool32 canPresent = false;
+    vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, queueTypeIndex, vulkanSurface.surface, &canPresent);
+    return canPresent;
+}
+
 } // namespace ToyRenderer

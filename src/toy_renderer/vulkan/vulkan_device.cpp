@@ -30,14 +30,15 @@ std::vector<QueueDescription> VulkanDevice::getQueues(ResourceManager *resourceM
         const uint32_t queueCountForFamily = queueRequest.count;
         for (uint32_t j = 0; j < queueCountForFamily; ++j) {
             VkQueue vkQueue{ VK_NULL_HANDLE };
-            vkGetDeviceQueue(device, queueRequest.familyIndex, j, &vkQueue);
+            vkGetDeviceQueue(device, queueRequest.queueTypeIndex, j, &vkQueue);
             const auto queueHandle = vulkanResourceManager->insertQueue(VulkanQueue{ vkQueue });
 
             QueueDescription queueDescription{
                 .queue = queueHandle,
-                .flags = queueTypes[queueRequest.familyIndex].flags,
-                .timestampValidBits = queueTypes[queueRequest.familyIndex].timestampValidBits,
-                .minImageTransferGranularity = queueTypes[queueRequest.familyIndex].minImageTransferGranularity
+                .flags = queueTypes[queueRequest.queueTypeIndex].flags,
+                .timestampValidBits = queueTypes[queueRequest.queueTypeIndex].timestampValidBits,
+                .minImageTransferGranularity = queueTypes[queueRequest.queueTypeIndex].minImageTransferGranularity,
+                .queueTypeIndex = queueRequest.queueTypeIndex
             };
             queueDescriptions.push_back(queueDescription);
 

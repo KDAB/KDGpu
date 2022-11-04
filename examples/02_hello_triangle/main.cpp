@@ -41,6 +41,32 @@ int main()
     };
     auto instance = api->createInstance(instanceOptions);
 
+    // Create a window and platform surface from it suitable for use with our chosen graphics API.
+    Window window;
+    window.width = 1920;
+    window.height = 1080;
+    window.visible = true;
+    window.visible.valueChanged().connect([&app](const bool &visible) {
+        if (visible == false)
+            app.quit();
+    });
+
+#if defined(TOY_RENDERER_PLATFORM_WIN32)
+    auto win32Window = dynamic_cast<Win32PlatformWindow *>(window.platformWindow());
+    SurfaceOptions surfaceOptions = {
+        .hWnd = win32Window->handle()
+    };
+#endif
+
+#if defined(TOY_RENDERER_PLATFORM_LINUX)
+    auto xcbWindow = dynamic_cast<LinuxXcbPlatformWindow *>(window.platformWindow());
+    SurfaceOptions surfaceOptions = {
+        .connection = xcbWindow->connection(),
+        .window = xcbWindow->handle()
+    };
+#endif
+    Surface surface = instance.createSurface(surfaceOptions);
+
     // Enumerate the adapters (physical devices) and select one to use. Here we look for
     // a discrete GPU. In a real app, we could fallback to an integrated one.
     Adapter selectedAdapter;
@@ -68,34 +94,10 @@ int main()
     const bool hasGraphicsAndCompute = queueTypes[0].supportsFeature(QueueFlags(QueueFlagBits::GraphicsBit) | QueueFlags(QueueFlagBits::ComputeBit));
     spdlog::critical("Queue family 0 graphics and compute support: {}", hasGraphicsAndCompute);
 
-    // Create a window and platform surface from it suitable for use with our chosen graphics API.
-    Window window;
-    window.width = 1920;
-    window.height = 1080;
-    window.visible = true;
-    window.visible.valueChanged().connect([&app](const bool &visible) {
-        if (visible == false)
-            app.quit();
-    });
-
-#if defined(TOY_RENDERER_PLATFORM_WIN32)
-    auto win32Window = dynamic_cast<Win32PlatformWindow *>(window.platformWindow());
-    SurfaceOptions surfaceOptions = {
-        .hWnd = win32Window->handle()
-    };
-#endif
-
-#if defined(TOY_RENDERER_PLATFORM_LINUX)
-    auto xcbWindow = dynamic_cast<LinuxXcbPlatformWindow *>(window.platformWindow());
-    SurfaceOptions surfaceOptions = {
-        .connection = xcbWindow->connection(),
-        .window = xcbWindow->handle()
-    };
-#endif
-    Surface surface = instance.createSurface(surfaceOptions);
-
-    // We are now able to query the adapter for presentation support with the window surface
+    // We are now able to query the adapter for swapchain properties and presentation support with the window surface
     const auto swapchainProperties = selectedAdapter.swapchainProperties(surface);
+    const bool supportsPresentation = selectedAdapter.supportsPresentation(surface, 0); // Query about the 1st queue type
+    spdlog::critical("Queue family 0 supports presentation: {}", supportsPresentation);
 
     // Now we can create a device from the selected adapter that we can then use to interact with the GPU.
     auto device = selectedAdapter.createDevice();

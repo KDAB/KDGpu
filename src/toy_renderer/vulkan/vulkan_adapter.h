@@ -16,6 +16,7 @@ struct VulkanAdapter : public ApiAdapter {
     AdapterFeatures queryAdapterFeatures() final;
     AdapterSwapchainProperties querySwapchainProperties(const Handle<Surface_t> &surfaceHandle) final;
     std::vector<AdapterQueueType> queryQueueTypes() final;
+    bool supportsPresentation(const Handle<Surface_t> surfaceHandle, uint32_t queueTypeIndex) final;
 
     VkPhysicalDevice physicalDevice{ VK_NULL_HANDLE };
     VulkanResourceManager *vulkanResourceManager{ nullptr };

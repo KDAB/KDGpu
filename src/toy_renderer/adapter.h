@@ -9,6 +9,7 @@
 
 #include <toy_renderer/toy_renderer_export.h>
 
+#include <stdint.h>
 #include <span>
 #include <string>
 #include <vector>
@@ -39,8 +40,8 @@ public:
     const AdapterFeatures &features() const noexcept;
     std::span<AdapterQueueType> queueTypes();
 
-    // TODO: Need an api-agnostic way to pass in a surface
     AdapterSwapchainProperties swapchainProperties(const Surface &surface) const;
+    bool supportsPresentation(const Surface &surface, uint32_t queueTypeIndex) const noexcept;
 
     Device createDevice(const DeviceOptions &options = DeviceOptions());
 
