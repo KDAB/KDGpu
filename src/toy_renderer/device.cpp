@@ -2,6 +2,7 @@
 
 #include <toy_renderer/adapter.h>
 #include <toy_renderer/graphics_api.h>
+#include <toy_renderer/swapchain_options.h>
 #include <toy_renderer/api/api_device.h>
 
 namespace ToyRenderer {
@@ -26,6 +27,11 @@ Device::Device(Adapter *adapter, GraphicsApi *api, const DeviceOptions &options)
 
 Device::~Device()
 {
+}
+
+Swapchain Device::createSwapchain(const SwapchainOptions &options)
+{
+    return {};
 }
 
 } // namespace ToyRenderer

@@ -37,6 +37,7 @@ set(HEADERS
     queue_description.h
     resource_manager.h
     swapchain.h
+    swapchain_options.h
     surface.h
     surface_options.h
     api/api_adapter.h

@@ -1,6 +1,9 @@
+#include <toy_renderer/device.h>
 #include <toy_renderer/instance.h>
 #include <toy_renderer/formatters.h>
 #include <toy_renderer/gpu_core.h>
+#include <toy_renderer/swapchain.h>
+#include <toy_renderer/swapchain_options.h>
 #include <toy_renderer/vulkan/vulkan_graphics_api.h>
 
 #include <Serenity/gui/gui_application.h>
@@ -107,6 +110,13 @@ int main()
     // Now we can create a device from the selected adapter that we can then use to interact with the GPU.
     auto device = selectedAdapter.createDevice();
     auto queue = device.queues()[0];
+
+    // Create a swapchain of images that we will render to.
+    SwapchainOptions swapchainOptions = {
+        .surface = surface,
+        .imageExtent = { .width = window.width(), .height = window.height() }
+    };
+    auto swapchain = device.createSwapchain(swapchainOptions);
 
     // TODO: Create a buffer to hold triangle vertex data
 
