@@ -99,6 +99,11 @@ int main()
     const bool supportsPresentation = selectedAdapter.supportsPresentation(surface, 0); // Query about the 1st queue type
     spdlog::critical("Queue family 0 supports presentation: {}", supportsPresentation);
 
+    if (!supportsPresentation || !hasGraphicsAndCompute) {
+        spdlog::critical("Selected adapter queue family 0 does not meet requirements. Aborting.");
+        return -1;
+    }
+
     // Now we can create a device from the selected adapter that we can then use to interact with the GPU.
     auto device = selectedAdapter.createDevice();
     auto queue = device.queues()[0];
