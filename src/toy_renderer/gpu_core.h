@@ -428,4 +428,10 @@ enum class ImageUsageFlagBits {
 };
 using ImageUsageFlags = Flags;
 
+enum class SharingMode {
+    Exclusive = 0,
+    Concurrent = 1,
+    MaxEnum = 0x7FFFFFFF
+};
+
 } // namespace ToyRenderer

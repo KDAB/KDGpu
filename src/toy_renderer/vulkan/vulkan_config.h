@@ -24,7 +24,7 @@ constexpr std::array<const char *, 1> requestedInstanceExtensions = {
     VK_EXT_DEBUG_UTILS_EXTENSION_NAME
 };
 
-std::vector<const char *> getRequestedInstanceExtensions()
+std::vector<const char *> getDefaultRequestedInstanceExtensions()
 {
     std::vector<const char *> extensions;
     extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
@@ -46,17 +46,15 @@ std::vector<const char *> getRequestedInstanceExtensions()
 //
 // Device Config
 //
-
-#ifdef PLATFORM_MACOS
-constexpr std::array<const char *, 2> requestedDeviceExtensions = {
-    VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-    "VK_KHR_portability_subset"
-};
-#else
-constexpr std::array<const char *, 1> requestedDeviceExtensions = {
-    VK_KHR_SWAPCHAIN_EXTENSION_NAME
-};
+std::vector<const char *> getDefaultRequestedDeviceExtensions()
+{
+    std::vector<const char *> extensions;
+    extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+#if defined(PLATFORM_MACOS)
+    extensions.push_back("VK_KHR_portability_subset");
 #endif
+    return extensions;
+}
 
 constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 

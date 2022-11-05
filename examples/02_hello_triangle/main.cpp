@@ -113,7 +113,7 @@ int main()
 
     // Create a swapchain of images that we will render to.
     SwapchainOptions swapchainOptions = {
-        .surface = surface,
+        .surface = surface.handle(),
         .imageExtent = { .width = window.width(), .height = window.height() }
     };
     auto swapchain = device.createSwapchain(swapchainOptions);

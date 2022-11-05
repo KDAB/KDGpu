@@ -1,7 +1,9 @@
 #include "vulkan_resource_manager.h"
 
 #include <toy_renderer/instance.h>
+#include <toy_renderer/swapchain_options.h>
 #include <toy_renderer/vulkan/vulkan_config.h>
+#include <toy_renderer/vulkan/vulkan_enums.h>
 
 #include <assert.h>
 #include <stdexcept>
@@ -37,7 +39,7 @@ Handle<Instance_t> VulkanResourceManager::createInstance(const InstanceOptions &
         createInfo.ppEnabledLayerNames = requestedInstanceLayers.data();
     }
 
-    const auto requestedInstanceExtensions = getRequestedInstanceExtensions();
+    const auto requestedInstanceExtensions = getDefaultRequestedInstanceExtensions();
     if (!requestedInstanceExtensions.empty()) {
         createInfo.enabledExtensionCount = static_cast<uint32_t>(requestedInstanceExtensions.size());
         assert(requestedInstanceExtensions.size() <= std::numeric_limits<uint32_t>::max());
@@ -102,9 +104,6 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
         queueCreateInfos.push_back(queueCreateInfo);
     }
 
-    // TODO: Obey requested adapter features (e.g. geometry shaders)
-    // TODO: Obey requested device extensions and layers
-
     VkDeviceCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     createInfo.pNext = nullptr; // TODO: Use VkPhysicalDeviceFeatures2
@@ -115,6 +114,15 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     createInfo.ppEnabledLayerNames = nullptr;
     createInfo.enabledExtensionCount = 0;
     createInfo.ppEnabledExtensionNames = nullptr;
+
+    // TODO: Obey requested adapter features (e.g. geometry shaders)
+    // TODO: Merge requested device extensions and layers with our defaults
+    const auto requestedDeviceExtensions = getDefaultRequestedDeviceExtensions();
+    if (!requestedDeviceExtensions.empty()) {
+        createInfo.enabledExtensionCount = static_cast<uint32_t>(requestedDeviceExtensions.size());
+        assert(requestedDeviceExtensions.size() <= std::numeric_limits<uint32_t>::max());
+        createInfo.ppEnabledExtensionNames = requestedDeviceExtensions.data();
+    }
 
     VkDevice vkDevice{ VK_NULL_HANDLE };
     VulkanAdapter vulkanAdapter = *getAdapter(adapterHandle);
@@ -143,9 +151,38 @@ void VulkanResourceManager::removeQueue(Handle<Queue_t> handle)
     m_queues.remove(handle);
 }
 
-Handle<Swapchain_t> VulkanResourceManager::createSwapchain()
+Handle<Swapchain_t> VulkanResourceManager::createSwapchain(const Handle<Device_t> &deviceHandle,
+                                                           const SwapchainOptions &options)
 {
-    return {};
+    VulkanDevice vulkanDevice = *m_devices.get(deviceHandle);
+    VulkanSurface vulkanSurface = *m_surfaces.get(options.surface);
+
+    VkSwapchainCreateInfoKHR createInfo = {};
+    createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+    createInfo.surface = vulkanSurface.surface;
+    createInfo.minImageCount = options.minImageCount;
+    createInfo.imageFormat = formatToVkFormat(options.format);
+    createInfo.imageColorSpace = colorSpaceToVkColorSpaceKHR(options.colorSpace);
+    createInfo.imageExtent = { .width = options.imageExtent.width, .height = options.imageExtent.height };
+    createInfo.imageArrayLayers = options.imageLayers;
+    createInfo.imageUsage = options.imageUsageFlags;
+    createInfo.imageSharingMode = sharingModeToVkSharingMode(options.imageSharingMode);
+    if (!options.queueTypeIndices.empty()) {
+        createInfo.queueFamilyIndexCount = options.queueTypeIndices.size();
+        createInfo.pQueueFamilyIndices = options.queueTypeIndices.data();
+    }
+    createInfo.preTransform = surfaceTransformFlagBitsToVkSurfaceTransformFlagBitsKHR(options.transform);
+    createInfo.compositeAlpha = compositeAlphaFlagBitsToVkCompositeAlphaFlagBitsKHR(options.compositeAlpha);
+    createInfo.presentMode = presentModeToVkPresentModeKHR(options.presentMode);
+    createInfo.clipped = options.clipped;
+    createInfo.oldSwapchain = VK_NULL_HANDLE;
+
+    VkSwapchainKHR vkSwapchain{ VK_NULL_HANDLE };
+    if (vkCreateSwapchainKHR(vulkanDevice.device, &createInfo, nullptr, &vkSwapchain) != VK_SUCCESS)
+        return {};
+
+    const auto swapchainHandle = m_swapchains.emplace(VulkanSwapchain{ vkSwapchain });
+    return swapchainHandle;
 }
 
 void VulkanResourceManager::deleteSwapchain(Handle<Swapchain_t> handle)

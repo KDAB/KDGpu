@@ -38,7 +38,7 @@ public:
     void removeQueue(Handle<Queue_t> handle) final;
     VulkanQueue *getQueue(const Handle<Queue_t> &handle) final { return m_queues.get(handle); }
 
-    Handle<Swapchain_t> createSwapchain() final;
+    Handle<Swapchain_t> createSwapchain(const Handle<Device_t> &deviceHandle, const SwapchainOptions &options) final;
     void deleteSwapchain(Handle<Swapchain_t> handle) final;
     VulkanSwapchain *getSwapchain(const Handle<Swapchain_t> &handle) final { return m_swapchains.get(handle); }
 

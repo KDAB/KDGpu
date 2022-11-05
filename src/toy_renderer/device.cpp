@@ -31,7 +31,7 @@ Device::~Device()
 
 Swapchain Device::createSwapchain(const SwapchainOptions &options)
 {
-    return {};
+    return Swapchain(m_api, m_api->resourceManager()->createSwapchain(m_device, options));
 }
 
 } // namespace ToyRenderer

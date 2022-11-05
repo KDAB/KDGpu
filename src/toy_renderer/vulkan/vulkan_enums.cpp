@@ -33,9 +33,19 @@ Format vkFormatToFormat(VkFormat format)
     return static_cast<Format>(static_cast<uint32_t>(format));
 }
 
+VkFormat formatToVkFormat(Format format)
+{
+    return static_cast<VkFormat>(static_cast<uint32_t>(format));
+}
+
 ColorSpace vkColorSpaceKHRToColorSpace(VkColorSpaceKHR colorSpace)
 {
     return static_cast<ColorSpace>(static_cast<uint32_t>(colorSpace));
+}
+
+VkColorSpaceKHR colorSpaceToVkColorSpaceKHR(ColorSpace colorSpace)
+{
+    return static_cast<VkColorSpaceKHR>(static_cast<uint32_t>(colorSpace));
 }
 
 PresentMode vkPresentModeKHRToPresentMode(VkPresentModeKHR presentMode)
@@ -43,9 +53,39 @@ PresentMode vkPresentModeKHRToPresentMode(VkPresentModeKHR presentMode)
     return static_cast<PresentMode>(static_cast<uint32_t>(presentMode));
 }
 
+VkPresentModeKHR presentModeToVkPresentModeKHR(PresentMode presentMode)
+{
+    return static_cast<VkPresentModeKHR>(static_cast<uint32_t>(presentMode));
+}
+
 SurfaceTransformFlagBits vkSurfaceTransformFlagBitsKHRToSurfaceTransformFlagBits(VkSurfaceTransformFlagBitsKHR transform)
 {
     return static_cast<SurfaceTransformFlagBits>(static_cast<uint32_t>(transform));
+}
+
+VkSurfaceTransformFlagBitsKHR surfaceTransformFlagBitsToVkSurfaceTransformFlagBitsKHR(SurfaceTransformFlagBits transform)
+{
+    return static_cast<VkSurfaceTransformFlagBitsKHR>(static_cast<uint32_t>(transform));
+}
+
+CompositeAlphaFlagBits vkCompositeAlphaFlagBitsKHRToCompositeAlphaFlagBits(VkCompositeAlphaFlagBitsKHR compositeAlpha)
+{
+    return static_cast<CompositeAlphaFlagBits>(static_cast<uint32_t>(compositeAlpha));
+}
+
+VkCompositeAlphaFlagBitsKHR compositeAlphaFlagBitsToVkCompositeAlphaFlagBitsKHR(CompositeAlphaFlagBits compositeAlpha)
+{
+    return static_cast<VkCompositeAlphaFlagBitsKHR>(static_cast<uint32_t>(compositeAlpha));
+}
+
+SharingMode vkSharingModeToSharingMode(VkSharingMode sharingMode)
+{
+    return static_cast<SharingMode>(static_cast<uint32_t>(sharingMode));
+}
+
+VkSharingMode sharingModeToVkSharingMode(SharingMode sharingMode)
+{
+    return static_cast<VkSharingMode>(static_cast<uint32_t>(sharingMode));
 }
 
 } // namespace ToyRenderer

@@ -59,7 +59,7 @@ public:
     virtual void deleteSurface(Handle<Surface_t> handle) = 0;
     virtual ApiSurface *getSurface(const Handle<Surface_t> &handle) = 0;
 
-    virtual Handle<Swapchain_t> createSwapchain() = 0;
+    virtual Handle<Swapchain_t> createSwapchain(const Handle<Device_t> &deviceHandle, const SwapchainOptions &options) = 0;
     virtual void deleteSwapchain(Handle<Swapchain_t> handle) = 0;
     virtual ApiSwapchain *getSwapchain(const Handle<Swapchain_t> &handle) = 0;
 

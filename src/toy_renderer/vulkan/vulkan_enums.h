@@ -9,11 +9,21 @@ namespace ToyRenderer {
 AdapterDeviceType vkPhysicalDeviceTypeToAdapterDeviceType(VkPhysicalDeviceType deviceType);
 
 Format vkFormatToFormat(VkFormat format);
+VkFormat formatToVkFormat(Format format);
 
 ColorSpace vkColorSpaceKHRToColorSpace(VkColorSpaceKHR colorSpace);
+VkColorSpaceKHR colorSpaceToVkColorSpaceKHR(ColorSpace colorSpace);
 
 PresentMode vkPresentModeKHRToPresentMode(VkPresentModeKHR presentMode);
+VkPresentModeKHR presentModeToVkPresentModeKHR(PresentMode presentMode);
 
 SurfaceTransformFlagBits vkSurfaceTransformFlagBitsKHRToSurfaceTransformFlagBits(VkSurfaceTransformFlagBitsKHR transform);
+VkSurfaceTransformFlagBitsKHR surfaceTransformFlagBitsToVkSurfaceTransformFlagBitsKHR(SurfaceTransformFlagBits transform);
+
+CompositeAlphaFlagBits vkCompositeAlphaFlagBitsKHRToCompositeAlphaFlagBits(VkCompositeAlphaFlagBitsKHR compositeAlpha);
+VkCompositeAlphaFlagBitsKHR compositeAlphaFlagBitsToVkCompositeAlphaFlagBitsKHR(CompositeAlphaFlagBits compositeAlpha);
+
+SharingMode vkSharingModeToSharingMode(VkSharingMode sharingMode);
+VkSharingMode sharingModeToVkSharingMode(SharingMode sharingMode);
 
 } // namespace ToyRenderer
