@@ -3,12 +3,15 @@
 #include <toy_renderer/resource_manager.h>
 
 #include <toy_renderer/pool.h>
+
+// TODO: Can we make these forward declarations?
 #include <toy_renderer/vulkan/vulkan_adapter.h>
 #include <toy_renderer/vulkan/vulkan_device.h>
 #include <toy_renderer/vulkan/vulkan_instance.h>
 #include <toy_renderer/vulkan/vulkan_queue.h>
 #include <toy_renderer/vulkan/vulkan_swapchain.h>
 #include <toy_renderer/vulkan/vulkan_surface.h>
+#include <toy_renderer/vulkan/vulkan_texture.h>
 
 #include <toy_renderer/toy_renderer_export.h>
 
@@ -46,6 +49,16 @@ public:
     void deleteSurface(Handle<Surface_t> handle) final;
     VulkanSurface *getSurface(const Handle<Surface_t> &handle) final { return m_surfaces.get(handle); }
 
+    // For swapchain-owned images
+    Handle<Texture_t> insertTexture(const VulkanTexture &texture);
+    void removeTexture(Handle<Texture_t> handle);
+
+    // TODO: For user-created textures
+    // Handle<Texture_t> createTexture(const Handle<Device_t> deviceHandle, const TextureOptions &options) final;
+    // void deleteTexture(Handle<Texture_t> handle) final;
+
+    VulkanTexture *getTexture(const Handle<Texture_t> &handle) final { return m_textures.get(handle); }
+
     // virtual Handle<Shader> createShader(ShaderDescription desc) = 0;
     Handle<BindGroup> createBindGroup(BindGroupDescription desc) final;
     // virtual Handle<Texture> createTexture(TextureDescription desc) = 0;
@@ -63,6 +76,7 @@ private:
     Pool<VulkanQueue, Queue_t> m_queues{ 4 };
     Pool<VulkanSurface, Surface_t> m_surfaces{ 1 };
     Pool<VulkanSwapchain, Swapchain_t> m_swapchains{ 1 };
+    Pool<VulkanTexture, Texture_t> m_textures{ 128 };
 };
 
 } // namespace ToyRenderer

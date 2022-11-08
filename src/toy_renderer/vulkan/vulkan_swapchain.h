@@ -6,10 +6,18 @@
 
 namespace ToyRenderer {
 
-struct VulkanSwapchain : public ApiSwapchain {
-    VulkanSwapchain(VkSwapchainKHR _swapchain);
+class VulkanResourceManager;
 
+struct VulkanSwapchain : public ApiSwapchain {
+    VulkanSwapchain(VkSwapchainKHR _swapchain,
+                    VkDevice _device,
+                    VulkanResourceManager *_vulkanResourceManager);
+
+    std::vector<Handle<Texture_t>> getTextures() final;
+
+    VulkanResourceManager *vulkanResourceManager{ nullptr };
     VkSwapchainKHR swapchain{ VK_NULL_HANDLE };
+    VkDevice device{ VK_NULL_HANDLE };
 };
 
 } // namespace ToyRenderer

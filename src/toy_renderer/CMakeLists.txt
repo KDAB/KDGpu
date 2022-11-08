@@ -9,6 +9,7 @@ set(SOURCES
     resource_manager.cpp
     swapchain.cpp
     surface.cpp
+    texture.cpp
     vulkan/vulkan_adapter.cpp
     vulkan/vulkan_device.cpp
     vulkan/vulkan_enums.cpp
@@ -18,6 +19,7 @@ set(SOURCES
     vulkan/vulkan_queue.cpp
     vulkan/vulkan_swapchain.cpp
     vulkan/vulkan_surface.cpp
+    vulkan/vulkan_texture.cpp
 )
 
 set(HEADERS
@@ -45,6 +47,7 @@ set(HEADERS
     api/api_instance.h
     api/api_swapchain.h
     api/api_surface.h
+    api/api_texture.h
     vulkan/vulkan_adapter.h
     vulkan/vulkan_device.h
     vulkan/vulkan_enums.h
@@ -54,6 +57,7 @@ set(HEADERS
     vulkan/vulkan_queue.h
     vulkan/vulkan_swapchain.h
     vulkan/vulkan_surface.h
+    vulkan/vulkan_texture.h
 )
 
 add_library(toy-renderer SHARED

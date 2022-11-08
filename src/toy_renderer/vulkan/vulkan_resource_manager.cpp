@@ -181,7 +181,7 @@ Handle<Swapchain_t> VulkanResourceManager::createSwapchain(const Handle<Device_t
     if (vkCreateSwapchainKHR(vulkanDevice.device, &createInfo, nullptr, &vkSwapchain) != VK_SUCCESS)
         return {};
 
-    const auto swapchainHandle = m_swapchains.emplace(VulkanSwapchain{ vkSwapchain });
+    const auto swapchainHandle = m_swapchains.emplace(VulkanSwapchain{ vkSwapchain, vulkanDevice.device, this });
     return swapchainHandle;
 }
 
@@ -201,6 +201,24 @@ void VulkanResourceManager::deleteSurface(Handle<Surface_t> handle)
         return;
     vkDestroySurfaceKHR(vulkanSurface->instance, vulkanSurface->surface, nullptr);
 }
+
+Handle<Texture_t> VulkanResourceManager::insertTexture(const VulkanTexture &vulkanTexture)
+{
+    return m_textures.emplace(vulkanTexture);
+}
+
+void VulkanResourceManager::removeTexture(Handle<Texture_t> handle)
+{
+    m_textures.remove(handle);
+}
+
+// Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> deviceHandle, const TextureOptions &options)
+// {
+// }
+
+// void VulkanResourceManager::deleteTexture(Handle<Texture_t> handle)
+// {
+// }
 
 Handle<BindGroup> VulkanResourceManager::createBindGroup(BindGroupDescription desc)
 {

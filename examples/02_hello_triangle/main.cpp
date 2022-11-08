@@ -117,6 +117,7 @@ int main()
         .imageExtent = { .width = window.width(), .height = window.height() }
     };
     auto swapchain = device.createSwapchain(swapchainOptions);
+    auto swapchainImages = swapchain.textures();
 
     // TODO: Create a buffer to hold triangle vertex data
 
@@ -127,6 +128,7 @@ int main()
     // TODO: Create a pipeline
 
     // TODO:    Implement the render loop {
+    //              Acquire next swapchain image
     //              Create a command encoder/recorder
     //              Begin render pass
     //              Bind pipeline

@@ -1,5 +1,6 @@
 #pragma once
 
+// TODO: Can we make these forward declarations?
 #include <toy_renderer/adapter.h>
 #include <toy_renderer/bind_group_description.h>
 #include <toy_renderer/device.h>
@@ -8,6 +9,7 @@
 #include <toy_renderer/queue.h>
 #include <toy_renderer/swapchain.h>
 #include <toy_renderer/surface.h>
+#include <toy_renderer/texture.h>
 
 #include <toy_renderer/toy_renderer_export.h>
 
@@ -19,12 +21,16 @@ struct ApiInstance;
 struct ApiQueue;
 struct ApiSwapchain;
 struct ApiSurface;
+struct ApiTexture;
 
 class BindGroup;
 
 struct InstanceOptions;
 struct DeviceOptions;
 
+// TODO: Should this class have create/destroy functions or should we put those onto the
+// parent resource type structs? For example VulkanDevice could have a createTexture()
+// function and just use this class as the place to store the resulting data.
 class TOY_RENDERER_EXPORT ResourceManager
 {
 public:
@@ -62,6 +68,8 @@ public:
     virtual Handle<Swapchain_t> createSwapchain(const Handle<Device_t> &deviceHandle, const SwapchainOptions &options) = 0;
     virtual void deleteSwapchain(Handle<Swapchain_t> handle) = 0;
     virtual ApiSwapchain *getSwapchain(const Handle<Swapchain_t> &handle) = 0;
+
+    virtual ApiTexture *getTexture(const Handle<Texture_t> &handle) = 0;
 
     // virtual Handle<Shader> createShader(ShaderDescription desc) = 0;
     virtual Handle<BindGroup> createBindGroup(BindGroupDescription desc) = 0;
