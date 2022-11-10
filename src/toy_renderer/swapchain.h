@@ -23,9 +23,10 @@ public:
     std::span<const Texture> textures() const { return m_textures; }
 
 private:
-    explicit Swapchain(GraphicsApi *api, const Handle<Swapchain_t> &swapchain);
+    explicit Swapchain(GraphicsApi *api, const Handle<Device_t> &device, const Handle<Swapchain_t> &swapchain);
 
     GraphicsApi *m_api{ nullptr };
+    Handle<Device_t> m_device;
     Handle<Swapchain_t> m_swapchain;
     std::vector<Texture> m_textures;
 

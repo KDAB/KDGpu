@@ -88,4 +88,14 @@ VkSharingMode sharingModeToVkSharingMode(SharingMode sharingMode)
     return static_cast<VkSharingMode>(static_cast<uint32_t>(sharingMode));
 }
 
+ViewType vkImageViewTypeToViewType(VkImageViewType viewType)
+{
+    return static_cast<ViewType>(static_cast<uint32_t>(viewType));
+}
+
+VkImageViewType viewTypeToVkImageViewType(ViewType viewType)
+{
+    return static_cast<VkImageViewType>(static_cast<uint32_t>(viewType));
+}
+
 } // namespace ToyRenderer

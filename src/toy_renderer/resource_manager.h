@@ -10,6 +10,7 @@
 #include <toy_renderer/swapchain.h>
 #include <toy_renderer/surface.h>
 #include <toy_renderer/texture.h>
+#include <toy_renderer/texture_view.h>
 
 #include <toy_renderer/toy_renderer_export.h>
 
@@ -22,11 +23,13 @@ struct ApiQueue;
 struct ApiSwapchain;
 struct ApiSurface;
 struct ApiTexture;
+struct ApiTextureView;
 
 class BindGroup;
 
 struct InstanceOptions;
 struct DeviceOptions;
+struct TextureViewOptions;
 
 // TODO: Should this class have create/destroy functions or should we put those onto the
 // parent resource type structs? For example VulkanDevice could have a createTexture()
@@ -70,6 +73,10 @@ public:
     virtual ApiSwapchain *getSwapchain(const Handle<Swapchain_t> &handle) = 0;
 
     virtual ApiTexture *getTexture(const Handle<Texture_t> &handle) = 0;
+
+    virtual Handle<TextureView_t> createTextureView(const Handle<Device_t> &deviceHandle, const Handle<Texture_t> &textureHandle, const TextureViewOptions &options) = 0;
+    virtual void deleteTextureView(Handle<TextureView_t> handle) = 0;
+    virtual ApiTextureView *getTextureView(const Handle<TextureView_t> &handle) = 0;
 
     // virtual Handle<Shader> createShader(ShaderDescription desc) = 0;
     virtual Handle<BindGroup> createBindGroup(BindGroupDescription desc) = 0;

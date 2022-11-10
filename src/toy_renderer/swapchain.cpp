@@ -6,8 +6,9 @@
 
 namespace ToyRenderer {
 
-Swapchain::Swapchain(GraphicsApi *api, const Handle<Swapchain_t> &swapchain)
+Swapchain::Swapchain(GraphicsApi *api, const Handle<Device_t> &device, const Handle<Swapchain_t> &swapchain)
     : m_api(api)
+    , m_device(device)
     , m_swapchain(swapchain)
 {
     // Fetch the textures owned by the swapchain
@@ -16,7 +17,7 @@ Swapchain::Swapchain(GraphicsApi *api, const Handle<Swapchain_t> &swapchain)
     const uint32_t textureCount = textureHandles.size();
     m_textures.reserve(textureCount);
     for (uint32_t i = 0; i < textureCount; ++i)
-        m_textures.emplace_back(Texture(m_api, textureHandles[i]));
+        m_textures.emplace_back(Texture(m_api, m_device, textureHandles[i]));
 }
 
 Swapchain::~Swapchain()

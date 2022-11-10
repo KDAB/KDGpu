@@ -220,6 +220,39 @@ void VulkanResourceManager::removeTexture(Handle<Texture_t> handle)
 // {
 // }
 
+Handle<TextureView_t> VulkanResourceManager::createTextureView(const Handle<Device_t> &deviceHandle,
+                                                               const Handle<Texture_t> &textureHandle,
+                                                               const TextureViewOptions &options)
+{
+    VulkanDevice vulkanDevice = *m_devices.get(deviceHandle);
+    VulkanTexture vulkanTexture = *m_textures.get(textureHandle);
+
+    VkImageViewCreateInfo createInfo = {};
+    createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    createInfo.image = vulkanTexture.image;
+    createInfo.viewType = viewTypeToVkImageViewType(options.viewType);
+    createInfo.format = formatToVkFormat(options.format); // TODO: Should we default this to match the texture format?
+    createInfo.subresourceRange = {
+        .aspectMask = options.range.aspectMask,
+        .baseMipLevel = options.range.baseMipLevel,
+        .levelCount = options.range.levelCount,
+        .baseArrayLayer = options.range.baseArrayLayer,
+        .layerCount = options.range.layerCount
+    };
+
+    VkImageView imageView;
+    if (vkCreateImageView(vulkanDevice.device, &createInfo, nullptr, &imageView) != VK_SUCCESS)
+        return {};
+
+    const auto vulkanTextureViewHandle = m_textureViews.emplace(VulkanTextureView(imageView));
+    return vulkanTextureViewHandle;
+}
+
+void VulkanResourceManager::deleteTextureView(Handle<TextureView_t> handle)
+{
+    // TODO: Implement me!
+}
+
 Handle<BindGroup> VulkanResourceManager::createBindGroup(BindGroupDescription desc)
 {
     // TODO: This is where we will call vkAllocateDescriptorSets

@@ -26,4 +26,7 @@ VkCompositeAlphaFlagBitsKHR compositeAlphaFlagBitsToVkCompositeAlphaFlagBitsKHR(
 SharingMode vkSharingModeToSharingMode(VkSharingMode sharingMode);
 VkSharingMode sharingModeToVkSharingMode(SharingMode sharingMode);
 
+ViewType vkImageViewTypeToViewType(VkImageViewType viewType);
+VkImageViewType viewTypeToVkImageViewType(ViewType viewType);
+
 } // namespace ToyRenderer

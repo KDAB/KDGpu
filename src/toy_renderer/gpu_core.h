@@ -12,6 +12,8 @@ namespace ToyRenderer {
 
 constexpr uint32_t maxAdapterNameSize = 256U;
 constexpr uint32_t UuidSize = 16U;
+constexpr uint32_t remainingArrayLayers = (~0U);
+constexpr uint32_t remainingMipLevels = (~0U);
 
 using DeviceSize = uint64_t;
 using Flags = uint32_t;
@@ -432,6 +434,42 @@ enum class SharingMode {
     Exclusive = 0,
     Concurrent = 1,
     MaxEnum = 0x7FFFFFFF
+};
+
+enum class ViewType {
+    ViewType1D = 0,
+    ViewType2D = 1,
+    ViewType3D = 2,
+    ViewTypeCube = 3,
+    ViewType1DArray = 4,
+    ViewType2DArray = 5,
+    ViewTypeCubeArray = 6,
+    MaxEnum = 0x7fffffff
+};
+
+enum class TextureAspectFlagBits {
+    None = 0,
+    ColorBit = 0x00000001,
+    DepthBit = 0x00000002,
+    StencilBit = 0x00000004,
+    MetadataBit = 0x00000008,
+    Plane0Bit = 0x00000010,
+    Plane1Bit = 0x00000020,
+    Plane2Bit = 0x00000040,
+    MemoryPlane0Bit = 0x00000080,
+    MemoryPlane1Bit = 0x00000100,
+    MemoryPlane2Bit = 0x00000200,
+    MemoryPlane3Bit = 0x00000400,
+    MaxEnum = 0x7fffffff
+};
+using TextureAspectFlags = Flags;
+
+struct TextureSubresourceRange {
+    TextureAspectFlags aspectMask{ static_cast<uint32_t>(TextureAspectFlagBits::ColorBit) };
+    uint32_t baseMipLevel{ 0 };
+    uint32_t levelCount{ remainingMipLevels };
+    uint32_t baseArrayLayer{ 0 };
+    uint32_t layerCount{ remainingArrayLayers };
 };
 
 } // namespace ToyRenderer

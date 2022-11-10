@@ -117,7 +117,14 @@ int main()
         .imageExtent = { .width = window.width(), .height = window.height() }
     };
     auto swapchain = device.createSwapchain(swapchainOptions);
-    auto swapchainImages = swapchain.textures();
+    auto swapchainTextures = swapchain.textures();
+    const auto swapchainTextureCount = swapchainTextures.size();
+    std::vector<TextureView> swapchainViews;
+    swapchainViews.reserve(swapchainTextureCount);
+    for (uint32_t i = 0; i < swapchainTextureCount; ++i) {
+        auto view = swapchainTextures[i].createView({ .format = swapchainOptions.format });
+        swapchainViews.push_back(view);
+    }
 
     // TODO: Create a buffer to hold triangle vertex data
 

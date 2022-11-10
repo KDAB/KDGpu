@@ -12,6 +12,7 @@
 #include <toy_renderer/vulkan/vulkan_swapchain.h>
 #include <toy_renderer/vulkan/vulkan_surface.h>
 #include <toy_renderer/vulkan/vulkan_texture.h>
+#include <toy_renderer/vulkan/vulkan_texture_view.h>
 
 #include <toy_renderer/toy_renderer_export.h>
 
@@ -59,6 +60,10 @@ public:
 
     VulkanTexture *getTexture(const Handle<Texture_t> &handle) final { return m_textures.get(handle); }
 
+    Handle<TextureView_t> createTextureView(const Handle<Device_t> &deviceHandle, const Handle<Texture_t> &textureHandle, const TextureViewOptions &options) final;
+    void deleteTextureView(Handle<TextureView_t> handle) final;
+    VulkanTextureView *getTextureView(const Handle<TextureView_t> &handle) final { return m_textureViews.get(handle); }
+
     // virtual Handle<Shader> createShader(ShaderDescription desc) = 0;
     Handle<BindGroup> createBindGroup(BindGroupDescription desc) final;
     // virtual Handle<Texture> createTexture(TextureDescription desc) = 0;
@@ -77,6 +82,7 @@ private:
     Pool<VulkanSurface, Surface_t> m_surfaces{ 1 };
     Pool<VulkanSwapchain, Swapchain_t> m_swapchains{ 1 };
     Pool<VulkanTexture, Texture_t> m_textures{ 128 };
+    Pool<VulkanTextureView, TextureView_t> m_textureViews{ 128 };
 };
 
 } // namespace ToyRenderer
