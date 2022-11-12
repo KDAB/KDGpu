@@ -29,6 +29,7 @@ class BindGroup;
 
 struct InstanceOptions;
 struct DeviceOptions;
+struct TextureOptions;
 struct TextureViewOptions;
 
 // TODO: Should this class have create/destroy functions or should we put those onto the
@@ -72,6 +73,8 @@ public:
     virtual void deleteSwapchain(Handle<Swapchain_t> handle) = 0;
     virtual ApiSwapchain *getSwapchain(const Handle<Swapchain_t> &handle) = 0;
 
+    virtual Handle<Texture_t> createTexture(const Handle<Device_t> deviceHandle, const TextureOptions &options) = 0;
+    virtual void deleteTexture(Handle<Texture_t> handle) = 0;
     virtual ApiTexture *getTexture(const Handle<Texture_t> &handle) = 0;
 
     virtual Handle<TextureView_t> createTextureView(const Handle<Device_t> &deviceHandle, const Handle<Texture_t> &textureHandle, const TextureViewOptions &options) = 0;

@@ -34,4 +34,9 @@ Swapchain Device::createSwapchain(const SwapchainOptions &options)
     return Swapchain(m_api, m_device, m_api->resourceManager()->createSwapchain(m_device, options));
 }
 
+Texture Device::createTexture(const TextureOptions &options)
+{
+    return Texture(m_api, m_device, m_api->resourceManager()->createTexture(m_device, options));
+}
+
 } // namespace ToyRenderer

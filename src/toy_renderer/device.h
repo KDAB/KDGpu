@@ -19,6 +19,7 @@ struct Adapter_t;
 struct Device_t;
 
 struct SwapchainOptions;
+struct TextureOptions;
 
 class TOY_RENDERER_EXPORT Device
 {
@@ -28,6 +29,7 @@ public:
     std::span<Queue> queues() { return m_queues; }
 
     Swapchain createSwapchain(const SwapchainOptions &options);
+    Texture createTexture(const TextureOptions &options);
 
 private:
     Device(Adapter *adapter, GraphicsApi *api, const DeviceOptions &options);

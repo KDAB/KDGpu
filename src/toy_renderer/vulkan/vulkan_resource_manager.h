@@ -54,9 +54,9 @@ public:
     Handle<Texture_t> insertTexture(const VulkanTexture &texture);
     void removeTexture(Handle<Texture_t> handle);
 
-    // TODO: For user-created textures
-    // Handle<Texture_t> createTexture(const Handle<Device_t> deviceHandle, const TextureOptions &options) final;
-    // void deleteTexture(Handle<Texture_t> handle) final;
+    // For user-created textures
+    Handle<Texture_t> createTexture(const Handle<Device_t> deviceHandle, const TextureOptions &options) final;
+    void deleteTexture(Handle<Texture_t> handle) final;
 
     VulkanTexture *getTexture(const Handle<Texture_t> &handle) final { return m_textures.get(handle); }
 

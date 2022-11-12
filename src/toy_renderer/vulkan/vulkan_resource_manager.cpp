@@ -2,6 +2,7 @@
 
 #include <toy_renderer/instance.h>
 #include <toy_renderer/swapchain_options.h>
+#include <toy_renderer/texture_options.h>
 #include <toy_renderer/vulkan/vulkan_config.h>
 #include <toy_renderer/vulkan/vulkan_enums.h>
 
@@ -212,13 +213,42 @@ void VulkanResourceManager::removeTexture(Handle<Texture_t> handle)
     m_textures.remove(handle);
 }
 
-// Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> deviceHandle, const TextureOptions &options)
-// {
-// }
+Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> deviceHandle, const TextureOptions &options)
+{
+    VulkanDevice vulkanDevice = *m_devices.get(deviceHandle);
 
-// void VulkanResourceManager::deleteTexture(Handle<Texture_t> handle)
-// {
-// }
+    VkImageCreateInfo createInfo = {};
+    createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    createInfo.imageType = textureTypeToVkImageType(options.type);
+    createInfo.format = formatToVkFormat(options.format);
+    createInfo.extent = {
+        .width = options.extent.width,
+        .height = options.extent.height,
+        .depth = options.extent.depth
+    };
+    createInfo.mipLevels = options.mipLevels;
+    createInfo.arrayLayers = options.arrayLayers;
+    createInfo.samples = sampleCountFlagBitsToVkSampleFlagBits(options.samples);
+    createInfo.tiling = textureTilingToVkImageTiling(options.tiling);
+    createInfo.usage = options.usage;
+    createInfo.sharingMode = sharingModeToVkSharingMode(options.sharingMode);
+    if (!options.queueTypeIndices.empty()) {
+        createInfo.queueFamilyIndexCount = options.queueTypeIndices.size();
+        createInfo.pQueueFamilyIndices = options.queueTypeIndices.data();
+    }
+    createInfo.initialLayout = textureLayoutToVkImageLayout(options.initialLayout);
+
+    VkImage vkImage;
+    if (vkCreateImage(vulkanDevice.device, &createInfo, nullptr, &vkImage) != VK_SUCCESS)
+        return {};
+
+    const auto vulkanTextureHandle = m_textures.emplace(VulkanTexture(vkImage, vulkanDevice.device, this));
+    return vulkanTextureHandle;
+}
+
+void VulkanResourceManager::deleteTexture(Handle<Texture_t> handle)
+{
+}
 
 Handle<TextureView_t> VulkanResourceManager::createTextureView(const Handle<Device_t> &deviceHandle,
                                                                const Handle<Texture_t> &textureHandle,
@@ -243,6 +273,8 @@ Handle<TextureView_t> VulkanResourceManager::createTextureView(const Handle<Devi
     VkImageView imageView;
     if (vkCreateImageView(vulkanDevice.device, &createInfo, nullptr, &imageView) != VK_SUCCESS)
         return {};
+
+    // TODO: Allocate memory and bind to image
 
     const auto vulkanTextureViewHandle = m_textureViews.emplace(VulkanTextureView(imageView));
     return vulkanTextureViewHandle;

@@ -4,6 +4,8 @@
 #include <toy_renderer/gpu_core.h>
 #include <toy_renderer/swapchain.h>
 #include <toy_renderer/swapchain_options.h>
+#include <toy_renderer/texture.h>
+#include <toy_renderer/texture_options.h>
 #include <toy_renderer/vulkan/vulkan_graphics_api.h>
 
 #include <Serenity/gui/gui_application.h>
@@ -125,6 +127,14 @@ int main()
         auto view = swapchainTextures[i].createView({ .format = swapchainOptions.format });
         swapchainViews.push_back(view);
     }
+
+    // Create a texture (just testing)
+    auto texture = device.createTexture(
+            { .type = TextureType::TextureType2D,
+              .format = Format::R8G8B8A8_UNORM,
+              .extent = { 512, 512, 0 },
+              .mipLevels = 1,
+              .usage = TextureUsageFlags(TextureUsageFlagBits::TransferDstBit) | TextureUsageFlags(TextureUsageFlagBits::SampledBit) });
 
     // TODO: Create a buffer to hold triangle vertex data
 

@@ -11,6 +11,9 @@ AdapterDeviceType vkPhysicalDeviceTypeToAdapterDeviceType(VkPhysicalDeviceType d
 Format vkFormatToFormat(VkFormat format);
 VkFormat formatToVkFormat(Format format);
 
+VkSampleCountFlagBits sampleCountFlagBitsToVkSampleFlagBits(SampleCountFlagBits samples);
+SampleCountFlagBits vkSampleCountFlagBitsToSampleFlagBits(VkSampleCountFlagBits samples);
+
 ColorSpace vkColorSpaceKHRToColorSpace(VkColorSpaceKHR colorSpace);
 VkColorSpaceKHR colorSpaceToVkColorSpaceKHR(ColorSpace colorSpace);
 
@@ -25,6 +28,15 @@ VkCompositeAlphaFlagBitsKHR compositeAlphaFlagBitsToVkCompositeAlphaFlagBitsKHR(
 
 SharingMode vkSharingModeToSharingMode(VkSharingMode sharingMode);
 VkSharingMode sharingModeToVkSharingMode(SharingMode sharingMode);
+
+VkImageType textureTypeToVkImageType(TextureType textureType);
+TextureType vkImageTypeToTextureType(VkImageType textureType);
+
+VkImageTiling textureTilingToVkImageTiling(TextureTiling tiling);
+TextureTiling vkImageTilingToTextureTiling(VkImageTiling tiling);
+
+VkImageLayout textureLayoutToVkImageLayout(TextureLayout layout);
+TextureLayout vkImageLayoutToTextureLayout(VkImageLayout layout);
 
 ViewType vkImageViewTypeToViewType(VkImageViewType viewType);
 VkImageViewType viewTypeToVkImageViewType(ViewType viewType);

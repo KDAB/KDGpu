@@ -45,7 +45,9 @@ set(HEADERS
     surface.h
     surface_options.h
     texture.h
+    texture_options.h
     texture_view.h
+    texture_view_options.h
     api/api_adapter.h
     api/api_device.h
     api/api_instance.h

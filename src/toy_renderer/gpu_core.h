@@ -408,7 +408,7 @@ enum class CompositeAlphaFlagBits {
 };
 using CompositeAlphaFlags = Flags;
 
-enum class ImageUsageFlagBits {
+enum class TextureUsageFlagBits {
     TransferSrcBit = 0x00000001,
     TransferDstBit = 0x00000002,
     SampledBit = 0x00000004,
@@ -428,12 +428,57 @@ enum class ImageUsageFlagBits {
     InvocationMaskBit = 0x00040000,
     MaxEnum = 0x7fffffff
 };
-using ImageUsageFlags = Flags;
+using TextureUsageFlags = Flags;
+
+enum class TextureTiling {
+    Optimal = 0,
+    Linear = 1,
+    DrmFormatModifier = 1000158000,
+    MaxEnum = 0x7fffffff
+};
+
+enum class TextureLayout {
+    Undefined = 0,
+    General = 1,
+    ColorAttachmentOptimal = 2,
+    DepthStencilAttachmentOptimal = 3,
+    DepthStencilReadOnlyOptimal = 4,
+    ShaderReadOnlyOptimal = 5,
+    TransferSrcOptimal = 6,
+    TransferDstOptimal = 7,
+    Preinitialized = 8,
+    DepthReadOnlyStencilAttachmentOptimal = 1000117000,
+    DepthAttachmentStencilReadOnlyOptimal = 1000117001,
+    DepthAttachmentOptimal = 1000241000,
+    DepthReadOnlyOptimal = 1000241001,
+    StencilAttachmentOptimal = 1000241002,
+    StencilReadOnlyOptimal = 1000241003,
+    PresentSrc = 1000001002,
+    VideoDecodeDst = 1000024000,
+    VideoDecodeSrc = 1000024001,
+    VideoDecodeDpb = 1000024002,
+    SharedPresent = 1000111000,
+    FragmentDensityMapOptimal = 1000218000,
+    FragmentShadingRateAttachmentOptimal = 1000164003,
+    VideoEncodeDst = 1000299000,
+    VideoEncodeSrc = 1000299001,
+    VideoEncodeDpb = 1000299002,
+    ReadOnlyOptimal = 1000314000,
+    AttachmentOptimal = 1000314001,
+    MaxEnum = 0x7fffffff
+};
 
 enum class SharingMode {
     Exclusive = 0,
     Concurrent = 1,
     MaxEnum = 0x7FFFFFFF
+};
+
+enum class TextureType {
+    TextureType1D = 0,
+    TextureType2D = 1,
+    TextureType3D = 2,
+    MaxEnum = 0x7fffffff
 };
 
 enum class ViewType {

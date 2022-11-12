@@ -38,6 +38,16 @@ VkFormat formatToVkFormat(Format format)
     return static_cast<VkFormat>(static_cast<uint32_t>(format));
 }
 
+VkSampleCountFlagBits sampleCountFlagBitsToVkSampleFlagBits(SampleCountFlagBits samples)
+{
+    return static_cast<VkSampleCountFlagBits>(static_cast<uint32_t>(samples));
+}
+
+SampleCountFlagBits vkSampleCountFlagBitsToSampleFlagBits(VkSampleCountFlagBits samples)
+{
+    return static_cast<SampleCountFlagBits>(static_cast<uint32_t>(samples));
+}
+
 ColorSpace vkColorSpaceKHRToColorSpace(VkColorSpaceKHR colorSpace)
 {
     return static_cast<ColorSpace>(static_cast<uint32_t>(colorSpace));
@@ -86,6 +96,36 @@ SharingMode vkSharingModeToSharingMode(VkSharingMode sharingMode)
 VkSharingMode sharingModeToVkSharingMode(SharingMode sharingMode)
 {
     return static_cast<VkSharingMode>(static_cast<uint32_t>(sharingMode));
+}
+
+VkImageType textureTypeToVkImageType(TextureType textureType)
+{
+    return static_cast<VkImageType>(static_cast<uint32_t>(textureType));
+}
+
+TextureType vkImageTypeToTextureType(VkImageType textureType)
+{
+    return static_cast<TextureType>(static_cast<uint32_t>(textureType));
+}
+
+VkImageTiling textureTilingToVkImageTiling(TextureTiling tiling)
+{
+    return static_cast<VkImageTiling>(static_cast<uint32_t>(tiling));
+}
+
+TextureTiling vkImageTilingToTextureTiling(VkImageTiling tiling)
+{
+    return static_cast<TextureTiling>(static_cast<uint32_t>(tiling));
+}
+
+VkImageLayout textureLayoutToVkImageLayout(TextureLayout layout)
+{
+    return static_cast<VkImageLayout>(static_cast<uint32_t>(layout));
+}
+
+TextureLayout vkImageLayoutToTextureLayout(VkImageLayout layout)
+{
+    return static_cast<TextureLayout>(static_cast<uint32_t>(layout));
 }
 
 ViewType vkImageViewTypeToViewType(VkImageViewType viewType)

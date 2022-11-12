@@ -16,7 +16,7 @@ struct SurfaceCapabilities {
     SurfaceTransformFlags supportedTransforms;
     SurfaceTransformFlagBits currentTransform;
     CompositeAlphaFlags supportedCompositeAlpha;
-    ImageUsageFlags supportedUsageFlags;
+    TextureUsageFlags supportedUsageFlags;
 };
 
 struct SurfaceFormat {
