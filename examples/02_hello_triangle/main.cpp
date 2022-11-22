@@ -128,15 +128,30 @@ int main()
         swapchainViews.push_back(view);
     }
 
-    // Create a texture (just testing)
+    // Create a depth texture to use for rendering
     auto texture = device.createTexture(
             { .type = TextureType::TextureType2D,
-              .format = Format::R8G8B8A8_UNORM,
-              .extent = { 512, 512, 0 },
+              .format = Format::D24_UNORM_S8_UINT,
+              .extent = { window.width(), window.height(), 0 },
               .mipLevels = 1,
-              .usage = TextureUsageFlags(TextureUsageFlagBits::TransferDstBit) | TextureUsageFlags(TextureUsageFlagBits::SampledBit) });
+              .usage = TextureUsageFlags(TextureUsageFlagBits::DepthStencilAttachmentBit) });
 
     // TODO: Create a buffer to hold triangle vertex data
+    // BufferOptions bufferOptions = {
+    //     .size = 3 * 2 * 4 * sizeof(float), // 3 vertices * 2 attributes * 4 float components
+    //     .usage = BufferUsage::Vertex
+    // };
+    // // clang-format off
+    // std::vector<float> vertexData = {
+    //      1.0f, -1.0f, 0.0f, 1.0f, // position
+    //      1.0f,  0.0f, 0.0f, 1.0f, // color
+    //     -1.0f, -1.0f, 0.0f, 1.0f, // position
+    //      0.0f,  1.0f, 0.0f, 1.0f, // color
+    //      0.0f,  1.0f, 0.0f, 1.0f, // position
+    //      0.0f,  0.0f, 1.0f, 1.0f, // color
+    // };
+    // // clang-format on
+    // auto buffer = device.createBuffer(bufferOptions, vertexData.data());
 
     // TODO: Create a vertex shader and fragment shader (spir-v only for now)
 
