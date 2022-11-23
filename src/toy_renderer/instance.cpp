@@ -22,7 +22,10 @@ std::span<Adapter> Instance::adapters()
 {
     if (m_adapters.empty()) {
         auto apiInstance = m_api->resourceManager()->getInstance(m_instance);
-        auto adapterHandles = apiInstance->queryAdapters();
+        // TODO: If we could look up a handle from a value, we would not need to pass m_instance into
+        // queryAdapters(). It is needed so the adapter can store the instance handle for later use
+        // when a device needs it to create a VMA allocator.
+        auto adapterHandles = apiInstance->queryAdapters(m_instance);
         const auto adapterCount = static_cast<uint32_t>(adapterHandles.size());
         m_adapters.reserve(adapterCount);
         for (uint32_t adapterIndex = 0; adapterIndex < adapterCount; ++adapterIndex)

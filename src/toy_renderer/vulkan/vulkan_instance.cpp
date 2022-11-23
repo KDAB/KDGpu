@@ -20,7 +20,7 @@ VulkanInstance::VulkanInstance(VulkanResourceManager *_vulkanResourceManager, Vk
 {
 }
 
-std::vector<Handle<Adapter_t>> VulkanInstance::queryAdapters()
+std::vector<Handle<Adapter_t>> VulkanInstance::queryAdapters(const Handle<Instance_t> &instanceHandle)
 {
     // Query the physical devices from the instance
     uint32_t adapterCount = 0;
@@ -33,7 +33,7 @@ std::vector<Handle<Adapter_t>> VulkanInstance::queryAdapters()
     std::vector<Handle<Adapter_t>> adapterHandles;
     adapterHandles.reserve(adapterCount);
     for (uint32_t adapterIndex = 0; adapterIndex < adapterCount; ++adapterIndex) {
-        VulkanAdapter vulkanAdapter{ physicalDevices[adapterIndex], vulkanResourceManager };
+        VulkanAdapter vulkanAdapter{ physicalDevices[adapterIndex], vulkanResourceManager, instanceHandle };
         adapterHandles.emplace_back(vulkanResourceManager->insertAdapter(vulkanAdapter));
     }
 

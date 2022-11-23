@@ -22,10 +22,11 @@
 namespace ToyRenderer {
 
 struct Adapter_t;
+struct Instance_t;
 struct Surface_t;
 
 struct ApiInstance {
-    virtual std::vector<Handle<Adapter_t>> queryAdapters() = 0;
+    virtual std::vector<Handle<Adapter_t>> queryAdapters(const Handle<Instance_t> &instanceHandle) = 0;
 
     virtual Handle<Surface_t> createSurface(const SurfaceOptions &options) = 0;
 };

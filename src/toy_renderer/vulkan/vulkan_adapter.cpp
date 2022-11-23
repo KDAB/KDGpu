@@ -6,10 +6,13 @@
 
 namespace ToyRenderer {
 
-VulkanAdapter::VulkanAdapter(VkPhysicalDevice _physicalDevice, VulkanResourceManager *_vulkanResourceManager)
+VulkanAdapter::VulkanAdapter(VkPhysicalDevice _physicalDevice,
+                             VulkanResourceManager *_vulkanResourceManager,
+                             const Handle<Instance_t> &_instanceHandle)
     : ApiAdapter()
     , physicalDevice(_physicalDevice)
     , vulkanResourceManager(_vulkanResourceManager)
+    , instanceHandle(_instanceHandle)
 {
 }
 

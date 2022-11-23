@@ -11,7 +11,7 @@ class VulkanResourceManager;
 struct VulkanInstance : public ApiInstance {
     explicit VulkanInstance(VulkanResourceManager *_vulkanResourceManager, VkInstance _instance);
 
-    std::vector<Handle<Adapter_t>> queryAdapters() final;
+    std::vector<Handle<Adapter_t>> queryAdapters(const Handle<Instance_t> &instanceHandle) final;
     Handle<Surface_t> createSurface(const SurfaceOptions &options) final;
 
     VulkanResourceManager *vulkanResourceManager{ nullptr };

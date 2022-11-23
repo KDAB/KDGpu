@@ -2,6 +2,8 @@
 
 #include <toy_renderer/api/api_adapter.h>
 
+#include <toy_renderer/handle.h>
+
 #include <vulkan/vulkan.h>
 
 namespace ToyRenderer {
@@ -9,8 +11,12 @@ namespace ToyRenderer {
 class GraphicsApi;
 class VulkanResourceManager;
 
+struct Instance_t;
+
 struct VulkanAdapter : public ApiAdapter {
-    explicit VulkanAdapter(VkPhysicalDevice _physicalDevice, VulkanResourceManager *_vulkanResourceManager);
+    explicit VulkanAdapter(VkPhysicalDevice _physicalDevice,
+                           VulkanResourceManager *_vulkanResourceManager,
+                           const Handle<Instance_t> &_instanceHandle);
 
     AdapterProperties queryAdapterProperties() final;
     AdapterFeatures queryAdapterFeatures() final;
@@ -20,6 +26,7 @@ struct VulkanAdapter : public ApiAdapter {
 
     VkPhysicalDevice physicalDevice{ VK_NULL_HANDLE };
     VulkanResourceManager *vulkanResourceManager{ nullptr };
+    Handle<Instance_t> instanceHandle;
 };
 
 } // namespace ToyRenderer

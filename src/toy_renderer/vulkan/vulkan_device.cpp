@@ -4,12 +4,30 @@
 #include <toy_renderer/vulkan/vulkan_queue.h>
 #include <toy_renderer/vulkan/vulkan_resource_manager.h>
 
+#include <stdexcept>
+
 namespace ToyRenderer {
 
-VulkanDevice::VulkanDevice(VkDevice _device)
+VulkanDevice::VulkanDevice(VkDevice _device,
+                           VulkanResourceManager *_vulkanResourceManager,
+                           const Handle<Adapter_t> &_adapterHandle)
     : ApiDevice()
     , device(_device)
+    , vulkanResourceManager(_vulkanResourceManager)
+    , adapterHandle(_adapterHandle)
 {
+    // Create an allocator for the device
+    VulkanAdapter *vulkanAdapter = vulkanResourceManager->getAdapter(adapterHandle);
+    VulkanInstance *vulkanInstance = vulkanResourceManager->getInstance(vulkanAdapter->instanceHandle);
+
+    VmaAllocatorCreateInfo allocatorInfo = {};
+    allocatorInfo.vulkanApiVersion = VK_API_VERSION_1_2;
+    allocatorInfo.instance = vulkanInstance->instance;
+    allocatorInfo.physicalDevice = vulkanAdapter->physicalDevice;
+    allocatorInfo.device = device;
+
+    if (vmaCreateAllocator(&allocatorInfo, &allocator) != VK_SUCCESS)
+        throw std::runtime_error("Failed to create Vulkan memory allocator!");
 }
 
 std::vector<QueueDescription> VulkanDevice::getQueues(ResourceManager *resourceManager,
