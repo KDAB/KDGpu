@@ -80,6 +80,7 @@ add_library(Toy::Renderer ALIAS toy-renderer)
 
 set(TOY_RENDERER_GUI_PUBLIC_LIBS
     Vulkan::Vulkan
+    ToyRenderer::vulkan_memory_allocator
     spdlog::spdlog
 
     # Serenity::Core
