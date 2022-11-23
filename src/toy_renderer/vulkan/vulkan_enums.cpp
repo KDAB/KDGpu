@@ -138,4 +138,14 @@ VkImageViewType viewTypeToVkImageViewType(ViewType viewType)
     return static_cast<VkImageViewType>(static_cast<uint32_t>(viewType));
 }
 
+MemoryUsage vmaMemoryUsageToMemoryUsage(VmaMemoryUsage memoryUsage)
+{
+    return static_cast<MemoryUsage>(static_cast<uint32_t>(memoryUsage));
+}
+
+VmaMemoryUsage memoryUsageToVmaMemoryUsage(MemoryUsage memoryUsage)
+{
+    return static_cast<VmaMemoryUsage>(static_cast<uint32_t>(memoryUsage));
+}
+
 } // namespace ToyRenderer

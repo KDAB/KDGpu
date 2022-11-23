@@ -2,6 +2,7 @@
 
 #include <toy_renderer/gpu_core.h>
 
+#include <vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
 
 namespace ToyRenderer {
@@ -40,5 +41,8 @@ TextureLayout vkImageLayoutToTextureLayout(VkImageLayout layout);
 
 ViewType vkImageViewTypeToViewType(VkImageViewType viewType);
 VkImageViewType viewTypeToVkImageViewType(ViewType viewType);
+
+MemoryUsage vmaMemoryUsageToMemoryUsage(VmaMemoryUsage memoryUsage);
+VmaMemoryUsage memoryUsageToVmaMemoryUsage(MemoryUsage memoryUsage);
 
 } // namespace ToyRenderer

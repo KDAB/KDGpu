@@ -13,6 +13,7 @@ set(SOURCES
     texture.cpp
     texture_view.cpp
     vulkan/vulkan_adapter.cpp
+    vulkan/vulkan_buffer.cpp
     vulkan/vulkan_device.cpp
     vulkan/vulkan_enums.cpp
     vulkan/vulkan_graphics_api.cpp
@@ -59,6 +60,7 @@ set(HEADERS
     api/api_texture.h
     api/api_texture_view.h
     vulkan/vulkan_adapter.h
+    vulkan/vulkan_buffer.h
     vulkan/vulkan_device.h
     vulkan/vulkan_enums.h
     vulkan/vulkan_graphics_api.h

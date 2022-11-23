@@ -1,5 +1,6 @@
 #include "vulkan_resource_manager.h"
 
+#include <toy_renderer/buffer_options.h>
 #include <toy_renderer/instance.h>
 #include <toy_renderer/swapchain_options.h>
 #include <toy_renderer/texture_options.h>
@@ -285,7 +286,28 @@ void VulkanResourceManager::deleteTextureView(Handle<TextureView_t> handle)
 
 Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> deviceHandle, const BufferOptions &options, void *initialData)
 {
-    return {};
+    VulkanDevice vulkanDevice = *m_devices.get(deviceHandle);
+
+    VkBufferCreateInfo createInfo = {};
+    createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    createInfo.size = options.size;
+    createInfo.usage = options.usage;
+    createInfo.sharingMode = sharingModeToVkSharingMode(options.sharingMode);
+    if (!options.queueTypeIndices.empty()) {
+        createInfo.queueFamilyIndexCount = options.queueTypeIndices.size();
+        createInfo.pQueueFamilyIndices = options.queueTypeIndices.data();
+    }
+
+    VmaAllocationCreateInfo allocInfo = {};
+    allocInfo.usage = memoryUsageToVmaMemoryUsage(options.memoryUsage);
+
+    VkBuffer vkBuffer;
+    VmaAllocation vmaAllocation;
+    if (vmaCreateBuffer(vulkanDevice.allocator, &createInfo, &allocInfo, &vkBuffer, &vmaAllocation, nullptr) != VK_SUCCESS)
+        return {};
+
+    const auto vulkanBufferHandle = m_buffers.emplace(VulkanBuffer(vkBuffer, vmaAllocation, this, deviceHandle));
+    return vulkanBufferHandle;
 }
 
 void VulkanResourceManager::deleteBuffer(Handle<Buffer_t> handle)

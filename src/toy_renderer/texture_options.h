@@ -2,6 +2,8 @@
 
 #include <toy_renderer/gpu_core.h>
 
+#include <vector>
+
 namespace ToyRenderer {
 
 struct TextureOptions {

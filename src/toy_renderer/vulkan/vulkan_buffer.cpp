@@ -9,7 +9,7 @@ VulkanBuffer::VulkanBuffer(VkBuffer _buffer,
     : buffer(_buffer)
     , allocation(_allocation)
     , vulkanResourceManager(_vulkanResourceManager)
-    , device(_device)
+    , deviceHandle(_deviceHandle)
 {
 }
 
