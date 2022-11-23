@@ -133,7 +133,7 @@ int main()
     auto texture = device.createTexture(
             { .type = TextureType::TextureType2D,
               .format = Format::D24_UNORM_S8_UINT,
-              .extent = { window.width(), window.height(), 0 },
+              .extent = { window.width(), window.height(), 1 },
               .mipLevels = 1,
               .usage = TextureUsageFlags(TextureUsageFlagBits::DepthStencilAttachmentBit) });
 
