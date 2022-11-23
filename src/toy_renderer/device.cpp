@@ -39,4 +39,9 @@ Texture Device::createTexture(const TextureOptions &options)
     return Texture(m_api, m_device, m_api->resourceManager()->createTexture(m_device, options));
 }
 
+Buffer Device::createBuffer(const BufferOptions &options, void *initialData)
+{
+    return Buffer(m_api, m_device, m_api->resourceManager()->createBuffer(m_device, options, initialData));
+}
+
 } // namespace ToyRenderer

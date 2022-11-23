@@ -285,6 +285,16 @@ void VulkanResourceManager::deleteTextureView(Handle<TextureView_t> handle)
     // TODO: Implement me!
 }
 
+Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> deviceHandle, const BufferOptions &options, void *initialData)
+{
+    return {};
+}
+
+void VulkanResourceManager::deleteBuffer(Handle<Buffer_t> handle)
+{
+    // TODO: Implement me!
+}
+
 Handle<BindGroup> VulkanResourceManager::createBindGroup(BindGroupDescription desc)
 {
     // TODO: This is where we will call vkAllocateDescriptorSets

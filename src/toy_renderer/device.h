@@ -1,5 +1,6 @@
 #pragma once
 
+#include <toy_renderer/buffer.h>
 #include <toy_renderer/device_options.h>
 #include <toy_renderer/handle.h>
 #include <toy_renderer/queue.h>
@@ -18,6 +19,7 @@ class GraphicsApi;
 struct Adapter_t;
 struct Device_t;
 
+struct BufferOptions;
 struct SwapchainOptions;
 struct TextureOptions;
 
@@ -30,6 +32,9 @@ public:
 
     Swapchain createSwapchain(const SwapchainOptions &options);
     Texture createTexture(const TextureOptions &options);
+
+    // TODO: If initialData is set, upload this to the newly created buffer
+    Buffer createBuffer(const BufferOptions &options, void *initialData = nullptr);
 
 private:
     Device(Adapter *adapter, GraphicsApi *api, const DeviceOptions &options);

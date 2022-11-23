@@ -1,3 +1,4 @@
+#include <toy_renderer/buffer_options.h>
 #include <toy_renderer/device.h>
 #include <toy_renderer/instance.h>
 #include <toy_renderer/formatters.h>
@@ -136,11 +137,15 @@ int main()
               .mipLevels = 1,
               .usage = TextureUsageFlags(TextureUsageFlagBits::DepthStencilAttachmentBit) });
 
-    // TODO: Create a buffer to hold triangle vertex data
-    // BufferOptions bufferOptions = {
-    //     .size = 3 * 2 * 4 * sizeof(float), // 3 vertices * 2 attributes * 4 float components
-    //     .usage = BufferUsage::Vertex
-    // };
+    // Create a buffer to hold triangle vertex data
+    BufferOptions bufferOptions = {
+        .size = 3 * 2 * 4 * sizeof(float), // 3 vertices * 2 attributes * 4 float components
+        .usage = BufferUsageFlags(BufferUsageFlagBits::VertexBufferBit), // TODO: Use a nice Flags template class
+        .memoryUsage = MemoryUsage::GpuOnly
+    };
+    auto buffer = device.createBuffer(bufferOptions);
+
+    // TODO: Upload the data to the buffer (needs command recording, barriers etc)
     // // clang-format off
     // std::vector<float> vertexData = {
     //      1.0f, -1.0f, 0.0f, 1.0f, // position

@@ -517,4 +517,45 @@ struct TextureSubresourceRange {
     uint32_t layerCount{ remainingArrayLayers };
 };
 
+enum class BufferUsageFlagBits {
+    TransferSrcBit = 0x00000001,
+    TransferDstBit = 0x00000002,
+    UniformTexelBufferBit = 0x00000004,
+    StorageTexelBuffer_bit = 0x00000008,
+    UniformBufferBit = 0x00000010,
+    StorageBufferBit = 0x00000020,
+    IndexBufferBit = 0x00000040,
+    VertexBufferBit = 0x00000080,
+    IndirectBufferBit = 0x00000100,
+    ShaderDeviceAddressBit = 0x00020000,
+    VideoDecodeSrcBit = 0x00002000,
+    VideoDecodeDstBit = 0x00004000,
+    TransformFeedbackBufferBit = 0x00000800,
+    TransformFeedbackCounterBufferBit = 0x00001000,
+    ConditionalRenderingBit = 0x00000200,
+    AccelerationStructureBuildInputReadOnlyBit = 0x00080000,
+    AccelerationStructureStorageBit = 0x00100000,
+    ShaderBindingTableBit = 0x00000400,
+    VideoEncodeDstBit = 0x00008000,
+    VideoEncodeSrcBit = 0x00010000,
+    SamplerDescriptorBufferBit = 0x00200000,
+    ResourceDescriptorBufferBit = 0x00400000,
+    PushDescriptorsDescriptorBufferBit = 0x04000000,
+    MicromapBuildInputReadOnlyBit = 0x00800000,
+    MicromapStorageBit = 0x01000000,
+    MaxEnum = 0x7fffffff
+};
+using BufferUsageFlags = Flags;
+
+enum class MemoryUsage {
+    Unknown = 0,
+    GpuOnly = 1,
+    CpuOnly = 2,
+    CpuToGpu = 3,
+    GpuToCpu = 4,
+    CpuCopy = 5,
+    GpuLazilyAllocated = 6,
+    MaxEnum = 0x7fffffff
+};
+
 } // namespace ToyRenderer

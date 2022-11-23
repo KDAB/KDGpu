@@ -2,6 +2,7 @@ find_package(Vulkan REQUIRED)
 
 set(SOURCES
     adapter.cpp
+    buffer.cpp
     device.cpp
     graphics_api.cpp
     instance.cpp
@@ -36,6 +37,8 @@ set(HEADERS
     gpu_core.h
     instance.h
     bind_group_description.h
+    buffer.h
+    buffer_options.h
     handle.h
     queue.h
     queue_description.h

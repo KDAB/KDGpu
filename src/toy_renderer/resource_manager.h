@@ -17,6 +17,7 @@
 namespace ToyRenderer {
 
 struct ApiAdapter;
+struct ApiBuffer;
 struct ApiDevice;
 struct ApiInstance;
 struct ApiQueue;
@@ -27,6 +28,7 @@ struct ApiTextureView;
 
 class BindGroup;
 
+struct BufferOptions;
 struct InstanceOptions;
 struct DeviceOptions;
 struct TextureOptions;
@@ -80,6 +82,10 @@ public:
     virtual Handle<TextureView_t> createTextureView(const Handle<Device_t> &deviceHandle, const Handle<Texture_t> &textureHandle, const TextureViewOptions &options) = 0;
     virtual void deleteTextureView(Handle<TextureView_t> handle) = 0;
     virtual ApiTextureView *getTextureView(const Handle<TextureView_t> &handle) = 0;
+
+    virtual Handle<Buffer_t> createBuffer(const Handle<Device_t> deviceHandle, const BufferOptions &options, void *initialData) = 0;
+    virtual void deleteBuffer(Handle<Buffer_t> handle) = 0;
+    virtual ApiBuffer *getBuffer(const Handle<Buffer_t> &handle) = 0;
 
     // virtual Handle<Shader> createShader(ShaderDescription desc) = 0;
     virtual Handle<BindGroup> createBindGroup(BindGroupDescription desc) = 0;

@@ -4,8 +4,8 @@
 
 #include <toy_renderer/pool.h>
 
-// TODO: Can we make these forward declarations?
 #include <toy_renderer/vulkan/vulkan_adapter.h>
+#include <toy_renderer/vulkan/vulkan_buffer.h>
 #include <toy_renderer/vulkan/vulkan_device.h>
 #include <toy_renderer/vulkan/vulkan_instance.h>
 #include <toy_renderer/vulkan/vulkan_queue.h>
@@ -64,6 +64,10 @@ public:
     void deleteTextureView(Handle<TextureView_t> handle) final;
     VulkanTextureView *getTextureView(const Handle<TextureView_t> &handle) final { return m_textureViews.get(handle); }
 
+    Handle<Buffer_t> createBuffer(const Handle<Device_t> deviceHandle, const BufferOptions &options, void *initialData) final;
+    void deleteBuffer(Handle<Buffer_t> handle) final;
+    VulkanBuffer *getBuffer(const Handle<Buffer_t> &handle) final { return m_buffers.get(handle); }
+
     // virtual Handle<Shader> createShader(ShaderDescription desc) = 0;
     Handle<BindGroup> createBindGroup(BindGroupDescription desc) final;
     // virtual Handle<Texture> createTexture(TextureDescription desc) = 0;
@@ -83,6 +87,7 @@ private:
     Pool<VulkanSwapchain, Swapchain_t> m_swapchains{ 1 };
     Pool<VulkanTexture, Texture_t> m_textures{ 128 };
     Pool<VulkanTextureView, TextureView_t> m_textureViews{ 128 };
+    Pool<VulkanBuffer, Buffer_t> m_buffers{ 128 };
 };
 
 } // namespace ToyRenderer
