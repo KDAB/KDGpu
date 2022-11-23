@@ -36,7 +36,7 @@ public:
 
     Handle<Device_t> createDevice(const Handle<Adapter_t> &adapterHandle, const DeviceOptions &options, std::vector<QueueRequest> &queueRequests) final;
     void deleteDevice(Handle<Device_t> handle) final;
-    ApiDevice *getDevice(const Handle<Device_t> &handle) final { return m_devices.get(handle); }
+    VulkanDevice *getDevice(const Handle<Device_t> &handle) final { return m_devices.get(handle); }
 
     Handle<Queue_t> insertQueue(const VulkanQueue &vulkanQueue);
     void removeQueue(Handle<Queue_t> handle) final;

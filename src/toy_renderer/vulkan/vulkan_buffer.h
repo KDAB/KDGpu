@@ -18,6 +18,9 @@ struct VulkanBuffer : public ApiBuffer {
                           VulkanResourceManager *_vulkanResourceManager,
                           const Handle<Device_t> &_deviceHandle);
 
+    void *map() final;
+    void unmap() final;
+
     VkBuffer buffer{ VK_NULL_HANDLE };
     VmaAllocation allocation{ VK_NULL_HANDLE };
     void *mapped{ nullptr };

@@ -141,21 +141,25 @@ int main()
     BufferOptions bufferOptions = {
         .size = 3 * 2 * 4 * sizeof(float), // 3 vertices * 2 attributes * 4 float components
         .usage = BufferUsageFlags(BufferUsageFlagBits::VertexBufferBit), // TODO: Use a nice Flags template class
-        .memoryUsage = MemoryUsage::GpuOnly
+        .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
     };
     auto buffer = device.createBuffer(bufferOptions);
 
-    // TODO: Upload the data to the buffer (needs command recording, barriers etc)
-    // // clang-format off
-    // std::vector<float> vertexData = {
-    //      1.0f, -1.0f, 0.0f, 1.0f, // position
-    //      1.0f,  0.0f, 0.0f, 1.0f, // color
-    //     -1.0f, -1.0f, 0.0f, 1.0f, // position
-    //      0.0f,  1.0f, 0.0f, 1.0f, // color
-    //      0.0f,  1.0f, 0.0f, 1.0f, // position
-    //      0.0f,  0.0f, 1.0f, 1.0f, // color
-    // };
-    // // clang-format on
+    // clang-format off
+    std::vector<float> vertexData = {
+         1.0f, -1.0f, 0.0f, 1.0f, // position
+         1.0f,  0.0f, 0.0f, 1.0f, // color
+        -1.0f, -1.0f, 0.0f, 1.0f, // position
+         0.0f,  1.0f, 0.0f, 1.0f, // color
+         0.0f,  1.0f, 0.0f, 1.0f, // position
+         0.0f,  0.0f, 1.0f, 1.0f, // color
+    };
+    // clang-format on
+    auto bufferData = buffer.map();
+    std::memcpy(bufferData, vertexData.data(), vertexData.size() * sizeof(float));
+    buffer.unmap();
+
+    // TODO: Upload the data to the buffer at creation (needs command recording, barriers etc)
     // auto buffer = device.createBuffer(bufferOptions, vertexData.data());
 
     // TODO: Create a vertex shader and fragment shader (spir-v only for now)

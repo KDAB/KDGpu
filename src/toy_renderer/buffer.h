@@ -17,12 +17,17 @@ public:
 
     const Handle<Buffer_t> &handle() const noexcept { return m_buffer; }
 
+    void *map();
+    void unmap();
+
 private:
     explicit Buffer(GraphicsApi *api, const Handle<Device_t> &device, const Handle<Buffer_t> &buffer);
 
     GraphicsApi *m_api{ nullptr };
     Handle<Device_t> m_device;
     Handle<Buffer_t> m_buffer;
+
+    void *m_mapped{ nullptr };
 
     friend class Device;
 };
