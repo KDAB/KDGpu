@@ -14,6 +14,9 @@ add_subdirectory(spdlog)
 # serenity
 add_subdirectory(serenity)
 
+# VMA
+add_subdirectory(vulkan_memory_allocator)
+
 if(TOYRENDERER_BUILD_TESTS)
     # doctest
     add_subdirectory(doctest)
