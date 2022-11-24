@@ -337,6 +337,16 @@ void VulkanResourceManager::deleteShaderModule(Handle<ShaderModule_t> handle)
     // TODO: Implement me!
 }
 
+Handle<PipelineLayout_t> VulkanResourceManager::createPipelineLayout(const Handle<Device_t> &deviceHandle, const PipelineLayoutOptions &options)
+{
+    return {};
+}
+
+void VulkanResourceManager::deletePipelineLayout(Handle<PipelineLayout_t> handle)
+{
+    // TODO: Implement me!
+}
+
 Handle<BindGroup> VulkanResourceManager::createBindGroup(BindGroupDescription desc)
 {
     // TODO: This is where we will call vkAllocateDescriptorSets

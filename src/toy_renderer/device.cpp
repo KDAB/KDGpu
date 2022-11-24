@@ -49,4 +49,9 @@ ShaderModule Device::createShaderModule(const std::vector<uint32_t> &code)
     return ShaderModule(m_api, m_device, m_api->resourceManager()->createShaderModule(m_device, code));
 }
 
+PipelineLayout Device::createPipelineLayout(const PipelineLayoutOptions &options)
+{
+    return PipelineLayout(m_api, m_device, m_api->resourceManager()->createPipelineLayout(m_device, options));
+}
+
 } // namespace ToyRenderer

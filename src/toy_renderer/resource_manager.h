@@ -20,6 +20,7 @@ struct ApiAdapter;
 struct ApiBuffer;
 struct ApiDevice;
 struct ApiInstance;
+struct ApiPipelineLayout;
 struct ApiQueue;
 struct ApiShaderModule;
 struct ApiSwapchain;
@@ -30,11 +31,13 @@ struct ApiTextureView;
 class BindGroup;
 
 struct BufferOptions;
-struct InstanceOptions;
 struct DeviceOptions;
+struct InstanceOptions;
+struct PipelineLayoutOptions;
 struct TextureOptions;
 struct TextureViewOptions;
 
+struct PipelineLayout_t;
 struct ShaderModule_t;
 
 // TODO: Should this class have create/destroy functions or should we put those onto the
@@ -93,6 +96,10 @@ public:
     virtual Handle<ShaderModule_t> createShaderModule(const Handle<Device_t> deviceHandle, const std::vector<uint32_t> &code) = 0;
     virtual void deleteShaderModule(Handle<ShaderModule_t> handle) = 0;
     virtual ApiShaderModule *getShaderModule(const Handle<ShaderModule_t> &handle) = 0;
+
+    virtual Handle<PipelineLayout_t> createPipelineLayout(const Handle<Device_t> &deviceHandle, const PipelineLayoutOptions &options) = 0;
+    virtual void deletePipelineLayout(Handle<PipelineLayout_t> handle) = 0;
+    virtual ApiPipelineLayout *getPipelineLayout(const Handle<PipelineLayout_t> &handle) = 0;
 
     // virtual Handle<Shader> createShader(ShaderDescription desc) = 0;
     virtual Handle<BindGroup> createBindGroup(BindGroupDescription desc) = 0;

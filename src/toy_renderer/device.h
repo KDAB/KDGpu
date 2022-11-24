@@ -3,6 +3,7 @@
 #include <toy_renderer/buffer.h>
 #include <toy_renderer/device_options.h>
 #include <toy_renderer/handle.h>
+#include <toy_renderer/pipeline_layout.h>
 #include <toy_renderer/queue.h>
 #include <toy_renderer/shader_module.h>
 #include <toy_renderer/swapchain.h>
@@ -17,10 +18,12 @@ namespace ToyRenderer {
 
 class Adapter;
 class GraphicsApi;
+
 struct Adapter_t;
 struct Device_t;
 
 struct BufferOptions;
+struct PipelineLayoutOptions;
 struct SwapchainOptions;
 struct TextureOptions;
 
@@ -34,10 +37,15 @@ public:
     Swapchain createSwapchain(const SwapchainOptions &options);
     Texture createTexture(const TextureOptions &options);
 
-    // TODO: If initialData is set, upload this to the newly created buffer
+    // TODO: If initialData is set, upload this to the newly created buffer.
+    // OR should this helper functionality go in a slightly higher layer that
+    // knows about the concept of a frame so that it can correctly submit such commands
+    // as part of the frame submission along with suitable memory barriers?
     Buffer createBuffer(const BufferOptions &options, void *initialData = nullptr);
 
     ShaderModule createShaderModule(const std::vector<uint32_t> &code);
+
+    PipelineLayout createPipelineLayout(const PipelineLayoutOptions &options);
 
 private:
     Device(Adapter *adapter, GraphicsApi *api, const DeviceOptions &options);
