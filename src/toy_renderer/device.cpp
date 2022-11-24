@@ -44,4 +44,9 @@ Buffer Device::createBuffer(const BufferOptions &options, void *initialData)
     return Buffer(m_api, m_device, m_api->resourceManager()->createBuffer(m_device, options, initialData));
 }
 
+ShaderModule Device::createShaderModule(const std::vector<uint32_t> &code)
+{
+    return ShaderModule(m_api, m_device, m_api->resourceManager()->createShaderModule(m_device, code));
+}
+
 } // namespace ToyRenderer

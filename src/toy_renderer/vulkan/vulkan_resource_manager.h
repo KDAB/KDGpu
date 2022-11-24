@@ -9,6 +9,7 @@
 #include <toy_renderer/vulkan/vulkan_device.h>
 #include <toy_renderer/vulkan/vulkan_instance.h>
 #include <toy_renderer/vulkan/vulkan_queue.h>
+#include <toy_renderer/vulkan/vulkan_shader_module.h>
 #include <toy_renderer/vulkan/vulkan_swapchain.h>
 #include <toy_renderer/vulkan/vulkan_surface.h>
 #include <toy_renderer/vulkan/vulkan_texture.h>
@@ -68,6 +69,10 @@ public:
     void deleteBuffer(Handle<Buffer_t> handle) final;
     VulkanBuffer *getBuffer(const Handle<Buffer_t> &handle) final { return m_buffers.get(handle); }
 
+    Handle<ShaderModule_t> createShaderModule(const Handle<Device_t> deviceHandle, const std::vector<uint32_t> &code) final;
+    void deleteShaderModule(Handle<ShaderModule_t> handle) final;
+    VulkanShaderModule *getShaderModule(const Handle<ShaderModule_t> &handle) final { return m_shaderModules.get(handle); }
+
     // virtual Handle<Shader> createShader(ShaderDescription desc) = 0;
     Handle<BindGroup> createBindGroup(BindGroupDescription desc) final;
     // virtual Handle<Texture> createTexture(TextureDescription desc) = 0;
@@ -88,6 +93,7 @@ private:
     Pool<VulkanTexture, Texture_t> m_textures{ 128 };
     Pool<VulkanTextureView, TextureView_t> m_textureViews{ 128 };
     Pool<VulkanBuffer, Buffer_t> m_buffers{ 128 };
+    Pool<VulkanShaderModule, ShaderModule_t> m_shaderModules{ 64 };
 };
 
 } // namespace ToyRenderer

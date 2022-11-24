@@ -4,6 +4,7 @@
 #include <toy_renderer/device_options.h>
 #include <toy_renderer/handle.h>
 #include <toy_renderer/queue.h>
+#include <toy_renderer/shader_module.h>
 #include <toy_renderer/swapchain.h>
 
 #include <toy_renderer/toy_renderer_export.h>
@@ -35,6 +36,8 @@ public:
 
     // TODO: If initialData is set, upload this to the newly created buffer
     Buffer createBuffer(const BufferOptions &options, void *initialData = nullptr);
+
+    ShaderModule createShaderModule(const std::vector<uint32_t> &code);
 
 private:
     Device(Adapter *adapter, GraphicsApi *api, const DeviceOptions &options);

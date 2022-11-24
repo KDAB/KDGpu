@@ -315,6 +315,28 @@ void VulkanResourceManager::deleteBuffer(Handle<Buffer_t> handle)
     // TODO: Implement me!
 }
 
+Handle<ShaderModule_t> VulkanResourceManager::createShaderModule(const Handle<Device_t> deviceHandle, const std::vector<uint32_t> &code)
+{
+    VulkanDevice vulkanDevice = *m_devices.get(deviceHandle);
+
+    VkShaderModuleCreateInfo createInfo = {};
+    createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+    createInfo.codeSize = code.size() * sizeof(uint32_t);
+    createInfo.pCode = code.data();
+
+    VkShaderModule vkShaderModule;
+    if (vkCreateShaderModule(vulkanDevice.device, &createInfo, nullptr, &vkShaderModule) != VK_SUCCESS)
+        return {};
+
+    const auto vulkanShaderModuleHandle = m_shaderModules.emplace(vkShaderModule, this, deviceHandle);
+    return vulkanShaderModuleHandle;
+}
+
+void VulkanResourceManager::deleteShaderModule(Handle<ShaderModule_t> handle)
+{
+    // TODO: Implement me!
+}
+
 Handle<BindGroup> VulkanResourceManager::createBindGroup(BindGroupDescription desc)
 {
     // TODO: This is where we will call vkAllocateDescriptorSets

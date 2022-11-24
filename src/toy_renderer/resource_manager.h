@@ -21,6 +21,7 @@ struct ApiBuffer;
 struct ApiDevice;
 struct ApiInstance;
 struct ApiQueue;
+struct ApiShaderModule;
 struct ApiSwapchain;
 struct ApiSurface;
 struct ApiTexture;
@@ -33,6 +34,8 @@ struct InstanceOptions;
 struct DeviceOptions;
 struct TextureOptions;
 struct TextureViewOptions;
+
+struct ShaderModule_t;
 
 // TODO: Should this class have create/destroy functions or should we put those onto the
 // parent resource type structs? For example VulkanDevice could have a createTexture()
@@ -86,6 +89,10 @@ public:
     virtual Handle<Buffer_t> createBuffer(const Handle<Device_t> deviceHandle, const BufferOptions &options, void *initialData) = 0;
     virtual void deleteBuffer(Handle<Buffer_t> handle) = 0;
     virtual ApiBuffer *getBuffer(const Handle<Buffer_t> &handle) = 0;
+
+    virtual Handle<ShaderModule_t> createShaderModule(const Handle<Device_t> deviceHandle, const std::vector<uint32_t> &code) = 0;
+    virtual void deleteShaderModule(Handle<ShaderModule_t> handle) = 0;
+    virtual ApiShaderModule *getShaderModule(const Handle<ShaderModule_t> &handle) = 0;
 
     // virtual Handle<Shader> createShader(ShaderDescription desc) = 0;
     virtual Handle<BindGroup> createBindGroup(BindGroupDescription desc) = 0;
