@@ -1,0 +1,1 @@
+add_subdirectory(02_hello_triangle)

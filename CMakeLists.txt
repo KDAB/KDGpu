@@ -63,6 +63,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
 endif()
 
 add_subdirectory(src)
+add_subdirectory(assets)
 
 # add_subdirectory(assets)
 option(TOY_RENDERER_BUILD_TESTS "Build tests" ON)

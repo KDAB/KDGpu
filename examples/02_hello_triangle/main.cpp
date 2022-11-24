@@ -21,7 +21,7 @@
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 
-#include <iostream>
+#include <fstream>
 #include <map>
 #include <memory>
 #include <span>
@@ -29,6 +29,33 @@
 
 using namespace Serenity;
 using namespace ToyRenderer;
+
+namespace ToyRenderer {
+
+inline std::string assetPath()
+{
+#if defined(TOY_RENDERER_ASSET_PATH)
+    return TOY_RENDERER_ASSET_PATH;
+#else
+    return "";
+#endif
+}
+
+std::vector<uint32_t> readShaderFile(const std::string &filename)
+{
+    std::ifstream file(filename, std::ios::ate | std::ios::binary);
+    if (!file.is_open())
+        throw std::runtime_error("Failed to open file");
+
+    const size_t fileSize = static_cast<size_t>(file.tellg());
+    std::vector<uint32_t> buffer(fileSize / 4);
+    file.seekg(0);
+    file.read(reinterpret_cast<char *>(buffer.data()), static_cast<std::streamsize>(fileSize));
+    file.close();
+    return buffer;
+}
+
+} // namespace ToyRenderer
 
 int main()
 {
@@ -162,7 +189,12 @@ int main()
     // TODO: Upload the data to the buffer at creation (needs command recording, barriers etc)
     // auto buffer = device.createBuffer(bufferOptions, vertexData.data());
 
-    // TODO: Create a vertex shader and fragment shader (spir-v only for now)
+    // Create a vertex shader and fragment shader (spir-v only for now)
+    const auto vertexShaderPath = ToyRenderer::assetPath() + "/shaders/examples/02_hello_triangle/hello_triangle.vert.spv";
+    auto vertexShader = device.createShaderModule(ToyRenderer::readShaderFile(vertexShaderPath));
+
+    const auto fragmentShaderPath = ToyRenderer::assetPath() + "/shaders/examples/02_hello_triangle/hello_triangle.frag.spv";
+    auto fragmentShader = device.createShaderModule(ToyRenderer::readShaderFile(fragmentShaderPath));
 
     // TODO: Create a pipeline layout (array of bind group layouts)
 

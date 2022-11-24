@@ -2,6 +2,8 @@
 
 #include <toy_renderer/handle.h>
 
+#include <toy_renderer/toy_renderer_export.h>
+
 namespace ToyRenderer {
 
 class GraphicsApi;
@@ -9,7 +11,7 @@ class GraphicsApi;
 struct Device_t;
 struct ShaderModule_t;
 
-class ShaderModule
+class TOY_RENDERER_EXPORT ShaderModule
 {
 public:
     ~ShaderModule();

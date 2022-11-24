@@ -1,0 +1,1 @@
+CompileShaderSet(ToyRendererHelloTriangle hello_triangle)
