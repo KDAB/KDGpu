@@ -339,6 +339,9 @@ void VulkanResourceManager::deleteShaderModule(Handle<ShaderModule_t> handle)
 
 Handle<PipelineLayout_t> VulkanResourceManager::createPipelineLayout(const Handle<Device_t> &deviceHandle, const PipelineLayoutOptions &options)
 {
+    VulkanDevice vulkanDevice = *m_devices.get(deviceHandle);
+    
+    
     return {};
 }
 

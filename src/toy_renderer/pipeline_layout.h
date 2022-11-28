@@ -16,6 +16,9 @@ class TOY_RENDERER_EXPORT PipelineLayout
 public:
     ~PipelineLayout();
 
+    const Handle<PipelineLayout_t> &handle() const noexcept { return m_pipelineLayout; }
+    bool isValid() const noexcept { return m_pipelineLayout.isValid(); }
+
 private:
     explicit PipelineLayout(GraphicsApi *api,
                             const Handle<Device_t> &device,

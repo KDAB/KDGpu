@@ -4,6 +4,7 @@
 #include <toy_renderer/device_options.h>
 #include <toy_renderer/handle.h>
 #include <toy_renderer/pipeline_layout.h>
+#include <toy_renderer/pipeline_layout_options.h>
 #include <toy_renderer/queue.h>
 #include <toy_renderer/shader_module.h>
 #include <toy_renderer/swapchain.h>
@@ -23,7 +24,6 @@ struct Adapter_t;
 struct Device_t;
 
 struct BufferOptions;
-struct PipelineLayoutOptions;
 struct SwapchainOptions;
 struct TextureOptions;
 
@@ -45,7 +45,7 @@ public:
 
     ShaderModule createShaderModule(const std::vector<uint32_t> &code);
 
-    PipelineLayout createPipelineLayout(const PipelineLayoutOptions &options);
+    PipelineLayout createPipelineLayout(const PipelineLayoutOptions &options = PipelineLayoutOptions());
 
 private:
     Device(Adapter *adapter, GraphicsApi *api, const DeviceOptions &options);

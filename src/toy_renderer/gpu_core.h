@@ -558,4 +558,40 @@ enum class MemoryUsage {
     MaxEnum = 0x7fffffff
 };
 
+enum class ShaderStageFlagBits {
+    VertexBit = 0x00000001,
+    TessellationControlBit = 0x00000002,
+    TessellationEvaluationBit = 0x00000004,
+    GeometryBit = 0x00000008,
+    FragmentBit = 0x00000010,
+    ComputeBit = 0x00000020,
+    AllGraphics = 0x0000001f,
+    All = 0x7fffffff,
+    RaygenBit = 0x00000100,
+    AnyHitBit = 0x00000200,
+    ClosestHitBit = 0x00000400,
+    MissBit = 0x00000800,
+    IntersectionBit = 0x00001000,
+    CallableBit = 0x00002000,
+    TaskBit = 0x00000040,
+    MeshBit = 0x00000080,
+    MaxEnum = 0x7fffffff
+};
+using ShaderStageFlags = Flags;
+
+enum class ResourceBindingType {
+    Sampler = 0,
+    CombinedImageSampler = 1,
+    SampledImage = 2,
+    StorageImage = 3,
+    UniformTexelBuffer = 4,
+    StorageTexelBuffer = 5,
+    UniformBuffer = 6,
+    StorageBuffer = 7,
+    DynamicUniformBuffer = 8,
+    DynamicStorageBuffer = 9,
+    InputAttachment = 10,
+    MaxEnum = 0x7fffffff
+};
+
 } // namespace ToyRenderer
