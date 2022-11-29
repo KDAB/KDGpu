@@ -19,14 +19,7 @@ struct ResourceBindingLayout {
 };
 
 struct BindGroupLayout {
-    uint32_t setNumber{ 0 };
     std::vector<ResourceBindingLayout> bindings;
-
-    void clear()
-    {
-        setNumber = 0;
-        bindings.clear();
-    }
 };
 
 struct PushConstantRange {

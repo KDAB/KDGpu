@@ -197,26 +197,22 @@ int main()
     auto fragmentShader = device.createShaderModule(ToyRenderer::readShaderFile(fragmentShaderPath));
 
     // TODO: Create a pipeline layout for a more complicated pipeline
-    // clang-format off
+    // // clang-format off
     // PipelineLayoutOptions pipelineLayoutOptions = {
-    //     .bindGroupLayouts = {{
-    //             .setNumber = 0,
+    //     .bindGroupLayouts = {{  // Set = 0
     //             .bindings = {{  // Camera uniforms
     //                 .binding = 0,
     //                 .count = 1,
     //                 .resourceType = ResourceBindingType::UniformBuffer,
     //                 .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit)
     //             }}
-    //         }, {
-    //             .setNumber = 1,
+    //         }, {                // Set = 1
     //             .bindings = {{  // Base color
     //                 .binding = 0,
-    //                 .count = 1,
     //                 .resourceType = ResourceBindingType::CombinedImageSampler,
     //                 .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit)
     //             }, {            // Metallic-Roughness
     //                 .binding = 1,
-    //                 .count = 1,
     //                 .resourceType = ResourceBindingType::CombinedImageSampler,
     //                 .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit)
     //             }}
@@ -224,12 +220,12 @@ int main()
     //     },
     //     .pushConstantRanges = {
     //         { .offset = 0, .size = 8, .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit) },
-    //         { .offset = 8, .size = 8, .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit) } 
+    //         { .offset = 0, .size = 8, .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit) }
     //     }
     // };
     // // clang-format on
     // auto pipelineLayout = device.createPipelineLayout(pipelineLayoutOptions);
-    
+
     // Create a pipeline layout (array of bind group layouts)
     auto pipelineLayout = device.createPipelineLayout();
 

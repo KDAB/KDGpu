@@ -45,4 +45,7 @@ VkImageViewType viewTypeToVkImageViewType(ViewType viewType);
 MemoryUsage vmaMemoryUsageToMemoryUsage(VmaMemoryUsage memoryUsage);
 VmaMemoryUsage memoryUsageToVmaMemoryUsage(MemoryUsage memoryUsage);
 
+VkDescriptorType resourceBindingTypeToVkDescriptorType(ResourceBindingType type);
+ResourceBindingType vkDescriptorTypeToVkDescriptorType(VkDescriptorType type);
+
 } // namespace ToyRenderer

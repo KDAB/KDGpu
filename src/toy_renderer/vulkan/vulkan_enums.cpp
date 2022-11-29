@@ -148,4 +148,14 @@ VmaMemoryUsage memoryUsageToVmaMemoryUsage(MemoryUsage memoryUsage)
     return static_cast<VmaMemoryUsage>(static_cast<uint32_t>(memoryUsage));
 }
 
+VkDescriptorType resourceBindingTypeToVkDescriptorType(ResourceBindingType type)
+{
+    return static_cast<VkDescriptorType>(static_cast<uint32_t>(type));
+}
+
+ResourceBindingType vkDescriptorTypeToVkDescriptorType(VkDescriptorType type)
+{
+    return static_cast<ResourceBindingType>(static_cast<uint32_t>(type));
+}
+
 } // namespace ToyRenderer

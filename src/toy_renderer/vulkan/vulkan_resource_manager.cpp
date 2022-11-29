@@ -340,9 +340,86 @@ void VulkanResourceManager::deleteShaderModule(Handle<ShaderModule_t> handle)
 Handle<PipelineLayout_t> VulkanResourceManager::createPipelineLayout(const Handle<Device_t> &deviceHandle, const PipelineLayoutOptions &options)
 {
     VulkanDevice vulkanDevice = *m_devices.get(deviceHandle);
-    
-    
-    return {};
+
+    assert(options.bindGroupLayouts.size() <= std::numeric_limits<uint32_t>::max());
+    const uint32_t bindGroupLayoutCount = static_cast<uint32_t>(options.bindGroupLayouts.size());
+    std::vector<VkDescriptorSetLayout> vkDescriptorSetLayouts;
+    vkDescriptorSetLayouts.reserve(bindGroupLayoutCount);
+
+    for (uint32_t i = 0; i < bindGroupLayoutCount; ++i) {
+        const auto &bindGroupLayout = options.bindGroupLayouts.at(i);
+
+        assert(bindGroupLayout.bindings.size() <= std::numeric_limits<uint32_t>::max());
+        const uint32_t bindingLayoutCount = static_cast<uint32_t>(bindGroupLayout.bindings.size());
+        std::vector<VkDescriptorSetLayoutBinding> vkBindingLayouts;
+        vkBindingLayouts.reserve(bindingLayoutCount);
+
+        for (uint32_t j = 0; j < bindingLayoutCount; ++j) {
+            const auto &bindingLayout = bindGroupLayout.bindings.at(j);
+
+            VkDescriptorSetLayoutBinding vkBindingLayout = {};
+            vkBindingLayout.binding = bindingLayout.binding;
+            vkBindingLayout.descriptorCount = bindingLayout.count;
+            vkBindingLayout.descriptorType = resourceBindingTypeToVkDescriptorType(bindingLayout.resourceType);
+            vkBindingLayout.stageFlags = bindingLayout.shaderStages;
+            vkBindingLayout.pImmutableSamplers = nullptr; // TODO: Expose immutable samplers?
+
+            vkBindingLayouts.emplace_back(std::move(vkBindingLayout));
+        }
+
+        // Associate the bindings into a descriptor set layout
+        VkDescriptorSetLayoutCreateInfo createInfo = {};
+        createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+        createInfo.bindingCount = static_cast<uint32_t>(vkBindingLayouts.size());
+        createInfo.pBindings = vkBindingLayouts.data();
+
+        VkDescriptorSetLayout vkDescriptorSetLayout{ VK_NULL_HANDLE };
+        if (vkCreateDescriptorSetLayout(vulkanDevice.device, &createInfo, nullptr, &vkDescriptorSetLayout) != VK_SUCCESS) {
+            // TODO: Log problem
+            return {};
+        }
+        vkDescriptorSetLayouts.emplace_back(vkDescriptorSetLayout);
+    }
+
+    // Create the pipeline layout
+    assert(options.pushConstantRanges.size() <= std::numeric_limits<uint32_t>::max());
+    const uint32_t pushConstantRangeCount = options.pushConstantRanges.size();
+    std::vector<VkPushConstantRange> vkPushConstantRanges;
+    vkPushConstantRanges.reserve(pushConstantRangeCount);
+
+    for (uint32_t i = 0; i < pushConstantRangeCount; ++i) {
+        const auto &pushConstantRange = options.pushConstantRanges.at(i);
+
+        VkPushConstantRange vkPushConstantRange = {
+            .stageFlags = pushConstantRange.shaderStages,
+            .offset = pushConstantRange.offset,
+            .size = pushConstantRange.size
+        };
+
+        vkPushConstantRanges.emplace_back(std::move(vkPushConstantRange));
+    }
+
+    VkPipelineLayoutCreateInfo createInfo = {};
+    createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    createInfo.setLayoutCount = static_cast<uint32_t>(vkDescriptorSetLayouts.size());
+    createInfo.pSetLayouts = vkDescriptorSetLayouts.data();
+    createInfo.pushConstantRangeCount = static_cast<uint32_t>(vkPushConstantRanges.size());
+    createInfo.pPushConstantRanges = vkPushConstantRanges.data();
+
+    VkPipelineLayout vkPipelineLayout{ VK_NULL_HANDLE };
+    if (vkCreatePipelineLayout(vulkanDevice.device, &createInfo, nullptr, &vkPipelineLayout) != VK_SUCCESS) {
+        // TODO: Log problem
+        return {};
+    }
+
+    // Store the results
+    const auto vulkanPipelineLayoutHandle = m_pipelineLayouts.emplace(VulkanPipelineLayout(
+            vkPipelineLayout,
+            std::move(vkDescriptorSetLayouts),
+            this,
+            deviceHandle));
+
+    return vulkanPipelineLayoutHandle;
 }
 
 void VulkanResourceManager::deletePipelineLayout(Handle<PipelineLayout_t> handle)
