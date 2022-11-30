@@ -19,6 +19,7 @@ set(SOURCES
     vulkan/vulkan_device.cpp
     vulkan/vulkan_enums.cpp
     vulkan/vulkan_graphics_api.cpp
+    vulkan/vulkan_graphics_pipeline.cpp
     vulkan/vulkan_instance.cpp
     vulkan/vulkan_pipeline_layout.cpp
     vulkan/vulkan_queue.cpp
@@ -62,6 +63,7 @@ set(HEADERS
     api/api_adapter.h
     api/api_buffer.h
     api/api_device.h
+    api/api_graphics_pipeline.h
     api/api_instance.h
     api/api_pipeline_layout.h
     api/api_shader_module.h
@@ -74,6 +76,7 @@ set(HEADERS
     vulkan/vulkan_device.h
     vulkan/vulkan_enums.h
     vulkan/vulkan_graphics_api.h
+    vulkan/vulkan_graphics_pipeline.h
     vulkan/vulkan_instance.h
     vulkan/vulkan_pipeline_layout.h
     vulkan/vulkan_queue.h
