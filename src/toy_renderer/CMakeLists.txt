@@ -5,6 +5,7 @@ set(SOURCES
     buffer.cpp
     device.cpp
     graphics_api.cpp
+    graphics_pipeline.cpp
     instance.cpp
     pipeline_layout.cpp
     queue.cpp
@@ -40,6 +41,8 @@ set(HEADERS
     device.h
     device_options.h
     graphics_api.h
+    graphics_pipeline.h
+    graphics_pipeline_options.h
     gpu_core.h
     instance.h
     bind_group_description.h

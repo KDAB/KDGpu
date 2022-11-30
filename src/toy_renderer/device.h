@@ -2,6 +2,7 @@
 
 #include <toy_renderer/buffer.h>
 #include <toy_renderer/device_options.h>
+#include <toy_renderer/graphics_pipeline.h>
 #include <toy_renderer/handle.h>
 #include <toy_renderer/pipeline_layout.h>
 #include <toy_renderer/pipeline_layout_options.h>
@@ -24,6 +25,7 @@ struct Adapter_t;
 struct Device_t;
 
 struct BufferOptions;
+struct GraphicsPipelineOptions;
 struct SwapchainOptions;
 struct TextureOptions;
 
@@ -46,6 +48,8 @@ public:
     ShaderModule createShaderModule(const std::vector<uint32_t> &code);
 
     PipelineLayout createPipelineLayout(const PipelineLayoutOptions &options = PipelineLayoutOptions());
+
+    GraphicsPipeline createGraphicsPipeline(const GraphicsPipelineOptions &options);
 
 private:
     Device(Adapter *adapter, GraphicsApi *api, const DeviceOptions &options);

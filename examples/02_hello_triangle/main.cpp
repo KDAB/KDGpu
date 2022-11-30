@@ -1,6 +1,8 @@
 #include <toy_renderer/buffer_options.h>
 #include <toy_renderer/device.h>
 #include <toy_renderer/instance.h>
+#include <toy_renderer/graphics_pipeline.h>
+#include <toy_renderer/graphics_pipeline_options.h>
 #include <toy_renderer/formatters.h>
 #include <toy_renderer/gpu_core.h>
 #include <toy_renderer/swapchain.h>
@@ -230,6 +232,10 @@ int main()
     auto pipelineLayout = device.createPipelineLayout();
 
     // TODO: Create a pipeline
+    GraphicsPipelineOptions pipelineOptions = {
+
+    };
+    auto pipeline = device.createGraphicsPipeline(pipelineOptions);
 
     // TODO:    Implement the render loop {
     //              Acquire next swapchain image

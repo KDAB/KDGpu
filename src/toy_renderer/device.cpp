@@ -54,4 +54,9 @@ PipelineLayout Device::createPipelineLayout(const PipelineLayoutOptions &options
     return PipelineLayout(m_api, m_device, m_api->resourceManager()->createPipelineLayout(m_device, options));
 }
 
+GraphicsPipeline Device::createGraphicsPipeline(const GraphicsPipelineOptions &options)
+{
+    return GraphicsPipeline(m_api, m_device, m_api->resourceManager()->createGraphicsPipeline(m_device, options));
+}
+
 } // namespace ToyRenderer
