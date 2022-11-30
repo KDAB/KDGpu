@@ -83,15 +83,9 @@ public:
     void deleteGraphicsPipeline(Handle<GraphicsPipeline_t> handle) final;
     VulkanGraphicsPipeline *getGraphicsPipeline(const Handle<GraphicsPipeline_t> &handle) final { return m_graphicsPipelines.get(handle); }
 
-    // virtual Handle<Shader> createShader(ShaderDescription desc) = 0;
+    // TODO: Complete BindGroup implementation
     Handle<BindGroup> createBindGroup(BindGroupDescription desc) final;
-    // virtual Handle<Texture> createTexture(TextureDescription desc) = 0;
-    // virtual Handle<Buffer> createBuffer(BufferDescription desc) = 0;
-
-    // virtual void deleteShader(Handle<Shader> handle) = 0;
     void deleteBindGroup(Handle<BindGroup> handle) final;
-    // virtual void deleteTexture(Handle<Texture> handle) = 0;
-    // virtual void deleteBuffer(Handle<Buffer> handle) = 0;
 
 private:
     Pool<VulkanInstance, Instance_t> m_instances{ 1 };
