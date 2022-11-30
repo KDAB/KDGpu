@@ -19,6 +19,7 @@ namespace ToyRenderer {
 struct ApiAdapter;
 struct ApiBuffer;
 struct ApiDevice;
+struct ApiGraphicsPipeline;
 struct ApiInstance;
 struct ApiPipelineLayout;
 struct ApiQueue;
@@ -32,11 +33,13 @@ class BindGroup;
 
 struct BufferOptions;
 struct DeviceOptions;
+struct GraphicsPipelineOptions;
 struct InstanceOptions;
 struct PipelineLayoutOptions;
 struct TextureOptions;
 struct TextureViewOptions;
 
+struct GraphicsPipeline_t;
 struct PipelineLayout_t;
 struct ShaderModule_t;
 
@@ -100,6 +103,10 @@ public:
     virtual Handle<PipelineLayout_t> createPipelineLayout(const Handle<Device_t> &deviceHandle, const PipelineLayoutOptions &options) = 0;
     virtual void deletePipelineLayout(Handle<PipelineLayout_t> handle) = 0;
     virtual ApiPipelineLayout *getPipelineLayout(const Handle<PipelineLayout_t> &handle) = 0;
+
+    virtual Handle<GraphicsPipeline_t> createGraphicsPipeline(const Handle<Device_t> &deviceHandle, const GraphicsPipelineOptions &options) = 0;
+    virtual void deleteGraphicsPipeline(Handle<GraphicsPipeline_t> handle) = 0;
+    virtual ApiGraphicsPipeline *getGraphicsPipeline(const Handle<GraphicsPipeline_t> &handle) = 0;
 
     // virtual Handle<Shader> createShader(ShaderDescription desc) = 0;
     virtual Handle<BindGroup> createBindGroup(BindGroupDescription desc) = 0;

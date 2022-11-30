@@ -7,6 +7,7 @@
 #include <toy_renderer/vulkan/vulkan_adapter.h>
 #include <toy_renderer/vulkan/vulkan_buffer.h>
 #include <toy_renderer/vulkan/vulkan_device.h>
+#include <toy_renderer/vulkan/vulkan_graphics_pipeline.h>
 #include <toy_renderer/vulkan/vulkan_instance.h>
 #include <toy_renderer/vulkan/vulkan_pipeline_layout.h>
 #include <toy_renderer/vulkan/vulkan_queue.h>
@@ -78,6 +79,10 @@ public:
     void deletePipelineLayout(Handle<PipelineLayout_t> handle) final;
     VulkanPipelineLayout *getPipelineLayout(const Handle<PipelineLayout_t> &handle) final { return m_pipelineLayouts.get(handle); }
 
+    Handle<GraphicsPipeline_t> createGraphicsPipeline(const Handle<Device_t> &deviceHandle, const GraphicsPipelineOptions &options) final;
+    void deleteGraphicsPipeline(Handle<GraphicsPipeline_t> handle) final;
+    VulkanGraphicsPipeline *getGraphicsPipeline(const Handle<GraphicsPipeline_t> &handle) final { return m_graphicsPipelines.get(handle); }
+
     // virtual Handle<Shader> createShader(ShaderDescription desc) = 0;
     Handle<BindGroup> createBindGroup(BindGroupDescription desc) final;
     // virtual Handle<Texture> createTexture(TextureDescription desc) = 0;
@@ -100,6 +105,7 @@ private:
     Pool<VulkanBuffer, Buffer_t> m_buffers{ 128 };
     Pool<VulkanShaderModule, ShaderModule_t> m_shaderModules{ 64 };
     Pool<VulkanPipelineLayout, PipelineLayout_t> m_pipelineLayouts{ 64 };
+    Pool<VulkanGraphicsPipeline, GraphicsPipeline_t> m_graphicsPipelines{ 64 };
 };
 
 } // namespace ToyRenderer

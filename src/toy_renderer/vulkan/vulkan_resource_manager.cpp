@@ -427,6 +427,17 @@ void VulkanResourceManager::deletePipelineLayout(Handle<PipelineLayout_t> handle
     // TODO: Implement me!
 }
 
+Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const Handle<Device_t> &deviceHandle, const GraphicsPipelineOptions &options)
+{
+    // TODO: Implement me!
+    return {};
+}
+
+void VulkanResourceManager::deleteGraphicsPipeline(Handle<GraphicsPipeline_t> handle)
+{
+    // TODO: Implement me!
+}
+
 Handle<BindGroup> VulkanResourceManager::createBindGroup(BindGroupDescription desc)
 {
     // TODO: This is where we will call vkAllocateDescriptorSets
