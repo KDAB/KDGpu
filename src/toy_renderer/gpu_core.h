@@ -17,6 +17,7 @@ constexpr uint32_t remainingMipLevels = (~0U);
 
 using DeviceSize = uint64_t;
 using Flags = uint32_t;
+using SampleMask = uint32_t;
 
 struct Extent2D {
     uint32_t width;
@@ -628,6 +629,118 @@ enum class PolygonMode {
     Fill = 0,
     Line = 1,
     Point = 2,
+    MaxEnum = 0x7fffffff
+};
+
+enum class CompareOperation {
+    Never = 0,
+    Less = 1,
+    Equal = 2,
+    LessOrEqual = 3,
+    Greater = 4,
+    NotEqual = 5,
+    GreaterOrEqual = 6,
+    Always = 7,
+    MaxEnum = 0x7fffffff
+};
+
+enum class StencilOperation {
+    Keep = 0,
+    Zero = 1,
+    Replace = 2,
+    IncrementAndClamp = 3,
+    DecrementAndClamp = 4,
+    Invert = 5,
+    IncrementAndWrap = 6,
+    DecrementAndWrap = 7,
+    MaxEnum = 0x7fffffff
+};
+
+enum ColorComponentFlagBits {
+    RedBit = 0x00000001,
+    GreenBit = 0x00000002,
+    BlueBit = 0x00000004,
+    AlphaBit = 0x00000008,
+    AllComponents = RedBit | GreenBit | BlueBit | AlphaBit,
+    MaxEnum = 0x7fffffff
+};
+using ColorComponentFlags = Flags;
+
+enum class BlendOperation {
+    Add = 0,
+    Subtract = 1,
+    ReverseSubtract = 2,
+    Min = 3,
+    Max = 4,
+    Zero = 1000148000,
+    Src = 1000148001,
+    Dst = 1000148002,
+    SrcOver = 1000148003,
+    DstOver = 1000148004,
+    SrcIn = 1000148005,
+    DstIn = 1000148006,
+    SrcOut = 1000148007,
+    DstOut = 1000148008,
+    SrcAtop = 1000148009,
+    DstAtop = 1000148010,
+    Xor = 1000148011,
+    Multiply = 1000148012,
+    Screen = 1000148013,
+    Overlay = 1000148014,
+    Darken = 1000148015,
+    Lighten = 1000148016,
+    ColorDodge = 1000148017,
+    ColorBurn = 1000148018,
+    HardLight = 1000148019,
+    SoftLight = 1000148020,
+    Difference = 1000148021,
+    Exclusion = 1000148022,
+    Invert = 1000148023,
+    InvertRgb = 1000148024,
+    LinearDodge = 1000148025,
+    LinearBurn = 1000148026,
+    VividLight = 1000148027,
+    LinearLight = 1000148028,
+    PinLight = 1000148029,
+    HardMix = 1000148030,
+    HslHue = 1000148031,
+    HslSaturation = 1000148032,
+    HslColor = 1000148033,
+    HslLuminosity = 1000148034,
+    Plus = 1000148035,
+    PlusClamped = 1000148036,
+    PlusClampedAlpha = 1000148037,
+    PlusDarker = 1000148038,
+    Minus = 1000148039,
+    MinusClamped = 1000148040,
+    Contrast = 1000148041,
+    InvertOvg = 1000148042,
+    Red = 1000148043,
+    Green = 1000148044,
+    Blue = 1000148045,
+    MaxEnum = 0x7fffffff
+};
+
+enum class BlendFactor {
+    Zero = 0,
+    One = 1,
+    SrcColor = 2,
+    OneMinusSrcColor = 3,
+    DstColor = 4,
+    OneMinusDstColor = 5,
+    SrcAlpha = 6,
+    OneMinusSrcAlpha = 7,
+    DstAlpha = 8,
+    OneMinusDstAlpha = 9,
+    ConstantColor = 10,
+    OneMinusConstantColor = 11,
+    ConstantAlpha = 12,
+    OneMinusConstantAlpha = 13,
+    SrcAlphaSaturate = 14,
+    Src1Color = 15,
+    OneMinusSrc1Color = 16,
+    Src1Alpha = 17,
+    OneMinusSrc1Alpha = 18,
     MaxEnum = 0x7fffffff
 };
 
