@@ -548,6 +548,12 @@ enum class BufferUsageFlagBits {
 };
 using BufferUsageFlags = Flags;
 
+enum class VertexRate {
+    Vertex = 0,
+    Instance = 1,
+    MaxEnum = 0x7fffffff
+};
+
 enum class MemoryUsage {
     Unknown = 0,
     GpuOnly = 1,

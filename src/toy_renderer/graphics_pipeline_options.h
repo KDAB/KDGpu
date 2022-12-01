@@ -5,6 +5,8 @@
 
 #include <vector>
 
+// TODO: Can we use std::span in these rather than std::vector?
+
 namespace ToyRenderer {
 
 struct PipelineLayout_t;
@@ -14,6 +16,24 @@ struct ShaderStage {
     Handle<ShaderModule_t> shaderModule;
     ShaderStageFlagBits stage;
     std::string entryPoint{ "main" };
+};
+
+struct VertexBufferLayout {
+    uint32_t binding;
+    uint32_t stride;
+    VertexRate inputRate;
+};
+
+struct VertexAttribute {
+    uint32_t location;
+    uint32_t binding;
+    Format format;
+    DeviceSize offset{ 0 };
+};
+
+struct VertexOptions {
+    std::vector<VertexBufferLayout> buffers;
+    std::vector<VertexAttribute> attributes;
 };
 
 struct StencilOperationOptions {
@@ -71,7 +91,7 @@ struct MultisampleOptions {
 struct GraphicsPipelineOptions {
     std::vector<ShaderStage> shaderStages;
     Handle<PipelineLayout_t> layout;
-    // VertexOptions vertex;
+    VertexOptions vertex;
     std::vector<RenderTargetOptions> renderTargets;
     DepthStencilOptions depthStencil;
     PrimitiveOptions primitive;
