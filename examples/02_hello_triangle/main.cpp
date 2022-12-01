@@ -231,10 +231,22 @@ int main()
     // Create a pipeline layout (array of bind group layouts)
     auto pipelineLayout = device.createPipelineLayout();
 
-    // TODO: Create a pipeline
+    // Create a pipeline
+    // clang-format off
     GraphicsPipelineOptions pipelineOptions = {
-
+        .shaderStages = {
+            { .shaderModule = vertexShader.handle(), .stage = ShaderStageFlagBits::VertexBit },
+            { .shaderModule = fragmentShader.handle(), .stage = ShaderStageFlagBits::FragmentBit }
+        },                                  // Shader program
+        .layout = pipelineLayout.handle(),  // Resource ABI
+        // .vertex = { ... },                  // Vertex buffer and attributes
+        // .viewport = { ... },                // Viewport and scissor
+        // .multisample = { ... },             // MS config and alpha to coverage
+        // .depthStencil = { ... },            // Depth test etc
+        // .blending = { ... },                // Blend modes (can we provide common cases as convenience?)
+        // .fragment = { ... }                 // Render target description (formats, attachment counts)
     };
+    // clang-format on
     auto pipeline = device.createGraphicsPipeline(pipelineOptions);
 
     // TODO:    Implement the render loop {
