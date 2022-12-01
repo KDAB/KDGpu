@@ -21,7 +21,7 @@ struct ShaderStage {
 struct VertexBufferLayout {
     uint32_t binding;
     uint32_t stride;
-    VertexRate inputRate;
+    VertexRate inputRate{ VertexRate::Vertex };
 };
 
 struct VertexAttribute {
@@ -65,10 +65,10 @@ struct RenderTargetOptions {
 };
 
 struct DepthStencilOptions {
-    Format format{ Format::D24_UNORM_S8_UINT };
+    Format format{ Format::UNDEFINED };
     bool depthTestEnabled{ true };
-    bool depthWritesEnabled{ true };
-    CompareOperation depthCompareOperation{ CompareOperation::Less };
+    bool depthWritesEnabled{ false };
+    CompareOperation depthCompareOperation{ CompareOperation::Always };
     bool stencilTestEnabled{ false };
     StencilOperationOptions stencilFront;
     StencilOperationOptions stencilBack;

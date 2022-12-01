@@ -159,12 +159,14 @@ int main()
     }
 
     // Create a depth texture to use for rendering
-    auto texture = device.createTexture(
-            { .type = TextureType::TextureType2D,
-              .format = Format::D24_UNORM_S8_UINT,
-              .extent = { window.width(), window.height(), 1 },
-              .mipLevels = 1,
-              .usage = TextureUsageFlags(TextureUsageFlagBits::DepthStencilAttachmentBit) });
+    TextureOptions depthTextureOptions = {
+        .type = TextureType::TextureType2D,
+        .format = Format::D24_UNORM_S8_UINT,
+        .extent = { window.width(), window.height(), 1 },
+        .mipLevels = 1,
+        .usage = TextureUsageFlags(TextureUsageFlagBits::DepthStencilAttachmentBit)
+    };
+    auto depthTexture = device.createTexture(depthTextureOptions);
 
     // Create a buffer to hold triangle vertex data
     BufferOptions bufferOptions = {
@@ -237,14 +239,25 @@ int main()
         .shaderStages = {
             { .shaderModule = vertexShader.handle(), .stage = ShaderStageFlagBits::VertexBit },
             { .shaderModule = fragmentShader.handle(), .stage = ShaderStageFlagBits::FragmentBit }
-        },                                  // Shader program
-        .layout = pipelineLayout.handle(),  // Resource ABI
-        // .vertex = { ... },                  // Vertex buffer and attributes
-        // .viewport = { ... },                // Viewport and scissor
-        // .multisample = { ... },             // MS config and alpha to coverage
-        // .depthStencil = { ... },            // Depth test etc
-        // .blending = { ... },                // Blend modes (can we provide common cases as convenience?)
-        // .fragment = { ... }                 // Render target description (formats, attachment counts)
+        },
+        .layout = pipelineLayout.handle(), 
+        .vertex = {
+            .buffers = {
+                { .binding = 0, .stride = 2 * 4 * sizeof(float) }
+            },
+            .attributes = {
+                { .location = 0, .binding = 0, .format = Format::R32G32B32A32_SFLOAT }, // Position
+                { .location = 1, .binding = 0, .format = Format::R32G32B32A32_SFLOAT, .offset = 4 * sizeof(float) } // Color
+            }
+        },
+        .renderTargets = {
+            { .format = swapchainOptions.format }
+        },
+        .depthStencil = {
+            .format = depthTextureOptions.format,
+            .depthWritesEnabled = true,
+            .depthCompareOperation = CompareOperation::Less
+        }
     };
     // clang-format on
     auto pipeline = device.createGraphicsPipeline(pipelineOptions);
