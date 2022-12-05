@@ -1,6 +1,7 @@
 #pragma once
 
 #include <toy_renderer/buffer.h>
+#include <toy_renderer/command_recorder.h>
 #include <toy_renderer/device_options.h>
 #include <toy_renderer/graphics_pipeline.h>
 #include <toy_renderer/handle.h>
@@ -50,6 +51,8 @@ public:
     PipelineLayout createPipelineLayout(const PipelineLayoutOptions &options = PipelineLayoutOptions());
 
     GraphicsPipeline createGraphicsPipeline(const GraphicsPipelineOptions &options);
+
+    CommandRecorder createCommandRecorder();
 
 private:
     Device(Adapter *adapter, GraphicsApi *api, const DeviceOptions &options);

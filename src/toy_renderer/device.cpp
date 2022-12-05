@@ -59,4 +59,10 @@ GraphicsPipeline Device::createGraphicsPipeline(const GraphicsPipelineOptions &o
     return GraphicsPipeline(m_api, m_device, m_api->resourceManager()->createGraphicsPipeline(m_device, options));
 }
 
+CommandRecorder Device::createCommandRecorder()
+{
+    // TODO: Implement me!
+    return CommandRecorder(m_api, m_device);
+}
+
 } // namespace ToyRenderer

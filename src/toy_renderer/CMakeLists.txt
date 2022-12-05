@@ -3,12 +3,15 @@ find_package(Vulkan REQUIRED)
 set(SOURCES
     adapter.cpp
     buffer.cpp
+    command_recorder.cpp
+    compute_pass_command_recorder.cpp
     device.cpp
     graphics_api.cpp
     graphics_pipeline.cpp
     instance.cpp
     pipeline_layout.cpp
     queue.cpp
+    render_pass_command_recorder.cpp
     resource_manager.cpp
     shader_module.cpp
     swapchain.cpp
@@ -38,6 +41,11 @@ set(HEADERS
     adapter_queue_type.h
     adapter_swapchain_properties.h
     adapter.h
+    bind_group_description.h
+    buffer.h
+    buffer_options.h
+    command_recorder.h
+    compute_pass_command_recorder.h
     device.h
     device_options.h
     graphics_api.h
@@ -45,14 +53,12 @@ set(HEADERS
     graphics_pipeline_options.h
     gpu_core.h
     instance.h
-    bind_group_description.h
-    buffer.h
-    buffer_options.h
     handle.h
     pipeline_layout.h
     pipeline_layout_options.h
     queue.h
     queue_description.h
+    render_pass_command_recorder.h
     render_pass_options.h
     resource_manager.h
     shader_module.h

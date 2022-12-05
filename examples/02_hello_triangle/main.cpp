@@ -282,44 +282,44 @@ int main()
     };
     // clang-format on
 
-    // while (window.visible()) {
-    //     // Acquire next swapchain image
-    //     uint32_t currentImageIndex;
-    //     const auto result = swapchain.getNextImageIndex(&currentImageIndex);
-    //     if (result != OK) {
-    //         // Do we need to recreate the swapchain and dependent resources?
-    //     }
+    while (window.visible()) {
+        // Acquire next swapchain image
+        uint32_t currentImageIndex = 0;
+        //     const auto result = swapchain.getNextImageIndex(&currentImageIndex);
+        //     if (result != OK) {
+        //         // Do we need to recreate the swapchain and dependent resources?
+        //     }
 
-    //     // Create a command encoder/recorder
-    //     auto commandRecorder = device.createCommandRecorder();
+        // Create a command encoder/recorder
+        auto commandRecorder = device.createCommandRecorder();
 
-    //     // Begin render pass
-    //     opaquePassOptions.colorAttachments[0].view = swapchainViews.at(currentImageIndex).handle();
-    //     auto opaquePass = commandRecorder.beginRenderPass(opaquePassOptions);
+        // Begin render pass
+        opaquePassOptions.colorAttachments[0].view = swapchainViews.at(currentImageIndex).handle();
+        auto opaquePass = commandRecorder.beginRenderPass(opaquePassOptions);
 
-    //     // Bind pipeline
-    //     opaquePass.setPipeline(pipeline);
+        // Bind pipeline
+        opaquePass.setPipeline(pipeline.handle());
 
-    //     // Bind vertex buffer
-    //     opaquePass.setVertexBuffer(0, buffer);
+        // Bind vertex buffer
+        opaquePass.setVertexBuffer(0, buffer.handle());
 
-    //     // Bind any resources (none needed for hello_triangle)
+        // Bind any resources (none needed for hello_triangle)
 
-    //     // Issue draw command
-    //     DrawCommand drawCmd = { .vertexCount = 3, .instanceCount = 1, .firstVertex = 0, .firstInstance = 0 };
-    //     opaquePass.draw(drawCmd);
+        // Issue draw command
+        const DrawCommand drawCmd = { .vertexCount = 3 };
+        opaquePass.draw(drawCmd);
 
-    //     // End render pass
-    //     opaquePass.end();
+        // End render pass
+        opaquePass.end();
 
-    //     // End recording
-    //     auto commands = commandRecorder.finish();
+        //     // End recording
+        //     auto commands = commandRecorder.finish();
 
-    //     // Submit command buffer to queue
-    //     queue.submit(commands.handle());
+        //     // Submit command buffer to queue
+        //     queue.submit(commands.handle());
 
-    //     // Present and request next frame (need API for this)
-    // }
+        //     // Present and request next frame (need API for this)
+    }
 
     return app.exec();
 }
