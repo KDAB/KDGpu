@@ -14,6 +14,9 @@ class TOY_RENDERER_EXPORT TextureView
 public:
     ~TextureView();
 
+    const Handle<TextureView_t> handle() const noexcept { return m_textureView; }
+    bool isValid() const noexcept { return m_textureView.isValid(); }
+
 private:
     explicit TextureView(GraphicsApi *api, const Handle<TextureView_t> &textureView);
 

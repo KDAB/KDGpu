@@ -5,6 +5,7 @@
 #include <toy_renderer/graphics_pipeline_options.h>
 #include <toy_renderer/formatters.h>
 #include <toy_renderer/gpu_core.h>
+#include <toy_renderer/render_pass_options.h>
 #include <toy_renderer/swapchain.h>
 #include <toy_renderer/swapchain_options.h>
 #include <toy_renderer/texture.h>
@@ -167,6 +168,7 @@ int main()
         .usage = TextureUsageFlags(TextureUsageFlagBits::DepthStencilAttachmentBit)
     };
     auto depthTexture = device.createTexture(depthTextureOptions);
+    auto depthTextureView = depthTexture.createView();
 
     // Create a buffer to hold triangle vertex data
     BufferOptions bufferOptions = {
@@ -262,19 +264,62 @@ int main()
     // clang-format on
     auto pipeline = device.createGraphicsPipeline(pipelineOptions);
 
-    // TODO:    Implement the render loop {
-    //              Acquire next swapchain image
-    //              Create a command encoder/recorder
-    //              Begin render pass
-    //              Bind pipeline
-    //              Bind vertex buffer
-    //              Bind any resources (bind groups (descriptor sets))
-    //              Issue draw command
-    //              End render pass
-    //              End recording
-    //              Submit command buffer to queue
-    //              Present and request next frame
-    //          }
+    // TODO: Implement the render loop
+    // Most of the render pass is the same between frames. The only thing that changes, is which image
+    // of the swapchain we wish to render to. So set up what we can here, and in the render loop we will
+    // just update the color texture view.
+    // clang-format off
+    RenderPassOptions opaquePassOptions = {
+        .colorAttachments = {
+            {
+                .view = {}, // Not setting the swapchain texture view just yet
+                .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f }
+            }
+        },
+        .depthStencilAttachment = {
+            .view = depthTextureView.handle(),
+        }
+    };
+    // clang-format on
+
+    // while (window.visible()) {
+    //     // Acquire next swapchain image
+    //     uint32_t currentImageIndex;
+    //     const auto result = swapchain.getNextImageIndex(&currentImageIndex);
+    //     if (result != OK) {
+    //         // Do we need to recreate the swapchain and dependent resources?
+    //     }
+
+    //     // Create a command encoder/recorder
+    //     auto commandRecorder = device.createCommandRecorder();
+
+    //     // Begin render pass
+    //     opaquePassOptions.colorAttachments[0].view = swapchainViews.at(currentImageIndex).handle();
+    //     auto opaquePass = commandRecorder.beginRenderPass(opaquePassOptions);
+
+    //     // Bind pipeline
+    //     opaquePass.setPipeline(pipeline);
+
+    //     // Bind vertex buffer
+    //     opaquePass.setVertexBuffer(0, buffer);
+
+    //     // Bind any resources (none needed for hello_triangle)
+
+    //     // Issue draw command
+    //     DrawCommand drawCmd = { .vertexCount = 3, .instanceCount = 1, .firstVertex = 0, .firstInstance = 0 };
+    //     opaquePass.draw(drawCmd);
+
+    //     // End render pass
+    //     opaquePass.end();
+
+    //     // End recording
+    //     auto commands = commandRecorder.finish();
+
+    //     // Submit command buffer to queue
+    //     queue.submit(commands.handle());
+
+    //     // Present and request next frame (need API for this)
+    // }
 
     return app.exec();
 }

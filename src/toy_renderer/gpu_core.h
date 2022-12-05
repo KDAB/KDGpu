@@ -46,6 +46,12 @@ struct Rect2D {
     Extent2D extent;
 };
 
+union ColorClearValue {
+    float float32[4];
+    int32_t int32[4];
+    uint32_t uint32[4];
+};
+
 enum class SampleCountFlagBits {
     Samples1Bit = 0x00000001,
     Samples2Bit = 0x00000002,
@@ -747,6 +753,19 @@ enum class BlendFactor {
     OneMinusSrc1Color = 16,
     Src1Alpha = 17,
     OneMinusSrc1Alpha = 18,
+    MaxEnum = 0x7fffffff
+};
+
+enum class AttachmentLoadOperation {
+    Load = 0,
+    Clear = 1,
+    DontCare = 2,
+    MaxEnum = 0x7fffffff
+};
+
+enum class AttachmentStoreOperation {
+    Store = 0,
+    DontCare = 1,
     MaxEnum = 0x7fffffff
 };
 

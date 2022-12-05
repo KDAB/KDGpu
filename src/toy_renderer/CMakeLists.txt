@@ -53,6 +53,7 @@ set(HEADERS
     pipeline_layout_options.h
     queue.h
     queue_description.h
+    render_pass_options.h
     resource_manager.h
     shader_module.h
     swapchain.h
