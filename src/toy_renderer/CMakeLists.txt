@@ -3,6 +3,7 @@ find_package(Vulkan REQUIRED)
 set(SOURCES
     adapter.cpp
     buffer.cpp
+    command_buffer.cpp
     command_recorder.cpp
     compute_pass_command_recorder.cpp
     device.cpp
@@ -44,6 +45,7 @@ set(HEADERS
     bind_group_description.h
     buffer.h
     buffer_options.h
+    command_buffer.h
     command_recorder.h
     compute_pass_command_recorder.h
     device.h

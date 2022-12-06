@@ -312,8 +312,8 @@ int main()
         // End render pass
         opaquePass.end();
 
-        //     // End recording
-        //     auto commands = commandRecorder.finish();
+        // End recording
+        auto commands = commandRecorder.finish();
 
         //     // Submit command buffer to queue
         //     queue.submit(commands.handle());

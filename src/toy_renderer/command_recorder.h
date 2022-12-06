@@ -1,5 +1,6 @@
 #pragma once
 
+#include <toy_renderer/command_buffer.h>
 #include <toy_renderer/handle.h>
 #include <toy_renderer/render_pass_command_recorder.h>
 #include <toy_renderer/render_pass_options.h>
@@ -17,6 +18,7 @@ public:
     ~CommandRecorder();
 
     RenderPassCommandRecorder beginRenderPass(const RenderPassOptions &options);
+    CommandBuffer finish();
 
 protected:
     explicit CommandRecorder(GraphicsApi *api, const Handle<Device_t> &device);

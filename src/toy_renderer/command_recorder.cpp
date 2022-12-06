@@ -18,4 +18,10 @@ RenderPassCommandRecorder CommandRecorder::beginRenderPass(const RenderPassOptio
     return {};
 }
 
+CommandBuffer CommandRecorder::finish()
+{
+    // TODO: Implement me!
+    return {};
+}
+
 } // namespace ToyRenderer
