@@ -315,8 +315,8 @@ int main()
         // End recording
         auto commands = commandRecorder.finish();
 
-        //     // Submit command buffer to queue
-        //     queue.submit(commands.handle());
+        // Submit command buffer to queue
+        queue.submit(commands.handle());
 
         //     // Present and request next frame (need API for this)
     }

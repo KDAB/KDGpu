@@ -12,6 +12,7 @@ class GraphicsApi;
 class Surface;
 
 struct Adapter_t;
+struct CommandBuffer_t;
 
 class TOY_RENDERER_EXPORT Queue
 {
@@ -26,6 +27,8 @@ public:
     uint32_t timestampValidBits() const noexcept { return m_timestampValidBits; }
     Extent3D minImageTransferGranularity() const noexcept { return m_minImageTransferGranularity; }
     uint32_t queueTypeIndex() const noexcept { return m_queueTypeIndex; }
+
+    void submit(const Handle<CommandBuffer_t> &commands);
 
 private:
     Queue(GraphicsApi *api, const QueueDescription &queueDescription);

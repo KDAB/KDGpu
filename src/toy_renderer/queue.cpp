@@ -22,4 +22,9 @@ Queue::~Queue()
 {
 }
 
+void Queue::submit(const Handle<CommandBuffer_t> &commands)
+{
+    // TODO: Implement me!
+}
+
 } // namespace ToyRenderer
