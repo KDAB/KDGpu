@@ -18,6 +18,7 @@ class TOY_RENDERER_EXPORT Swapchain
 public:
     ~Swapchain();
 
+    const Handle<Swapchain_t> &handle() const noexcept { return m_swapchain; }
     bool isValid() const noexcept { return m_swapchain.isValid(); }
 
     std::span<const Texture> textures() const { return m_textures; }

@@ -5,6 +5,7 @@
 #include <toy_renderer/graphics_pipeline_options.h>
 #include <toy_renderer/formatters.h>
 #include <toy_renderer/gpu_core.h>
+#include <toy_renderer/queue.h>
 #include <toy_renderer/render_pass_options.h>
 #include <toy_renderer/swapchain.h>
 #include <toy_renderer/swapchain_options.h>
@@ -318,7 +319,11 @@ int main()
         // Submit command buffer to queue
         queue.submit(commands.handle());
 
-        //     // Present and request next frame (need API for this)
+        // Present and request next frame (need API for this)
+        PresentOptions presentOptions = {
+            .swapchainInfos = { { .swapchain = swapchain.handle(), .imageIndex = currentImageIndex } }
+        };
+        queue.present(presentOptions);
     }
 
     return app.exec();

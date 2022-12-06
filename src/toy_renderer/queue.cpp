@@ -27,4 +27,14 @@ void Queue::submit(const Handle<CommandBuffer_t> &commands)
     // TODO: Implement me!
 }
 
+void Queue::present(const Handle<Swapchain_t> &swapchain, uint32_t imageIndex)
+{
+    // TODO: Implement me!
+}
+
+void Queue::present(const PresentOptions &options)
+{
+    // TODO: Implement me!
+}
+
 } // namespace ToyRenderer
