@@ -1,6 +1,7 @@
 #include "vulkan_resource_manager.h"
 
 #include <toy_renderer/buffer_options.h>
+#include <toy_renderer/graphics_pipeline_options.h>
 #include <toy_renderer/instance.h>
 #include <toy_renderer/swapchain_options.h>
 #include <toy_renderer/texture_options.h>
@@ -430,6 +431,55 @@ void VulkanResourceManager::deletePipelineLayout(Handle<PipelineLayout_t> handle
 Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const Handle<Device_t> &deviceHandle, const GraphicsPipelineOptions &options)
 {
     // TODO: Implement me!
+    VulkanDevice vulkanDevice = *m_devices.get(deviceHandle);
+
+    // Shader stages
+    std::vector<VkPipelineShaderStageCreateInfo> shaderInfos;
+    const uint32_t shaderCount = static_cast<uint32_t>(options.shaderStages.size());
+    shaderInfos.reserve(shaderCount);
+    for (uint32_t i = 0; i < shaderCount; ++i) {
+        const auto &shaderStage = options.shaderStages.at(i);
+
+        VkPipelineShaderStageCreateInfo shaderInfo = {};
+        shaderInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        shaderInfo.stage = shaderStageFlagBitsToVkShaderStageFlagBits(shaderStage.stage);
+
+        // Lookup the shader module
+        const auto vulkanShaderModule = getShaderModule(shaderStage.shaderModule);
+        if (!vulkanShaderModule)
+            return {};
+        shaderInfo.module = vulkanShaderModule->shaderModule;
+
+        shaderInfos.emplace_back(shaderInfo);
+    }
+
+    // Bring it all together in the all-knowing pipeline create info
+    VkGraphicsPipelineCreateInfo pipelineInfo = {};
+    pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+    pipelineInfo.stageCount = static_cast<uint32_t>(shaderInfos.size());
+    pipelineInfo.pStages = shaderInfos.data();
+    // pipelineInfo.pVertexInputState = &vertexInputInfo;
+    // pipelineInfo.pInputAssemblyState = &inputAssembly;
+    // pipelineInfo.pViewportState = &viewportState;
+    // pipelineInfo.pRasterizationState = &rasterizer;
+    // pipelineInfo.pMultisampleState = &multisampling;
+    // pipelineInfo.pDepthStencilState = &depthStencil; // Optional
+    // pipelineInfo.pColorBlendState = &colorBlending;
+    // pipelineInfo.pDynamicState = &dynamicStateInfo; // Optional
+    // pipelineInfo.pTessellationState = &tessellationStateInfo;
+    // pipelineInfo.layout = pipeline.layout;
+    // pipelineInfo.renderPass = renderPass;
+    // pipelineInfo.subpass = subpassIndex;
+    // pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
+    // pipelineInfo.basePipelineIndex = -1; // Optional
+
+    VkPipeline vkPipeline{ VK_NULL_HANDLE };
+    if (vkCreateGraphicsPipelines(vulkanDevice.device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &vkPipeline) != VK_SUCCESS) {
+        return {};
+    }
+
+    // TODO: Create VulkanPipeline object and return handle
+
     return {};
 }
 

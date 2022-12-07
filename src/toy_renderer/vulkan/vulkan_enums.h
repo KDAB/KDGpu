@@ -48,4 +48,7 @@ VmaMemoryUsage memoryUsageToVmaMemoryUsage(MemoryUsage memoryUsage);
 VkDescriptorType resourceBindingTypeToVkDescriptorType(ResourceBindingType type);
 ResourceBindingType vkDescriptorTypeToVkDescriptorType(VkDescriptorType type);
 
+VkShaderStageFlagBits shaderStageFlagBitsToVkShaderStageFlagBits(ShaderStageFlagBits stage);
+ShaderStageFlagBits vkShaderStageFlagBitsToShaderStageFlagBits(VkShaderStageFlagBits stage);
+
 } // namespace ToyRenderer

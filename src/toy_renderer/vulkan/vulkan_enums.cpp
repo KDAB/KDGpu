@@ -158,4 +158,14 @@ ResourceBindingType vkDescriptorTypeToVkDescriptorType(VkDescriptorType type)
     return static_cast<ResourceBindingType>(static_cast<uint32_t>(type));
 }
 
+VkShaderStageFlagBits shaderStageFlagBitsToVkShaderStageFlagBits(ShaderStageFlagBits stage)
+{
+    return static_cast<VkShaderStageFlagBits>(static_cast<uint32_t>(stage));
+}
+
+ShaderStageFlagBits vkShaderStageFlagBitsToShaderStageFlagBits(VkShaderStageFlagBits stage)
+{
+    return static_cast<ShaderStageFlagBits>(static_cast<uint32_t>(stage));
+}
+
 } // namespace ToyRenderer
