@@ -24,4 +24,10 @@ Swapchain::~Swapchain()
 {
 }
 
+bool Swapchain::getNextImageIndex(uint32_t &imageIndex)
+{
+    // TODO: Implement me!
+    return true;
+}
+
 } // namespace ToyRenderer

@@ -23,6 +23,9 @@ public:
 
     std::span<const Texture> textures() const { return m_textures; }
 
+    // TODO: More informative return value
+    bool getNextImageIndex(uint32_t &imageIndex);
+
 private:
     explicit Swapchain(GraphicsApi *api, const Handle<Device_t> &device, const Handle<Swapchain_t> &swapchain);
 
