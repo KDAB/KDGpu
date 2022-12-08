@@ -178,4 +178,14 @@ VertexRate vkVertexInputRateToVertexRate(VkVertexInputRate rate)
     return static_cast<VertexRate>(static_cast<uint32_t>(rate));
 }
 
+VkPrimitiveTopology primitiveTopologyToVkPrimitiveTopology(PrimitiveTopology topology)
+{
+    return static_cast<VkPrimitiveTopology>(static_cast<uint32_t>(topology));
+}
+
+PrimitiveTopology vkPrimitiveTopologyToPrimitiveTopology(VkPrimitiveTopology topology)
+{
+    return static_cast<PrimitiveTopology>(static_cast<uint32_t>(topology));
+}
+
 } // namespace ToyRenderer

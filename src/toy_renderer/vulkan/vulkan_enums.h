@@ -54,4 +54,7 @@ ShaderStageFlagBits vkShaderStageFlagBitsToShaderStageFlagBits(VkShaderStageFlag
 VkVertexInputRate vertexRateToVkVertexInputRate(VertexRate rate);
 VertexRate vkVertexInputRateToVertexRate(VkVertexInputRate rate);
 
+VkPrimitiveTopology primitiveTopologyToVkPrimitiveTopology(PrimitiveTopology topology);
+PrimitiveTopology vkPrimitiveTopologyToPrimitiveTopology(VkPrimitiveTopology topology);
+
 } // namespace ToyRenderer

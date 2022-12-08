@@ -486,13 +486,19 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     vertexInputState.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributes.size());
     vertexInputState.pVertexAttributeDescriptions = attributes.data();
 
+    // Input assembly
+    VkPipelineInputAssemblyStateCreateInfo inputAssembly = {};
+    inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+    inputAssembly.topology = primitiveTopologyToVkPrimitiveTopology(options.primitive.topology);
+    inputAssembly.primitiveRestartEnable = options.primitive.primitiveRestart;
+
     // Bring it all together in the all-knowing pipeline create info
     VkGraphicsPipelineCreateInfo pipelineInfo = {};
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
     pipelineInfo.stageCount = static_cast<uint32_t>(shaderInfos.size());
     pipelineInfo.pStages = shaderInfos.data();
     pipelineInfo.pVertexInputState = &vertexInputState;
-    // pipelineInfo.pInputAssemblyState = &inputAssembly;
+    pipelineInfo.pInputAssemblyState = &inputAssembly;
     // pipelineInfo.pViewportState = &viewportState;
     // pipelineInfo.pRasterizationState = &rasterizer;
     // pipelineInfo.pMultisampleState = &multisampling;
