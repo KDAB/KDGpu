@@ -188,4 +188,24 @@ PrimitiveTopology vkPrimitiveTopologyToPrimitiveTopology(VkPrimitiveTopology top
     return static_cast<PrimitiveTopology>(static_cast<uint32_t>(topology));
 }
 
+VkPolygonMode polygonModeToVkPolygonMode(PolygonMode mode)
+{
+    return static_cast<VkPolygonMode>(static_cast<uint32_t>(mode));
+}
+
+PolygonMode vkPolygonModeToPolygonMode(VkPolygonMode mode)
+{
+    return static_cast<PolygonMode>(static_cast<uint32_t>(mode));
+}
+
+VkFrontFace frontFaceToVkFrontFace(FrontFace face)
+{
+    return static_cast<VkFrontFace>(static_cast<uint32_t>(face));
+}
+
+FrontFace vkFrontFaceToFrontFace(VkFrontFace face)
+{
+    return static_cast<FrontFace>(static_cast<uint32_t>(face));
+}
+
 } // namespace ToyRenderer

@@ -57,4 +57,10 @@ VertexRate vkVertexInputRateToVertexRate(VkVertexInputRate rate);
 VkPrimitiveTopology primitiveTopologyToVkPrimitiveTopology(PrimitiveTopology topology);
 PrimitiveTopology vkPrimitiveTopologyToPrimitiveTopology(VkPrimitiveTopology topology);
 
+VkPolygonMode polygonModeToVkPolygonMode(PolygonMode mode);
+PolygonMode vkPolygonModeToPolygonMode(VkPolygonMode mode);
+
+VkFrontFace frontFaceToVkFrontFace(FrontFace face);
+FrontFace vkFrontFaceToFrontFace(VkFrontFace face);
+
 } // namespace ToyRenderer

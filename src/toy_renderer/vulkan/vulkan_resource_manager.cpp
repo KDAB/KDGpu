@@ -492,6 +492,20 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     inputAssembly.topology = primitiveTopologyToVkPrimitiveTopology(options.primitive.topology);
     inputAssembly.primitiveRestartEnable = options.primitive.primitiveRestart;
 
+    // Rasterizer
+    VkPipelineRasterizationStateCreateInfo rasterizer = {};
+    rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+    rasterizer.depthClampEnable = VK_FALSE;
+    rasterizer.rasterizerDiscardEnable = VK_FALSE;
+    rasterizer.polygonMode = polygonModeToVkPolygonMode(options.primitive.polygonMode);
+    rasterizer.lineWidth = 1.0f;
+    rasterizer.cullMode = options.primitive.cullMode;
+    rasterizer.frontFace = frontFaceToVkFrontFace(options.primitive.frontFace);
+    rasterizer.depthBiasEnable = VK_FALSE;
+    rasterizer.depthBiasConstantFactor = 0.0f;
+    rasterizer.depthBiasClamp = 0.0f;
+    rasterizer.depthBiasSlopeFactor = 0.0f;
+
     // Bring it all together in the all-knowing pipeline create info
     VkGraphicsPipelineCreateInfo pipelineInfo = {};
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -499,8 +513,8 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     pipelineInfo.pStages = shaderInfos.data();
     pipelineInfo.pVertexInputState = &vertexInputState;
     pipelineInfo.pInputAssemblyState = &inputAssembly;
-    // pipelineInfo.pViewportState = &viewportState;
-    // pipelineInfo.pRasterizationState = &rasterizer;
+    pipelineInfo.pViewportState = nullptr;
+    pipelineInfo.pRasterizationState = &rasterizer;
     // pipelineInfo.pMultisampleState = &multisampling;
     // pipelineInfo.pDepthStencilState = &depthStencil; // Optional
     // pipelineInfo.pColorBlendState = &colorBlending;
