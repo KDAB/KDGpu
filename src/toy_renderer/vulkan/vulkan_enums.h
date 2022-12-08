@@ -63,4 +63,10 @@ PolygonMode vkPolygonModeToPolygonMode(VkPolygonMode mode);
 VkFrontFace frontFaceToVkFrontFace(FrontFace face);
 FrontFace vkFrontFaceToFrontFace(VkFrontFace face);
 
+VkCompareOp compareOperationToVkCompareOp(CompareOperation op);
+CompareOperation vkCompareOpToCompareOperation(VkCompareOp op);
+
+VkStencilOp stencilOperationToVkStencilOp(StencilOperation op);
+StencilOperation vkStencilOpToStencilOperation(StencilOperation op);
+
 } // namespace ToyRenderer

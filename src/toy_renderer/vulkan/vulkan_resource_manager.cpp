@@ -516,6 +516,31 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     multisampling.alphaToCoverageEnable = options.multisample.alphaToCoverageEnabled;
     multisampling.alphaToOneEnable = VK_FALSE;
 
+    // Depth and stencil testing
+    auto vkStencilOpStateFromStencilOperationOptions = [](const StencilOperationOptions &options) {
+        VkStencilOpState stencilOp = {};
+        stencilOp.failOp = stencilOperationToVkStencilOp(options.failOp);
+        stencilOp.passOp = stencilOperationToVkStencilOp(options.passOp);
+        stencilOp.depthFailOp = stencilOperationToVkStencilOp(options.depthFailOp);
+        stencilOp.compareOp = compareOperationToVkCompareOp(options.compareOp);
+        stencilOp.compareMask = options.compareMask;
+        stencilOp.writeMask = options.writeMask;
+        stencilOp.reference = options.reference;
+        return stencilOp;
+    };
+
+    VkPipelineDepthStencilStateCreateInfo depthStencil = {};
+    depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+    depthStencil.depthTestEnable = options.depthStencil.depthTestEnabled;
+    depthStencil.depthWriteEnable = options.depthStencil.depthWritesEnabled;
+    depthStencil.depthCompareOp = compareOperationToVkCompareOp(options.depthStencil.depthCompareOperation);
+    depthStencil.depthBoundsTestEnable = VK_FALSE;
+    depthStencil.minDepthBounds = 0.0f;
+    depthStencil.maxDepthBounds = 1.0f;
+    depthStencil.stencilTestEnable = VK_FALSE;
+    depthStencil.front = vkStencilOpStateFromStencilOperationOptions(options.depthStencil.stencilFront);
+    depthStencil.back = vkStencilOpStateFromStencilOperationOptions(options.depthStencil.stencilBack);
+
     // Bring it all together in the all-knowing pipeline create info
     VkGraphicsPipelineCreateInfo pipelineInfo = {};
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -526,7 +551,7 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     pipelineInfo.pViewportState = nullptr;
     pipelineInfo.pRasterizationState = &rasterizer;
     pipelineInfo.pMultisampleState = &multisampling;
-    // pipelineInfo.pDepthStencilState = &depthStencil; // Optional
+    pipelineInfo.pDepthStencilState = &depthStencil;
     // pipelineInfo.pColorBlendState = &colorBlending;
     // pipelineInfo.pDynamicState = &dynamicStateInfo; // Optional
     // pipelineInfo.pTessellationState = &tessellationStateInfo;

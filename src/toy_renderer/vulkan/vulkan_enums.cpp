@@ -208,4 +208,24 @@ FrontFace vkFrontFaceToFrontFace(VkFrontFace face)
     return static_cast<FrontFace>(static_cast<uint32_t>(face));
 }
 
+VkCompareOp compareOperationToVkCompareOp(CompareOperation op)
+{
+    return static_cast<VkCompareOp>(static_cast<uint32_t>(op));
+}
+
+CompareOperation vkCompareOpToCompareOperation(VkCompareOp op)
+{
+    return static_cast<CompareOperation>(static_cast<uint32_t>(op));
+}
+
+VkStencilOp stencilOperationToVkStencilOp(StencilOperation op)
+{
+    return static_cast<VkStencilOp>(static_cast<uint32_t>(op));
+}
+
+StencilOperation vkStencilOpToStencilOperation(StencilOperation op)
+{
+    return static_cast<StencilOperation>(static_cast<uint32_t>(op));
+}
+
 } // namespace ToyRenderer
