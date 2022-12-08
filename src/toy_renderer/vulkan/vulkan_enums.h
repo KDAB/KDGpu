@@ -51,4 +51,7 @@ ResourceBindingType vkDescriptorTypeToVkDescriptorType(VkDescriptorType type);
 VkShaderStageFlagBits shaderStageFlagBitsToVkShaderStageFlagBits(ShaderStageFlagBits stage);
 ShaderStageFlagBits vkShaderStageFlagBitsToShaderStageFlagBits(VkShaderStageFlagBits stage);
 
+VkVertexInputRate vertexRateToVkVertexInputRate(VertexRate rate);
+VertexRate vkVertexInputRateToVertexRate(VkVertexInputRate rate);
+
 } // namespace ToyRenderer

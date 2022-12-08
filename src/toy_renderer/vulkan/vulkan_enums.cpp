@@ -168,4 +168,14 @@ ShaderStageFlagBits vkShaderStageFlagBitsToShaderStageFlagBits(VkShaderStageFlag
     return static_cast<ShaderStageFlagBits>(static_cast<uint32_t>(stage));
 }
 
+VkVertexInputRate vertexRateToVkVertexInputRate(VertexRate rate)
+{
+    return static_cast<VkVertexInputRate>(static_cast<uint32_t>(rate));
+}
+
+VertexRate vkVertexInputRateToVertexRate(VkVertexInputRate rate)
+{
+    return static_cast<VertexRate>(static_cast<uint32_t>(rate));
+}
+
 } // namespace ToyRenderer

@@ -453,12 +453,45 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
         shaderInfos.emplace_back(shaderInfo);
     }
 
+    // Vertex input
+    const uint32_t vertexBindingCount = static_cast<uint32_t>(options.vertex.buffers.size());
+    std::vector<VkVertexInputBindingDescription> vertexBindings;
+    vertexBindings.reserve(vertexBindingCount);
+    for (uint32_t i = 0; i < vertexBindingCount; ++i) {
+        const auto &binding = options.vertex.buffers.at(i);
+        VkVertexInputBindingDescription vkBinding = {};
+        vkBinding.binding = binding.binding;
+        vkBinding.stride = binding.stride;
+        vkBinding.inputRate = vertexRateToVkVertexInputRate(binding.inputRate);
+        vertexBindings.emplace_back(vkBinding);
+    }
+
+    const uint32_t attributeCount = static_cast<uint32_t>(options.vertex.attributes.size());
+    std::vector<VkVertexInputAttributeDescription> attributes;
+    attributes.reserve(attributeCount);
+    for (uint32_t i = 0; i < attributeCount; ++i) {
+        const auto &attribute = options.vertex.attributes.at(i);
+        VkVertexInputAttributeDescription vkAttribute = {};
+        vkAttribute.location = attribute.location;
+        vkAttribute.binding = attribute.binding;
+        vkAttribute.format = formatToVkFormat(attribute.format);
+        vkAttribute.offset = attribute.offset;
+        attributes.emplace_back(vkAttribute);
+    }
+
+    VkPipelineVertexInputStateCreateInfo vertexInputState = {};
+    vertexInputState.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+    vertexInputState.vertexBindingDescriptionCount = static_cast<uint32_t>(vertexBindings.size());
+    vertexInputState.pVertexBindingDescriptions = vertexBindings.data();
+    vertexInputState.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributes.size());
+    vertexInputState.pVertexAttributeDescriptions = attributes.data();
+
     // Bring it all together in the all-knowing pipeline create info
     VkGraphicsPipelineCreateInfo pipelineInfo = {};
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
     pipelineInfo.stageCount = static_cast<uint32_t>(shaderInfos.size());
     pipelineInfo.pStages = shaderInfos.data();
-    // pipelineInfo.pVertexInputState = &vertexInputInfo;
+    pipelineInfo.pVertexInputState = &vertexInputState;
     // pipelineInfo.pInputAssemblyState = &inputAssembly;
     // pipelineInfo.pViewportState = &viewportState;
     // pipelineInfo.pRasterizationState = &rasterizer;
