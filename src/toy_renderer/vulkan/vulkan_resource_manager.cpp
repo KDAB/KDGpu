@@ -506,6 +506,16 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     rasterizer.depthBiasClamp = 0.0f;
     rasterizer.depthBiasSlopeFactor = 0.0f;
 
+    // Multisampling
+    VkPipelineMultisampleStateCreateInfo multisampling = {};
+    multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+    multisampling.sampleShadingEnable = options.multisample.samples > SampleCountFlagBits::Samples1Bit;
+    multisampling.rasterizationSamples = sampleCountFlagBitsToVkSampleFlagBits(options.multisample.samples);
+    multisampling.minSampleShading = 1.0f;
+    multisampling.pSampleMask = options.multisample.sampleMasks.data();
+    multisampling.alphaToCoverageEnable = options.multisample.alphaToCoverageEnabled;
+    multisampling.alphaToOneEnable = VK_FALSE;
+
     // Bring it all together in the all-knowing pipeline create info
     VkGraphicsPipelineCreateInfo pipelineInfo = {};
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -515,7 +525,7 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     pipelineInfo.pInputAssemblyState = &inputAssembly;
     pipelineInfo.pViewportState = nullptr;
     pipelineInfo.pRasterizationState = &rasterizer;
-    // pipelineInfo.pMultisampleState = &multisampling;
+    pipelineInfo.pMultisampleState = &multisampling;
     // pipelineInfo.pDepthStencilState = &depthStencil; // Optional
     // pipelineInfo.pColorBlendState = &colorBlending;
     // pipelineInfo.pDynamicState = &dynamicStateInfo; // Optional
