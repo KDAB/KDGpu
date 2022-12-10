@@ -492,6 +492,12 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     inputAssembly.topology = primitiveTopologyToVkPrimitiveTopology(options.primitive.topology);
     inputAssembly.primitiveRestartEnable = options.primitive.primitiveRestart;
 
+    // Tessellation
+    VkPipelineTessellationStateCreateInfo tessellationStateInfo = {};
+    tessellationStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_TESSELLATION_STATE_CREATE_INFO;
+    tessellationStateInfo.flags = 0;
+    tessellationStateInfo.patchControlPoints = options.primitive.patchControlPoints;
+
     // Rasterizer
     VkPipelineRasterizationStateCreateInfo rasterizer = {};
     rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
@@ -572,6 +578,21 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     colorBlending.blendConstants[2] = 0.0f;
     colorBlending.blendConstants[3] = 0.0f;
 
+    // Dynamic pipeline state. This is state that can be overridden whilst recording
+    // command buffers with commands such as vkCmdSetViewport or vkCmdSetScissor. We
+    // always make the viewport and scissor states dynamic and require clients to
+    // set these when recording.
+    std::vector<VkDynamicState> dynamicStates = {
+        VK_DYNAMIC_STATE_VIEWPORT,
+        VK_DYNAMIC_STATE_SCISSOR
+    };
+
+    VkPipelineDynamicStateCreateInfo dynamicStateInfo{};
+    dynamicStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+    dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
+    dynamicStateInfo.pDynamicStates = dynamicStates.data();
+    dynamicStateInfo.flags = 0;
+
     // Bring it all together in the all-knowing pipeline create info
     VkGraphicsPipelineCreateInfo pipelineInfo = {};
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -579,13 +600,13 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     pipelineInfo.pStages = shaderInfos.data();
     pipelineInfo.pVertexInputState = &vertexInputState;
     pipelineInfo.pInputAssemblyState = &inputAssembly;
+    pipelineInfo.pTessellationState = &tessellationStateInfo;
     pipelineInfo.pViewportState = nullptr;
     pipelineInfo.pRasterizationState = &rasterizer;
     pipelineInfo.pMultisampleState = &multisampling;
     pipelineInfo.pDepthStencilState = &depthStencil;
     pipelineInfo.pColorBlendState = &colorBlending;
-    // pipelineInfo.pDynamicState = &dynamicStateInfo; // Optional
-    // pipelineInfo.pTessellationState = &tessellationStateInfo;
+    pipelineInfo.pDynamicState = &dynamicStateInfo;
     // pipelineInfo.layout = pipeline.layout;
     // pipelineInfo.renderPass = renderPass;
     // pipelineInfo.subpass = subpassIndex;

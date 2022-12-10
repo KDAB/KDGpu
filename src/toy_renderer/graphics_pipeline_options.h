@@ -80,6 +80,7 @@ struct PrimitiveOptions {
     CullModeFlags cullMode{ CullModeFlags(CullModeFlagBits::BackBit) };
     FrontFace frontFace{ FrontFace::CounterClockwise };
     PolygonMode polygonMode{ PolygonMode::Fill };
+    uint32_t patchControlPoints{ 0 };
 };
 
 struct MultisampleOptions {
