@@ -69,4 +69,10 @@ CompareOperation vkCompareOpToCompareOperation(VkCompareOp op);
 VkStencilOp stencilOperationToVkStencilOp(StencilOperation op);
 StencilOperation vkStencilOpToStencilOperation(StencilOperation op);
 
+VkBlendFactor blendFactorToVkBlendFactor(BlendFactor factor);
+BlendFactor vkBlendFactorToBlendFactor(VkBlendFactor factor);
+
+VkBlendOp blendOperationToVkBlendOp(BlendOperation op);
+BlendOperation vkBlendOpToBlendOperation(BlendOperation op);
+
 } // namespace ToyRenderer

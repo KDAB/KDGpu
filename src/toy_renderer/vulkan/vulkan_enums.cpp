@@ -228,4 +228,24 @@ StencilOperation vkStencilOpToStencilOperation(StencilOperation op)
     return static_cast<StencilOperation>(static_cast<uint32_t>(op));
 }
 
+VkBlendFactor blendFactorToVkBlendFactor(BlendFactor factor)
+{
+    return static_cast<VkBlendFactor>(static_cast<uint32_t>(factor));
+}
+
+BlendFactor vkBlendFactorToBlendFactor(VkBlendFactor factor)
+{
+    return static_cast<BlendFactor>(static_cast<uint32_t>(factor));
+}
+
+VkBlendOp blendOperationToVkBlendOp(BlendOperation op)
+{
+    return static_cast<VkBlendOp>(static_cast<uint32_t>(op));
+}
+
+BlendOperation vkBlendOpToBlendOperation(BlendOperation op)
+{
+    return static_cast<BlendOperation>(static_cast<uint32_t>(op));
+}
+
 } // namespace ToyRenderer

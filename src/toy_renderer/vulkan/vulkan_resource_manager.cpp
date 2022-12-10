@@ -541,6 +541,37 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     depthStencil.front = vkStencilOpStateFromStencilOperationOptions(options.depthStencil.stencilFront);
     depthStencil.back = vkStencilOpStateFromStencilOperationOptions(options.depthStencil.stencilBack);
 
+    // Blending
+    const uint32_t attachmentCount = options.renderTargets.size();
+    std::vector<VkPipelineColorBlendAttachmentState> attachmentBlends;
+    attachmentBlends.reserve(attachmentCount);
+    for (uint32_t i = 0; i < attachmentCount; ++i) {
+        const auto &renderTarget = options.renderTargets.at(i);
+
+        VkPipelineColorBlendAttachmentState vkAttachmentBlend = {};
+        vkAttachmentBlend.colorWriteMask = renderTarget.writeMask;
+        vkAttachmentBlend.blendEnable = renderTarget.blending.blendingEnabled;
+        vkAttachmentBlend.srcColorBlendFactor = blendFactorToVkBlendFactor(renderTarget.blending.color.srcFactor);
+        vkAttachmentBlend.dstColorBlendFactor = blendFactorToVkBlendFactor(renderTarget.blending.color.dstFactor);
+        vkAttachmentBlend.colorBlendOp = blendOperationToVkBlendOp(renderTarget.blending.color.operation);
+        vkAttachmentBlend.srcAlphaBlendFactor = blendFactorToVkBlendFactor(renderTarget.blending.alpha.srcFactor);
+        vkAttachmentBlend.dstAlphaBlendFactor = blendFactorToVkBlendFactor(renderTarget.blending.alpha.dstFactor);
+        vkAttachmentBlend.alphaBlendOp = blendOperationToVkBlendOp(renderTarget.blending.alpha.operation);
+
+        attachmentBlends.emplace_back(vkAttachmentBlend);
+    }
+
+    VkPipelineColorBlendStateCreateInfo colorBlending = {};
+    colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+    colorBlending.logicOpEnable = VK_FALSE;
+    colorBlending.logicOp = VK_LOGIC_OP_COPY; // Optional
+    colorBlending.attachmentCount = static_cast<uint32_t>(attachmentBlends.size());
+    colorBlending.pAttachments = attachmentBlends.data();
+    colorBlending.blendConstants[0] = 0.0f;
+    colorBlending.blendConstants[1] = 0.0f;
+    colorBlending.blendConstants[2] = 0.0f;
+    colorBlending.blendConstants[3] = 0.0f;
+
     // Bring it all together in the all-knowing pipeline create info
     VkGraphicsPipelineCreateInfo pipelineInfo = {};
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -552,7 +583,7 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     pipelineInfo.pRasterizationState = &rasterizer;
     pipelineInfo.pMultisampleState = &multisampling;
     pipelineInfo.pDepthStencilState = &depthStencil;
-    // pipelineInfo.pColorBlendState = &colorBlending;
+    pipelineInfo.pColorBlendState = &colorBlending;
     // pipelineInfo.pDynamicState = &dynamicStateInfo; // Optional
     // pipelineInfo.pTessellationState = &tessellationStateInfo;
     // pipelineInfo.layout = pipeline.layout;
