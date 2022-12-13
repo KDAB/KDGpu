@@ -449,6 +449,7 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
         if (!vulkanShaderModule)
             return {};
         shaderInfo.module = vulkanShaderModule->shaderModule;
+        shaderInfo.pName = shaderStage.entryPoint.data();
 
         shaderInfos.emplace_back(shaderInfo);
     }
@@ -593,34 +594,184 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     dynamicStateInfo.pDynamicStates = dynamicStates.data();
     dynamicStateInfo.flags = 0;
 
+    // We do still need to specify the number of viewports (and scissor rects) though
+    VkPipelineViewportStateCreateInfo viewportState = {};
+    viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+    viewportState.viewportCount = 1;
+    viewportState.pViewports = nullptr; // Provided by dynamic state
+    viewportState.scissorCount = 1;
+    viewportState.pScissors = nullptr; // Provided by dynamic state
+
+    // Fetch the specified pipeline layout
+    VulkanPipelineLayout *vulkanPipelineLayout = getPipelineLayout(options.layout);
+    if (!vulkanPipelineLayout) {
+        // TODO: Log invalid pipeline layout requested
+        return {};
+    }
+
+    // TODO: Investigate using VK_KHR_dynamic_rendering (core in Vulkan 1.3).
+    //       Do the other graphics APIs have an equivalent or perhaps they default
+    //       to that sort of model? We also need this to be supported across all
+    //       Vulkan target platforms (desktop, pi, android, imx8).
+    //
+    // Create a render pass that serves to specify the layout / compatibility of
+    // concrete render passes and framebuffers used to perform rendering with this
+    // pipeline at command record time. We only do this if the pipeline outputs to
+    // render targets.
+    VkRenderPass vkRenderPass = VK_NULL_HANDLE;
+    if (!options.renderTargets.empty()) {
+        // Specify attachment refs for all color and resolve render targets and any
+        // depth-stencil target. Concrete render passes that want to use this pipeline
+        // to render, must begin a render pass that is compatible with this render pass.
+        // See the detailed description of render pass compatibility at:
+        //
+        // https://registry.khronos.org/vulkan/specs/1.3-extensions/html/vkspec.html#renderpass-compatibility
+        //
+        // But in short, the concrete render pass must match attachment counts of each
+        // type and match the formats and sample counts in each case.
+
+        // The render pass create info needs to know about all of the attachments that
+        // could be used in all of the subpasses (just 1 here). We will populate this
+        // with all of the color attachments, resolve attachments (if using MSAA), and
+        // finally a depth-stencil attachment, if specified.
+        //
+        // We do not concern ourselves with subpass dependencies here as they do not
+        // impact upon render pass compatibility (I think/hope).
+        std::vector<VkAttachmentDescription> allAttachments;
+
+        // The subpass description will then index into the above vector of attachment
+        // descriptions to specify which subpasses use which of the available attachments.
+        uint32_t attachmentIndex = 0;
+        std::vector<VkAttachmentReference> colorAttachmentRefs;
+        std::vector<VkAttachmentReference> resolveAttachmentRefs;
+        VkAttachmentReference depthStencilAttachmentRef = {};
+
+        const bool usingMultisampling = options.multisample.samples > SampleCountFlagBits::Samples1Bit;
+        const VkSampleCountFlagBits sampleCount = sampleCountFlagBitsToVkSampleFlagBits(options.multisample.samples);
+
+        // Color and resolve attachments
+        {
+            const uint32_t colorTargetsCount = options.renderTargets.size();
+            colorAttachmentRefs.reserve(colorTargetsCount);
+            resolveAttachmentRefs.reserve(colorTargetsCount);
+
+            for (uint32_t i = 0; i < colorTargetsCount; ++i) {
+                const auto &renderTarget = options.renderTargets.at(i);
+
+                // NB: We don't care about load/store operations and initial/final layouts here
+                // so we just set some random values;
+                VkAttachmentDescription colorAttachment = {};
+                colorAttachment.format = formatToVkFormat(renderTarget.format);
+                colorAttachment.samples = sampleCount;
+                colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+                colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+                colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+                colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+                colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+                colorAttachment.finalLayout = usingMultisampling ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+                allAttachments.emplace_back(colorAttachment);
+
+                VkAttachmentReference colorAttachmentRef = {};
+                colorAttachmentRef.attachment = attachmentIndex++;
+                colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+                colorAttachmentRefs.emplace_back(colorAttachmentRef);
+
+                // If using multisampling, then for each color attachment we need a resolve attachment
+                if (usingMultisampling) {
+                    VkAttachmentDescription resolveAttachment = {};
+                    resolveAttachment.format = formatToVkFormat(renderTarget.format);
+                    resolveAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+                    resolveAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+                    resolveAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+                    resolveAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+                    resolveAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+                    resolveAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+                    resolveAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+                    allAttachments.emplace_back(resolveAttachment);
+
+                    VkAttachmentReference resolveAttachmentRef = {};
+                    resolveAttachmentRef.attachment = attachmentIndex++;
+                    resolveAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+                    colorAttachmentRefs.emplace_back(resolveAttachmentRef);
+                }
+            }
+        }
+
+        // Depth-stencil attachment
+        if (options.depthStencil.format != Format::UNDEFINED) {
+            VkAttachmentDescription depthStencilAttachment = {};
+            depthStencilAttachment.format = formatToVkFormat(options.depthStencil.format);
+            depthStencilAttachment.samples = sampleCount;
+            depthStencilAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+            depthStencilAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+            depthStencilAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+            depthStencilAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+            depthStencilAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+            depthStencilAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+            allAttachments.emplace_back(depthStencilAttachment);
+
+            depthStencilAttachmentRef.attachment = attachmentIndex++;
+            depthStencilAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        }
+
+        // Just create a single subpass. We do not support multiple subpasses at this
+        // stage as other graphics APIs do not have an equivalent to subpasses.
+        VkSubpassDescription subpass = {};
+        subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+        subpass.colorAttachmentCount = static_cast<uint32_t>(colorAttachmentRefs.size());
+        subpass.pColorAttachments = colorAttachmentRefs.data();
+        subpass.pResolveAttachments = usingMultisampling ? resolveAttachmentRefs.data() : nullptr;
+        subpass.pDepthStencilAttachment = options.depthStencil.format != Format::UNDEFINED ? &depthStencilAttachmentRef : nullptr;
+
+        VkRenderPassCreateInfo renderPassInfo = {};
+        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+        renderPassInfo.attachmentCount = static_cast<uint32_t>(allAttachments.size());
+        renderPassInfo.pAttachments = allAttachments.data();
+        renderPassInfo.subpassCount = 1;
+        renderPassInfo.pSubpasses = &subpass;
+        renderPassInfo.dependencyCount = 0;
+        renderPassInfo.pDependencies = nullptr;
+
+        if (vkCreateRenderPass(vulkanDevice.device, &renderPassInfo, nullptr, &vkRenderPass) != VK_SUCCESS) {
+            // TODO: Log failure to create a render pass
+            return {};
+        }
+    }
+
     // Bring it all together in the all-knowing pipeline create info
     VkGraphicsPipelineCreateInfo pipelineInfo = {};
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+    pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
+    pipelineInfo.basePipelineIndex = -1;
     pipelineInfo.stageCount = static_cast<uint32_t>(shaderInfos.size());
     pipelineInfo.pStages = shaderInfos.data();
     pipelineInfo.pVertexInputState = &vertexInputState;
     pipelineInfo.pInputAssemblyState = &inputAssembly;
     pipelineInfo.pTessellationState = &tessellationStateInfo;
-    pipelineInfo.pViewportState = nullptr;
+    pipelineInfo.pViewportState = &viewportState;
     pipelineInfo.pRasterizationState = &rasterizer;
     pipelineInfo.pMultisampleState = &multisampling;
     pipelineInfo.pDepthStencilState = &depthStencil;
     pipelineInfo.pColorBlendState = &colorBlending;
     pipelineInfo.pDynamicState = &dynamicStateInfo;
-    // pipelineInfo.layout = pipeline.layout;
-    // pipelineInfo.renderPass = renderPass;
-    // pipelineInfo.subpass = subpassIndex;
-    // pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
-    // pipelineInfo.basePipelineIndex = -1; // Optional
+    pipelineInfo.layout = vulkanPipelineLayout->pipelineLayout;
+    pipelineInfo.renderPass = vkRenderPass;
+    pipelineInfo.subpass = 0;
 
     VkPipeline vkPipeline{ VK_NULL_HANDLE };
     if (vkCreateGraphicsPipelines(vulkanDevice.device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &vkPipeline) != VK_SUCCESS) {
+        // TODO: Log failure to create a pipeline
         return {};
     }
 
     // TODO: Create VulkanPipeline object and return handle
+    const auto vulkanGraphicsPipelineHandle = m_graphicsPipelines.emplace(VulkanGraphicsPipeline(
+            vkPipeline,
+            vkRenderPass,
+            this,
+            deviceHandle));
 
-    return {};
+    return vulkanGraphicsPipelineHandle;
 }
 
 void VulkanResourceManager::deleteGraphicsPipeline(Handle<GraphicsPipeline_t> handle)
