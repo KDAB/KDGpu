@@ -182,7 +182,12 @@ Handle<Swapchain_t> VulkanResourceManager::createSwapchain(const Handle<Device_t
     if (vkCreateSwapchainKHR(vulkanDevice.device, &createInfo, nullptr, &vkSwapchain) != VK_SUCCESS)
         return {};
 
-    const auto swapchainHandle = m_swapchains.emplace(VulkanSwapchain{ vkSwapchain, this, deviceHandle });
+    const auto swapchainHandle = m_swapchains.emplace(VulkanSwapchain{
+            vkSwapchain,
+            options.format,
+            options.imageUsageFlags,
+            this,
+            deviceHandle });
     return swapchainHandle;
 }
 
@@ -247,7 +252,13 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> de
     if (vmaCreateImage(vulkanDevice.allocator, &createInfo, &allocInfo, &vkImage, &vmaAllocation, nullptr) != VK_SUCCESS)
         return {};
 
-    const auto vulkanTextureHandle = m_textures.emplace(VulkanTexture(vkImage, vmaAllocation, this, deviceHandle));
+    const auto vulkanTextureHandle = m_textures.emplace(VulkanTexture(
+            vkImage,
+            vmaAllocation,
+            options.format,
+            options.usage,
+            this,
+            deviceHandle));
     return vulkanTextureHandle;
 }
 
@@ -266,7 +277,15 @@ Handle<TextureView_t> VulkanResourceManager::createTextureView(const Handle<Devi
     createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     createInfo.image = vulkanTexture.image;
     createInfo.viewType = viewTypeToVkImageViewType(options.viewType);
-    createInfo.format = formatToVkFormat(options.format); // TODO: Should we default this to match the texture format?
+
+    // Specify the format. If none specified, default to the source texture's format
+    if (options.format == Format::UNDEFINED) {
+        createInfo.format = formatToVkFormat(vulkanTexture.format);
+    } else {
+        createInfo.format = formatToVkFormat(options.format);
+    }
+
+    // Specify which subset of the texture the view exposes
     createInfo.subresourceRange = {
         .aspectMask = options.range.aspectMask,
         .baseMipLevel = options.range.baseMipLevel,
@@ -274,6 +293,15 @@ Handle<TextureView_t> VulkanResourceManager::createTextureView(const Handle<Devi
         .baseArrayLayer = options.range.baseArrayLayer,
         .layerCount = options.range.layerCount
     };
+
+    // If no aspect is set, default to Color or Depth depending upon the texture usage
+    if (options.range.aspectMask == static_cast<uint32_t>(TextureAspectFlagBits::None)) {
+        if (vulkanTexture.usage & static_cast<uint32_t>(TextureUsageFlagBits::DepthStencilAttachmentBit))
+            createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+
+        if (vulkanTexture.usage & static_cast<uint32_t>(TextureUsageFlagBits::ColorAttachmentBit))
+            createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    }
 
     VkImageView imageView;
     if (vkCreateImageView(vulkanDevice.device, &createInfo, nullptr, &imageView) != VK_SUCCESS)

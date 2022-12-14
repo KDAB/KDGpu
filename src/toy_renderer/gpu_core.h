@@ -517,7 +517,7 @@ enum class TextureAspectFlagBits {
 using TextureAspectFlags = Flags;
 
 struct TextureSubresourceRange {
-    TextureAspectFlags aspectMask{ static_cast<uint32_t>(TextureAspectFlagBits::ColorBit) };
+    TextureAspectFlags aspectMask{ static_cast<uint32_t>(TextureAspectFlagBits::None) };
     uint32_t baseMipLevel{ 0 };
     uint32_t levelCount{ remainingMipLevels };
     uint32_t baseArrayLayer{ 0 };
