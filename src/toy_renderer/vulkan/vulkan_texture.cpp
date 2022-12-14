@@ -3,12 +3,14 @@
 namespace ToyRenderer {
 
 VulkanTexture::VulkanTexture(VkImage _image,
-                             VkDevice _device,
-                             VulkanResourceManager *_vulkanResourceManager)
+                             VmaAllocation _allocation,
+                             VulkanResourceManager *_vulkanResourceManager,
+                             const Handle<Device_t> &_deviceHandle)
     : ApiTexture()
-    , vulkanResourceManager(_vulkanResourceManager)
     , image(_image)
-    , device(_device)
+    , allocation(allocation)
+    , vulkanResourceManager(_vulkanResourceManager)
+    , deviceHandle(_deviceHandle)
 {
 }
 

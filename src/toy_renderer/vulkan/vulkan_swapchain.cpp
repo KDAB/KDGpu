@@ -5,17 +5,24 @@
 namespace ToyRenderer {
 
 VulkanSwapchain::VulkanSwapchain(VkSwapchainKHR _swapchain,
-                                 VkDevice _device,
-                                 VulkanResourceManager *_vulkanResourceManager)
+                                 VulkanResourceManager *_vulkanResourceManager,
+                                 const Handle<Device_t> &_deviceHandle)
     : ApiSwapchain()
-    , vulkanResourceManager(_vulkanResourceManager)
     , swapchain(_swapchain)
-    , device(_device)
+    , vulkanResourceManager(_vulkanResourceManager)
+    , deviceHandle(_deviceHandle)
 {
 }
 
 std::vector<Handle<Texture_t>> VulkanSwapchain::getTextures()
 {
+    VulkanDevice *vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
+    if (!vulkanDevice) {
+        // TODO: Log could not find device
+        return {};
+    }
+    VkDevice device = vulkanDevice->device;
+
     std::vector<VkImage> vkImages;
     uint32_t imageCount;
     vkGetSwapchainImagesKHR(device, swapchain, &imageCount, nullptr);
@@ -26,9 +33,11 @@ std::vector<Handle<Texture_t>> VulkanSwapchain::getTextures()
     textureHandles.reserve(imageCount);
     for (uint32_t i = 0; i < imageCount; ++i) {
         textureHandles.emplace_back(
-                vulkanResourceManager->insertTexture({ vkImages[i],
-                                                       device,
-                                                       vulkanResourceManager }));
+                vulkanResourceManager->insertTexture(VulkanTexture(
+                        vkImages[i],
+                        VK_NULL_HANDLE, // No allocation for swapchain images
+                        vulkanResourceManager,
+                        deviceHandle)));
     }
     return textureHandles;
 }

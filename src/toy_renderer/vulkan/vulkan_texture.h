@@ -2,21 +2,27 @@
 
 #include <toy_renderer/api/api_texture.h>
 
+#include <toy_renderer/handle.h>
+
+#include <vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
 
 namespace ToyRenderer {
 
 class VulkanResourceManager;
 
+struct Device_t;
+
 struct VulkanTexture : public ApiTexture {
-    VulkanTexture(VkImage _image, VkDevice _device, VulkanResourceManager *_vulkanResourceManager);
+    explicit VulkanTexture(VkImage _image,
+                           VmaAllocation _allocation,
+                           VulkanResourceManager *_vulkanResourceManager,
+                           const Handle<Device_t> &_deviceHandle);
 
-    // TODO: Implement creation of texture views (subset of texture)
-    // Handle<TextureView_t> createView() final;
-
-    VulkanResourceManager *vulkanResourceManager{ nullptr };
     VkImage image{ VK_NULL_HANDLE };
-    VkDevice device{ VK_NULL_HANDLE };
+    VmaAllocation allocation{ VK_NULL_HANDLE };
+    VulkanResourceManager *vulkanResourceManager{ nullptr };
+    Handle<Device_t> deviceHandle;
 };
 
 } // namespace ToyRenderer

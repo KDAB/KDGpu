@@ -2,22 +2,26 @@
 
 #include <toy_renderer/api/api_swapchain.h>
 
+#include <toy_renderer/handle.h>
+
 #include <vulkan/vulkan.h>
 
 namespace ToyRenderer {
 
 class VulkanResourceManager;
 
+struct Device_t;
+
 struct VulkanSwapchain : public ApiSwapchain {
-    VulkanSwapchain(VkSwapchainKHR _swapchain,
-                    VkDevice _device,
-                    VulkanResourceManager *_vulkanResourceManager);
+    explicit VulkanSwapchain(VkSwapchainKHR _swapchain,
+                             VulkanResourceManager *_vulkanResourceManager,
+                             const Handle<Device_t> &_deviceHandle);
 
     std::vector<Handle<Texture_t>> getTextures() final;
 
-    VulkanResourceManager *vulkanResourceManager{ nullptr };
     VkSwapchainKHR swapchain{ VK_NULL_HANDLE };
-    VkDevice device{ VK_NULL_HANDLE };
+    VulkanResourceManager *vulkanResourceManager{ nullptr };
+    Handle<Device_t> deviceHandle;
 };
 
 } // namespace ToyRenderer

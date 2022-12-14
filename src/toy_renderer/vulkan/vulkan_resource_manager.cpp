@@ -182,7 +182,7 @@ Handle<Swapchain_t> VulkanResourceManager::createSwapchain(const Handle<Device_t
     if (vkCreateSwapchainKHR(vulkanDevice.device, &createInfo, nullptr, &vkSwapchain) != VK_SUCCESS)
         return {};
 
-    const auto swapchainHandle = m_swapchains.emplace(VulkanSwapchain{ vkSwapchain, vulkanDevice.device, this });
+    const auto swapchainHandle = m_swapchains.emplace(VulkanSwapchain{ vkSwapchain, this, deviceHandle });
     return swapchainHandle;
 }
 
@@ -242,7 +242,7 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> de
     if (vkCreateImage(vulkanDevice.device, &createInfo, nullptr, &vkImage) != VK_SUCCESS)
         return {};
 
-    const auto vulkanTextureHandle = m_textures.emplace(VulkanTexture(vkImage, vulkanDevice.device, this));
+    const auto vulkanTextureHandle = m_textures.emplace(VulkanTexture(vkImage, VK_NULL_HANDLE, this, deviceHandle));
     return vulkanTextureHandle;
 }
 
