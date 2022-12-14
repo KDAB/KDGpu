@@ -238,11 +238,16 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> de
     }
     createInfo.initialLayout = textureLayoutToVkImageLayout(options.initialLayout);
 
+    VmaAllocationCreateInfo allocInfo = {};
+    allocInfo.usage = memoryUsageToVmaMemoryUsage(options.memoryUsage);
+
     VkImage vkImage;
-    if (vkCreateImage(vulkanDevice.device, &createInfo, nullptr, &vkImage) != VK_SUCCESS)
+    VmaAllocation vmaAllocation;
+
+    if (vmaCreateImage(vulkanDevice.allocator, &createInfo, &allocInfo, &vkImage, &vmaAllocation, nullptr) != VK_SUCCESS)
         return {};
 
-    const auto vulkanTextureHandle = m_textures.emplace(VulkanTexture(vkImage, VK_NULL_HANDLE, this, deviceHandle));
+    const auto vulkanTextureHandle = m_textures.emplace(VulkanTexture(vkImage, vmaAllocation, this, deviceHandle));
     return vulkanTextureHandle;
 }
 
@@ -273,8 +278,6 @@ Handle<TextureView_t> VulkanResourceManager::createTextureView(const Handle<Devi
     VkImageView imageView;
     if (vkCreateImageView(vulkanDevice.device, &createInfo, nullptr, &imageView) != VK_SUCCESS)
         return {};
-
-    // TODO: Allocate memory and bind to image
 
     const auto vulkanTextureViewHandle = m_textureViews.emplace(VulkanTextureView(imageView));
     return vulkanTextureViewHandle;

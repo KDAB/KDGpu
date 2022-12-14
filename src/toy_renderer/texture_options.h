@@ -15,6 +15,7 @@ struct TextureOptions {
     SampleCountFlagBits samples{ SampleCountFlagBits::Samples1Bit };
     TextureTiling tiling{ TextureTiling::Optimal };
     TextureUsageFlags usage;
+    MemoryUsage memoryUsage;
     SharingMode sharingMode{ SharingMode::Exclusive };
     std::vector<uint32_t> queueTypeIndices{};
     TextureLayout initialLayout{ TextureLayout::Undefined };
