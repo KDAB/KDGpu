@@ -1,6 +1,7 @@
 #pragma once
 
 #include <toy_renderer/adapter.h>
+#include <toy_renderer/device.h>
 #include <toy_renderer/gpu_core.h>
 #include <toy_renderer/handle.h>
 #include <toy_renderer/surface.h>
@@ -29,6 +30,7 @@
 namespace ToyRenderer {
 
 class GraphicsApi;
+class Surface;
 struct Instance_t;
 
 struct InstanceOptions {
@@ -38,12 +40,19 @@ struct InstanceOptions {
     std::vector<std::string> extensions;
 };
 
+struct AdapterAndDevice {
+    Adapter adapter;
+    Device device;
+};
+
 class TOY_RENDERER_EXPORT Instance
 {
 public:
     ~Instance();
 
     bool isValid() const { return m_instance.isValid(); }
+
+    AdapterAndDevice createDefaultDevice(const Surface &surface);
 
     std::span<Adapter> adapters();
 

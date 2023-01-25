@@ -7,6 +7,11 @@
 
 namespace ToyRenderer {
 
+Device::Device()
+    : m_api(nullptr)
+{
+}
+
 Device::Device(Adapter *adapter, GraphicsApi *api, const DeviceOptions &options)
     : m_api(api)
 {

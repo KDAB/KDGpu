@@ -33,7 +33,11 @@ struct TextureOptions;
 class TOY_RENDERER_EXPORT Device
 {
 public:
+    Device();
     ~Device();
+
+    Handle<Device_t> handle() const noexcept { return m_device; }
+    bool isValid() const noexcept { return m_device.isValid(); }
 
     std::span<Queue> queues() { return m_queues; }
 

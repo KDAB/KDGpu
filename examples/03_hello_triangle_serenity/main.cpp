@@ -72,46 +72,10 @@ int main()
     // Create a window and platform surface from it suitable for use with our chosen graphics API.
     ToyRendererSerenity::View window;
     Surface surface = window.createSurface(instance);
-
-    // Enumerate the adapters (physical devices) and select one to use. Here we look for
-    // a discrete GPU. In a real app, we could fallback to an integrated one.
-    Adapter selectedAdapter;
-    auto adapters = instance.adapters();
-    for (auto &adapter : adapters) {
-        const auto properties = adapter.properties();
-        spdlog::critical("Found device: Name: {}, Type: {}", properties.deviceName, properties.deviceType);
-
-        if (properties.deviceType == AdapterDeviceType::DiscreteGpu) {
-            selectedAdapter = adapter;
-            break;
-        }
-    }
-
-    if (!selectedAdapter.isValid()) {
-        spdlog::critical("Unable to find a discrete GPU. Aborting...");
-        return -1;
-    }
-
-    // We can easily query the adapter for various features, properties and limits.
-    spdlog::critical("maxBoundDescriptorSets = {}", selectedAdapter.properties().limits.maxBoundDescriptorSets);
-    spdlog::critical("multiDrawIndirect = {}", selectedAdapter.features().multiDrawIndirect);
-
-    auto queueTypes = selectedAdapter.queueTypes();
-    const bool hasGraphicsAndCompute = queueTypes[0].supportsFeature(QueueFlags(QueueFlagBits::GraphicsBit) | QueueFlags(QueueFlagBits::ComputeBit));
-    spdlog::critical("Queue family 0 graphics and compute support: {}", hasGraphicsAndCompute);
-
-    // We are now able to query the adapter for swapchain properties and presentation support with the window surface
-    const auto swapchainProperties = selectedAdapter.swapchainProperties(surface);
-    const bool supportsPresentation = selectedAdapter.supportsPresentation(surface, 0); // Query about the 1st queue type
-    spdlog::critical("Queue family 0 supports presentation: {}", supportsPresentation);
-
-    if (!supportsPresentation || !hasGraphicsAndCompute) {
-        spdlog::critical("Selected adapter queue family 0 does not meet requirements. Aborting.");
-        return -1;
-    }
+    auto defaultDevice = instance.createDefaultDevice(surface);
 
     // Now we can create a device from the selected adapter that we can then use to interact with the GPU.
-    auto device = selectedAdapter.createDevice();
+    auto device = defaultDevice.device;
     auto queue = device.queues()[0];
 
     // Create a swapchain of images that we will render to.
@@ -172,36 +136,6 @@ int main()
 
     const auto fragmentShaderPath = ToyRenderer::assetPath() + "/shaders/examples/02_hello_triangle/hello_triangle.frag.spv";
     auto fragmentShader = device.createShaderModule(ToyRenderer::readShaderFile(fragmentShaderPath));
-
-    // TODO: Create a pipeline layout for a more complicated pipeline
-    // // clang-format off
-    // PipelineLayoutOptions pipelineLayoutOptions = {
-    //     .bindGroupLayouts = {{  // Set = 0
-    //             .bindings = {{  // Camera uniforms
-    //                 .binding = 0,
-    //                 .count = 1,
-    //                 .resourceType = ResourceBindingType::UniformBuffer,
-    //                 .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit)
-    //             }}
-    //         }, {                // Set = 1
-    //             .bindings = {{  // Base color
-    //                 .binding = 0,
-    //                 .resourceType = ResourceBindingType::CombinedImageSampler,
-    //                 .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit)
-    //             }, {            // Metallic-Roughness
-    //                 .binding = 1,
-    //                 .resourceType = ResourceBindingType::CombinedImageSampler,
-    //                 .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit)
-    //             }}
-    //         }
-    //     },
-    //     .pushConstantRanges = {
-    //         { .offset = 0, .size = 8, .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit) },
-    //         { .offset = 0, .size = 8, .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit) }
-    //     }
-    // };
-    // // clang-format on
-    // auto pipelineLayout = device.createPipelineLayout(pipelineLayoutOptions);
 
     // Create a pipeline layout (array of bind group layouts)
     auto pipelineLayout = device.createPipelineLayout();
