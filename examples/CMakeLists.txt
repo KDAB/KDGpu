@@ -1,2 +1,3 @@
 add_subdirectory(01_bind_group)
 add_subdirectory(02_hello_triangle)
+add_subdirectory(03_hello_triangle_serenity)

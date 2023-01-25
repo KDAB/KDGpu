@@ -107,18 +107,15 @@ add_library(toy-renderer SHARED
 )
 add_library(Toy::Renderer ALIAS toy-renderer)
 
-set(TOY_RENDERER_GUI_PUBLIC_LIBS
+set(TOY_RENDERER_PUBLIC_LIBS
     Vulkan::Vulkan
     ToyRenderer::vulkan_memory_allocator
     spdlog::spdlog
-
-    # Serenity::Core
-    # Serenity::Gui
 )
 
 target_link_libraries(toy-renderer
     PUBLIC
-    ${TOY_RENDERER_GUI_PUBLIC_LIBS}
+    ${TOY_RENDERER_PUBLIC_LIBS}
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")

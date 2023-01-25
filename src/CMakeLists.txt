@@ -1,1 +1,2 @@
 add_subdirectory(toy_renderer)
+add_subdirectory(toy_renderer_serenity)
