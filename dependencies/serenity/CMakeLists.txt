@@ -3,7 +3,7 @@ if(NOT TARGET Serenity::Core)
     FetchContent_Declare(
         Serenity
         GIT_REPOSITORY ssh://codereview.kdab.com:29418/kdab/serenity
-        GIT_TAG cmake
+        GIT_TAG master
     )
 
     set(SERENITY_BUILD_EXAMPLES OFF CACHE INTERNAL "")
