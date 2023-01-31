@@ -25,7 +25,7 @@ public:
     ExampleEngineLayer();
     ~ExampleEngineLayer();
 
-private:
+protected:
     void onAttached() override;
     void onDetached() override;
     void update() override;
@@ -41,4 +41,7 @@ private:
     std::vector<TextureView> m_swapchainViews;
     Texture m_depthTexture;
     TextureView m_depthTextureView;
+
+    const Format m_swapchainFormat{ Format::B8G8R8A8_UNORM };
+    const Format m_depthFormat{ Format::D24_UNORM_S8_UINT };
 };

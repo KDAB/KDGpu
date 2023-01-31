@@ -37,6 +37,7 @@ void ExampleEngineLayer::onAttached()
     // Create a swapchain of images that we will render to.
     SwapchainOptions swapchainOptions = {
         .surface = m_surface.handle(),
+        .format = m_swapchainFormat,
         .imageExtent = { .width = m_window->width(), .height = m_window->height() }
     };
     m_swapchain = m_device.createSwapchain(swapchainOptions);

@@ -11,11 +11,12 @@ public:
 
     const Engine *engine() const noexcept { return m_engine; }
 
-private:
+protected:
     virtual void onAttached();
     virtual void onDetached();
     virtual void update();
 
+private:
     Engine *m_engine{ nullptr };
 
     friend class Engine;
