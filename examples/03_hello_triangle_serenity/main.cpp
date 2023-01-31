@@ -1,3 +1,6 @@
+#include "engine.h"
+#include "example_engine_layer.h"
+
 #include <toy_renderer/buffer_options.h>
 #include <toy_renderer/device.h>
 #include <toy_renderer/instance.h>
@@ -59,6 +62,8 @@ std::vector<uint32_t> readShaderFile(const std::string &filename)
 int main()
 {
     GuiApplication app;
+    Engine engine;
+    auto exampleLayer = engine.createEngineLayer<ExampleEngineLayer>();
 
     std::unique_ptr<GraphicsApi> api = std::make_unique<VulkanGraphicsApi>();
 

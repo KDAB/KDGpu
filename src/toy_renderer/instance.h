@@ -48,8 +48,10 @@ struct AdapterAndDevice {
 class TOY_RENDERER_EXPORT Instance
 {
 public:
+    Instance();
     ~Instance();
 
+    Handle<Instance_t> handle() const noexcept { return m_instance; }
     bool isValid() const { return m_instance.isValid(); }
 
     AdapterAndDevice createDefaultDevice(const Surface &surface);

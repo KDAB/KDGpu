@@ -16,6 +16,7 @@ struct Swapchain_t;
 class TOY_RENDERER_EXPORT Swapchain
 {
 public:
+    Swapchain();
     ~Swapchain();
 
     const Handle<Swapchain_t> &handle() const noexcept { return m_swapchain; }

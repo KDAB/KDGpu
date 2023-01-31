@@ -6,6 +6,10 @@
 
 namespace ToyRenderer {
 
+Swapchain::Swapchain()
+{
+}
+
 Swapchain::Swapchain(GraphicsApi *api, const Handle<Device_t> &device, const Handle<Swapchain_t> &swapchain)
     : m_api(api)
     , m_device(device)

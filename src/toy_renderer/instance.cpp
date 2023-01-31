@@ -9,6 +9,10 @@
 
 namespace ToyRenderer {
 
+Instance::Instance()
+{
+}
+
 Instance::Instance(GraphicsApi *api, const InstanceOptions &options)
 {
     // Create an instance using the underlying API

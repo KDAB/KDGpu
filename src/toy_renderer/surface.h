@@ -10,9 +10,11 @@ struct Surface_t;
 class TOY_RENDERER_EXPORT Surface
 {
 public:
+    Surface();
     ~Surface();
 
     Handle<Surface_t> handle() const noexcept { return m_surface; }
+    bool isValid() const noexcept { return m_surface.isValid(); }
 
 private:
     Surface(const Handle<Surface_t> &surface);
