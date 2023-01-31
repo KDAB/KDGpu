@@ -5,6 +5,10 @@
 
 namespace ToyRenderer {
 
+Texture::Texture()
+{
+}
+
 Texture::Texture(GraphicsApi *api, const Handle<Device_t> &device, const Handle<Texture_t> &texture)
     : m_api(api)
     , m_device(device)

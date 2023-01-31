@@ -65,175 +65,177 @@ int main()
     Engine engine;
     auto exampleLayer = engine.createEngineLayer<ExampleEngineLayer>();
 
-    std::unique_ptr<GraphicsApi> api = std::make_unique<VulkanGraphicsApi>();
+    // std::unique_ptr<GraphicsApi> api = std::make_unique<VulkanGraphicsApi>();
 
-    // Request an instance of the api with whatever layers and extensions we wish to request.
-    InstanceOptions instanceOptions = {
-        .applicationName = "03_hello_triangle_simple",
-        .applicationVersion = SERENITY_MAKE_API_VERSION(0, 1, 0, 0)
-    };
-    auto instance = api->createInstance(instanceOptions);
+    // // Request an instance of the api with whatever layers and extensions we wish to request.
+    // InstanceOptions instanceOptions = {
+    //     .applicationName = "03_hello_triangle_simple",
+    //     .applicationVersion = SERENITY_MAKE_API_VERSION(0, 1, 0, 0)
+    // };
+    // auto instance = api->createInstance(instanceOptions);
 
-    // Create a window and platform surface from it suitable for use with our chosen graphics API.
-    ToyRendererSerenity::View window;
-    Surface surface = window.createSurface(instance);
-    auto defaultDevice = instance.createDefaultDevice(surface);
+    // // Create a window and platform surface from it suitable for use with our chosen graphics API.
+    // ToyRendererSerenity::View window;
+    // Surface surface = window.createSurface(instance);
+    // auto defaultDevice = instance.createDefaultDevice(surface);
 
-    // Now we can create a device from the selected adapter that we can then use to interact with the GPU.
-    auto device = defaultDevice.device;
-    auto queue = device.queues()[0];
+    // // Now we can create a device from the selected adapter that we can then use to interact with the GPU.
+    // auto device = defaultDevice.device;
+    // auto queue = device.queues()[0];
 
-    // Create a swapchain of images that we will render to.
-    SwapchainOptions swapchainOptions = {
-        .surface = surface.handle(),
-        .imageExtent = { .width = window.width(), .height = window.height() }
-    };
-    auto swapchain = device.createSwapchain(swapchainOptions);
-    auto swapchainTextures = swapchain.textures();
-    const auto swapchainTextureCount = swapchainTextures.size();
-    std::vector<TextureView> swapchainViews;
-    swapchainViews.reserve(swapchainTextureCount);
-    for (uint32_t i = 0; i < swapchainTextureCount; ++i) {
-        auto view = swapchainTextures[i].createView({ .format = swapchainOptions.format });
-        swapchainViews.push_back(view);
-    }
+    // // Create a swapchain of images that we will render to.
+    // SwapchainOptions swapchainOptions = {
+    //     .surface = surface.handle(),
+    //     .imageExtent = { .width = window.width(), .height = window.height() }
+    // };
+    // auto swapchain = device.createSwapchain(swapchainOptions);
+    // auto swapchainTextures = swapchain.textures();
+    // const auto swapchainTextureCount = swapchainTextures.size();
+    // std::vector<TextureView> swapchainViews;
+    // swapchainViews.reserve(swapchainTextureCount);
+    // for (uint32_t i = 0; i < swapchainTextureCount; ++i) {
+    //     auto view = swapchainTextures[i].createView({ .format = swapchainOptions.format });
+    //     swapchainViews.push_back(view);
+    // }
 
-    // Create a depth texture to use for rendering
-    TextureOptions depthTextureOptions = {
-        .type = TextureType::TextureType2D,
-        .format = Format::D24_UNORM_S8_UINT,
-        .extent = { window.width(), window.height(), 1 },
-        .mipLevels = 1,
-        .usage = TextureUsageFlags(TextureUsageFlagBits::DepthStencilAttachmentBit),
-        .memoryUsage = MemoryUsage::GpuOnly
-    };
-    auto depthTexture = device.createTexture(depthTextureOptions);
-    auto depthTextureView = depthTexture.createView();
+    // // Create a depth texture to use for rendering
+    // TextureOptions depthTextureOptions = {
+    //     .type = TextureType::TextureType2D,
+    //     .format = Format::D24_UNORM_S8_UINT,
+    //     .extent = { window.width(), window.height(), 1 },
+    //     .mipLevels = 1,
+    //     .usage = TextureUsageFlags(TextureUsageFlagBits::DepthStencilAttachmentBit),
+    //     .memoryUsage = MemoryUsage::GpuOnly
+    // };
+    // auto depthTexture = device.createTexture(depthTextureOptions);
+    // auto depthTextureView = depthTexture.createView();
 
-    // Create a buffer to hold triangle vertex data
-    BufferOptions bufferOptions = {
-        .size = 3 * 2 * 4 * sizeof(float), // 3 vertices * 2 attributes * 4 float components
-        .usage = BufferUsageFlags(BufferUsageFlagBits::VertexBufferBit), // TODO: Use a nice Flags template class
-        .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
-    };
-    auto buffer = device.createBuffer(bufferOptions);
+    // TODO: Put this stuff into an example-specific layer. Should we subclass or stack layers?
 
-    // clang-format off
-    std::vector<float> vertexData = {
-         1.0f, -1.0f, 0.0f, 1.0f, // position
-         1.0f,  0.0f, 0.0f, 1.0f, // color
-        -1.0f, -1.0f, 0.0f, 1.0f, // position
-         0.0f,  1.0f, 0.0f, 1.0f, // color
-         0.0f,  1.0f, 0.0f, 1.0f, // position
-         0.0f,  0.0f, 1.0f, 1.0f, // color
-    };
-    // clang-format on
-    auto bufferData = buffer.map();
-    std::memcpy(bufferData, vertexData.data(), vertexData.size() * sizeof(float));
-    buffer.unmap();
+    // // Create a buffer to hold triangle vertex data
+    // BufferOptions bufferOptions = {
+    //     .size = 3 * 2 * 4 * sizeof(float), // 3 vertices * 2 attributes * 4 float components
+    //     .usage = BufferUsageFlags(BufferUsageFlagBits::VertexBufferBit), // TODO: Use a nice Flags template class
+    //     .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
+    // };
+    // auto buffer = device.createBuffer(bufferOptions);
 
-    // TODO: Upload the data to the buffer at creation (needs command recording, barriers etc)
-    // auto buffer = device.createBuffer(bufferOptions, vertexData.data());
+    // // clang-format off
+    // std::vector<float> vertexData = {
+    //      1.0f, -1.0f, 0.0f, 1.0f, // position
+    //      1.0f,  0.0f, 0.0f, 1.0f, // color
+    //     -1.0f, -1.0f, 0.0f, 1.0f, // position
+    //      0.0f,  1.0f, 0.0f, 1.0f, // color
+    //      0.0f,  1.0f, 0.0f, 1.0f, // position
+    //      0.0f,  0.0f, 1.0f, 1.0f, // color
+    // };
+    // // clang-format on
+    // auto bufferData = buffer.map();
+    // std::memcpy(bufferData, vertexData.data(), vertexData.size() * sizeof(float));
+    // buffer.unmap();
 
-    // Create a vertex shader and fragment shader (spir-v only for now)
-    const auto vertexShaderPath = ToyRenderer::assetPath() + "/shaders/examples/02_hello_triangle/hello_triangle.vert.spv";
-    auto vertexShader = device.createShaderModule(ToyRenderer::readShaderFile(vertexShaderPath));
+    // // TODO: Upload the data to the buffer at creation (needs command recording, barriers etc)
+    // // auto buffer = device.createBuffer(bufferOptions, vertexData.data());
 
-    const auto fragmentShaderPath = ToyRenderer::assetPath() + "/shaders/examples/02_hello_triangle/hello_triangle.frag.spv";
-    auto fragmentShader = device.createShaderModule(ToyRenderer::readShaderFile(fragmentShaderPath));
+    // // Create a vertex shader and fragment shader (spir-v only for now)
+    // const auto vertexShaderPath = ToyRenderer::assetPath() + "/shaders/examples/02_hello_triangle/hello_triangle.vert.spv";
+    // auto vertexShader = device.createShaderModule(ToyRenderer::readShaderFile(vertexShaderPath));
 
-    // Create a pipeline layout (array of bind group layouts)
-    auto pipelineLayout = device.createPipelineLayout();
+    // const auto fragmentShaderPath = ToyRenderer::assetPath() + "/shaders/examples/02_hello_triangle/hello_triangle.frag.spv";
+    // auto fragmentShader = device.createShaderModule(ToyRenderer::readShaderFile(fragmentShaderPath));
 
-    // Create a pipeline
-    // clang-format off
-    GraphicsPipelineOptions pipelineOptions = {
-        .shaderStages = {
-            { .shaderModule = vertexShader.handle(), .stage = ShaderStageFlagBits::VertexBit },
-            { .shaderModule = fragmentShader.handle(), .stage = ShaderStageFlagBits::FragmentBit }
-        },
-        .layout = pipelineLayout.handle(), 
-        .vertex = {
-            .buffers = {
-                { .binding = 0, .stride = 2 * 4 * sizeof(float) }
-            },
-            .attributes = {
-                { .location = 0, .binding = 0, .format = Format::R32G32B32A32_SFLOAT }, // Position
-                { .location = 1, .binding = 0, .format = Format::R32G32B32A32_SFLOAT, .offset = 4 * sizeof(float) } // Color
-            }
-        },
-        .renderTargets = {
-            { .format = swapchainOptions.format }
-        },
-        .depthStencil = {
-            .format = depthTextureOptions.format,
-            .depthWritesEnabled = true,
-            .depthCompareOperation = CompareOperation::Less
-        }
-    };
-    // clang-format on
-    auto pipeline = device.createGraphicsPipeline(pipelineOptions);
+    // // Create a pipeline layout (array of bind group layouts)
+    // auto pipelineLayout = device.createPipelineLayout();
 
-    // TODO: Implement the render loop
-    // Most of the render pass is the same between frames. The only thing that changes, is which image
-    // of the swapchain we wish to render to. So set up what we can here, and in the render loop we will
-    // just update the color texture view.
-    // clang-format off
-    RenderPassOptions opaquePassOptions = {
-        .colorAttachments = {
-            {
-                .view = {}, // Not setting the swapchain texture view just yet
-                .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f }
-            }
-        },
-        .depthStencilAttachment = {
-            .view = depthTextureView.handle(),
-        }
-    };
-    // clang-format on
+    // // Create a pipeline
+    // // clang-format off
+    // GraphicsPipelineOptions pipelineOptions = {
+    //     .shaderStages = {
+    //         { .shaderModule = vertexShader.handle(), .stage = ShaderStageFlagBits::VertexBit },
+    //         { .shaderModule = fragmentShader.handle(), .stage = ShaderStageFlagBits::FragmentBit }
+    //     },
+    //     .layout = pipelineLayout.handle(),
+    //     .vertex = {
+    //         .buffers = {
+    //             { .binding = 0, .stride = 2 * 4 * sizeof(float) }
+    //         },
+    //         .attributes = {
+    //             { .location = 0, .binding = 0, .format = Format::R32G32B32A32_SFLOAT }, // Position
+    //             { .location = 1, .binding = 0, .format = Format::R32G32B32A32_SFLOAT, .offset = 4 * sizeof(float) } // Color
+    //         }
+    //     },
+    //     .renderTargets = {
+    //         { .format = swapchainOptions.format }
+    //     },
+    //     .depthStencil = {
+    //         .format = depthTextureOptions.format,
+    //         .depthWritesEnabled = true,
+    //         .depthCompareOperation = CompareOperation::Less
+    //     }
+    // };
+    // // clang-format on
+    // auto pipeline = device.createGraphicsPipeline(pipelineOptions);
 
-    while (window.visible()) {
-        // Acquire next swapchain image
-        uint32_t currentImageIndex = 0;
-        const auto result = swapchain.getNextImageIndex(currentImageIndex);
-        if (result != true) {
-            // Do we need to recreate the swapchain and dependent resources?
-        }
+    // // TODO: Implement the render loop
+    // // Most of the render pass is the same between frames. The only thing that changes, is which image
+    // // of the swapchain we wish to render to. So set up what we can here, and in the render loop we will
+    // // just update the color texture view.
+    // // clang-format off
+    // RenderPassOptions opaquePassOptions = {
+    //     .colorAttachments = {
+    //         {
+    //             .view = {}, // Not setting the swapchain texture view just yet
+    //             .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f }
+    //         }
+    //     },
+    //     .depthStencilAttachment = {
+    //         .view = depthTextureView.handle(),
+    //     }
+    // };
+    // // clang-format on
 
-        // Create a command encoder/recorder
-        auto commandRecorder = device.createCommandRecorder();
+    // while (window.visible()) {
+    //     // Acquire next swapchain image
+    //     uint32_t currentImageIndex = 0;
+    //     const auto result = swapchain.getNextImageIndex(currentImageIndex);
+    //     if (result != true) {
+    //         // Do we need to recreate the swapchain and dependent resources?
+    //     }
 
-        // Begin render pass
-        opaquePassOptions.colorAttachments[0].view = swapchainViews.at(currentImageIndex).handle();
-        auto opaquePass = commandRecorder.beginRenderPass(opaquePassOptions);
+    //     // Create a command encoder/recorder
+    //     auto commandRecorder = device.createCommandRecorder();
 
-        // Bind pipeline
-        opaquePass.setPipeline(pipeline.handle());
+    //     // Begin render pass
+    //     opaquePassOptions.colorAttachments[0].view = swapchainViews.at(currentImageIndex).handle();
+    //     auto opaquePass = commandRecorder.beginRenderPass(opaquePassOptions);
 
-        // Bind vertex buffer
-        opaquePass.setVertexBuffer(0, buffer.handle());
+    //     // Bind pipeline
+    //     opaquePass.setPipeline(pipeline.handle());
 
-        // Bind any resources (none needed for hello_triangle)
+    //     // Bind vertex buffer
+    //     opaquePass.setVertexBuffer(0, buffer.handle());
 
-        // Issue draw command
-        const DrawCommand drawCmd = { .vertexCount = 3 };
-        opaquePass.draw(drawCmd);
+    //     // Bind any resources (none needed for hello_triangle)
 
-        // End render pass
-        opaquePass.end();
+    //     // Issue draw command
+    //     const DrawCommand drawCmd = { .vertexCount = 3 };
+    //     opaquePass.draw(drawCmd);
 
-        // End recording
-        auto commands = commandRecorder.finish();
+    //     // End render pass
+    //     opaquePass.end();
 
-        // Submit command buffer to queue
-        queue.submit(commands.handle());
+    //     // End recording
+    //     auto commands = commandRecorder.finish();
 
-        // Present and request next frame (need API for this)
-        PresentOptions presentOptions = {
-            .swapchainInfos = { { .swapchain = swapchain.handle(), .imageIndex = currentImageIndex } }
-        };
-        queue.present(presentOptions);
-    }
+    //     // Submit command buffer to queue
+    //     queue.submit(commands.handle());
+
+    //     // Present and request next frame (need API for this)
+    //     PresentOptions presentOptions = {
+    //         .swapchainInfos = { { .swapchain = swapchain.handle(), .imageIndex = currentImageIndex } }
+    //     };
+    //     queue.present(presentOptions);
+    // }
 
     return app.exec();
 }

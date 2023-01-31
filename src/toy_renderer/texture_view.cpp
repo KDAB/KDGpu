@@ -2,6 +2,10 @@
 
 namespace ToyRenderer {
 
+TextureView::TextureView()
+{
+}
+
 TextureView::TextureView(GraphicsApi *api, const Handle<TextureView_t> &textureView)
     : m_api(api)
     , m_textureView(textureView)

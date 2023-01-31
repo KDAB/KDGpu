@@ -9,9 +9,12 @@
 #include <toy_renderer/queue.h>
 #include <toy_renderer/surface.h>
 #include <toy_renderer/swapchain.h>
+#include <toy_renderer/texture.h>
+#include <toy_renderer/texture_view.h>
 #include <toy_renderer/vulkan/vulkan_graphics_api.h>
 
 #include <memory>
+#include <vector>
 
 using namespace ToyRenderer;
 using namespace ToyRendererSerenity;
@@ -35,4 +38,7 @@ private:
     Device m_device;
     Queue m_queue;
     Swapchain m_swapchain;
+    std::vector<TextureView> m_swapchainViews;
+    Texture m_depthTexture;
+    TextureView m_depthTextureView;
 };

@@ -15,9 +15,11 @@ class GraphicsApi;
 class TOY_RENDERER_EXPORT Texture
 {
 public:
+    Texture();
     ~Texture();
 
     const Handle<Texture_t> &handle() const noexcept { return m_texture; }
+    bool isValid() const noexcept { return m_texture.isValid(); }
 
     TextureView createView(const TextureViewOptions &options = TextureViewOptions()) const;
 

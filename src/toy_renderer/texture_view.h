@@ -12,6 +12,7 @@ struct TextureView_t;
 class TOY_RENDERER_EXPORT TextureView
 {
 public:
+    TextureView();
     ~TextureView();
 
     const Handle<TextureView_t> handle() const noexcept { return m_textureView; }
