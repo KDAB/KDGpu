@@ -26,6 +26,11 @@ public:
     ~ExampleEngineLayer();
 
 protected:
+    virtual void initializeScene() = 0;
+    virtual void cleanupScene() = 0;
+    virtual void updateScene() = 0;
+    virtual void render() = 0;
+
     void onAttached() override;
     void onDetached() override;
     void update() override;
@@ -41,6 +46,8 @@ protected:
     std::vector<TextureView> m_swapchainViews;
     Texture m_depthTexture;
     TextureView m_depthTextureView;
+
+    uint32_t m_currentSwapchainImageIndex{ 0 };
 
     const Format m_swapchainFormat{ Format::B8G8R8A8_UNORM };
     const Format m_depthFormat{ Format::D24_UNORM_S8_UINT };

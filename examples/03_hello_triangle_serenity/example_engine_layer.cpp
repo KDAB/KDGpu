@@ -61,10 +61,14 @@ void ExampleEngineLayer::onAttached()
     };
     m_depthTexture = m_device.createTexture(depthTextureOptions);
     m_depthTextureView = m_depthTexture.createView();
+
+    initializeScene();
 }
 
 void ExampleEngineLayer::onDetached()
 {
+    cleanupScene();
+
     // TODO: Properly handle destroying the underlying resources
     m_depthTextureView = {};
     m_depthTexture = {};
@@ -79,4 +83,23 @@ void ExampleEngineLayer::onDetached()
 
 void ExampleEngineLayer::update()
 {
+    // Call updateScene() function to update scene state.
+    updateScene();
+
+    // Obtain swapchain image view
+    const auto result = m_swapchain.getNextImageIndex(m_currentSwapchainImageIndex);
+    if (result != true) {
+        // Do we need to recreate the swapchain and dependent resources?
+    }
+
+    // Call subclass render() function to record and submit drawing commands
+    render();
+
+    // Present the swapchain image
+    PresentOptions presentOptions = {
+        .swapchainInfos = {
+                { .swapchain = m_swapchain.handle(),
+                  .imageIndex = m_currentSwapchainImageIndex } }
+    };
+    m_queue.present(presentOptions);
 }

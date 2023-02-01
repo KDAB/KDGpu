@@ -6,6 +6,10 @@
 
 namespace ToyRenderer {
 
+Buffer::Buffer()
+{
+}
+
 Buffer::Buffer(GraphicsApi *api, const Handle<Device_t> &device, const Handle<Buffer_t> &buffer)
     : m_api(api)
     , m_device(device)

@@ -33,10 +33,8 @@ std::vector<uint32_t> readShaderFile(const std::string &filename)
 
 } // namespace ToyRenderer
 
-void HelloTriangle::onAttached()
+void HelloTriangle::initializeScene()
 {
-    ExampleEngineLayer::onAttached();
-
     // Create a buffer to hold triangle vertex data
     BufferOptions bufferOptions = {
         .size = 3 * 2 * 4 * sizeof(float), // 3 vertices * 2 attributes * 4 float components
@@ -102,7 +100,7 @@ void HelloTriangle::onAttached()
     // of the swapchain we wish to render to. So set up what we can here, and in the render loop we will
     // just update the color texture view.
     // clang-format off
-    RenderPassOptions opaquePassOptions = {
+    RenderPassOptions m_opaquePassOptions = {
         .colorAttachments = {
             {
                 .view = {}, // Not setting the swapchain texture view just yet
@@ -116,9 +114,45 @@ void HelloTriangle::onAttached()
     // clang-format on
 }
 
-void HelloTriangle::onDetached()
+void HelloTriangle::cleanupScene()
 {
-    ExampleEngineLayer::onDetached();
+    // TODO: Properly handle destroying the underlying resources
+    m_pipeline = {};
+    m_buffer = {};
 }
 
-// TODO: Implement the render loop
+void HelloTriangle::updateScene()
+{
+    // Nothing to do for this simple, static, non-interactive example
+}
+
+void HelloTriangle::render()
+{
+    // Create a command encoder/recorder
+    auto commandRecorder = m_device.createCommandRecorder();
+
+    // Begin render pass
+    m_opaquePassOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex).handle();
+    auto opaquePass = commandRecorder.beginRenderPass(m_opaquePassOptions);
+
+    // Bind pipeline
+    opaquePass.setPipeline(m_pipeline.handle());
+
+    // Bind vertex buffer
+    opaquePass.setVertexBuffer(0, m_buffer.handle());
+
+    // Bind any resources (none needed for hello_triangle)
+
+    // Issue draw command
+    const DrawCommand drawCmd = { .vertexCount = 3 };
+    opaquePass.draw(drawCmd);
+
+    // End render pass
+    opaquePass.end();
+
+    // End recording
+    auto commands = commandRecorder.finish();
+
+    // Submit command buffer to queue
+    m_queue.submit(commands.handle());
+}

@@ -2,6 +2,10 @@
 
 namespace ToyRenderer {
 
+GraphicsPipeline::GraphicsPipeline()
+{
+}
+
 GraphicsPipeline::GraphicsPipeline(GraphicsApi *api,
                                    const Handle<Device_t> &device,
                                    const Handle<GraphicsPipeline_t> &graphicsPipeline)

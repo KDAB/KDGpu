@@ -13,9 +13,11 @@ class GraphicsApi;
 class TOY_RENDERER_EXPORT Buffer
 {
 public:
+    Buffer();
     ~Buffer();
 
     const Handle<Buffer_t> &handle() const noexcept { return m_buffer; }
+    bool isValid() const noexcept { return m_buffer.isValid(); }
 
     void *map();
     void unmap();

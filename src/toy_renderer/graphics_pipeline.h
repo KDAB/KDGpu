@@ -14,6 +14,7 @@ struct GraphicsPipeline_t;
 class TOY_RENDERER_EXPORT GraphicsPipeline
 {
 public:
+    GraphicsPipeline();
     ~GraphicsPipeline();
 
     const Handle<GraphicsPipeline_t> &handle() const noexcept { return m_graphicsPipeline; }
