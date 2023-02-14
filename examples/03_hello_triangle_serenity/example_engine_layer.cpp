@@ -45,9 +45,13 @@ void ExampleEngineLayer::onAttached()
     auto swapchainTextures = m_swapchain.textures();
     const auto swapchainTextureCount = swapchainTextures.size();
     m_swapchainViews.reserve(swapchainTextureCount);
+    m_swapchainSemaphores.reserve(swapchainTextureCount);
     for (uint32_t i = 0; i < swapchainTextureCount; ++i) {
         auto view = swapchainTextures[i].createView({ .format = swapchainOptions.format });
         m_swapchainViews.push_back(view);
+
+        auto semaphore = m_device.createGpuSemaphore();
+        m_swapchainSemaphores.push_back(semaphore);
     }
 
     // Create a depth texture to use for depth-correct rendering
@@ -72,6 +76,7 @@ void ExampleEngineLayer::onDetached()
     // TODO: Properly handle destroying the underlying resources
     m_depthTextureView = {};
     m_depthTexture = {};
+    m_swapchainSemaphores.clear();
     m_swapchainViews.clear();
     m_swapchain = {};
     m_queue = {};

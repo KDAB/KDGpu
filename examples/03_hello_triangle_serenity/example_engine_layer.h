@@ -5,6 +5,7 @@
 #include <toy_renderer_serenity/view.h>
 
 #include <toy_renderer/device.h>
+#include <toy_renderer/gpu_semaphore.h>
 #include <toy_renderer/instance.h>
 #include <toy_renderer/queue.h>
 #include <toy_renderer/surface.h>
@@ -44,6 +45,7 @@ protected:
     Queue m_queue;
     Swapchain m_swapchain;
     std::vector<TextureView> m_swapchainViews;
+    std::vector<GpuSemaphore> m_swapchainSemaphores;
     Texture m_depthTexture;
     TextureView m_depthTextureView;
 
