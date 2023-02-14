@@ -28,10 +28,11 @@ Swapchain::~Swapchain()
 {
 }
 
-bool Swapchain::getNextImageIndex(uint32_t &imageIndex)
+bool Swapchain::getNextImageIndex(uint32_t &imageIndex, const Handle<GpuSemaphore_t> &semaphore)
 {
     // TODO: Implement me!
-    return true;
+    auto apiSwapchain = m_api->resourceManager()->getSwapchain(m_swapchain);
+    return apiSwapchain->getNextImageIndex(imageIndex, semaphore);
 }
 
 } // namespace ToyRenderer

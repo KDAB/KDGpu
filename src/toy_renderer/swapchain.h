@@ -11,6 +11,7 @@ namespace ToyRenderer {
 
 class GraphicsApi;
 
+struct GpuSemaphore_t;
 struct Swapchain_t;
 
 class TOY_RENDERER_EXPORT Swapchain
@@ -25,7 +26,7 @@ public:
     std::span<const Texture> textures() const { return m_textures; }
 
     // TODO: More informative return value
-    bool getNextImageIndex(uint32_t &imageIndex);
+    bool getNextImageIndex(uint32_t &imageIndex, const Handle<GpuSemaphore_t> &semaphore = Handle<GpuSemaphore_t>());
 
 private:
     explicit Swapchain(GraphicsApi *api, const Handle<Device_t> &device, const Handle<Swapchain_t> &swapchain);

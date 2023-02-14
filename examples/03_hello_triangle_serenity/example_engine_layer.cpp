@@ -1,5 +1,7 @@
 #include "example_engine_layer.h"
 
+#include "engine.h"
+
 #include <toy_renderer/swapchain_options.h>
 #include <toy_renderer/texture_options.h>
 
@@ -45,13 +47,9 @@ void ExampleEngineLayer::onAttached()
     auto swapchainTextures = m_swapchain.textures();
     const auto swapchainTextureCount = swapchainTextures.size();
     m_swapchainViews.reserve(swapchainTextureCount);
-    m_swapchainSemaphores.reserve(swapchainTextureCount);
     for (uint32_t i = 0; i < swapchainTextureCount; ++i) {
         auto view = swapchainTextures[i].createView({ .format = swapchainOptions.format });
         m_swapchainViews.push_back(view);
-
-        auto semaphore = m_device.createGpuSemaphore();
-        m_swapchainSemaphores.push_back(semaphore);
     }
 
     // Create a depth texture to use for depth-correct rendering
@@ -66,6 +64,12 @@ void ExampleEngineLayer::onAttached()
     m_depthTexture = m_device.createTexture(depthTextureOptions);
     m_depthTextureView = m_depthTexture.createView();
 
+    // Create the present complete and render complete semaphores
+    for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+        m_presentCompleteSemaphores[i] = m_device.createGpuSemaphore();
+        m_renderCompleteSemaphores[i] = m_device.createGpuSemaphore();
+    }
+
     initializeScene();
 }
 
@@ -74,9 +78,10 @@ void ExampleEngineLayer::onDetached()
     cleanupScene();
 
     // TODO: Properly handle destroying the underlying resources
+    m_presentCompleteSemaphores = {};
+    m_renderCompleteSemaphores = {};
     m_depthTextureView = {};
     m_depthTexture = {};
-    m_swapchainSemaphores.clear();
     m_swapchainViews.clear();
     m_swapchain = {};
     m_queue = {};
@@ -92,15 +97,19 @@ void ExampleEngineLayer::update()
     updateScene();
 
     // Obtain swapchain image view
-    const auto result = m_swapchain.getNextImageIndex(m_currentSwapchainImageIndex);
+    m_inFlightIndex = engine()->frameNumber() % MAX_FRAMES_IN_FLIGHT;
+    const auto result = m_swapchain.getNextImageIndex(m_currentSwapchainImageIndex,
+                                                      m_presentCompleteSemaphores[m_inFlightIndex].handle());
     if (result != true) {
         // Do we need to recreate the swapchain and dependent resources?
+        return;
     }
 
     // Call subclass render() function to record and submit drawing commands
     render();
 
     // Present the swapchain image
+    // TODO: Pass in the render finished semaphore as the wait semaphore
     PresentOptions presentOptions = {
         .swapchainInfos = {
                 { .swapchain = m_swapchain.handle(),

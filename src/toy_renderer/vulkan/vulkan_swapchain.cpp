@@ -2,6 +2,8 @@
 
 #include <toy_renderer/vulkan/vulkan_resource_manager.h>
 
+#include <limits>
+
 namespace ToyRenderer {
 
 VulkanSwapchain::VulkanSwapchain(VkSwapchainKHR _swapchain,
@@ -46,6 +48,35 @@ std::vector<Handle<Texture_t>> VulkanSwapchain::getTextures()
                         deviceHandle)));
     }
     return textureHandles;
+}
+
+bool VulkanSwapchain::getNextImageIndex(uint32_t &imageIndex, const Handle<GpuSemaphore_t> &semaphore)
+{
+    VulkanDevice *vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
+    if (!vulkanDevice) {
+        // TODO: Log could not find device
+        return false;
+    }
+    VkDevice device = vulkanDevice->device;
+
+    VkSemaphore vkSemaphore{ VK_NULL_HANDLE };
+    if (semaphore.isValid()) {
+        VulkanGpuSemaphore *vulkanSemaphore = vulkanResourceManager->getGpuSemaphore(semaphore);
+        if (vulkanSemaphore)
+            vkSemaphore = vulkanSemaphore->semaphore;
+    }
+
+    const VkResult result = vkAcquireNextImageKHR(
+            device, swapchain, std::numeric_limits<uint64_t>::max(),
+            vkSemaphore, VK_NULL_HANDLE, &imageIndex);
+
+    if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR) {
+        return true;
+    } else if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+        // TODO: Indicate we need to resize
+        return false;
+    }
+    return false;
 }
 
 } // namespace ToyRenderer

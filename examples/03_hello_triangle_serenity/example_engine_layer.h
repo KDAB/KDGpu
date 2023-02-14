@@ -14,11 +14,18 @@
 #include <toy_renderer/texture_view.h>
 #include <toy_renderer/vulkan/vulkan_graphics_api.h>
 
+#include <array>
 #include <memory>
 #include <vector>
 
 using namespace ToyRenderer;
 using namespace ToyRendererSerenity;
+
+// This determines the maximum number of frames that can be in-flight at any one time.
+// With the default setting of 2, we can be recording the commands for frame N+1 whilst
+// the GPU is executing those for frame N. We cannot then record commands for frame N+2
+// until the GPU signals it is done with frame N.
+constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;
 
 class ExampleEngineLayer : public EngineLayer
 {
@@ -45,11 +52,13 @@ protected:
     Queue m_queue;
     Swapchain m_swapchain;
     std::vector<TextureView> m_swapchainViews;
-    std::vector<GpuSemaphore> m_swapchainSemaphores;
     Texture m_depthTexture;
     TextureView m_depthTextureView;
 
     uint32_t m_currentSwapchainImageIndex{ 0 };
+    uint32_t m_inFlightIndex{ 0 };
+    std::array<GpuSemaphore, MAX_FRAMES_IN_FLIGHT> m_presentCompleteSemaphores;
+    std::array<GpuSemaphore, MAX_FRAMES_IN_FLIGHT> m_renderCompleteSemaphores;
 
     const Format m_swapchainFormat{ Format::B8G8R8A8_UNORM };
     const Format m_depthFormat{ Format::D24_UNORM_S8_UINT };
