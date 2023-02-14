@@ -11,5 +11,6 @@ int main()
     GuiApplication app;
     Engine engine;
     auto exampleLayer = engine.createEngineLayer<HelloTriangle>();
+    engine.running = true;
     return app.exec();
 }
