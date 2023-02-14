@@ -9,6 +9,7 @@ set(SOURCES
     device.cpp
     graphics_api.cpp
     graphics_pipeline.cpp
+    gpu_semaphore.cpp
     instance.cpp
     pipeline_layout.cpp
     queue.cpp
@@ -23,6 +24,7 @@ set(SOURCES
     vulkan/vulkan_buffer.cpp
     vulkan/vulkan_device.cpp
     vulkan/vulkan_enums.cpp
+    vulkan/vulkan_gpu_semaphore.cpp
     vulkan/vulkan_graphics_api.cpp
     vulkan/vulkan_graphics_pipeline.cpp
     vulkan/vulkan_instance.cpp
@@ -54,6 +56,7 @@ set(HEADERS
     graphics_pipeline.h
     graphics_pipeline_options.h
     gpu_core.h
+    gpu_semaphore.h
     instance.h
     handle.h
     pipeline_layout.h
@@ -75,6 +78,7 @@ set(HEADERS
     api/api_adapter.h
     api/api_buffer.h
     api/api_device.h
+    api/api_gpu_semaphore.h
     api/api_graphics_pipeline.h
     api/api_instance.h
     api/api_pipeline_layout.h
@@ -87,6 +91,7 @@ set(HEADERS
     vulkan/vulkan_buffer.h
     vulkan/vulkan_device.h
     vulkan/vulkan_enums.h
+    vulkan/vulkan_gpu_semaphore.h
     vulkan/vulkan_graphics_api.h
     vulkan/vulkan_graphics_pipeline.h
     vulkan/vulkan_instance.h

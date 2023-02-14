@@ -70,4 +70,9 @@ CommandRecorder Device::createCommandRecorder()
     return CommandRecorder(m_api, m_device);
 }
 
+GpuSemaphore Device::createGpuSemaphore(const GpuSemaphoreOptions &options)
+{
+    return GpuSemaphore(m_api, m_device, m_api->resourceManager()->createGpuSemaphore(m_device, options));
+}
+
 } // namespace ToyRenderer

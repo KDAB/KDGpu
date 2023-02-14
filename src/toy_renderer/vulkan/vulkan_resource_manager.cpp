@@ -461,7 +461,6 @@ void VulkanResourceManager::deletePipelineLayout(Handle<PipelineLayout_t> handle
 
 Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const Handle<Device_t> &deviceHandle, const GraphicsPipelineOptions &options)
 {
-    // TODO: Implement me!
     VulkanDevice vulkanDevice = *m_devices.get(deviceHandle);
 
     // Shader stages
@@ -795,7 +794,7 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
         return {};
     }
 
-    // TODO: Create VulkanPipeline object and return handle
+    // Create VulkanPipeline object and return handle
     const auto vulkanGraphicsPipelineHandle = m_graphicsPipelines.emplace(VulkanGraphicsPipeline(
             vkPipeline,
             vkRenderPass,
@@ -806,6 +805,32 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
 }
 
 void VulkanResourceManager::deleteGraphicsPipeline(Handle<GraphicsPipeline_t> handle)
+{
+    // TODO: Implement me!
+}
+
+Handle<GpuSemaphore_t> VulkanResourceManager::createGpuSemaphore(const Handle<Device_t> &deviceHandle, const GpuSemaphoreOptions &options)
+{
+    VulkanDevice vulkanDevice = *m_devices.get(deviceHandle);
+
+    VkSemaphoreCreateInfo semaphoreInfo = {};
+    semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+    VkSemaphore vkSemaphore{ VK_NULL_HANDLE };
+    if (vkCreateSemaphore(vulkanDevice.device, &semaphoreInfo, nullptr, &vkSemaphore) != VK_SUCCESS) {
+        // TODO: Log failure to create a pipeline
+        return {};
+    }
+
+    const auto vulkanGpuSemaphoreHandle = m_gpuSemaphores.emplace(VulkanGpuSemaphore(
+            vkSemaphore,
+            this,
+            deviceHandle));
+
+    return vulkanGpuSemaphoreHandle;
+}
+
+void VulkanResourceManager::deleteGpuSemaphore(Handle<GpuSemaphore_t> handle)
 {
     // TODO: Implement me!
 }

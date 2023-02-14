@@ -4,6 +4,7 @@
 #include <toy_renderer/adapter.h>
 #include <toy_renderer/bind_group_description.h>
 #include <toy_renderer/device.h>
+#include <toy_renderer/gpu_semaphore.h>
 #include <toy_renderer/handle.h>
 #include <toy_renderer/pool.h>
 #include <toy_renderer/queue.h>
@@ -19,6 +20,7 @@ namespace ToyRenderer {
 struct ApiAdapter;
 struct ApiBuffer;
 struct ApiDevice;
+struct ApiGpuSemaphore;
 struct ApiGraphicsPipeline;
 struct ApiInstance;
 struct ApiPipelineLayout;
@@ -33,6 +35,7 @@ class BindGroup;
 
 struct BufferOptions;
 struct DeviceOptions;
+struct GpuSemaphoreOptions;
 struct GraphicsPipelineOptions;
 struct InstanceOptions;
 struct PipelineLayoutOptions;
@@ -107,6 +110,10 @@ public:
     virtual Handle<GraphicsPipeline_t> createGraphicsPipeline(const Handle<Device_t> &deviceHandle, const GraphicsPipelineOptions &options) = 0;
     virtual void deleteGraphicsPipeline(Handle<GraphicsPipeline_t> handle) = 0;
     virtual ApiGraphicsPipeline *getGraphicsPipeline(const Handle<GraphicsPipeline_t> &handle) = 0;
+
+    virtual Handle<GpuSemaphore_t> createGpuSemaphore(const Handle<Device_t> &deviceHandle, const GpuSemaphoreOptions &options) = 0;
+    virtual void deleteGpuSemaphore(Handle<GpuSemaphore_t> handle) = 0;
+    virtual ApiGpuSemaphore *getGpuSemaphore(const Handle<GpuSemaphore_t> &handle) = 0;
 
     // virtual Handle<Shader> createShader(ShaderDescription desc) = 0;
     virtual Handle<BindGroup> createBindGroup(BindGroupDescription desc) = 0;

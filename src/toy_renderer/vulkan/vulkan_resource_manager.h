@@ -7,6 +7,7 @@
 #include <toy_renderer/vulkan/vulkan_adapter.h>
 #include <toy_renderer/vulkan/vulkan_buffer.h>
 #include <toy_renderer/vulkan/vulkan_device.h>
+#include <toy_renderer/vulkan/vulkan_gpu_semaphore.h>
 #include <toy_renderer/vulkan/vulkan_graphics_pipeline.h>
 #include <toy_renderer/vulkan/vulkan_instance.h>
 #include <toy_renderer/vulkan/vulkan_pipeline_layout.h>
@@ -83,6 +84,10 @@ public:
     void deleteGraphicsPipeline(Handle<GraphicsPipeline_t> handle) final;
     VulkanGraphicsPipeline *getGraphicsPipeline(const Handle<GraphicsPipeline_t> &handle) final { return m_graphicsPipelines.get(handle); }
 
+    Handle<GpuSemaphore_t> createGpuSemaphore(const Handle<Device_t> &deviceHandle, const GpuSemaphoreOptions &options) final;
+    void deleteGpuSemaphore(Handle<GpuSemaphore_t> handle) final;
+    VulkanGpuSemaphore *getGpuSemaphore(const Handle<GpuSemaphore_t> &handle) final { return m_gpuSemaphores.get(handle); }
+
     // TODO: Complete BindGroup implementation
     Handle<BindGroup> createBindGroup(BindGroupDescription desc) final;
     void deleteBindGroup(Handle<BindGroup> handle) final;
@@ -100,6 +105,7 @@ private:
     Pool<VulkanShaderModule, ShaderModule_t> m_shaderModules{ 64 };
     Pool<VulkanPipelineLayout, PipelineLayout_t> m_pipelineLayouts{ 64 };
     Pool<VulkanGraphicsPipeline, GraphicsPipeline_t> m_graphicsPipelines{ 64 };
+    Pool<VulkanGpuSemaphore, GpuSemaphore_t> m_gpuSemaphores{ 32 };
 };
 
 } // namespace ToyRenderer

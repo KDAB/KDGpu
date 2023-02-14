@@ -3,6 +3,7 @@
 #include <toy_renderer/buffer.h>
 #include <toy_renderer/command_recorder.h>
 #include <toy_renderer/device_options.h>
+#include <toy_renderer/gpu_semaphore.h>
 #include <toy_renderer/graphics_pipeline.h>
 #include <toy_renderer/handle.h>
 #include <toy_renderer/pipeline_layout.h>
@@ -57,6 +58,8 @@ public:
     GraphicsPipeline createGraphicsPipeline(const GraphicsPipelineOptions &options);
 
     CommandRecorder createCommandRecorder();
+
+    GpuSemaphore createGpuSemaphore(const GpuSemaphoreOptions &options = GpuSemaphoreOptions());
 
 private:
     Device(Adapter *adapter, GraphicsApi *api, const DeviceOptions &options);
