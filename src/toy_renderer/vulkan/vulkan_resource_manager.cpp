@@ -909,14 +909,17 @@ Handle<CommandRecorder_t> VulkanResourceManager::createCommandRecorder(const Han
         return {};
     }
 
+    const auto vulkanCommandBufferHandle = m_commandBuffers.emplace(VulkanCommandBuffer(vkCommandBuffer));
+
     // Finally, we can create the command recorder object
-    const auto vulkanCommandPoolHandle = m_commandRecorders.emplace(VulkanCommandRecorder(
+    const auto vulkanCommandRecorderHandle = m_commandRecorders.emplace(VulkanCommandRecorder(
             vkCommandPool,
             vkCommandBuffer,
+            vulkanCommandBufferHandle,
             this,
             deviceHandle));
 
-    return vulkanCommandPoolHandle;
+    return vulkanCommandRecorderHandle;
 }
 
 void VulkanResourceManager::deleteCommandRecorder(Handle<CommandRecorder_t> handle)

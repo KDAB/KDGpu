@@ -132,23 +132,23 @@ void HelloTriangle::render()
     auto commandRecorder = m_device.createCommandRecorder();
 
     // Begin render pass
-    m_opaquePassOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex).handle();
-    auto opaquePass = commandRecorder.beginRenderPass(m_opaquePassOptions);
+    // m_opaquePassOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex).handle();
+    // auto opaquePass = commandRecorder.beginRenderPass(m_opaquePassOptions);
 
-    // Bind pipeline
-    opaquePass.setPipeline(m_pipeline.handle());
+    // // Bind pipeline
+    // opaquePass.setPipeline(m_pipeline.handle());
 
-    // Bind vertex buffer
-    opaquePass.setVertexBuffer(0, m_buffer.handle());
+    // // Bind vertex buffer
+    // opaquePass.setVertexBuffer(0, m_buffer.handle());
 
-    // Bind any resources (none needed for hello_triangle)
+    // // Bind any resources (none needed for hello_triangle)
 
-    // Issue draw command
-    const DrawCommand drawCmd = { .vertexCount = 3 };
-    opaquePass.draw(drawCmd);
+    // // Issue draw command
+    // const DrawCommand drawCmd = { .vertexCount = 3 };
+    // opaquePass.draw(drawCmd);
 
-    // End render pass
-    opaquePass.end();
+    // // End render pass
+    // opaquePass.end();
 
     // End recording
     auto commands = commandRecorder.finish();

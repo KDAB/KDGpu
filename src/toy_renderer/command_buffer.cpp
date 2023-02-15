@@ -2,7 +2,8 @@
 
 namespace ToyRenderer {
 
-CommandBuffer::CommandBuffer()
+CommandBuffer::CommandBuffer(const Handle<CommandBuffer_t> &commandBuffer)
+    : m_commandBuffer(commandBuffer)
 {
 }
 

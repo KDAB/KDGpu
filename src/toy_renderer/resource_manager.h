@@ -19,6 +19,7 @@ namespace ToyRenderer {
 
 struct ApiAdapter;
 struct ApiBuffer;
+struct ApiCommandBuffer;
 struct ApiCommandRecorder;
 struct ApiDevice;
 struct ApiGpuSemaphore;
@@ -121,6 +122,11 @@ public:
     virtual Handle<CommandRecorder_t> createCommandRecorder(const Handle<Device_t> &deviceHandle, const CommandRecorderOptions &options) = 0;
     virtual void deleteCommandRecorder(Handle<CommandRecorder_t> handle) = 0;
     virtual ApiCommandRecorder *getCommandRecorder(const Handle<CommandRecorder_t> &handle) = 0;
+
+    // Command buffers are not created by the api. It is up to the concrete subclasses to insert the command buffers
+    // by whatever mechanism they wish. They also do not need to be destroyed as they are cleaned up by the owning
+    // command pool (command recorder).
+    virtual ApiCommandBuffer *getCommandBuffer(const Handle<CommandBuffer_t> &handle) = 0;
 
     // virtual Handle<Shader> createShader(ShaderDescription desc) = 0;
     virtual Handle<BindGroup> createBindGroup(BindGroupDescription desc) = 0;

@@ -15,7 +15,7 @@ public:
     const Handle<CommandBuffer_t> &handle() const noexcept { return m_commandBuffer; }
 
 private:
-    CommandBuffer();
+    explicit CommandBuffer(const Handle<CommandBuffer_t> &commandBuffer);
 
     Handle<CommandBuffer_t> m_commandBuffer;
 

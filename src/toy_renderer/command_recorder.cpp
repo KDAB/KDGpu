@@ -1,5 +1,8 @@
 #include "command_recorder.h"
 
+#include <toy_renderer/graphics_api.h>
+#include <toy_renderer/api/api_command_recorder.h>
+
 namespace ToyRenderer {
 
 CommandRecorder::CommandRecorder(GraphicsApi *api, const Handle<Device_t> &device, const Handle<CommandRecorder_t> &commandRecorder)
@@ -21,8 +24,8 @@ RenderPassCommandRecorder CommandRecorder::beginRenderPass(const RenderPassOptio
 
 CommandBuffer CommandRecorder::finish()
 {
-    // TODO: Implement me!
-    return {};
+    auto apiCommandRecorder = m_api->resourceManager()->getCommandRecorder(m_commandRecorder);
+    return CommandBuffer(apiCommandRecorder->finish());
 }
 
 } // namespace ToyRenderer
