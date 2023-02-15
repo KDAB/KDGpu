@@ -14,6 +14,7 @@ struct Device_t;
 
 struct VulkanCommandRecorder : public ApiCommandRecorder {
     explicit VulkanCommandRecorder(VkCommandPool _commandPool,
+                                   VkCommandBuffer _commandBuffer,
                                    VulkanResourceManager *_vulkanResourceManager,
                                    const Handle<Device_t> &_deviceHandle);
 
@@ -21,6 +22,7 @@ struct VulkanCommandRecorder : public ApiCommandRecorder {
     Handle<CommandBuffer_t> finish() final;
 
     VkCommandPool commandPool{ VK_NULL_HANDLE };
+    VkCommandBuffer commandBuffer{ VK_NULL_HANDLE };
     VulkanResourceManager *vulkanResourceManager{ nullptr };
     Handle<Device_t> deviceHandle;
 };

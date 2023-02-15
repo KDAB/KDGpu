@@ -884,9 +884,35 @@ Handle<CommandRecorder_t> VulkanResourceManager::createCommandRecorder(const Han
     }
     VkCommandPool vkCommandPool = vulkanDevice->commandPools[queueTypeIndex];
 
+    // Allocate a command buffer object from the pool
+    // TODO: Support secondary command buffers? Is that a thing outside of Vulkan? Do we care?
+    VkCommandBufferAllocateInfo allocInfo = {};
+    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocInfo.commandPool = vkCommandPool;
+    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    allocInfo.commandBufferCount = 1U;
+
+    VkCommandBuffer vkCommandBuffer{ VK_NULL_HANDLE };
+    if (vkAllocateCommandBuffers(vulkanDevice->device, &allocInfo, &vkCommandBuffer) != VK_SUCCESS) {
+        // TODO: Log failure to allocate a command buffer
+        return {};
+    }
+
+    // Begin recording
+    VkCommandBufferBeginInfo beginInfo = {};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+    beginInfo.pInheritanceInfo = nullptr;
+
+    if (vkBeginCommandBuffer(vkCommandBuffer, &beginInfo) != VK_SUCCESS) {
+        // TODO: Log failure to begin recording
+        return {};
+    }
+
     // Finally, we can create the command recorder object
     const auto vulkanCommandPoolHandle = m_commandRecorders.emplace(VulkanCommandRecorder(
             vkCommandPool,
+            vkCommandBuffer,
             this,
             deviceHandle));
 
