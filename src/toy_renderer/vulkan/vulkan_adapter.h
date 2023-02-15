@@ -27,6 +27,7 @@ struct VulkanAdapter : public ApiAdapter {
     VkPhysicalDevice physicalDevice{ VK_NULL_HANDLE };
     VulkanResourceManager *vulkanResourceManager{ nullptr };
     Handle<Instance_t> instanceHandle;
+    std::vector<AdapterQueueType> queueTypes;
 };
 
 } // namespace ToyRenderer

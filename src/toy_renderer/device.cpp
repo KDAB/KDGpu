@@ -64,10 +64,9 @@ GraphicsPipeline Device::createGraphicsPipeline(const GraphicsPipelineOptions &o
     return GraphicsPipeline(m_api, m_device, m_api->resourceManager()->createGraphicsPipeline(m_device, options));
 }
 
-CommandRecorder Device::createCommandRecorder()
+CommandRecorder Device::createCommandRecorder(const CommandRecorderOptions &options)
 {
-    // TODO: Implement me!
-    return CommandRecorder(m_api, m_device);
+    return CommandRecorder(m_api, m_device, m_api->resourceManager()->createCommandRecorder(m_device, options));
 }
 
 GpuSemaphore Device::createGpuSemaphore(const GpuSemaphoreOptions &options)

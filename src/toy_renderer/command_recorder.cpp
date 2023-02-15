@@ -2,9 +2,10 @@
 
 namespace ToyRenderer {
 
-CommandRecorder::CommandRecorder(GraphicsApi *api, const Handle<Device_t> &device)
+CommandRecorder::CommandRecorder(GraphicsApi *api, const Handle<Device_t> &device, const Handle<CommandRecorder_t> &commandRecorder)
     : m_api(api)
     , m_device(device)
+    , m_commandRecorder(commandRecorder)
 {
 }
 

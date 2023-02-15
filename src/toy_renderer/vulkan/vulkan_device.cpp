@@ -28,6 +28,12 @@ VulkanDevice::VulkanDevice(VkDevice _device,
 
     if (vmaCreateAllocator(&allocatorInfo, &allocator) != VK_SUCCESS)
         throw std::runtime_error("Failed to create Vulkan memory allocator!");
+
+    // Resize the vector of command pools to have one for each queue family
+    const auto queueTypeCount = vulkanAdapter->queueTypes.size();
+    commandPools.resize(queueTypeCount);
+    for (uint32_t i = 0; i < queueTypeCount; ++i)
+        commandPools[i] = VK_NULL_HANDLE;
 }
 
 std::vector<QueueDescription> VulkanDevice::getQueues(ResourceManager *resourceManager,
@@ -40,7 +46,8 @@ std::vector<QueueDescription> VulkanDevice::getQueues(ResourceManager *resourceM
     uint32_t queueCount = 0;
     for (const auto &queueRequest : queueRequests)
         queueCount += queueRequest.count;
-    std::vector<QueueDescription> queueDescriptions;
+
+    queueDescriptions.clear();
     queueDescriptions.reserve(queueCount);
 
     uint32_t i = 0;

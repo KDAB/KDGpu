@@ -10,7 +10,13 @@ namespace ToyRenderer {
 
 class GraphicsApi;
 
+struct CommandRecorder_t;
 struct Device_t;
+struct Queue_t;
+
+struct CommandRecorderOptions {
+    Handle<Queue_t> queue; // The queue on which you wish to submit the recorded commands. If not set, defaults to first queue of the device
+};
 
 class TOY_RENDERER_EXPORT CommandRecorder
 {
@@ -21,10 +27,11 @@ public:
     CommandBuffer finish();
 
 protected:
-    explicit CommandRecorder(GraphicsApi *api, const Handle<Device_t> &device);
+    explicit CommandRecorder(GraphicsApi *api, const Handle<Device_t> &device, const Handle<CommandRecorder_t> &commandRecorder);
 
     GraphicsApi *m_api{ nullptr };
     Handle<Device_t> m_device;
+    Handle<CommandRecorder_t> m_commandRecorder;
 
     friend class Device;
 };

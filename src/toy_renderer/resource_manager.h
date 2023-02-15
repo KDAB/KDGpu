@@ -19,6 +19,7 @@ namespace ToyRenderer {
 
 struct ApiAdapter;
 struct ApiBuffer;
+struct ApiCommandRecorder;
 struct ApiDevice;
 struct ApiGpuSemaphore;
 struct ApiGraphicsPipeline;
@@ -34,6 +35,7 @@ struct ApiTextureView;
 class BindGroup;
 
 struct BufferOptions;
+struct CommandRecorderOptions;
 struct DeviceOptions;
 struct GpuSemaphoreOptions;
 struct GraphicsPipelineOptions;
@@ -42,6 +44,7 @@ struct PipelineLayoutOptions;
 struct TextureOptions;
 struct TextureViewOptions;
 
+struct CommandRecorder_t;
 struct GraphicsPipeline_t;
 struct PipelineLayout_t;
 struct ShaderModule_t;
@@ -114,6 +117,10 @@ public:
     virtual Handle<GpuSemaphore_t> createGpuSemaphore(const Handle<Device_t> &deviceHandle, const GpuSemaphoreOptions &options) = 0;
     virtual void deleteGpuSemaphore(Handle<GpuSemaphore_t> handle) = 0;
     virtual ApiGpuSemaphore *getGpuSemaphore(const Handle<GpuSemaphore_t> &handle) = 0;
+
+    virtual Handle<CommandRecorder_t> createCommandRecorder(const Handle<Device_t> &deviceHandle, const CommandRecorderOptions &options) = 0;
+    virtual void deleteCommandRecorder(Handle<CommandRecorder_t> handle) = 0;
+    virtual ApiCommandRecorder *getCommandRecorder(const Handle<CommandRecorder_t> &handle) = 0;
 
     // virtual Handle<Shader> createShader(ShaderDescription desc) = 0;
     virtual Handle<BindGroup> createBindGroup(BindGroupDescription desc) = 0;

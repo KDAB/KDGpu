@@ -321,7 +321,7 @@ std::vector<AdapterQueueType> VulkanAdapter::queryQueueTypes()
     std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
     vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, queueFamilies.data());
     
-    std::vector<AdapterQueueType> queueTypes;
+    queueTypes.clear();
     queueTypes.reserve(queueFamilyCount);
     for (uint32_t i = 0; i < queueFamilyCount; ++i) {
         const auto &queueFamily = queueFamilies[i];

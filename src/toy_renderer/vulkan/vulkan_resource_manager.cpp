@@ -835,6 +835,69 @@ void VulkanResourceManager::deleteGpuSemaphore(Handle<GpuSemaphore_t> handle)
     // TODO: Implement me!
 }
 
+Handle<CommandRecorder_t> VulkanResourceManager::createCommandRecorder(const Handle<Device_t> &deviceHandle, const CommandRecorderOptions &options)
+{
+    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
+
+    // Which queue is the command recorder requested for?
+    Handle<Queue_t> queueHandle;
+    uint32_t queueTypeIndex = std::numeric_limits<uint32_t>::max();
+    if (!options.queue.isValid()) {
+        if (vulkanDevice->queueDescriptions.empty()) {
+            // TODO: Log that we have no queue descriptions on the device
+            return {};
+        }
+
+        queueHandle = vulkanDevice->queueDescriptions[0].queue;
+        queueTypeIndex = vulkanDevice->queueDescriptions[0].queueTypeIndex;
+    } else {
+        // Look for this queue on the device
+        const auto it = std::find_if(
+                vulkanDevice->queueDescriptions.begin(),
+                vulkanDevice->queueDescriptions.end(),
+                [options](const QueueDescription &queueDescription) { return queueDescription.queue == options.queue; });
+        if (it == vulkanDevice->queueDescriptions.end()) {
+            // TODO: Log that we can't find the requested queue on this device
+            return {};
+        }
+
+        queueHandle = it->queue;
+        queueTypeIndex = it->queueTypeIndex;
+    }
+    assert(queueHandle.isValid());
+    assert(queueTypeIndex != std::numeric_limits<uint32_t>::max());
+
+    // Find or create a command pool for this combination of thread and queue family
+    if (vulkanDevice->commandPools[queueTypeIndex] == VK_NULL_HANDLE) {
+        // No command pool exists yet for this queue family, let's create one why not!
+        VkCommandPoolCreateInfo poolInfo = {};
+        poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+        poolInfo.queueFamilyIndex = queueTypeIndex;
+        poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+
+        VkCommandPool vkCommandPool = VK_NULL_HANDLE;
+        if (vkCreateCommandPool(vulkanDevice->device, &poolInfo, nullptr, &vkCommandPool) != VK_SUCCESS) {
+            // TODO: Log that we failed to create a command pool for this queue family
+            return {};
+        }
+        vulkanDevice->commandPools[queueTypeIndex] = vkCommandPool;
+    }
+    VkCommandPool vkCommandPool = vulkanDevice->commandPools[queueTypeIndex];
+
+    // Finally, we can create the command recorder object
+    const auto vulkanCommandPoolHandle = m_commandRecorders.emplace(VulkanCommandRecorder(
+            vkCommandPool,
+            this,
+            deviceHandle));
+
+    return vulkanCommandPoolHandle;
+}
+
+void VulkanResourceManager::deleteCommandRecorder(Handle<CommandRecorder_t> handle)
+{
+    // TODO: Implement me!
+}
+
 Handle<BindGroup> VulkanResourceManager::createBindGroup(BindGroupDescription desc)
 {
     // TODO: This is where we will call vkAllocateDescriptorSets

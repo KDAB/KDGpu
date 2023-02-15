@@ -22,6 +22,7 @@ set(SOURCES
     texture_view.cpp
     vulkan/vulkan_adapter.cpp
     vulkan/vulkan_buffer.cpp
+    vulkan/vulkan_command_recorder.cpp
     vulkan/vulkan_device.cpp
     vulkan/vulkan_enums.cpp
     vulkan/vulkan_gpu_semaphore.cpp
@@ -77,6 +78,7 @@ set(HEADERS
     texture_view_options.h
     api/api_adapter.h
     api/api_buffer.h
+    api/api_command_recorder.h
     api/api_device.h
     api/api_gpu_semaphore.h
     api/api_graphics_pipeline.h
@@ -89,6 +91,7 @@ set(HEADERS
     api/api_texture_view.h
     vulkan/vulkan_adapter.h
     vulkan/vulkan_buffer.h
+    vulkan/vulkan_command_recorder.h
     vulkan/vulkan_device.h
     vulkan/vulkan_enums.h
     vulkan/vulkan_gpu_semaphore.h

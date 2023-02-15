@@ -6,6 +6,7 @@
 
 #include <toy_renderer/vulkan/vulkan_adapter.h>
 #include <toy_renderer/vulkan/vulkan_buffer.h>
+#include <toy_renderer/vulkan/vulkan_command_recorder.h>
 #include <toy_renderer/vulkan/vulkan_device.h>
 #include <toy_renderer/vulkan/vulkan_gpu_semaphore.h>
 #include <toy_renderer/vulkan/vulkan_graphics_pipeline.h>
@@ -88,6 +89,10 @@ public:
     void deleteGpuSemaphore(Handle<GpuSemaphore_t> handle) final;
     VulkanGpuSemaphore *getGpuSemaphore(const Handle<GpuSemaphore_t> &handle) final { return m_gpuSemaphores.get(handle); }
 
+    Handle<CommandRecorder_t> createCommandRecorder(const Handle<Device_t> &deviceHandle, const CommandRecorderOptions &options) final;
+    void deleteCommandRecorder(Handle<CommandRecorder_t> handle) final;
+    VulkanCommandRecorder *getCommandRecorder(const Handle<CommandRecorder_t> &handle) final { return m_commandRecorders.get(handle); }
+
     // TODO: Complete BindGroup implementation
     Handle<BindGroup> createBindGroup(BindGroupDescription desc) final;
     void deleteBindGroup(Handle<BindGroup> handle) final;
@@ -106,6 +111,7 @@ private:
     Pool<VulkanPipelineLayout, PipelineLayout_t> m_pipelineLayouts{ 64 };
     Pool<VulkanGraphicsPipeline, GraphicsPipeline_t> m_graphicsPipelines{ 64 };
     Pool<VulkanGpuSemaphore, GpuSemaphore_t> m_gpuSemaphores{ 32 };
+    Pool<VulkanCommandRecorder, CommandRecorder_t> m_commandRecorders{ 32 };
 };
 
 } // namespace ToyRenderer

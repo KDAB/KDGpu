@@ -30,3 +30,15 @@ private:
     template<typename U, typename V>
     friend class Pool;
 };
+
+template<typename T>
+bool operator==(const Handle<T> &lhs, const Handle<T> &rhs)
+{
+    return lhs.index() == rhs.index() && lhs.generation() == rhs.generation();
+}
+
+template<typename T>
+bool operator!=(const Handle<T> &lhs, const Handle<T> &rhs)
+{
+    return !(lhs == rhs);
+}

@@ -57,7 +57,7 @@ public:
 
     GraphicsPipeline createGraphicsPipeline(const GraphicsPipelineOptions &options);
 
-    CommandRecorder createCommandRecorder();
+    CommandRecorder createCommandRecorder(const CommandRecorderOptions &options = CommandRecorderOptions());
 
     GpuSemaphore createGpuSemaphore(const GpuSemaphoreOptions &options = GpuSemaphoreOptions());
 
