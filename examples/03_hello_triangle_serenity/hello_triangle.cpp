@@ -100,7 +100,7 @@ void HelloTriangle::initializeScene()
     // of the swapchain we wish to render to. So set up what we can here, and in the render loop we will
     // just update the color texture view.
     // clang-format off
-    RenderPassOptions m_opaquePassOptions = {
+    m_opaquePassOptions = {
         .colorAttachments = {
             {
                 .view = {}, // Not setting the swapchain texture view just yet
