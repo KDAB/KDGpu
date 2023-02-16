@@ -13,9 +13,59 @@ VulkanQueue::VulkanQueue(VkQueue _queue,
 {
 }
 
-void VulkanQueue::submit()
+void VulkanQueue::submit(const SubmitOptions &options)
 {
-    // TODO: Implement me!
+    // TODO: Do we need to expose the wait stage flags to the public API or is waiting
+    // for the semaphores at the top of the pipeline good enough?
+    const uint32_t waitSemaphoreCount = static_cast<uint32_t>(options.waitSemaphores.size());
+    std::vector<VkSemaphore> vkWaitSemaphores;
+    std::vector<VkPipelineStageFlags> vkWaitStageFlags;
+    vkWaitSemaphores.reserve(waitSemaphoreCount);
+    vkWaitStageFlags.reserve(waitSemaphoreCount);
+    for (uint32_t i = 0; i < waitSemaphoreCount; ++i) {
+        auto vulkanSemaphore = vulkanResourceManager->getGpuSemaphore(options.waitSemaphores.at(i));
+        if (vulkanSemaphore) {
+            vkWaitSemaphores.push_back(vulkanSemaphore->semaphore);
+            vkWaitStageFlags.push_back(VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
+        }
+    }
+
+    const uint32_t signalSemaphoreCount = static_cast<uint32_t>(options.signalSemaphores.size());
+    std::vector<VkSemaphore> vkSignalSemaphores;
+    vkSignalSemaphores.reserve(signalSemaphoreCount);
+    for (uint32_t i = 0; i < signalSemaphoreCount; ++i) {
+        auto vulkanSemaphore = vulkanResourceManager->getGpuSemaphore(options.signalSemaphores.at(i));
+        if (vulkanSemaphore)
+            vkSignalSemaphores.push_back(vulkanSemaphore->semaphore);
+    }
+
+    const uint32_t commandBufferCount = static_cast<uint32_t>(options.commandBuffers.size());
+    std::vector<VkCommandBuffer> vkCommandBuffers;
+    vkCommandBuffers.reserve(commandBufferCount);
+    for (uint32_t i = 0; i < commandBufferCount; ++i) {
+        auto vulkanCommandBuffer = vulkanResourceManager->getCommandBuffer(options.commandBuffers.at(i));
+        if (vulkanCommandBuffer)
+            vkCommandBuffers.push_back(vulkanCommandBuffer->commandBuffer);
+    }
+
+    VkSubmitInfo submitInfo = {};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.waitSemaphoreCount = static_cast<uint32_t>(vkWaitSemaphores.size());
+    submitInfo.pWaitSemaphores = vkWaitSemaphores.data();
+    submitInfo.pWaitDstStageMask = vkWaitStageFlags.data();
+
+    submitInfo.signalSemaphoreCount = static_cast<uint32_t>(vkSignalSemaphores.size());
+    submitInfo.pSignalSemaphores = vkSignalSemaphores.data();
+
+    submitInfo.commandBufferCount = static_cast<uint32_t>(vkCommandBuffers.size());
+    submitInfo.pCommandBuffers = vkCommandBuffers.data();
+
+    // TODO: Support fences
+    // Make sure the fence is ready for use and submit
+    // VkFence inFlightFences[] = { frameFence };
+    // vkResetFences(renderer()->vulkanDevice()->device(), 1, inFlightFences);
+
+    VkResult result = vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
 }
 
 void VulkanQueue::present(const PresentOptions &options)

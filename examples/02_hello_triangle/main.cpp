@@ -318,7 +318,13 @@ int main()
         auto commands = commandRecorder.finish();
 
         // Submit command buffer to queue
-        queue.submit(commands.handle());
+        // TODO: Semaphores
+        SubmitOptions submitOptions = {
+            .commandBuffers = { commands.handle() },
+            .waitSemaphores = {},
+            .signalSemaphores = {}
+        };
+        queue.submit(submitOptions);
 
         // Present and request next frame (need API for this)
         PresentOptions presentOptions = {

@@ -12,7 +12,7 @@ struct VulkanQueue : public ApiQueue {
     explicit VulkanQueue(VkQueue _queue,
                          VulkanResourceManager *_vulkanResourceManager);
 
-    void submit() final;
+    void submit(const SubmitOptions &options) final;
     void present(const PresentOptions &options) final;
 
     VkQueue queue{ VK_NULL_HANDLE };

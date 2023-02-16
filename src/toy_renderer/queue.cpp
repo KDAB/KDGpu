@@ -25,9 +25,10 @@ Queue::~Queue()
 {
 }
 
-void Queue::submit(const Handle<CommandBuffer_t> &commands)
+void Queue::submit(const SubmitOptions &options)
 {
-    // TODO: Implement me!
+    auto apiQueue = m_api->resourceManager()->getQueue(m_queue);
+    apiQueue->submit(options);
 }
 
 void Queue::present(const PresentOptions &options)

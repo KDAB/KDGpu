@@ -154,7 +154,10 @@ void HelloTriangle::render()
     auto commands = commandRecorder.finish();
 
     // Submit command buffer to queue
-    // TODO: Pass in the present complete semaphore as the wait semaphore
-    // TODO: Pass in the render complete semaphore as the signal semaphore
-    m_queue.submit(commands.handle());
+    SubmitOptions submitOptions = {
+        .commandBuffers = { commands.handle() },
+        .waitSemaphores = { m_presentCompleteSemaphores[m_inFlightIndex].handle() },
+        .signalSemaphores = { m_renderCompleteSemaphores[m_inFlightIndex].handle() }
+    };
+    m_queue.submit(submitOptions);
 }

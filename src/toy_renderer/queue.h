@@ -17,6 +17,12 @@ struct CommandBuffer_t;
 struct GpuSemaphore_t;
 struct Swapchain_t;
 
+struct SubmitOptions {
+    std::vector<Handle<CommandBuffer_t>> commandBuffers;
+    std::vector<Handle<GpuSemaphore_t>> waitSemaphores;
+    std::vector<Handle<GpuSemaphore_t>> signalSemaphores;
+};
+
 struct SwapchainPresentInfo {
     Handle<Swapchain_t> swapchain;
     uint32_t imageIndex;
@@ -41,7 +47,7 @@ public:
     Extent3D minImageTransferGranularity() const noexcept { return m_minImageTransferGranularity; }
     uint32_t queueTypeIndex() const noexcept { return m_queueTypeIndex; }
 
-    void submit(const Handle<CommandBuffer_t> &commands);
+    void submit(const SubmitOptions &options);
 
     // TODO: Return values of present operation
     void present(const PresentOptions &options);
