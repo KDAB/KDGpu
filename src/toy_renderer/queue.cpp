@@ -1,6 +1,9 @@
 #include "queue.h"
 
+#include <toy_renderer/graphics_api.h>
 #include <toy_renderer/queue.h>
+#include <toy_renderer/resource_manager.h>
+#include <toy_renderer/api/api_queue.h>
 
 namespace ToyRenderer {
 
@@ -27,14 +30,10 @@ void Queue::submit(const Handle<CommandBuffer_t> &commands)
     // TODO: Implement me!
 }
 
-void Queue::present(const Handle<Swapchain_t> &swapchain, uint32_t imageIndex)
-{
-    // TODO: Implement me!
-}
-
 void Queue::present(const PresentOptions &options)
 {
-    // TODO: Implement me!
+    auto apiQueue = m_api->resourceManager()->getQueue(m_queue);
+    apiQueue->present(options);
 }
 
 } // namespace ToyRenderer

@@ -14,6 +14,7 @@ class Surface;
 
 struct Adapter_t;
 struct CommandBuffer_t;
+struct GpuSemaphore_t;
 struct Swapchain_t;
 
 struct SwapchainPresentInfo {
@@ -22,7 +23,7 @@ struct SwapchainPresentInfo {
 };
 
 struct PresentOptions {
-    // TODO: Semaphores?
+    std::vector<Handle<GpuSemaphore_t>> waitSemaphores;
     std::vector<SwapchainPresentInfo> swapchainInfos;
 };
 
@@ -42,9 +43,7 @@ public:
 
     void submit(const Handle<CommandBuffer_t> &commands);
 
-    // TODO: Semaphore?
     // TODO: Return values of present operation
-    void present(const Handle<Swapchain_t> &swapchain, uint32_t imageIndex);
     void present(const PresentOptions &options);
 
 private:

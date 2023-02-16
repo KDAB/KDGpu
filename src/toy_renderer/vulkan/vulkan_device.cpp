@@ -56,7 +56,7 @@ std::vector<QueueDescription> VulkanDevice::getQueues(ResourceManager *resourceM
         for (uint32_t j = 0; j < queueCountForFamily; ++j) {
             VkQueue vkQueue{ VK_NULL_HANDLE };
             vkGetDeviceQueue(device, queueRequest.queueTypeIndex, j, &vkQueue);
-            const auto queueHandle = vulkanResourceManager->insertQueue(VulkanQueue{ vkQueue });
+            const auto queueHandle = vulkanResourceManager->insertQueue(VulkanQueue{ vkQueue, vulkanResourceManager });
 
             QueueDescription queueDescription{
                 .queue = queueHandle,

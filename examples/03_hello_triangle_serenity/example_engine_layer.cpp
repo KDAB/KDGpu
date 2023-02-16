@@ -116,4 +116,7 @@ void ExampleEngineLayer::update()
                   .imageIndex = m_currentSwapchainImageIndex } }
     };
     m_queue.present(presentOptions);
+
+    // TODO: Use fences to not block here
+    m_device.waitUntilIdle();
 }
