@@ -927,6 +927,17 @@ void VulkanResourceManager::deleteCommandRecorder(Handle<CommandRecorder_t> hand
     // TODO: Implement me!
 }
 
+Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassCommandRecorder(const Handle<Device_t> &deviceHandle,
+                                                                                           const RenderPassOptions &options)
+{
+    return {};
+}
+
+void VulkanResourceManager::deleteRenderPassCommandRecorder(Handle<RenderPassCommandRecorder_t> handle)
+{
+    // TODO: Implement me!
+}
+
 Handle<BindGroup> VulkanResourceManager::createBindGroup(BindGroupDescription desc)
 {
     // TODO: This is where we will call vkAllocateDescriptorSets

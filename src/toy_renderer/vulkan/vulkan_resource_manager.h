@@ -14,6 +14,7 @@
 #include <toy_renderer/vulkan/vulkan_instance.h>
 #include <toy_renderer/vulkan/vulkan_pipeline_layout.h>
 #include <toy_renderer/vulkan/vulkan_queue.h>
+#include <toy_renderer/vulkan/vulkan_render_pass_command_recorder.h>
 #include <toy_renderer/vulkan/vulkan_shader_module.h>
 #include <toy_renderer/vulkan/vulkan_swapchain.h>
 #include <toy_renderer/vulkan/vulkan_surface.h>
@@ -94,6 +95,10 @@ public:
     void deleteCommandRecorder(Handle<CommandRecorder_t> handle) final;
     VulkanCommandRecorder *getCommandRecorder(const Handle<CommandRecorder_t> &handle) final { return m_commandRecorders.get(handle); }
 
+    Handle<RenderPassCommandRecorder_t> createRenderPassCommandRecorder(const Handle<Device_t> &deviceHandle, const RenderPassOptions &options) final;
+    void deleteRenderPassCommandRecorder(Handle<RenderPassCommandRecorder_t> handle) final;
+    VulkanRenderPassCommandRecorder *getRenderPassCommandRecorder(const Handle<RenderPassCommandRecorder_t> &handle) final { return m_renderPassCommandRecorders.get(handle); }
+
     VulkanCommandBuffer *getCommandBuffer(const Handle<CommandBuffer_t> &handle) final { return m_commandBuffers.get(handle); }
 
     // TODO: Complete BindGroup implementation
@@ -115,6 +120,7 @@ private:
     Pool<VulkanGraphicsPipeline, GraphicsPipeline_t> m_graphicsPipelines{ 64 };
     Pool<VulkanGpuSemaphore, GpuSemaphore_t> m_gpuSemaphores{ 32 };
     Pool<VulkanCommandRecorder, CommandRecorder_t> m_commandRecorders{ 32 };
+    Pool<VulkanRenderPassCommandRecorder, RenderPassCommandRecorder_t> m_renderPassCommandRecorders{ 32 };
     Pool<VulkanCommandBuffer, CommandBuffer_t> m_commandBuffers{ 128 };
 };
 

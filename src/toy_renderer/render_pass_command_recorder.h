@@ -8,7 +8,11 @@
 namespace ToyRenderer {
 
 struct Buffer_t;
+struct Device_t;
 struct GraphicsPipeline_t;
+struct RenderPassCommandRecorder_t;
+
+class GraphicsApi;
 
 struct DrawCommand {
     uint32_t vertexCount{ 0 };
@@ -20,6 +24,8 @@ struct DrawCommand {
 class TOY_RENDERER_EXPORT RenderPassCommandRecorder
 {
 public:
+    ~RenderPassCommandRecorder();
+
     void setPipeline(const Handle<GraphicsPipeline_t> &pipeline);
     void setVertexBuffer(uint32_t index, const Handle<Buffer_t> &buffer);
 
@@ -29,6 +35,14 @@ public:
     void end();
 
 private:
+    explicit RenderPassCommandRecorder(GraphicsApi *api,
+                                       const Handle<Device_t> &device,
+                                       const Handle<RenderPassCommandRecorder_t> &renderPassCommandRecorder);
+
+    GraphicsApi *m_api{ nullptr };
+    Handle<Device_t> m_device;
+    Handle<RenderPassCommandRecorder_t> m_renderPassCommandRecorder;
+
     friend class CommandRecorder;
 };
 
