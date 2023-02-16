@@ -42,6 +42,8 @@ public:
 
     std::span<Queue> queues() { return m_queues; }
 
+    void waitUntilIdle();
+
     Swapchain createSwapchain(const SwapchainOptions &options);
     Texture createTexture(const TextureOptions &options);
 

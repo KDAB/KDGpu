@@ -22,6 +22,8 @@ struct VulkanDevice : public ApiDevice {
                                             const std::vector<QueueRequest> &queueRequests,
                                             std::span<AdapterQueueType> queueTypes) final;
 
+    void waitUntilIdle() final;
+
     VkDevice device{ VK_NULL_HANDLE };
 
     VulkanResourceManager *vulkanResourceManager{ nullptr };

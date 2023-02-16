@@ -74,4 +74,9 @@ std::vector<QueueDescription> VulkanDevice::getQueues(ResourceManager *resourceM
     return queueDescriptions;
 }
 
+void VulkanDevice::waitUntilIdle()
+{
+    vkDeviceWaitIdle(device);
+}
+
 } // namespace ToyRenderer

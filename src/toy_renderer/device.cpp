@@ -34,6 +34,12 @@ Device::~Device()
 {
 }
 
+void Device::waitUntilIdle()
+{
+    auto apiDevice = m_api->resourceManager()->getDevice(m_device);
+    apiDevice->waitUntilIdle();
+}
+
 Swapchain Device::createSwapchain(const SwapchainOptions &options)
 {
     return Swapchain(m_api, m_device, m_api->resourceManager()->createSwapchain(m_device, options));
