@@ -75,4 +75,10 @@ BlendFactor vkBlendFactorToBlendFactor(VkBlendFactor factor);
 VkBlendOp blendOperationToVkBlendOp(BlendOperation op);
 BlendOperation vkBlendOpToBlendOperation(BlendOperation op);
 
+VkAttachmentLoadOp attachmentLoadOperationToVkAttachmentLoadOp(AttachmentLoadOperation op);
+AttachmentLoadOperation vkAttachmentLoadOperationToAttachmentLoadOperation(AttachmentLoadOperation op);
+
+VkAttachmentStoreOp attachmentStoreOperationToVkAttachmentStoreOp(AttachmentStoreOperation op);
+AttachmentStoreOperation vkAttachmentStoreOperationToAttachmentStoreOperation(AttachmentStoreOperation op);
+
 } // namespace ToyRenderer

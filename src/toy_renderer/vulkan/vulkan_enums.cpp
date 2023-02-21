@@ -248,4 +248,24 @@ BlendOperation vkBlendOpToBlendOperation(BlendOperation op)
     return static_cast<BlendOperation>(static_cast<uint32_t>(op));
 }
 
+VkAttachmentLoadOp attachmentLoadOperationToVkAttachmentLoadOp(AttachmentLoadOperation op)
+{
+    return static_cast<VkAttachmentLoadOp>(static_cast<uint32_t>(op));
+}
+
+AttachmentLoadOperation vkAttachmentLoadOperationToAttachmentLoadOperation(AttachmentLoadOperation op)
+{
+    return static_cast<AttachmentLoadOperation>(static_cast<uint32_t>(op));
+}
+
+VkAttachmentStoreOp attachmentStoreOperationToVkAttachmentStoreOp(AttachmentStoreOperation op)
+{
+    return static_cast<VkAttachmentStoreOp>(static_cast<uint32_t>(op));
+}
+
+AttachmentStoreOperation vkAttachmentStoreOperationToAttachmentStoreOperation(AttachmentStoreOperation op)
+{
+    return static_cast<AttachmentStoreOperation>(static_cast<uint32_t>(op));
+}
+
 } // namespace ToyRenderer
