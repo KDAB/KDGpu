@@ -14,6 +14,7 @@
 #include <toy_renderer/vulkan/vulkan_instance.h>
 #include <toy_renderer/vulkan/vulkan_pipeline_layout.h>
 #include <toy_renderer/vulkan/vulkan_queue.h>
+#include <toy_renderer/vulkan/vulkan_render_pass.h>
 #include <toy_renderer/vulkan/vulkan_render_pass_command_recorder.h>
 #include <toy_renderer/vulkan/vulkan_shader_module.h>
 #include <toy_renderer/vulkan/vulkan_swapchain.h>
@@ -95,9 +96,14 @@ public:
     void deleteCommandRecorder(Handle<CommandRecorder_t> handle) final;
     VulkanCommandRecorder *getCommandRecorder(const Handle<CommandRecorder_t> &handle) final { return m_commandRecorders.get(handle); }
 
-    Handle<RenderPassCommandRecorder_t> createRenderPassCommandRecorder(const Handle<Device_t> &deviceHandle, const RenderPassOptions &options) final;
+    Handle<RenderPassCommandRecorder_t> createRenderPassCommandRecorder(const Handle<Device_t> &deviceHandle,
+                                                                        const Handle<CommandRecorder_t> commandRecorderHandle,
+                                                                        const RenderPassCommandRecorderOptions &options) final;
     void deleteRenderPassCommandRecorder(Handle<RenderPassCommandRecorder_t> handle) final;
     VulkanRenderPassCommandRecorder *getRenderPassCommandRecorder(const Handle<RenderPassCommandRecorder_t> &handle) final { return m_renderPassCommandRecorders.get(handle); }
+
+    // TODO: Should we make this part of the ResourceManager api? Or combine it with the public RenderPass api?
+    Handle<RenderPass_t> createRenderPass(const Handle<Device_t> &deviceHandle, const RenderPassCommandRecorderOptions &options);
 
     VulkanCommandBuffer *getCommandBuffer(const Handle<CommandBuffer_t> &handle) final { return m_commandBuffers.get(handle); }
 
@@ -122,6 +128,8 @@ private:
     Pool<VulkanCommandRecorder, CommandRecorder_t> m_commandRecorders{ 32 };
     Pool<VulkanRenderPassCommandRecorder, RenderPassCommandRecorder_t> m_renderPassCommandRecorders{ 32 };
     Pool<VulkanCommandBuffer, CommandBuffer_t> m_commandBuffers{ 128 };
+    Pool<VulkanRenderPass, RenderPass_t> m_renderPasses{ 16 };
+    // Pool<VulkanFramebuffer, Framebuffer_t> m_framebuffers{ 16 };
 };
 
 } // namespace ToyRenderer

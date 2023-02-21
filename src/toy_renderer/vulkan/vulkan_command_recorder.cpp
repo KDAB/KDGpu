@@ -16,7 +16,7 @@ VulkanCommandRecorder::VulkanCommandRecorder(VkCommandPool _commandPool,
 {
 }
 
-Handle<RenderPassCommandRecorder_t> VulkanCommandRecorder::beginRenderPass(const RenderPassOptions &options)
+Handle<RenderPassCommandRecorder_t> VulkanCommandRecorder::beginRenderPass(const RenderPassCommandRecorderOptions &options)
 {
     // TODO;: Implement me!
     return Handle<RenderPassCommandRecorder_t>();

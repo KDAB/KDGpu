@@ -307,7 +307,7 @@ Handle<TextureView_t> VulkanResourceManager::createTextureView(const Handle<Devi
     if (vkCreateImageView(vulkanDevice.device, &createInfo, nullptr, &imageView) != VK_SUCCESS)
         return {};
 
-    const auto vulkanTextureViewHandle = m_textureViews.emplace(VulkanTextureView(imageView));
+    const auto vulkanTextureViewHandle = m_textureViews.emplace(VulkanTextureView(imageView, textureHandle));
     return vulkanTextureViewHandle;
 }
 
@@ -928,14 +928,198 @@ void VulkanResourceManager::deleteCommandRecorder(Handle<CommandRecorder_t> hand
 }
 
 Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassCommandRecorder(const Handle<Device_t> &deviceHandle,
-                                                                                           const RenderPassOptions &options)
+                                                                                           const Handle<CommandRecorder_t> commandRecorderHandle,
+                                                                                           const RenderPassCommandRecorderOptions &options)
 {
+    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
+
+    // TODO: Should we make RenderPass and Framebuffer objects explicitly available to the API?
+    // Doing so would make our API more Vulkan-like and perhaps give a tiny performance boost. On the downside
+    // it's more API surface area (like Vulkan) and other backends would need to store the render pass and
+    // framebuffer requirements to look them up later when using whatever wrapper they have around render passes.
+    // E.g in a WebGPU backend, the render pass backend would just store the options, ready to pass to beginRenderPass().
+    // For now we take a similar approach to WebGPU or the Vulkan dynamic rendering extension.
+
+    // Find or create a render pass object that matches the request
+    const VulkanRenderPassKey renderPassKey{ options };
+    auto it = vulkanDevice->renderPasses.find(renderPassKey);
+    Handle<RenderPass_t> vulkanRenderPassHandle;
+    if (it == vulkanDevice->renderPasses.end()) {
+        // TODO: Create the render pass and cache the handle for it
+        vulkanRenderPassHandle = createRenderPass(deviceHandle, options);
+        vulkanDevice->renderPasses.insert({ renderPassKey, vulkanRenderPassHandle });
+    } else {
+        vulkanRenderPassHandle = it->second;
+    }
+
+    VulkanRenderPass *vulkanRenderPass = m_renderPasses.get(vulkanRenderPassHandle);
+    if (!vulkanRenderPass) {
+        // TODO: Log about not finding/creating a render pass
+        return {};
+    }
+    VkRenderPass vkRenderPass = vulkanRenderPass->renderPass;
+
+    // TODO: Find or create a framebuffer as per the render pass above
+
+    VkRenderPassBeginInfo renderPassInfo = {};
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    renderPassInfo.renderPass = vkRenderPass;
+
+    // TODO:
+    // renderPassInfo.framebuffer = vkFramebuffer;
+    // render area
+    // clear values
+
+    VulkanCommandRecorder *vulkanCommandRecorder = m_commandRecorders.get(commandRecorderHandle);
+    if (!vulkanCommandRecorder) {
+        // TODO: Log about not having a valid command recorder
+        return {};
+    }
+    VkCommandBuffer vkCommandBuffer = vulkanCommandRecorder->commandBuffer;
+
+    vkCmdBeginRenderPass(vkCommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
     return {};
 }
 
 void VulkanResourceManager::deleteRenderPassCommandRecorder(Handle<RenderPassCommandRecorder_t> handle)
 {
     // TODO: Implement me!
+}
+
+Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device_t> &deviceHandle,
+                                                             const RenderPassCommandRecorderOptions &options)
+{
+    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
+    std::vector<VkAttachmentDescription> allAttachments;
+
+    // The subpass description will then index into the above vector of attachment
+    // descriptions to specify which subpasses use which of the available attachments.
+    uint32_t attachmentIndex = 0;
+    std::vector<VkAttachmentReference> colorAttachmentRefs;
+    std::vector<VkAttachmentReference> resolveAttachmentRefs;
+    VkAttachmentReference depthStencilAttachmentRef = {};
+
+    // TODO: Handle multisampling
+    const bool usingMultisampling = false; // options.multisample.samples > SampleCountFlagBits::Samples1Bit;
+    const VkSampleCountFlagBits sampleCount = VK_SAMPLE_COUNT_1_BIT; // sampleCountFlagBitsToVkSampleFlagBits(options.multisample.samples);
+
+    // Color and resolve attachments
+    {
+        const uint32_t colorTargetsCount = options.colorAttachments.size();
+        colorAttachmentRefs.reserve(colorTargetsCount);
+        resolveAttachmentRefs.reserve(colorTargetsCount);
+
+        for (uint32_t i = 0; i < colorTargetsCount; ++i) {
+            const auto &renderTarget = options.colorAttachments.at(i);
+
+            VulkanTextureView *view = getTextureView(renderTarget.view);
+            if (!view) {
+                // Log invalid view requested
+                return {};
+            }
+            VulkanTexture *texture = getTexture(view->textureHandle);
+            if (!texture) {
+                // Log invalid texture requested
+                return {};
+            }
+
+            // NB: We don't care about load/store operations and initial/final layouts here
+            // so we just set some random values;
+            VkAttachmentDescription colorAttachment = {};
+            colorAttachment.format = formatToVkFormat(texture->format);
+            colorAttachment.samples = sampleCount;
+            colorAttachment.loadOp = attachmentLoadOperationToVkAttachmentLoadOp(renderTarget.loadOperation);
+            colorAttachment.storeOp = attachmentStoreOperationToVkAttachmentStoreOp(renderTarget.storeOperation);
+            colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+            colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+            colorAttachment.initialLayout = textureLayoutToVkImageLayout(renderTarget.initialLayout);
+            colorAttachment.finalLayout = textureLayoutToVkImageLayout(renderTarget.finalLayout);
+            // colorAttachment.finalLayout = usingMultisampling ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+            allAttachments.emplace_back(colorAttachment);
+
+            VkAttachmentReference colorAttachmentRef = {};
+            colorAttachmentRef.attachment = attachmentIndex++;
+            colorAttachmentRef.layout = textureLayoutToVkImageLayout(renderTarget.initialLayout);
+            colorAttachmentRefs.emplace_back(colorAttachmentRef);
+
+            // If using multisampling, then for each color attachment we need a resolve attachment
+            // if (usingMultisampling) {
+            //     VkAttachmentDescription resolveAttachment = {};
+            //     resolveAttachment.format = formatToVkFormat(renderTarget.format);
+            //     resolveAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+            //     resolveAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+            //     resolveAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+            //     resolveAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+            //     resolveAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+            //     resolveAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+            //     resolveAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+            //     allAttachments.emplace_back(resolveAttachment);
+
+            //     VkAttachmentReference resolveAttachmentRef = {};
+            //     resolveAttachmentRef.attachment = attachmentIndex++;
+            //     resolveAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            //     colorAttachmentRefs.emplace_back(resolveAttachmentRef);
+            // }
+        }
+    }
+
+    // Depth-stencil attachment
+    if (options.depthStencilAttachment.view.isValid()) {
+        const auto &renderTarget = options.depthStencilAttachment;
+
+        VulkanTextureView *view = getTextureView(renderTarget.view);
+        if (!view) {
+            // Log invalid view requested
+            return {};
+        }
+        VulkanTexture *texture = getTexture(view->textureHandle);
+        if (!texture) {
+            // Log invalid texture requested
+            return {};
+        }
+
+        VkAttachmentDescription depthStencilAttachment = {};
+        depthStencilAttachment.format = formatToVkFormat(texture->format);
+        depthStencilAttachment.samples = sampleCount;
+        depthStencilAttachment.loadOp = attachmentLoadOperationToVkAttachmentLoadOp(renderTarget.depthLoadOperation);
+        depthStencilAttachment.storeOp = attachmentStoreOperationToVkAttachmentStoreOp(renderTarget.depthStoreOperation);
+        depthStencilAttachment.stencilLoadOp = attachmentLoadOperationToVkAttachmentLoadOp(renderTarget.stencilLoadOperation);
+        depthStencilAttachment.stencilStoreOp = attachmentStoreOperationToVkAttachmentStoreOp(renderTarget.stencilStoreOperation);
+        depthStencilAttachment.initialLayout = textureLayoutToVkImageLayout(renderTarget.initialLayout);
+        depthStencilAttachment.finalLayout = textureLayoutToVkImageLayout(renderTarget.finalLayout);
+        allAttachments.emplace_back(depthStencilAttachment);
+
+        depthStencilAttachmentRef.attachment = attachmentIndex++;
+        depthStencilAttachmentRef.layout = textureLayoutToVkImageLayout(renderTarget.initialLayout);
+    }
+
+    // Just create a single subpass. We do not support multiple subpasses at this
+    // stage as other graphics APIs do not have an equivalent to subpasses.
+    VkSubpassDescription subpass = {};
+    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+    subpass.colorAttachmentCount = static_cast<uint32_t>(colorAttachmentRefs.size());
+    subpass.pColorAttachments = colorAttachmentRefs.data();
+    subpass.pResolveAttachments = usingMultisampling ? resolveAttachmentRefs.data() : nullptr;
+    subpass.pDepthStencilAttachment = options.depthStencilAttachment.view.isValid() ? &depthStencilAttachmentRef : nullptr;
+
+    VkRenderPassCreateInfo renderPassInfo = {};
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+    renderPassInfo.attachmentCount = static_cast<uint32_t>(allAttachments.size());
+    renderPassInfo.pAttachments = allAttachments.data();
+    renderPassInfo.subpassCount = 1;
+    renderPassInfo.pSubpasses = &subpass;
+    renderPassInfo.dependencyCount = 0;
+    renderPassInfo.pDependencies = nullptr;
+
+    VkRenderPass vkRenderPass{ VK_NULL_HANDLE };
+    if (vkCreateRenderPass(vulkanDevice->device, &renderPassInfo, nullptr, &vkRenderPass) != VK_SUCCESS) {
+        // TODO: Log failure to create a render pass
+        return {};
+    }
+
+    const auto vulkanRenderPassHandle = m_renderPasses.emplace(VulkanRenderPass(vkRenderPass, this, deviceHandle));
+    return vulkanRenderPassHandle;
 }
 
 Handle<BindGroup> VulkanResourceManager::createBindGroup(BindGroupDescription desc)

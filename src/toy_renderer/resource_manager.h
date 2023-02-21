@@ -27,6 +27,7 @@ struct ApiGraphicsPipeline;
 struct ApiInstance;
 struct ApiPipelineLayout;
 struct ApiQueue;
+struct ApiRenderPass;
 struct ApiRenderPassCommandRecorder;
 struct ApiShaderModule;
 struct ApiSwapchain;
@@ -50,6 +51,7 @@ struct TextureViewOptions;
 struct CommandRecorder_t;
 struct GraphicsPipeline_t;
 struct PipelineLayout_t;
+struct RenderPass_t;
 struct ShaderModule_t;
 
 // TODO: Should this class have create/destroy functions or should we put those onto the
@@ -125,7 +127,9 @@ public:
     virtual void deleteCommandRecorder(Handle<CommandRecorder_t> handle) = 0;
     virtual ApiCommandRecorder *getCommandRecorder(const Handle<CommandRecorder_t> &handle) = 0;
 
-    virtual Handle<RenderPassCommandRecorder_t> createRenderPassCommandRecorder(const Handle<Device_t> &deviceHandle, const RenderPassOptions &options) = 0;
+    virtual Handle<RenderPassCommandRecorder_t> createRenderPassCommandRecorder(const Handle<Device_t> &deviceHandle,
+                                                                                const Handle<CommandRecorder_t> commandRecorderHandle,
+                                                                                const RenderPassCommandRecorderOptions &options) = 0;
     virtual void deleteRenderPassCommandRecorder(Handle<RenderPassCommandRecorder_t> handle) = 0;
     virtual ApiRenderPassCommandRecorder *getRenderPassCommandRecorder(const Handle<RenderPassCommandRecorder_t> &handle) = 0;
 

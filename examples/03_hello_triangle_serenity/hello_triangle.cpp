@@ -104,7 +104,8 @@ void HelloTriangle::initializeScene()
         .colorAttachments = {
             {
                 .view = {}, // Not setting the swapchain texture view just yet
-                .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f }
+                .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
+                .finalLayout = TextureLayout::PresentSrc
             }
         },
         .depthStencilAttachment = {

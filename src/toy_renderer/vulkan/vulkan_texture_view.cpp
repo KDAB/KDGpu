@@ -2,9 +2,10 @@
 
 namespace ToyRenderer {
 
-VulkanTextureView::VulkanTextureView(VkImageView _imageView)
+VulkanTextureView::VulkanTextureView(VkImageView _imageView, const Handle<Texture_t> &_textureHandle)
     : ApiTextureView()
     , imageView(_imageView)
+    , textureHandle(_textureHandle)
 {
 }
 

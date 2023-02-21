@@ -14,6 +14,8 @@ struct ColorAttachment {
     AttachmentLoadOperation loadOperation{ AttachmentLoadOperation::Clear };
     AttachmentStoreOperation storeOperation{ AttachmentStoreOperation::Store };
     ColorClearValue clearValue;
+    TextureLayout initialLayout{ TextureLayout::ColorAttachmentOptimal };
+    TextureLayout finalLayout{ TextureLayout::ColorAttachmentOptimal };
 };
 
 struct DepthStencilAttachment {
@@ -24,9 +26,12 @@ struct DepthStencilAttachment {
     AttachmentLoadOperation stencilLoadOperation{ AttachmentLoadOperation::Clear };
     AttachmentStoreOperation stencilStoreOperation{ AttachmentStoreOperation::Store };
     uint32_t stencilClearValue{ 0 };
+    TextureLayout initialLayout{ TextureLayout::DepthStencilAttachmentOptimal };
+    TextureLayout finalLayout{ TextureLayout::DepthStencilAttachmentOptimal };
 };
 
-struct RenderPassOptions {
+// TODO: Make the depthStencilAttachment optional with std::optional?
+struct RenderPassCommandRecorderOptions {
     std::vector<ColorAttachment> colorAttachments;
     DepthStencilAttachment depthStencilAttachment;
 };

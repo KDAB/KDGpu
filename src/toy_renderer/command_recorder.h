@@ -3,7 +3,7 @@
 #include <toy_renderer/command_buffer.h>
 #include <toy_renderer/handle.h>
 #include <toy_renderer/render_pass_command_recorder.h>
-#include <toy_renderer/render_pass_options.h>
+#include <toy_renderer/render_pass_command_recorder_options.h>
 #include <toy_renderer/toy_renderer_export.h>
 
 namespace ToyRenderer {
@@ -23,7 +23,7 @@ class TOY_RENDERER_EXPORT CommandRecorder
 public:
     ~CommandRecorder();
 
-    RenderPassCommandRecorder beginRenderPass(const RenderPassOptions &options);
+    RenderPassCommandRecorder beginRenderPass(const RenderPassCommandRecorderOptions &options);
     CommandBuffer finish();
 
 protected:

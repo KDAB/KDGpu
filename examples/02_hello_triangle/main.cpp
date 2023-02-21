@@ -6,7 +6,7 @@
 #include <toy_renderer/formatters.h>
 #include <toy_renderer/gpu_core.h>
 #include <toy_renderer/queue.h>
-#include <toy_renderer/render_pass_options.h>
+#include <toy_renderer/render_pass_command_recorder_options.h>
 #include <toy_renderer/swapchain.h>
 #include <toy_renderer/swapchain_options.h>
 #include <toy_renderer/texture.h>
@@ -271,7 +271,7 @@ int main()
     // of the swapchain we wish to render to. So set up what we can here, and in the render loop we will
     // just update the color texture view.
     // clang-format off
-    RenderPassOptions opaquePassOptions = {
+    RenderPassCommandRecorderOptions opaquePassOptions = {
         .colorAttachments = {
             {
                 .view = {}, // Not setting the swapchain texture view just yet

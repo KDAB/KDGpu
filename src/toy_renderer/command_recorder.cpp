@@ -16,9 +16,9 @@ CommandRecorder::~CommandRecorder()
 {
 }
 
-RenderPassCommandRecorder CommandRecorder::beginRenderPass(const RenderPassOptions &options)
+RenderPassCommandRecorder CommandRecorder::beginRenderPass(const RenderPassCommandRecorderOptions &options)
 {
-    return RenderPassCommandRecorder(m_api, m_device, m_api->resourceManager()->createRenderPassCommandRecorder(m_device, options));
+    return RenderPassCommandRecorder(m_api, m_device, m_api->resourceManager()->createRenderPassCommandRecorder(m_device, m_commandRecorder, options));
 }
 
 CommandBuffer CommandRecorder::finish()

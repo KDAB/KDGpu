@@ -19,7 +19,7 @@ struct VulkanCommandRecorder : public ApiCommandRecorder {
                                    VulkanResourceManager *_vulkanResourceManager,
                                    const Handle<Device_t> &_deviceHandle);
 
-    Handle<RenderPassCommandRecorder_t> beginRenderPass(const RenderPassOptions &options) final;
+    Handle<RenderPassCommandRecorder_t> beginRenderPass(const RenderPassCommandRecorderOptions &options) final;
     Handle<CommandBuffer_t> finish() final;
 
     VkCommandPool commandPool{ VK_NULL_HANDLE };

@@ -4,7 +4,7 @@
 
 #include <toy_renderer/buffer.h>
 #include <toy_renderer/graphics_pipeline.h>
-#include <toy_renderer/render_pass_options.h>
+#include <toy_renderer/render_pass_command_recorder_options.h>
 
 class HelloTriangle : public ExampleEngineLayer
 {
@@ -18,5 +18,5 @@ protected:
 private:
     Buffer m_buffer;
     GraphicsPipeline m_pipeline;
-    RenderPassOptions m_opaquePassOptions;
+    RenderPassCommandRecorderOptions m_opaquePassOptions;
 };
