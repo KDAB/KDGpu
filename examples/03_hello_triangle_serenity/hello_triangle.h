@@ -16,6 +16,8 @@ protected:
     void render() override;
 
 private:
+    void updateClearColor();
+
     Buffer m_buffer;
     GraphicsPipeline m_pipeline;
     RenderPassCommandRecorderOptions m_opaquePassOptions;
