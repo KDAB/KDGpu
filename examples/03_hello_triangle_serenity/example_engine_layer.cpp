@@ -109,7 +109,6 @@ void ExampleEngineLayer::update()
     render();
 
     // Present the swapchain image
-    // TODO: Pass in the render finished semaphore as the wait semaphore
     // clang-format off
     PresentOptions presentOptions = {
         .waitSemaphores = {{ m_renderCompleteSemaphores[m_inFlightIndex].handle() }},
