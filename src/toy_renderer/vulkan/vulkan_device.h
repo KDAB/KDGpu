@@ -1,6 +1,7 @@
 #pragma once
 
 #include <toy_renderer/api/api_device.h>
+#include <toy_renderer/vulkan/vulkan_framebuffer.h>
 #include <toy_renderer/vulkan/vulkan_render_pass.h>
 
 #include <toy_renderer/handle.h>
@@ -15,7 +16,6 @@ namespace ToyRenderer {
 class VulkanResourceManager;
 
 struct Adapter_t;
-struct RenderPass_t;
 
 struct VulkanDevice : public ApiDevice {
     explicit VulkanDevice(VkDevice _device,
@@ -36,6 +36,7 @@ struct VulkanDevice : public ApiDevice {
     std::vector<QueueDescription> queueDescriptions;
     std::vector<VkCommandPool> commandPools; // Indexed by queue type (family)
     std::unordered_map<VulkanRenderPassKey, Handle<RenderPass_t>> renderPasses;
+    std::unordered_map<VulkanFramebufferKey, Handle<Framebuffer_t>> framebuffers;
 };
 
 } // namespace ToyRenderer

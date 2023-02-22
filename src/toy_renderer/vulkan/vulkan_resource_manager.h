@@ -9,6 +9,7 @@
 #include <toy_renderer/vulkan/vulkan_command_buffer.h>
 #include <toy_renderer/vulkan/vulkan_command_recorder.h>
 #include <toy_renderer/vulkan/vulkan_device.h>
+#include <toy_renderer/vulkan/vulkan_framebuffer.h>
 #include <toy_renderer/vulkan/vulkan_gpu_semaphore.h>
 #include <toy_renderer/vulkan/vulkan_graphics_pipeline.h>
 #include <toy_renderer/vulkan/vulkan_instance.h>
@@ -103,7 +104,9 @@ public:
     VulkanRenderPassCommandRecorder *getRenderPassCommandRecorder(const Handle<RenderPassCommandRecorder_t> &handle) final { return m_renderPassCommandRecorders.get(handle); }
 
     // TODO: Should we make this part of the ResourceManager api? Or combine it with the public RenderPass api?
+    // TODO: Should we pass in specific options types here for render passes and framebuffers?
     Handle<RenderPass_t> createRenderPass(const Handle<Device_t> &deviceHandle, const RenderPassCommandRecorderOptions &options);
+    Handle<Framebuffer_t> createFramebuffer(const Handle<Device_t> &deviceHandle, const VulkanFramebufferKey &options);
 
     VulkanCommandBuffer *getCommandBuffer(const Handle<CommandBuffer_t> &handle) final { return m_commandBuffers.get(handle); }
 
@@ -129,7 +132,7 @@ private:
     Pool<VulkanRenderPassCommandRecorder, RenderPassCommandRecorder_t> m_renderPassCommandRecorders{ 32 };
     Pool<VulkanCommandBuffer, CommandBuffer_t> m_commandBuffers{ 128 };
     Pool<VulkanRenderPass, RenderPass_t> m_renderPasses{ 16 };
-    // Pool<VulkanFramebuffer, Framebuffer_t> m_framebuffers{ 16 };
+    Pool<VulkanFramebuffer, Framebuffer_t> m_framebuffers{ 16 };
 };
 
 } // namespace ToyRenderer

@@ -8,12 +8,16 @@ namespace ToyRenderer {
 
 VulkanSwapchain::VulkanSwapchain(VkSwapchainKHR _swapchain,
                                  Format _format,
+                                 Extent3D _extent,
+                                 uint32_t _arrayLayers,
                                  TextureUsageFlags _imageUsageFlags,
                                  VulkanResourceManager *_vulkanResourceManager,
                                  const Handle<Device_t> &_deviceHandle)
     : ApiSwapchain()
     , swapchain(_swapchain)
     , format(_format)
+    , extent(_extent)
+    , arrayLayers(_arrayLayers)
     , imageUsageFlags(_imageUsageFlags)
     , vulkanResourceManager(_vulkanResourceManager)
     , deviceHandle(_deviceHandle)
@@ -43,6 +47,9 @@ std::vector<Handle<Texture_t>> VulkanSwapchain::getTextures()
                         vkImages[i],
                         VK_NULL_HANDLE, // No allocation for swapchain images
                         format,
+                        extent,
+                        1,
+                        arrayLayers,
                         imageUsageFlags,
                         vulkanResourceManager,
                         deviceHandle)));

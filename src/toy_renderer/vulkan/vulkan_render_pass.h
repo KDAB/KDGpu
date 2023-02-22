@@ -4,10 +4,9 @@
 
 #include <toy_renderer/handle.h>
 #include <toy_renderer/render_pass_command_recorder_options.h>
+#include <toy_renderer/utils/hash_utils.h>
 
 #include <vulkan/vulkan.h>
-
-#include <functional>
 
 namespace ToyRenderer {
 
@@ -119,13 +118,6 @@ struct VulkanRenderPassKey {
     std::vector<VulkanRenderPassKeyColorAttachment> colorAttachments;
     VulkanRenderPassKeyDepthStencilAttachment depthStencilAttachment;
 };
-
-template<class T>
-inline void hash_combine(uint64_t &seed, const T &v)
-{
-    std::hash<T> hasher;
-    seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-}
 
 class VulkanResourceManager;
 

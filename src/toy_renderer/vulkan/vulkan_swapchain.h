@@ -16,6 +16,8 @@ struct Device_t;
 struct VulkanSwapchain : public ApiSwapchain {
     explicit VulkanSwapchain(VkSwapchainKHR _swapchain,
                              Format _format,
+                             Extent3D _extent,
+                             uint32_t _arrayLayers,
                              TextureUsageFlags _imageUsageFlags,
                              VulkanResourceManager *_vulkanResourceManager,
                              const Handle<Device_t> &_deviceHandle);
@@ -26,6 +28,8 @@ struct VulkanSwapchain : public ApiSwapchain {
 
     VkSwapchainKHR swapchain{ VK_NULL_HANDLE };
     Format format;
+    Extent3D extent;
+    uint32_t arrayLayers;
     TextureUsageFlags imageUsageFlags;
     VulkanResourceManager *vulkanResourceManager{ nullptr };
     Handle<Device_t> deviceHandle;

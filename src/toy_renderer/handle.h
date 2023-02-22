@@ -1,5 +1,7 @@
 #pragma once
 
+#include <toy_renderer/utils/hash_utils.h>
+
 #include <stdint.h>
 
 template<typename T>
@@ -42,3 +44,20 @@ bool operator!=(const Handle<T> &lhs, const Handle<T> &rhs)
 {
     return !(lhs == rhs);
 }
+
+namespace std {
+
+template<typename T>
+struct hash<Handle<T>> {
+    size_t operator()(const Handle<T> &handle) const
+    {
+        uint64_t hash = 0;
+
+        ToyRenderer::hash_combine(hash, handle.index());
+        ToyRenderer::hash_combine(hash, handle.generation());
+
+        return hash;
+    }
+};
+
+} // namespace std

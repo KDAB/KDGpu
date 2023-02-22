@@ -185,6 +185,8 @@ Handle<Swapchain_t> VulkanResourceManager::createSwapchain(const Handle<Device_t
     const auto swapchainHandle = m_swapchains.emplace(VulkanSwapchain{
             vkSwapchain,
             options.format,
+            Extent3D{ options.imageExtent.width, options.imageExtent.height, 1 },
+            options.imageLayers,
             options.imageUsageFlags,
             this,
             deviceHandle });
@@ -256,6 +258,9 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> de
             vkImage,
             vmaAllocation,
             options.format,
+            options.extent,
+            options.mipLevels,
+            options.arrayLayers,
             options.usage,
             this,
             deviceHandle));
@@ -942,14 +947,14 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
 
     // Find or create a render pass object that matches the request
     const VulkanRenderPassKey renderPassKey{ options };
-    auto it = vulkanDevice->renderPasses.find(renderPassKey);
+    auto itRenderPass = vulkanDevice->renderPasses.find(renderPassKey);
     Handle<RenderPass_t> vulkanRenderPassHandle;
-    if (it == vulkanDevice->renderPasses.end()) {
+    if (itRenderPass == vulkanDevice->renderPasses.end()) {
         // TODO: Create the render pass and cache the handle for it
         vulkanRenderPassHandle = createRenderPass(deviceHandle, options);
         vulkanDevice->renderPasses.insert({ renderPassKey, vulkanRenderPassHandle });
     } else {
-        vulkanRenderPassHandle = it->second;
+        vulkanRenderPassHandle = itRenderPass->second;
     }
 
     VulkanRenderPass *vulkanRenderPass = m_renderPasses.get(vulkanRenderPassHandle);
@@ -960,13 +965,63 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
     VkRenderPass vkRenderPass = vulkanRenderPass->renderPass;
 
     // TODO: Find or create a framebuffer as per the render pass above
+    // TODO: Include resolve attachments if using MSAA.
+    std::vector<Handle<TextureView_t>> attachments;
+    attachments.reserve(2 * options.colorAttachments.size() + 1); // (Color + Resolve) + DepthStencil
+    for (const auto &colorAttachment : options.colorAttachments)
+        attachments.push_back(colorAttachment.view);
+    if (options.depthStencilAttachment.view.isValid())
+        attachments.push_back(options.depthStencilAttachment.view);
+
+    // Take the dimensions of the first attachment as the framebuffer dimensions
+    // TODO: Should this be the dimensions of the view rather than the texture itself? i.e. can we
+    // use views to render to a subset of a texture?
+    assert(!attachments.empty());
+    VulkanTextureView *firstView = getTextureView(attachments.at(0));
+    if (!firstView) {
+        // TODO: Log invalid attachment
+        return {};
+    }
+    VulkanTexture *firstTexture = getTexture(firstView->textureHandle);
+    if (!firstTexture) {
+        // TODO: Log invalid attachment
+        return {};
+    }
+
+    // TODO: Use VK_FRAMEBUFFER_CREATE_IMAGELESS_BIT to create just one framebuffer rather than
+    // 1 per swapchain image by allowing us to defer the image configuration to the begin render
+    // pass call. See.
+    // https://github.com/KhronosGroup/Vulkan-Guide/blob/main/chapters/extensions/VK_KHR_imageless_framebuffer.adoc
+    VulkanFramebufferKey framebufferKey;
+    framebufferKey.renderPass = vulkanRenderPassHandle;
+    framebufferKey.attachments = attachments;
+    framebufferKey.width = firstTexture->extent.width;
+    framebufferKey.height = firstTexture->extent.height;
+    framebufferKey.layers = firstTexture->arrayLayers;
+
+    auto itFramebuffer = vulkanDevice->framebuffers.find(framebufferKey);
+    Handle<Framebuffer_t> vulkanFramebufferHandle;
+    if (itFramebuffer == vulkanDevice->framebuffers.end()) {
+        // Create the framebuffer and cache the handle for it
+        vulkanFramebufferHandle = createFramebuffer(deviceHandle, framebufferKey);
+        vulkanDevice->framebuffers.insert({ framebufferKey, vulkanFramebufferHandle });
+    } else {
+        vulkanFramebufferHandle = itFramebuffer->second;
+    }
+
+    VulkanFramebuffer *vulkanFramebuffer = m_framebuffers.get(vulkanFramebufferHandle);
+    if (!vulkanFramebuffer) {
+        // TODO: Log about not finding/creating a framebuffer
+        return {};
+    }
+    VkFramebuffer vkFramebuffer = vulkanFramebuffer->framebuffer;
 
     VkRenderPassBeginInfo renderPassInfo = {};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = vkRenderPass;
+    renderPassInfo.framebuffer = vkFramebuffer;
 
     // TODO:
-    // renderPassInfo.framebuffer = vkFramebuffer;
     // render area
     // clear values
 
@@ -1120,6 +1175,37 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
 
     const auto vulkanRenderPassHandle = m_renderPasses.emplace(VulkanRenderPass(vkRenderPass, this, deviceHandle));
     return vulkanRenderPassHandle;
+}
+
+Handle<Framebuffer_t> VulkanResourceManager::createFramebuffer(const Handle<Device_t> &deviceHandle, const VulkanFramebufferKey &options)
+{
+    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
+
+    VkRenderPass vkRenderPass = m_renderPasses.get(options.renderPass)->renderPass;
+
+    const uint32_t attachmentCount = static_cast<uint32_t>(options.attachments.size());
+    std::vector<VkImageView> attachments;
+    attachments.reserve(attachmentCount);
+    for (uint32_t i = 0; i < attachmentCount; ++i)
+        attachments.push_back(m_textureViews.get(options.attachments.at(i))->imageView);
+
+    VkFramebufferCreateInfo framebufferInfo = {};
+    framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+    framebufferInfo.renderPass = vkRenderPass;
+    framebufferInfo.attachmentCount = attachmentCount;
+    framebufferInfo.pAttachments = attachments.data();
+    framebufferInfo.width = options.width;
+    framebufferInfo.height = options.height;
+    framebufferInfo.layers = options.layers;
+
+    VkFramebuffer vkFramebuffer{ VK_NULL_HANDLE };
+    if (vkCreateFramebuffer(vulkanDevice->device, &framebufferInfo, nullptr, &vkFramebuffer) != VK_SUCCESS) {
+        // TODO: Log failure to create a framebuffer
+        return {};
+    }
+
+    const auto vulkanFramebufferHandle = m_framebuffers.emplace(VulkanFramebuffer(vkFramebuffer));
+    return vulkanFramebufferHandle;
 }
 
 Handle<BindGroup> VulkanResourceManager::createBindGroup(BindGroupDescription desc)
