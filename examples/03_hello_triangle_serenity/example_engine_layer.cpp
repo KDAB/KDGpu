@@ -110,11 +110,15 @@ void ExampleEngineLayer::update()
 
     // Present the swapchain image
     // TODO: Pass in the render finished semaphore as the wait semaphore
+    // clang-format off
     PresentOptions presentOptions = {
-        .swapchainInfos = {
-                { .swapchain = m_swapchain.handle(),
-                  .imageIndex = m_currentSwapchainImageIndex } }
+        .waitSemaphores = {{ m_renderCompleteSemaphores[m_inFlightIndex].handle() }},
+        .swapchainInfos = {{
+            .swapchain = m_swapchain.handle(),
+            .imageIndex = m_currentSwapchainImageIndex
+        }}
     };
+    // clang-format on
     m_queue.present(presentOptions);
 
     // TODO: Use fences to not block here
