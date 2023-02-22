@@ -142,10 +142,8 @@ void HelloTriangle::render()
     // Bind pipeline
     opaquePass.setPipeline(m_pipeline.handle());
 
-    // // Bind vertex buffer
-    // opaquePass.setVertexBuffer(0, m_buffer.handle());
-
-    // // Bind any resources (none needed for hello_triangle)
+    // Bind vertex buffer
+    opaquePass.setVertexBuffer(0, m_buffer.handle());
 
     // // Issue draw command
     // const DrawCommand drawCmd = { .vertexCount = 3 };
