@@ -1021,9 +1021,33 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
     renderPassInfo.renderPass = vkRenderPass;
     renderPassInfo.framebuffer = vkFramebuffer;
 
-    // TODO:
-    // render area
-    // clear values
+    // Render area - assume full view area for now. Can expose as an option later if needed.
+    renderPassInfo.renderArea = {
+        .offset = { .x = 0, .y = 0 },
+        .extent = { .width = firstTexture->extent.width, .height = firstTexture->extent.height }
+    };
+
+    // Clear values
+    // TODO: Include resolve clear colors if using MSAA.
+    std::vector<VkClearValue> vkClearValues;
+    vkClearValues.reserve(2 * options.colorAttachments.size() + 1);
+    for (const auto &colorAttachment : options.colorAttachments) {
+        VkClearValue vkClearValue = {};
+        vkClearValue.color.uint32[0] = colorAttachment.clearValue.uint32[0];
+        vkClearValue.color.uint32[1] = colorAttachment.clearValue.uint32[1];
+        vkClearValue.color.uint32[2] = colorAttachment.clearValue.uint32[2];
+        vkClearValue.color.uint32[3] = colorAttachment.clearValue.uint32[3];
+        vkClearValues.emplace_back(vkClearValue);
+    }
+    if (options.depthStencilAttachment.view.isValid()) {
+        VkClearValue vkClearValue = {};
+        vkClearValue.depthStencil.depth = options.depthStencilAttachment.depthClearValue;
+        vkClearValue.depthStencil.stencil = options.depthStencilAttachment.stencilClearValue;
+        vkClearValues.emplace_back(vkClearValue);
+    }
+
+    renderPassInfo.clearValueCount = static_cast<uint32_t>(vkClearValues.size());
+    renderPassInfo.pClearValues = vkClearValues.data();
 
     VulkanCommandRecorder *vulkanCommandRecorder = m_commandRecorders.get(commandRecorderHandle);
     if (!vulkanCommandRecorder) {
@@ -1034,7 +1058,9 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
 
     vkCmdBeginRenderPass(vkCommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-    return {};
+    const auto vulkanRenderPassCommandRecorderHandle = m_renderPassCommandRecorders.emplace(
+            VulkanRenderPassCommandRecorder(vkCommandBuffer, this, deviceHandle));
+    return vulkanRenderPassCommandRecorderHandle;
 }
 
 void VulkanResourceManager::deleteRenderPassCommandRecorder(Handle<RenderPassCommandRecorder_t> handle)
