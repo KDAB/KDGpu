@@ -21,7 +21,8 @@ RenderPassCommandRecorder::~RenderPassCommandRecorder()
 
 void RenderPassCommandRecorder::setPipeline(const Handle<GraphicsPipeline_t> &pipeline)
 {
-    // TODO: Implement me!
+    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    apiRenderPassCommandRecorder->setPipeline(pipeline);
 }
 
 void RenderPassCommandRecorder::setVertexBuffer(uint32_t index, const Handle<Buffer_t> &buffer)

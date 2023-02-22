@@ -17,6 +17,7 @@ struct VulkanRenderPassCommandRecorder : public ApiRenderPassCommandRecorder {
                                              VulkanResourceManager *_vulkanResourceManager,
                                              const Handle<Device_t> &_deviceHandle);
 
+    void setPipeline(const Handle<GraphicsPipeline_t> &pipeline) final;
     void end() final;
 
     VkCommandBuffer commandBuffer{ VK_NULL_HANDLE };
