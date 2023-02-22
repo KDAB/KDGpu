@@ -1121,7 +1121,7 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
 
             VkAttachmentReference colorAttachmentRef = {};
             colorAttachmentRef.attachment = attachmentIndex++;
-            colorAttachmentRef.layout = textureLayoutToVkImageLayout(renderTarget.initialLayout);
+            colorAttachmentRef.layout = textureLayoutToVkImageLayout(renderTarget.layout);
             colorAttachmentRefs.emplace_back(colorAttachmentRef);
 
             // If using multisampling, then for each color attachment we need a resolve attachment
@@ -1172,7 +1172,7 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
         allAttachments.emplace_back(depthStencilAttachment);
 
         depthStencilAttachmentRef.attachment = attachmentIndex++;
-        depthStencilAttachmentRef.layout = textureLayoutToVkImageLayout(renderTarget.initialLayout);
+        depthStencilAttachmentRef.layout = textureLayoutToVkImageLayout(renderTarget.layout);
     }
 
     // Just create a single subpass. We do not support multiple subpasses at this
