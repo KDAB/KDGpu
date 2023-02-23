@@ -32,6 +32,10 @@ private:
 
     friend class Swapchain;
     friend class Device;
+    friend bool operator==(const Texture &, const Texture &);
 };
+
+bool operator==(const Texture &a, const Texture &b);
+bool operator!=(const Texture &a, const Texture &b);
 
 } // namespace ToyRenderer

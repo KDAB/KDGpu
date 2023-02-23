@@ -26,4 +26,14 @@ TextureView Texture::createView(const TextureViewOptions &options) const
     return TextureView(m_api, textureViewHandle);
 }
 
+bool operator==(const Texture &a, const Texture &b)
+{
+    return a.m_api == b.m_api && a.m_device == b.m_device && a.m_texture == b.m_texture;
+}
+
+bool operator!=(const Texture &a, const Texture &b)
+{
+    return !(a == b);
+}
+
 } // namespace ToyRenderer
