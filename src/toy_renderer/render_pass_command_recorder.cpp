@@ -45,7 +45,8 @@ void RenderPassCommandRecorder::draw(const DrawCommand &drawCommand)
 
 void RenderPassCommandRecorder::draw(const std::vector<DrawCommand> &drawCommands)
 {
-    // TODO: Implement me!
+    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    apiRenderPassCommandRecorder->draw(drawCommands);
 }
 
 } // namespace ToyRenderer

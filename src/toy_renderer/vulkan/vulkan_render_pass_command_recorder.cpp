@@ -55,6 +55,17 @@ void VulkanRenderPassCommandRecorder::draw(const DrawCommand &drawCommand)
               drawCommand.firstInstance);
 }
 
+void VulkanRenderPassCommandRecorder::draw(const std::vector<DrawCommand> &drawCommands)
+{
+    for (const auto &drawCommand : drawCommands) {
+        vkCmdDraw(commandBuffer,
+                  drawCommand.vertexCount,
+                  drawCommand.instanceCount,
+                  drawCommand.firstVertex,
+                  drawCommand.firstInstance);
+    }
+}
+
 void VulkanRenderPassCommandRecorder::end()
 {
     vkCmdEndRenderPass(commandBuffer);
