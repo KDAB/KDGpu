@@ -12,6 +12,9 @@ struct Device_t;
 struct GraphicsPipeline_t;
 struct RenderPassCommandRecorder_t;
 
+struct Rect2D;
+struct Viewport;
+
 class GraphicsApi;
 
 struct DrawCommand {
@@ -30,6 +33,9 @@ public:
 
     // TODO: Add overload for setting many vertex buffers at once
     void setVertexBuffer(uint32_t index, const Handle<Buffer_t> &buffer);
+
+    void setViewport(const Viewport &viewport);
+    void setScissor(const Rect2D &scissor);
 
     void draw(const DrawCommand &drawCommand);
     void draw(const std::vector<DrawCommand> &drawCommands);

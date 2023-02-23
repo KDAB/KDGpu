@@ -52,6 +52,15 @@ union ColorClearValue {
     uint32_t uint32[4];
 };
 
+struct Viewport {
+    float x{ 0.0f };
+    float y{ 0.0f };
+    float width;
+    float height;
+    float minDepth{ 0.0f };
+    float maxDepth{ 1.0f };
+};
+
 enum class SampleCountFlagBits {
     Samples1Bit = 0x00000001,
     Samples2Bit = 0x00000002,
