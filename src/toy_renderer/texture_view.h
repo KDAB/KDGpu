@@ -25,7 +25,7 @@ private:
     Handle<TextureView_t> m_textureView;
 
     friend class Texture;
-    friend bool operator==(const TextureView &, const TextureView &);
+    friend TOY_RENDERER_EXPORT bool operator==(const TextureView &, const TextureView &);
 };
 
 TOY_RENDERER_EXPORT bool operator==(const TextureView &a, const TextureView &b);

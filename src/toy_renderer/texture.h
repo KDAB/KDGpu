@@ -32,7 +32,7 @@ private:
 
     friend class Swapchain;
     friend class Device;
-    friend bool operator==(const Texture &, const Texture &);
+    friend TOY_RENDERER_EXPORT bool operator==(const Texture &, const Texture &);
 };
 
 TOY_RENDERER_EXPORT bool operator==(const Texture &a, const Texture &b);

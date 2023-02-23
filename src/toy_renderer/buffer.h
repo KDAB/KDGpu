@@ -32,7 +32,7 @@ private:
     void *m_mapped{ nullptr };
 
     friend class Device;
-    friend bool operator==(const Buffer &, const Buffer &);
+    friend TOY_RENDERER_EXPORT bool operator==(const Buffer &, const Buffer &);
 };
 
 TOY_RENDERER_EXPORT bool operator==(const Buffer &a, const Buffer &b);
