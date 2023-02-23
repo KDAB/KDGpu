@@ -25,28 +25,14 @@ Instance::~Instance()
     // TODO: Destroy the instance using the underlying API
 }
 
-AdapterAndDevice Instance::createDefaultDevice(const Surface &surface)
+AdapterAndDevice Instance::createDefaultDevice(const Surface &surface,
+                                               AdapterDeviceType deviceType) const
 {
-    // TODO: Rewrite this example code to create a device that supports:
-    //          * Presentation
-    //          * Graphics Queue
-    //          * Compute Queue
-
     // Enumerate the adapters (physical devices) and select one to use. Here we look for
     // a discrete GPU. In a real app, we could fallback to an integrated one.
-    Adapter selectedAdapter;
-    for (auto &adapter : adapters()) {
-        const auto properties = adapter.properties();
-        spdlog::critical("Found device: Name: {}, Type: {}", properties.deviceName, properties.deviceType);
-
-        if (properties.deviceType == AdapterDeviceType::DiscreteGpu) {
-            selectedAdapter = adapter;
-            break;
-        }
-    }
-
+    Adapter selectedAdapter = selectAdapter(deviceType).value_or(Adapter());
     if (!selectedAdapter.isValid()) {
-        spdlog::critical("Unable to find a discrete GPU. Aborting...");
+        spdlog::critical("Unable to find a suitable Adapter. Aborting...");
         return {};
     }
 
@@ -74,7 +60,7 @@ AdapterAndDevice Instance::createDefaultDevice(const Surface &surface)
     return { selectedAdapter, device };
 }
 
-std::span<Adapter> Instance::adapters()
+std::span<Adapter> Instance::adapters() const
 {
     if (m_adapters.empty()) {
         auto apiInstance = m_api->resourceManager()->getInstance(m_instance);
@@ -88,6 +74,18 @@ std::span<Adapter> Instance::adapters()
             m_adapters.emplace_back(Adapter{ m_api, adapterHandles[adapterIndex] });
     }
     return std::span{ m_adapters };
+}
+
+std::optional<Adapter> Instance::selectAdapter(AdapterDeviceType deviceType) const
+{
+    const auto &adaptersList = adapters();
+    for (const Adapter &adapter : adaptersList) {
+        const AdapterProperties &properties = adapter.properties();
+
+        if (properties.deviceType == deviceType)
+            return { adapter };
+    }
+    return {};
 }
 
 Surface Instance::createSurface(const SurfaceOptions &options)

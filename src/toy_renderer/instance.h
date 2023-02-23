@@ -12,6 +12,7 @@
 #include <span>
 #include <string>
 #include <vector>
+#include <optional>
 
 #if defined(TOY_RENDERER_PLATFORM_WIN32)
 #define NOMINMAX
@@ -54,9 +55,11 @@ public:
     Handle<Instance_t> handle() const noexcept { return m_instance; }
     bool isValid() const { return m_instance.isValid(); }
 
-    AdapterAndDevice createDefaultDevice(const Surface &surface);
+    AdapterAndDevice createDefaultDevice(const Surface &surface,
+                                         AdapterDeviceType deviceType = AdapterDeviceType::DiscreteGpu) const;
 
-    std::span<Adapter> adapters();
+    std::span<Adapter> adapters() const;
+    std::optional<Adapter> selectAdapter(AdapterDeviceType deviceType) const;
 
     // TODO: Support Serenity::Window, QWindow etc
     //
@@ -71,7 +74,7 @@ private:
 
     GraphicsApi *m_api{ nullptr };
     Handle<Instance_t> m_instance;
-    std::vector<Adapter> m_adapters;
+    mutable std::vector<Adapter> m_adapters;
 
     friend class GraphicsApi;
 };
