@@ -32,6 +32,33 @@ void VulkanRenderPassCommandRecorder::setVertexBuffer(uint32_t index, const Hand
     vkCmdBindVertexBuffers(commandBuffer, index, 1, buffers.data(), offsets.data());
 }
 
+void VulkanRenderPassCommandRecorder::draw(const DrawCommand &drawCommand)
+{
+    // TODO: Expose the viewport and scissor setting commands
+    // TODO: Set default viewport and scissor settings when starting a render pass
+    VkViewport vkViewport = {
+        .x = 0,
+        .y = 0,
+        .width = 1920,
+        .height = 1080,
+        .minDepth = 0,
+        .maxDepth = 1
+    };
+    vkCmdSetViewport(commandBuffer, 0, 1, &vkViewport);
+
+    VkRect2D vkScissorRect = {
+        .offset = { 0, 0 },
+        .extent = { 1920, 1080 }
+    };
+    vkCmdSetScissor(commandBuffer, 0, 1, &vkScissorRect);
+
+    vkCmdDraw(commandBuffer,
+              drawCommand.vertexCount,
+              drawCommand.instanceCount,
+              drawCommand.firstVertex,
+              drawCommand.firstInstance);
+}
+
 void VulkanRenderPassCommandRecorder::end()
 {
     vkCmdEndRenderPass(commandBuffer);

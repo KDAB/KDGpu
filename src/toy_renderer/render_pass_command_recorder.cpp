@@ -37,12 +37,13 @@ void RenderPassCommandRecorder::end()
     apiRenderPassCommandRecorder->end();
 }
 
-void RenderPassCommandRecorder::draw(const DrawCommand &drawCmd)
+void RenderPassCommandRecorder::draw(const DrawCommand &drawCommand)
 {
-    // TODO: Implement me!
+    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    apiRenderPassCommandRecorder->draw(drawCommand);
 }
 
-void RenderPassCommandRecorder::draw(const std::vector<DrawCommand> &drawCmds)
+void RenderPassCommandRecorder::draw(const std::vector<DrawCommand> &drawCommands)
 {
     // TODO: Implement me!
 }

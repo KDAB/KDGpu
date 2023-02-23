@@ -31,8 +31,8 @@ public:
     // TODO: Add overload for setting many vertex buffers at once
     void setVertexBuffer(uint32_t index, const Handle<Buffer_t> &buffer);
 
-    void draw(const DrawCommand &drawCmd);
-    void draw(const std::vector<DrawCommand> &drawCmds);
+    void draw(const DrawCommand &drawCommand);
+    void draw(const std::vector<DrawCommand> &drawCommands);
 
     void end();
 

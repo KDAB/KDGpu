@@ -145,9 +145,9 @@ void HelloTriangle::render()
     // Bind vertex buffer
     opaquePass.setVertexBuffer(0, m_buffer.handle());
 
-    // // Issue draw command
-    // const DrawCommand drawCmd = { .vertexCount = 3 };
-    // opaquePass.draw(drawCmd);
+    // Issue draw command
+    const DrawCommand drawCmd = { .vertexCount = 3 };
+    opaquePass.draw(drawCmd);
 
     // End render pass
     opaquePass.end();
