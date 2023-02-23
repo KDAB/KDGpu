@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Serenity/gui/window.h>
+#include <KDGui/window.h>
 
 #include <toy_renderer/surface.h>
 
@@ -12,7 +12,7 @@ class Instance;
 
 namespace ToyRendererSerenity {
 
-class TOY_RENDERER_SERENITY_EXPORT View : public Serenity::Window
+class TOY_RENDERER_SERENITY_EXPORT View : public KDGui::Window
 {
 public:
     View();

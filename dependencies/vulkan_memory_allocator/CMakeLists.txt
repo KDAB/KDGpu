@@ -49,4 +49,4 @@ target_compile_definitions(
 
 add_library(ToyRenderer::vulkan_memory_allocator ALIAS vulkan_memory_allocator)
 
-install(FILES ${vulkanmemoryallocator_SOURCE_DIR}/include/vk_mem_alloc.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/toy_renderer/vulkan_memory_allocator/)
+install(FILES ${vulkan_memory_allocator_SOURCE_DIR}/include/vk_mem_alloc.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/toy_renderer/vulkan_memory_allocator/)

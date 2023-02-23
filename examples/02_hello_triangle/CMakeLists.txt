@@ -10,7 +10,7 @@ add_executable(
 target_link_libraries(
     ${PROJECT_NAME}
     toy-renderer
-    Serenity::Gui
+    KDUtils::Gui
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")

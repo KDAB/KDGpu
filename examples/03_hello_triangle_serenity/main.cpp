@@ -1,9 +1,9 @@
 #include "engine.h"
 #include "hello_triangle.h"
 
-#include <Serenity/gui/gui_application.h>
+#include <KDGui/gui_application.h>
 
-using namespace Serenity;
+using namespace KDGui;
 using namespace ToyRenderer;
 
 int main()

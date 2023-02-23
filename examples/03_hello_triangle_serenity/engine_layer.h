@@ -1,10 +1,10 @@
 #pragma once
 
-#include <Serenity/core/object.h>
+#include <KDFoundation/object.h>
 
 class Engine;
 
-class EngineLayer : public Serenity::Object
+class EngineLayer : public KDFoundation::Object
 {
 public:
     ~EngineLayer() override;

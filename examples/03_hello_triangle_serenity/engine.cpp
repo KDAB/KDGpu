@@ -1,10 +1,10 @@
 #include "engine.h"
 
-#include <Serenity/core/core_application.h>
-#include <Serenity/core/postman.h>
+#include <KDFoundation/core_application.h>
+#include <KDFoundation/postman.h>
 
 Engine::Engine()
-    : Serenity::Object()
+    : KDFoundation::Object()
 {
     m_logger = spdlog::get("engine");
     if (!m_logger) {
@@ -14,7 +14,7 @@ Engine::Engine()
 
     running.valueChanged().connect(&Engine::onRunningChanged, this);
 
-    auto app = Serenity::CoreApplication::instance();
+    auto app = KDFoundation::CoreApplication::instance();
     if (app)
         app->postman()->addFilter(this);
 }
@@ -24,7 +24,7 @@ Engine::~Engine()
     // Stop execution of the engine
     running = false;
 
-    auto app = Serenity::CoreApplication::instance();
+    auto app = KDFoundation::CoreApplication::instance();
     if (app)
         app->postman()->removeFilter(this);
 }
@@ -89,7 +89,7 @@ std::unique_ptr<EngineLayer> Engine::detachEngineLayer(EngineLayer *engineLayer)
     return takenEngineLayer;
 }
 
-void Engine::event(Serenity::EventReceiver *target, Serenity::Event *ev)
+void Engine::event(KDFoundation::EventReceiver *target, KDFoundation::Event *ev)
 {
     // Give the application layers each a chance to process the event.
     // We process these in the reverse order in which they were attached.
@@ -100,7 +100,7 @@ void Engine::event(Serenity::EventReceiver *target, Serenity::Event *ev)
     }
 
     // Handle events we care about
-    if (target == this && ev->type() == Serenity::Event::Type::Update) {
+    if (target == this && ev->type() == KDFoundation::Event::Type::Update) {
         // Do stuff for this frame
         doFrame();
 
@@ -116,7 +116,7 @@ void Engine::event(Serenity::EventReceiver *target, Serenity::Event *ev)
 
 void Engine::requestFrame()
 {
-    Serenity::CoreApplication::instance()->postEvent(this, std::make_unique<Serenity::UpdateEvent>());
+    KDFoundation::CoreApplication::instance()->postEvent(this, std::make_unique<KDFoundation::UpdateEvent>());
 }
 
 void Engine::doFrame()

@@ -17,8 +17,7 @@ add_library(Toy::RendererSerenity ALIAS toy-renderer-serenity)
 
 set(TOY_RENDERER_SERENITY_PUBLIC_LIBS
     Toy::Renderer
-    Serenity::Core
-    Serenity::Gui
+    KDUtils::Gui
 )
 
 target_link_libraries(toy-renderer-serenity

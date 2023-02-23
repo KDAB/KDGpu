@@ -13,13 +13,15 @@
 #include <toy_renderer/texture_options.h>
 #include <toy_renderer/vulkan/vulkan_graphics_api.h>
 
-#include <Serenity/gui/gui_application.h>
-#include <Serenity/gui/window.h>
-#if defined(TOY_RENDERER_PLATFORM_WIN32)
-#include <Serenity/gui/platform/win32/win32_platform_window.h>
+#include <KDGui/gui_application.h>
+#include <KDGui/window.h>
+
+#include <KDFoundation/config.h> // For KD_PLATFORM
+#if defined(KD_PLATFORM_WIN32)
+#include <KDGui/platform/win32/win32_platform_window.h>
 #endif
-#if defined(TOY_RENDERER_PLATFORM_LINUX)
-#include <Serenity/gui/platform/linux/xcb/linux_xcb_platform_window.h>
+#if defined(KD_PLATFORM_LINUX)
+#include <KDGui/platform/linux/xcb/linux_xcb_platform_window.h>
 #endif
 
 #include <spdlog/spdlog.h>
@@ -31,7 +33,7 @@
 #include <span>
 #include <vector>
 
-using namespace Serenity;
+using namespace KDGui;
 using namespace ToyRenderer;
 
 namespace ToyRenderer {
@@ -88,14 +90,14 @@ int main()
             app.quit();
     });
 
-#if defined(TOY_RENDERER_PLATFORM_WIN32)
+#if defined(KD_PLATFORM_WIN32)
     auto win32Window = dynamic_cast<Win32PlatformWindow *>(window.platformWindow());
     SurfaceOptions surfaceOptions = {
         .hWnd = win32Window->handle()
     };
 #endif
 
-#if defined(TOY_RENDERER_PLATFORM_LINUX)
+#if defined(KD_PLATFORM_LINUX)
     auto xcbWindow = dynamic_cast<LinuxXcbPlatformWindow *>(window.platformWindow());
     SurfaceOptions surfaceOptions = {
         .connection = xcbWindow->connection(),
@@ -244,7 +246,7 @@ int main()
             { .shaderModule = vertexShader.handle(), .stage = ShaderStageFlagBits::VertexBit },
             { .shaderModule = fragmentShader.handle(), .stage = ShaderStageFlagBits::FragmentBit }
         },
-        .layout = pipelineLayout.handle(), 
+        .layout = pipelineLayout.handle(),
         .vertex = {
             .buffers = {
                 { .binding = 0, .stride = 2 * 4 * sizeof(float) }

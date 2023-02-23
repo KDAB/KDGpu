@@ -2,8 +2,8 @@
 
 #include "engine_layer.h"
 
-#include <Serenity/core/object.h>
-#include <Serenity/core/logging.h>
+#include <KDFoundation/object.h>
+#include <KDFoundation/logging.h>
 
 #include <kdbindings/property.h>
 
@@ -14,7 +14,7 @@
 using namespace KDBindings;
 using TimePoint = std::chrono::time_point<std::chrono::high_resolution_clock>;
 
-class Engine : public Serenity::Object
+class Engine : public KDFoundation::Object
 {
 public:
     Property<bool> running{ false };
@@ -47,7 +47,7 @@ public:
         return nullptr;
     }
 
-    void event(Serenity::EventReceiver *target, Serenity::Event *ev) override;
+    void event(KDFoundation::EventReceiver *target, KDFoundation::Event *ev) override;
 
     void requestFrame();
     void doFrame();

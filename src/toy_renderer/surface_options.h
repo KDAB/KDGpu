@@ -1,29 +1,31 @@
 #pragma once
 
-#if defined(TOY_RENDERER_PLATFORM_WIN32)
+#include <KDFoundation/config.h>
+
+#if defined(KD_PLATFORM_WIN32)
 #define NOMINMAX
 #include <windows.h>
 #endif
 
-#if defined(TOY_RENDERER_PLATFORM_LINUX)
+#if defined(KD_PLATFORM_LINUX)
 #include <xcb/xproto.h>
 #endif
 
-#if defined(TOY_RENDERER_PLATFORM_MACOS)
+#if defined(KD_PLATFORM_MACOS)
 #endif
 
 namespace ToyRenderer {
 
 struct SurfaceOptions {
-#if defined(TOY_RENDERER_PLATFORM_WIN32)
+#if defined(KD_PLATFORM_WIN32)
     HWND hWnd;
 #endif
-#if defined(TOY_RENDERER_PLATFORM_LINUX)
+#if defined(KD_PLATFORM_LINUX)
     // TODO: Add Wayland support
     xcb_connection_t *connection;
     xcb_window_t window;
 #endif
-#if defined(TOY_RENDERER_PLATFORM_MACOS)
+#if defined(KD_PLATFORM_MACOS)
     CAMetalLayer *layer;
 #endif
 };

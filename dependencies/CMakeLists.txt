@@ -8,11 +8,11 @@ message(STATUS "Checking/updating dependencies. This may take a little while...
     Set the FETCHCONTENT_QUIET option to OFF to get verbose output.
 ")
 
+# KDUtils
+add_subdirectory(kdutils)
+
 # spdlog Logging Library
 add_subdirectory(spdlog)
-
-# serenity
-add_subdirectory(serenity)
 
 # VMA
 add_subdirectory(vulkan_memory_allocator)
