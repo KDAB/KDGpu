@@ -32,6 +32,10 @@ private:
     void *m_mapped{ nullptr };
 
     friend class Device;
+    friend bool operator==(const Buffer &, const Buffer &);
 };
+
+bool operator==(const Buffer &a, const Buffer &b);
+bool operator!=(const Buffer &a, const Buffer &b);
 
 } // namespace ToyRenderer

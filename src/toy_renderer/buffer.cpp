@@ -37,4 +37,14 @@ void Buffer::unmap()
     m_mapped = nullptr;
 }
 
+bool operator==(const Buffer &a, const Buffer &b)
+{
+    return a.m_api == b.m_api && a.m_device == b.m_device && a.m_buffer == b.m_buffer && a.m_mapped == b.m_mapped;
+}
+
+bool operator!=(const Buffer &a, const Buffer &b)
+{
+    return !(a == b);
+}
+
 } // namespace ToyRenderer
