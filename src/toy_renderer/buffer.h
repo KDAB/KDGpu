@@ -19,6 +19,8 @@ public:
     const Handle<Buffer_t> &handle() const noexcept { return m_buffer; }
     bool isValid() const noexcept { return m_buffer.isValid(); }
 
+    operator Handle<Buffer_t>() const noexcept { return m_buffer; }
+
     void *map();
     void unmap();
 

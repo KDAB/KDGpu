@@ -39,9 +39,11 @@ public:
     Queue();
     ~Queue();
 
+    const Handle<Queue_t> &handle() const noexcept { return m_queue; }
     bool isValid() const noexcept { return m_queue.isValid(); }
 
-    const Handle<Queue_t> &handle() const noexcept { return m_queue; }
+    operator Handle<Queue_t>() const noexcept { return m_queue; }
+
     QueueFlags flags() const noexcept { return m_flags; }
     uint32_t timestampValidBits() const noexcept { return m_timestampValidBits; }
     Extent3D minImageTransferGranularity() const noexcept { return m_minImageTransferGranularity; }

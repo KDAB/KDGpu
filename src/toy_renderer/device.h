@@ -40,6 +40,8 @@ public:
     Handle<Device_t> handle() const noexcept { return m_device; }
     bool isValid() const noexcept { return m_device.isValid(); }
 
+    operator Handle<Device_t>() const noexcept { return m_device; }
+
     std::span<Queue> queues() { return m_queues; }
 
     void waitUntilIdle();

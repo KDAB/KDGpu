@@ -73,10 +73,10 @@ void HelloTriangle::initializeScene()
     // clang-format off
     GraphicsPipelineOptions pipelineOptions = {
         .shaderStages = {
-            { .shaderModule = vertexShader.handle(), .stage = ShaderStageFlagBits::VertexBit },
-            { .shaderModule = fragmentShader.handle(), .stage = ShaderStageFlagBits::FragmentBit }
+            { .shaderModule = vertexShader, .stage = ShaderStageFlagBits::VertexBit },
+            { .shaderModule = fragmentShader, .stage = ShaderStageFlagBits::FragmentBit }
         },
-        .layout = pipelineLayout.handle(),
+        .layout = pipelineLayout,
         .vertex = {
             .buffers = {
                 { .binding = 0, .stride = 2 * 4 * sizeof(float) }
@@ -111,7 +111,7 @@ void HelloTriangle::initializeScene()
             }
         },
         .depthStencilAttachment = {
-            .view = m_depthTextureView.handle(),
+            .view = m_depthTextureView,
         }
     };
     // clang-format on
@@ -136,14 +136,14 @@ void HelloTriangle::render()
 
     // Begin render pass - oscillate the clear color just to show something changing.
     updateClearColor();
-    m_opaquePassOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex).handle();
+    m_opaquePassOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex);
     auto opaquePass = commandRecorder.beginRenderPass(m_opaquePassOptions);
 
     // Bind pipeline
-    opaquePass.setPipeline(m_pipeline.handle());
+    opaquePass.setPipeline(m_pipeline);
 
     // Bind vertex buffer
-    opaquePass.setVertexBuffer(0, m_buffer.handle());
+    opaquePass.setVertexBuffer(0, m_buffer);
 
     // Issue draw command
     const DrawCommand drawCmd = { .vertexCount = 3 };
@@ -157,9 +157,9 @@ void HelloTriangle::render()
 
     // Submit command buffer to queue
     SubmitOptions submitOptions = {
-        .commandBuffers = { commands.handle() },
-        .waitSemaphores = { m_presentCompleteSemaphores[m_inFlightIndex].handle() },
-        .signalSemaphores = { m_renderCompleteSemaphores[m_inFlightIndex].handle() }
+        .commandBuffers = { commands },
+        .waitSemaphores = { m_presentCompleteSemaphores[m_inFlightIndex] },
+        .signalSemaphores = { m_renderCompleteSemaphores[m_inFlightIndex] }
     };
     m_queue.submit(submitOptions);
 }

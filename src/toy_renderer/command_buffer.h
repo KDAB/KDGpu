@@ -13,6 +13,9 @@ public:
     ~CommandBuffer();
 
     const Handle<CommandBuffer_t> &handle() const noexcept { return m_commandBuffer; }
+    bool isValid() const noexcept { return m_commandBuffer.isValid(); }
+
+    operator Handle<CommandBuffer_t>() const noexcept { return m_commandBuffer; }
 
 private:
     explicit CommandBuffer(const Handle<CommandBuffer_t> &commandBuffer);

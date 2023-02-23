@@ -29,6 +29,11 @@ class TOY_RENDERER_EXPORT RenderPassCommandRecorder
 public:
     ~RenderPassCommandRecorder();
 
+    const Handle<RenderPassCommandRecorder_t> &handle() const noexcept { return m_renderPassCommandRecorder; }
+    bool isValid() const noexcept { return m_renderPassCommandRecorder.isValid(); }
+
+    operator Handle<RenderPassCommandRecorder_t>() const noexcept { return m_renderPassCommandRecorder; }
+
     void setPipeline(const Handle<GraphicsPipeline_t> &pipeline);
 
     // TODO: Add overload for setting many vertex buffers at once

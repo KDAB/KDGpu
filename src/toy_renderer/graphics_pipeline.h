@@ -20,6 +20,8 @@ public:
     const Handle<GraphicsPipeline_t> &handle() const noexcept { return m_graphicsPipeline; }
     bool isValid() const noexcept { return m_graphicsPipeline.isValid(); }
 
+    operator Handle<GraphicsPipeline_t>() const noexcept { return m_graphicsPipeline; }
+
 private:
     explicit GraphicsPipeline(GraphicsApi *api, const Handle<Device_t> &device, const Handle<GraphicsPipeline_t> &graphicsPipeline);
 

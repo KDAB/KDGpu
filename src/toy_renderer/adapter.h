@@ -36,6 +36,8 @@ public:
     Handle<Adapter_t> handle() const noexcept { return m_adapter; }
     bool isValid() const noexcept { return m_adapter.isValid(); }
 
+    operator Handle<Adapter_t>() const noexcept { return m_adapter; }
+
     const AdapterProperties &properties() const noexcept;
     const AdapterFeatures &features() const noexcept;
     std::span<AdapterQueueType> queueTypes();

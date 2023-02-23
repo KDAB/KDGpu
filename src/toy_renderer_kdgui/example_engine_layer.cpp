@@ -38,7 +38,7 @@ void ExampleEngineLayer::onAttached()
     // TODO: Move swapchain handling to View?
     // Create a swapchain of images that we will render to.
     SwapchainOptions swapchainOptions = {
-        .surface = m_surface.handle(),
+        .surface = m_surface,
         .format = m_swapchainFormat,
         .imageExtent = { .width = m_window->width(), .height = m_window->height() }
     };
@@ -99,7 +99,7 @@ void ExampleEngineLayer::update()
     // Obtain swapchain image view
     m_inFlightIndex = engine()->frameNumber() % MAX_FRAMES_IN_FLIGHT;
     const auto result = m_swapchain.getNextImageIndex(m_currentSwapchainImageIndex,
-                                                      m_presentCompleteSemaphores[m_inFlightIndex].handle());
+                                                      m_presentCompleteSemaphores[m_inFlightIndex]);
     if (result != true) {
         // Do we need to recreate the swapchain and dependent resources?
         return;
@@ -111,9 +111,9 @@ void ExampleEngineLayer::update()
     // Present the swapchain image
     // clang-format off
     PresentOptions presentOptions = {
-        .waitSemaphores = {{ m_renderCompleteSemaphores[m_inFlightIndex].handle() }},
+        .waitSemaphores = { m_renderCompleteSemaphores[m_inFlightIndex] },
         .swapchainInfos = {{
-            .swapchain = m_swapchain.handle(),
+            .swapchain = m_swapchain,
             .imageIndex = m_currentSwapchainImageIndex
         }}
     };

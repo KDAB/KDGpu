@@ -18,6 +18,8 @@ public:
     const Handle<TextureView_t> handle() const noexcept { return m_textureView; }
     bool isValid() const noexcept { return m_textureView.isValid(); }
 
+    operator Handle<TextureView_t>() const noexcept { return m_textureView; }
+
 private:
     explicit TextureView(GraphicsApi *api, const Handle<TextureView_t> &textureView);
 

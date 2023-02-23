@@ -16,6 +16,8 @@ public:
     Handle<Surface_t> handle() const noexcept { return m_surface; }
     bool isValid() const noexcept { return m_surface.isValid(); }
 
+    operator Handle<Surface_t>() const noexcept { return m_surface; }
+
 private:
     Surface(const Handle<Surface_t> &surface);
 

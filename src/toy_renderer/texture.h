@@ -21,6 +21,8 @@ public:
     const Handle<Texture_t> &handle() const noexcept { return m_texture; }
     bool isValid() const noexcept { return m_texture.isValid(); }
 
+    operator Handle<Texture_t>() const noexcept { return m_texture; }
+
     TextureView createView(const TextureViewOptions &options = TextureViewOptions()) const;
 
 private:

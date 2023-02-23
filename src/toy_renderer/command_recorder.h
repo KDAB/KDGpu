@@ -23,6 +23,11 @@ class TOY_RENDERER_EXPORT CommandRecorder
 public:
     ~CommandRecorder();
 
+    const Handle<CommandRecorder_t> &handle() const noexcept { return m_commandRecorder; }
+    bool isValid() const noexcept { return m_commandRecorder.isValid(); }
+
+    operator Handle<CommandRecorder_t>() const noexcept { return m_commandRecorder; }
+
     RenderPassCommandRecorder beginRenderPass(const RenderPassCommandRecorderOptions &options);
     CommandBuffer finish();
 

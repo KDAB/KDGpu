@@ -23,6 +23,8 @@ public:
     const Handle<GpuSemaphore_t> &handle() const noexcept { return m_gpuSemaphore; }
     bool isValid() const noexcept { return m_gpuSemaphore.isValid(); }
 
+    operator Handle<GpuSemaphore_t>() const noexcept { return m_gpuSemaphore; }
+
 private:
     explicit GpuSemaphore(GraphicsApi *api, const Handle<Device_t> &device, const Handle<GpuSemaphore_t> &gpuSemaphore);
 

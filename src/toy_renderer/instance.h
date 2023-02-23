@@ -55,6 +55,8 @@ public:
     Handle<Instance_t> handle() const noexcept { return m_instance; }
     bool isValid() const { return m_instance.isValid(); }
 
+    operator Handle<Instance_t>() const noexcept { return m_instance; }
+
     AdapterAndDevice createDefaultDevice(const Surface &surface,
                                          AdapterDeviceType deviceType = AdapterDeviceType::DiscreteGpu) const;
 

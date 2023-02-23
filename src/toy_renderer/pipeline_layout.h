@@ -19,6 +19,8 @@ public:
     const Handle<PipelineLayout_t> &handle() const noexcept { return m_pipelineLayout; }
     bool isValid() const noexcept { return m_pipelineLayout.isValid(); }
 
+    operator Handle<PipelineLayout_t>() const noexcept { return m_pipelineLayout; }
+
 private:
     explicit PipelineLayout(GraphicsApi *api,
                             const Handle<Device_t> &device,

@@ -19,6 +19,8 @@ public:
     Handle<ShaderModule_t> handle() const noexcept { return m_shaderModule; }
     bool isValid() const noexcept { return m_shaderModule.isValid(); }
 
+    operator Handle<ShaderModule_t>() const noexcept { return m_shaderModule; }
+
 private:
     ShaderModule(GraphicsApi *api, const Handle<Device_t> &device, const Handle<ShaderModule_t> &shaderModule);
 
