@@ -12,7 +12,7 @@
 #include <KDGui/platform/linux/xcb/linux_xcb_platform_window.h>
 #endif
 
-namespace ToyRendererSerenity {
+namespace ToyRendererKDGui {
 
 View::View()
     : KDGui::Window()
@@ -58,4 +58,4 @@ ToyRenderer::Surface View::createSurface(ToyRenderer::Instance &instance)
     return surface;
 }
 
-} // namespace ToyRendererSerenity
+} // namespace ToyRendererKDGui

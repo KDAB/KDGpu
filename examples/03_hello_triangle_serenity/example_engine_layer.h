@@ -2,7 +2,7 @@
 
 #include "engine_layer.h"
 
-#include <toy_renderer_serenity/view.h>
+#include <toy_renderer_kdgui/view.h>
 
 #include <toy_renderer/device.h>
 #include <toy_renderer/gpu_semaphore.h>
@@ -19,7 +19,7 @@
 #include <vector>
 
 using namespace ToyRenderer;
-using namespace ToyRendererSerenity;
+using namespace ToyRendererKDGui;
 
 // This determines the maximum number of frames that can be in-flight at any one time.
 // With the default setting of 2, we can be recording the commands for frame N+1 whilst

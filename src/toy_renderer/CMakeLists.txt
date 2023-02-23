@@ -126,7 +126,7 @@ add_library(toy-renderer SHARED
     ${PUBLIC_HEADERS}
     ${PRIVATE_HEADERS}
 )
-add_library(Toy::Renderer ALIAS toy-renderer)
+add_library(ToyRenderer::ToyRenderer ALIAS toy-renderer)
 
 set(TOY_RENDERER_PUBLIC_LIBS
     Vulkan::Vulkan

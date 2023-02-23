@@ -5,15 +5,15 @@
 #include <toy_renderer/surface.h>
 #include <toy_renderer/surface_options.h>
 
-#include <toy_renderer_serenity/toy_renderer_serenity_export.h>
+#include <toy_renderer_kdgui/toy_renderer_kdgui_export.h>
 
 namespace ToyRenderer {
 class Instance;
 }
 
-namespace ToyRendererSerenity {
+namespace ToyRendererKDGui {
 
-class TOY_RENDERER_SERENITY_EXPORT View : public KDGui::Window
+class TOY_RENDERER_KDGUI_EXPORT View : public KDGui::Window
 {
 public:
     View();
@@ -23,4 +23,4 @@ public:
     ToyRenderer::Surface createSurface(ToyRenderer::Instance &instance);
 };
 
-} // namespace ToyRendererSerenity
+} // namespace ToyRendererKDGui
