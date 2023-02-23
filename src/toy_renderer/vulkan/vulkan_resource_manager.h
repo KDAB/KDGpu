@@ -73,7 +73,7 @@ public:
     void deleteTextureView(Handle<TextureView_t> handle) final;
     VulkanTextureView *getTextureView(const Handle<TextureView_t> &handle) final { return m_textureViews.get(handle); }
 
-    Handle<Buffer_t> createBuffer(const Handle<Device_t> deviceHandle, const BufferOptions &options, void *initialData) final;
+    Handle<Buffer_t> createBuffer(const Handle<Device_t> deviceHandle, const BufferOptions &options, const void *initialData) final;
     void deleteBuffer(Handle<Buffer_t> handle) final;
     VulkanBuffer *getBuffer(const Handle<Buffer_t> &handle) final { return m_buffers.get(handle); }
 

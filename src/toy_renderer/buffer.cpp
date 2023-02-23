@@ -23,7 +23,7 @@ Buffer::~Buffer()
 
 void *Buffer::map()
 {
-    if (!m_mapped) {
+    if (!m_mapped && isValid()) {
         auto apiBuffer = m_api->resourceManager()->getBuffer(m_buffer);
         m_mapped = apiBuffer->map();
     }
@@ -32,6 +32,8 @@ void *Buffer::map()
 
 void Buffer::unmap()
 {
+    if (!m_mapped)
+        return;
     auto apiBuffer = m_api->resourceManager()->getBuffer(m_buffer);
     apiBuffer->unmap();
     m_mapped = nullptr;

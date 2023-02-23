@@ -103,7 +103,7 @@ public:
     virtual void deleteTextureView(Handle<TextureView_t> handle) = 0;
     virtual ApiTextureView *getTextureView(const Handle<TextureView_t> &handle) = 0;
 
-    virtual Handle<Buffer_t> createBuffer(const Handle<Device_t> deviceHandle, const BufferOptions &options, void *initialData) = 0;
+    virtual Handle<Buffer_t> createBuffer(const Handle<Device_t> deviceHandle, const BufferOptions &options, const void *initialData) = 0;
     virtual void deleteBuffer(Handle<Buffer_t> handle) = 0;
     virtual ApiBuffer *getBuffer(const Handle<Buffer_t> &handle) = 0;
 
