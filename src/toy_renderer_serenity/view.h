@@ -3,6 +3,7 @@
 #include <KDGui/window.h>
 
 #include <toy_renderer/surface.h>
+#include <toy_renderer/surface_options.h>
 
 #include <toy_renderer_serenity/toy_renderer_serenity_export.h>
 
@@ -18,6 +19,7 @@ public:
     View();
     ~View();
 
+    ToyRenderer::SurfaceOptions surfaceOptions() const;
     ToyRenderer::Surface createSurface(ToyRenderer::Instance &instance);
 };
 
