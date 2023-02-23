@@ -1,7 +1,6 @@
 #pragma once
 
 #include <toy_renderer_kdgui/engine_layer.h>
-
 #include <toy_renderer_kdgui/view.h>
 
 #include <toy_renderer/device.h>
@@ -13,6 +12,8 @@
 #include <toy_renderer/texture.h>
 #include <toy_renderer/texture_view.h>
 #include <toy_renderer/vulkan/vulkan_graphics_api.h>
+
+#include <toy_renderer_kdgui/toy_renderer_kdgui_export.h>
 
 #include <array>
 #include <memory>
@@ -27,7 +28,9 @@ using namespace ToyRendererKDGui;
 // until the GPU signals it is done with frame N.
 constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;
 
-class ExampleEngineLayer : public EngineLayer
+// TODO: Should we move this into a small library specifically for the examples that we ship?
+// Let's see how stable this becomes or if we need many variations of it.
+class TOY_RENDERER_KDGUI_EXPORT ExampleEngineLayer : public EngineLayer
 {
 public:
     ExampleEngineLayer();

@@ -3,12 +3,14 @@ find_package(Vulkan REQUIRED)
 set(SOURCES
     engine.cpp
     engine_layer.cpp
+    example_engine_layer.cpp
     view.cpp
 )
 
 set(HEADERS
     engine.h
     engine_layer.h
+    example_engine_layer.h
     view.h
 )
 
