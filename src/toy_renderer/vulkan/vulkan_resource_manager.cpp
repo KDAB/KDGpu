@@ -1059,7 +1059,7 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
     vkCmdBeginRenderPass(vkCommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
     const auto vulkanRenderPassCommandRecorderHandle = m_renderPassCommandRecorders.emplace(
-            VulkanRenderPassCommandRecorder(vkCommandBuffer, this, deviceHandle));
+            VulkanRenderPassCommandRecorder(vkCommandBuffer, renderPassInfo.renderArea, this, deviceHandle));
     return vulkanRenderPassCommandRecorderHandle;
 }
 

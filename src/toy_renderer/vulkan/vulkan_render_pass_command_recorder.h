@@ -14,6 +14,7 @@ struct Device_t;
 
 struct VulkanRenderPassCommandRecorder : public ApiRenderPassCommandRecorder {
     explicit VulkanRenderPassCommandRecorder(VkCommandBuffer _commandBuffer,
+                                             VkRect2D _renderArea,
                                              VulkanResourceManager *_vulkanResourceManager,
                                              const Handle<Device_t> &_deviceHandle);
 
@@ -23,6 +24,7 @@ struct VulkanRenderPassCommandRecorder : public ApiRenderPassCommandRecorder {
     void end() final;
 
     VkCommandBuffer commandBuffer{ VK_NULL_HANDLE };
+    VkRect2D renderArea{};
     VulkanResourceManager *vulkanResourceManager{ nullptr };
     Handle<Device_t> deviceHandle;
 };

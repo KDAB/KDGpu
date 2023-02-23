@@ -8,13 +8,26 @@
 namespace ToyRenderer {
 
 VulkanRenderPassCommandRecorder::VulkanRenderPassCommandRecorder(VkCommandBuffer _commandBuffer,
+                                                                 VkRect2D _renderArea,
                                                                  VulkanResourceManager *_vulkanResourceManager,
                                                                  const Handle<Device_t> &_deviceHandle)
     : ApiRenderPassCommandRecorder()
     , commandBuffer(_commandBuffer)
+    , renderArea(_renderArea)
     , vulkanResourceManager(_vulkanResourceManager)
     , deviceHandle(_deviceHandle)
 {
+    // Set the initial viewport and scissor rect to the full extent of the render area
+    VkViewport vkViewport = {
+        .x = static_cast<float>(renderArea.offset.x),
+        .y = static_cast<float>(renderArea.offset.y),
+        .width = static_cast<float>(renderArea.extent.width),
+        .height = static_cast<float>(renderArea.extent.height),
+        .minDepth = 0.0f,
+        .maxDepth = 1.0f
+    };
+    vkCmdSetViewport(commandBuffer, 0, 1, &vkViewport);
+    vkCmdSetScissor(commandBuffer, 0, 1, &renderArea);
 }
 
 void VulkanRenderPassCommandRecorder::setPipeline(const Handle<GraphicsPipeline_t> &pipeline)
@@ -35,23 +48,6 @@ void VulkanRenderPassCommandRecorder::setVertexBuffer(uint32_t index, const Hand
 void VulkanRenderPassCommandRecorder::draw(const DrawCommand &drawCommand)
 {
     // TODO: Expose the viewport and scissor setting commands
-    // TODO: Set default viewport and scissor settings when starting a render pass
-    VkViewport vkViewport = {
-        .x = 0,
-        .y = 0,
-        .width = 1920,
-        .height = 1080,
-        .minDepth = 0,
-        .maxDepth = 1
-    };
-    vkCmdSetViewport(commandBuffer, 0, 1, &vkViewport);
-
-    VkRect2D vkScissorRect = {
-        .offset = { 0, 0 },
-        .extent = { 1920, 1080 }
-    };
-    vkCmdSetScissor(commandBuffer, 0, 1, &vkScissorRect);
-
     vkCmdDraw(commandBuffer,
               drawCommand.vertexCount,
               drawCommand.instanceCount,
