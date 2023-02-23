@@ -2,6 +2,8 @@
 
 #include "engine_layer.h"
 
+#include <toy_renderer_kdgui/toy_renderer_kdgui_export.h>
+
 #include <KDFoundation/object.h>
 #include <KDFoundation/logging.h>
 
@@ -14,7 +16,9 @@
 using namespace KDBindings;
 using TimePoint = std::chrono::time_point<std::chrono::high_resolution_clock>;
 
-class Engine : public KDFoundation::Object
+namespace ToyRendererKDGui {
+
+class TOY_RENDERER_KDGUI_EXPORT Engine : public KDFoundation::Object
 {
 public:
     Property<bool> running{ false };
@@ -86,3 +90,5 @@ private:
     uint64_t m_totalFrameCounter{ 0 };
     TimePoint m_lastFpsTimestamp;
 };
+
+} // namespace ToyRendererKDGui

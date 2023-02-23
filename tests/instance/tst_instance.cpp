@@ -2,7 +2,7 @@
 #include <toy_renderer/instance.h>
 #include <toy_renderer/vulkan/vulkan_graphics_api.h>
 
-#include <toy_renderer_serenity/view.h>
+#include <toy_renderer_kdgui/view.h>
 
 #include <KDGui/gui_application.h>
 
@@ -13,7 +13,7 @@
 
 using namespace KDGui;
 using namespace ToyRenderer;
-using namespace ToyRendererSerenity;
+using namespace ToyRendererKDGui;
 
 TEST_SUITE("Instance")
 {

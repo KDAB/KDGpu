@@ -1,6 +1,6 @@
 #include "hello_triangle.h"
 
-#include "engine.h"
+#include <toy_renderer_kdgui/engine.h>
 
 #include <toy_renderer/buffer_options.h>
 #include <toy_renderer/graphics_pipeline_options.h>

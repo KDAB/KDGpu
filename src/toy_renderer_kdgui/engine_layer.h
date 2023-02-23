@@ -2,9 +2,13 @@
 
 #include <KDFoundation/object.h>
 
+#include <toy_renderer_kdgui/toy_renderer_kdgui_export.h>
+
+namespace ToyRendererKDGui {
+
 class Engine;
 
-class EngineLayer : public KDFoundation::Object
+class TOY_RENDERER_KDGUI_EXPORT EngineLayer : public KDFoundation::Object
 {
 public:
     ~EngineLayer() override;
@@ -21,3 +25,5 @@ private:
 
     friend class Engine;
 };
+
+} // namespace ToyRendererKDGui

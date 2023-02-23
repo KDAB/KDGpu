@@ -3,6 +3,8 @@
 #include <KDFoundation/core_application.h>
 #include <KDFoundation/postman.h>
 
+namespace ToyRendererKDGui {
+
 Engine::Engine()
     : KDFoundation::Object()
 {
@@ -144,3 +146,5 @@ void Engine::doFrame()
         SPDLOG_LOGGER_TRACE(m_logger, "fps = {}", fps());
     }
 }
+
+} // namespace ToyRendererKDGui

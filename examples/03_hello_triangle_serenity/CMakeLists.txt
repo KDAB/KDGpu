@@ -5,8 +5,6 @@ find_package(Vulkan REQUIRED)
 add_executable(
     ${PROJECT_NAME}
     main.cpp
-    engine.cpp
-    engine_layer.cpp
     example_engine_layer.cpp
     hello_triangle.cpp
 )

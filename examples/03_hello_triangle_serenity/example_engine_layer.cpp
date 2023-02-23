@@ -1,6 +1,6 @@
 #include "example_engine_layer.h"
 
-#include "engine.h"
+#include <toy_renderer_kdgui/engine.h>
 
 #include <toy_renderer/swapchain_options.h>
 #include <toy_renderer/texture_options.h>
