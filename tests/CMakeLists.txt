@@ -5,3 +5,4 @@ include_directories(./doctest)
 
 add_subdirectory(pool)
 add_subdirectory(buffer)
+add_subdirectory(texture)
