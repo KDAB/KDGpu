@@ -140,9 +140,13 @@ target_link_libraries(toy-renderer
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    target_compile_definitions(toy-renderer PUBLIC TOY_RENDERER_PLATFORM_LINUX)
+    target_compile_definitions(toy-renderer PRIVATE PLATFORM_LINUX)
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    target_compile_definitions(toy-renderer PUBLIC TOY_RENDERER_PLATFORM_WIN32)
+    target_compile_definitions(toy-renderer PRIVATE PLATFORM_WIN32)
     target_compile_definitions(toy-renderer PRIVATE UNICODE)
     target_compile_definitions(toy-renderer PRIVATE "VMA_CALL_PRE=__declspec(dllexport)")
     target_compile_definitions(toy-renderer PRIVATE "IMGUI_API=__declspec(dllexport)")
@@ -150,6 +154,8 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    target_compile_definitions(toy-renderer PUBLIC TOY_RENDERER_PLATFORM_MACOS)
+    target_compile_definitions(toy-renderer PRIVATE PLATFORM_MACOS)
 endif()
 
 # Require >=C++20 for us and downstream projects
