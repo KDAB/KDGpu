@@ -35,7 +35,7 @@ private:
     friend bool operator==(const Buffer &, const Buffer &);
 };
 
-bool operator==(const Buffer &a, const Buffer &b);
-bool operator!=(const Buffer &a, const Buffer &b);
+TOY_RENDERER_EXPORT bool operator==(const Buffer &a, const Buffer &b);
+TOY_RENDERER_EXPORT bool operator!=(const Buffer &a, const Buffer &b);
 
 } // namespace ToyRenderer

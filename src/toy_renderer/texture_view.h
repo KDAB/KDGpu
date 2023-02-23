@@ -28,7 +28,7 @@ private:
     friend bool operator==(const TextureView &, const TextureView &);
 };
 
-bool operator==(const TextureView &a, const TextureView &b);
-bool operator!=(const TextureView &a, const TextureView &b);
+TOY_RENDERER_EXPORT bool operator==(const TextureView &a, const TextureView &b);
+TOY_RENDERER_EXPORT bool operator!=(const TextureView &a, const TextureView &b);
 
 } // namespace ToyRenderer

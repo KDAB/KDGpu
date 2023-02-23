@@ -35,7 +35,7 @@ private:
     friend bool operator==(const Texture &, const Texture &);
 };
 
-bool operator==(const Texture &a, const Texture &b);
-bool operator!=(const Texture &a, const Texture &b);
+TOY_RENDERER_EXPORT bool operator==(const Texture &a, const Texture &b);
+TOY_RENDERER_EXPORT bool operator!=(const Texture &a, const Texture &b);
 
 } // namespace ToyRenderer
