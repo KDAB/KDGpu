@@ -3,6 +3,7 @@ find_package(Vulkan REQUIRED)
 set(SOURCES
     adapter.cpp
     buffer.cpp
+    bind_group.cpp
     command_buffer.cpp
     command_recorder.cpp
     compute_pass_command_recorder.cpp
@@ -21,6 +22,7 @@ set(SOURCES
     texture.cpp
     texture_view.cpp
     vulkan/vulkan_adapter.cpp
+    vulkan/vulkan_bind_group.cpp
     vulkan/vulkan_buffer.cpp
     vulkan/vulkan_command_buffer.cpp
     vulkan/vulkan_command_recorder.cpp
@@ -49,6 +51,7 @@ set(HEADERS
     adapter_queue_type.h
     adapter_swapchain_properties.h
     adapter.h
+    bind_group.h
     bind_group_description.h
     buffer.h
     buffer_options.h
@@ -81,6 +84,7 @@ set(HEADERS
     texture_view.h
     texture_view_options.h
     api/api_adapter.h
+    api/api_bind_group.h
     api/api_buffer.h
     api/api_command_buffer.h
     api/api_command_recorder.h
@@ -99,6 +103,7 @@ set(HEADERS
     api/api_texture_view.h
     utils/hash_utils.h
     vulkan/vulkan_adapter.h
+    vulkan/vulkan_bind_group.h
     vulkan/vulkan_buffer.h
     vulkan/vulkan_command_buffer.h
     vulkan/vulkan_command_recorder.h

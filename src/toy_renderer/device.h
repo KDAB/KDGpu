@@ -1,5 +1,6 @@
 #pragma once
 
+#include <toy_renderer/bind_group.h>
 #include <toy_renderer/buffer.h>
 #include <toy_renderer/command_recorder.h>
 #include <toy_renderer/device_options.h>
@@ -64,6 +65,8 @@ public:
     CommandRecorder createCommandRecorder(const CommandRecorderOptions &options = CommandRecorderOptions());
 
     GpuSemaphore createGpuSemaphore(const GpuSemaphoreOptions &options = GpuSemaphoreOptions());
+
+    BindGroup createBindGroup(const BindGroupOptions &options);
 
 private:
     Device(Adapter *adapter, GraphicsApi *api, const DeviceOptions &options);

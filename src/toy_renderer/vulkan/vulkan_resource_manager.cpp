@@ -1234,15 +1234,21 @@ Handle<Framebuffer_t> VulkanResourceManager::createFramebuffer(const Handle<Devi
     return vulkanFramebufferHandle;
 }
 
-Handle<BindGroup> VulkanResourceManager::createBindGroup(BindGroupDescription desc)
+Handle<BindGroup_t> VulkanResourceManager::createBindGroup(const Handle<Device_t> deviceHandle, BindGroupOptions options)
 {
-    // TODO: This is where we will call vkAllocateDescriptorSets
+    // TODO: implement
     return {};
 }
 
-void VulkanResourceManager::deleteBindGroup(Handle<BindGroup> handle)
+void VulkanResourceManager::deleteBindGroup(Handle<BindGroup_t> handle)
 {
-    // TODO: Implement me!
+    // TODO: implement
+}
+
+VulkanBindGroup *VulkanResourceManager::getBindGroup(const Handle<BindGroup_t> &handle)
+{
+    // TODO: implement
+    return nullptr;
 }
 
 } // namespace ToyRenderer

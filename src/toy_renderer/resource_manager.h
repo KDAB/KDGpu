@@ -2,6 +2,7 @@
 
 // TODO: Can we make these forward declarations?
 #include <toy_renderer/adapter.h>
+#include <toy_renderer/bind_group.h>
 #include <toy_renderer/bind_group_description.h>
 #include <toy_renderer/device.h>
 #include <toy_renderer/gpu_semaphore.h>
@@ -18,6 +19,7 @@
 namespace ToyRenderer {
 
 struct ApiAdapter;
+struct ApiBindGroup;
 struct ApiBuffer;
 struct ApiCommandBuffer;
 struct ApiCommandRecorder;
@@ -35,8 +37,7 @@ struct ApiSurface;
 struct ApiTexture;
 struct ApiTextureView;
 
-class BindGroup;
-
+struct BindGroupOptions;
 struct BufferOptions;
 struct CommandRecorderOptions;
 struct DeviceOptions;
@@ -48,6 +49,7 @@ struct RenderPassCommandRecorderOptions;
 struct TextureOptions;
 struct TextureViewOptions;
 
+struct BindGroup_t;
 struct CommandRecorder_t;
 struct GraphicsPipeline_t;
 struct PipelineLayout_t;
@@ -139,14 +141,9 @@ public:
     virtual ApiCommandBuffer *getCommandBuffer(const Handle<CommandBuffer_t> &handle) = 0;
 
     // virtual Handle<Shader> createShader(ShaderDescription desc) = 0;
-    virtual Handle<BindGroup> createBindGroup(BindGroupDescription desc) = 0;
-    // virtual Handle<Texture> createTexture(TextureDescription desc) = 0;
-    // virtual Handle<Buffer> createBuffer(BufferDescription desc) = 0;
-
-    // virtual void deleteShader(Handle<Shader> handle) = 0;
-    virtual void deleteBindGroup(Handle<BindGroup> handle) = 0;
-    // virtual void deleteTexture(Handle<Texture> handle) = 0;
-    // virtual void deleteBuffer(Handle<Buffer> handle) = 0;
+    virtual Handle<BindGroup_t> createBindGroup(const Handle<Device_t> deviceHandle, BindGroupOptions options) = 0;
+    virtual void deleteBindGroup(Handle<BindGroup_t> handle) = 0;
+    virtual ApiBindGroup *getBindGroup(const Handle<BindGroup_t> &handle) = 0;
 
 protected:
     ResourceManager();

@@ -16,6 +16,9 @@
 #include <KDGui/gui_application.h>
 #include <KDGui/window.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include <KDFoundation/config.h> // For KD_PLATFORM
 #if defined(KD_PLATFORM_WIN32)
 #include <KDGui/platform/win32/win32_platform_window.h>
@@ -175,12 +178,12 @@ int main()
     auto depthTextureView = depthTexture.createView();
 
     // Create a buffer to hold triangle vertex data
-    BufferOptions bufferOptions = {
+    BufferOptions vertexBufferOptions = {
         .size = 3 * 2 * 4 * sizeof(float), // 3 vertices * 2 attributes * 4 float components
         .usage = BufferUsageFlags(BufferUsageFlagBits::VertexBufferBit), // TODO: Use a nice Flags template class
         .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
     };
-    auto buffer = device.createBuffer(bufferOptions);
+    auto vertexBuffer = device.createBuffer(vertexBufferOptions);
 
     // clang-format off
     std::vector<float> vertexData = {
@@ -192,12 +195,19 @@ int main()
          0.0f,  0.0f, 1.0f, 1.0f, // color
     };
     // clang-format on
-    auto bufferData = buffer.map();
+    auto bufferData = vertexBuffer.map();
     std::memcpy(bufferData, vertexData.data(), vertexData.size() * sizeof(float));
-    buffer.unmap();
+    vertexBuffer.unmap();
 
     // TODO: Upload the data to the buffer at creation (needs command recording, barriers etc)
     // auto buffer = device.createBuffer(bufferOptions, vertexData.data());
+
+    BufferOptions cameraUboBufferOptions = {
+        .size = 16 * sizeof(float), // 1 * mat4x4
+        .usage = BufferUsageFlags(BufferUsageFlagBits::VertexBufferBit), // TODO: Use a nice Flags template class
+        .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
+    };
+    auto cameraUBOBuffer = device.createBuffer(cameraUboBufferOptions);
 
     // Create a vertex shader and fragment shader (spir-v only for now)
     const auto vertexShaderPath = ToyRenderer::assetPath() + "/shaders/examples/02_hello_triangle/hello_triangle.vert.spv";
@@ -208,36 +218,34 @@ int main()
 
     // TODO: Create a pipeline layout for a more complicated pipeline
     // // clang-format off
-    // PipelineLayoutOptions pipelineLayoutOptions = {
-    //     .bindGroupLayouts = {{  // Set = 0
-    //             .bindings = {{  // Camera uniforms
-    //                 .binding = 0,
-    //                 .count = 1,
-    //                 .resourceType = ResourceBindingType::UniformBuffer,
-    //                 .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit)
-    //             }}
-    //         }, {                // Set = 1
-    //             .bindings = {{  // Base color
-    //                 .binding = 0,
-    //                 .resourceType = ResourceBindingType::CombinedImageSampler,
-    //                 .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit)
-    //             }, {            // Metallic-Roughness
-    //                 .binding = 1,
-    //                 .resourceType = ResourceBindingType::CombinedImageSampler,
-    //                 .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit)
-    //             }}
-    //         }
-    //     },
-    //     .pushConstantRanges = {
-    //         { .offset = 0, .size = 8, .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit) },
-    //         { .offset = 0, .size = 8, .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit) }
-    //     }
-    // };
+    PipelineLayoutOptions pipelineLayoutOptions = {
+        .bindGroupLayouts = {
+                { // Set = 0
+                  .bindings = { { // Camera uniforms
+                                  .binding = 0,
+                                  .count = 1,
+                                  .resourceType = ResourceBindingType::UniformBuffer,
+                                  .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit) } } },
+        }
+        //                       { // Set = 1
+        //                         .bindings = { { // Base color
+        //                                         .binding = 0,
+        //                                         .resourceType = ResourceBindingType::CombinedImageSampler,
+        //                                         .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit) },
+        //                                       { // Metallic-Roughness
+        //                                         .binding = 1,
+        //                                         .resourceType = ResourceBindingType::CombinedImageSampler,
+        //                                         .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit) } } } },
+        // .pushConstantRanges = {
+        //         // { .offset = 0, .size = 8, .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit) },
+        //         // { .offset = 0, .size = 8, .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit) }
+        // }
+    };
     // // clang-format on
-    // auto pipelineLayout = device.createPipelineLayout(pipelineLayoutOptions);
+    auto pipelineLayout = device.createPipelineLayout(pipelineLayoutOptions);
 
     // Create a pipeline layout (array of bind group layouts)
-    auto pipelineLayout = device.createPipelineLayout();
+    // auto pipelineLayout = device.createPipelineLayout();
 
     // Create a pipeline
     // clang-format off
@@ -286,6 +294,14 @@ int main()
     };
     // clang-format on
 
+    BindGroupOptions bindGroupCreateOptions = {
+        .layout = pipelineLayoutOptions.bindGroupLayouts[0],
+        .resources = {
+                { .binding = 0,
+                  .resource = BindingResource(BufferBinding{ .buffer = cameraUBOBuffer }) } }
+    };
+    BindGroup bindGroup = device.createBindGroup(bindGroupCreateOptions);
+
     while (window.visible()) {
         // Acquire next swapchain image
         uint32_t currentImageIndex = 0;
@@ -297,15 +313,26 @@ int main()
         // Create a command encoder/recorder
         auto commandRecorder = device.createCommandRecorder();
 
+        // Note: with Vulkan we can't perform Buffer updates during a RenderPass (not sure about other APIs)
+
+        // Update Camera UBO data
+        auto cameraBufferData = cameraUBOBuffer.map();
+        glm::mat4 cameraMatrix(1.0f);
+        std::memcpy(cameraBufferData, glm::value_ptr(cameraMatrix), 16 * sizeof(float));
+        cameraUBOBuffer.unmap();
+
         // Begin render pass
         opaquePassOptions.colorAttachments[0].view = swapchainViews.at(currentImageIndex).handle();
-        auto opaquePass = commandRecorder.beginRenderPass(opaquePassOptions);
+        RenderPassCommandRecorder opaquePass = commandRecorder.beginRenderPass(opaquePassOptions);
 
         // Bind pipeline
         opaquePass.setPipeline(pipeline.handle());
 
         // Bind vertex buffer
-        opaquePass.setVertexBuffer(0, buffer.handle());
+        opaquePass.setVertexBuffer(0, vertexBuffer.handle());
+
+        // Binding GPU Resources (UBO / SSBO / Textures)
+        opaquePass.setBindGroup(0, bindGroup);
 
         // Bind any resources (none needed for hello_triangle)
 

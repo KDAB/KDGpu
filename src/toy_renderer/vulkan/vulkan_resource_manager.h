@@ -5,6 +5,7 @@
 #include <toy_renderer/pool.h>
 
 #include <toy_renderer/vulkan/vulkan_adapter.h>
+#include <toy_renderer/vulkan/vulkan_bind_group.h>
 #include <toy_renderer/vulkan/vulkan_buffer.h>
 #include <toy_renderer/vulkan/vulkan_command_buffer.h>
 #include <toy_renderer/vulkan/vulkan_command_recorder.h>
@@ -110,9 +111,9 @@ public:
 
     VulkanCommandBuffer *getCommandBuffer(const Handle<CommandBuffer_t> &handle) final { return m_commandBuffers.get(handle); }
 
-    // TODO: Complete BindGroup implementation
-    Handle<BindGroup> createBindGroup(BindGroupDescription desc) final;
-    void deleteBindGroup(Handle<BindGroup> handle) final;
+    Handle<BindGroup_t> createBindGroup(const Handle<Device_t> deviceHandle, BindGroupOptions options) final;
+    void deleteBindGroup(Handle<BindGroup_t> handle) final;
+    VulkanBindGroup *getBindGroup(const Handle<BindGroup_t> &handle) final;
 
 private:
     Pool<VulkanInstance, Instance_t> m_instances{ 1 };

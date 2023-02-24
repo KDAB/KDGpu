@@ -7,6 +7,7 @@
 
 namespace ToyRenderer {
 
+struct BindGroup_t;
 struct Buffer_t;
 struct Device_t;
 struct GraphicsPipeline_t;
@@ -38,6 +39,8 @@ public:
 
     // TODO: Add overload for setting many vertex buffers at once
     void setVertexBuffer(uint32_t index, const Handle<Buffer_t> &buffer);
+
+    void setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroup);
 
     void setViewport(const Viewport &viewport);
     void setScissor(const Rect2D &scissor);

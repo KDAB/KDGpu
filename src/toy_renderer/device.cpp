@@ -80,4 +80,9 @@ GpuSemaphore Device::createGpuSemaphore(const GpuSemaphoreOptions &options)
     return GpuSemaphore(m_api, m_device, m_api->resourceManager()->createGpuSemaphore(m_device, options));
 }
 
+BindGroup Device::createBindGroup(const BindGroupOptions &options)
+{
+    return BindGroup(m_api, m_device, m_api->resourceManager()->createBindGroup(m_device, options));
+}
+
 } // namespace ToyRenderer

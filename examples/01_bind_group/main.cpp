@@ -1,13 +1,48 @@
-#include <toy_renderer/vulkan/vulkan_resource_manager.h>
-
+#include <toy_renderer/device.h>
+#include <toy_renderer/instance.h>
 #include <toy_renderer/bind_group_description.h>
+#include <toy_renderer/bind_group.h>
+#include <toy_renderer/graphics_pipeline.h>
+#include <toy_renderer/graphics_pipeline_options.h>
 
+#include <toy_renderer/vulkan/vulkan_graphics_api.h>
+
+#include <toy_renderer_kdgui/view.h>
+
+#include <KDGui/gui_application.h>
+
+#include <fstream>
 #include <iostream>
 #include <map>
 #include <span>
 #include <vector>
 
+using namespace KDGui;
 using namespace ToyRenderer;
+using namespace ToyRendererKDGui;
+
+inline std::string assetPath()
+{
+#if defined(TOY_RENDERER_ASSET_PATH)
+    return TOY_RENDERER_ASSET_PATH;
+#else
+    return "";
+#endif
+}
+
+std::vector<uint32_t> readShaderFile(const std::string &filename)
+{
+    std::ifstream file(filename, std::ios::ate | std::ios::binary);
+    if (!file.is_open())
+        throw std::runtime_error("Failed to open file");
+
+    const size_t fileSize = static_cast<size_t>(file.tellg());
+    std::vector<uint32_t> buffer(fileSize / 4);
+    file.seekg(0);
+    file.read(reinterpret_cast<char *>(buffer.data()), static_cast<std::streamsize>(fileSize));
+    file.close();
+    return buffer;
+}
 
 class Pipeline;
 
@@ -77,7 +112,7 @@ void renderGltf(RenderPass &renderPass)
             // them as usual.
             for (const auto &gpuPrimitive : primitives) {
                 for (const auto &vertexBuffer : gpuPrimitive.vertexBuffers) {
-                    renderPass.setVertexBuffer(vertexBuffer.slot, vertexBuffer.buffer, vertexBuffer.offset, vertexBuffer.size);
+                    // renderPass.setVertexBuffer(0, vertexBuffer.buffer, vertexBuffer.offset, vertexBuffer.size);
                 }
 
                 renderPass.draw(gpuPrimitive.drawCount, gpuPrimitive.instances.count, 0, gpuPrimitive.instances.first);
@@ -88,36 +123,117 @@ void renderGltf(RenderPass &renderPass)
 
 int main()
 {
-    // Assume we have a working Vulkan resource manager;
-    ResourceManager *resourceManager = new VulkanResourceManager;
+    GuiApplication app;
+
+    // Initiate Vulkan API
+    std::unique_ptr<GraphicsApi> api = std::make_unique<VulkanGraphicsApi>();
+
+    // Create Instance
+    InstanceOptions instanceOptions = {
+        .applicationName = "02_hello_triangle",
+        .applicationVersion = SERENITY_MAKE_API_VERSION(0, 1, 0, 0)
+    };
+    Instance instance = api->createInstance(instanceOptions);
+
+    // Rendering Surface
+    View v;
+    const SurfaceOptions surfaceOptions = v.surfaceOptions();
+    Surface s = instance.createSurface(surfaceOptions);
+
+    // Select best device to render on surface
+    AdapterAndDevice aAndD = instance.createDefaultDevice(s);
+
+    Device device = aAndD.device;
+
+    // Our shader uniform layout
+    const BindGroupLayout bindGroupLayout = {
+        .bindings = {
+                { .binding = 0,
+                  .count = 1,
+                  .resourceType = ResourceBindingType::CombinedImageSampler,
+                  .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit) },
+                { .binding = 1,
+                  .count = 1,
+                  .resourceType = ResourceBindingType::CombinedImageSampler,
+                  .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit) },
+                { .binding = 2,
+                  .count = 1,
+                  .resourceType = ResourceBindingType::CombinedImageSampler,
+                  .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit) },
+                { .binding = 3,
+                  .count = 1,
+                  .resourceType = ResourceBindingType::UniformBuffer,
+                  .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit) },
+        }
+    };
+
+    const PipelineLayoutOptions pipelineLayoutOptions = {
+        .bindGroupLayouts = { bindGroupLayout }
+    };
+
+    const PipelineLayout pipelineLayout = device.createPipelineLayout(pipelineLayoutOptions);
+
+    // Create a vertex shader and fragment shader (spir-v only for now)
+    const auto vertexShaderPath = assetPath() + "/shaders/examples/02_hello_triangle/hello_triangle.vert.spv";
+    auto vertexShader = device.createShaderModule(readShaderFile(vertexShaderPath));
+
+    const auto fragmentShaderPath = assetPath() + "/shaders/examples/02_hello_triangle/hello_triangle.frag.spv";
+    auto fragmentShader = device.createShaderModule(readShaderFile(fragmentShaderPath));
+
+    // Create a pipeline
+    // clang-format off
+    GraphicsPipelineOptions pipelineOptions = {
+        .shaderStages = {
+            { .shaderModule = vertexShader.handle(), .stage = ShaderStageFlagBits::VertexBit },
+            { .shaderModule = fragmentShader.handle(), .stage = ShaderStageFlagBits::FragmentBit }
+        },
+        .layout = pipelineLayout.handle(),
+        .vertex = {
+            .buffers = {
+                { .binding = 0, .stride = 2 * 4 * sizeof(float) }
+            },
+            .attributes = {
+                { .location = 0, .binding = 0, .format = Format::R32G32B32A32_SFLOAT }, // Position
+                { .location = 1, .binding = 0, .format = Format::R32G32B32A32_SFLOAT, .offset = 4 * sizeof(float) } // Color
+            }
+        },
+        .renderTargets = {
+            { .format = Format::R8G8B8A8_UNORM }
+        },
+        .depthStencil = {
+            .format = Format::D24_UNORM_S8_UINT,
+            .depthWritesEnabled = true,
+            .depthCompareOperation = CompareOperation::Less
+        }
+    };
+    // clang-format on
+    GraphicsPipeline pipeline = device.createGraphicsPipeline(pipelineOptions);
 
     // Assume we have some textures and a buffer for a material and we want to bind these...
-    Handle<Texture> textureBaseColor;
-    Handle<Texture> textureMetalRough;
-    Handle<Texture> textureNormal;
-    Handle<Buffer> materialUniforms;
+    Handle<TextureView_t> textureBaseColor;
+    Handle<TextureView_t> textureMetalRough;
+    Handle<TextureView_t> textureNormal;
+    Handle<Sampler_t> sampler;
+    Handle<Buffer_t> materialUniforms;
 
-    TextureBinding textureBindings[3];
-    textureBindings[0].texture = textureBaseColor;
-    textureBindings[0].slot = 0;
-    textureBindings[1].texture = textureMetalRough;
-    textureBindings[1].slot = 1;
-    textureBindings[2].texture = textureNormal;
-    textureBindings[2].slot = 2;
-
-    BufferBinding bufferBindings[1];
-    bufferBindings[0].buffer = materialUniforms;
-    bufferBindings[0].slot = 0;
-
-    BindGroupDescription bindGroupDescription;
-    bindGroupDescription.textures = textureBindings;
-    bindGroupDescription.buffers = bufferBindings;
+    // BindGroupOptions to create a bind group that sets data for above layout
+    BindGroupOptions bindGroupOptions = { .layout = bindGroupLayout,
+                                          .resources = {
+                                                  { .binding = 0,
+                                                    .resource = BindingResource(TextureViewBinding{ .textureView = textureBaseColor /*, .sampler = sampler */ }) },
+                                                  { .binding = 1,
+                                                    .resource = BindingResource(TextureViewBinding{ .textureView = textureMetalRough /*, .sampler = sampler */ }) },
+                                                  { .binding = 2,
+                                                    .resource = BindingResource(TextureViewBinding{ .textureView = textureNormal /*, .sampler = sampler */ }) },
+                                                  { .binding = 3,
+                                                    .resource = BindingResource(BufferBinding{ .buffer = materialUniforms }) },
+                                          } };
 
     // Create the bind group
-    Handle<BindGroup> bindGroup = resourceManager->createBindGroup(bindGroupDescription);
+    BindGroup bindGroup = device.createBindGroup(bindGroupOptions);
 
     // And release it again
-    resourceManager->deleteBindGroup(bindGroup);
+    // resourceManager->deleteBindGroup(bindGroup);
 
     return 0;
 }

@@ -1,39 +1,79 @@
 #pragma once
 
 #include <toy_renderer/handle.h>
+#include <toy_renderer/gpu_core.h>
+#include <toy_renderer/pipeline_layout_options.h>
 
+#include <cstring>
 #include <span>
 
 namespace ToyRenderer {
 
-class Buffer;
-class Texture;
+struct Buffer_t;
+struct TextureView_t;
+struct Sampler_t;
 
-struct TextureBinding {
-    Handle<Texture> texture{};
+struct TextureViewBinding {
+    Handle<TextureView_t> textureView{};
+    // Handle<Sampler_t> sampler{};
     // TODO: Use TextureView instead of Texture?
     // TODO: Add support for samplers.
-    uint32_t slot{ 0 };
+};
+
+struct ImageBinding {
+    // TODO: Complete
 };
 
 struct BufferBinding {
     static constexpr uint32_t WholeSize = 0xffffffff;
 
-    Handle<Buffer> buffer{};
+    Handle<Buffer_t> buffer{};
     uint32_t offset{ 0 };
     uint32_t size{ WholeSize };
-    uint32_t slot{ 0 };
 };
 
-// A BindGroup is what is known as a descriptor set in Vulkan parlance. Other APIs such
-// as web-gpu call them bind groups which to me helps with the mental model a little more.
-//
-// The following struct describes a bind group (descriptor set) layout and from this we
-// will be able to subsequently allocate the actual bind group (descriptor set). Before
-// the bind group can be used we will need to populate it with the specified bindings.
-struct BindGroupDescription {
-    std::span<TextureBinding> textures;
-    std::span<BufferBinding> buffers;
+class BindingResource
+{
+public:
+    BindingResource(const TextureViewBinding &textureView)
+        : m_type(ResourceBindingType::CombinedImageSampler)
+    {
+        m_resource.textureView = textureView;
+    }
+
+    BindingResource(const ImageBinding &image)
+        : m_type(ResourceBindingType::StorageImage)
+    {
+        m_resource.image = image;
+    }
+
+    BindingResource(const BufferBinding &buffer)
+        : m_type(ResourceBindingType::UniformBuffer) // TODO: How do we distinguish from SSBO...
+    {
+        m_resource.buffer = buffer;
+    }
+
+    ResourceBindingType type() const { return m_type; }
+
+private:
+    union Resource {
+        Resource() { std::memset(this, 0, sizeof(Resource)); }
+
+        TextureViewBinding textureView;
+        ImageBinding image;
+        BufferBinding buffer;
+    } m_resource;
+    ResourceBindingType m_type;
+};
+
+struct BindGroupEntry { // An entry into a BindGroup ( == a descriptor in a descriptor set)
+    uint32_t binding;
+    BindingResource resource;
+};
+
+struct BindGroupOptions {
+    BindGroupLayout layout;
+    std::vector<BindGroupEntry> resources;
 };
 
 } // namespace ToyRenderer
