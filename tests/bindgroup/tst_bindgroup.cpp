@@ -1,4 +1,7 @@
 #include <toy_renderer/bind_group.h>
+#include <toy_renderer/bind_group_options.h>
+#include <toy_renderer/bind_group_layout.h>
+#include <toy_renderer/bind_group_layout_options.h>
 #include <toy_renderer/bind_group_description.h>
 #include <toy_renderer/buffer_options.h>
 #include <toy_renderer/buffer.h>
@@ -40,13 +43,15 @@ TEST_SUITE("BindGroup")
             };
             auto ubo = device.createBuffer(uboOptions);
 
-            const BindGroupLayout bindGroupLayout = {
+            const BindGroupLayoutOptions bindGroupLayoutOptions = {
                 .bindings = { { // Camera uniforms
                                 .binding = 0,
                                 .count = 1,
                                 .resourceType = ResourceBindingType::UniformBuffer,
                                 .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit) } }
             };
+
+            const BindGroupLayout bindGroupLayout = device.createBindGroupLayout(bindGroupLayoutOptions);
 
             const BindGroupOptions bindGroupOptions = {
                 .layout = bindGroupLayout,
@@ -92,13 +97,15 @@ TEST_SUITE("BindGroup")
             };
             auto ubo = device.createBuffer(uboOptions);
 
-            const BindGroupLayout bindGroupLayout = {
+            const BindGroupLayoutOptions bindGroupLayoutOptions = {
                 .bindings = { { // Camera uniforms
                                 .binding = 0,
                                 .count = 1,
                                 .resourceType = ResourceBindingType::UniformBuffer,
                                 .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit) } }
             };
+
+            const BindGroupLayout bindGroupLayout = device.createBindGroupLayout(bindGroupLayoutOptions);
 
             const BindGroupOptions bindGroupOptions = {
                 .layout = bindGroupLayout,

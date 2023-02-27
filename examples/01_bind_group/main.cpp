@@ -2,6 +2,9 @@
 #include <toy_renderer/instance.h>
 #include <toy_renderer/bind_group_description.h>
 #include <toy_renderer/bind_group.h>
+#include <toy_renderer/bind_group_options.h>
+#include <toy_renderer/bind_group_layout.h>
+#include <toy_renderer/bind_group_layout_options.h>
 #include <toy_renderer/graphics_pipeline.h>
 #include <toy_renderer/graphics_pipeline_options.h>
 
@@ -146,7 +149,7 @@ int main()
     Device device = aAndD.device;
 
     // Our shader uniform layout
-    const BindGroupLayout bindGroupLayout = {
+    const BindGroupLayoutOptions bindGroupLayoutOptions = {
         .bindings = {
                 { .binding = 0,
                   .count = 1,
@@ -166,6 +169,8 @@ int main()
                   .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit) },
         }
     };
+
+    const BindGroupLayout bindGroupLayout = device.createBindGroupLayout(bindGroupLayoutOptions);
 
     const PipelineLayoutOptions pipelineLayoutOptions = {
         .bindGroupLayouts = { bindGroupLayout }

@@ -1,4 +1,7 @@
 #include <toy_renderer/buffer_options.h>
+#include <toy_renderer/bind_group_layout_options.h>
+#include <toy_renderer/bind_group_layout.h>
+#include <toy_renderer/bind_group_options.h>
 #include <toy_renderer/device.h>
 #include <toy_renderer/instance.h>
 #include <toy_renderer/graphics_pipeline.h>
@@ -216,30 +219,20 @@ int main()
     const auto fragmentShaderPath = ToyRenderer::assetPath() + "/shaders/examples/02_hello_triangle/hello_triangle.frag.spv";
     auto fragmentShader = device.createShaderModule(ToyRenderer::readShaderFile(fragmentShaderPath));
 
+    BindGroupLayoutOptions bindGroupLayoutOptions = {
+        .bindings = { { // Camera uniforms
+                        .binding = 0,
+                        .count = 1,
+                        .resourceType = ResourceBindingType::UniformBuffer,
+                        .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit) } }
+    };
+
+    BindGroupLayout bindGroupLayout = device.createBindGroupLayout(bindGroupLayoutOptions);
+
     // TODO: Create a pipeline layout for a more complicated pipeline
     // // clang-format off
     PipelineLayoutOptions pipelineLayoutOptions = {
-        .bindGroupLayouts = {
-                { // Set = 0
-                  .bindings = { { // Camera uniforms
-                                  .binding = 0,
-                                  .count = 1,
-                                  .resourceType = ResourceBindingType::UniformBuffer,
-                                  .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit) } } },
-        }
-        //                       { // Set = 1
-        //                         .bindings = { { // Base color
-        //                                         .binding = 0,
-        //                                         .resourceType = ResourceBindingType::CombinedImageSampler,
-        //                                         .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit) },
-        //                                       { // Metallic-Roughness
-        //                                         .binding = 1,
-        //                                         .resourceType = ResourceBindingType::CombinedImageSampler,
-        //                                         .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit) } } } },
-        // .pushConstantRanges = {
-        //         // { .offset = 0, .size = 8, .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit) },
-        //         // { .offset = 0, .size = 8, .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit) }
-        // }
+        .bindGroupLayouts = { bindGroupLayout }
     };
     // // clang-format on
     auto pipelineLayout = device.createPipelineLayout(pipelineLayoutOptions);

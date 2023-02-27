@@ -66,14 +66,4 @@ private:
     ResourceBindingType m_type;
 };
 
-struct BindGroupEntry { // An entry into a BindGroup ( == a descriptor in a descriptor set)
-    uint32_t binding;
-    BindingResource resource;
-};
-
-struct BindGroupOptions {
-    BindGroupLayout layout;
-    std::vector<BindGroupEntry> resources;
-};
-
 } // namespace ToyRenderer
