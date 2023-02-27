@@ -133,6 +133,7 @@ private:
     Pool<VulkanShaderModule, ShaderModule_t> m_shaderModules{ 64 };
     Pool<VulkanPipelineLayout, PipelineLayout_t> m_pipelineLayouts{ 64 };
     Pool<VulkanBindGroupLayout, BindGroupLayout_t> m_bindGroupLayouts{ 128 };
+    Pool<VulkanBindGroup, BindGroup_t> m_bindGroups{ 128 };
     Pool<VulkanGraphicsPipeline, GraphicsPipeline_t> m_graphicsPipelines{ 64 };
     Pool<VulkanGpuSemaphore, GpuSemaphore_t> m_gpuSemaphores{ 32 };
     Pool<VulkanCommandRecorder, CommandRecorder_t> m_commandRecorders{ 32 };
