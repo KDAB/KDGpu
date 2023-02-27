@@ -31,6 +31,7 @@ struct VulkanRenderPassCommandRecorder : public ApiRenderPassCommandRecorder {
     VkRect2D renderArea{};
     VulkanResourceManager *vulkanResourceManager{ nullptr };
     Handle<Device_t> deviceHandle;
+    Handle<GraphicsPipeline_t> pipeline;
 };
 
 } // namespace ToyRenderer

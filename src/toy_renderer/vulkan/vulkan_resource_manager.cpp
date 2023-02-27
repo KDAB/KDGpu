@@ -777,6 +777,7 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     const auto vulkanGraphicsPipelineHandle = m_graphicsPipelines.emplace(VulkanGraphicsPipeline(
             vkPipeline,
             vkRenderPass,
+            vulkanPipelineLayout->pipelineLayout,
             this,
             deviceHandle));
 
