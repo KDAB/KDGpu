@@ -54,6 +54,9 @@ public:
     }
 
     ResourceBindingType type() const { return m_type; }
+    const BufferBinding &bufferBinding() const { return m_resource.buffer; }
+    const ImageBinding &imageBinding() const { return m_resource.image; }
+    const TextureViewBinding &textureViewBinding() const { return m_resource.textureView; }
 
 private:
     union Resource {

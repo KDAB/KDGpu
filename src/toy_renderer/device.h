@@ -34,6 +34,7 @@ struct SwapchainOptions;
 struct TextureOptions;
 struct BindGroupOptions;
 struct BindGroupLayoutOptions;
+struct BindGroupEntry;
 
 class TOY_RENDERER_EXPORT Device
 {
@@ -72,6 +73,7 @@ public:
     BindGroupLayout createBindGroupLayout(const BindGroupLayoutOptions &options);
 
     BindGroup createBindGroup(const BindGroupOptions &options);
+    void updateBindGroup(const Handle<BindGroup_t> &bindGroup, const BindGroupEntry &entry);
 
 private:
     Device(Adapter *adapter, GraphicsApi *api, const DeviceOptions &options);

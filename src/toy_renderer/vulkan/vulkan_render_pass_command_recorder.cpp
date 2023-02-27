@@ -48,40 +48,7 @@ void VulkanRenderPassCommandRecorder::setVertexBuffer(uint32_t index, const Hand
 void VulkanRenderPassCommandRecorder::setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroupH)
 {
     VulkanBindGroup *bindGroup = vulkanResourceManager->getBindGroup(bindGroupH);
-    // TODO: We need to have created the descriptor first, do we want that to be done internally or should that be exposed in
-    // the API
-    VkDescriptorSet set = bindGroup->descriptorSet; // Find DescriptorSet for group;
-
-    // TODO: Add API to know all the dirty descriptors in
-
-    // VulkanBuffer *vulkanBuffer = vulkanResourceManager->getBuffer(buffer);
-
-    // VkDescriptorBufferInfo uboBufferInfo;
-    // uboBufferInfo.buffer = vulkanBuffer->buffer; // VkBuffer
-    // uboBufferInfo.offset = 0;
-    // // TODO: We need API to retrieve the size
-    // // uboBufferInfo.range = vulkanBuffer->size();
-
-    // VkDescriptorImageInfo imageInfo;
-    // imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    // imageInfo.imageView = vulkanTextureView->imageView;
-    // // TODO: Create Sampler
-    // // imageInfo.sampler = vulkanTextureView.sampler;
-
-    // VkWriteDescriptorSet descriptorWrite{};
-    // descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    // descriptorWrite.dstSet = set;
-    // descriptorWrite.dstBinding = index;
-    // descriptorWrite.dstArrayElement = 0;
-    // descriptorWrite.descriptorCount = 1;
-    // descriptorWrite.pImageInfo = nullptr;
-    // descriptorWrite.pTexelBufferView = nullptr;
-    // descriptorWrite.pBufferInfo = &uboBufferInfo;
-    // descriptorWrite.pTexelBufferView = nullptr;
-    // descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-
-    // auto device = vulkanResourceManager->getDevice(deviceHandle);
-    // vkUpdateDescriptorSets(device->device, 1, &descriptorWrite, 0, nullptr);
+    VkDescriptorSet set = bindGroup->descriptorSet;
 
     // Bind Descriptor Set
     VkPipelineLayout pipelineLayout{ VK_NULL_HANDLE }; // TODO: Retrieve that

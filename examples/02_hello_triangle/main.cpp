@@ -295,6 +295,9 @@ int main()
     };
     BindGroup bindGroup = device.createBindGroup(bindGroupCreateOptions);
 
+    // Update BindGroup for binding 0
+    device.updateBindGroup(bindGroup, BindGroupEntry{ .binding = 0, .resource = BindingResource(BufferBinding{ .buffer = cameraUBOBuffer }) });
+
     while (window.visible()) {
         // Acquire next swapchain image
         uint32_t currentImageIndex = 0;
@@ -302,6 +305,10 @@ int main()
         if (result != true) {
             // Do we need to recreate the swapchain and dependent resources?
         }
+
+        cameraUBOBuffer.map();
+        // TODO: Update Camera UBO
+        cameraUBOBuffer.unmap();
 
         // Create a command encoder/recorder
         auto commandRecorder = device.createCommandRecorder();

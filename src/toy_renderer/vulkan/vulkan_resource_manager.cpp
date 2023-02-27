@@ -1208,7 +1208,7 @@ Handle<Framebuffer_t> VulkanResourceManager::createFramebuffer(const Handle<Devi
     return vulkanFramebufferHandle;
 }
 
-Handle<BindGroup_t> VulkanResourceManager::createBindGroup(const Handle<Device_t> deviceHandle, BindGroupOptions options)
+Handle<BindGroup_t> VulkanResourceManager::createBindGroup(const Handle<Device_t> &deviceHandle, const BindGroupOptions &options)
 {
     VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
 
@@ -1259,7 +1259,58 @@ Handle<BindGroup_t> VulkanResourceManager::createBindGroup(const Handle<Device_t
     return vulkanBindGroupHandle;
 }
 
-void VulkanResourceManager::deleteBindGroup(Handle<BindGroup_t> handle)
+void VulkanResourceManager::updateBindGroup(const Handle<Device_t> &deviceHandle, const Handle<BindGroup_t> &handle, const BindGroupEntry &entry)
+{
+    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
+    VulkanBindGroup *bindGroup = m_bindGroups.get(handle);
+
+    VkDescriptorBufferInfo uboBufferInfo{};
+
+    VkDescriptorImageInfo imageInfo{};
+    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+    VkWriteDescriptorSet descriptorWrite{};
+    descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    descriptorWrite.dstSet = bindGroup->descriptorSet;
+    descriptorWrite.dstBinding = entry.binding;
+    descriptorWrite.dstArrayElement = 0;
+    descriptorWrite.descriptorCount = 0;
+    descriptorWrite.pImageInfo = nullptr;
+    descriptorWrite.pTexelBufferView = nullptr;
+    descriptorWrite.pBufferInfo = nullptr;
+    descriptorWrite.pTexelBufferView = nullptr;
+    descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+
+    switch (entry.resource.type()) {
+    case ResourceBindingType::CombinedImageSampler: {
+        const TextureViewBinding &textureViewBinding = entry.resource.textureViewBinding();
+        VulkanTextureView *textView = m_textureViews.get(textureViewBinding.textureView);
+        // VulkanSampler *sampler = m_samplers.get(textureViewBinding.sampler);
+        imageInfo.imageView = textView->imageView;
+        // TODO: Create Sampler
+        // imageInfo.sampler = vulkanTextureView.sampler;
+
+        descriptorWrite.descriptorCount = 1;
+        descriptorWrite.pImageInfo = &imageInfo;
+        break;
+    }
+    case ResourceBindingType::UniformBuffer:
+        const BufferBinding &bufferBinding = entry.resource.bufferBinding();
+        VulkanBuffer *buffer = m_buffers.get(bufferBinding.buffer);
+        uboBufferInfo.buffer = buffer->buffer; // VkBuffer
+        uboBufferInfo.offset = bufferBinding.offset;
+        uboBufferInfo.range = (bufferBinding.size == BufferBinding::WholeSize) ? VK_WHOLE_SIZE : bufferBinding.size;
+
+        descriptorWrite.descriptorCount = 1;
+        descriptorWrite.pBufferInfo = &uboBufferInfo;
+        break;
+    }
+
+    if (descriptorWrite.descriptorCount > 0)
+        vkUpdateDescriptorSets(vulkanDevice->device, 1, &descriptorWrite, 0, nullptr);
+}
+
+void VulkanResourceManager::deleteBindGroup(const Handle<BindGroup_t> &handle)
 {
     // TODO: implement
 }
@@ -1270,7 +1321,7 @@ VulkanBindGroup *VulkanResourceManager::getBindGroup(const Handle<BindGroup_t> &
     return nullptr;
 }
 
-Handle<BindGroupLayout_t> VulkanResourceManager::createBindGroupLayout(const Handle<Device_t> deviceHandle, BindGroupLayoutOptions options)
+Handle<BindGroupLayout_t> VulkanResourceManager::createBindGroupLayout(const Handle<Device_t> &deviceHandle, const BindGroupLayoutOptions &options)
 {
     VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
 
@@ -1308,7 +1359,7 @@ Handle<BindGroupLayout_t> VulkanResourceManager::createBindGroupLayout(const Han
     return vulkanBindGroupLayoutHandle;
 }
 
-void VulkanResourceManager::deleteBindGroupLayout(Handle<BindGroupLayout_t> handle)
+void VulkanResourceManager::deleteBindGroupLayout(const Handle<BindGroupLayout_t> &handle)
 {
     // TODO: implement
 }

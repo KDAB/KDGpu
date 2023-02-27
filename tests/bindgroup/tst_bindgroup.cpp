@@ -69,6 +69,44 @@ TEST_SUITE("BindGroup")
         }
     }
 
+    TEST_CASE("Update BindGroup")
+    {
+        // GIVEN
+        BufferOptions uboOptions = {
+            .size = 16 * sizeof(float),
+            .usage = BufferUsageFlags(BufferUsageFlagBits::VertexBufferBit),
+            .memoryUsage = MemoryUsage::CpuToGpu
+        };
+        auto ubo = device.createBuffer(uboOptions);
+
+        const BindGroupLayoutOptions bindGroupLayoutOptions = {
+            .bindings = { { // Camera uniforms
+                            .binding = 0,
+                            .count = 1,
+                            .resourceType = ResourceBindingType::UniformBuffer,
+                            .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit) } }
+        };
+
+        const BindGroupLayout bindGroupLayout = device.createBindGroupLayout(bindGroupLayoutOptions);
+
+        const BindGroupOptions bindGroupOptions = {
+            .layout = bindGroupLayout,
+            .resources = {
+                    { .binding = 0,
+                      .resource = BindingResource(BufferBinding{ .buffer = ubo }) },
+            }
+        };
+
+        // WHEN
+        BindGroup t = device.createBindGroup(bindGroupOptions);
+
+        // THEN
+        CHECK(t.isValid());
+
+        // WHEN
+        device.updateBindGroup(t, BindGroupEntry{ .binding = 0, .resource = BindingResource(BufferBinding{ .buffer = ubo }) });
+    }
+
     TEST_CASE("Comparison")
     {
         SUBCASE("Compare default contructed BindGroups")

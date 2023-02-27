@@ -112,12 +112,13 @@ public:
 
     VulkanCommandBuffer *getCommandBuffer(const Handle<CommandBuffer_t> &handle) final { return m_commandBuffers.get(handle); }
 
-    Handle<BindGroup_t> createBindGroup(const Handle<Device_t> deviceHandle, BindGroupOptions options) final;
-    void deleteBindGroup(Handle<BindGroup_t> handle) final;
+    Handle<BindGroup_t> createBindGroup(const Handle<Device_t> &deviceHandle, const BindGroupOptions &options) final;
+    void updateBindGroup(const Handle<Device_t> &deviceHandle, const Handle<BindGroup_t> &handle, const BindGroupEntry &entry) final;
+    void deleteBindGroup(const Handle<BindGroup_t> &handle) final;
     VulkanBindGroup *getBindGroup(const Handle<BindGroup_t> &handle) final;
 
-    Handle<BindGroupLayout_t> createBindGroupLayout(const Handle<Device_t> deviceHandle, BindGroupLayoutOptions options) final;
-    void deleteBindGroupLayout(Handle<BindGroupLayout_t> handle) final;
+    Handle<BindGroupLayout_t> createBindGroupLayout(const Handle<Device_t> &deviceHandle, const BindGroupLayoutOptions &options) final;
+    void deleteBindGroupLayout(const Handle<BindGroupLayout_t> &handle) final;
     VulkanBindGroupLayout *getBindGroupLayout(const Handle<BindGroupLayout_t> &handle) final { return m_bindGroupLayouts.get(handle); }
 
 private:
