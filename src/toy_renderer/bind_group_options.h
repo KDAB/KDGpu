@@ -11,7 +11,7 @@ struct BindGroupEntry { // An entry into a BindGroup ( == a descriptor in a desc
 };
 
 struct BindGroupOptions {
-    BindGroupLayout layout;
+    Handle<BindGroupLayout_t> layout;
     std::vector<BindGroupEntry> resources;
 };
 
