@@ -378,6 +378,8 @@ Handle<PipelineLayout_t> VulkanResourceManager::createPipelineLayout(const Handl
 {
     VulkanDevice vulkanDevice = *m_devices.get(deviceHandle);
 
+    // TODO: Extract the VkDescriptorSetLayout creation into a Device::createBindGroupLayout as we will need
+    // to use the VkDescriptorSetLayout when creating the PipelineLayout as well as when creating the BindGroup
     assert(options.bindGroupLayouts.size() <= std::numeric_limits<uint32_t>::max());
     const uint32_t bindGroupLayoutCount = static_cast<uint32_t>(options.bindGroupLayouts.size());
     std::vector<VkDescriptorSetLayout> vkDescriptorSetLayouts;
