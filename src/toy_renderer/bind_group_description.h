@@ -15,9 +15,7 @@ struct Sampler_t;
 
 struct TextureViewBinding {
     Handle<TextureView_t> textureView{};
-    // Handle<Sampler_t> sampler{};
-    // TODO: Use TextureView instead of Texture?
-    // TODO: Add support for samplers.
+    Handle<Sampler_t> sampler{};
 };
 
 struct ImageBinding {
