@@ -7,6 +7,7 @@ set(SOURCES
     bind_group_layout.cpp
     command_buffer.cpp
     command_recorder.cpp
+    compute_pipeline.cpp
     compute_pass_command_recorder.cpp
     device.cpp
     graphics_api.cpp
@@ -64,6 +65,8 @@ set(HEADERS
     buffer_options.h
     command_buffer.h
     command_recorder.h
+    compute_pipeline.h
+    compute_pipeline_options.h
     compute_pass_command_recorder.h
     device.h
     device_options.h
