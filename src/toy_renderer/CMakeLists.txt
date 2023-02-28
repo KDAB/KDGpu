@@ -41,6 +41,7 @@ set(SOURCES
     vulkan/vulkan_render_pass.cpp
     vulkan/vulkan_render_pass_command_recorder.cpp
     vulkan/vulkan_resource_manager.cpp
+    vulkan/vulkan_sampler.cpp
     vulkan/vulkan_shader_module.cpp
     vulkan/vulkan_swapchain.cpp
     vulkan/vulkan_surface.cpp
@@ -105,6 +106,7 @@ set(HEADERS
     api/api_pipeline_layout.h
     api/api_render_pass.h
     api/api_render_pass_command_recorder.h
+    api/api_sampler.h
     api/api_shader_module.h
     api/api_swapchain.h
     api/api_surface.h
@@ -129,6 +131,7 @@ set(HEADERS
     vulkan/vulkan_render_pass.h
     vulkan/vulkan_render_pass_command_recorder.h
     vulkan/vulkan_resource_manager.h
+    vulkan/vulkan_sampler.h
     vulkan/vulkan_shader_module.h
     vulkan/vulkan_swapchain.h
     vulkan/vulkan_surface.h
