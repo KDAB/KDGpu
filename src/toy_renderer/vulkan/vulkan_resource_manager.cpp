@@ -431,6 +431,14 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
         return {};
 
     const auto vulkanBufferHandle = m_buffers.emplace(VulkanBuffer(vkBuffer, vmaAllocation, this, deviceHandle));
+
+    if (initialData) {
+        VulkanBuffer *vulkanBuffer = m_buffers.get(vulkanBufferHandle);
+        auto bufferData = vulkanBuffer->map();
+        std::memcpy(bufferData, initialData, createInfo.size);
+        vulkanBuffer->unmap();
+    }
+
     return vulkanBufferHandle;
 }
 
