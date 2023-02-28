@@ -8,11 +8,16 @@
 namespace ToyRenderer {
 
 struct Texture_t;
+struct Device_t;
+
 struct VulkanTextureView : public ApiTextureView {
-    explicit VulkanTextureView(VkImageView _imageView, const Handle<Texture_t> &_textureHandle);
+    explicit VulkanTextureView(VkImageView _imageView,
+                               const Handle<Texture_t> &_textureHandle,
+                               const Handle<Device_t> &_deviceHandle);
 
     VkImageView imageView{ VK_NULL_HANDLE };
     Handle<Texture_t> textureHandle;
+    Handle<Device_t> deviceHandle;
 };
 
 } // namespace ToyRenderer

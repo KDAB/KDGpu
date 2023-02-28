@@ -66,7 +66,10 @@ Handle<Instance_t> VulkanResourceManager::createInstance(const InstanceOptions &
 
 void VulkanResourceManager::deleteInstance(Handle<Instance_t> handle)
 {
-    // TODO: Implement me!
+    VulkanInstance *instance = m_instances.get(handle);
+    vkDestroyInstance(instance->instance, nullptr);
+
+    m_instances.remove(handle);
 }
 
 VulkanInstance *VulkanResourceManager::getInstance(const Handle<Instance_t> &handle) const
@@ -152,7 +155,10 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
 
 void VulkanResourceManager::deleteDevice(Handle<Device_t> handle)
 {
-    // TODO: Implement me!
+    VulkanDevice *vulkanDevice = m_devices.get(handle);
+    vkDestroyDevice(vulkanDevice->device, nullptr);
+
+    m_devices.remove(handle);
 }
 
 VulkanDevice *VulkanResourceManager::getDevice(const Handle<Device_t> &handle) const
@@ -218,6 +224,10 @@ Handle<Swapchain_t> VulkanResourceManager::createSwapchain(const Handle<Device_t
 
 void VulkanResourceManager::deleteSwapchain(Handle<Swapchain_t> handle)
 {
+    VulkanSwapchain *vulkanSwapChain = m_swapchains.get(handle);
+    VulkanDevice *vulkanDevice = m_devices.get(vulkanSwapChain->deviceHandle);
+    vkDestroySwapchainKHR(vulkanDevice->device, vulkanSwapChain->swapchain, nullptr);
+    m_swapchains.remove(handle);
 }
 
 VulkanSwapchain *VulkanResourceManager::getSwapchain(const Handle<Swapchain_t> &handle) const
@@ -236,6 +246,7 @@ void VulkanResourceManager::deleteSurface(Handle<Surface_t> handle)
     if (vulkanSurface == nullptr)
         return;
     vkDestroySurfaceKHR(vulkanSurface->instance, vulkanSurface->surface, nullptr);
+    m_surfaces.remove(handle);
 }
 
 VulkanSurface *VulkanResourceManager::getSurface(const Handle<Surface_t> &handle) const
@@ -302,6 +313,12 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> de
 
 void VulkanResourceManager::deleteTexture(Handle<Texture_t> handle)
 {
+    VulkanTexture *vulkanTexture = m_textures.get(handle);
+    VulkanDevice *vulkanDevice = m_devices.get(vulkanTexture->deviceHandle);
+
+    vmaDestroyImage(vulkanDevice->allocator, vulkanTexture->image, vulkanTexture->allocation);
+
+    m_textures.remove(handle);
 }
 
 VulkanTexture *VulkanResourceManager::getTexture(const Handle<Texture_t> &handle) const
@@ -350,13 +367,17 @@ Handle<TextureView_t> VulkanResourceManager::createTextureView(const Handle<Devi
     if (vkCreateImageView(vulkanDevice.device, &createInfo, nullptr, &imageView) != VK_SUCCESS)
         return {};
 
-    const auto vulkanTextureViewHandle = m_textureViews.emplace(VulkanTextureView(imageView, textureHandle));
+    const auto vulkanTextureViewHandle = m_textureViews.emplace(VulkanTextureView(imageView, textureHandle, deviceHandle));
     return vulkanTextureViewHandle;
 }
 
 void VulkanResourceManager::deleteTextureView(Handle<TextureView_t> handle)
 {
-    // TODO: Implement me!
+    VulkanTextureView *vulkanTextureView = m_textureViews.get(handle);
+    VulkanDevice *vulkanDevice = m_devices.get(vulkanTextureView->deviceHandle);
+    vkDestroyImageView(vulkanDevice->device, vulkanTextureView->imageView, nullptr);
+
+    m_textureViews.remove(handle);
 }
 
 VulkanTextureView *VulkanResourceManager::getTextureView(const Handle<TextureView_t> &handle) const
@@ -392,7 +413,12 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> devi
 
 void VulkanResourceManager::deleteBuffer(Handle<Buffer_t> handle)
 {
-    // TODO: Implement me!
+    VulkanBuffer *vulkanBuffer = m_buffers.get(handle);
+    VulkanDevice *vulkanDevice = m_devices.get(vulkanBuffer->deviceHandle);
+
+    vmaDestroyBuffer(vulkanDevice->allocator, vulkanBuffer->buffer, vulkanBuffer->allocation);
+
+    m_buffers.remove(handle);
 }
 
 VulkanBuffer *VulkanResourceManager::getBuffer(const Handle<Buffer_t> &handle) const
@@ -419,7 +445,12 @@ Handle<ShaderModule_t> VulkanResourceManager::createShaderModule(const Handle<De
 
 void VulkanResourceManager::deleteShaderModule(Handle<ShaderModule_t> handle)
 {
-    // TODO: Implement me!
+    VulkanShaderModule *shaderModule = m_shaderModules.get(handle);
+    VulkanDevice *vulkanDevice = m_devices.get(shaderModule->deviceHandle);
+
+    vkDestroyShaderModule(vulkanDevice->device, shaderModule->shaderModule, nullptr);
+
+    m_shaderModules.remove(handle);
 }
 
 VulkanShaderModule *VulkanResourceManager::getShaderModule(const Handle<ShaderModule_t> &handle) const
@@ -486,7 +517,12 @@ Handle<PipelineLayout_t> VulkanResourceManager::createPipelineLayout(const Handl
 
 void VulkanResourceManager::deletePipelineLayout(Handle<PipelineLayout_t> handle)
 {
-    // TODO: Implement me!
+    VulkanPipelineLayout *vulkanPipelineLayout = m_pipelineLayouts.get(handle);
+    VulkanDevice *vulkanDevice = m_devices.get(vulkanPipelineLayout->deviceHandle);
+
+    vkDestroyPipelineLayout(vulkanDevice->device, vulkanPipelineLayout->pipelineLayout, nullptr);
+
+    m_pipelineLayouts.remove(handle);
 }
 
 VulkanPipelineLayout *VulkanResourceManager::getPipelineLayout(const Handle<PipelineLayout_t> &handle) const
@@ -842,7 +878,12 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
 
 void VulkanResourceManager::deleteGraphicsPipeline(Handle<GraphicsPipeline_t> handle)
 {
-    // TODO: Implement me!
+    VulkanGraphicsPipeline *vulkanPipeline = m_graphicsPipelines.get(handle);
+    VulkanDevice *vulkanDevice = m_devices.get(vulkanPipeline->deviceHandle);
+
+    vkDestroyPipeline(vulkanDevice->device, vulkanPipeline->pipeline, nullptr);
+
+    m_graphicsPipelines.remove(handle);
 }
 
 VulkanGraphicsPipeline *VulkanResourceManager::getGraphicsPipeline(const Handle<GraphicsPipeline_t> &handle) const
@@ -873,7 +914,12 @@ Handle<GpuSemaphore_t> VulkanResourceManager::createGpuSemaphore(const Handle<De
 
 void VulkanResourceManager::deleteGpuSemaphore(Handle<GpuSemaphore_t> handle)
 {
-    // TODO: Implement me!
+    VulkanGpuSemaphore *vulkanSemaphore = m_gpuSemaphores.get(handle);
+    VulkanDevice *vulkanDevice = m_devices.get(vulkanSemaphore->deviceHandle);
+
+    vkDestroySemaphore(vulkanDevice->device, vulkanSemaphore->semaphore, nullptr);
+
+    m_gpuSemaphores.remove(handle);
 }
 
 VulkanGpuSemaphore *VulkanResourceManager::getGpuSemaphore(const Handle<GpuSemaphore_t> &handle) const
@@ -970,12 +1016,23 @@ Handle<CommandRecorder_t> VulkanResourceManager::createCommandRecorder(const Han
 
 void VulkanResourceManager::deleteCommandRecorder(Handle<CommandRecorder_t> handle)
 {
-    // TODO: Implement me!
+    VulkanCommandRecorder *vulkanCommandRecorder = m_commandRecorders.get(handle);
+    VulkanDevice *vulkanDevice = m_devices.get(vulkanCommandRecorder->deviceHandle);
+
+    // TODO: Find out when we can/should release the command pool
+    // vkDestroyCommandPool(vulkanDevice->device, vulkanCommandBuffer->commandPool, nullptr);
+
+    m_commandRecorders.remove(handle);
 }
 
 VulkanCommandRecorder *VulkanResourceManager::getCommandRecorder(const Handle<CommandRecorder_t> &handle) const
 {
     return m_commandRecorders.get(handle);
+}
+
+VulkanCommandBuffer *VulkanResourceManager::getCommandBuffer(const Handle<CommandBuffer_t> &handle) const
+{
+    return m_commandBuffers.get(handle);
 }
 
 Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassCommandRecorder(const Handle<Device_t> &deviceHandle,
@@ -1109,9 +1166,16 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
     return vulkanRenderPassCommandRecorderHandle;
 }
 
+VulkanRenderPassCommandRecorder *VulkanResourceManager::getRenderPassCommandRecorder(const Handle<RenderPassCommandRecorder_t> &handle) const
+{
+    return m_renderPassCommandRecorders.get(handle);
+}
+
 void VulkanResourceManager::deleteRenderPassCommandRecorder(Handle<RenderPassCommandRecorder_t> handle)
 {
-    // TODO: Implement me!
+    VulkanRenderPassCommandRecorder *vulkanCommandPassRecorder = m_renderPassCommandRecorders.get(handle);
+
+    m_renderPassCommandRecorders.remove(handle);
 }
 
 Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device_t> &deviceHandle,
@@ -1249,16 +1313,6 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
     return vulkanRenderPassHandle;
 }
 
-VulkanRenderPassCommandRecorder *VulkanResourceManager::getRenderPassCommandRecorder(const Handle<RenderPassCommandRecorder_t> &handle) const
-{
-    return m_renderPassCommandRecorders.get(handle);
-}
-
-VulkanCommandBuffer *VulkanResourceManager::getCommandBuffer(const Handle<CommandBuffer_t> &handle) const
-{
-    return m_commandBuffers.get(handle);
-}
-
 Handle<Framebuffer_t> VulkanResourceManager::createFramebuffer(const Handle<Device_t> &deviceHandle, const VulkanFramebufferKey &options)
 {
     VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
@@ -1343,7 +1397,12 @@ Handle<BindGroup_t> VulkanResourceManager::createBindGroup(const Handle<Device_t
 
 void VulkanResourceManager::deleteBindGroup(const Handle<BindGroup_t> &handle)
 {
-    // TODO: implement
+    VulkanBindGroup *vulkanBindGroup = m_bindGroups.get(handle);
+    VulkanDevice *vulkanDevice = m_devices.get(vulkanBindGroup->deviceHandle);
+
+    vkFreeDescriptorSets(vulkanDevice->device, vulkanDevice->descriptorSetPool, 1, &vulkanBindGroup->descriptorSet);
+
+    m_bindGroups.remove(handle);
 }
 
 VulkanBindGroup *VulkanResourceManager::getBindGroup(const Handle<BindGroup_t> &handle) const
@@ -1385,13 +1444,18 @@ Handle<BindGroupLayout_t> VulkanResourceManager::createBindGroupLayout(const Han
         // SPDLOG_WARN("Failed to create DescriptorSetLayout");
     }
 
-    const auto vulkanBindGroupLayoutHandle = m_bindGroupLayouts.emplace(VulkanBindGroupLayout(vkDescriptorSetLayout));
+    const auto vulkanBindGroupLayoutHandle = m_bindGroupLayouts.emplace(VulkanBindGroupLayout(vkDescriptorSetLayout, deviceHandle));
     return vulkanBindGroupLayoutHandle;
 }
 
 void VulkanResourceManager::deleteBindGroupLayout(const Handle<BindGroupLayout_t> &handle)
 {
-    // TODO: implement
+    VulkanBindGroupLayout *vulkanBindGroupLayout = m_bindGroupLayouts.get(handle);
+    VulkanDevice *vulkanDevice = m_devices.get(vulkanBindGroupLayout->deviceHandle);
+
+    vkDestroyDescriptorSetLayout(vulkanDevice->device, vulkanBindGroupLayout->descriptorSetLayout, nullptr);
+
+    m_bindGroupLayouts.remove(handle);
 }
 
 VulkanBindGroupLayout *VulkanResourceManager::getBindGroupLayout(const Handle<BindGroupLayout_t> &handle) const

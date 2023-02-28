@@ -2,8 +2,10 @@
 
 namespace ToyRenderer {
 
-VulkanBindGroupLayout::VulkanBindGroupLayout(VkDescriptorSetLayout _descriptorSetLayout)
+VulkanBindGroupLayout::VulkanBindGroupLayout(VkDescriptorSetLayout _descriptorSetLayout,
+                                             const Handle<Device_t> &_deviceHandle)
     : descriptorSetLayout(_descriptorSetLayout)
+    , deviceHandle(deviceHandle)
 {
 }
 
