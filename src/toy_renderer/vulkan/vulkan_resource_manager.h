@@ -19,6 +19,7 @@
 #include <toy_renderer/vulkan/vulkan_queue.h>
 #include <toy_renderer/vulkan/vulkan_render_pass.h>
 #include <toy_renderer/vulkan/vulkan_render_pass_command_recorder.h>
+#include <toy_renderer/vulkan/vulkan_sampler.h>
 #include <toy_renderer/vulkan/vulkan_shader_module.h>
 #include <toy_renderer/vulkan/vulkan_swapchain.h>
 #include <toy_renderer/vulkan/vulkan_surface.h>
@@ -120,6 +121,10 @@ public:
     void deleteBindGroupLayout(const Handle<BindGroupLayout_t> &handle) final;
     VulkanBindGroupLayout *getBindGroupLayout(const Handle<BindGroupLayout_t> &handle) final { return m_bindGroupLayouts.get(handle); }
 
+    Handle<Sampler_t> createSampler(const Handle<Device_t> &deviceHandle, const SamplerOptions &options) final;
+    void deleteSampler(const Handle<Sampler_t> &handle) final;
+    VulkanSampler *getSampler(const Handle<Sampler_t> &handle) final;
+
 private:
     Pool<VulkanInstance, Instance_t> m_instances{ 1 };
     Pool<VulkanAdapter, Adapter_t> m_adapters{ 1 };
@@ -141,6 +146,7 @@ private:
     Pool<VulkanCommandBuffer, CommandBuffer_t> m_commandBuffers{ 128 };
     Pool<VulkanRenderPass, RenderPass_t> m_renderPasses{ 16 };
     Pool<VulkanFramebuffer, Framebuffer_t> m_framebuffers{ 16 };
+    Pool<VulkanSampler, Sampler_t> m_samplers{ 16 };
 };
 
 } // namespace ToyRenderer

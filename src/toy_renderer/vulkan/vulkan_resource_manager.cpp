@@ -5,6 +5,7 @@
 #include <toy_renderer/buffer_options.h>
 #include <toy_renderer/graphics_pipeline_options.h>
 #include <toy_renderer/instance.h>
+#include <toy_renderer/sampler_options.h>
 #include <toy_renderer/swapchain_options.h>
 #include <toy_renderer/texture_options.h>
 #include <toy_renderer/vulkan/vulkan_config.h>
@@ -1311,6 +1312,53 @@ Handle<BindGroupLayout_t> VulkanResourceManager::createBindGroupLayout(const Han
 void VulkanResourceManager::deleteBindGroupLayout(const Handle<BindGroupLayout_t> &handle)
 {
     // TODO: implement
+}
+
+Handle<Sampler_t> VulkanResourceManager::createSampler(const Handle<Device_t> &deviceHandle, const SamplerOptions &options)
+{
+    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
+
+    VkSamplerCreateInfo samplerInfo{};
+    samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+    samplerInfo.magFilter = filterModeToVkFilterMode(options.magFilter);
+    samplerInfo.minFilter = filterModeToVkFilterMode(options.minFilter);
+
+    samplerInfo.addressModeU = addressModeToVkSamplerAddressMode(options.u);
+    samplerInfo.addressModeV = addressModeToVkSamplerAddressMode(options.v);
+    samplerInfo.addressModeW = addressModeToVkSamplerAddressMode(options.w);
+
+    samplerInfo.anisotropyEnable = options.anisotropyEnabled;
+    samplerInfo.maxAnisotropy = options.maxAnisotropy;
+
+    samplerInfo.compareEnable = options.compareEnabled;
+    samplerInfo.compareOp = compareOperationToVkCompareOp(options.compare);
+
+    samplerInfo.mipmapMode = mipMapFilterModeToVkSamplerMipmapMode(options.mipmapFilter);
+    samplerInfo.mipLodBias = 0.0f;
+    samplerInfo.minLod = options.lodMinClamp;
+    samplerInfo.maxLod = options.lodMaxClamp;
+
+    VkSampler sampler{ VK_NULL_HANDLE };
+    if (vkCreateSampler(vulkanDevice->device, &samplerInfo, nullptr, &sampler) != VK_SUCCESS)
+        return {};
+
+    auto samplerHandle = m_samplers.emplace(VulkanSampler(sampler, deviceHandle));
+    return samplerHandle;
+}
+
+void VulkanResourceManager::deleteSampler(const Handle<Sampler_t> &handle)
+{
+    VulkanSampler *sampler = m_samplers.get(handle);
+    VulkanDevice *vulkanDevice = m_devices.get(sampler->deviceHandle);
+
+    vkDestroySampler(vulkanDevice->device, sampler->sampler, nullptr);
+
+    m_samplers.remove(handle);
+}
+
+VulkanSampler *VulkanResourceManager::getSampler(const Handle<Sampler_t> &handle)
+{
+    return m_samplers.get(handle);
 }
 
 } // namespace ToyRenderer

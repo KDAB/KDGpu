@@ -778,4 +778,25 @@ enum class AttachmentStoreOperation {
     MaxEnum = 0x7fffffff
 };
 
+enum class AddressMode {
+    Repeat = 0,
+    MirroredRepeat = 1,
+    ClampToEdge = 2,
+    ClampToBorder = 3,
+    MirrorClampToEdge = 4,
+    MaxEnum = 0x7fffffff
+};
+
+enum class FilterMode {
+    Nearest = 0,
+    Linear = 1,
+    MaxEnum = 0x7fffffff
+};
+
+enum class MipmapFilterMode {
+    Nearest = 0,
+    Linear = 1,
+    MaxEnum = 0x7fffffff
+};
+
 } // namespace ToyRenderer

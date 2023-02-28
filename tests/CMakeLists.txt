@@ -10,3 +10,6 @@ add_subdirectory(textureview)
 add_subdirectory(instance)
 add_subdirectory(bindgroup)
 add_subdirectory(bindgrouplayout)
+add_subdirectory(sampler)
+
+
