@@ -33,11 +33,11 @@ TEST_SUITE("Sampler")
             // GIVEN
             const SamplerOptions samplerOptions{};
 
-            // // WHEN
-            // Sampler s = device.createSampler(samplerOptions);
+            // WHEN
+            Sampler s = device.createSampler(samplerOptions);
 
-            // // THEN
-            // CHECK(s.isValid());
+            // THEN
+            CHECK(s.isValid());
         }
     }
 
@@ -64,18 +64,18 @@ TEST_SUITE("Sampler")
             // GIVEN
             const SamplerOptions samplerOptions{};
 
-            // // WHEN
-            // Sampler a = device.createSampler(samplerOptions);
-            // Sampler b = device.createSampler(samplerOptions);
+            // WHEN
+            Sampler a = device.createSampler(samplerOptions);
+            Sampler b = device.createSampler(samplerOptions);
 
-            // // THEN
-            // CHECK(a != b);
+            // THEN
+            CHECK(a != b);
 
-            // // WHEN
-            // a = b;
+            // WHEN
+            a = b;
 
-            // // THEN
-            // CHECK(a == b);
+            // THEN
+            CHECK(a == b);
         }
     }
 }

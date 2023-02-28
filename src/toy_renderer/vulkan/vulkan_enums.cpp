@@ -268,4 +268,19 @@ AttachmentStoreOperation vkAttachmentStoreOperationToAttachmentStoreOperation(At
     return static_cast<AttachmentStoreOperation>(static_cast<uint32_t>(op));
 }
 
+VkFilter filterModeToVkFilterMode(FilterMode mode)
+{
+    return static_cast<VkFilter>(static_cast<uint32_t>(mode));
+}
+
+VkSamplerMipmapMode mipMapFilterModeToVkSamplerMipmapMode(MipmapFilterMode mode)
+{
+    return static_cast<VkSamplerMipmapMode>(static_cast<uint32_t>(mode));
+}
+
+VkSamplerAddressMode addressModeToVkSamplerAddressMode(AddressMode mode)
+{
+    return static_cast<VkSamplerAddressMode>(static_cast<uint32_t>(mode));
+}
+
 } // namespace ToyRenderer

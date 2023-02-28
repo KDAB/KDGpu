@@ -32,6 +32,7 @@ struct ApiPipelineLayout;
 struct ApiQueue;
 struct ApiRenderPass;
 struct ApiRenderPassCommandRecorder;
+struct ApiSampler;
 struct ApiShaderModule;
 struct ApiSwapchain;
 struct ApiSurface;
@@ -47,6 +48,7 @@ struct GraphicsPipelineOptions;
 struct InstanceOptions;
 struct PipelineLayoutOptions;
 struct RenderPassCommandRecorderOptions;
+struct SamplerOptions;
 struct TextureOptions;
 struct TextureViewOptions;
 
@@ -55,6 +57,7 @@ struct CommandRecorder_t;
 struct GraphicsPipeline_t;
 struct PipelineLayout_t;
 struct RenderPass_t;
+struct Sampler_t;
 struct ShaderModule_t;
 
 // TODO: Should this class have create/destroy functions or should we put those onto the
@@ -149,6 +152,10 @@ public:
     virtual Handle<BindGroupLayout_t> createBindGroupLayout(const Handle<Device_t> &deviceHandle, const BindGroupLayoutOptions &options) = 0;
     virtual void deleteBindGroupLayout(const Handle<BindGroupLayout_t> &handle) = 0;
     virtual ApiBindGroupLayout *getBindGroupLayout(const Handle<BindGroupLayout_t> &handle) = 0;
+
+    virtual Handle<Sampler_t> createSampler(const Handle<Device_t> &deviceHandle, const SamplerOptions &options) = 0;
+    virtual void deleteSampler(const Handle<Sampler_t> &handle) = 0;
+    virtual ApiSampler *getSampler(const Handle<Sampler_t> &handle) = 0;
 
 protected:
     ResourceManager();

@@ -27,6 +27,7 @@ private:
     Handle<Device_t> m_device;
     Handle<Sampler_t> m_sampler;
 
+    friend class Device;
     friend TOY_RENDERER_EXPORT bool operator==(const Sampler &, const Sampler &);
 };
 

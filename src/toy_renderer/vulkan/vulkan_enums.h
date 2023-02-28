@@ -81,4 +81,8 @@ AttachmentLoadOperation vkAttachmentLoadOperationToAttachmentLoadOperation(Attac
 VkAttachmentStoreOp attachmentStoreOperationToVkAttachmentStoreOp(AttachmentStoreOperation op);
 AttachmentStoreOperation vkAttachmentStoreOperationToAttachmentStoreOperation(AttachmentStoreOperation op);
 
+VkFilter filterModeToVkFilterMode(FilterMode mode);
+VkSamplerMipmapMode mipMapFilterModeToVkSamplerMipmapMode(MipmapFilterMode mode);
+VkSamplerAddressMode addressModeToVkSamplerAddressMode(AddressMode mode);
+
 } // namespace ToyRenderer
