@@ -1,5 +1,7 @@
 #include "vulkan_resource_manager.h"
 
+#include <toy_renderer/bind_group_options.h>
+#include <toy_renderer/bind_group_layout_options.h>
 #include <toy_renderer/buffer_options.h>
 #include <toy_renderer/graphics_pipeline_options.h>
 #include <toy_renderer/instance.h>
@@ -378,44 +380,16 @@ Handle<PipelineLayout_t> VulkanResourceManager::createPipelineLayout(const Handl
 {
     VulkanDevice vulkanDevice = *m_devices.get(deviceHandle);
 
+    // TODO: Extract the VkDescriptorSetLayout creation into a Device::createBindGroupLayout as we will need
+    // to use the VkDescriptorSetLayout when creating the PipelineLayout as well as when creating the BindGroup
     assert(options.bindGroupLayouts.size() <= std::numeric_limits<uint32_t>::max());
     const uint32_t bindGroupLayoutCount = static_cast<uint32_t>(options.bindGroupLayouts.size());
     std::vector<VkDescriptorSetLayout> vkDescriptorSetLayouts;
     vkDescriptorSetLayouts.reserve(bindGroupLayoutCount);
 
     for (uint32_t i = 0; i < bindGroupLayoutCount; ++i) {
-        const auto &bindGroupLayout = options.bindGroupLayouts.at(i);
-
-        assert(bindGroupLayout.bindings.size() <= std::numeric_limits<uint32_t>::max());
-        const uint32_t bindingLayoutCount = static_cast<uint32_t>(bindGroupLayout.bindings.size());
-        std::vector<VkDescriptorSetLayoutBinding> vkBindingLayouts;
-        vkBindingLayouts.reserve(bindingLayoutCount);
-
-        for (uint32_t j = 0; j < bindingLayoutCount; ++j) {
-            const auto &bindingLayout = bindGroupLayout.bindings.at(j);
-
-            VkDescriptorSetLayoutBinding vkBindingLayout = {};
-            vkBindingLayout.binding = bindingLayout.binding;
-            vkBindingLayout.descriptorCount = bindingLayout.count;
-            vkBindingLayout.descriptorType = resourceBindingTypeToVkDescriptorType(bindingLayout.resourceType);
-            vkBindingLayout.stageFlags = bindingLayout.shaderStages;
-            vkBindingLayout.pImmutableSamplers = nullptr; // TODO: Expose immutable samplers?
-
-            vkBindingLayouts.emplace_back(std::move(vkBindingLayout));
-        }
-
-        // Associate the bindings into a descriptor set layout
-        VkDescriptorSetLayoutCreateInfo createInfo = {};
-        createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-        createInfo.bindingCount = static_cast<uint32_t>(vkBindingLayouts.size());
-        createInfo.pBindings = vkBindingLayouts.data();
-
-        VkDescriptorSetLayout vkDescriptorSetLayout{ VK_NULL_HANDLE };
-        if (vkCreateDescriptorSetLayout(vulkanDevice.device, &createInfo, nullptr, &vkDescriptorSetLayout) != VK_SUCCESS) {
-            // TODO: Log problem
-            return {};
-        }
-        vkDescriptorSetLayouts.emplace_back(vkDescriptorSetLayout);
+        VulkanBindGroupLayout *bindGroupLayout = getBindGroupLayout(options.bindGroupLayouts[i]);
+        vkDescriptorSetLayouts.push_back(bindGroupLayout->descriptorSetLayout);
     }
 
     // Create the pipeline layout
@@ -803,6 +777,7 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     const auto vulkanGraphicsPipelineHandle = m_graphicsPipelines.emplace(VulkanGraphicsPipeline(
             vkPipeline,
             vkRenderPass,
+            vulkanPipelineLayout->pipelineLayout,
             this,
             deviceHandle));
 
@@ -1234,15 +1209,108 @@ Handle<Framebuffer_t> VulkanResourceManager::createFramebuffer(const Handle<Devi
     return vulkanFramebufferHandle;
 }
 
-Handle<BindGroup> VulkanResourceManager::createBindGroup(BindGroupDescription desc)
+Handle<BindGroup_t> VulkanResourceManager::createBindGroup(const Handle<Device_t> &deviceHandle, const BindGroupOptions &options)
 {
-    // TODO: This is where we will call vkAllocateDescriptorSets
-    return {};
+    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
+
+    auto createDescriptorSetPool = [](VkDevice device) {
+        const std::vector<VkDescriptorPoolSize> poolSizes{
+            { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 64 },
+            { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 16 },
+            { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 2 }
+        };
+
+        VkDescriptorPool pool{ VK_NULL_HANDLE };
+        VkDescriptorPoolCreateInfo poolInfo = {};
+        poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+        poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
+        poolInfo.pPoolSizes = poolSizes.data();
+
+        poolInfo.maxSets = 82;
+        poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+
+        const VkResult result = vkCreateDescriptorPool(device, &poolInfo, nullptr, &pool);
+        if (result != VK_SUCCESS)
+            return static_cast<VkDescriptorPool>(VK_NULL_HANDLE);
+        return pool;
+    };
+
+    // Have we create a DescriptorSet pool already?
+    if (vulkanDevice->descriptorSetPool == VK_NULL_HANDLE) {
+        vulkanDevice->descriptorSetPool = createDescriptorSetPool(vulkanDevice->device);
+    }
+
+    VulkanBindGroupLayout *bindGroupLayout = getBindGroupLayout(options.layout);
+
+    VkDescriptorSetAllocateInfo allocInfo = {};
+    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    allocInfo.descriptorPool = vulkanDevice->descriptorSetPool;
+    allocInfo.descriptorSetCount = 1;
+    allocInfo.pSetLayouts = &bindGroupLayout->descriptorSetLayout;
+
+    VkDescriptorSet descriptorSet{ VK_NULL_HANDLE };
+    const VkResult result = vkAllocateDescriptorSets(vulkanDevice->device, &allocInfo, &descriptorSet);
+    if (result == VK_ERROR_OUT_OF_POOL_MEMORY || result == VK_ERROR_FRAGMENTED_POOL) {
+        // TODO: We need to allocate a new DescriptorPool and retry
+    }
+    if (result != VK_SUCCESS)
+        return {};
+
+    const auto vulkanBindGroupHandle = m_bindGroups.emplace(VulkanBindGroup(descriptorSet, this, deviceHandle));
+    return vulkanBindGroupHandle;
 }
 
-void VulkanResourceManager::deleteBindGroup(Handle<BindGroup> handle)
+void VulkanResourceManager::deleteBindGroup(const Handle<BindGroup_t> &handle)
 {
-    // TODO: Implement me!
+    // TODO: implement
+}
+
+VulkanBindGroup *VulkanResourceManager::getBindGroup(const Handle<BindGroup_t> &handle)
+{
+    return m_bindGroups.get(handle);
+}
+
+Handle<BindGroupLayout_t> VulkanResourceManager::createBindGroupLayout(const Handle<Device_t> &deviceHandle, const BindGroupLayoutOptions &options)
+{
+    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
+
+    assert(options.bindings.size() <= std::numeric_limits<uint32_t>::max());
+    const uint32_t bindingLayoutCount = static_cast<uint32_t>(options.bindings.size());
+    std::vector<VkDescriptorSetLayoutBinding> vkBindingLayouts;
+    vkBindingLayouts.reserve(bindingLayoutCount);
+
+    for (uint32_t j = 0; j < bindingLayoutCount; ++j) {
+        const auto &bindingLayout = options.bindings.at(j);
+
+        VkDescriptorSetLayoutBinding vkBindingLayout = {};
+        vkBindingLayout.binding = bindingLayout.binding;
+        vkBindingLayout.descriptorCount = bindingLayout.count;
+        vkBindingLayout.descriptorType = resourceBindingTypeToVkDescriptorType(bindingLayout.resourceType);
+        vkBindingLayout.stageFlags = bindingLayout.shaderStages;
+        vkBindingLayout.pImmutableSamplers = nullptr; // TODO: Expose immutable samplers?
+
+        vkBindingLayouts.emplace_back(std::move(vkBindingLayout));
+    }
+
+    // Associate the bindings into a descriptor set layout
+    VkDescriptorSetLayoutCreateInfo createInfo = {};
+    createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    createInfo.bindingCount = static_cast<uint32_t>(vkBindingLayouts.size());
+    createInfo.pBindings = vkBindingLayouts.data();
+
+    VkDescriptorSetLayout vkDescriptorSetLayout{ VK_NULL_HANDLE };
+    if (vkCreateDescriptorSetLayout(vulkanDevice->device, &createInfo, nullptr, &vkDescriptorSetLayout) != VK_SUCCESS) {
+        // TODO: Log problem
+        // SPDLOG_WARN("Failed to create DescriptorSetLayout");
+    }
+
+    const auto vulkanBindGroupLayoutHandle = m_bindGroupLayouts.emplace(VulkanBindGroupLayout(vkDescriptorSetLayout));
+    return vulkanBindGroupLayoutHandle;
+}
+
+void VulkanResourceManager::deleteBindGroupLayout(const Handle<BindGroupLayout_t> &handle)
+{
+    // TODO: implement
 }
 
 } // namespace ToyRenderer

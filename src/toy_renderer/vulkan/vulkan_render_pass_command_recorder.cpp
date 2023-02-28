@@ -30,8 +30,9 @@ VulkanRenderPassCommandRecorder::VulkanRenderPassCommandRecorder(VkCommandBuffer
     vkCmdSetScissor(commandBuffer, 0, 1, &renderArea);
 }
 
-void VulkanRenderPassCommandRecorder::setPipeline(const Handle<GraphicsPipeline_t> &pipeline)
+void VulkanRenderPassCommandRecorder::setPipeline(const Handle<GraphicsPipeline_t> &_pipeline)
 {
+    pipeline = _pipeline;
     VulkanGraphicsPipeline *vulkanGraphicsPipeline = vulkanResourceManager->getGraphicsPipeline(pipeline);
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanGraphicsPipeline->pipeline);
 }
@@ -43,6 +44,21 @@ void VulkanRenderPassCommandRecorder::setVertexBuffer(uint32_t index, const Hand
     std::array<VkDeviceSize, 1> offsets = { 0 };
 
     vkCmdBindVertexBuffers(commandBuffer, index, 1, buffers.data(), offsets.data());
+}
+
+void VulkanRenderPassCommandRecorder::setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroupH)
+{
+    VulkanBindGroup *bindGroup = vulkanResourceManager->getBindGroup(bindGroupH);
+    VkDescriptorSet set = bindGroup->descriptorSet;
+
+    // Bind Descriptor Set
+    VulkanGraphicsPipeline *p = vulkanResourceManager->getGraphicsPipeline(pipeline);
+    VkPipelineLayout pipelineLayout = p->pipelineLayout;
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                            pipelineLayout,
+                            group,
+                            1, &set,
+                            0, nullptr);
 }
 
 void VulkanRenderPassCommandRecorder::setViewport(const Viewport &viewport)

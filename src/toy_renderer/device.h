@@ -1,5 +1,7 @@
 #pragma once
 
+#include <toy_renderer/bind_group.h>
+#include <toy_renderer/bind_group_layout.h>
 #include <toy_renderer/buffer.h>
 #include <toy_renderer/command_recorder.h>
 #include <toy_renderer/device_options.h>
@@ -30,6 +32,9 @@ struct BufferOptions;
 struct GraphicsPipelineOptions;
 struct SwapchainOptions;
 struct TextureOptions;
+struct BindGroupOptions;
+struct BindGroupLayoutOptions;
+struct BindGroupEntry;
 
 class TOY_RENDERER_EXPORT Device
 {
@@ -64,6 +69,10 @@ public:
     CommandRecorder createCommandRecorder(const CommandRecorderOptions &options = CommandRecorderOptions());
 
     GpuSemaphore createGpuSemaphore(const GpuSemaphoreOptions &options = GpuSemaphoreOptions());
+
+    BindGroupLayout createBindGroupLayout(const BindGroupLayoutOptions &options);
+
+    BindGroup createBindGroup(const BindGroupOptions &options);
 
 private:
     Device(Adapter *adapter, GraphicsApi *api, const DeviceOptions &options);

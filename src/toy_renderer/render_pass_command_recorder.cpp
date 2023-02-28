@@ -31,6 +31,12 @@ void RenderPassCommandRecorder::setVertexBuffer(uint32_t index, const Handle<Buf
     apiRenderPassCommandRecorder->setVertexBuffer(index, buffer);
 }
 
+void RenderPassCommandRecorder::setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroup)
+{
+    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    apiRenderPassCommandRecorder->setBindGroup(group, bindGroup);
+}
+
 void RenderPassCommandRecorder::setViewport(const Viewport &viewport)
 {
     auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);

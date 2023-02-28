@@ -5,6 +5,6 @@ add_executable(
     main.cpp
 )
 
-target_link_libraries(${PROJECT_NAME} toy-renderer)
+target_link_libraries(${PROJECT_NAME} toy-renderer toy-renderer-kdgui)
 
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)

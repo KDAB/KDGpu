@@ -11,6 +11,7 @@ target_link_libraries(
     ${PROJECT_NAME}
     toy-renderer
     KDUtils::Gui
+    glm::glm
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")

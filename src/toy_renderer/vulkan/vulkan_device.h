@@ -35,6 +35,7 @@ struct VulkanDevice : public ApiDevice {
     VmaAllocator allocator{ VK_NULL_HANDLE };
     std::vector<QueueDescription> queueDescriptions;
     std::vector<VkCommandPool> commandPools; // Indexed by queue type (family)
+    VkDescriptorPool descriptorSetPool{ VK_NULL_HANDLE };
     std::unordered_map<VulkanRenderPassKey, Handle<RenderPass_t>> renderPasses;
     std::unordered_map<VulkanFramebufferKey, Handle<Framebuffer_t>> framebuffers;
 };

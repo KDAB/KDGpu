@@ -20,6 +20,7 @@ struct VulkanRenderPassCommandRecorder : public ApiRenderPassCommandRecorder {
 
     void setPipeline(const Handle<GraphicsPipeline_t> &pipeline) final;
     void setVertexBuffer(uint32_t index, const Handle<Buffer_t> &buffer) final;
+    void setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroup) final;
     void setViewport(const Viewport &viewport) final;
     void setScissor(const Rect2D &scissor) final;
     void draw(const DrawCommand &drawCommand) final;
@@ -30,6 +31,7 @@ struct VulkanRenderPassCommandRecorder : public ApiRenderPassCommandRecorder {
     VkRect2D renderArea{};
     VulkanResourceManager *vulkanResourceManager{ nullptr };
     Handle<Device_t> deviceHandle;
+    Handle<GraphicsPipeline_t> pipeline;
 };
 
 } // namespace ToyRenderer

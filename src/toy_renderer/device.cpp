@@ -4,6 +4,8 @@
 #include <toy_renderer/graphics_api.h>
 #include <toy_renderer/swapchain_options.h>
 #include <toy_renderer/api/api_device.h>
+#include <toy_renderer/bind_group_options.h>
+#include <toy_renderer/bind_group_layout_options.h>
 
 namespace ToyRenderer {
 
@@ -78,6 +80,16 @@ CommandRecorder Device::createCommandRecorder(const CommandRecorderOptions &opti
 GpuSemaphore Device::createGpuSemaphore(const GpuSemaphoreOptions &options)
 {
     return GpuSemaphore(m_api, m_device, m_api->resourceManager()->createGpuSemaphore(m_device, options));
+}
+
+BindGroupLayout Device::createBindGroupLayout(const BindGroupLayoutOptions &options)
+{
+    return BindGroupLayout(m_api, m_device, m_api->resourceManager()->createBindGroupLayout(m_device, options));
+}
+
+BindGroup Device::createBindGroup(const BindGroupOptions &options)
+{
+    return BindGroup(m_api, m_device, m_api->resourceManager()->createBindGroup(m_device, options));
 }
 
 } // namespace ToyRenderer

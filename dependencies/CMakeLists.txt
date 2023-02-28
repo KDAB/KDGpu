@@ -17,6 +17,9 @@ add_subdirectory(spdlog)
 # VMA
 add_subdirectory(vulkan_memory_allocator)
 
+# glm
+add_subdirectory(glm)
+
 if(TOYRENDERER_BUILD_TESTS)
     # doctest
     add_subdirectory(doctest)
