@@ -1,8 +1,8 @@
 #pragma once
 
 #include <toy_renderer/handle.h>
-
 #include <toy_renderer/toy_renderer_export.h>
+#include <string>
 
 namespace ToyRenderer {
 
@@ -30,5 +30,7 @@ private:
 
     friend class Device;
 };
+
+TOY_RENDERER_EXPORT std::vector<uint32_t> readShaderFile(const std::string &filename);
 
 } // namespace ToyRenderer

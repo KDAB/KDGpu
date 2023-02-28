@@ -33,7 +33,6 @@
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 
-#include <fstream>
 #include <map>
 #include <memory>
 #include <span>
@@ -51,20 +50,6 @@ inline std::string assetPath()
 #else
     return "";
 #endif
-}
-
-std::vector<uint32_t> readShaderFile(const std::string &filename)
-{
-    std::ifstream file(filename, std::ios::ate | std::ios::binary);
-    if (!file.is_open())
-        throw std::runtime_error("Failed to open file");
-
-    const size_t fileSize = static_cast<size_t>(file.tellg());
-    std::vector<uint32_t> buffer(fileSize / 4);
-    file.seekg(0);
-    file.read(reinterpret_cast<char *>(buffer.data()), static_cast<std::streamsize>(fileSize));
-    file.close();
-    return buffer;
 }
 
 } // namespace ToyRenderer
