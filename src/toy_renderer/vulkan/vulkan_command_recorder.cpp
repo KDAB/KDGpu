@@ -1,4 +1,6 @@
 #include "vulkan_command_recorder.h"
+#include <toy_renderer/vulkan/vulkan_resource_manager.h>
+#include <toy_renderer/vulkan/vulkan_buffer.h>
 
 namespace ToyRenderer {
 
@@ -20,6 +22,19 @@ Handle<RenderPassCommandRecorder_t> VulkanCommandRecorder::beginRenderPass(const
 {
     // TODO;: Implement me!
     return Handle<RenderPassCommandRecorder_t>();
+}
+
+void VulkanCommandRecorder::copyBuffer(const Handle<Buffer_t> &src, const Handle<Buffer_t> &dst, size_t byteSize)
+{
+    VulkanBuffer *srcBuf = vulkanResourceManager->getBuffer(src);
+    VulkanBuffer *dstBuf = vulkanResourceManager->getBuffer(dst);
+
+    VkBufferCopy bufferCopy{};
+    bufferCopy.size = byteSize;
+    bufferCopy.dstOffset = 0;
+    bufferCopy.srcOffset = 0;
+
+    vkCmdCopyBuffer(commandBuffer, srcBuf->buffer, dstBuf->buffer, 1, &bufferCopy);
 }
 
 Handle<CommandBuffer_t> VulkanCommandRecorder::finish()

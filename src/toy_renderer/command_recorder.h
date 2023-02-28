@@ -29,6 +29,7 @@ public:
     operator Handle<CommandRecorder_t>() const noexcept { return m_commandRecorder; }
 
     RenderPassCommandRecorder beginRenderPass(const RenderPassCommandRecorderOptions &options);
+    void copyBuffer(const Handle<Buffer_t> &src, const Handle<Buffer_t> &dst, size_t byteSize);
     CommandBuffer finish();
 
 protected:
