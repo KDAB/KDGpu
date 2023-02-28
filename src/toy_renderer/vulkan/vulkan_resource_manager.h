@@ -113,7 +113,6 @@ public:
     VulkanCommandBuffer *getCommandBuffer(const Handle<CommandBuffer_t> &handle) final { return m_commandBuffers.get(handle); }
 
     Handle<BindGroup_t> createBindGroup(const Handle<Device_t> &deviceHandle, const BindGroupOptions &options) final;
-    void updateBindGroup(const Handle<Device_t> &deviceHandle, const Handle<BindGroup_t> &handle, const BindGroupEntry &entry) final;
     void deleteBindGroup(const Handle<BindGroup_t> &handle) final;
     VulkanBindGroup *getBindGroup(const Handle<BindGroup_t> &handle) final;
 

@@ -14,6 +14,8 @@ struct VulkanBindGroup : public ApiBindGroup {
                              VulkanResourceManager *_vulkanResourceManager,
                              const Handle<Device_t> &_deviceHandle);
 
+    void update(const BindGroupEntry &entry) final;
+
     VkDescriptorSet descriptorSet{ VK_NULL_HANDLE };
     VulkanResourceManager *vulkanResourceManager;
     Handle<Device_t> deviceHandle;

@@ -92,9 +92,4 @@ BindGroup Device::createBindGroup(const BindGroupOptions &options)
     return BindGroup(m_api, m_device, m_api->resourceManager()->createBindGroup(m_device, options));
 }
 
-void Device::updateBindGroup(const Handle<BindGroup_t> &bindGroup, const BindGroupEntry &entry)
-{
-    m_api->resourceManager()->updateBindGroup(m_device, bindGroup, entry);
-}
-
 } // namespace ToyRenderer

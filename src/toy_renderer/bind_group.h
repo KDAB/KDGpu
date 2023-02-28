@@ -5,6 +5,7 @@
 
 namespace ToyRenderer {
 
+struct BindGroupEntry;
 struct BindGroup_t;
 struct Device_t;
 class GraphicsApi;
@@ -23,6 +24,8 @@ public:
     bool isValid() const noexcept { return m_bindGroup.isValid(); }
 
     operator Handle<BindGroup_t>() const noexcept { return m_bindGroup; }
+
+    void update(const BindGroupEntry &entry);
 
 private:
     explicit BindGroup(GraphicsApi *api, const Handle<Device_t> &device, const Handle<BindGroup_t> &bindGroup);

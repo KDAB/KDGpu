@@ -296,7 +296,7 @@ int main()
     BindGroup bindGroup = device.createBindGroup(bindGroupCreateOptions);
 
     // Update BindGroup for binding 0
-    device.updateBindGroup(bindGroup, BindGroupEntry{ .binding = 0, .resource = BindingResource(BufferBinding{ .buffer = cameraUBOBuffer }) });
+    bindGroup.update(BindGroupEntry{ .binding = 0, .resource = BindingResource(BufferBinding{ .buffer = cameraUBOBuffer }) });
 
     while (window.visible()) {
         // Acquire next swapchain image

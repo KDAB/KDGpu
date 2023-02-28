@@ -144,7 +144,6 @@ public:
     // virtual Handle<Shader> createShader(ShaderDescription desc) = 0;
     virtual Handle<BindGroup_t> createBindGroup(const Handle<Device_t> &deviceHandle, const BindGroupOptions &options) = 0;
     virtual void deleteBindGroup(const Handle<BindGroup_t> &handle) = 0;
-    virtual void updateBindGroup(const Handle<Device_t> &deviceHandle, const Handle<BindGroup_t> &handle, const BindGroupEntry &entry) = 0;
     virtual ApiBindGroup *getBindGroup(const Handle<BindGroup_t> &handle) = 0;
 
     virtual Handle<BindGroupLayout_t> createBindGroupLayout(const Handle<Device_t> &deviceHandle, const BindGroupLayoutOptions &options) = 0;

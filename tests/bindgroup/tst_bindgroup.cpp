@@ -104,7 +104,7 @@ TEST_SUITE("BindGroup")
         CHECK(t.isValid());
 
         // WHEN
-        device.updateBindGroup(t, BindGroupEntry{ .binding = 0, .resource = BindingResource(BufferBinding{ .buffer = ubo }) });
+        t.update(BindGroupEntry{ .binding = 0, .resource = BindingResource(BufferBinding{ .buffer = ubo }) });
     }
 
     TEST_CASE("Comparison")
