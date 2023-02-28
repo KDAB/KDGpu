@@ -1,0 +1,1 @@
+CompileShaderSet(ToyRendererRotatingTriangle rotating_triangle)

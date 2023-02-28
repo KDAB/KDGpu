@@ -1421,6 +1421,12 @@ Handle<BindGroup_t> VulkanResourceManager::createBindGroup(const Handle<Device_t
         return {};
 
     const auto vulkanBindGroupHandle = m_bindGroups.emplace(VulkanBindGroup(descriptorSet, this, deviceHandle));
+    auto vulkanBindGroup = m_bindGroups.get(vulkanBindGroupHandle);
+
+    // Set up the initial bindings
+    for (const auto &resource : options.resources)
+        vulkanBindGroup->update(resource);
+
     return vulkanBindGroupHandle;
 }
 

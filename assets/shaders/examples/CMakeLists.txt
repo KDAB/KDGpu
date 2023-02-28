@@ -1,1 +1,2 @@
 add_subdirectory(02_hello_triangle)
+add_subdirectory(05_rotating_triangle)
