@@ -40,27 +40,27 @@ public:
 
     Handle<Instance_t> createInstance(const InstanceOptions &options) final;
     void deleteInstance(Handle<Instance_t> handle) final;
-    VulkanInstance *getInstance(const Handle<Instance_t> &handle) { return m_instances.get(handle); }
+    VulkanInstance *getInstance(const Handle<Instance_t> &handle) const final;
 
     Handle<Adapter_t> insertAdapter(const VulkanAdapter &vulkanAdapter);
     void removeAdapter(Handle<Adapter_t> handle) final;
-    VulkanAdapter *getAdapter(const Handle<Adapter_t> &handle) final { return m_adapters.get(handle); }
+    VulkanAdapter *getAdapter(const Handle<Adapter_t> &handle) const final;
 
     Handle<Device_t> createDevice(const Handle<Adapter_t> &adapterHandle, const DeviceOptions &options, std::vector<QueueRequest> &queueRequests) final;
     void deleteDevice(Handle<Device_t> handle) final;
-    VulkanDevice *getDevice(const Handle<Device_t> &handle) final { return m_devices.get(handle); }
+    VulkanDevice *getDevice(const Handle<Device_t> &handle) const final;
 
     Handle<Queue_t> insertQueue(const VulkanQueue &vulkanQueue);
     void removeQueue(Handle<Queue_t> handle) final;
-    VulkanQueue *getQueue(const Handle<Queue_t> &handle) final { return m_queues.get(handle); }
+    VulkanQueue *getQueue(const Handle<Queue_t> &handle) const final;
 
     Handle<Swapchain_t> createSwapchain(const Handle<Device_t> &deviceHandle, const SwapchainOptions &options) final;
     void deleteSwapchain(Handle<Swapchain_t> handle) final;
-    VulkanSwapchain *getSwapchain(const Handle<Swapchain_t> &handle) final { return m_swapchains.get(handle); }
+    VulkanSwapchain *getSwapchain(const Handle<Swapchain_t> &handle) const final;
 
     Handle<Surface_t> insertSurface(const VulkanSurface &surface);
     void deleteSurface(Handle<Surface_t> handle) final;
-    VulkanSurface *getSurface(const Handle<Surface_t> &handle) final { return m_surfaces.get(handle); }
+    VulkanSurface *getSurface(const Handle<Surface_t> &handle) const final;
 
     // For swapchain-owned images
     Handle<Texture_t> insertTexture(const VulkanTexture &texture);
@@ -69,61 +69,60 @@ public:
     // For user-created textures
     Handle<Texture_t> createTexture(const Handle<Device_t> deviceHandle, const TextureOptions &options) final;
     void deleteTexture(Handle<Texture_t> handle) final;
-
-    VulkanTexture *getTexture(const Handle<Texture_t> &handle) final { return m_textures.get(handle); }
+    VulkanTexture *getTexture(const Handle<Texture_t> &handle) const final;
 
     Handle<TextureView_t> createTextureView(const Handle<Device_t> &deviceHandle, const Handle<Texture_t> &textureHandle, const TextureViewOptions &options) final;
     void deleteTextureView(Handle<TextureView_t> handle) final;
-    VulkanTextureView *getTextureView(const Handle<TextureView_t> &handle) final { return m_textureViews.get(handle); }
+    VulkanTextureView *getTextureView(const Handle<TextureView_t> &handle) const final;
 
     Handle<Buffer_t> createBuffer(const Handle<Device_t> deviceHandle, const BufferOptions &options, const void *initialData) final;
     void deleteBuffer(Handle<Buffer_t> handle) final;
-    VulkanBuffer *getBuffer(const Handle<Buffer_t> &handle) final { return m_buffers.get(handle); }
+    VulkanBuffer *getBuffer(const Handle<Buffer_t> &handle) const final;
 
     Handle<ShaderModule_t> createShaderModule(const Handle<Device_t> deviceHandle, const std::vector<uint32_t> &code) final;
     void deleteShaderModule(Handle<ShaderModule_t> handle) final;
-    VulkanShaderModule *getShaderModule(const Handle<ShaderModule_t> &handle) final { return m_shaderModules.get(handle); }
+    VulkanShaderModule *getShaderModule(const Handle<ShaderModule_t> &handle) const final;
 
     Handle<PipelineLayout_t> createPipelineLayout(const Handle<Device_t> &deviceHandle, const PipelineLayoutOptions &options) final;
     void deletePipelineLayout(Handle<PipelineLayout_t> handle) final;
-    VulkanPipelineLayout *getPipelineLayout(const Handle<PipelineLayout_t> &handle) final { return m_pipelineLayouts.get(handle); }
+    VulkanPipelineLayout *getPipelineLayout(const Handle<PipelineLayout_t> &handle) const final;
 
     Handle<GraphicsPipeline_t> createGraphicsPipeline(const Handle<Device_t> &deviceHandle, const GraphicsPipelineOptions &options) final;
     void deleteGraphicsPipeline(Handle<GraphicsPipeline_t> handle) final;
-    VulkanGraphicsPipeline *getGraphicsPipeline(const Handle<GraphicsPipeline_t> &handle) final { return m_graphicsPipelines.get(handle); }
+    VulkanGraphicsPipeline *getGraphicsPipeline(const Handle<GraphicsPipeline_t> &handle) const final;
 
     Handle<GpuSemaphore_t> createGpuSemaphore(const Handle<Device_t> &deviceHandle, const GpuSemaphoreOptions &options) final;
     void deleteGpuSemaphore(Handle<GpuSemaphore_t> handle) final;
-    VulkanGpuSemaphore *getGpuSemaphore(const Handle<GpuSemaphore_t> &handle) final { return m_gpuSemaphores.get(handle); }
+    VulkanGpuSemaphore *getGpuSemaphore(const Handle<GpuSemaphore_t> &handle) const final;
 
     Handle<CommandRecorder_t> createCommandRecorder(const Handle<Device_t> &deviceHandle, const CommandRecorderOptions &options) final;
     void deleteCommandRecorder(Handle<CommandRecorder_t> handle) final;
-    VulkanCommandRecorder *getCommandRecorder(const Handle<CommandRecorder_t> &handle) final { return m_commandRecorders.get(handle); }
+    VulkanCommandRecorder *getCommandRecorder(const Handle<CommandRecorder_t> &handle) const final;
 
     Handle<RenderPassCommandRecorder_t> createRenderPassCommandRecorder(const Handle<Device_t> &deviceHandle,
                                                                         const Handle<CommandRecorder_t> commandRecorderHandle,
                                                                         const RenderPassCommandRecorderOptions &options) final;
     void deleteRenderPassCommandRecorder(Handle<RenderPassCommandRecorder_t> handle) final;
-    VulkanRenderPassCommandRecorder *getRenderPassCommandRecorder(const Handle<RenderPassCommandRecorder_t> &handle) final { return m_renderPassCommandRecorders.get(handle); }
+    VulkanRenderPassCommandRecorder *getRenderPassCommandRecorder(const Handle<RenderPassCommandRecorder_t> &handle) const final;
 
     // TODO: Should we make this part of the ResourceManager api? Or combine it with the public RenderPass api?
     // TODO: Should we pass in specific options types here for render passes and framebuffers?
     Handle<RenderPass_t> createRenderPass(const Handle<Device_t> &deviceHandle, const RenderPassCommandRecorderOptions &options);
     Handle<Framebuffer_t> createFramebuffer(const Handle<Device_t> &deviceHandle, const VulkanFramebufferKey &options);
 
-    VulkanCommandBuffer *getCommandBuffer(const Handle<CommandBuffer_t> &handle) final { return m_commandBuffers.get(handle); }
+    VulkanCommandBuffer *getCommandBuffer(const Handle<CommandBuffer_t> &handle) const final;
 
     Handle<BindGroup_t> createBindGroup(const Handle<Device_t> &deviceHandle, const BindGroupOptions &options) final;
     void deleteBindGroup(const Handle<BindGroup_t> &handle) final;
-    VulkanBindGroup *getBindGroup(const Handle<BindGroup_t> &handle) final;
+    VulkanBindGroup *getBindGroup(const Handle<BindGroup_t> &handle) const final;
 
     Handle<BindGroupLayout_t> createBindGroupLayout(const Handle<Device_t> &deviceHandle, const BindGroupLayoutOptions &options) final;
     void deleteBindGroupLayout(const Handle<BindGroupLayout_t> &handle) final;
-    VulkanBindGroupLayout *getBindGroupLayout(const Handle<BindGroupLayout_t> &handle) final { return m_bindGroupLayouts.get(handle); }
+    VulkanBindGroupLayout *getBindGroupLayout(const Handle<BindGroupLayout_t> &handle) const final;
 
     Handle<Sampler_t> createSampler(const Handle<Device_t> &deviceHandle, const SamplerOptions &options) final;
     void deleteSampler(const Handle<Sampler_t> &handle) final;
-    VulkanSampler *getSampler(const Handle<Sampler_t> &handle) final;
+    VulkanSampler *getSampler(const Handle<Sampler_t> &handle) const final;
 
 private:
     Pool<VulkanInstance, Instance_t> m_instances{ 1 };

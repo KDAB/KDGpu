@@ -70,21 +70,21 @@ public:
 
     virtual Handle<Instance_t> createInstance(const InstanceOptions &options) = 0;
     virtual void deleteInstance(Handle<Instance_t> handle) = 0;
-    virtual ApiInstance *getInstance(const Handle<Instance_t> &handle) = 0;
+    virtual ApiInstance *getInstance(const Handle<Instance_t> &handle) const = 0;
 
     // Adapters are not created, they are queried from the instance. It is up to
     // the concrete subclasses as to how they insert whatever they need.
     virtual void removeAdapter(Handle<Adapter_t> handle) = 0;
-    virtual ApiAdapter *getAdapter(const Handle<Adapter_t> &handle) = 0;
+    virtual ApiAdapter *getAdapter(const Handle<Adapter_t> &handle) const = 0;
 
     virtual Handle<Device_t> createDevice(const Handle<Adapter_t> &adapterHandle, const DeviceOptions &options, std::vector<QueueRequest> &queueRequests) = 0;
     virtual void deleteDevice(Handle<Device_t> handle) = 0;
-    virtual ApiDevice *getDevice(const Handle<Device_t> &handle) = 0;
+    virtual ApiDevice *getDevice(const Handle<Device_t> &handle) const = 0;
 
     // Queue are not created, they are queried from the device. It is up to
     // the concrete subclasses as to how they insert whatever they need.
     virtual void removeQueue(Handle<Queue_t> handle) = 0;
-    virtual ApiQueue *getQueue(const Handle<Queue_t> &queue) = 0;
+    virtual ApiQueue *getQueue(const Handle<Queue_t> &queue) const = 0;
 
     // Surfaces are created by the api instance and inserted into the resource
     // manager by way of custom api on the api-specific resource manager concrete
@@ -95,67 +95,67 @@ public:
     //
     // virtual Handle<Surface_t> createSurface(const Handle<Instance_t> &instanceHandle, const SurfaceOptions &options) = 0;
     virtual void deleteSurface(Handle<Surface_t> handle) = 0;
-    virtual ApiSurface *getSurface(const Handle<Surface_t> &handle) = 0;
+    virtual ApiSurface *getSurface(const Handle<Surface_t> &handle) const = 0;
 
     virtual Handle<Swapchain_t> createSwapchain(const Handle<Device_t> &deviceHandle, const SwapchainOptions &options) = 0;
     virtual void deleteSwapchain(Handle<Swapchain_t> handle) = 0;
-    virtual ApiSwapchain *getSwapchain(const Handle<Swapchain_t> &handle) = 0;
+    virtual ApiSwapchain *getSwapchain(const Handle<Swapchain_t> &handle) const = 0;
 
     virtual Handle<Texture_t> createTexture(const Handle<Device_t> deviceHandle, const TextureOptions &options) = 0;
     virtual void deleteTexture(Handle<Texture_t> handle) = 0;
-    virtual ApiTexture *getTexture(const Handle<Texture_t> &handle) = 0;
+    virtual ApiTexture *getTexture(const Handle<Texture_t> &handle) const = 0;
 
     virtual Handle<TextureView_t> createTextureView(const Handle<Device_t> &deviceHandle, const Handle<Texture_t> &textureHandle, const TextureViewOptions &options) = 0;
     virtual void deleteTextureView(Handle<TextureView_t> handle) = 0;
-    virtual ApiTextureView *getTextureView(const Handle<TextureView_t> &handle) = 0;
+    virtual ApiTextureView *getTextureView(const Handle<TextureView_t> &handle) const = 0;
 
     virtual Handle<Buffer_t> createBuffer(const Handle<Device_t> deviceHandle, const BufferOptions &options, const void *initialData) = 0;
     virtual void deleteBuffer(Handle<Buffer_t> handle) = 0;
-    virtual ApiBuffer *getBuffer(const Handle<Buffer_t> &handle) = 0;
+    virtual ApiBuffer *getBuffer(const Handle<Buffer_t> &handle) const = 0;
 
     virtual Handle<ShaderModule_t> createShaderModule(const Handle<Device_t> deviceHandle, const std::vector<uint32_t> &code) = 0;
     virtual void deleteShaderModule(Handle<ShaderModule_t> handle) = 0;
-    virtual ApiShaderModule *getShaderModule(const Handle<ShaderModule_t> &handle) = 0;
+    virtual ApiShaderModule *getShaderModule(const Handle<ShaderModule_t> &handle) const = 0;
 
     virtual Handle<PipelineLayout_t> createPipelineLayout(const Handle<Device_t> &deviceHandle, const PipelineLayoutOptions &options) = 0;
     virtual void deletePipelineLayout(Handle<PipelineLayout_t> handle) = 0;
-    virtual ApiPipelineLayout *getPipelineLayout(const Handle<PipelineLayout_t> &handle) = 0;
+    virtual ApiPipelineLayout *getPipelineLayout(const Handle<PipelineLayout_t> &handle) const = 0;
 
     virtual Handle<GraphicsPipeline_t> createGraphicsPipeline(const Handle<Device_t> &deviceHandle, const GraphicsPipelineOptions &options) = 0;
     virtual void deleteGraphicsPipeline(Handle<GraphicsPipeline_t> handle) = 0;
-    virtual ApiGraphicsPipeline *getGraphicsPipeline(const Handle<GraphicsPipeline_t> &handle) = 0;
+    virtual ApiGraphicsPipeline *getGraphicsPipeline(const Handle<GraphicsPipeline_t> &handle) const = 0;
 
     virtual Handle<GpuSemaphore_t> createGpuSemaphore(const Handle<Device_t> &deviceHandle, const GpuSemaphoreOptions &options) = 0;
     virtual void deleteGpuSemaphore(Handle<GpuSemaphore_t> handle) = 0;
-    virtual ApiGpuSemaphore *getGpuSemaphore(const Handle<GpuSemaphore_t> &handle) = 0;
+    virtual ApiGpuSemaphore *getGpuSemaphore(const Handle<GpuSemaphore_t> &handle) const = 0;
 
     virtual Handle<CommandRecorder_t> createCommandRecorder(const Handle<Device_t> &deviceHandle, const CommandRecorderOptions &options) = 0;
     virtual void deleteCommandRecorder(Handle<CommandRecorder_t> handle) = 0;
-    virtual ApiCommandRecorder *getCommandRecorder(const Handle<CommandRecorder_t> &handle) = 0;
+    virtual ApiCommandRecorder *getCommandRecorder(const Handle<CommandRecorder_t> &handle) const = 0;
 
     virtual Handle<RenderPassCommandRecorder_t> createRenderPassCommandRecorder(const Handle<Device_t> &deviceHandle,
                                                                                 const Handle<CommandRecorder_t> commandRecorderHandle,
                                                                                 const RenderPassCommandRecorderOptions &options) = 0;
     virtual void deleteRenderPassCommandRecorder(Handle<RenderPassCommandRecorder_t> handle) = 0;
-    virtual ApiRenderPassCommandRecorder *getRenderPassCommandRecorder(const Handle<RenderPassCommandRecorder_t> &handle) = 0;
+    virtual ApiRenderPassCommandRecorder *getRenderPassCommandRecorder(const Handle<RenderPassCommandRecorder_t> &handle) const = 0;
 
     // Command buffers are not created by the api. It is up to the concrete subclasses to insert the command buffers
     // by whatever mechanism they wish. They also do not need to be destroyed as they are cleaned up by the owning
     // command pool (command recorder).
-    virtual ApiCommandBuffer *getCommandBuffer(const Handle<CommandBuffer_t> &handle) = 0;
+    virtual ApiCommandBuffer *getCommandBuffer(const Handle<CommandBuffer_t> &handle) const = 0;
 
     // virtual Handle<Shader> createShader(ShaderDescription desc) = 0;
     virtual Handle<BindGroup_t> createBindGroup(const Handle<Device_t> &deviceHandle, const BindGroupOptions &options) = 0;
     virtual void deleteBindGroup(const Handle<BindGroup_t> &handle) = 0;
-    virtual ApiBindGroup *getBindGroup(const Handle<BindGroup_t> &handle) = 0;
+    virtual ApiBindGroup *getBindGroup(const Handle<BindGroup_t> &handle) const = 0;
 
     virtual Handle<BindGroupLayout_t> createBindGroupLayout(const Handle<Device_t> &deviceHandle, const BindGroupLayoutOptions &options) = 0;
     virtual void deleteBindGroupLayout(const Handle<BindGroupLayout_t> &handle) = 0;
-    virtual ApiBindGroupLayout *getBindGroupLayout(const Handle<BindGroupLayout_t> &handle) = 0;
+    virtual ApiBindGroupLayout *getBindGroupLayout(const Handle<BindGroupLayout_t> &handle) const = 0;
 
     virtual Handle<Sampler_t> createSampler(const Handle<Device_t> &deviceHandle, const SamplerOptions &options) = 0;
     virtual void deleteSampler(const Handle<Sampler_t> &handle) = 0;
-    virtual ApiSampler *getSampler(const Handle<Sampler_t> &handle) = 0;
+    virtual ApiSampler *getSampler(const Handle<Sampler_t> &handle) const = 0;
 
 protected:
     ResourceManager();

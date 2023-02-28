@@ -69,6 +69,11 @@ void VulkanResourceManager::deleteInstance(Handle<Instance_t> handle)
     // TODO: Implement me!
 }
 
+VulkanInstance *VulkanResourceManager::getInstance(const Handle<Instance_t> &handle) const
+{
+    return m_instances.get(handle);
+}
+
 Handle<Adapter_t> VulkanResourceManager::insertAdapter(const VulkanAdapter &physicalDevice)
 {
     return m_adapters.emplace(physicalDevice);
@@ -77,6 +82,11 @@ Handle<Adapter_t> VulkanResourceManager::insertAdapter(const VulkanAdapter &phys
 void VulkanResourceManager::removeAdapter(Handle<Adapter_t> handle)
 {
     m_adapters.remove(handle);
+}
+
+VulkanAdapter *VulkanResourceManager::getAdapter(const Handle<Adapter_t> &handle) const
+{
+    return m_adapters.get(handle);
 }
 
 /*
@@ -145,6 +155,11 @@ void VulkanResourceManager::deleteDevice(Handle<Device_t> handle)
     // TODO: Implement me!
 }
 
+VulkanDevice *VulkanResourceManager::getDevice(const Handle<Device_t> &handle) const
+{
+    return m_devices.get(handle);
+}
+
 Handle<Queue_t> VulkanResourceManager::insertQueue(const VulkanQueue &vulkanQueue)
 {
     return m_queues.emplace(vulkanQueue);
@@ -153,6 +168,11 @@ Handle<Queue_t> VulkanResourceManager::insertQueue(const VulkanQueue &vulkanQueu
 void VulkanResourceManager::removeQueue(Handle<Queue_t> handle)
 {
     m_queues.remove(handle);
+}
+
+VulkanQueue *VulkanResourceManager::getQueue(const Handle<Queue_t> &handle) const
+{
+    return m_queues.get(handle);
 }
 
 Handle<Swapchain_t> VulkanResourceManager::createSwapchain(const Handle<Device_t> &deviceHandle,
@@ -200,6 +220,11 @@ void VulkanResourceManager::deleteSwapchain(Handle<Swapchain_t> handle)
 {
 }
 
+VulkanSwapchain *VulkanResourceManager::getSwapchain(const Handle<Swapchain_t> &handle) const
+{
+    return m_swapchains.get(handle);
+}
+
 Handle<Surface_t> VulkanResourceManager::insertSurface(const VulkanSurface &vulkanSurface)
 {
     return m_surfaces.emplace(vulkanSurface);
@@ -211,6 +236,11 @@ void VulkanResourceManager::deleteSurface(Handle<Surface_t> handle)
     if (vulkanSurface == nullptr)
         return;
     vkDestroySurfaceKHR(vulkanSurface->instance, vulkanSurface->surface, nullptr);
+}
+
+VulkanSurface *VulkanResourceManager::getSurface(const Handle<Surface_t> &handle) const
+{
+    return m_surfaces.get(handle);
 }
 
 Handle<Texture_t> VulkanResourceManager::insertTexture(const VulkanTexture &vulkanTexture)
@@ -274,6 +304,11 @@ void VulkanResourceManager::deleteTexture(Handle<Texture_t> handle)
 {
 }
 
+VulkanTexture *VulkanResourceManager::getTexture(const Handle<Texture_t> &handle) const
+{
+    return m_textures.get(handle);
+}
+
 Handle<TextureView_t> VulkanResourceManager::createTextureView(const Handle<Device_t> &deviceHandle,
                                                                const Handle<Texture_t> &textureHandle,
                                                                const TextureViewOptions &options)
@@ -324,6 +359,11 @@ void VulkanResourceManager::deleteTextureView(Handle<TextureView_t> handle)
     // TODO: Implement me!
 }
 
+VulkanTextureView *VulkanResourceManager::getTextureView(const Handle<TextureView_t> &handle) const
+{
+    return m_textureViews.get(handle);
+}
+
 Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> deviceHandle, const BufferOptions &options, const void *initialData)
 {
     VulkanDevice vulkanDevice = *m_devices.get(deviceHandle);
@@ -355,6 +395,11 @@ void VulkanResourceManager::deleteBuffer(Handle<Buffer_t> handle)
     // TODO: Implement me!
 }
 
+VulkanBuffer *VulkanResourceManager::getBuffer(const Handle<Buffer_t> &handle) const
+{
+    return m_buffers.get(handle);
+}
+
 Handle<ShaderModule_t> VulkanResourceManager::createShaderModule(const Handle<Device_t> deviceHandle, const std::vector<uint32_t> &code)
 {
     VulkanDevice vulkanDevice = *m_devices.get(deviceHandle);
@@ -375,6 +420,11 @@ Handle<ShaderModule_t> VulkanResourceManager::createShaderModule(const Handle<De
 void VulkanResourceManager::deleteShaderModule(Handle<ShaderModule_t> handle)
 {
     // TODO: Implement me!
+}
+
+VulkanShaderModule *VulkanResourceManager::getShaderModule(const Handle<ShaderModule_t> &handle) const
+{
+    return m_shaderModules.get(handle);
 }
 
 Handle<PipelineLayout_t> VulkanResourceManager::createPipelineLayout(const Handle<Device_t> &deviceHandle, const PipelineLayoutOptions &options)
@@ -437,6 +487,11 @@ Handle<PipelineLayout_t> VulkanResourceManager::createPipelineLayout(const Handl
 void VulkanResourceManager::deletePipelineLayout(Handle<PipelineLayout_t> handle)
 {
     // TODO: Implement me!
+}
+
+VulkanPipelineLayout *VulkanResourceManager::getPipelineLayout(const Handle<PipelineLayout_t> &handle) const
+{
+    return m_pipelineLayouts.get(handle);
 }
 
 Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const Handle<Device_t> &deviceHandle, const GraphicsPipelineOptions &options)
@@ -790,6 +845,11 @@ void VulkanResourceManager::deleteGraphicsPipeline(Handle<GraphicsPipeline_t> ha
     // TODO: Implement me!
 }
 
+VulkanGraphicsPipeline *VulkanResourceManager::getGraphicsPipeline(const Handle<GraphicsPipeline_t> &handle) const
+{
+    return m_graphicsPipelines.get(handle);
+}
+
 Handle<GpuSemaphore_t> VulkanResourceManager::createGpuSemaphore(const Handle<Device_t> &deviceHandle, const GpuSemaphoreOptions &options)
 {
     VulkanDevice vulkanDevice = *m_devices.get(deviceHandle);
@@ -814,6 +874,11 @@ Handle<GpuSemaphore_t> VulkanResourceManager::createGpuSemaphore(const Handle<De
 void VulkanResourceManager::deleteGpuSemaphore(Handle<GpuSemaphore_t> handle)
 {
     // TODO: Implement me!
+}
+
+VulkanGpuSemaphore *VulkanResourceManager::getGpuSemaphore(const Handle<GpuSemaphore_t> &handle) const
+{
+    return m_gpuSemaphores.get(handle);
 }
 
 Handle<CommandRecorder_t> VulkanResourceManager::createCommandRecorder(const Handle<Device_t> &deviceHandle, const CommandRecorderOptions &options)
@@ -906,6 +971,11 @@ Handle<CommandRecorder_t> VulkanResourceManager::createCommandRecorder(const Han
 void VulkanResourceManager::deleteCommandRecorder(Handle<CommandRecorder_t> handle)
 {
     // TODO: Implement me!
+}
+
+VulkanCommandRecorder *VulkanResourceManager::getCommandRecorder(const Handle<CommandRecorder_t> &handle) const
+{
+    return m_commandRecorders.get(handle);
 }
 
 Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassCommandRecorder(const Handle<Device_t> &deviceHandle,
@@ -1179,6 +1249,16 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
     return vulkanRenderPassHandle;
 }
 
+VulkanRenderPassCommandRecorder *VulkanResourceManager::getRenderPassCommandRecorder(const Handle<RenderPassCommandRecorder_t> &handle) const
+{
+    return m_renderPassCommandRecorders.get(handle);
+}
+
+VulkanCommandBuffer *VulkanResourceManager::getCommandBuffer(const Handle<CommandBuffer_t> &handle) const
+{
+    return m_commandBuffers.get(handle);
+}
+
 Handle<Framebuffer_t> VulkanResourceManager::createFramebuffer(const Handle<Device_t> &deviceHandle, const VulkanFramebufferKey &options)
 {
     VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
@@ -1266,7 +1346,7 @@ void VulkanResourceManager::deleteBindGroup(const Handle<BindGroup_t> &handle)
     // TODO: implement
 }
 
-VulkanBindGroup *VulkanResourceManager::getBindGroup(const Handle<BindGroup_t> &handle)
+VulkanBindGroup *VulkanResourceManager::getBindGroup(const Handle<BindGroup_t> &handle) const
 {
     return m_bindGroups.get(handle);
 }
@@ -1314,6 +1394,11 @@ void VulkanResourceManager::deleteBindGroupLayout(const Handle<BindGroupLayout_t
     // TODO: implement
 }
 
+VulkanBindGroupLayout *VulkanResourceManager::getBindGroupLayout(const Handle<BindGroupLayout_t> &handle) const
+{
+    return m_bindGroupLayouts.get(handle);
+}
+
 Handle<Sampler_t> VulkanResourceManager::createSampler(const Handle<Device_t> &deviceHandle, const SamplerOptions &options)
 {
     VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
@@ -1356,7 +1441,7 @@ void VulkanResourceManager::deleteSampler(const Handle<Sampler_t> &handle)
     m_samplers.remove(handle);
 }
 
-VulkanSampler *VulkanResourceManager::getSampler(const Handle<Sampler_t> &handle)
+VulkanSampler *VulkanResourceManager::getSampler(const Handle<Sampler_t> &handle) const
 {
     return m_samplers.get(handle);
 }
