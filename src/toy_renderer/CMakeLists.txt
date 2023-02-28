@@ -17,6 +17,7 @@ set(SOURCES
     queue.cpp
     render_pass_command_recorder.cpp
     resource_manager.cpp
+    sampler.cpp
     shader_module.cpp
     swapchain.cpp
     surface.cpp
@@ -79,6 +80,8 @@ set(HEADERS
     render_pass_command_recorder.h
     render_pass_command_recorder_options.h
     resource_manager.h
+    sampler.h
+    sampler_options.h
     shader_module.h
     swapchain.h
     swapchain_options.h
