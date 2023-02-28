@@ -33,22 +33,21 @@ void VulkanBindGroup::update(const BindGroupEntry &entry)
     descriptorWrite.pTexelBufferView = nullptr;
     descriptorWrite.pBufferInfo = nullptr;
     descriptorWrite.pTexelBufferView = nullptr;
-    descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 
     switch (entry.resource.type()) {
     case ResourceBindingType::CombinedImageSampler: {
         const TextureViewBinding &textureViewBinding = entry.resource.textureViewBinding();
         VulkanTextureView *textView = vulkanResourceManager->getTextureView(textureViewBinding.textureView);
-        // VulkanSampler *sampler = m_samplers.get(textureViewBinding.sampler);
+        VulkanSampler *sampler = vulkanResourceManager->getSampler(textureViewBinding.sampler);
         imageInfo.imageView = textView->imageView;
-        // TODO: Create Sampler
-        // imageInfo.sampler = vulkanTextureView.sampler;
+        imageInfo.sampler = sampler->sampler;
 
         descriptorWrite.descriptorCount = 1;
         descriptorWrite.pImageInfo = &imageInfo;
+        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         break;
     }
-    case ResourceBindingType::UniformBuffer:
+    case ResourceBindingType::UniformBuffer: {
         const BufferBinding &bufferBinding = entry.resource.bufferBinding();
         VulkanBuffer *buffer = vulkanResourceManager->getBuffer(bufferBinding.buffer);
         uboBufferInfo.buffer = buffer->buffer; // VkBuffer
@@ -57,6 +56,10 @@ void VulkanBindGroup::update(const BindGroupEntry &entry)
 
         descriptorWrite.descriptorCount = 1;
         descriptorWrite.pBufferInfo = &uboBufferInfo;
+        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        break;
+    }
+    default:
         break;
     }
 
