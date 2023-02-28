@@ -16,6 +16,7 @@ struct RenderPassCommandRecorder_t;
 
 struct Rect2D;
 struct Viewport;
+struct PushConstantRange;
 
 class GraphicsApi;
 
@@ -60,6 +61,8 @@ public:
 
     void drawIndexed(const DrawIndexedCommand &drawCommand);
     void drawIndexed(const std::vector<DrawIndexedCommand> &drawCommands);
+
+    void pushConstant(const PushConstantRange &constantRange, const std::vector<uint8_t> &data);
 
     void end();
 

@@ -28,6 +28,7 @@ struct VulkanRenderPassCommandRecorder : public ApiRenderPassCommandRecorder {
     void draw(const std::vector<DrawCommand> &drawCommands) final;
     void drawIndexed(const DrawIndexedCommand &drawCommand) final;
     void drawIndexed(const std::vector<DrawIndexedCommand> &drawCommands) final;
+    void pushConstant(const PushConstantRange &constantRange, const std::vector<uint8_t> &data) final;
     void end() final;
 
     VkCommandBuffer commandBuffer{ VK_NULL_HANDLE };

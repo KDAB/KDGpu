@@ -85,4 +85,10 @@ void RenderPassCommandRecorder::drawIndexed(const std::vector<DrawIndexedCommand
     apiRenderPassCommandRecorder->drawIndexed(drawCommands);
 }
 
+void RenderPassCommandRecorder::pushConstant(const PushConstantRange &constantRange, const std::vector<uint8_t> &data)
+{
+    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    apiRenderPassCommandRecorder->pushConstant(constantRange, data);
+}
+
 } // namespace ToyRenderer
