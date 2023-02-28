@@ -156,6 +156,29 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
 void VulkanResourceManager::deleteDevice(Handle<Device_t> handle)
 {
     VulkanDevice *vulkanDevice = m_devices.get(handle);
+
+    // Destroy Render Passes
+    for (const auto &[passKey, passHandle] : vulkanDevice->renderPasses) {
+        VulkanRenderPass *pass = m_renderPasses.get(passHandle);
+        vkDestroyRenderPass(vulkanDevice->device, pass->renderPass, nullptr);
+        m_renderPasses.remove(passHandle);
+    }
+
+    // Destroy FrameBuffers
+    for (const auto &[fbKey, fbHandle] : vulkanDevice->framebuffers) {
+        VulkanFramebuffer *fb = m_framebuffers.get(fbHandle);
+        vkDestroyFramebuffer(vulkanDevice->device, fb->framebuffer, nullptr);
+        m_framebuffers.remove(fbHandle);
+    }
+
+    // Destroy Descriptor Pool
+    vkDestroyDescriptorPool(vulkanDevice->device, vulkanDevice->descriptorSetPool, nullptr);
+
+    // Destroy Command Pool
+    for (VkCommandPool commandPool : vulkanDevice->commandPools)
+        vkDestroyCommandPool(vulkanDevice->device, commandPool, nullptr);
+
+    // At last, destroy device
     vkDestroyDevice(vulkanDevice->device, nullptr);
 
     m_devices.remove(handle);
@@ -1016,11 +1039,9 @@ Handle<CommandRecorder_t> VulkanResourceManager::createCommandRecorder(const Han
 
 void VulkanResourceManager::deleteCommandRecorder(Handle<CommandRecorder_t> handle)
 {
-    VulkanCommandRecorder *vulkanCommandRecorder = m_commandRecorders.get(handle);
-    VulkanDevice *vulkanDevice = m_devices.get(vulkanCommandRecorder->deviceHandle);
-
-    // TODO: Find out when we can/should release the command pool
-    // vkDestroyCommandPool(vulkanDevice->device, vulkanCommandBuffer->commandPool, nullptr);
+    // VulkanCommandRecorder *vulkanCommandRecorder = m_commandRecorders.get(handle);
+    // VulkanDevice *vulkanDevice = m_devices.get(vulkanCommandRecorder->deviceHandle);
+    // Maybe we should destroy the Command Buffers here
 
     m_commandRecorders.remove(handle);
 }
