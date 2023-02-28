@@ -4,6 +4,7 @@
 #include <toy_renderer/bind_group_layout.h>
 #include <toy_renderer/buffer.h>
 #include <toy_renderer/command_recorder.h>
+#include <toy_renderer/compute_pipeline.h>
 #include <toy_renderer/device_options.h>
 #include <toy_renderer/gpu_semaphore.h>
 #include <toy_renderer/graphics_pipeline.h>
@@ -37,6 +38,7 @@ struct TextureOptions;
 struct BindGroupOptions;
 struct BindGroupLayoutOptions;
 struct BindGroupEntry;
+struct ComputePipelineOptions;
 
 class TOY_RENDERER_EXPORT Device
 {
@@ -67,6 +69,8 @@ public:
     PipelineLayout createPipelineLayout(const PipelineLayoutOptions &options = PipelineLayoutOptions());
 
     GraphicsPipeline createGraphicsPipeline(const GraphicsPipelineOptions &options);
+
+    ComputePipeline createComputePipeline(const ComputePipelineOptions &options);
 
     CommandRecorder createCommandRecorder(const CommandRecorderOptions &options = CommandRecorderOptions());
 

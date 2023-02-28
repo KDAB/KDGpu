@@ -24,6 +24,7 @@ struct ApiBindGroupLayout;
 struct ApiBuffer;
 struct ApiCommandBuffer;
 struct ApiCommandRecorder;
+struct ApiComputePipeline;
 struct ApiDevice;
 struct ApiGpuSemaphore;
 struct ApiGraphicsPipeline;
@@ -42,6 +43,7 @@ struct ApiTextureView;
 struct BindGroupOptions;
 struct BufferOptions;
 struct CommandRecorderOptions;
+struct ComputePipelineOptions;
 struct DeviceOptions;
 struct GpuSemaphoreOptions;
 struct GraphicsPipelineOptions;
@@ -54,6 +56,7 @@ struct TextureViewOptions;
 
 struct BindGroup_t;
 struct CommandRecorder_t;
+struct ComputePipeline_t;
 struct GraphicsPipeline_t;
 struct PipelineLayout_t;
 struct RenderPass_t;
@@ -124,6 +127,10 @@ public:
     virtual Handle<GraphicsPipeline_t> createGraphicsPipeline(const Handle<Device_t> &deviceHandle, const GraphicsPipelineOptions &options) = 0;
     virtual void deleteGraphicsPipeline(const Handle<GraphicsPipeline_t> &handle) = 0;
     virtual ApiGraphicsPipeline *getGraphicsPipeline(const Handle<GraphicsPipeline_t> &handle) const = 0;
+
+    virtual Handle<ComputePipeline_t> createComputePipeline(const Handle<Device_t> &deviceHandle, const ComputePipelineOptions &options) = 0;
+    virtual void deleteComputePipeline(const Handle<ComputePipeline_t> &handle) = 0;
+    virtual ApiComputePipeline *getComputePipeline(const Handle<ComputePipeline_t> &handle) const = 0;
 
     virtual Handle<GpuSemaphore_t> createGpuSemaphore(const Handle<Device_t> &deviceHandle, const GpuSemaphoreOptions &options) = 0;
     virtual void deleteGpuSemaphore(const Handle<GpuSemaphore_t> &handle) = 0;

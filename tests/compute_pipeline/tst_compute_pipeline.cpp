@@ -9,6 +9,17 @@
 
 using namespace ToyRenderer;
 
+namespace {
+inline std::string assetPath()
+{
+#if defined(TOY_RENDERER_ASSET_PATH)
+    return TOY_RENDERER_ASSET_PATH;
+#else
+    return "";
+#endif
+}
+} // namespace
+
 TEST_SUITE("ComputePipeline")
 {
     std::unique_ptr<GraphicsApi> api = std::make_unique<VulkanGraphicsApi>();
@@ -17,6 +28,9 @@ TEST_SUITE("ComputePipeline")
             .applicationVersion = SERENITY_MAKE_API_VERSION(0, 1, 0, 0) });
     Adapter discreteGPUAdapter = instance.selectAdapter(AdapterDeviceType::DiscreteGpu).value_or(Adapter());
     Device device = discreteGPUAdapter.createDevice();
+
+    const auto computeShaderPath = assetPath() + "/shaders/tests/compute_pipeline/empty_compute.comp.spv";
+    auto computeShader = device.createShaderModule(ToyRenderer::readShaderFile(computeShaderPath));
 
     TEST_CASE("Construction")
     {
@@ -31,13 +45,23 @@ TEST_SUITE("ComputePipeline")
         SUBCASE("A constructed ComputePipeline from a Vulkan API")
         {
             // GIVEN
-            const ComputePipelineOptions options{};
+            PipelineLayoutOptions pipelineLayoutOptions{};
+            PipelineLayout pipelineLayout = device.createPipelineLayout(pipelineLayoutOptions);
 
-            // // WHEN
-            // ComputePipeline c = device.createComputePipeline(options);
+            // clang-format off
+            const ComputePipelineOptions computePipelineOptions {
+                .layout = pipelineLayout,
+                .shaderStage = ComputeShaderStage {
+                    .shaderModule = computeShader.handle()
+                }
+            };
+            // clang-format on
 
-            // // THEN
-            // CHECK(c.isValid());
+            // WHEN
+            ComputePipeline c = device.createComputePipeline(computePipelineOptions);
+
+            // THEN
+            CHECK(c.isValid());
         }
     }
 
@@ -62,20 +86,30 @@ TEST_SUITE("ComputePipeline")
         SUBCASE("Compare device created ComputePipelines")
         {
             // GIVEN
-            const ComputePipelineOptions options{};
+            PipelineLayoutOptions pipelineLayoutOptions{};
+            PipelineLayout pipelineLayout = device.createPipelineLayout(pipelineLayoutOptions);
+
+            // clang-format off
+            const ComputePipelineOptions computePipelineOptions {
+                .layout = pipelineLayout,
+                .shaderStage = ComputeShaderStage {
+                    .shaderModule = computeShader.handle()
+                }
+            };
+            // clang-format on
 
             // WHEN
-            // ComputePipeline a = device.createComputePipeline(options);
-            // ComputePipeline b = device.createComputePipeline(options);
+            ComputePipeline a = device.createComputePipeline(computePipelineOptions);
+            ComputePipeline b = device.createComputePipeline(computePipelineOptions);
 
-            // // THEN
-            // CHECK(a != b);
+            // THEN
+            CHECK(a != b);
 
-            // // WHEN
-            // a = b;
+            // WHEN
+            a = b;
 
-            // // THEN
-            // CHECK(a == b);
+            // THEN
+            CHECK(a == b);
         }
     }
 }

@@ -10,6 +10,7 @@
 #include <toy_renderer/vulkan/vulkan_buffer.h>
 #include <toy_renderer/vulkan/vulkan_command_buffer.h>
 #include <toy_renderer/vulkan/vulkan_command_recorder.h>
+#include <toy_renderer/vulkan/vulkan_compute_pipeline.h>
 #include <toy_renderer/vulkan/vulkan_device.h>
 #include <toy_renderer/vulkan/vulkan_framebuffer.h>
 #include <toy_renderer/vulkan/vulkan_gpu_semaphore.h>
@@ -91,6 +92,10 @@ public:
     void deleteGraphicsPipeline(const Handle<GraphicsPipeline_t> &handle) final;
     VulkanGraphicsPipeline *getGraphicsPipeline(const Handle<GraphicsPipeline_t> &handle) const final;
 
+    Handle<ComputePipeline_t> createComputePipeline(const Handle<Device_t> &deviceHandle, const ComputePipelineOptions &options) final;
+    void deleteComputePipeline(const Handle<ComputePipeline_t> &handle) final;
+    VulkanComputePipeline *getComputePipeline(const Handle<ComputePipeline_t> &handle) const final;
+
     Handle<GpuSemaphore_t> createGpuSemaphore(const Handle<Device_t> &deviceHandle, const GpuSemaphoreOptions &options) final;
     void deleteGpuSemaphore(const Handle<GpuSemaphore_t> &handle) final;
     VulkanGpuSemaphore *getGpuSemaphore(const Handle<GpuSemaphore_t> &handle) const final;
@@ -139,6 +144,7 @@ private:
     Pool<VulkanBindGroupLayout, BindGroupLayout_t> m_bindGroupLayouts{ 128 };
     Pool<VulkanBindGroup, BindGroup_t> m_bindGroups{ 128 };
     Pool<VulkanGraphicsPipeline, GraphicsPipeline_t> m_graphicsPipelines{ 64 };
+    Pool<VulkanComputePipeline, ComputePipeline_t> m_computePipelines{ 64 };
     Pool<VulkanGpuSemaphore, GpuSemaphore_t> m_gpuSemaphores{ 32 };
     Pool<VulkanCommandRecorder, CommandRecorder_t> m_commandRecorders{ 32 };
     Pool<VulkanRenderPassCommandRecorder, RenderPassCommandRecorder_t> m_renderPassCommandRecorders{ 32 };

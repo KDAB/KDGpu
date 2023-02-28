@@ -1,6 +1,7 @@
 project(shaders)
 
 add_subdirectory(examples)
+add_subdirectory(tests)
 
 add_custom_target(toy_renderer_assets ALL)
 

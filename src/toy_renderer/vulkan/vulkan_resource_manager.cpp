@@ -3,6 +3,7 @@
 #include <toy_renderer/bind_group_options.h>
 #include <toy_renderer/bind_group_layout_options.h>
 #include <toy_renderer/buffer_options.h>
+#include <toy_renderer/compute_pipeline_options.h>
 #include <toy_renderer/graphics_pipeline_options.h>
 #include <toy_renderer/instance.h>
 #include <toy_renderer/sampler_options.h>
@@ -920,6 +921,64 @@ void VulkanResourceManager::deleteGraphicsPipeline(const Handle<GraphicsPipeline
 VulkanGraphicsPipeline *VulkanResourceManager::getGraphicsPipeline(const Handle<GraphicsPipeline_t> &handle) const
 {
     return m_graphicsPipelines.get(handle);
+}
+
+Handle<ComputePipeline_t> VulkanResourceManager::createComputePipeline(const Handle<Device_t> &deviceHandle, const ComputePipelineOptions &options)
+{
+    VulkanDevice vulkanDevice = *m_devices.get(deviceHandle);
+
+    // Fetch the specified pipeline layout
+    VulkanPipelineLayout *vulkanPipelineLayout = getPipelineLayout(options.layout);
+    if (!vulkanPipelineLayout) {
+        // TODO: Log invalid pipeline layout requested
+        return {};
+    }
+
+    // Shader stages
+    VkPipelineShaderStageCreateInfo computeShaderInfo{};
+    computeShaderInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    computeShaderInfo.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+
+    // Lookup the shader module
+    const auto vulkanShaderModule = getShaderModule(options.shaderStage.shaderModule);
+    if (!vulkanShaderModule)
+        return {};
+    computeShaderInfo.module = vulkanShaderModule->shaderModule;
+    computeShaderInfo.pName = options.shaderStage.entryPoint.data();
+
+    VkComputePipelineCreateInfo pipelineInfo = {};
+    pipelineInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+    pipelineInfo.stage = computeShaderInfo;
+    pipelineInfo.layout = vulkanPipelineLayout->pipelineLayout;
+
+    VkPipeline vkPipeline{ VK_NULL_HANDLE };
+
+    if (vkCreateComputePipelines(vulkanDevice.device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &vkPipeline) != VK_SUCCESS) {
+        return {};
+    }
+
+    // Create VulkanPipeline object and return handle
+    const auto vulkanComputePipelineHandle = m_computePipelines.emplace(VulkanComputePipeline(
+            vkPipeline,
+            vulkanPipelineLayout->pipelineLayout,
+            this,
+            deviceHandle));
+
+    return vulkanComputePipelineHandle;
+}
+void VulkanResourceManager::deleteComputePipeline(const Handle<ComputePipeline_t> &handle)
+{
+    VulkanComputePipeline *vulkanPipeline = m_computePipelines.get(handle);
+    VulkanDevice *vulkanDevice = m_devices.get(vulkanPipeline->deviceHandle);
+
+    vkDestroyPipeline(vulkanDevice->device, vulkanPipeline->pipeline, nullptr);
+
+    m_computePipelines.remove(handle);
+}
+
+VulkanComputePipeline *VulkanResourceManager::getComputePipeline(const Handle<ComputePipeline_t> &handle) const
+{
+    return m_computePipelines.get(handle);
 }
 
 Handle<GpuSemaphore_t> VulkanResourceManager::createGpuSemaphore(const Handle<Device_t> &deviceHandle, const GpuSemaphoreOptions &options)

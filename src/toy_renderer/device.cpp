@@ -72,6 +72,11 @@ GraphicsPipeline Device::createGraphicsPipeline(const GraphicsPipelineOptions &o
     return GraphicsPipeline(m_api, m_device, m_api->resourceManager()->createGraphicsPipeline(m_device, options));
 }
 
+ComputePipeline Device::createComputePipeline(const ComputePipelineOptions &options)
+{
+    return ComputePipeline(m_api, m_device, m_api->resourceManager()->createComputePipeline(m_device, options));
+}
+
 CommandRecorder Device::createCommandRecorder(const CommandRecorderOptions &options)
 {
     return CommandRecorder(m_api, m_device, m_api->resourceManager()->createCommandRecorder(m_device, options));
