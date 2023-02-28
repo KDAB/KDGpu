@@ -20,11 +20,14 @@ struct VulkanRenderPassCommandRecorder : public ApiRenderPassCommandRecorder {
 
     void setPipeline(const Handle<GraphicsPipeline_t> &pipeline) final;
     void setVertexBuffer(uint32_t index, const Handle<Buffer_t> &buffer) final;
+    void setIndexBuffer(const Handle<Buffer_t> &buffer, DeviceSize offset, IndexType indexType) final;
     void setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroup) final;
     void setViewport(const Viewport &viewport) final;
     void setScissor(const Rect2D &scissor) final;
     void draw(const DrawCommand &drawCommand) final;
     void draw(const std::vector<DrawCommand> &drawCommands) final;
+    void drawIndexed(const DrawIndexedCommand &drawCommand) final;
+    void drawIndexed(const std::vector<DrawIndexedCommand> &drawCommands) final;
     void end() final;
 
     VkCommandBuffer commandBuffer{ VK_NULL_HANDLE };

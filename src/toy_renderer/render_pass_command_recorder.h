@@ -1,5 +1,6 @@
 #pragma once
 
+#include <toy_renderer/gpu_core.h>
 #include <toy_renderer/handle.h>
 #include <toy_renderer/toy_renderer_export.h>
 
@@ -25,6 +26,14 @@ struct DrawCommand {
     uint32_t firstInstance{ 0 };
 };
 
+struct DrawIndexedCommand {
+    uint32_t indexCount{ 0 };
+    uint32_t instanceCount{ 1 };
+    uint32_t firstIndex{ 0 };
+    int32_t vertexOffset{ 0 };
+    uint32_t firstInstance{ 0 };
+};
+
 class TOY_RENDERER_EXPORT RenderPassCommandRecorder
 {
 public:
@@ -39,6 +48,7 @@ public:
 
     // TODO: Add overload for setting many vertex buffers at once
     void setVertexBuffer(uint32_t index, const Handle<Buffer_t> &buffer);
+    void setIndexBuffer(const Handle<Buffer_t> &buffer, DeviceSize offset = 0, IndexType indexType = IndexType::Uint32);
 
     void setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroup);
 
@@ -47,6 +57,9 @@ public:
 
     void draw(const DrawCommand &drawCommand);
     void draw(const std::vector<DrawCommand> &drawCommands);
+
+    void drawIndexed(const DrawIndexedCommand &drawCommand);
+    void drawIndexed(const std::vector<DrawIndexedCommand> &drawCommands);
 
     void end();
 

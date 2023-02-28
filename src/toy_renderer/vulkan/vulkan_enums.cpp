@@ -283,4 +283,14 @@ VkSamplerAddressMode addressModeToVkSamplerAddressMode(AddressMode mode)
     return static_cast<VkSamplerAddressMode>(static_cast<uint32_t>(mode));
 }
 
+VkIndexType indexTypeToVkIndexType(IndexType type)
+{
+    return static_cast<VkIndexType>(static_cast<uint32_t>(type));
+}
+
+IndexType vkIndexTypeToIndexType(VkIndexType type)
+{
+    return static_cast<IndexType>(static_cast<uint32_t>(type));
+}
+
 } // namespace ToyRenderer

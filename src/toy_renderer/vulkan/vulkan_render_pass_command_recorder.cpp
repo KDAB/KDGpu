@@ -1,5 +1,6 @@
 #include "vulkan_render_pass_command_recorder.h"
 
+#include <toy_renderer/vulkan/vulkan_enums.h>
 #include <toy_renderer/vulkan/vulkan_graphics_pipeline.h>
 #include <toy_renderer/vulkan/vulkan_resource_manager.h>
 
@@ -46,6 +47,12 @@ void VulkanRenderPassCommandRecorder::setVertexBuffer(uint32_t index, const Hand
     vkCmdBindVertexBuffers(commandBuffer, index, 1, buffers.data(), offsets.data());
 }
 
+void VulkanRenderPassCommandRecorder::setIndexBuffer(const Handle<Buffer_t> &buffer, DeviceSize offset, IndexType indexType)
+{
+    VulkanBuffer *vulkanBuffer = vulkanResourceManager->getBuffer(buffer);
+    vkCmdBindIndexBuffer(commandBuffer, vulkanBuffer->buffer, offset, indexTypeToVkIndexType(indexType));
+}
+
 void VulkanRenderPassCommandRecorder::setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroupH)
 {
     VulkanBindGroup *bindGroup = vulkanResourceManager->getBindGroup(bindGroupH);
@@ -85,7 +92,6 @@ void VulkanRenderPassCommandRecorder::setScissor(const Rect2D &scissor)
 
 void VulkanRenderPassCommandRecorder::draw(const DrawCommand &drawCommand)
 {
-    // TODO: Expose the viewport and scissor setting commands
     vkCmdDraw(commandBuffer,
               drawCommand.vertexCount,
               drawCommand.instanceCount,
@@ -101,6 +107,28 @@ void VulkanRenderPassCommandRecorder::draw(const std::vector<DrawCommand> &drawC
                   drawCommand.instanceCount,
                   drawCommand.firstVertex,
                   drawCommand.firstInstance);
+    }
+}
+
+void VulkanRenderPassCommandRecorder::drawIndexed(const DrawIndexedCommand &drawCommand)
+{
+    vkCmdDrawIndexed(commandBuffer,
+                     drawCommand.indexCount,
+                     drawCommand.instanceCount,
+                     drawCommand.firstIndex,
+                     drawCommand.vertexOffset,
+                     drawCommand.firstInstance);
+}
+
+void VulkanRenderPassCommandRecorder::drawIndexed(const std::vector<DrawIndexedCommand> &drawCommands)
+{
+    for (const auto &drawCommand : drawCommands) {
+        vkCmdDrawIndexed(commandBuffer,
+                         drawCommand.indexCount,
+                         drawCommand.instanceCount,
+                         drawCommand.firstIndex,
+                         drawCommand.vertexOffset,
+                         drawCommand.firstInstance);
     }
 }
 

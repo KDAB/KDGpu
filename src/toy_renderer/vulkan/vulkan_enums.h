@@ -85,4 +85,7 @@ VkFilter filterModeToVkFilterMode(FilterMode mode);
 VkSamplerMipmapMode mipMapFilterModeToVkSamplerMipmapMode(MipmapFilterMode mode);
 VkSamplerAddressMode addressModeToVkSamplerAddressMode(AddressMode mode);
 
+VkIndexType indexTypeToVkIndexType(IndexType type);
+IndexType vkIndexTypeToIndexType(VkIndexType type);
+
 } // namespace ToyRenderer

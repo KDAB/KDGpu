@@ -31,6 +31,12 @@ void RenderPassCommandRecorder::setVertexBuffer(uint32_t index, const Handle<Buf
     apiRenderPassCommandRecorder->setVertexBuffer(index, buffer);
 }
 
+void RenderPassCommandRecorder::setIndexBuffer(const Handle<Buffer_t> &buffer, DeviceSize offset, IndexType indexType)
+{
+    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    apiRenderPassCommandRecorder->setIndexBuffer(buffer, offset, indexType);
+}
+
 void RenderPassCommandRecorder::setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroup)
 {
     auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
@@ -65,6 +71,18 @@ void RenderPassCommandRecorder::draw(const std::vector<DrawCommand> &drawCommand
 {
     auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->draw(drawCommands);
+}
+
+void RenderPassCommandRecorder::drawIndexed(const DrawIndexedCommand &drawCommand)
+{
+    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    apiRenderPassCommandRecorder->drawIndexed(drawCommand);
+}
+
+void RenderPassCommandRecorder::drawIndexed(const std::vector<DrawIndexedCommand> &drawCommands)
+{
+    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    apiRenderPassCommandRecorder->drawIndexed(drawCommands);
 }
 
 } // namespace ToyRenderer

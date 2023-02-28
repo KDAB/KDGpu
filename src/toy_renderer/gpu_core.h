@@ -569,6 +569,12 @@ enum class VertexRate {
     MaxEnum = 0x7fffffff
 };
 
+enum class IndexType {
+    Uint16 = 0,
+    Uint32 = 1,
+    MaxEnum = 0x7fffffff
+};
+
 enum class MemoryUsage {
     Unknown = 0,
     GpuOnly = 1,
