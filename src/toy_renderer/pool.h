@@ -76,18 +76,11 @@ public:
     uint32_t capacity() const noexcept { return m_capacity; }
     uint32_t size() const noexcept { return m_data.size() - m_freeIndices.size(); }
 
-    T *get(const Handle<H> &handle) noexcept
+    T *get(const Handle<H> &handle) const noexcept
     {
         if (!canUseHandle(handle))
             return nullptr;
-        return &m_data[handle.m_index];
-    }
-
-    const T *get(const Handle<H> &handle) const noexcept
-    {
-        if (!canUseHandle(handle))
-            return nullptr;
-        return &m_data[handle.m_index];
+        return const_cast<T *>(&m_data[handle.m_index]);
     }
 
     template<typename... Args>
