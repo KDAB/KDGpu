@@ -11,6 +11,7 @@
 #include <toy_renderer/vulkan/vulkan_command_buffer.h>
 #include <toy_renderer/vulkan/vulkan_command_recorder.h>
 #include <toy_renderer/vulkan/vulkan_compute_pipeline.h>
+#include <toy_renderer/vulkan/vulkan_compute_pass_command_recorder.h>
 #include <toy_renderer/vulkan/vulkan_device.h>
 #include <toy_renderer/vulkan/vulkan_framebuffer.h>
 #include <toy_renderer/vulkan/vulkan_gpu_semaphore.h>
@@ -110,6 +111,12 @@ public:
     void deleteRenderPassCommandRecorder(const Handle<RenderPassCommandRecorder_t> &handle) final;
     VulkanRenderPassCommandRecorder *getRenderPassCommandRecorder(const Handle<RenderPassCommandRecorder_t> &handle) const final;
 
+    Handle<ComputePassCommandRecorder_t> createComputePassCommandRecorder(const Handle<Device_t> &deviceHandle,
+                                                                          const Handle<CommandRecorder_t> &commandRecorderHandle,
+                                                                          const ComputePassCommandRecorderOptions &options) final;
+    void deleteComputePassCommandRecorder(const Handle<ComputePassCommandRecorder_t> &handle) final;
+    VulkanComputePassCommandRecorder *getComputePassCommandRecorder(const Handle<ComputePassCommandRecorder_t> &handle) const final;
+
     // TODO: Should we make this part of the ResourceManager api? Or combine it with the public RenderPass api?
     // TODO: Should we pass in specific options types here for render passes and framebuffers?
     Handle<RenderPass_t> createRenderPass(const Handle<Device_t> &deviceHandle, const RenderPassCommandRecorderOptions &options);
@@ -148,6 +155,7 @@ private:
     Pool<VulkanGpuSemaphore, GpuSemaphore_t> m_gpuSemaphores{ 32 };
     Pool<VulkanCommandRecorder, CommandRecorder_t> m_commandRecorders{ 32 };
     Pool<VulkanRenderPassCommandRecorder, RenderPassCommandRecorder_t> m_renderPassCommandRecorders{ 32 };
+    Pool<VulkanComputePassCommandRecorder, ComputePassCommandRecorder_t> m_computePassCommandRecorders{ 32 };
     Pool<VulkanCommandBuffer, CommandBuffer_t> m_commandBuffers{ 128 };
     Pool<VulkanRenderPass, RenderPass_t> m_renderPasses{ 16 };
     Pool<VulkanFramebuffer, Framebuffer_t> m_framebuffers{ 16 };

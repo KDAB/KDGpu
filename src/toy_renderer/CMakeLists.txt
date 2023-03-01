@@ -30,6 +30,7 @@ set(SOURCES
     vulkan/vulkan_buffer.cpp
     vulkan/vulkan_command_buffer.cpp
     vulkan/vulkan_command_recorder.cpp
+    vulkan/vulkan_compute_pass_command_recorder.cpp
     vulkan/vulkan_compute_pipeline.cpp
     vulkan/vulkan_device.cpp
     vulkan/vulkan_enums.cpp
@@ -103,6 +104,7 @@ set(HEADERS
     api/api_command_buffer.h
     api/api_command_recorder.h
     api/api_compute_pipeline.h
+    api/api_compute_pass_command_recorder.h
     api/api_device.h
     api/api_framebuffer.h
     api/api_gpu_semaphore.h
@@ -124,6 +126,7 @@ set(HEADERS
     vulkan/vulkan_buffer.h
     vulkan/vulkan_command_buffer.h
     vulkan/vulkan_command_recorder.h
+    vulkan/vulkan_compute_pass_command_recorder.h
     vulkan/vulkan_compute_pipeline.h
     vulkan/vulkan_device.h
     vulkan/vulkan_enums.h

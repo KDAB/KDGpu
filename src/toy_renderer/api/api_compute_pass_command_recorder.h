@@ -1,0 +1,24 @@
+#pragma once
+
+#include <toy_renderer/handle.h>
+
+namespace ToyRenderer {
+
+struct BindGroup_t;
+struct ComputePipeline_t;
+struct ComputeCommand;
+struct ComputeCommandIndirect;
+struct PushConstantRange;
+
+struct ApiComputePassCommandRecorder {
+    virtual void setPipeline(const Handle<ComputePipeline_t> &pipeline) = 0;
+    virtual void setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroup) = 0;
+    virtual void dispatchCompute(const ComputeCommand &command) = 0;
+    virtual void dispatchCompute(const std::vector<ComputeCommand> &commands) = 0;
+    virtual void dispatchComputeIndirect(const ComputeCommandIndirect &command) = 0;
+    virtual void dispatchComputeIndirect(const std::vector<ComputeCommandIndirect> &commands) = 0;
+    virtual void pushConstant(const PushConstantRange &constantRange, const std::vector<uint8_t> &data) = 0;
+    virtual void end() = 0;
+};
+
+} // namespace ToyRenderer

@@ -1266,6 +1266,36 @@ void VulkanResourceManager::deleteRenderPassCommandRecorder(const Handle<RenderP
     m_renderPassCommandRecorders.remove(handle);
 }
 
+Handle<ComputePassCommandRecorder_t> VulkanResourceManager::createComputePassCommandRecorder(const Handle<Device_t> &deviceHandle,
+                                                                                             const Handle<CommandRecorder_t> &commandRecorderHandle,
+                                                                                             const ComputePassCommandRecorderOptions &)
+{
+    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
+
+    VulkanCommandRecorder *vulkanCommandRecorder = m_commandRecorders.get(commandRecorderHandle);
+    if (!vulkanCommandRecorder) {
+        // TODO: Log about not having a valid command recorder
+        return {};
+    }
+    VkCommandBuffer vkCommandBuffer = vulkanCommandRecorder->commandBuffer;
+
+    const auto vulkanComputePassCommandRecorderHandle = m_computePassCommandRecorders.emplace(
+            VulkanComputePassCommandRecorder(vkCommandBuffer, this, deviceHandle));
+    return vulkanComputePassCommandRecorderHandle;
+}
+
+void VulkanResourceManager::deleteComputePassCommandRecorder(const Handle<ComputePassCommandRecorder_t> &handle)
+{
+    VulkanComputePassCommandRecorder *vulkanCommandPassRecorder = m_computePassCommandRecorders.get(handle);
+
+    m_computePassCommandRecorders.remove(handle);
+}
+
+VulkanComputePassCommandRecorder *VulkanResourceManager::getComputePassCommandRecorder(const Handle<ComputePassCommandRecorder_t> &handle) const
+{
+    return m_computePassCommandRecorders.get(handle);
+}
+
 Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device_t> &deviceHandle,
                                                              const RenderPassCommandRecorderOptions &options)
 {

@@ -25,6 +25,7 @@ struct ApiBuffer;
 struct ApiCommandBuffer;
 struct ApiCommandRecorder;
 struct ApiComputePipeline;
+struct ApiComputePassCommandRecorder;
 struct ApiDevice;
 struct ApiGpuSemaphore;
 struct ApiGraphicsPipeline;
@@ -145,6 +146,12 @@ public:
                                                                                 const RenderPassCommandRecorderOptions &options) = 0;
     virtual void deleteRenderPassCommandRecorder(const Handle<RenderPassCommandRecorder_t> &handle) = 0;
     virtual ApiRenderPassCommandRecorder *getRenderPassCommandRecorder(const Handle<RenderPassCommandRecorder_t> &handle) const = 0;
+
+    virtual Handle<ComputePassCommandRecorder_t> createComputePassCommandRecorder(const Handle<Device_t> &deviceHandle,
+                                                                                  const Handle<CommandRecorder_t> &commandRecorderHandle,
+                                                                                  const ComputePassCommandRecorderOptions &options) = 0;
+    virtual void deleteComputePassCommandRecorder(const Handle<ComputePassCommandRecorder_t> &handle) = 0;
+    virtual ApiComputePassCommandRecorder *getComputePassCommandRecorder(const Handle<ComputePassCommandRecorder_t> &handle) const = 0;
 
     // Command buffers are not created by the api. It is up to the concrete subclasses to insert the command buffers
     // by whatever mechanism they wish. They also do not need to be destroyed as they are cleaned up by the owning
