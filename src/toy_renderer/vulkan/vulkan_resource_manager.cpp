@@ -516,7 +516,8 @@ Handle<PipelineLayout_t> VulkanResourceManager::createPipelineLayout(const Handl
         const auto &pushConstantRange = options.pushConstantRanges.at(i);
 
         VkPushConstantRange vkPushConstantRange = {
-            .stageFlags = shaderStageFlagBitsToVkShaderStageFlagBits(static_cast<ShaderStageFlagBits>(pushConstantRange.shaderStages)),
+            .stageFlags = static_cast<VkShaderStageFlags>(shaderStageFlagBitsToVkShaderStageFlagBits(
+                    static_cast<ShaderStageFlagBits>(pushConstantRange.shaderStages))),
             .offset = pushConstantRange.offset,
             .size = pushConstantRange.size
         };
