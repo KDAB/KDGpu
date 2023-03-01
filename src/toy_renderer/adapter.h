@@ -40,7 +40,7 @@ public:
 
     const AdapterProperties &properties() const noexcept;
     const AdapterFeatures &features() const noexcept;
-    std::span<AdapterQueueType> queueTypes();
+    std::span<AdapterQueueType> queueTypes() const;
 
     AdapterSwapchainProperties swapchainProperties(const Surface &surface) const;
     bool supportsPresentation(const Surface &surface, uint32_t queueTypeIndex) const noexcept;

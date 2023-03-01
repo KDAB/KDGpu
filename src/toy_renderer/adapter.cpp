@@ -43,7 +43,7 @@ const AdapterFeatures &Adapter::features() const noexcept
     return m_features;
 }
 
-std::span<AdapterQueueType> Adapter::queueTypes()
+std::span<AdapterQueueType> Adapter::queueTypes() const
 {
     if (m_queueTypes.empty()) {
         // TODO: query queue type information
