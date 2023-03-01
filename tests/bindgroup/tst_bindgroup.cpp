@@ -49,8 +49,7 @@ TEST_SUITE("BindGroup")
             auto ubo = device.createBuffer(uboOptions);
 
             const BindGroupLayoutOptions bindGroupLayoutOptions = {
-                .bindings = { { // Camera uniforms
-                                .binding = 0,
+                .bindings = { { .binding = 0,
                                 .count = 1,
                                 .resourceType = ResourceBindingType::UniformBuffer,
                                 .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit) } }
@@ -62,7 +61,7 @@ TEST_SUITE("BindGroup")
                 .layout = bindGroupLayout,
                 .resources = {
                         { .binding = 0,
-                          .resource = BindingResource(BufferBinding{ .buffer = ubo }) },
+                          .resource = BindingResource(UniformBufferBinding{ .buffer = ubo }) },
                 }
             };
 
@@ -100,7 +99,7 @@ TEST_SUITE("BindGroup")
                 .layout = bindGroupLayout,
                 .resources = {
                         { .binding = 0,
-                          .resource = BindingResource(BufferBinding{ .buffer = ubo }) },
+                          .resource = BindingResource(UniformBufferBinding{ .buffer = ubo }) },
                 }
             };
 
@@ -111,7 +110,7 @@ TEST_SUITE("BindGroup")
             CHECK(t.isValid());
 
             // WHEN
-            t.update(BindGroupEntry{ .binding = 0, .resource = BindingResource(BufferBinding{ .buffer = ubo }) });
+            t.update(BindGroupEntry{ .binding = 0, .resource = BindingResource(UniformBufferBinding{ .buffer = ubo }) });
         }
 
         SUBCASE("TextureView")
@@ -213,7 +212,7 @@ TEST_SUITE("BindGroup")
                 .layout = bindGroupLayout,
                 .resources = {
                         { .binding = 0,
-                          .resource = BindingResource(BufferBinding{ .buffer = ubo }) },
+                          .resource = BindingResource(UniformBufferBinding{ .buffer = ubo }) },
                 }
             };
 

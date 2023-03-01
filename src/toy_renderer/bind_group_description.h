@@ -22,7 +22,15 @@ struct ImageBinding {
     // TODO: Complete
 };
 
-struct BufferBinding {
+struct UniformBufferBinding {
+    static constexpr uint32_t WholeSize = 0xffffffff;
+
+    Handle<Buffer_t> buffer{};
+    uint32_t offset{ 0 };
+    uint32_t size{ WholeSize };
+};
+
+struct StorageBufferBinding {
     static constexpr uint32_t WholeSize = 0xffffffff;
 
     Handle<Buffer_t> buffer{};
@@ -45,14 +53,21 @@ public:
         m_resource.image = image;
     }
 
-    BindingResource(const BufferBinding &buffer)
-        : m_type(ResourceBindingType::UniformBuffer) // TODO: How do we distinguish from SSBO...
+    BindingResource(const UniformBufferBinding &buffer)
+        : m_type(ResourceBindingType::UniformBuffer)
     {
-        m_resource.buffer = buffer;
+        m_resource.uniformBuffer = buffer;
+    }
+
+    BindingResource(const StorageBufferBinding &buffer)
+        : m_type(ResourceBindingType::StorageBuffer)
+    {
+        m_resource.storageBuffer = buffer;
     }
 
     ResourceBindingType type() const { return m_type; }
-    const BufferBinding &bufferBinding() const { return m_resource.buffer; }
+    const UniformBufferBinding &uniformBufferBinding() const { return m_resource.uniformBuffer; }
+    const StorageBufferBinding &storageBufferBinding() const { return m_resource.storageBuffer; }
     const ImageBinding &imageBinding() const { return m_resource.image; }
     const TextureViewBinding &textureViewBinding() const { return m_resource.textureView; }
 
@@ -62,7 +77,8 @@ private:
 
         TextureViewBinding textureView;
         ImageBinding image;
-        BufferBinding buffer;
+        UniformBufferBinding uniformBuffer;
+        StorageBufferBinding storageBuffer;
     } m_resource;
     ResourceBindingType m_type;
 };

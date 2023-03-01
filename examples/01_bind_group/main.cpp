@@ -64,7 +64,7 @@ struct Material {
 };
 
 struct GpuPrimitive {
-    std::vector<BufferBinding> vertexBuffers;
+    std::vector<UniformBufferBinding> vertexBuffers;
 
     uint32_t drawCount;
     struct Instances {
@@ -217,7 +217,7 @@ int main()
                                                   { .binding = 2,
                                                     .resource = BindingResource(TextureViewBinding{ .textureView = textureNormal /*, .sampler = sampler */ }) },
                                                   { .binding = 3,
-                                                    .resource = BindingResource(BufferBinding{ .buffer = materialUniforms }) },
+                                                    .resource = BindingResource(UniformBufferBinding{ .buffer = materialUniforms }) },
                                           } };
 
     // Create the bind group

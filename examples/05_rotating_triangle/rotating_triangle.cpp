@@ -140,11 +140,11 @@ void RotatingTriangle::initializeScene()
 
     // Create a bindGroup to hold the UBO with the transform
     // clang-format off
-    BindGroupOptions bindGroupOptions = { 
+    BindGroupOptions bindGroupOptions = {
         .layout = bindGroupLayout,
         .resources = {{
             .binding = 0,
-            .resource = BindingResource(BufferBinding{ .buffer = m_transformBuffer })
+            .resource = BindingResource(UniformBufferBinding{ .buffer = m_transformBuffer })
         }}
     };
     // clang-format on

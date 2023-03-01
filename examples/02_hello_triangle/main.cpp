@@ -276,12 +276,12 @@ int main()
         .layout = pipelineLayoutOptions.bindGroupLayouts[0],
         .resources = {
                 { .binding = 0,
-                  .resource = BindingResource(BufferBinding{ .buffer = cameraUBOBuffer }) } }
+                  .resource = BindingResource(UniformBufferBinding{ .buffer = cameraUBOBuffer }) } }
     };
     BindGroup bindGroup = device.createBindGroup(bindGroupCreateOptions);
 
     // Update BindGroup for binding 0
-    bindGroup.update(BindGroupEntry{ .binding = 0, .resource = BindingResource(BufferBinding{ .buffer = cameraUBOBuffer }) });
+    bindGroup.update(BindGroupEntry{ .binding = 0, .resource = BindingResource(UniformBufferBinding{ .buffer = cameraUBOBuffer }) });
 
     while (window.visible()) {
         // Acquire next swapchain image

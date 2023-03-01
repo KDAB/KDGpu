@@ -18,7 +18,7 @@ void VulkanBindGroup::update(const BindGroupEntry &entry)
 {
     VulkanDevice *vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
 
-    VkDescriptorBufferInfo uboBufferInfo{};
+    VkDescriptorBufferInfo bufferInfo{};
 
     VkDescriptorImageInfo imageInfo{};
     imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -48,15 +48,27 @@ void VulkanBindGroup::update(const BindGroupEntry &entry)
         break;
     }
     case ResourceBindingType::UniformBuffer: {
-        const BufferBinding &bufferBinding = entry.resource.bufferBinding();
+        const UniformBufferBinding &bufferBinding = entry.resource.uniformBufferBinding();
         VulkanBuffer *buffer = vulkanResourceManager->getBuffer(bufferBinding.buffer);
-        uboBufferInfo.buffer = buffer->buffer; // VkBuffer
-        uboBufferInfo.offset = bufferBinding.offset;
-        uboBufferInfo.range = (bufferBinding.size == BufferBinding::WholeSize) ? VK_WHOLE_SIZE : bufferBinding.size;
+        bufferInfo.buffer = buffer->buffer; // VkBuffer
+        bufferInfo.offset = bufferBinding.offset;
+        bufferInfo.range = (bufferBinding.size == UniformBufferBinding::WholeSize) ? VK_WHOLE_SIZE : bufferBinding.size;
 
         descriptorWrite.descriptorCount = 1;
-        descriptorWrite.pBufferInfo = &uboBufferInfo;
+        descriptorWrite.pBufferInfo = &bufferInfo;
         descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        break;
+    }
+    case ResourceBindingType::StorageBuffer: {
+        const StorageBufferBinding &bufferBinding = entry.resource.storageBufferBinding();
+        VulkanBuffer *buffer = vulkanResourceManager->getBuffer(bufferBinding.buffer);
+        bufferInfo.buffer = buffer->buffer; // VkBuffer
+        bufferInfo.offset = bufferBinding.offset;
+        bufferInfo.range = (bufferBinding.size == StorageBufferBinding::WholeSize) ? VK_WHOLE_SIZE : bufferBinding.size;
+
+        descriptorWrite.descriptorCount = 1;
+        descriptorWrite.pBufferInfo = &bufferInfo;
+        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         break;
     }
     default:
