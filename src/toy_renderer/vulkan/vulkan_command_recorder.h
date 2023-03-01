@@ -22,6 +22,7 @@ struct VulkanCommandRecorder : public ApiCommandRecorder {
 
     Handle<RenderPassCommandRecorder_t> beginRenderPass(const RenderPassCommandRecorderOptions &options) final;
     void copyBuffer(const BufferCopy &copy) final;
+    void memoryBarrier(const MemoryBarrierOptions &options) final;
     Handle<CommandBuffer_t> finish() final;
 
     VkCommandPool commandPool{ VK_NULL_HANDLE };

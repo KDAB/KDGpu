@@ -79,6 +79,7 @@ set(HEADERS
     gpu_semaphore.h
     instance.h
     handle.h
+    memory_barrier.h
     pipeline_layout.h
     pipeline_layout_options.h
     queue.h

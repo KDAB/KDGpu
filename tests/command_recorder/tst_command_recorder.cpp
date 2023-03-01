@@ -192,4 +192,115 @@ TEST_CASE("CommandRecorder")
             gpuToCpu.unmap();
         }
     }
+
+    SUBCASE("Buffer Copies Barriers")
+    {
+        // GIVEN
+        const BufferOptions cpuGpuBufferOptions = {
+            .size = 4 * sizeof(float),
+            .usage = BufferUsageFlags(BufferUsageFlagBits::TransferSrcBit),
+            .memoryUsage = MemoryUsage::CpuToGpu
+        };
+        const BufferOptions gpuGpuBufferOptions = {
+            .size = 4 * sizeof(float),
+            .usage = BufferUsageFlags(BufferUsageFlagBits::TransferSrcBit) | BufferUsageFlags(BufferUsageFlagBits::TransferDstBit),
+            .memoryUsage = MemoryUsage::GpuOnly
+        };
+        const BufferOptions gpuCpuBufferOptions = {
+            .size = 4 * sizeof(float),
+            .usage = BufferUsageFlags(BufferUsageFlagBits::TransferSrcBit) | BufferUsageFlags(BufferUsageFlagBits::TransferDstBit),
+            .memoryUsage = MemoryUsage::GpuToCpu
+        };
+
+        // WHEN
+        const float initialData[] = { 1.0f, 2.0f, 3.0f, 4.0f };
+        Buffer cpuToGpu = device.createBuffer(cpuGpuBufferOptions, initialData);
+        Buffer gpuToGpu = device.createBuffer(gpuGpuBufferOptions);
+        Buffer gpuToCpu = device.createBuffer(gpuCpuBufferOptions);
+
+        // THEN
+        CHECK(cpuToGpu.isValid());
+        CHECK(gpuToGpu.isValid());
+        CHECK(gpuToCpu.isValid());
+
+        {
+            // WHEN
+            const float *m = reinterpret_cast<const float *>(cpuToGpu.map());
+
+            // THEN
+            CHECK(m != nullptr);
+            CHECK(m[0] == initialData[0]);
+            CHECK(m[1] == initialData[1]);
+            CHECK(m[2] == initialData[2]);
+            CHECK(m[3] == initialData[3]);
+
+            // WHEN
+            cpuToGpu.unmap();
+        }
+
+        // WHEN
+        CommandRecorder c = device.createCommandRecorder();
+
+        // Copy cpuGpu[2], cpuGpu[3] -> gpuGpu[0], gpuGpu[1]
+        c.copyBuffer(BufferCopy{
+                .src = cpuToGpu,
+                .srcOffset = 2 * sizeof(float),
+                .dst = gpuToGpu,
+                .dstOffset = 0,
+                .byteSize = 2 * sizeof(float) });
+
+        // Copy cpuGpu[0], cpuGpu[1] -> gpuGpu[2], gpuGpu[3]
+        c.copyBuffer(BufferCopy{
+                .src = cpuToGpu,
+                .srcOffset = 0,
+                .dst = gpuToGpu,
+                .dstOffset = 2 * sizeof(float),
+                .byteSize = 2 * sizeof(float) });
+
+        // Memory Barrier to ensure all writes to gpuToGpu are completed before
+        // commands to follow are executed
+        // clang-format off
+        c.memoryBarrier(MemoryBarrierOptions {
+                .srcStages = PipelineStageFlags(PipelineStageFlagBit::TransferBit),
+                .dstStages = PipelineStageFlags(PipelineStageFlagBit::TransferBit),
+                .memoryBarriers = {
+                            {
+                                .srcMask = AccessFlags(AccessFlagBit::TransferReadBit) | AccessFlags(AccessFlagBit::TransferWriteBit),
+                                .dstMask = AccessFlags(AccessFlagBit::TransferReadBit) | AccessFlags(AccessFlagBit::TransferWriteBit)
+                            }
+                }
+        });
+        // clang-format on
+
+        // Copy gpuGpu to gpuCpu
+        c.copyBuffer(BufferCopy{
+                .src = gpuToGpu,
+                .srcOffset = 0,
+                .dst = gpuToCpu,
+                .dstOffset = 0,
+                .byteSize = 4 * sizeof(float) });
+
+        auto commandBuffer = c.finish();
+
+        transferQueue.submit(SubmitOptions{
+                .commandBuffers = { commandBuffer } });
+
+        device.waitUntilIdle();
+
+        // THEN
+        {
+            // WHEN
+            const float *m = reinterpret_cast<const float *>(gpuToCpu.map());
+
+            // THEN
+            CHECK(m != nullptr);
+            CHECK(m[0] == initialData[2]);
+            CHECK(m[1] == initialData[3]);
+            CHECK(m[2] == initialData[0]);
+            CHECK(m[3] == initialData[1]);
+
+            // WHEN
+            gpuToCpu.unmap();
+        }
+    }
 }

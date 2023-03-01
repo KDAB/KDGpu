@@ -293,4 +293,14 @@ IndexType vkIndexTypeToIndexType(VkIndexType type)
     return static_cast<IndexType>(static_cast<uint32_t>(type));
 }
 
+VkAccessFlagBits accessFlagsToVkAccessFlagBits(AccessFlags accessFlags)
+{
+    return static_cast<VkAccessFlagBits>(static_cast<uint32_t>(accessFlags));
+}
+
+VkPipelineStageFlagBits pipelineStageFlagsToVkPipelineStageFlagBits(PipelineStageFlags pipelineFlags)
+{
+    return static_cast<VkPipelineStageFlagBits>(static_cast<uint32_t>(pipelineFlags));
+}
+
 } // namespace ToyRenderer

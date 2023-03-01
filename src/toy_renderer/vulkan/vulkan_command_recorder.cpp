@@ -1,6 +1,7 @@
 #include "vulkan_command_recorder.h"
 #include <toy_renderer/vulkan/vulkan_resource_manager.h>
 #include <toy_renderer/vulkan/vulkan_buffer.h>
+#include <toy_renderer/vulkan/vulkan_enums.h>
 
 namespace ToyRenderer {
 
@@ -35,6 +36,28 @@ void VulkanCommandRecorder::copyBuffer(const BufferCopy &copy)
     bufferCopy.srcOffset = copy.srcOffset;
 
     vkCmdCopyBuffer(commandBuffer, srcBuf->buffer, dstBuf->buffer, 1, &bufferCopy);
+}
+
+void VulkanCommandRecorder::memoryBarrier(const MemoryBarrierOptions &options)
+{
+    std::vector<VkMemoryBarrier> memoryBarriers;
+
+    memoryBarriers.reserve(options.memoryBarriers.size());
+    for (const MemoryBarrier &b : options.memoryBarriers) {
+        VkMemoryBarrier barrier{};
+        barrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+        barrier.srcAccessMask = accessFlagsToVkAccessFlagBits(b.srcMask);
+        barrier.dstAccessMask = accessFlagsToVkAccessFlagBits(b.dstMask);
+        memoryBarriers.push_back(barrier);
+    }
+
+    vkCmdPipelineBarrier(commandBuffer,
+                         pipelineStageFlagsToVkPipelineStageFlagBits(options.srcStages),
+                         pipelineStageFlagsToVkPipelineStageFlagBits(options.dstStages),
+                         0, // None
+                         memoryBarriers.size(), memoryBarriers.data(),
+                         0, nullptr,
+                         0, nullptr);
 }
 
 Handle<CommandBuffer_t> VulkanCommandRecorder::finish()

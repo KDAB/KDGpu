@@ -85,6 +85,10 @@ VkFilter filterModeToVkFilterMode(FilterMode mode);
 VkSamplerMipmapMode mipMapFilterModeToVkSamplerMipmapMode(MipmapFilterMode mode);
 VkSamplerAddressMode addressModeToVkSamplerAddressMode(AddressMode mode);
 
+VkAccessFlagBits accessFlagsToVkAccessFlagBits(AccessFlags accessFlags);
+
+VkPipelineStageFlagBits pipelineStageFlagsToVkPipelineStageFlagBits(PipelineStageFlags pipelineFlags);
+
 VkIndexType indexTypeToVkIndexType(IndexType type);
 IndexType vkIndexTypeToIndexType(VkIndexType type);
 

@@ -32,6 +32,12 @@ void CommandRecorder::copyBuffer(const BufferCopy &copy)
     apiCommandRecorder->copyBuffer(copy);
 }
 
+void CommandRecorder::memoryBarrier(const MemoryBarrierOptions &options)
+{
+    auto apiCommandRecorder = m_api->resourceManager()->getCommandRecorder(m_commandRecorder);
+    apiCommandRecorder->memoryBarrier(options);
+}
+
 CommandBuffer CommandRecorder::finish()
 {
     auto apiCommandRecorder = m_api->resourceManager()->getCommandRecorder(m_commandRecorder);

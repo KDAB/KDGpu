@@ -6,6 +6,7 @@
 #include <toy_renderer/render_pass_command_recorder.h>
 #include <toy_renderer/render_pass_command_recorder_options.h>
 #include <toy_renderer/toy_renderer_export.h>
+#include <toy_renderer/memory_barrier.h>
 
 namespace ToyRenderer {
 
@@ -27,6 +28,12 @@ struct BufferCopy {
     size_t byteSize{ 0 };
 };
 
+struct MemoryBarrierOptions {
+    PipelineStageFlags srcStages;
+    PipelineStageFlags dstStages;
+    std::vector<MemoryBarrier> memoryBarriers;
+};
+
 class TOY_RENDERER_EXPORT CommandRecorder
 {
 public:
@@ -40,6 +47,7 @@ public:
     RenderPassCommandRecorder beginRenderPass(const RenderPassCommandRecorderOptions &options);
     ComputePassCommandRecorder beginComputePass(const ComputePassCommandRecorderOptions &options = {});
     void copyBuffer(const BufferCopy &copy);
+    void memoryBarrier(const MemoryBarrierOptions &options);
     CommandBuffer finish();
 
 protected:
