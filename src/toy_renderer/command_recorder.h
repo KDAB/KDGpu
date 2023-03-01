@@ -19,6 +19,14 @@ struct CommandRecorderOptions {
     Handle<Queue_t> queue; // The queue on which you wish to submit the recorded commands. If not set, defaults to first queue of the device
 };
 
+struct BufferCopy {
+    Handle<Buffer_t> src;
+    size_t srcOffset{ 0 };
+    Handle<Buffer_t> dst;
+    size_t dstOffset{ 0 };
+    size_t byteSize{ 0 };
+};
+
 class TOY_RENDERER_EXPORT CommandRecorder
 {
 public:
@@ -31,7 +39,7 @@ public:
 
     RenderPassCommandRecorder beginRenderPass(const RenderPassCommandRecorderOptions &options);
     ComputePassCommandRecorder beginComputePass(const ComputePassCommandRecorderOptions &options = {});
-    void copyBuffer(const Handle<Buffer_t> &src, const Handle<Buffer_t> &dst, size_t byteSize);
+    void copyBuffer(const BufferCopy &copy);
     CommandBuffer finish();
 
 protected:

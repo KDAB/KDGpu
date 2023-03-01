@@ -24,15 +24,15 @@ Handle<RenderPassCommandRecorder_t> VulkanCommandRecorder::beginRenderPass(const
     return Handle<RenderPassCommandRecorder_t>();
 }
 
-void VulkanCommandRecorder::copyBuffer(const Handle<Buffer_t> &src, const Handle<Buffer_t> &dst, size_t byteSize)
+void VulkanCommandRecorder::copyBuffer(const BufferCopy &copy)
 {
-    VulkanBuffer *srcBuf = vulkanResourceManager->getBuffer(src);
-    VulkanBuffer *dstBuf = vulkanResourceManager->getBuffer(dst);
+    VulkanBuffer *srcBuf = vulkanResourceManager->getBuffer(copy.src);
+    VulkanBuffer *dstBuf = vulkanResourceManager->getBuffer(copy.dst);
 
     VkBufferCopy bufferCopy{};
-    bufferCopy.size = byteSize;
-    bufferCopy.dstOffset = 0;
-    bufferCopy.srcOffset = 0;
+    bufferCopy.size = copy.byteSize;
+    bufferCopy.dstOffset = copy.dstOffset;
+    bufferCopy.srcOffset = copy.srcOffset;
 
     vkCmdCopyBuffer(commandBuffer, srcBuf->buffer, dstBuf->buffer, 1, &bufferCopy);
 }

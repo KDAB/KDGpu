@@ -26,10 +26,10 @@ ComputePassCommandRecorder CommandRecorder::beginComputePass(const ComputePassCo
     return ComputePassCommandRecorder(m_api, m_device, m_api->resourceManager()->createComputePassCommandRecorder(m_device, m_commandRecorder, options));
 }
 
-void CommandRecorder::copyBuffer(const Handle<Buffer_t> &src, const Handle<Buffer_t> &dst, size_t byteSize)
+void CommandRecorder::copyBuffer(const BufferCopy &copy)
 {
     auto apiCommandRecorder = m_api->resourceManager()->getCommandRecorder(m_commandRecorder);
-    apiCommandRecorder->copyBuffer(src, dst, byteSize);
+    apiCommandRecorder->copyBuffer(copy);
 }
 
 CommandBuffer CommandRecorder::finish()
