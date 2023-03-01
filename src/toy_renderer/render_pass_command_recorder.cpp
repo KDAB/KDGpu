@@ -85,6 +85,30 @@ void RenderPassCommandRecorder::drawIndexed(const std::vector<DrawIndexedCommand
     apiRenderPassCommandRecorder->drawIndexed(drawCommands);
 }
 
+void RenderPassCommandRecorder::drawIndirect(const DrawIndirectCommand &drawCommand)
+{
+    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    apiRenderPassCommandRecorder->drawIndirect(drawCommand);
+}
+
+void RenderPassCommandRecorder::drawIndirect(const std::vector<DrawIndirectCommand> &drawCommands)
+{
+    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    apiRenderPassCommandRecorder->drawIndirect(drawCommands);
+}
+
+void RenderPassCommandRecorder::drawIndexedIndirect(const DrawIndexedIndirectCommand &drawCommand)
+{
+    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    apiRenderPassCommandRecorder->drawIndexedIndirect(drawCommand);
+}
+
+void RenderPassCommandRecorder::drawIndexedIndirect(const std::vector<DrawIndexedIndirectCommand> &drawCommands)
+{
+    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    apiRenderPassCommandRecorder->drawIndexedIndirect(drawCommands);
+}
+
 void RenderPassCommandRecorder::pushConstant(const PushConstantRange &constantRange, const std::vector<uint8_t> &data)
 {
     auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);

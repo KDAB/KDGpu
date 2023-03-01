@@ -28,6 +28,10 @@ struct VulkanRenderPassCommandRecorder : public ApiRenderPassCommandRecorder {
     void draw(const std::vector<DrawCommand> &drawCommands) final;
     void drawIndexed(const DrawIndexedCommand &drawCommand) final;
     void drawIndexed(const std::vector<DrawIndexedCommand> &drawCommands) final;
+    void drawIndirect(const DrawIndirectCommand &drawCommand) final;
+    void drawIndirect(const std::vector<DrawIndirectCommand> &drawCommands) final;
+    void drawIndexedIndirect(const DrawIndexedIndirectCommand &drawCommand) final;
+    void drawIndexedIndirect(const std::vector<DrawIndexedIndirectCommand> &drawCommands) final;
     void pushConstant(const PushConstantRange &constantRange, const std::vector<uint8_t> &data) final;
     void end() final;
 

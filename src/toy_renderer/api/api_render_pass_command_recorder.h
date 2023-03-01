@@ -11,6 +11,8 @@ struct GraphicsPipeline_t;
 struct TextureView_t;
 struct DrawCommand;
 struct DrawIndexedCommand;
+struct DrawIndirectCommand;
+struct DrawIndexedIndirectCommand;
 struct PushConstantRange;
 
 struct ApiRenderPassCommandRecorder {
@@ -24,6 +26,10 @@ struct ApiRenderPassCommandRecorder {
     virtual void draw(const std::vector<DrawCommand> &drawCommands) = 0;
     virtual void drawIndexed(const DrawIndexedCommand &drawCommand) = 0;
     virtual void drawIndexed(const std::vector<DrawIndexedCommand> &drawCommands) = 0;
+    virtual void drawIndirect(const DrawIndirectCommand &drawCommand) = 0;
+    virtual void drawIndirect(const std::vector<DrawIndirectCommand> &drawCommands) = 0;
+    virtual void drawIndexedIndirect(const DrawIndexedIndirectCommand &drawCommand) = 0;
+    virtual void drawIndexedIndirect(const std::vector<DrawIndexedIndirectCommand> &drawCommands) = 0;
     virtual void pushConstant(const PushConstantRange &constantRange, const std::vector<uint8_t> &data) = 0;
     virtual void end() = 0;
 };

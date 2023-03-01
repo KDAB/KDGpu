@@ -101,13 +101,8 @@ void VulkanRenderPassCommandRecorder::draw(const DrawCommand &drawCommand)
 
 void VulkanRenderPassCommandRecorder::draw(const std::vector<DrawCommand> &drawCommands)
 {
-    for (const auto &drawCommand : drawCommands) {
-        vkCmdDraw(commandBuffer,
-                  drawCommand.vertexCount,
-                  drawCommand.instanceCount,
-                  drawCommand.firstVertex,
-                  drawCommand.firstInstance);
-    }
+    for (const auto &drawCommand : drawCommands)
+        draw(drawCommand);
 }
 
 void VulkanRenderPassCommandRecorder::drawIndexed(const DrawIndexedCommand &drawCommand)
@@ -122,14 +117,40 @@ void VulkanRenderPassCommandRecorder::drawIndexed(const DrawIndexedCommand &draw
 
 void VulkanRenderPassCommandRecorder::drawIndexed(const std::vector<DrawIndexedCommand> &drawCommands)
 {
-    for (const auto &drawCommand : drawCommands) {
-        vkCmdDrawIndexed(commandBuffer,
-                         drawCommand.indexCount,
-                         drawCommand.instanceCount,
-                         drawCommand.firstIndex,
-                         drawCommand.vertexOffset,
-                         drawCommand.firstInstance);
-    }
+    for (const auto &drawCommand : drawCommands)
+        drawIndexed(drawCommand);
+}
+
+void VulkanRenderPassCommandRecorder::drawIndirect(const DrawIndirectCommand &drawCommand)
+{
+    VulkanBuffer *vulkanBuffer = vulkanResourceManager->getBuffer(drawCommand.buffer);
+    vkCmdDrawIndirect(commandBuffer,
+                      vulkanBuffer->buffer,
+                      drawCommand.offset,
+                      drawCommand.drawCount,
+                      drawCommand.stride);
+}
+
+void VulkanRenderPassCommandRecorder::drawIndirect(const std::vector<DrawIndirectCommand> &drawCommands)
+{
+    for (const auto &drawCommand : drawCommands)
+        drawIndirect(drawCommand);
+}
+
+void VulkanRenderPassCommandRecorder::drawIndexedIndirect(const DrawIndexedIndirectCommand &drawCommand)
+{
+    VulkanBuffer *vulkanBuffer = vulkanResourceManager->getBuffer(drawCommand.buffer);
+    vkCmdDrawIndexedIndirect(commandBuffer,
+                             vulkanBuffer->buffer,
+                             drawCommand.offset,
+                             drawCommand.drawCount,
+                             drawCommand.stride);
+}
+
+void VulkanRenderPassCommandRecorder::drawIndexedIndirect(const std::vector<DrawIndexedIndirectCommand> &drawCommands)
+{
+    for (const auto &drawCommand : drawCommands)
+        drawIndexedIndirect(drawCommand);
 }
 
 void VulkanRenderPassCommandRecorder::pushConstant(const PushConstantRange &constantRange, const std::vector<uint8_t> &data)

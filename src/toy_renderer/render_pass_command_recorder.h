@@ -35,6 +35,20 @@ struct DrawIndexedCommand {
     uint32_t firstInstance{ 0 };
 };
 
+struct DrawIndirectCommand {
+    Handle<Buffer_t> buffer;
+    size_t offset{ 0 };
+    uint32_t drawCount{ 0 };
+    uint32_t stride{ 0 };
+};
+
+struct DrawIndexedIndirectCommand {
+    Handle<Buffer_t> buffer;
+    size_t offset{ 0 };
+    uint32_t drawCount{ 0 };
+    uint32_t stride{ 0 };
+};
+
 class TOY_RENDERER_EXPORT RenderPassCommandRecorder
 {
 public:
@@ -61,6 +75,12 @@ public:
 
     void drawIndexed(const DrawIndexedCommand &drawCommand);
     void drawIndexed(const std::vector<DrawIndexedCommand> &drawCommands);
+
+    void drawIndirect(const DrawIndirectCommand &drawCommand);
+    void drawIndirect(const std::vector<DrawIndirectCommand> &drawCommands);
+
+    void drawIndexedIndirect(const DrawIndexedIndirectCommand &drawCommand);
+    void drawIndexedIndirect(const std::vector<DrawIndexedIndirectCommand> &drawCommands);
 
     void pushConstant(const PushConstantRange &constantRange, const std::vector<uint8_t> &data);
 
