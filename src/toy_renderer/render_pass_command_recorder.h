@@ -54,6 +54,12 @@ class TOY_RENDERER_EXPORT RenderPassCommandRecorder
 public:
     ~RenderPassCommandRecorder();
 
+    RenderPassCommandRecorder(RenderPassCommandRecorder &&);
+    RenderPassCommandRecorder &operator=(RenderPassCommandRecorder &&);
+
+    RenderPassCommandRecorder(const RenderPassCommandRecorder &) = delete;
+    RenderPassCommandRecorder &operator=(const RenderPassCommandRecorder &) = delete;
+
     const Handle<RenderPassCommandRecorder_t> &handle() const noexcept { return m_renderPassCommandRecorder; }
     bool isValid() const noexcept { return m_renderPassCommandRecorder.isValid(); }
 

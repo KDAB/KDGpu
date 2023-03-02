@@ -17,6 +17,32 @@ RenderPassCommandRecorder::RenderPassCommandRecorder(GraphicsApi *api,
 
 RenderPassCommandRecorder::~RenderPassCommandRecorder()
 {
+    if (isValid())
+        m_api->resourceManager()->deleteRenderPassCommandRecorder(handle());
+}
+
+RenderPassCommandRecorder::RenderPassCommandRecorder(RenderPassCommandRecorder &&other)
+{
+    m_api = other.m_api;
+    m_device = other.m_device;
+    m_renderPassCommandRecorder = other.m_renderPassCommandRecorder;
+
+    other.m_api = nullptr;
+    other.m_device = {};
+    other.m_renderPassCommandRecorder = {};
+}
+
+RenderPassCommandRecorder &RenderPassCommandRecorder::operator=(RenderPassCommandRecorder &&other)
+{
+    if (this != &other) {
+        m_api = other.m_api;
+        m_device = other.m_device;
+        m_renderPassCommandRecorder = other.m_renderPassCommandRecorder;
+
+        other.m_api = nullptr;
+        other.m_device = {};
+        other.m_renderPassCommandRecorder = {};
+    }
 }
 
 void RenderPassCommandRecorder::setPipeline(const Handle<GraphicsPipeline_t> &pipeline)
