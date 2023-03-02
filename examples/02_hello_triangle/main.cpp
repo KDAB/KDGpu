@@ -150,7 +150,7 @@ int main()
     swapchainViews.reserve(swapchainTextureCount);
     for (uint32_t i = 0; i < swapchainTextureCount; ++i) {
         auto view = swapchainTextures[i].createView({ .format = swapchainOptions.format });
-        swapchainViews.push_back(view);
+        swapchainViews.push_back(std::move(view));
     }
 
     // Create a depth texture to use for rendering

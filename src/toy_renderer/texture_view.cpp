@@ -1,5 +1,9 @@
 #include "texture_view.h"
 
+#include <toy_renderer/graphics_api.h>
+#include <toy_renderer/resource_manager.h>
+#include <toy_renderer/api/api_texture_view.h>
+
 namespace ToyRenderer {
 
 TextureView::TextureView()
@@ -14,6 +18,29 @@ TextureView::TextureView(GraphicsApi *api, const Handle<TextureView_t> &textureV
 
 TextureView::~TextureView()
 {
+    if (isValid())
+        m_api->resourceManager()->deleteTextureView(handle());
+}
+
+TextureView::TextureView(TextureView &&other)
+{
+    m_api = other.m_api;
+    m_textureView = other.m_textureView;
+
+    other.m_api = nullptr;
+    other.m_textureView = {};
+}
+
+TextureView &TextureView::operator=(TextureView &&other)
+{
+    if (this != &other) {
+        m_api = other.m_api;
+        m_textureView = other.m_textureView;
+
+        other.m_api = nullptr;
+        other.m_textureView = {};
+    }
+    return *this;
 }
 
 bool operator==(const TextureView &a, const TextureView &b)

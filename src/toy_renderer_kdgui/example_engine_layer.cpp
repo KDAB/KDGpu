@@ -49,7 +49,7 @@ void ExampleEngineLayer::onAttached()
     m_swapchainViews.reserve(swapchainTextureCount);
     for (uint32_t i = 0; i < swapchainTextureCount; ++i) {
         auto view = swapchainTextures[i].createView({ .format = swapchainOptions.format });
-        m_swapchainViews.push_back(view);
+        m_swapchainViews.push_back(std::move(view));
     }
 
     // Create a depth texture to use for depth-correct rendering

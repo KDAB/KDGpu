@@ -15,6 +15,12 @@ public:
     TextureView();
     ~TextureView();
 
+    TextureView(TextureView &&);
+    TextureView &operator=(TextureView &&);
+
+    TextureView(const TextureView &) = delete;
+    TextureView &operator=(const TextureView &) = delete;
+
     const Handle<TextureView_t> handle() const noexcept { return m_textureView; }
     bool isValid() const noexcept { return m_textureView.isValid(); }
 

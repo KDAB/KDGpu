@@ -15,7 +15,7 @@ TEST_SUITE("TextureView")
 {
     std::unique_ptr<GraphicsApi> api = std::make_unique<VulkanGraphicsApi>();
     Instance instance = api->createInstance(InstanceOptions{
-            .applicationName = "buffer",
+            .applicationName = "TextureView",
             .applicationVersion = SERENITY_MAKE_API_VERSION(0, 1, 0, 0) });
     Adapter discreteGPUAdapter = instance.selectAdapter(AdapterDeviceType::DiscreteGpu).value_or(Adapter());
     Device device = discreteGPUAdapter.createDevice();
@@ -56,6 +56,38 @@ TEST_SUITE("TextureView")
         }
     }
 
+    TEST_CASE("Destruction")
+    {
+        // GIVEN
+        const TextureOptions textureOptions = {
+            .type = TextureType::TextureType2D,
+            .format = Format::R8G8B8A8_SNORM,
+            .extent = { 512, 512, 1 },
+            .mipLevels = 1,
+            .usage = TextureUsageFlags(TextureUsageFlagBits::SampledBit),
+            .memoryUsage = MemoryUsage::GpuOnly
+        };
+
+        Texture t = device.createTexture(textureOptions);
+
+        Handle<TextureView_t> textureViewHandle;
+
+        {
+            // WHEN
+            TextureView tv = t.createView();
+            textureViewHandle = tv.handle();
+
+            // THEN
+            CHECK(t.isValid());
+            CHECK(tv.isValid());
+            CHECK(textureViewHandle.isValid());
+            CHECK(api->resourceManager()->getTextureView(textureViewHandle) != nullptr);
+        }
+
+        // THEN
+        CHECK(api->resourceManager()->getTextureView(textureViewHandle) == nullptr);
+    }
+
     TEST_CASE("Comparison")
     {
         SUBCASE("Compare default contructed Textures")
@@ -63,12 +95,6 @@ TEST_SUITE("TextureView")
             // GIVEN
             TextureView a;
             TextureView b;
-
-            // THEN
-            CHECK(a == b);
-
-            // WHEN
-            a = b;
 
             // THEN
             CHECK(a == b);
@@ -93,12 +119,6 @@ TEST_SUITE("TextureView")
 
             // THEN
             CHECK(a != b);
-
-            // WHEN
-            a = b;
-
-            // THEN
-            CHECK(a == b);
         }
     }
 }
