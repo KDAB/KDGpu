@@ -107,7 +107,7 @@ void RotatingTriangle::initializeScene()
     const PipelineLayoutOptions pipelineLayoutOptions = {
         .bindGroupLayouts = { bindGroupLayout }
     };
-    auto pipelineLayout = m_device.createPipelineLayout(pipelineLayoutOptions);
+    m_pipelineLayout = m_device.createPipelineLayout(pipelineLayoutOptions);
 
     // Create a pipeline
     // clang-format off
@@ -116,7 +116,7 @@ void RotatingTriangle::initializeScene()
             { .shaderModule = vertexShader, .stage = ShaderStageFlagBits::VertexBit },
             { .shaderModule = fragmentShader, .stage = ShaderStageFlagBits::FragmentBit }
         },
-        .layout = pipelineLayout,
+        .layout = m_pipelineLayout,
         .vertex = {
             .buffers = {
                 { .binding = 0, .stride = sizeof(Vertex) }

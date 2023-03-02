@@ -127,7 +127,7 @@ void ComputeParticles::initializeScene()
         const PipelineLayoutOptions pipelineLayoutOptions = {
             .bindGroupLayouts = { bindGroupLayout }
         };
-        auto pipelineLayout = m_device.createPipelineLayout(pipelineLayoutOptions);
+        m_computePipelineLayout = m_device.createPipelineLayout(pipelineLayoutOptions);
 
         // Create a bindGroup to hold the UBO with the transform
         // clang-format off
@@ -142,7 +142,7 @@ void ComputeParticles::initializeScene()
         m_particleBindGroup = m_device.createBindGroup(bindGroupOptions);
 
         const ComputePipelineOptions pipelineOptions{
-            .layout = pipelineLayout,
+            .layout = m_computePipelineLayout,
             .shaderStage = { .shaderModule = computeShader }
         };
 
@@ -159,7 +159,7 @@ void ComputeParticles::initializeScene()
 
         // Create a pipeline layout (array of bind group layouts)
         const PipelineLayoutOptions pipelineLayoutOptions = {};
-        auto pipelineLayout = m_device.createPipelineLayout(pipelineLayoutOptions);
+        m_graphicsPipelineLayout = m_device.createPipelineLayout(pipelineLayoutOptions);
 
         // Create a pipeline
         // clang-format off
@@ -168,7 +168,7 @@ void ComputeParticles::initializeScene()
                 { .shaderModule = vertexShader, .stage = ShaderStageFlagBits::VertexBit },
                 { .shaderModule = fragmentShader, .stage = ShaderStageFlagBits::FragmentBit }
             },
-            .layout = pipelineLayout,
+            .layout = m_graphicsPipelineLayout,
             .vertex = {
                 .buffers = {
                     { .binding = 0, .stride = sizeof(Vertex) },

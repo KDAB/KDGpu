@@ -25,6 +25,8 @@ private:
     Buffer m_triangleVertexBuffer;
     ComputePipeline m_computePipeline;
     GraphicsPipeline m_graphicsPipeline;
+    PipelineLayout m_graphicsPipelineLayout;
+    PipelineLayout m_computePipelineLayout;
     RenderPassCommandRecorderOptions m_opaquePassOptions;
 
     BindGroup m_particleBindGroup;

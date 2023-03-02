@@ -23,6 +23,7 @@ protected:
 private:
     Buffer m_buffer;
     Buffer m_indexBuffer;
+    PipelineLayout m_pipelineLayout;
     GraphicsPipeline m_pipeline;
     RenderPassCommandRecorderOptions m_opaquePassOptions;
 

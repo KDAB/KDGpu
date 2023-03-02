@@ -60,7 +60,11 @@ void VulkanRenderPassCommandRecorder::setBindGroup(uint32_t group, const Handle<
 
     // Bind Descriptor Set
     VulkanGraphicsPipeline *p = vulkanResourceManager->getGraphicsPipeline(pipeline);
-    VkPipelineLayout pipelineLayout = p->pipelineLayout;
+    VulkanPipelineLayout *pLayout = vulkanResourceManager->getPipelineLayout(p->pipelineLayoutHandle);
+
+    assert(pLayout != nullptr); // The PipelineLayout should outlive the pipelines
+
+    VkPipelineLayout pipelineLayout = pLayout->pipelineLayout;
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
                             pipelineLayout,
                             group,
@@ -156,9 +160,11 @@ void VulkanRenderPassCommandRecorder::drawIndexedIndirect(const std::vector<Draw
 void VulkanRenderPassCommandRecorder::pushConstant(const PushConstantRange &constantRange, const std::vector<uint8_t> &data)
 {
     VulkanGraphicsPipeline *vulkanPipeline = vulkanResourceManager->getGraphicsPipeline(pipeline);
+    VulkanPipelineLayout *pLayout = vulkanResourceManager->getPipelineLayout(vulkanPipeline->pipelineLayoutHandle);
 
+    assert(pLayout != nullptr); // The PipelineLayout should outlive the pipelines
     vkCmdPushConstants(commandBuffer,
-                       vulkanPipeline->pipelineLayout,
+                       pLayout->pipelineLayout,
                        shaderStageFlagBitsToVkShaderStageFlagBits(static_cast<ShaderStageFlagBits>(constantRange.shaderStages)),
                        constantRange.offset,
                        constantRange.size,

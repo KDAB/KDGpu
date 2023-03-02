@@ -14,7 +14,14 @@ struct PipelineLayout_t;
 class TOY_RENDERER_EXPORT PipelineLayout
 {
 public:
+    PipelineLayout();
     ~PipelineLayout();
+
+    PipelineLayout(PipelineLayout &&);
+    PipelineLayout &operator=(PipelineLayout &&);
+
+    PipelineLayout(const PipelineLayout &) = delete;
+    PipelineLayout &operator=(const PipelineLayout &) = delete;
 
     const Handle<PipelineLayout_t> &handle() const noexcept { return m_pipelineLayout; }
     bool isValid() const noexcept { return m_pipelineLayout.isValid(); }
@@ -31,6 +38,10 @@ private:
     Handle<Device_t> m_device;
 
     friend class Device;
+    friend TOY_RENDERER_EXPORT bool operator==(const PipelineLayout &, const PipelineLayout &);
 };
+
+TOY_RENDERER_EXPORT bool operator==(const PipelineLayout &a, const PipelineLayout &b);
+TOY_RENDERER_EXPORT bool operator!=(const PipelineLayout &a, const PipelineLayout &b);
 
 } // namespace ToyRenderer

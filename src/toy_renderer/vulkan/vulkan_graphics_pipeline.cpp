@@ -4,15 +4,15 @@ namespace ToyRenderer {
 
 VulkanGraphicsPipeline::VulkanGraphicsPipeline(VkPipeline _pipeline,
                                                VkRenderPass _renderPass,
-                                               VkPipelineLayout _pipelineLayout,
                                                VulkanResourceManager *_vulkanResourceManager,
-                                               const Handle<Device_t> &_deviceHandle)
+                                               const Handle<Device_t> &_deviceHandle,
+                                               const Handle<PipelineLayout_t> &_pipelineLayoutHandle)
     : ApiGraphicsPipeline()
     , pipeline(_pipeline)
     , renderPass(_renderPass)
-    , pipelineLayout(_pipelineLayout)
     , vulkanResourceManager(_vulkanResourceManager)
     , deviceHandle(_deviceHandle)
+    , pipelineLayoutHandle(_pipelineLayoutHandle)
 {
 }
 

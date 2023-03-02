@@ -53,7 +53,7 @@ void HelloTriangle::initializeScene()
     auto fragmentShader = m_device.createShaderModule(ToyRenderer::readShaderFile(fragmentShaderPath));
 
     // Create a pipeline layout (array of bind group layouts)
-    auto pipelineLayout = m_device.createPipelineLayout();
+    m_pipelineLayout = m_device.createPipelineLayout();
 
     // Create a pipeline
     // clang-format off
@@ -62,7 +62,7 @@ void HelloTriangle::initializeScene()
             { .shaderModule = vertexShader, .stage = ShaderStageFlagBits::VertexBit },
             { .shaderModule = fragmentShader, .stage = ShaderStageFlagBits::FragmentBit }
         },
-        .layout = pipelineLayout,
+        .layout = m_pipelineLayout,
         .vertex = {
             .buffers = {
                 { .binding = 0, .stride = 2 * 4 * sizeof(float) }

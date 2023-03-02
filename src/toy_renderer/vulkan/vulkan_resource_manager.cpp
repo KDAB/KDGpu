@@ -905,9 +905,9 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     const auto vulkanGraphicsPipelineHandle = m_graphicsPipelines.emplace(VulkanGraphicsPipeline(
             vkPipeline,
             vkRenderPass,
-            vulkanPipelineLayout->pipelineLayout,
             this,
-            deviceHandle));
+            deviceHandle,
+            options.layout));
 
     return vulkanGraphicsPipelineHandle;
 }
@@ -964,9 +964,9 @@ Handle<ComputePipeline_t> VulkanResourceManager::createComputePipeline(const Han
     // Create VulkanPipeline object and return handle
     const auto vulkanComputePipelineHandle = m_computePipelines.emplace(VulkanComputePipeline(
             vkPipeline,
-            vulkanPipelineLayout->pipelineLayout,
             this,
-            deviceHandle));
+            deviceHandle,
+            options.layout));
 
     return vulkanComputePipelineHandle;
 }
