@@ -34,6 +34,12 @@ class TOY_RENDERER_EXPORT ComputePassCommandRecorder
 public:
     ~ComputePassCommandRecorder();
 
+    ComputePassCommandRecorder(ComputePassCommandRecorder &&);
+    ComputePassCommandRecorder &operator=(ComputePassCommandRecorder &&);
+
+    ComputePassCommandRecorder(const ComputePassCommandRecorder &) = delete;
+    ComputePassCommandRecorder &operator=(const ComputePassCommandRecorder &) = delete;
+
     const Handle<ComputePassCommandRecorder_t> &handle() const noexcept { return m_computePassCommandRecorder; }
     bool isValid() const noexcept { return m_computePassCommandRecorder.isValid(); }
 

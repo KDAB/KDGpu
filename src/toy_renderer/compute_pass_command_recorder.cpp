@@ -16,6 +16,32 @@ ComputePassCommandRecorder::ComputePassCommandRecorder(GraphicsApi *api,
 
 ComputePassCommandRecorder::~ComputePassCommandRecorder()
 {
+    if (isValid())
+        m_api->resourceManager()->deleteComputePassCommandRecorder(handle());
+}
+
+ComputePassCommandRecorder::ComputePassCommandRecorder(ComputePassCommandRecorder &&other)
+{
+    m_api = other.m_api;
+    m_device = other.m_device;
+    m_computePassCommandRecorder = other.m_computePassCommandRecorder;
+
+    other.m_api = nullptr;
+    other.m_device = {};
+    other.m_computePassCommandRecorder = {};
+}
+
+ComputePassCommandRecorder &ComputePassCommandRecorder::operator=(ComputePassCommandRecorder &&other)
+{
+    if (this != &other) {
+        m_api = other.m_api;
+        m_device = other.m_device;
+        m_computePassCommandRecorder = other.m_computePassCommandRecorder;
+
+        other.m_api = nullptr;
+        other.m_device = {};
+        other.m_computePassCommandRecorder = {};
+    }
 }
 
 void ComputePassCommandRecorder::setPipeline(const Handle<ComputePipeline_t> &pipeline)

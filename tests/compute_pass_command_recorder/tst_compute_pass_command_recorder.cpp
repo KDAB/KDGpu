@@ -103,4 +103,41 @@ TEST_CASE("ComputePassCommandRecorder")
         // THEN
         CHECK(computeCommandRecorder.isValid());
     }
+
+    SUBCASE("Destruction")
+    {
+        const PipelineLayoutOptions pipelineLayoutOptions{};
+        const PipelineLayout pipelineLayout = device.createPipelineLayout(pipelineLayoutOptions);
+        const ComputePipelineOptions computePipelineOptions{
+            .layout = pipelineLayout,
+            .shaderStage = ComputeShaderStage{ .shaderModule = computeShader.handle() }
+        };
+        const ComputePipeline computePipeline = device.createComputePipeline(computePipelineOptions);
+
+        // THEN
+        CHECK(computePipeline.isValid());
+
+        // WHEN
+        const CommandRecorderOptions commandRecorderOptions{
+            .queue = computeQueue
+        };
+
+        CommandRecorder commandRecorder = device.createCommandRecorder(commandRecorderOptions);
+        Handle<ComputePassCommandRecorder_t> recorderHandle;
+
+        {
+            // WHEN
+            ComputePassCommandRecorder computeCommandRecorder = commandRecorder.beginComputePass();
+            recorderHandle = computeCommandRecorder.handle();
+
+            // THEN
+            CHECK(commandRecorder.isValid());
+            CHECK(computeCommandRecorder.isValid());
+            CHECK(recorderHandle.isValid());
+            CHECK(api->resourceManager()->getComputePassCommandRecorder(recorderHandle) != nullptr);
+        }
+
+        // THEN
+        CHECK(api->resourceManager()->getComputePassCommandRecorder(recorderHandle) == nullptr);
+    }
 }
