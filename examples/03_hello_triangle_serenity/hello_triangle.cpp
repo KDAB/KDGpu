@@ -107,6 +107,7 @@ void HelloTriangle::cleanupScene()
 {
     // TODO: Properly handle destroying the underlying resources
     m_pipeline = {};
+    m_pipelineLayout = {};
     m_buffer = {};
 }
 
