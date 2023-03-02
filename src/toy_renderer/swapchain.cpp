@@ -39,6 +39,9 @@ Swapchain::Swapchain(Swapchain &&other)
 Swapchain &Swapchain::operator=(Swapchain &&other)
 {
     if (this != &other) {
+        if (isValid())
+            m_api->resourceManager()->deleteSwapchain(handle());
+
         m_api = other.m_api;
         m_device = other.m_device;
         m_swapchain = other.m_swapchain;
@@ -53,6 +56,8 @@ Swapchain &Swapchain::operator=(Swapchain &&other)
 
 Swapchain::~Swapchain()
 {
+    if (isValid())
+        m_api->resourceManager()->deleteSwapchain(handle());
 }
 
 bool Swapchain::getNextImageIndex(uint32_t &imageIndex, const Handle<GpuSemaphore_t> &semaphore)

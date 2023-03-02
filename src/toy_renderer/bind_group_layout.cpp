@@ -36,6 +36,9 @@ BindGroupLayout::BindGroupLayout(BindGroupLayout &&other)
 BindGroupLayout &BindGroupLayout::operator=(BindGroupLayout &&other)
 {
     if (this != &other) {
+        if (isValid())
+            m_api->resourceManager()->deleteBindGroupLayout(handle());
+
         m_api = other.m_api;
         m_device = other.m_device;
         m_bindGroupLayout = other.m_bindGroupLayout;

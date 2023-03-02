@@ -40,6 +40,9 @@ Instance::Instance(Instance &&other)
 Instance &Instance::operator=(Instance &&other)
 {
     if (this != &other) {
+        if (isValid())
+            m_api->resourceManager()->deleteInstance(handle());
+
         m_api = other.m_api;
         m_instance = other.m_instance;
         m_adapters = std::move(other.m_adapters);

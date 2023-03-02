@@ -34,6 +34,9 @@ ComputePassCommandRecorder::ComputePassCommandRecorder(ComputePassCommandRecorde
 ComputePassCommandRecorder &ComputePassCommandRecorder::operator=(ComputePassCommandRecorder &&other)
 {
     if (this != &other) {
+        if (isValid())
+            m_api->resourceManager()->deleteComputePassCommandRecorder(handle());
+
         m_api = other.m_api;
         m_device = other.m_device;
         m_computePassCommandRecorder = other.m_computePassCommandRecorder;

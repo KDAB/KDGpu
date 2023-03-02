@@ -34,6 +34,9 @@ Sampler::Sampler(Sampler &&other)
 Sampler &Sampler::operator=(Sampler &&other)
 {
     if (this != &other) {
+        if (isValid())
+            m_api->resourceManager()->deleteSampler(handle());
+
         m_api = other.m_api;
         m_device = other.m_device;
         m_sampler = other.m_sampler;

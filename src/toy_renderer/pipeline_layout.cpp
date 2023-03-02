@@ -30,6 +30,9 @@ PipelineLayout::PipelineLayout(PipelineLayout &&other)
 PipelineLayout &PipelineLayout::operator=(PipelineLayout &&other)
 {
     if (this != &other) {
+        if (isValid())
+            m_api->resourceManager()->deletePipelineLayout(handle());
+
         m_api = other.m_api;
         m_device = other.m_device;
         m_pipelineLayout = other.m_pipelineLayout;

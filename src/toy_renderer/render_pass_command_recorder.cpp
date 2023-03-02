@@ -35,6 +35,9 @@ RenderPassCommandRecorder::RenderPassCommandRecorder(RenderPassCommandRecorder &
 RenderPassCommandRecorder &RenderPassCommandRecorder::operator=(RenderPassCommandRecorder &&other)
 {
     if (this != &other) {
+        if (isValid())
+            m_api->resourceManager()->deleteRenderPassCommandRecorder(handle());
+
         m_api = other.m_api;
         m_device = other.m_device;
         m_renderPassCommandRecorder = other.m_renderPassCommandRecorder;

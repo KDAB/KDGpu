@@ -46,6 +46,9 @@ Device::Device(Device &&other)
 Device &Device::operator=(Device &&other)
 {
     if (this != &other) {
+        if (isValid())
+            m_api->resourceManager()->deleteDevice(handle());
+
         m_api = other.m_api;
         m_device = other.m_device;
         m_queues = std::move(other.m_queues);

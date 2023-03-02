@@ -37,6 +37,9 @@ GpuSemaphore::GpuSemaphore(GpuSemaphore &&other)
 GpuSemaphore &GpuSemaphore::operator=(GpuSemaphore &&other)
 {
     if (this != &other) {
+        if (isValid())
+            m_api->resourceManager()->deleteGpuSemaphore(handle());
+
         m_api = other.m_api;
         m_device = other.m_device;
         m_gpuSemaphore = other.m_gpuSemaphore;

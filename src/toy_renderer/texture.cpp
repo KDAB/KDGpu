@@ -31,6 +31,9 @@ Texture::Texture(Texture &&other)
 Texture &Texture::operator=(Texture &&other)
 {
     if (this != &other) {
+        if (isValid())
+            m_api->resourceManager()->deleteTexture(handle());
+
         m_api = other.m_api;
         m_device = other.m_device;
         m_texture = other.m_texture;

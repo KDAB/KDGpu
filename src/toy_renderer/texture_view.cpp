@@ -34,6 +34,9 @@ TextureView::TextureView(TextureView &&other)
 TextureView &TextureView::operator=(TextureView &&other)
 {
     if (this != &other) {
+        if (isValid())
+            m_api->resourceManager()->deleteTextureView(handle());
+
         m_api = other.m_api;
         m_textureView = other.m_textureView;
 

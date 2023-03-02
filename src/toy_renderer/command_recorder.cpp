@@ -32,6 +32,9 @@ CommandRecorder::CommandRecorder(CommandRecorder &&other)
 CommandRecorder &CommandRecorder::operator=(CommandRecorder &&other)
 {
     if (this != &other) {
+        if (isValid())
+            m_api->resourceManager()->deleteCommandRecorder(handle());
+
         m_api = other.m_api;
         m_device = other.m_device;
         m_commandRecorder = other.m_commandRecorder;

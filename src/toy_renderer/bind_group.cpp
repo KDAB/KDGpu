@@ -30,6 +30,9 @@ BindGroup::BindGroup(BindGroup &&other)
 BindGroup &BindGroup::operator=(BindGroup &&other)
 {
     if (this != &other) {
+        if (isValid())
+            m_api->resourceManager()->deleteBindGroup(handle());
+
         m_api = other.m_api;
         m_device = other.m_device;
         m_bindGroup = other.m_bindGroup;

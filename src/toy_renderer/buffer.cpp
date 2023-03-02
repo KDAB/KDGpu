@@ -29,6 +29,9 @@ Buffer::Buffer(Buffer &&other)
 Buffer &Buffer::operator=(Buffer &&other)
 {
     if (this != &other) {
+        if (isValid())
+            m_api->resourceManager()->deleteBuffer(handle());
+
         m_api = other.m_api;
         m_device = other.m_device;
         m_buffer = other.m_buffer;

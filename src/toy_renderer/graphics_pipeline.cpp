@@ -31,6 +31,9 @@ GraphicsPipeline::GraphicsPipeline(GraphicsPipeline &&other)
 GraphicsPipeline &GraphicsPipeline::operator=(GraphicsPipeline &&other)
 {
     if (this != &other) {
+        if (isValid())
+            m_api->resourceManager()->deleteGraphicsPipeline(handle());
+
         m_api = other.m_api;
         m_device = other.m_device;
         m_graphicsPipeline = other.m_graphicsPipeline;

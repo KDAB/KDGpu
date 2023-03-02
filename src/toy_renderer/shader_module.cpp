@@ -34,6 +34,9 @@ ShaderModule::ShaderModule(ShaderModule &&other)
 ShaderModule &ShaderModule::operator=(ShaderModule &&other)
 {
     if (this != &other) {
+        if (isValid())
+            m_api->resourceManager()->deleteShaderModule(handle());
+
         m_api = other.m_api;
         m_device = other.m_device;
         m_shaderModule = other.m_shaderModule;
