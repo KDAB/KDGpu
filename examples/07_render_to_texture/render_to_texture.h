@@ -44,7 +44,7 @@ private:
         .size = sizeof(float),
         .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit)
     };
-    std::vector<uint8_t> m_filterPosData = { sizeof(float) };
+    std::vector<uint8_t> m_filterPosData;
     float m_filterPos{ 0.0f };
 
     // Rendering resources

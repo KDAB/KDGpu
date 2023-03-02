@@ -68,6 +68,8 @@ void RenderToTexture::initializeScene()
         }
     };
     // clang-format on
+
+    m_filterPosData.resize(sizeof(float));
 }
 
 void RenderToTexture::initializeMainScene()
@@ -308,9 +310,19 @@ void RenderToTexture::initializePostProcess()
 
 void RenderToTexture::cleanupScene()
 {
-    // TODO: Properly handle destroying the underlying resources
     m_pipeline = {};
+    m_pipelineLayout = {};
     m_buffer = {};
+    m_indexBuffer = {};
+    m_transformBindGroup = {};
+    m_transformBuffer = {};
+    m_fullScreenQuad = {};
+    m_colorBindGroup = {};
+    m_colorOutputSampler = {};
+    m_colorOutputView = {};
+    m_colorOutput = {};
+    m_postProcessPipeline = {};
+    m_postProcessPipelineLayout = {};
 }
 
 void RenderToTexture::updateScene()
