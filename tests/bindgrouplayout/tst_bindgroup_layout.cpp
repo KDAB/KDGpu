@@ -18,7 +18,7 @@ TEST_SUITE("BindGroupLayout")
 {
     std::unique_ptr<GraphicsApi> api = std::make_unique<VulkanGraphicsApi>();
     Instance instance = api->createInstance(InstanceOptions{
-            .applicationName = "buffer",
+            .applicationName = "BindGroupLayout",
             .applicationVersion = SERENITY_MAKE_API_VERSION(0, 1, 0, 0) });
     Adapter discreteGPUAdapter = instance.selectAdapter(AdapterDeviceType::DiscreteGpu).value_or(Adapter());
     Device device = discreteGPUAdapter.createDevice();
@@ -51,6 +51,34 @@ TEST_SUITE("BindGroupLayout")
         }
     }
 
+    TEST_CASE("Destruction")
+    {
+        // GIVEN
+        const BindGroupLayoutOptions bindGroupLayoutOptions = {
+            .bindings = { { // Camera uniforms
+                            .binding = 0,
+                            .count = 1,
+                            .resourceType = ResourceBindingType::UniformBuffer,
+                            .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit) } }
+        };
+
+        Handle<BindGroupLayout_t> bindGroupLayoutHandle;
+
+        {
+            // WHEN
+            const BindGroupLayout bindGroupLayout = device.createBindGroupLayout(bindGroupLayoutOptions);
+            bindGroupLayoutHandle = bindGroupLayout.handle();
+
+            // THEN
+            CHECK(bindGroupLayout.isValid());
+            CHECK(bindGroupLayoutHandle.isValid());
+            CHECK(api->resourceManager()->getBindGroupLayout(bindGroupLayoutHandle) != nullptr);
+        }
+
+        // THEN
+        CHECK(api->resourceManager()->getBindGroupLayout(bindGroupLayoutHandle) == nullptr);
+    }
+
     TEST_CASE("Comparison")
     {
         SUBCASE("Compare default contructed BindGroupLayouts")
@@ -58,12 +86,6 @@ TEST_SUITE("BindGroupLayout")
             // GIVEN
             BindGroupLayout a;
             BindGroupLayout b;
-
-            // THEN
-            CHECK(a == b);
-
-            // WHEN
-            a = b;
 
             // THEN
             CHECK(a == b);
@@ -86,12 +108,6 @@ TEST_SUITE("BindGroupLayout")
 
             // THEN
             CHECK(a != b);
-
-            // WHEN
-            a = b;
-
-            // THEN
-            CHECK(a == b);
         }
     }
 }

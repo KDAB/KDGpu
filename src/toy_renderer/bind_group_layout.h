@@ -15,6 +15,12 @@ public:
     BindGroupLayout();
     ~BindGroupLayout();
 
+    BindGroupLayout(BindGroupLayout &&);
+    BindGroupLayout &operator=(BindGroupLayout &&);
+
+    BindGroupLayout(const BindGroupLayout &) = delete;
+    BindGroupLayout &operator=(const BindGroupLayout &) = delete;
+
     const Handle<BindGroupLayout_t> &handle() const noexcept { return m_bindGroupLayout; }
     bool isValid() const noexcept { return m_bindGroupLayout.isValid(); }
 

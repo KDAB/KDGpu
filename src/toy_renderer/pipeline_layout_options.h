@@ -2,6 +2,7 @@
 
 #include <toy_renderer/gpu_core.h>
 #include <toy_renderer/bind_group_layout.h>
+#include <toy_renderer/handle.h>
 
 namespace ToyRenderer {
 
@@ -11,8 +12,10 @@ struct PushConstantRange {
     ShaderStageFlags shaderStages;
 };
 
+struct BindGroupLayout_t;
+
 struct PipelineLayoutOptions {
-    std::vector<BindGroupLayout> bindGroupLayouts;
+    std::vector<Handle<BindGroupLayout_t>> bindGroupLayouts;
     std::vector<PushConstantRange> pushConstantRanges;
 };
 
