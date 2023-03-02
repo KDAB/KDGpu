@@ -232,13 +232,17 @@ TEST_CASE("Non-trivial types")
 {
     SUBCASE("Non-default constructible types can be used")
     {
-        MyTypePool array;
+        std::unique_ptr<MyTypePool> array = std::make_unique<MyTypePool>();
 
-        auto handle = array.emplace(123, 69);
-        REQUIRE(array.get(handle)->a() == 123);
-        REQUIRE(array.get(handle)->b() == 69);
+        auto handle = array->emplace(123, 69);
+        REQUIRE(array->get(handle)->a() == 123);
+        REQUIRE(array->get(handle)->b() == 69);
 
-        array.remove(handle);
+        array->remove(handle);
+        REQUIRE(MyType::ms_destructorCalled == false);
+
+        // Dtor only called when pool goes out of scope
+        array = {};
         REQUIRE(MyType::ms_destructorCalled == true);
         MyType::ms_destructorCalled = false;
     }

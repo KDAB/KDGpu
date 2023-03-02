@@ -97,11 +97,7 @@ public:
             m_freeIndices.pop_back();
             handle.m_generation = m_generations[handle.m_index].generation; // The generation was already bumped when this entry was removed
             m_generations[handle.m_index].isAlive = true;
-
-            // SPDLOG_WARN("{} {} {}", __FUNCTION__, typeid(T).name(), handle.m_index);
-
-            // Use placement new
-            new (m_data.data() + handle.m_index) T(std::forward<Args>(args)...);
+            m_data[handle.m_index] = T(std::forward<Args>(args)...);
 
             return handle;
         } else {
@@ -127,10 +123,9 @@ public:
         if (!canUseHandle(handle))
             return;
 
-        // Explicitly destroy the data object (counterpart of placement new)
-        // IF THIS IS COMMENTED, THEN THERE IS NO DOUBLE DELETE WHEN DESTROYING DEVICE
-        m_data[handle.m_index].~T();
-        // SPDLOG_WARN("{} {} {}", __FUNCTION__, typeid(T).name(), handle.m_index);
+        // The contained data dtor is not called here, we simply mark the slot as available
+        // for reuse. So if you need that, this Pool is not the Pool you are looking for.
+        // The dtor will only be called when the entire pool goes out of scope.
 
         // Bump the generation so we know not to deref this data from any existing handles
         auto &generation = m_generations[handle.m_index];
