@@ -236,6 +236,65 @@ void ComputeParticles::updateScene()
 
 void ComputeParticles::render()
 {
+    constexpr bool useSingleCommandBuffer = true;
+    if constexpr (useSingleCommandBuffer)
+        renderSingleCommandBuffer();
+    else
+        renderMultipleCommandBuffers();
+}
+
+void ComputeParticles::renderSingleCommandBuffer()
+{
+    // Prepare Command Buffers
+
+    auto commandRecorder = m_device.createCommandRecorder();
+    {
+        // Compute
+        auto computePass = commandRecorder.beginComputePass();
+        computePass.setPipeline(m_computePipeline);
+        computePass.setBindGroup(0, m_particleBindGroup);
+        constexpr size_t LocalWorkGroupXSize = 256;
+        computePass.dispatchCompute(ComputeCommand{ .workGroupX = ParticlesCount / LocalWorkGroupXSize });
+        computePass.end();
+
+        // Barrier to force waiting for compute commands SSBO writes to have completed
+        // before vertex shaders tries to read per instance vertex attributes
+
+        // clang-format off
+        commandRecorder.memoryBarrier(MemoryBarrierOptions {
+                .srcStages = PipelineStageFlags(PipelineStageFlagBit::ComputeShaderBit),
+                .dstStages = PipelineStageFlags(PipelineStageFlagBit::VertexInputBit),
+                .memoryBarriers = {
+                            {
+                                .srcMask = AccessFlags(AccessFlagBit::ShaderWriteBit),
+                                .dstMask = AccessFlags(AccessFlagBit::VertexAttributeReadBit)
+                            }
+                }
+        });
+        // clang-format on
+
+        // Render
+        m_opaquePassOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex);
+        auto opaquePass = commandRecorder.beginRenderPass(m_opaquePassOptions);
+        opaquePass.setPipeline(m_graphicsPipeline);
+        opaquePass.setVertexBuffer(0, m_triangleVertexBuffer);
+        opaquePass.setVertexBuffer(1, m_particleDataBuffer); // Per instance Data
+        opaquePass.draw(DrawCommand{ .vertexCount = 3, .instanceCount = ParticlesCount });
+        opaquePass.end();
+    }
+    const auto commands = commandRecorder.finish();
+
+    // Submit Commands
+    SubmitOptions submitOptions = {
+        .commandBuffers = { commands },
+        .waitSemaphores = { m_presentCompleteSemaphores[m_inFlightIndex] },
+        .signalSemaphores = { m_renderCompleteSemaphores[m_inFlightIndex] }
+    };
+    m_queue.submit(submitOptions);
+}
+
+void ComputeParticles::renderMultipleCommandBuffers()
+{
     // Prepare Command Buffers
 
     // Compute

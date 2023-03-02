@@ -20,6 +20,9 @@ protected:
     void updateScene() override;
     void render() override;
 
+    void renderSingleCommandBuffer();
+    void renderMultipleCommandBuffers();
+
 private:
     Buffer m_particleDataBuffer;
     Buffer m_triangleVertexBuffer;
