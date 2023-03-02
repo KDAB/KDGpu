@@ -1,0 +1,2 @@
+CompileShaderSet(ToyRendererRenderToTexture1 rotating_triangle)
+CompileShaderSet(ToyRendererRenderToTexture2 desaturate)

@@ -1,3 +1,4 @@
 add_subdirectory(02_hello_triangle)
 add_subdirectory(05_rotating_triangle)
 add_subdirectory(06_compute_particles)
+add_subdirectory(07_render_to_texture)
