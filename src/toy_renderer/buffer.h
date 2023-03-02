@@ -13,8 +13,14 @@ class GraphicsApi;
 class TOY_RENDERER_EXPORT Buffer
 {
 public:
-    Buffer();
     ~Buffer();
+    Buffer();
+
+    Buffer(Buffer &&);
+    Buffer &operator=(Buffer &&);
+
+    Buffer(const Buffer &) = delete;
+    Buffer &operator=(const Buffer &) = delete;
 
     const Handle<Buffer_t> &handle() const noexcept { return m_buffer; }
     bool isValid() const noexcept { return m_buffer.isValid(); }

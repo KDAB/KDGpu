@@ -6,9 +6,7 @@
 
 namespace ToyRenderer {
 
-Buffer::Buffer()
-{
-}
+Buffer::Buffer() = default;
 
 Buffer::Buffer(GraphicsApi *api, const Handle<Device_t> &device, const Handle<Buffer_t> &buffer)
     : m_api(api)
@@ -17,8 +15,35 @@ Buffer::Buffer(GraphicsApi *api, const Handle<Device_t> &device, const Handle<Bu
 {
 }
 
+Buffer::Buffer(Buffer &&other)
+{
+    m_api = other.m_api;
+    m_device = other.m_device;
+    m_buffer = other.m_buffer;
+
+    other.m_api = nullptr;
+    other.m_device = {};
+    other.m_buffer = {};
+}
+
+Buffer &Buffer::operator=(Buffer &&other)
+{
+    if (this != &other) {
+        m_api = other.m_api;
+        m_device = other.m_device;
+        m_buffer = other.m_buffer;
+
+        other.m_api = nullptr;
+        other.m_device = {};
+        other.m_buffer = {};
+    }
+    return *this;
+}
+
 Buffer::~Buffer()
 {
+    if (isValid())
+        m_api->resourceManager()->deleteBuffer(handle());
 }
 
 void *Buffer::map()

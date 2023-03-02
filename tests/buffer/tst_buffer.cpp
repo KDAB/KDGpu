@@ -69,6 +69,36 @@ TEST_SUITE("Buffer")
         }
     }
 
+    TEST_CASE("Destruction")
+    {
+        // GIVEN
+        const BufferOptions bufferOptions = {
+            .size = 4 * sizeof(float),
+            .usage = BufferUsageFlags(BufferUsageFlagBits::VertexBufferBit),
+            .memoryUsage = MemoryUsage::CpuToGpu
+        };
+
+        const std::vector<float> vertexData = {
+            1.0f, -1.0f, 0.0f, 1.0f
+        };
+
+        Handle<Buffer_t> bufferHandle;
+
+        {
+            // WHEN
+            Buffer b = device.createBuffer(bufferOptions, vertexData.data());
+            bufferHandle = b.handle();
+
+            // THEN
+            CHECK(b.isValid());
+            CHECK(bufferHandle.isValid());
+            CHECK(api->resourceManager()->getBuffer(bufferHandle) != nullptr);
+        }
+
+        // THEN
+        CHECK(api->resourceManager()->getBuffer(bufferHandle) == nullptr);
+    }
+
     TEST_CASE("Map/Unmap")
     {
         SUBCASE("Invalid Buffer")
@@ -112,11 +142,10 @@ TEST_SUITE("Buffer")
 
             // THEN
             CHECK(rawData != nullptr);
-            // TODO Restore once initial data copy is handled
-            // CHECK(rawData[0] == vertexData[0]);
-            // CHECK(rawData[1] == vertexData[1]);
-            // CHECK(rawData[2] == vertexData[2]);
-            // CHECK(rawData[3] == vertexData[3]);
+            CHECK(rawData[0] == vertexData[0]);
+            CHECK(rawData[1] == vertexData[1]);
+            CHECK(rawData[2] == vertexData[2]);
+            CHECK(rawData[3] == vertexData[3]);
 
             // WHEN
             b.unmap();
@@ -132,12 +161,6 @@ TEST_SUITE("Buffer")
             // GIVEN
             Buffer a;
             Buffer b;
-
-            // THEN
-            CHECK(a == b);
-
-            // WHEN
-            a = b;
 
             // THEN
             CHECK(a == b);
@@ -158,12 +181,6 @@ TEST_SUITE("Buffer")
 
             // THEN
             CHECK(a != b);
-
-            // WHEN
-            a = b;
-
-            // THEN
-            CHECK(a == b);
         }
     }
 }
