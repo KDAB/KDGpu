@@ -17,6 +17,12 @@ public:
     GraphicsPipeline();
     ~GraphicsPipeline();
 
+    GraphicsPipeline(GraphicsPipeline &&);
+    GraphicsPipeline &operator=(GraphicsPipeline &&);
+
+    GraphicsPipeline(const GraphicsPipeline &) = delete;
+    GraphicsPipeline &operator=(const GraphicsPipeline &) = delete;
+
     const Handle<GraphicsPipeline_t> &handle() const noexcept { return m_graphicsPipeline; }
     bool isValid() const noexcept { return m_graphicsPipeline.isValid(); }
 
@@ -30,6 +36,10 @@ private:
     Handle<GraphicsPipeline_t> m_graphicsPipeline;
 
     friend class Device;
+    friend TOY_RENDERER_EXPORT bool operator==(const GraphicsPipeline &, const GraphicsPipeline &);
 };
+
+TOY_RENDERER_EXPORT bool operator==(const GraphicsPipeline &a, const GraphicsPipeline &b);
+TOY_RENDERER_EXPORT bool operator!=(const GraphicsPipeline &a, const GraphicsPipeline &b);
 
 } // namespace ToyRenderer

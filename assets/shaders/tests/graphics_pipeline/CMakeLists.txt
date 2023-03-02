@@ -1,0 +1,1 @@
+CompileShaderSet(ToyRendererGraphicsPipeline triangle)

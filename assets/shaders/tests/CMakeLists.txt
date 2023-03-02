@@ -1,1 +1,2 @@
 add_subdirectory(compute_pipeline)
+add_subdirectory(graphics_pipeline)
