@@ -29,6 +29,13 @@ Engine::~Engine()
     auto app = KDFoundation::CoreApplication::instance();
     if (app)
         app->postman()->removeFilter(this);
+
+    // Detach and destroy all of the engine layers
+    int32_t layerIndex = static_cast<int32_t>(m_engineLayers.size());
+    while (layerIndex > 0) {
+        EngineLayer *rawLayer = m_engineLayers.at(--layerIndex).get();
+        auto layer = detachEngineLayer(rawLayer);
+    }
 }
 
 void Engine::onRunningChanged(const bool &newValue)
