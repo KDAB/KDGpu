@@ -20,6 +20,12 @@ public:
     GpuSemaphore();
     ~GpuSemaphore();
 
+    GpuSemaphore(GpuSemaphore &&);
+    GpuSemaphore &operator=(GpuSemaphore &&);
+
+    GpuSemaphore(const GpuSemaphore &) = delete;
+    GpuSemaphore &operator=(const GpuSemaphore &) = delete;
+
     const Handle<GpuSemaphore_t> &handle() const noexcept { return m_gpuSemaphore; }
     bool isValid() const noexcept { return m_gpuSemaphore.isValid(); }
 
