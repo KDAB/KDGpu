@@ -10,6 +10,7 @@ set(SOURCES
     compute_pipeline.cpp
     compute_pass_command_recorder.cpp
     device.cpp
+    fence.cpp
     graphics_api.cpp
     graphics_pipeline.cpp
     gpu_semaphore.cpp
@@ -34,6 +35,7 @@ set(SOURCES
     vulkan/vulkan_compute_pipeline.cpp
     vulkan/vulkan_device.cpp
     vulkan/vulkan_enums.cpp
+    vulkan/vulkan_fence.cpp
     vulkan/vulkan_framebuffer.cpp
     vulkan/vulkan_gpu_semaphore.cpp
     vulkan/vulkan_graphics_api.cpp
@@ -72,6 +74,7 @@ set(HEADERS
     compute_pass_command_recorder.h
     device.h
     device_options.h
+    fence.h
     graphics_api.h
     graphics_pipeline.h
     graphics_pipeline_options.h
@@ -107,6 +110,7 @@ set(HEADERS
     api/api_compute_pipeline.h
     api/api_compute_pass_command_recorder.h
     api/api_device.h
+    api/api_fence.h
     api/api_framebuffer.h
     api/api_gpu_semaphore.h
     api/api_graphics_pipeline.h
@@ -131,6 +135,7 @@ set(HEADERS
     vulkan/vulkan_compute_pipeline.h
     vulkan/vulkan_device.h
     vulkan/vulkan_enums.h
+    vulkan/vulkan_fence.h
     vulkan/vulkan_framebuffer.h
     vulkan/vulkan_gpu_semaphore.h
     vulkan/vulkan_graphics_api.h

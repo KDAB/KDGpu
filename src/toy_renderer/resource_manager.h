@@ -13,6 +13,7 @@
 #include <toy_renderer/surface.h>
 #include <toy_renderer/texture.h>
 #include <toy_renderer/texture_view.h>
+#include <toy_renderer/fence.h>
 
 #include <toy_renderer/toy_renderer_export.h>
 
@@ -27,6 +28,7 @@ struct ApiCommandRecorder;
 struct ApiComputePipeline;
 struct ApiComputePassCommandRecorder;
 struct ApiDevice;
+struct ApiFence;
 struct ApiGpuSemaphore;
 struct ApiGraphicsPipeline;
 struct ApiInstance;
@@ -46,6 +48,7 @@ struct BufferOptions;
 struct CommandRecorderOptions;
 struct ComputePipelineOptions;
 struct DeviceOptions;
+struct FenceOptions;
 struct GpuSemaphoreOptions;
 struct GraphicsPipelineOptions;
 struct InstanceOptions;
@@ -58,6 +61,7 @@ struct TextureViewOptions;
 struct BindGroup_t;
 struct CommandRecorder_t;
 struct ComputePipeline_t;
+struct Fence_t;
 struct GraphicsPipeline_t;
 struct PipelineLayout_t;
 struct RenderPass_t;
@@ -170,6 +174,10 @@ public:
     virtual Handle<Sampler_t> createSampler(const Handle<Device_t> &deviceHandle, const SamplerOptions &options) = 0;
     virtual void deleteSampler(const Handle<Sampler_t> &handle) = 0;
     virtual ApiSampler *getSampler(const Handle<Sampler_t> &handle) const = 0;
+
+    virtual Handle<Fence_t> createFence(const Handle<Device_t> &deviceHandle, const FenceOptions &options) = 0;
+    virtual void deleteFence(const Handle<Fence_t> &handle) = 0;
+    virtual ApiFence *getFence(const Handle<Fence_t> &handle) const = 0;
 
 protected:
     ResourceManager();

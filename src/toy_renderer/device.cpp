@@ -132,4 +132,9 @@ Sampler Device::createSampler(const SamplerOptions &options)
     return Sampler(m_api, m_device, m_api->resourceManager()->createSampler(m_device, options));
 }
 
+Fence Device::createFence(const FenceOptions &options)
+{
+    return Fence(m_api, m_device, m_api->resourceManager()->createFence(m_device, options));
+}
+
 } // namespace ToyRenderer

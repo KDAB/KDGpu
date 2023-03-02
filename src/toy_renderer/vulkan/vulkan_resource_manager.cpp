@@ -1642,4 +1642,34 @@ VulkanSampler *VulkanResourceManager::getSampler(const Handle<Sampler_t> &handle
     return m_samplers.get(handle);
 }
 
+Handle<Fence_t> VulkanResourceManager::createFence(const Handle<Device_t> &deviceHandle, const FenceOptions &options)
+{
+    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
+
+    VkFenceCreateInfo fenceInfo{};
+    fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+
+    VkFence fence{ VK_NULL_HANDLE };
+    if (vkCreateFence(vulkanDevice->device, &fenceInfo, nullptr, &fence) != VK_SUCCESS)
+        return {};
+
+    auto fenceHandle = m_fences.emplace(VulkanFence(fence, this, deviceHandle));
+    return fenceHandle;
+}
+
+void VulkanResourceManager::deleteFence(const Handle<Fence_t> &handle)
+{
+    VulkanFence *fence = m_fences.get(handle);
+    VulkanDevice *vulkanDevice = m_devices.get(fence->deviceHandle);
+
+    vkDestroyFence(vulkanDevice->device, fence->fence, nullptr);
+
+    m_fences.remove(handle);
+}
+
+VulkanFence *VulkanResourceManager::getFence(const Handle<Fence_t> &handle) const
+{
+    return m_fences.get(handle);
+}
+
 } // namespace ToyRenderer

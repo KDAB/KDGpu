@@ -6,6 +6,7 @@
 #include <toy_renderer/command_recorder.h>
 #include <toy_renderer/compute_pipeline.h>
 #include <toy_renderer/device_options.h>
+#include <toy_renderer/fence.h>
 #include <toy_renderer/gpu_semaphore.h>
 #include <toy_renderer/graphics_pipeline.h>
 #include <toy_renderer/handle.h>
@@ -87,6 +88,8 @@ public:
     BindGroup createBindGroup(const BindGroupOptions &options);
 
     Sampler createSampler(const SamplerOptions &options = SamplerOptions());
+
+    Fence createFence(const FenceOptions &options = FenceOptions());
 
 private:
     Device(Adapter *adapter, GraphicsApi *api, const DeviceOptions &options);

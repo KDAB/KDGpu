@@ -13,6 +13,7 @@
 #include <toy_renderer/vulkan/vulkan_compute_pipeline.h>
 #include <toy_renderer/vulkan/vulkan_compute_pass_command_recorder.h>
 #include <toy_renderer/vulkan/vulkan_device.h>
+#include <toy_renderer/vulkan/vulkan_fence.h>
 #include <toy_renderer/vulkan/vulkan_framebuffer.h>
 #include <toy_renderer/vulkan/vulkan_gpu_semaphore.h>
 #include <toy_renderer/vulkan/vulkan_graphics_pipeline.h>
@@ -136,6 +137,10 @@ public:
     void deleteSampler(const Handle<Sampler_t> &handle) final;
     VulkanSampler *getSampler(const Handle<Sampler_t> &handle) const final;
 
+    Handle<Fence_t> createFence(const Handle<Device_t> &deviceHandle, const FenceOptions &options) final;
+    void deleteFence(const Handle<Fence_t> &handle) final;
+    VulkanFence *getFence(const Handle<Fence_t> &handle) const final;
+
 private:
     Pool<VulkanInstance, Instance_t> m_instances{ 1 };
     Pool<VulkanAdapter, Adapter_t> m_adapters{ 1 };
@@ -160,6 +165,7 @@ private:
     Pool<VulkanRenderPass, RenderPass_t> m_renderPasses{ 16 };
     Pool<VulkanFramebuffer, Framebuffer_t> m_framebuffers{ 16 };
     Pool<VulkanSampler, Sampler_t> m_samplers{ 16 };
+    Pool<VulkanFence, Fence_t> m_fences{ 16 };
 };
 
 } // namespace ToyRenderer
