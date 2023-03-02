@@ -16,6 +16,12 @@ class TOY_RENDERER_EXPORT ShaderModule
 public:
     ~ShaderModule();
 
+    ShaderModule(ShaderModule &&);
+    ShaderModule &operator=(ShaderModule &&);
+
+    ShaderModule(const ShaderModule &) = delete;
+    ShaderModule &operator=(const ShaderModule &) = delete;
+
     Handle<ShaderModule_t> handle() const noexcept { return m_shaderModule; }
     bool isValid() const noexcept { return m_shaderModule.isValid(); }
 

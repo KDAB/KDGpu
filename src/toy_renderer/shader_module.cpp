@@ -1,6 +1,10 @@
 #include "shader_module.h"
 #include <fstream>
 
+#include <toy_renderer/graphics_api.h>
+#include <toy_renderer/resource_manager.h>
+#include <toy_renderer/api/api_shader_module.h>
+
 namespace ToyRenderer {
 
 ShaderModule::ShaderModule(GraphicsApi *api, const Handle<Device_t> &device, const Handle<ShaderModule_t> &shaderModule)
@@ -12,6 +16,33 @@ ShaderModule::ShaderModule(GraphicsApi *api, const Handle<Device_t> &device, con
 
 ShaderModule::~ShaderModule()
 {
+    if (isValid())
+        m_api->resourceManager()->deleteShaderModule(handle());
+}
+
+ShaderModule::ShaderModule(ShaderModule &&other)
+{
+    m_api = other.m_api;
+    m_device = other.m_device;
+    m_shaderModule = other.m_shaderModule;
+
+    other.m_api = nullptr;
+    other.m_device = {};
+    other.m_shaderModule = {};
+}
+
+ShaderModule &ShaderModule::operator=(ShaderModule &&other)
+{
+    if (this != &other) {
+        m_api = other.m_api;
+        m_device = other.m_device;
+        m_shaderModule = other.m_shaderModule;
+
+        other.m_api = nullptr;
+        other.m_device = {};
+        other.m_shaderModule = {};
+    }
+    return *this;
 }
 
 std::vector<uint32_t> readShaderFile(const std::string &filename)
