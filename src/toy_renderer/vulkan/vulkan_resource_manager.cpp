@@ -179,6 +179,9 @@ void VulkanResourceManager::deleteDevice(const Handle<Device_t> &handle)
     for (VkCommandPool commandPool : vulkanDevice->commandPools)
         vkDestroyCommandPool(vulkanDevice->device, commandPool, nullptr);
 
+    // Destroy Memory Allocator
+    vmaDestroyAllocator(vulkanDevice->allocator);
+
     // At last, destroy device
     vkDestroyDevice(vulkanDevice->device, nullptr);
 

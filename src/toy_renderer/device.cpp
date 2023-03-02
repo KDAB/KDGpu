@@ -32,8 +32,35 @@ Device::Device(Adapter *adapter, GraphicsApi *api, const DeviceOptions &options)
         m_queues.emplace_back(Queue(m_api, queueDescriptions[i]));
 }
 
+Device::Device(Device &&other)
+{
+    m_api = other.m_api;
+    m_device = other.m_device;
+    m_queues = std::move(other.m_queues);
+
+    other.m_api = nullptr;
+    other.m_device = {};
+    other.m_queues = {};
+}
+
+Device &Device::operator=(Device &&other)
+{
+    if (this != &other) {
+        m_api = other.m_api;
+        m_device = other.m_device;
+        m_queues = std::move(other.m_queues);
+
+        other.m_api = nullptr;
+        other.m_device = {};
+        other.m_queues = {};
+    }
+    return *this;
+}
+
 Device::~Device()
 {
+    if (isValid())
+        m_api->resourceManager()->deleteDevice(handle());
 }
 
 void Device::waitUntilIdle()

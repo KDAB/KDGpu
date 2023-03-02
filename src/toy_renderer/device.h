@@ -46,6 +46,12 @@ public:
     Device();
     ~Device();
 
+    Device(Device &&);
+    Device &operator=(Device &&);
+
+    Device(const Device &) = delete;
+    Device &operator=(const Device &) = delete;
+
     Handle<Device_t> handle() const noexcept { return m_device; }
     bool isValid() const noexcept { return m_device.isValid(); }
 

@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <limits>
 #include <vector>
+#include <spdlog/spdlog.h>
 
 /*
     The templated Pool class allows to store a collection of objects of type T
@@ -97,11 +98,16 @@ public:
             handle.m_generation = m_generations[handle.m_index].generation; // The generation was already bumped when this entry was removed
             m_generations[handle.m_index].isAlive = true;
 
+            // SPDLOG_WARN("{} {} {}", __FUNCTION__, typeid(T).name(), handle.m_index);
+
             // Use placement new
             new (m_data.data() + handle.m_index) T(std::forward<Args>(args)...);
 
             return handle;
         } else {
+
+            // SPDLOG_WARN("Grow {} {} {}", __FUNCTION__, typeid(T).name(), m_data.size());
+
             // No gaps in the m_data vector, add a new element at the end
             m_data.emplace_back(args...);
             m_generations.emplace_back(GenerationEntry{ 1, true });
@@ -122,7 +128,9 @@ public:
             return;
 
         // Explicitly destroy the data object (counterpart of placement new)
+        // IF THIS IS COMMENTED, THEN THERE IS NO DOUBLE DELETE WHEN DESTROYING DEVICE
         m_data[handle.m_index].~T();
+        // SPDLOG_WARN("{} {} {}", __FUNCTION__, typeid(T).name(), handle.m_index);
 
         // Bump the generation so we know not to deref this data from any existing handles
         auto &generation = m_generations[handle.m_index];

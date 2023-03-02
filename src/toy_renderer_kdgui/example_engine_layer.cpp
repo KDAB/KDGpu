@@ -32,7 +32,7 @@ void ExampleEngineLayer::onAttached()
 
     // Create a device and a queue to use
     auto defaultDevice = m_instance.createDefaultDevice(m_surface);
-    m_device = defaultDevice.device;
+    m_device = std::move(defaultDevice.device);
     m_queue = m_device.queues()[0];
 
     // TODO: Move swapchain handling to View?

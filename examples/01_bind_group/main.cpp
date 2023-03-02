@@ -132,7 +132,7 @@ int main()
     // Select best device to render on surface
     AdapterAndDevice aAndD = instance.createDefaultDevice(s);
 
-    Device device = aAndD.device;
+    Device device = std::move(aAndD.device);
 
     // Our shader uniform layout
     const BindGroupLayoutOptions bindGroupLayoutOptions = {
