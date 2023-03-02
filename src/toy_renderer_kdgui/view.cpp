@@ -21,10 +21,11 @@ View::View()
     height = 1080;
     visible = true;
 
-    auto app = KDFoundation::CoreApplication::instance();
-    visible.valueChanged().connect([&app](const bool &visible) {
-        if (visible == false)
+    visible.valueChanged().connect([](const bool &visible) {
+        if (visible == false) {
+            auto app = KDFoundation::CoreApplication::instance();
             app->quit();
+        }
     });
 }
 
