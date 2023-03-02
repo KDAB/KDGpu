@@ -7,6 +7,7 @@ namespace ToyRenderer {
 
 struct BindGroupLayout_t;
 struct Device_t;
+struct BindGroupLayoutOptions;
 class GraphicsApi;
 
 class TOY_RENDERER_EXPORT BindGroupLayout
@@ -27,7 +28,7 @@ public:
     operator Handle<BindGroupLayout_t>() const noexcept { return m_bindGroupLayout; }
 
 private:
-    explicit BindGroupLayout(GraphicsApi *api, const Handle<Device_t> &device, const Handle<BindGroupLayout_t> &bindGroupLayout);
+    explicit BindGroupLayout(GraphicsApi *api, const Handle<Device_t> &device, const BindGroupLayoutOptions &options);
 
     GraphicsApi *m_api{ nullptr };
     Handle<Device_t> m_device;

@@ -13,6 +13,7 @@ class GraphicsApi;
 
 struct GpuSemaphore_t;
 struct Swapchain_t;
+struct SwapchainOptions;
 
 class TOY_RENDERER_EXPORT Swapchain
 {
@@ -37,7 +38,7 @@ public:
     bool getNextImageIndex(uint32_t &imageIndex, const Handle<GpuSemaphore_t> &semaphore = Handle<GpuSemaphore_t>());
 
 private:
-    explicit Swapchain(GraphicsApi *api, const Handle<Device_t> &device, const Handle<Swapchain_t> &swapchain);
+    explicit Swapchain(GraphicsApi *api, const Handle<Device_t> &device, const SwapchainOptions &options);
 
     GraphicsApi *m_api{ nullptr };
     Handle<Device_t> m_device;

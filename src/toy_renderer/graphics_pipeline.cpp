@@ -10,10 +10,10 @@ GraphicsPipeline::GraphicsPipeline()
 
 GraphicsPipeline::GraphicsPipeline(GraphicsApi *api,
                                    const Handle<Device_t> &device,
-                                   const Handle<GraphicsPipeline_t> &graphicsPipeline)
+                                   const GraphicsPipelineOptions &options)
     : m_api(api)
     , m_device(device)
-    , m_graphicsPipeline(graphicsPipeline)
+    , m_graphicsPipeline(m_api->resourceManager()->createGraphicsPipeline(m_device, options))
 {
 }
 

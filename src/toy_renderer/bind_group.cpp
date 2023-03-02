@@ -44,10 +44,10 @@ BindGroup &BindGroup::operator=(BindGroup &&other)
     return *this;
 }
 
-BindGroup::BindGroup(GraphicsApi *api, const Handle<Device_t> &device, const Handle<BindGroup_t> &bindGroup)
+BindGroup::BindGroup(GraphicsApi *api, const Handle<Device_t> &device, const BindGroupOptions &options)
     : m_api(api)
     , m_device(device)
-    , m_bindGroup(bindGroup)
+    , m_bindGroup(m_api->resourceManager()->createBindGroup(m_device, options))
 {
 }
 

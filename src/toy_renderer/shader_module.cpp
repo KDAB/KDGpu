@@ -7,10 +7,10 @@
 
 namespace ToyRenderer {
 
-ShaderModule::ShaderModule(GraphicsApi *api, const Handle<Device_t> &device, const Handle<ShaderModule_t> &shaderModule)
+ShaderModule::ShaderModule(GraphicsApi *api, const Handle<Device_t> &device, const std::vector<uint32_t> &code)
     : m_api(api)
     , m_device(device)
-    , m_shaderModule(shaderModule)
+    , m_shaderModule(m_api->resourceManager()->createShaderModule(m_device, code))
 {
 }
 

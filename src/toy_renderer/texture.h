@@ -11,6 +11,7 @@ struct Device_t;
 struct Texture_t;
 
 class GraphicsApi;
+struct TextureOptions;
 
 class TOY_RENDERER_EXPORT Texture
 {
@@ -32,7 +33,8 @@ public:
     TextureView createView(const TextureViewOptions &options = TextureViewOptions()) const;
 
 private:
-    explicit Texture(GraphicsApi *api, const Handle<Device_t> &device, const Handle<Texture_t> &texture);
+    explicit Texture(GraphicsApi *api, const Handle<Device_t> &device, const TextureOptions &options);
+    explicit Texture(GraphicsApi *api, const Handle<Device_t> &device, const Handle<Texture_t> &handle); // From Swapchain
 
     GraphicsApi *m_api{ nullptr };
     Handle<Device_t> m_device;

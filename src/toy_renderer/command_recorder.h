@@ -57,7 +57,7 @@ public:
     CommandBuffer finish();
 
 protected:
-    explicit CommandRecorder(GraphicsApi *api, const Handle<Device_t> &device, const Handle<CommandRecorder_t> &commandRecorder);
+    explicit CommandRecorder(GraphicsApi *api, const Handle<Device_t> &device, const CommandRecorderOptions &options);
 
     GraphicsApi *m_api{ nullptr };
     Handle<Device_t> m_device;

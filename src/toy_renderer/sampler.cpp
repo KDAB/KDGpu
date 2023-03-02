@@ -13,10 +13,10 @@ Sampler::~Sampler()
         m_api->resourceManager()->deleteSampler(handle());
 };
 
-Sampler::Sampler(GraphicsApi *api, const Handle<Device_t> &device, const Handle<Sampler_t> &sampler)
+Sampler::Sampler(GraphicsApi *api, const Handle<Device_t> &device, const SamplerOptions &options)
     : m_api(api)
     , m_device(device)
-    , m_sampler(sampler)
+    , m_sampler(m_api->resourceManager()->createSampler(m_device, options))
 {
 }
 

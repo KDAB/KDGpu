@@ -9,10 +9,10 @@ PipelineLayout::PipelineLayout() = default;
 
 PipelineLayout::PipelineLayout(GraphicsApi *api,
                                const Handle<Device_t> &device,
-                               const Handle<PipelineLayout_t> &pipelineLayout)
+                               const PipelineLayoutOptions &options)
     : m_api(api)
-    , m_pipelineLayout(pipelineLayout)
     , m_device(device)
+    , m_pipelineLayout(m_api->resourceManager()->createPipelineLayout(m_device, options))
 {
 }
 

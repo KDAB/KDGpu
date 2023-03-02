@@ -34,7 +34,7 @@ public:
     void wait();
 
 private:
-    explicit Fence(GraphicsApi *api, const Handle<Device_t> &device, const Handle<Fence_t> &fence);
+    explicit Fence(GraphicsApi *api, const Handle<Device_t> &device, const FenceOptions &options);
 
     GraphicsApi *m_api{ nullptr };
     Handle<Device_t> m_device;

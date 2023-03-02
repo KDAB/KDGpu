@@ -37,10 +37,10 @@ Fence &Fence::operator=(Fence &&other)
     return *this;
 }
 
-Fence::Fence(GraphicsApi *api, const Handle<Device_t> &device, const Handle<Fence_t> &fence)
+Fence::Fence(GraphicsApi *api, const Handle<Device_t> &device, const FenceOptions &options)
     : m_api(api)
     , m_device(device)
-    , m_fence(fence)
+    , m_fence(m_api->resourceManager()->createFence(m_device, options))
 {
 }
 

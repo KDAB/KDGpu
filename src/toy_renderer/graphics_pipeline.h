@@ -10,6 +10,7 @@ class GraphicsApi;
 
 struct Device_t;
 struct GraphicsPipeline_t;
+struct GraphicsPipelineOptions;
 
 class TOY_RENDERER_EXPORT GraphicsPipeline
 {
@@ -29,7 +30,7 @@ public:
     operator Handle<GraphicsPipeline_t>() const noexcept { return m_graphicsPipeline; }
 
 private:
-    explicit GraphicsPipeline(GraphicsApi *api, const Handle<Device_t> &device, const Handle<GraphicsPipeline_t> &graphicsPipeline);
+    explicit GraphicsPipeline(GraphicsApi *api, const Handle<Device_t> &device, const GraphicsPipelineOptions &options);
 
     GraphicsApi *m_api{ nullptr };
     Handle<Device_t> m_device;

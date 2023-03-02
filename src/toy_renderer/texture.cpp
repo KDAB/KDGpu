@@ -3,6 +3,7 @@
 #include <toy_renderer/graphics_api.h>
 #include <toy_renderer/resource_manager.h>
 #include <toy_renderer/api/api_texture.h>
+#include <toy_renderer/texture_options.h>
 
 namespace ToyRenderer {
 
@@ -14,6 +15,11 @@ Texture::Texture(GraphicsApi *api, const Handle<Device_t> &device, const Handle<
     : m_api(api)
     , m_device(device)
     , m_texture(texture)
+{
+}
+
+Texture::Texture(GraphicsApi *api, const Handle<Device_t> &device, const TextureOptions &options)
+    : Texture(api, device, api->resourceManager()->createTexture(device, options))
 {
 }
 

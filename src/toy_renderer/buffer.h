@@ -7,7 +7,7 @@ namespace ToyRenderer {
 
 struct Device_t;
 struct Buffer_t;
-
+struct BufferOptions;
 class GraphicsApi;
 
 class TOY_RENDERER_EXPORT Buffer
@@ -31,7 +31,7 @@ public:
     void unmap();
 
 private:
-    explicit Buffer(GraphicsApi *api, const Handle<Device_t> &device, const Handle<Buffer_t> &buffer);
+    explicit Buffer(GraphicsApi *api, const Handle<Device_t> &device, const BufferOptions &options, const void *initialData);
 
     GraphicsApi *m_api{ nullptr };
     Handle<Device_t> m_device;

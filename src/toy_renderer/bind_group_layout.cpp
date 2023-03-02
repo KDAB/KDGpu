@@ -15,10 +15,10 @@ BindGroupLayout::~BindGroupLayout()
 
 BindGroupLayout::BindGroupLayout(GraphicsApi *api,
                                  const Handle<Device_t> &device,
-                                 const Handle<BindGroupLayout_t> &bindGroupLayout)
+                                 const BindGroupLayoutOptions &options)
     : m_api(api)
     , m_device(device)
-    , m_bindGroupLayout(bindGroupLayout)
+    , m_bindGroupLayout(m_api->resourceManager()->createBindGroupLayout(m_device, options))
 {
 }
 

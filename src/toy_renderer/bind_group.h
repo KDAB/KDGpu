@@ -8,6 +8,7 @@ namespace ToyRenderer {
 struct BindGroupEntry;
 struct BindGroup_t;
 struct Device_t;
+struct BindGroupOptions;
 class GraphicsApi;
 
 // A BindGroup is what is known as a descriptor set in Vulkan parlance. Other APIs such
@@ -34,7 +35,7 @@ public:
     void update(const BindGroupEntry &entry);
 
 private:
-    explicit BindGroup(GraphicsApi *api, const Handle<Device_t> &device, const Handle<BindGroup_t> &bindGroup);
+    explicit BindGroup(GraphicsApi *api, const Handle<Device_t> &device, const BindGroupOptions &options);
 
     GraphicsApi *m_api{ nullptr };
     Handle<Device_t> m_device;

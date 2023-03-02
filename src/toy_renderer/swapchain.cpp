@@ -3,6 +3,7 @@
 #include <toy_renderer/graphics_api.h>
 #include <toy_renderer/resource_manager.h>
 #include <toy_renderer/api/api_swapchain.h>
+#include <toy_renderer/swapchain_options.h>
 
 namespace ToyRenderer {
 
@@ -10,10 +11,10 @@ Swapchain::Swapchain()
 {
 }
 
-Swapchain::Swapchain(GraphicsApi *api, const Handle<Device_t> &device, const Handle<Swapchain_t> &swapchain)
+Swapchain::Swapchain(GraphicsApi *api, const Handle<Device_t> &device, const SwapchainOptions &options)
     : m_api(api)
     , m_device(device)
-    , m_swapchain(swapchain)
+    , m_swapchain(m_api->resourceManager()->createSwapchain(m_device, options))
 {
     // Fetch the textures owned by the swapchain
     auto apiSwapchain = m_api->resourceManager()->getSwapchain(m_swapchain);

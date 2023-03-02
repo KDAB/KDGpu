@@ -3,15 +3,16 @@
 #include <toy_renderer/graphics_api.h>
 #include <toy_renderer/resource_manager.h>
 #include <toy_renderer/api/api_buffer.h>
+#include <toy_renderer/buffer_options.h>
 
 namespace ToyRenderer {
 
 Buffer::Buffer() = default;
 
-Buffer::Buffer(GraphicsApi *api, const Handle<Device_t> &device, const Handle<Buffer_t> &buffer)
+Buffer::Buffer(GraphicsApi *api, const Handle<Device_t> &device, const BufferOptions &options, const void *initialData)
     : m_api(api)
     , m_device(device)
-    , m_buffer(buffer)
+    , m_buffer(m_api->resourceManager()->createBuffer(m_device, options, initialData))
 {
 }
 

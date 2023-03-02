@@ -74,67 +74,67 @@ void Device::waitUntilIdle()
 
 Swapchain Device::createSwapchain(const SwapchainOptions &options)
 {
-    return Swapchain(m_api, m_device, m_api->resourceManager()->createSwapchain(m_device, options));
+    return Swapchain(m_api, m_device, options);
 }
 
 Texture Device::createTexture(const TextureOptions &options)
 {
-    return Texture(m_api, m_device, m_api->resourceManager()->createTexture(m_device, options));
+    return Texture(m_api, m_device, options);
 }
 
 Buffer Device::createBuffer(const BufferOptions &options, const void *initialData)
 {
-    return Buffer(m_api, m_device, m_api->resourceManager()->createBuffer(m_device, options, initialData));
+    return Buffer(m_api, m_device, options, initialData);
 }
 
 ShaderModule Device::createShaderModule(const std::vector<uint32_t> &code)
 {
-    return ShaderModule(m_api, m_device, m_api->resourceManager()->createShaderModule(m_device, code));
+    return ShaderModule(m_api, m_device, code);
 }
 
 PipelineLayout Device::createPipelineLayout(const PipelineLayoutOptions &options)
 {
-    return PipelineLayout(m_api, m_device, m_api->resourceManager()->createPipelineLayout(m_device, options));
+    return PipelineLayout(m_api, m_device, options);
 }
 
 GraphicsPipeline Device::createGraphicsPipeline(const GraphicsPipelineOptions &options)
 {
-    return GraphicsPipeline(m_api, m_device, m_api->resourceManager()->createGraphicsPipeline(m_device, options));
+    return GraphicsPipeline(m_api, m_device, options);
 }
 
 ComputePipeline Device::createComputePipeline(const ComputePipelineOptions &options)
 {
-    return ComputePipeline(m_api, m_device, m_api->resourceManager()->createComputePipeline(m_device, options));
+    return ComputePipeline(m_api, m_device, options);
 }
 
 CommandRecorder Device::createCommandRecorder(const CommandRecorderOptions &options)
 {
-    return CommandRecorder(m_api, m_device, m_api->resourceManager()->createCommandRecorder(m_device, options));
+    return CommandRecorder(m_api, m_device, options);
 }
 
 GpuSemaphore Device::createGpuSemaphore(const GpuSemaphoreOptions &options)
 {
-    return GpuSemaphore(m_api, m_device, m_api->resourceManager()->createGpuSemaphore(m_device, options));
+    return GpuSemaphore(m_api, m_device, options);
 }
 
 BindGroupLayout Device::createBindGroupLayout(const BindGroupLayoutOptions &options)
 {
-    return BindGroupLayout(m_api, m_device, m_api->resourceManager()->createBindGroupLayout(m_device, options));
+    return BindGroupLayout(m_api, m_device, options);
 }
 
 BindGroup Device::createBindGroup(const BindGroupOptions &options)
 {
-    return BindGroup(m_api, m_device, m_api->resourceManager()->createBindGroup(m_device, options));
+    return BindGroup(m_api, m_device, options);
 }
 
 Sampler Device::createSampler(const SamplerOptions &options)
 {
-    return Sampler(m_api, m_device, m_api->resourceManager()->createSampler(m_device, options));
+    return Sampler(m_api, m_device, options);
 }
 
 Fence Device::createFence(const FenceOptions &options)
 {
-    return Fence(m_api, m_device, m_api->resourceManager()->createFence(m_device, options));
+    return Fence(m_api, m_device, options);
 }
 
 } // namespace ToyRenderer

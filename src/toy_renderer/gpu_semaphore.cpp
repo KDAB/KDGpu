@@ -10,10 +10,10 @@ GpuSemaphore::GpuSemaphore()
 {
 }
 
-GpuSemaphore::GpuSemaphore(GraphicsApi *api, const Handle<Device_t> &device, const Handle<GpuSemaphore_t> &gpuSemaphore)
+GpuSemaphore::GpuSemaphore(GraphicsApi *api, const Handle<Device_t> &device, const GpuSemaphoreOptions &options)
     : m_api(api)
     , m_device(device)
-    , m_gpuSemaphore(gpuSemaphore)
+    , m_gpuSemaphore(m_api->resourceManager()->createGpuSemaphore(m_device, options))
 {
 }
 

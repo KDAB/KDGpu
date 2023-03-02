@@ -28,7 +28,7 @@ public:
     operator Handle<ShaderModule_t>() const noexcept { return m_shaderModule; }
 
 private:
-    ShaderModule(GraphicsApi *api, const Handle<Device_t> &device, const Handle<ShaderModule_t> &shaderModule);
+    ShaderModule(GraphicsApi *api, const Handle<Device_t> &device, const std::vector<uint32_t> &code);
 
     GraphicsApi *m_api{ nullptr };
     Handle<Device_t> m_device;

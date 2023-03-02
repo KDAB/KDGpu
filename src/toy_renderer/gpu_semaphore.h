@@ -32,7 +32,7 @@ public:
     operator Handle<GpuSemaphore_t>() const noexcept { return m_gpuSemaphore; }
 
 private:
-    explicit GpuSemaphore(GraphicsApi *api, const Handle<Device_t> &device, const Handle<GpuSemaphore_t> &gpuSemaphore);
+    explicit GpuSemaphore(GraphicsApi *api, const Handle<Device_t> &device, const GpuSemaphoreOptions &options);
 
     GraphicsApi *m_api{ nullptr };
     Handle<Device_t> m_device;

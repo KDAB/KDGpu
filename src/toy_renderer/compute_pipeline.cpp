@@ -1,4 +1,6 @@
 #include "compute_pipeline.h"
+#include <toy_renderer/graphics_api.h>
+#include <toy_renderer/compute_pipeline_options.h>
 
 namespace ToyRenderer {
 
@@ -7,10 +9,10 @@ ComputePipeline::~ComputePipeline() = default;
 
 ComputePipeline::ComputePipeline(GraphicsApi *api,
                                  const Handle<Device_t> &device,
-                                 const Handle<ComputePipeline_t> &computePipeline)
+                                 const ComputePipelineOptions &options)
     : m_api(api)
     , m_device(device)
-    , m_computePipeline(computePipeline)
+    , m_computePipeline(m_api->resourceManager()->createComputePipeline(m_device, options))
 {
 }
 

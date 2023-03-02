@@ -8,6 +8,7 @@ namespace ToyRenderer {
 class GraphicsApi;
 struct Device_t;
 struct Sampler_t;
+struct SamplerOptions;
 
 class TOY_RENDERER_EXPORT Sampler
 {
@@ -27,7 +28,7 @@ public:
     operator Handle<Sampler_t>() const noexcept { return m_sampler; }
 
 private:
-    Sampler(GraphicsApi *api, const Handle<Device_t> &device, const Handle<Sampler_t> &sampler);
+    Sampler(GraphicsApi *api, const Handle<Device_t> &device, const SamplerOptions &options);
 
     GraphicsApi *m_api{ nullptr };
     Handle<Device_t> m_device;

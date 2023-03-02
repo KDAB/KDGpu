@@ -9,6 +9,7 @@ class GraphicsApi;
 
 struct Device_t;
 struct ComputePipeline_t;
+struct ComputePipelineOptions;
 
 class TOY_RENDERER_EXPORT ComputePipeline
 {
@@ -24,7 +25,7 @@ public:
 private:
     explicit ComputePipeline(GraphicsApi *api,
                              const Handle<Device_t> &device,
-                             const Handle<ComputePipeline_t> &computePipeline);
+                             const ComputePipelineOptions &options);
 
     GraphicsApi *m_api{ nullptr };
     Handle<Device_t> m_device;

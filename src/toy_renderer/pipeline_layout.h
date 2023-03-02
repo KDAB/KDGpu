@@ -10,6 +10,7 @@ class GraphicsApi;
 
 struct Device_t;
 struct PipelineLayout_t;
+struct PipelineLayoutOptions;
 
 class TOY_RENDERER_EXPORT PipelineLayout
 {
@@ -31,11 +32,11 @@ public:
 private:
     explicit PipelineLayout(GraphicsApi *api,
                             const Handle<Device_t> &device,
-                            const Handle<PipelineLayout_t> &pipelineLayout);
+                            const PipelineLayoutOptions &options);
 
     GraphicsApi *m_api{ nullptr };
-    Handle<PipelineLayout_t> m_pipelineLayout;
     Handle<Device_t> m_device;
+    Handle<PipelineLayout_t> m_pipelineLayout;
 
     friend class Device;
     friend TOY_RENDERER_EXPORT bool operator==(const PipelineLayout &, const PipelineLayout &);
