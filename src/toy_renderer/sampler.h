@@ -15,6 +15,12 @@ public:
     Sampler();
     ~Sampler();
 
+    Sampler(Sampler &&);
+    Sampler &operator=(Sampler &&);
+
+    Sampler(const Sampler &) = delete;
+    Sampler &operator=(const Sampler &) = delete;
+
     Handle<Sampler_t> handle() const noexcept { return m_sampler; }
     bool isValid() const noexcept { return m_sampler.isValid(); }
 

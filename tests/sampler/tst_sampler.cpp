@@ -41,6 +41,28 @@ TEST_SUITE("Sampler")
         }
     }
 
+    TEST_CASE("Destruction")
+    {
+        // GIVEN
+        const SamplerOptions samplerOptions{};
+
+        Handle<Sampler_t> samplerHandle;
+
+        {
+            // WHEN
+            Sampler s = device.createSampler(samplerOptions);
+            samplerHandle = s.handle();
+
+            // THEN
+            CHECK(s.isValid());
+            CHECK(samplerHandle.isValid());
+            CHECK(api->resourceManager()->getSampler(samplerHandle) != nullptr);
+        }
+
+        // THEN
+        CHECK(api->resourceManager()->getSampler(samplerHandle) == nullptr);
+    }
+
     TEST_CASE("Comparison")
     {
         SUBCASE("Compare default contructed Samplers")
@@ -48,12 +70,6 @@ TEST_SUITE("Sampler")
             // GIVEN
             Sampler a;
             Sampler b;
-
-            // THEN
-            CHECK(a == b);
-
-            // WHEN
-            a = b;
 
             // THEN
             CHECK(a == b);
@@ -70,12 +86,6 @@ TEST_SUITE("Sampler")
 
             // THEN
             CHECK(a != b);
-
-            // WHEN
-            a = b;
-
-            // THEN
-            CHECK(a == b);
         }
     }
 }
