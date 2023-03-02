@@ -17,6 +17,12 @@ public:
     ComputePipeline();
     ~ComputePipeline();
 
+    ComputePipeline(ComputePipeline &&);
+    ComputePipeline &operator=(ComputePipeline &&);
+
+    ComputePipeline(const ComputePipeline &) = delete;
+    ComputePipeline &operator=(const ComputePipeline &) = delete;
+
     const Handle<ComputePipeline_t> &handle() const noexcept { return m_computePipeline; }
     bool isValid() const noexcept { return m_computePipeline.isValid(); }
 

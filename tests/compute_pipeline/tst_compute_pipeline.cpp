@@ -65,6 +65,38 @@ TEST_SUITE("ComputePipeline")
         }
     }
 
+    TEST_CASE("Destruction")
+    {
+        // GIVEN
+        PipelineLayoutOptions pipelineLayoutOptions{};
+        PipelineLayout pipelineLayout = device.createPipelineLayout(pipelineLayoutOptions);
+
+        // clang-format off
+        const ComputePipelineOptions computePipelineOptions {
+            .layout = pipelineLayout,
+            .shaderStage = ComputeShaderStage {
+                .shaderModule = computeShader.handle()
+            }
+        };
+        // clang-format on
+
+        Handle<ComputePipeline_t> pipelineHandle;
+
+        {
+            // WHEN
+            ComputePipeline c = device.createComputePipeline(computePipelineOptions);
+            pipelineHandle = c.handle();
+
+            // THEN
+            CHECK(c.isValid());
+            CHECK(pipelineHandle.isValid());
+            CHECK(api->resourceManager()->getComputePipeline(pipelineHandle) != nullptr);
+        }
+
+        // THEN
+        CHECK(api->resourceManager()->getComputePipeline(pipelineHandle) == nullptr);
+    }
+
     TEST_CASE("Comparison")
     {
         SUBCASE("Compare default contructed ComputePipelines")
@@ -72,12 +104,6 @@ TEST_SUITE("ComputePipeline")
             // GIVEN
             ComputePipeline a;
             ComputePipeline b;
-
-            // THEN
-            CHECK(a == b);
-
-            // WHEN
-            a = b;
 
             // THEN
             CHECK(a == b);
@@ -104,12 +130,6 @@ TEST_SUITE("ComputePipeline")
 
             // THEN
             CHECK(a != b);
-
-            // WHEN
-            a = b;
-
-            // THEN
-            CHECK(a == b);
         }
     }
 }

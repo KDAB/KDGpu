@@ -5,7 +5,12 @@
 namespace ToyRenderer {
 
 ComputePipeline::ComputePipeline() = default;
-ComputePipeline::~ComputePipeline() = default;
+
+ComputePipeline::~ComputePipeline()
+{
+    if (isValid())
+        m_api->resourceManager()->deleteComputePipeline(handle());
+}
 
 ComputePipeline::ComputePipeline(GraphicsApi *api,
                                  const Handle<Device_t> &device,
@@ -14,6 +19,33 @@ ComputePipeline::ComputePipeline(GraphicsApi *api,
     , m_device(device)
     , m_computePipeline(m_api->resourceManager()->createComputePipeline(m_device, options))
 {
+}
+
+ComputePipeline::ComputePipeline(ComputePipeline &&other)
+{
+    m_api = other.m_api;
+    m_device = other.m_device;
+    m_computePipeline = other.m_computePipeline;
+
+    other.m_api = nullptr;
+    other.m_device = {};
+    other.m_computePipeline = {};
+}
+
+ComputePipeline &ComputePipeline::operator=(ComputePipeline &&other)
+{
+    if (this != &other) {
+        if (isValid())
+            m_api->resourceManager()->deleteComputePipeline(handle());
+        m_api = other.m_api;
+        m_device = other.m_device;
+        m_computePipeline = other.m_computePipeline;
+
+        other.m_api = nullptr;
+        other.m_device = {};
+        other.m_computePipeline = {};
+    }
+    return *this;
 }
 
 bool operator==(const ComputePipeline &a, const ComputePipeline &b)
