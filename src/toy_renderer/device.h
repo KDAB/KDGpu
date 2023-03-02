@@ -13,6 +13,7 @@
 #include <toy_renderer/pipeline_layout_options.h>
 #include <toy_renderer/queue.h>
 #include <toy_renderer/sampler.h>
+#include <toy_renderer/sampler_options.h>
 #include <toy_renderer/shader_module.h>
 #include <toy_renderer/swapchain.h>
 
@@ -32,7 +33,6 @@ struct Device_t;
 
 struct BufferOptions;
 struct GraphicsPipelineOptions;
-struct SamplerOptions;
 struct SwapchainOptions;
 struct TextureOptions;
 struct BindGroupOptions;
@@ -86,7 +86,7 @@ public:
 
     BindGroup createBindGroup(const BindGroupOptions &options);
 
-    Sampler createSampler(const SamplerOptions &options);
+    Sampler createSampler(const SamplerOptions &options = SamplerOptions());
 
 private:
     Device(Adapter *adapter, GraphicsApi *api, const DeviceOptions &options);
