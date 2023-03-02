@@ -120,7 +120,7 @@ std::optional<Adapter> Instance::selectAdapter(AdapterDeviceType deviceType) con
 Surface Instance::createSurface(const SurfaceOptions &options)
 {
     auto apiInstance = m_api->resourceManager()->getInstance(m_instance);
-    return Surface(apiInstance->createSurface(options));
+    return Surface(m_api, apiInstance->createSurface(options));
 }
 
 } // namespace ToyRenderer
