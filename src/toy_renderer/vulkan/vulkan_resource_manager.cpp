@@ -921,6 +921,7 @@ void VulkanResourceManager::deleteGraphicsPipeline(const Handle<GraphicsPipeline
     VulkanDevice *vulkanDevice = m_devices.get(vulkanPipeline->deviceHandle);
 
     vkDestroyPipeline(vulkanDevice->device, vulkanPipeline->pipeline, nullptr);
+    vkDestroyRenderPass(vulkanDevice->device, vulkanPipeline->renderPass, nullptr);
 
     m_graphicsPipelines.remove(handle);
 }
