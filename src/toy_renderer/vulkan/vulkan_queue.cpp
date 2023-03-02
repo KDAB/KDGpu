@@ -48,6 +48,11 @@ void VulkanQueue::submit(const SubmitOptions &options)
             vkCommandBuffers.push_back(vulkanCommandBuffer->commandBuffer);
     }
 
+    VkFence vkFenceToSignal{ VK_NULL_HANDLE };
+    VulkanFence *vulkanFence = vulkanResourceManager->getFence(options.signalFence);
+    if (vulkanFence)
+        vkFenceToSignal = vulkanFence->fence;
+
     VkSubmitInfo submitInfo = {};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     submitInfo.waitSemaphoreCount = static_cast<uint32_t>(vkWaitSemaphores.size());
@@ -65,7 +70,7 @@ void VulkanQueue::submit(const SubmitOptions &options)
     // VkFence inFlightFences[] = { frameFence };
     // vkResetFences(renderer()->vulkanDevice()->device(), 1, inFlightFences);
 
-    VkResult result = vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
+    VkResult result = vkQueueSubmit(queue, 1, &submitInfo, vkFenceToSignal);
 }
 
 void VulkanQueue::present(const PresentOptions &options)

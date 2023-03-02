@@ -16,11 +16,13 @@ struct Adapter_t;
 struct CommandBuffer_t;
 struct GpuSemaphore_t;
 struct Swapchain_t;
+struct Fence_t;
 
 struct SubmitOptions {
     std::vector<Handle<CommandBuffer_t>> commandBuffers;
     std::vector<Handle<GpuSemaphore_t>> waitSemaphores;
     std::vector<Handle<GpuSemaphore_t>> signalSemaphores;
+    Handle<Fence_t> signalFence;
 };
 
 struct SwapchainPresentInfo {
