@@ -18,6 +18,12 @@ public:
     Texture();
     ~Texture();
 
+    Texture(Texture &&);
+    Texture &operator=(Texture &&);
+
+    Texture(const Texture &) = delete;
+    Texture &operator=(const Texture &) = delete;
+
     const Handle<Texture_t> &handle() const noexcept { return m_texture; }
     bool isValid() const noexcept { return m_texture.isValid(); }
 

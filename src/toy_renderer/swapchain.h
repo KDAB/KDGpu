@@ -20,12 +20,18 @@ public:
     Swapchain();
     ~Swapchain();
 
+    Swapchain(Swapchain &&);
+    Swapchain &operator=(Swapchain &&);
+
+    Swapchain(const Swapchain &) = delete;
+    Swapchain &operator=(const Swapchain &) = delete;
+
     const Handle<Swapchain_t> &handle() const noexcept { return m_swapchain; }
     bool isValid() const noexcept { return m_swapchain.isValid(); }
 
     operator Handle<Swapchain_t>() const noexcept { return m_swapchain; }
 
-    std::span<const Texture> textures() const { return m_textures; }
+    const std::vector<Texture> &textures() const { return m_textures; }
 
     // TODO: More informative return value
     bool getNextImageIndex(uint32_t &imageIndex, const Handle<GpuSemaphore_t> &semaphore = Handle<GpuSemaphore_t>());

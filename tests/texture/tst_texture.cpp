@@ -50,6 +50,35 @@ TEST_SUITE("Texture")
         }
     }
 
+    TEST_CASE("Destruction")
+    {
+        // GIVEN
+        const TextureOptions textureOptions = {
+            .type = TextureType::TextureType2D,
+            .format = Format::R8G8B8A8_SNORM,
+            .extent = { 512, 512, 1 },
+            .mipLevels = 1,
+            .usage = TextureUsageFlags(TextureUsageFlagBits::SampledBit),
+            .memoryUsage = MemoryUsage::GpuOnly
+        };
+
+        Handle<Texture_t> textureHandle;
+
+        {
+            // WHEN
+            Texture t = device.createTexture(textureOptions);
+            textureHandle = t.handle();
+
+            // THEN
+            CHECK(t.isValid());
+            CHECK(textureHandle.isValid());
+            CHECK(api->resourceManager()->getTexture(textureHandle) != nullptr);
+        }
+
+        // THEN
+        CHECK(api->resourceManager()->getTexture(textureHandle) == nullptr);
+    }
+
     TEST_CASE("Comparison")
     {
         SUBCASE("Compare default contructed Textures")
@@ -57,12 +86,6 @@ TEST_SUITE("Texture")
             // GIVEN
             Texture a;
             Texture b;
-
-            // THEN
-            CHECK(a == b);
-
-            // WHEN
-            a = b;
 
             // THEN
             CHECK(a == b);
@@ -86,12 +109,6 @@ TEST_SUITE("Texture")
 
             // THEN
             CHECK(a != b);
-
-            // WHEN
-            a = b;
-
-            // THEN
-            CHECK(a == b);
         }
     }
 }

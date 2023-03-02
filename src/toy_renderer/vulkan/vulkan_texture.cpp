@@ -13,7 +13,7 @@ VulkanTexture::VulkanTexture(VkImage _image,
                              const Handle<Device_t> &_deviceHandle)
     : ApiTexture()
     , image(_image)
-    , allocation(allocation)
+    , allocation(_allocation)
     , format(_format)
     , extent(_extent)
     , mipLevels(_mipLevels)

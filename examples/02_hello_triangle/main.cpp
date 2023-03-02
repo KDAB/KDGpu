@@ -144,7 +144,7 @@ int main()
         .imageExtent = { .width = window.width(), .height = window.height() }
     };
     auto swapchain = device.createSwapchain(swapchainOptions);
-    auto swapchainTextures = swapchain.textures();
+    const auto &swapchainTextures = swapchain.textures();
     const auto swapchainTextureCount = swapchainTextures.size();
     std::vector<TextureView> swapchainViews;
     swapchainViews.reserve(swapchainTextureCount);

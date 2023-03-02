@@ -24,6 +24,33 @@ Swapchain::Swapchain(GraphicsApi *api, const Handle<Device_t> &device, const Han
         m_textures.emplace_back(Texture(m_api, m_device, textureHandles[i]));
 }
 
+Swapchain::Swapchain(Swapchain &&other)
+{
+    m_api = other.m_api;
+    m_device = other.m_device;
+    m_swapchain = other.m_swapchain;
+    m_textures = std::move(other.m_textures);
+
+    other.m_api = nullptr;
+    other.m_device = {};
+    other.m_swapchain = {};
+}
+
+Swapchain &Swapchain::operator=(Swapchain &&other)
+{
+    if (this != &other) {
+        m_api = other.m_api;
+        m_device = other.m_device;
+        m_swapchain = other.m_swapchain;
+        m_textures = std::move(other.m_textures);
+
+        other.m_api = nullptr;
+        other.m_device = {};
+        other.m_swapchain = {};
+    }
+    return *this;
+}
+
 Swapchain::~Swapchain()
 {
 }

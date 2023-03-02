@@ -44,7 +44,7 @@ void ExampleEngineLayer::onAttached()
     };
     m_swapchain = m_device.createSwapchain(swapchainOptions);
 
-    auto swapchainTextures = m_swapchain.textures();
+    const auto &swapchainTextures = m_swapchain.textures();
     const auto swapchainTextureCount = swapchainTextures.size();
     m_swapchainViews.reserve(swapchainTextureCount);
     for (uint32_t i = 0; i < swapchainTextureCount; ++i) {

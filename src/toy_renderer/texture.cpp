@@ -2,6 +2,7 @@
 
 #include <toy_renderer/graphics_api.h>
 #include <toy_renderer/resource_manager.h>
+#include <toy_renderer/api/api_texture.h>
 
 namespace ToyRenderer {
 
@@ -16,8 +17,35 @@ Texture::Texture(GraphicsApi *api, const Handle<Device_t> &device, const Handle<
 {
 }
 
+Texture::Texture(Texture &&other)
+{
+    m_api = other.m_api;
+    m_device = other.m_device;
+    m_texture = other.m_texture;
+
+    other.m_api = nullptr;
+    other.m_device = {};
+    other.m_texture = {};
+}
+
+Texture &Texture::operator=(Texture &&other)
+{
+    if (this != &other) {
+        m_api = other.m_api;
+        m_device = other.m_device;
+        m_texture = other.m_texture;
+
+        other.m_api = nullptr;
+        other.m_device = {};
+        other.m_texture = {};
+    }
+    return *this;
+}
+
 Texture::~Texture()
 {
+    if (isValid())
+        m_api->resourceManager()->deleteTexture(handle());
 }
 
 TextureView Texture::createView(const TextureViewOptions &options) const
