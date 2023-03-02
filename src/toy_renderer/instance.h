@@ -52,6 +52,12 @@ public:
     Instance();
     ~Instance();
 
+    Instance(Instance &&);
+    Instance &operator=(Instance &&);
+
+    Instance(const Instance &) = delete;
+    Instance &operator=(const Instance &) = delete;
+
     Handle<Instance_t> handle() const noexcept { return m_instance; }
     bool isValid() const { return m_instance.isValid(); }
 

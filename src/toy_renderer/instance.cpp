@@ -22,7 +22,33 @@ Instance::Instance(GraphicsApi *api, const InstanceOptions &options)
 
 Instance::~Instance()
 {
-    // TODO: Destroy the instance using the underlying API
+    if (isValid())
+        m_api->resourceManager()->deleteInstance(handle());
+}
+
+Instance::Instance(Instance &&other)
+{
+    m_api = other.m_api;
+    m_instance = other.m_instance;
+    m_adapters = std::move(other.m_adapters);
+
+    other.m_api = nullptr;
+    other.m_instance = {};
+    other.m_adapters = {};
+}
+
+Instance &Instance::operator=(Instance &&other)
+{
+    if (this != &other) {
+        m_api = other.m_api;
+        m_instance = other.m_instance;
+        m_adapters = std::move(other.m_adapters);
+
+        other.m_api = nullptr;
+        other.m_instance = {};
+        other.m_adapters = {};
+    }
+    return *this;
 }
 
 AdapterAndDevice Instance::createDefaultDevice(const Surface &surface,
