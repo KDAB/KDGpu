@@ -303,4 +303,23 @@ TEST_CASE("CommandRecorder")
             gpuToCpu.unmap();
         }
     }
+
+    SUBCASE("Destruction")
+    {
+        Handle<CommandRecorder_t> recorderHandle;
+
+        {
+            // WHEN
+            CommandRecorder commandRecorder = device.createCommandRecorder();
+            recorderHandle = commandRecorder.handle();
+
+            // THEN
+            CHECK(commandRecorder.isValid());
+            CHECK(recorderHandle.isValid());
+            CHECK(api->resourceManager()->getCommandRecorder(recorderHandle) != nullptr);
+        }
+
+        // THEN
+        CHECK(api->resourceManager()->getCommandRecorder(recorderHandle) == nullptr);
+    }
 }

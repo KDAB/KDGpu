@@ -39,6 +39,12 @@ class TOY_RENDERER_EXPORT CommandRecorder
 public:
     ~CommandRecorder();
 
+    CommandRecorder(CommandRecorder &&);
+    CommandRecorder &operator=(CommandRecorder &&);
+
+    CommandRecorder(const CommandRecorder &) = delete;
+    CommandRecorder &operator=(const CommandRecorder &) = delete;
+
     const Handle<CommandRecorder_t> &handle() const noexcept { return m_commandRecorder; }
     bool isValid() const noexcept { return m_commandRecorder.isValid(); }
 

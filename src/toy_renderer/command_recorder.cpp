@@ -14,6 +14,32 @@ CommandRecorder::CommandRecorder(GraphicsApi *api, const Handle<Device_t> &devic
 
 CommandRecorder::~CommandRecorder()
 {
+    if (isValid())
+        m_api->resourceManager()->deleteCommandRecorder(handle());
+}
+
+CommandRecorder::CommandRecorder(CommandRecorder &&other)
+{
+    m_api = other.m_api;
+    m_device = other.m_device;
+    m_commandRecorder = other.m_commandRecorder;
+
+    other.m_api = nullptr;
+    other.m_device = {};
+    other.m_commandRecorder = {};
+}
+
+CommandRecorder &CommandRecorder::operator=(CommandRecorder &&other)
+{
+    if (this != &other) {
+        m_api = other.m_api;
+        m_device = other.m_device;
+        m_commandRecorder = other.m_commandRecorder;
+
+        other.m_api = nullptr;
+        other.m_device = {};
+        other.m_commandRecorder = {};
+    }
 }
 
 RenderPassCommandRecorder CommandRecorder::beginRenderPass(const RenderPassCommandRecorderOptions &options)
