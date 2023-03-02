@@ -77,7 +77,6 @@ void ExampleEngineLayer::onDetached()
 {
     cleanupScene();
 
-    // TODO: Properly handle destroying the underlying resources
     m_presentCompleteSemaphores = {};
     m_renderCompleteSemaphores = {};
     m_depthTextureView = {};
