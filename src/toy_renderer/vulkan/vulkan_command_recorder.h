@@ -20,7 +20,6 @@ struct VulkanCommandRecorder : public ApiCommandRecorder {
                                    VulkanResourceManager *_vulkanResourceManager,
                                    const Handle<Device_t> &_deviceHandle);
 
-    Handle<RenderPassCommandRecorder_t> beginRenderPass(const RenderPassCommandRecorderOptions &options) final;
     void copyBuffer(const BufferCopy &copy) final;
     void memoryBarrier(const MemoryBarrierOptions &options) final;
     Handle<CommandBuffer_t> finish() final;

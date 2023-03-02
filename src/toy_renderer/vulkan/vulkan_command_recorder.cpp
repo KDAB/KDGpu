@@ -3,6 +3,11 @@
 #include <toy_renderer/vulkan/vulkan_buffer.h>
 #include <toy_renderer/vulkan/vulkan_enums.h>
 
+// MemoryBarrier is a define in winnt.h
+#if defined(MemoryBarrier)
+#undef MemoryBarrier
+#endif
+
 namespace ToyRenderer {
 
 VulkanCommandRecorder::VulkanCommandRecorder(VkCommandPool _commandPool,
@@ -17,12 +22,6 @@ VulkanCommandRecorder::VulkanCommandRecorder(VkCommandPool _commandPool,
     , vulkanResourceManager(_vulkanResourceManager)
     , deviceHandle(_deviceHandle)
 {
-}
-
-Handle<RenderPassCommandRecorder_t> VulkanCommandRecorder::beginRenderPass(const RenderPassCommandRecorderOptions &options)
-{
-    // TODO;: Implement me!
-    return Handle<RenderPassCommandRecorder_t>();
 }
 
 void VulkanCommandRecorder::copyBuffer(const BufferCopy &copy)
