@@ -341,6 +341,9 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
 void VulkanResourceManager::deleteTexture(const Handle<Texture_t> &handle)
 {
     VulkanTexture *vulkanTexture = m_textures.get(handle);
+    if (vulkanTexture->ownedBySwapchain)
+        return;
+
     VulkanDevice *vulkanDevice = m_devices.get(vulkanTexture->deviceHandle);
 
     vmaDestroyImage(vulkanDevice->allocator, vulkanTexture->image, vulkanTexture->allocation);
