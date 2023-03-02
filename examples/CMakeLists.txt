@@ -1,6 +1,6 @@
 add_subdirectory(01_bind_group)
 add_subdirectory(02_hello_triangle)
-add_subdirectory(03_hello_triangle_serenity)
+add_subdirectory(03_hello_triangle_kdgui)
 add_subdirectory(04_hello_indexed_triangle)
 add_subdirectory(05_rotating_triangle)
 add_subdirectory(06_compute_particles)
