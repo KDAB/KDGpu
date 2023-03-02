@@ -20,6 +20,12 @@ public:
     BindGroup();
     ~BindGroup();
 
+    BindGroup(BindGroup &&);
+    BindGroup &operator=(BindGroup &&);
+
+    BindGroup(const BindGroup &) = delete;
+    BindGroup &operator=(const BindGroup &) = delete;
+
     const Handle<BindGroup_t> &handle() const noexcept { return m_bindGroup; }
     bool isValid() const noexcept { return m_bindGroup.isValid(); }
 

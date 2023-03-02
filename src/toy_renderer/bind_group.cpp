@@ -12,6 +12,33 @@ BindGroup::BindGroup()
 
 BindGroup::~BindGroup()
 {
+    if (isValid())
+        m_api->resourceManager()->deleteBindGroup(handle());
+}
+
+BindGroup::BindGroup(BindGroup &&other)
+{
+    m_api = other.m_api;
+    m_device = other.m_device;
+    m_bindGroup = other.m_bindGroup;
+
+    other.m_api = nullptr;
+    other.m_device = {};
+    other.m_bindGroup = {};
+}
+
+BindGroup &BindGroup::operator=(BindGroup &&other)
+{
+    if (this != &other) {
+        m_api = other.m_api;
+        m_device = other.m_device;
+        m_bindGroup = other.m_bindGroup;
+
+        other.m_api = nullptr;
+        other.m_device = {};
+        other.m_bindGroup = {};
+    }
+    return *this;
 }
 
 BindGroup::BindGroup(GraphicsApi *api, const Handle<Device_t> &device, const Handle<BindGroup_t> &bindGroup)

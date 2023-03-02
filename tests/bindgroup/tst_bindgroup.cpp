@@ -23,7 +23,7 @@ TEST_SUITE("BindGroup")
 {
     std::unique_ptr<GraphicsApi> api = std::make_unique<VulkanGraphicsApi>();
     Instance instance = api->createInstance(InstanceOptions{
-            .applicationName = "buffer",
+            .applicationName = "BindGroup",
             .applicationVersion = SERENITY_MAKE_API_VERSION(0, 1, 0, 0) });
     Adapter discreteGPUAdapter = instance.selectAdapter(AdapterDeviceType::DiscreteGpu).value_or(Adapter());
     Device device = discreteGPUAdapter.createDevice();
@@ -170,6 +170,51 @@ TEST_SUITE("BindGroup")
         }
     }
 
+    TEST_CASE("Destruction")
+    {
+        // GIVEN
+        BufferOptions uboOptions = {
+            .size = 16 * sizeof(float),
+            .usage = BufferUsageFlags(BufferUsageFlagBits::UniformBufferBit),
+            .memoryUsage = MemoryUsage::CpuToGpu
+        };
+        auto ubo = device.createBuffer(uboOptions);
+
+        const BindGroupLayoutOptions bindGroupLayoutOptions = {
+            .bindings = { { // Camera uniforms
+                            .binding = 0,
+                            .count = 1,
+                            .resourceType = ResourceBindingType::UniformBuffer,
+                            .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit) } }
+        };
+
+        const BindGroupLayout bindGroupLayout = device.createBindGroupLayout(bindGroupLayoutOptions);
+
+        const BindGroupOptions bindGroupOptions = {
+            .layout = bindGroupLayout,
+            .resources = {
+                    { .binding = 0,
+                      .resource = BindingResource(UniformBufferBinding{ .buffer = ubo }) },
+            }
+        };
+
+        Handle<BindGroup_t> bindGroupHandle;
+
+        {
+            // WHEN
+            BindGroup bindGroup = device.createBindGroup(bindGroupOptions);
+            bindGroupHandle = bindGroup.handle();
+
+            // THEN
+            CHECK(bindGroup.isValid());
+            CHECK(bindGroup.isValid());
+            CHECK(api->resourceManager()->getBindGroup(bindGroupHandle) != nullptr);
+        }
+
+        // THEN
+        CHECK(api->resourceManager()->getBindGroup(bindGroupHandle) == nullptr);
+    }
+
     TEST_CASE("Comparison")
     {
         SUBCASE("Compare default contructed BindGroups")
@@ -177,12 +222,6 @@ TEST_SUITE("BindGroup")
             // GIVEN
             BindGroup a;
             BindGroup b;
-
-            // THEN
-            CHECK(a == b);
-
-            // WHEN
-            a = b;
 
             // THEN
             CHECK(a == b);
@@ -222,12 +261,6 @@ TEST_SUITE("BindGroup")
 
             // THEN
             CHECK(a != b);
-
-            // WHEN
-            a = b;
-
-            // THEN
-            CHECK(a == b);
         }
     }
 }
