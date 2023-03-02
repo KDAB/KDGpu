@@ -171,9 +171,12 @@ void RotatingTriangle::initializeScene()
 
 void RotatingTriangle::cleanupScene()
 {
-    // TODO: Properly handle destroying the underlying resources
     m_pipeline = {};
+    m_pipelineLayout = {};
     m_buffer = {};
+    m_indexBuffer = {};
+    m_transformBindGroup = {};
+    m_transformBuffer = {};
 }
 
 void RotatingTriangle::updateScene()
