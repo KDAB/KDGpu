@@ -40,6 +40,7 @@ CommandRecorder &CommandRecorder::operator=(CommandRecorder &&other)
         other.m_device = {};
         other.m_commandRecorder = {};
     }
+    return *this;
 }
 
 RenderPassCommandRecorder CommandRecorder::beginRenderPass(const RenderPassCommandRecorderOptions &options)

@@ -43,6 +43,7 @@ RenderPassCommandRecorder &RenderPassCommandRecorder::operator=(RenderPassComman
         other.m_device = {};
         other.m_renderPassCommandRecorder = {};
     }
+    return *this;
 }
 
 void RenderPassCommandRecorder::setPipeline(const Handle<GraphicsPipeline_t> &pipeline)

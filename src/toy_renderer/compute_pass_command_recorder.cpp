@@ -42,6 +42,7 @@ ComputePassCommandRecorder &ComputePassCommandRecorder::operator=(ComputePassCom
         other.m_device = {};
         other.m_computePassCommandRecorder = {};
     }
+    return *this;
 }
 
 void ComputePassCommandRecorder::setPipeline(const Handle<ComputePipeline_t> &pipeline)
