@@ -1,21 +1,21 @@
-#include "example_engine_layer.h"
+#include "simple_example_engine_layer.h"
 
 #include <toy_renderer_kdgui/engine.h>
 
 #include <toy_renderer/swapchain_options.h>
 #include <toy_renderer/texture_options.h>
 
-ExampleEngineLayer::ExampleEngineLayer()
+SimpleExampleEngineLayer::SimpleExampleEngineLayer()
     : EngineLayer()
     , m_api(std::make_unique<VulkanGraphicsApi>())
 {
 }
 
-ExampleEngineLayer::~ExampleEngineLayer()
+SimpleExampleEngineLayer::~SimpleExampleEngineLayer()
 {
 }
 
-void ExampleEngineLayer::onAttached()
+void SimpleExampleEngineLayer::onAttached()
 {
     m_window = std::make_unique<View>();
 
@@ -73,7 +73,7 @@ void ExampleEngineLayer::onAttached()
     initializeScene();
 }
 
-void ExampleEngineLayer::onDetached()
+void SimpleExampleEngineLayer::onDetached()
 {
     cleanupScene();
 
@@ -90,7 +90,7 @@ void ExampleEngineLayer::onDetached()
     m_window = {};
 }
 
-void ExampleEngineLayer::update()
+void SimpleExampleEngineLayer::update()
 {
     // Call updateScene() function to update scene state.
     updateScene();

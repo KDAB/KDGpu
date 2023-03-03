@@ -1,6 +1,6 @@
 #pragma once
 
-#include <toy_renderer_kdgui/example_engine_layer.h>
+#include <toy_renderer_kdgui/simple_example_engine_layer.h>
 
 #include <toy_renderer/buffer.h>
 #include <toy_renderer/graphics_pipeline.h>
@@ -8,7 +8,7 @@
 
 using namespace ToyRendererKDGui;
 
-class HelloTriangle : public ExampleEngineLayer
+class HelloTriangle : public SimpleExampleEngineLayer
 {
 public:
 protected:

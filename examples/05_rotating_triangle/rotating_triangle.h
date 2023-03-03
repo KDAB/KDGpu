@@ -1,6 +1,6 @@
 #pragma once
 
-#include <toy_renderer_kdgui/example_engine_layer.h>
+#include <toy_renderer_kdgui/simple_example_engine_layer.h>
 
 #include <toy_renderer/bind_group.h>
 #include <toy_renderer/buffer.h>
@@ -11,7 +11,7 @@
 
 using namespace ToyRendererKDGui;
 
-class RotatingTriangle : public ExampleEngineLayer
+class RotatingTriangle : public SimpleExampleEngineLayer
 {
 public:
 protected:

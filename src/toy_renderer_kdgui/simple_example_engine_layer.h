@@ -30,11 +30,11 @@ constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;
 
 // TODO: Should we move this into a small library specifically for the examples that we ship?
 // Let's see how stable this becomes or if we need many variations of it.
-class TOY_RENDERER_KDGUI_EXPORT ExampleEngineLayer : public EngineLayer
+class TOY_RENDERER_KDGUI_EXPORT SimpleExampleEngineLayer : public EngineLayer
 {
 public:
-    ExampleEngineLayer();
-    ~ExampleEngineLayer();
+    SimpleExampleEngineLayer();
+    ~SimpleExampleEngineLayer();
 
 protected:
     virtual void initializeScene() = 0;
