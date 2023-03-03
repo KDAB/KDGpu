@@ -220,9 +220,10 @@ void ComputeParticles::initializeScene()
 
 void ComputeParticles::cleanupScene()
 {
-    // TODO: Properly handle destroying the underlying resources
     m_computePipeline = {};
     m_graphicsPipeline = {};
+    m_computePipelineLayout = {};
+    m_graphicsPipelineLayout = {};
     m_particleDataBuffer = {};
     m_triangleVertexBuffer = {};
     m_opaquePassOptions = {};
