@@ -303,4 +303,9 @@ VkPipelineStageFlagBits pipelineStageFlagsToVkPipelineStageFlagBits(PipelineStag
     return static_cast<VkPipelineStageFlagBits>(static_cast<uint32_t>(pipelineFlags));
 }
 
+VkCommandBufferLevel commandBufferLevelToVkCommandBufferLevel(CommandBufferLevel level)
+{
+    return static_cast<VkCommandBufferLevel>(static_cast<uint32_t>(level));
+}
+
 } // namespace ToyRenderer

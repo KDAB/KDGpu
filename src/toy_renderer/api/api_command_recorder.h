@@ -11,8 +11,10 @@ struct MemoryBarrierOptions;
 struct BufferCopy;
 
 struct ApiCommandRecorder {
+    virtual void begin() = 0;
     virtual void copyBuffer(const BufferCopy &copy) = 0;
     virtual void memoryBarrier(const MemoryBarrierOptions &options) = 0;
+    virtual void executeSecondaryCommandBuffer(const Handle<CommandBuffer_t> &secondaryCommandBuffer) = 0;
     virtual Handle<CommandBuffer_t> finish() = 0;
 };
 

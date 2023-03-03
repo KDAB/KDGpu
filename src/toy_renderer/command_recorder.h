@@ -18,6 +18,7 @@ struct Queue_t;
 
 struct CommandRecorderOptions {
     Handle<Queue_t> queue; // The queue on which you wish to submit the recorded commands. If not set, defaults to first queue of the device
+    CommandBufferLevel level{ CommandBufferLevel::Primary };
 };
 
 struct BufferCopy {
@@ -54,6 +55,8 @@ public:
     ComputePassCommandRecorder beginComputePass(const ComputePassCommandRecorderOptions &options = {});
     void copyBuffer(const BufferCopy &copy);
     void memoryBarrier(const MemoryBarrierOptions &options);
+    void executeSecondaryCommandBuffer(const Handle<CommandBuffer_t> &secondaryCommandBuffer);
+
     CommandBuffer finish();
 
 protected:
@@ -62,6 +65,7 @@ protected:
     GraphicsApi *m_api{ nullptr };
     Handle<Device_t> m_device;
     Handle<CommandRecorder_t> m_commandRecorder;
+    CommandBufferLevel m_level;
 
     friend class Device;
 };

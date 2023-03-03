@@ -15,13 +15,14 @@ struct Buffer_t;
 
 struct VulkanCommandRecorder : public ApiCommandRecorder {
     explicit VulkanCommandRecorder(VkCommandPool _commandPool,
-                                   VkCommandBuffer _commandBuffer,
                                    const Handle<CommandBuffer_t> _commandBufferHandle,
                                    VulkanResourceManager *_vulkanResourceManager,
                                    const Handle<Device_t> &_deviceHandle);
 
+    void begin() final;
     void copyBuffer(const BufferCopy &copy) final;
     void memoryBarrier(const MemoryBarrierOptions &options) final;
+    void executeSecondaryCommandBuffer(const Handle<CommandBuffer_t> &secondaryCommandBuffer) final;
     Handle<CommandBuffer_t> finish() final;
 
     VkCommandPool commandPool{ VK_NULL_HANDLE };

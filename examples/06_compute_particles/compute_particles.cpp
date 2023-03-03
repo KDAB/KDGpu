@@ -229,6 +229,9 @@ void ComputeParticles::cleanupScene()
     m_opaquePassOptions = {};
     m_particleBindGroup = {};
     m_computeSemaphoreComplete = {};
+    m_graphicsCommands = {};
+    m_computeCommands = {};
+    m_graphicsAndComputeCommands = {};
 }
 
 void ComputeParticles::updateScene()
@@ -283,11 +286,11 @@ void ComputeParticles::renderSingleCommandBuffer()
         opaquePass.draw(DrawCommand{ .vertexCount = 3, .instanceCount = ParticlesCount });
         opaquePass.end();
     }
-    const auto commands = commandRecorder.finish();
+    m_graphicsAndComputeCommands = commandRecorder.finish();
 
     // Submit Commands
     SubmitOptions submitOptions = {
-        .commandBuffers = { commands },
+        .commandBuffers = { m_graphicsAndComputeCommands },
         .waitSemaphores = { m_presentCompleteSemaphores[m_inFlightIndex] },
         .signalSemaphores = { m_renderCompleteSemaphores[m_inFlightIndex] }
     };
@@ -308,7 +311,7 @@ void ComputeParticles::renderMultipleCommandBuffers()
         computePass.dispatchCompute(ComputeCommand{ .workGroupX = ParticlesCount / LocalWorkGroupXSize });
         computePass.end();
     }
-    const auto computeCommands = computeCommandRecorder.finish();
+    m_computeCommands = computeCommandRecorder.finish();
 
     // Render
     auto graphicsCommandRecorder = m_device.createCommandRecorder();
@@ -321,13 +324,13 @@ void ComputeParticles::renderMultipleCommandBuffers()
         opaquePass.draw(DrawCommand{ .vertexCount = 3, .instanceCount = ParticlesCount });
         opaquePass.end();
     }
-    const auto graphicsCommands = graphicsCommandRecorder.finish();
+    m_graphicsCommands = graphicsCommandRecorder.finish();
 
     // Submit Commands
 
     // We first submit compute commands
     SubmitOptions computeSubmitOptions = {
-        .commandBuffers = { computeCommands },
+        .commandBuffers = { m_computeCommands },
         .waitSemaphores = { m_presentCompleteSemaphores[m_inFlightIndex] },
         .signalSemaphores = { m_computeSemaphoreComplete }
     };
@@ -336,7 +339,7 @@ void ComputeParticles::renderMultipleCommandBuffers()
     // Then we submit the graphics command, we rely on a semaphore to ensure
     // graphics commands don't start prior to the compute commands being completed
     SubmitOptions graphicsSubmitOptions = {
-        .commandBuffers = { graphicsCommands },
+        .commandBuffers = { m_graphicsCommands },
         .waitSemaphores = { m_computeSemaphoreComplete },
         .signalSemaphores = { m_renderCompleteSemaphores[m_inFlightIndex] }
     };

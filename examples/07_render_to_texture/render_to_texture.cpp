@@ -323,6 +323,7 @@ void RenderToTexture::cleanupScene()
     m_colorOutput = {};
     m_postProcessPipeline = {};
     m_postProcessPipelineLayout = {};
+    m_commandBuffer = {};
 }
 
 void RenderToTexture::updateScene()
@@ -369,10 +370,10 @@ void RenderToTexture::render()
     finalPass.end();
 
     // Finalize the command recording
-    auto commands = commandRecorder.finish();
+    m_commandBuffer = commandRecorder.finish();
 
     SubmitOptions submitOptions = {
-        .commandBuffers = { commands },
+        .commandBuffers = { m_commandBuffer },
         .waitSemaphores = { m_presentCompleteSemaphores[m_inFlightIndex] },
         .signalSemaphores = { m_renderCompleteSemaphores[m_inFlightIndex] }
     };

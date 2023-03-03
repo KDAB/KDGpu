@@ -850,4 +850,10 @@ enum class PipelineStageFlagBit {
 };
 using PipelineStageFlags = Flags;
 
+enum class CommandBufferLevel {
+    Primary = 0,
+    Secondary = 1,
+    MaxEnum = 0x7FFFFFFF
+};
+
 } // namespace ToyRenderer

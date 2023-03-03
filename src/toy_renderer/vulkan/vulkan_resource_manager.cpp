@@ -1030,16 +1030,15 @@ Handle<CommandRecorder_t> VulkanResourceManager::createCommandRecorder(const Han
     VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
 
     // Which queue is the command recorder requested for?
-    Handle<Queue_t> queueHandle;
-    uint32_t queueTypeIndex = std::numeric_limits<uint32_t>::max();
+
+    QueueDescription *queueDescription = nullptr;
+
     if (!options.queue.isValid()) {
         if (vulkanDevice->queueDescriptions.empty()) {
             // TODO: Log that we have no queue descriptions on the device
             return {};
         }
-
-        queueHandle = vulkanDevice->queueDescriptions[0].queue;
-        queueTypeIndex = vulkanDevice->queueDescriptions[0].queueTypeIndex;
+        queueDescription = &vulkanDevice->queueDescriptions[0];
     } else {
         // Look for this queue on the device
         const auto it = std::find_if(
@@ -1050,10 +1049,11 @@ Handle<CommandRecorder_t> VulkanResourceManager::createCommandRecorder(const Han
             // TODO: Log that we can't find the requested queue on this device
             return {};
         }
-
-        queueHandle = it->queue;
-        queueTypeIndex = it->queueTypeIndex;
+        queueDescription = &(*it);
     }
+
+    Handle<Queue_t> queueHandle = queueDescription->queue;
+    const uint32_t queueTypeIndex = queueDescription->queueTypeIndex;
     assert(queueHandle.isValid());
     assert(queueTypeIndex != std::numeric_limits<uint32_t>::max());
 
@@ -1072,40 +1072,17 @@ Handle<CommandRecorder_t> VulkanResourceManager::createCommandRecorder(const Han
         }
         vulkanDevice->commandPools[queueTypeIndex] = vkCommandPool;
     }
+
+    // Create the Command Buffer
     VkCommandPool vkCommandPool = vulkanDevice->commandPools[queueTypeIndex];
-
-    // Allocate a command buffer object from the pool
-    // TODO: Support secondary command buffers? Is that a thing outside of Vulkan? Do we care?
-    VkCommandBufferAllocateInfo allocInfo = {};
-    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocInfo.commandPool = vkCommandPool;
-    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocInfo.commandBufferCount = 1U;
-
-    VkCommandBuffer vkCommandBuffer{ VK_NULL_HANDLE };
-    if (vkAllocateCommandBuffers(vulkanDevice->device, &allocInfo, &vkCommandBuffer) != VK_SUCCESS) {
-        // TODO: Log failure to allocate a command buffer
-        return {};
-    }
-
-    // Begin recording
-    VkCommandBufferBeginInfo beginInfo = {};
-    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-    beginInfo.pInheritanceInfo = nullptr;
-
-    if (vkBeginCommandBuffer(vkCommandBuffer, &beginInfo) != VK_SUCCESS) {
-        // TODO: Log failure to begin recording
-        return {};
-    }
-
-    const auto vulkanCommandBufferHandle = m_commandBuffers.emplace(VulkanCommandBuffer(vkCommandBuffer));
+    const Handle<CommandBuffer_t> commandBufferHandle = createCommandBuffer(deviceHandle,
+                                                                            *queueDescription,
+                                                                            options.level);
 
     // Finally, we can create the command recorder object
     const auto vulkanCommandRecorderHandle = m_commandRecorders.emplace(VulkanCommandRecorder(
             vkCommandPool,
-            vkCommandBuffer,
-            vulkanCommandBufferHandle,
+            commandBufferHandle,
             this,
             deviceHandle));
 
@@ -1114,16 +1091,54 @@ Handle<CommandRecorder_t> VulkanResourceManager::createCommandRecorder(const Han
 
 void VulkanResourceManager::deleteCommandRecorder(const Handle<CommandRecorder_t> &handle)
 {
-    // VulkanCommandRecorder *vulkanCommandRecorder = m_commandRecorders.get(handle);
-    // VulkanDevice *vulkanDevice = m_devices.get(vulkanCommandRecorder->deviceHandle);
-    // Maybe we should destroy the Command Buffers here
-
+    // VulkanCommandRecorder actually doesn't map to an actual Vulkan Resource.
+    // It creates a VulkanCommandBuffer that holds VkCommandBuffer and whose lifetime
     m_commandRecorders.remove(handle);
 }
 
 VulkanCommandRecorder *VulkanResourceManager::getCommandRecorder(const Handle<CommandRecorder_t> &handle) const
 {
     return m_commandRecorders.get(handle);
+}
+
+Handle<CommandBuffer_t> VulkanResourceManager::createCommandBuffer(const Handle<Device_t> &deviceHandle,
+                                                                   const QueueDescription &queueDescription,
+                                                                   CommandBufferLevel commandLevel)
+{
+    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
+    VkCommandPool vkCommandPool = vulkanDevice->commandPools[queueDescription.queueTypeIndex];
+
+    // Allocate a command buffer object from the pool
+    // TODO: Support secondary command buffers? Is that a thing outside of Vulkan? Do we care?
+    VkCommandBufferAllocateInfo allocInfo = {};
+    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocInfo.commandPool = vkCommandPool;
+    allocInfo.level = commandBufferLevelToVkCommandBufferLevel(commandLevel);
+    allocInfo.commandBufferCount = 1U;
+
+    VkCommandBuffer vkCommandBuffer{ VK_NULL_HANDLE };
+    if (vkAllocateCommandBuffers(vulkanDevice->device, &allocInfo, &vkCommandBuffer) != VK_SUCCESS) {
+        // TODO: Log failure to allocate a command buffer
+        return {};
+    }
+
+    const auto vulkanCommandBufferHandle = m_commandBuffers.emplace(VulkanCommandBuffer(vkCommandBuffer,
+                                                                                        vkCommandPool,
+                                                                                        allocInfo.level,
+                                                                                        this,
+                                                                                        deviceHandle));
+
+    return vulkanCommandBufferHandle;
+}
+
+void VulkanResourceManager::deleteCommandBuffer(const Handle<CommandBuffer_t> &handle)
+{
+    VulkanCommandBuffer *commandBuffer = m_commandBuffers.get(handle);
+    VulkanDevice *vulkanDevice = m_devices.get(commandBuffer->deviceHandle);
+
+    vkFreeCommandBuffers(vulkanDevice->device, commandBuffer->commandPool, 1, &commandBuffer->commandBuffer);
+
+    m_commandBuffers.remove(handle);
 }
 
 VulkanCommandBuffer *VulkanResourceManager::getCommandBuffer(const Handle<CommandBuffer_t> &handle) const

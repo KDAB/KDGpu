@@ -9,7 +9,10 @@ CommandRecorder::CommandRecorder(GraphicsApi *api, const Handle<Device_t> &devic
     : m_api(api)
     , m_device(device)
     , m_commandRecorder(m_api->resourceManager()->createCommandRecorder(m_device, options))
+    , m_level(options.level)
 {
+    auto apiCommandRecorder = m_api->resourceManager()->getCommandRecorder(m_commandRecorder);
+    apiCommandRecorder->begin();
 }
 
 CommandRecorder::~CommandRecorder()
@@ -23,10 +26,12 @@ CommandRecorder::CommandRecorder(CommandRecorder &&other)
     m_api = other.m_api;
     m_device = other.m_device;
     m_commandRecorder = other.m_commandRecorder;
+    m_level = other.m_level;
 
     other.m_api = nullptr;
     other.m_device = {};
     other.m_commandRecorder = {};
+    other.m_level = CommandBufferLevel::MaxEnum;
 }
 
 CommandRecorder &CommandRecorder::operator=(CommandRecorder &&other)
@@ -38,10 +43,12 @@ CommandRecorder &CommandRecorder::operator=(CommandRecorder &&other)
         m_api = other.m_api;
         m_device = other.m_device;
         m_commandRecorder = other.m_commandRecorder;
+        m_level = other.m_level;
 
         other.m_api = nullptr;
         other.m_device = {};
         other.m_commandRecorder = {};
+        other.m_level = CommandBufferLevel::MaxEnum;
     }
     return *this;
 }
@@ -71,7 +78,14 @@ void CommandRecorder::memoryBarrier(const MemoryBarrierOptions &options)
 CommandBuffer CommandRecorder::finish()
 {
     auto apiCommandRecorder = m_api->resourceManager()->getCommandRecorder(m_commandRecorder);
-    return CommandBuffer(apiCommandRecorder->finish());
+    return CommandBuffer(m_api, m_device, apiCommandRecorder->finish());
+}
+
+void CommandRecorder::executeSecondaryCommandBuffer(const Handle<CommandBuffer_t> &secondaryCommandBuffer)
+{
+    assert(m_level == CommandBufferLevel::Primary);
+    auto apiCommandRecorder = m_api->resourceManager()->getCommandRecorder(m_commandRecorder);
+    apiCommandRecorder->executeSecondaryCommandBuffer(secondaryCommandBuffer);
 }
 
 } // namespace ToyRenderer

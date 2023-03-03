@@ -23,4 +23,5 @@ private:
     GraphicsPipeline m_pipeline;
     PipelineLayout m_pipelineLayout;
     RenderPassCommandRecorderOptions m_opaquePassOptions;
+    CommandBuffer m_commandBuffer;
 };

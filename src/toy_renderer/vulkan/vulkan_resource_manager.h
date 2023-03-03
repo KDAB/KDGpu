@@ -123,6 +123,14 @@ public:
     Handle<RenderPass_t> createRenderPass(const Handle<Device_t> &deviceHandle, const RenderPassCommandRecorderOptions &options);
     Handle<Framebuffer_t> createFramebuffer(const Handle<Device_t> &deviceHandle, const VulkanFramebufferKey &options);
 
+    // Command buffers are not created by the api. It is up to the concrete subclasses to insert the command buffers
+    // by whatever mechanism they wish. They also do not need to be destroyed as they are cleaned up by the owning
+    // command pool (command recorder).
+    // Yet we add the usual create/destroy functions to make it more consistent
+    Handle<CommandBuffer_t> createCommandBuffer(const Handle<Device_t> &deviceHandle,
+                                                const QueueDescription &queueDescription,
+                                                CommandBufferLevel commandLevel) final;
+    void deleteCommandBuffer(const Handle<CommandBuffer_t> &handle) final;
     VulkanCommandBuffer *getCommandBuffer(const Handle<CommandBuffer_t> &handle) const final;
 
     Handle<BindGroup_t> createBindGroup(const Handle<Device_t> &deviceHandle, const BindGroupOptions &options) final;

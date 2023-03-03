@@ -125,6 +125,7 @@ void HelloIndexedTriangle::cleanupScene()
     m_pipelineLayout = {};
     m_buffer = {};
     m_indexBuffer = {};
+    m_commandBuffer = {};
 }
 
 void HelloIndexedTriangle::updateScene()
@@ -144,10 +145,10 @@ void HelloIndexedTriangle::render()
     const DrawIndexedCommand drawCmd = { .indexCount = 3 };
     opaquePass.drawIndexed(drawCmd);
     opaquePass.end();
-    auto commands = commandRecorder.finish();
+    m_commandBuffer = commandRecorder.finish();
 
     SubmitOptions submitOptions = {
-        .commandBuffers = { commands },
+        .commandBuffers = { m_commandBuffer },
         .waitSemaphores = { m_presentCompleteSemaphores[m_inFlightIndex] },
         .signalSemaphores = { m_renderCompleteSemaphores[m_inFlightIndex] }
     };

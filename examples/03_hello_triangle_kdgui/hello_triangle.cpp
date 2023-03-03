@@ -108,6 +108,7 @@ void HelloTriangle::cleanupScene()
     m_pipeline = {};
     m_pipelineLayout = {};
     m_buffer = {};
+    m_commandBuffer = {};
 }
 
 void HelloTriangle::updateScene()
@@ -139,11 +140,11 @@ void HelloTriangle::render()
     opaquePass.end();
 
     // End recording
-    auto commands = commandRecorder.finish();
+    m_commandBuffer = commandRecorder.finish();
 
     // Submit command buffer to queue
     SubmitOptions submitOptions = {
-        .commandBuffers = { commands },
+        .commandBuffers = { m_commandBuffer },
         .waitSemaphores = { m_presentCompleteSemaphores[m_inFlightIndex] },
         .signalSemaphores = { m_renderCompleteSemaphores[m_inFlightIndex] }
     };

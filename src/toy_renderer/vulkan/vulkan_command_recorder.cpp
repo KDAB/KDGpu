@@ -1,6 +1,7 @@
 #include "vulkan_command_recorder.h"
 #include <toy_renderer/vulkan/vulkan_resource_manager.h>
 #include <toy_renderer/vulkan/vulkan_buffer.h>
+#include <toy_renderer/vulkan/vulkan_command_buffer.h>
 #include <toy_renderer/vulkan/vulkan_enums.h>
 
 // MemoryBarrier is a define in winnt.h
@@ -11,17 +12,23 @@
 namespace ToyRenderer {
 
 VulkanCommandRecorder::VulkanCommandRecorder(VkCommandPool _commandPool,
-                                             VkCommandBuffer _commandBuffer,
                                              const Handle<CommandBuffer_t> _commandBufferHandle,
                                              VulkanResourceManager *_vulkanResourceManager,
                                              const Handle<Device_t> &_deviceHandle)
     : ApiCommandRecorder()
     , commandPool(_commandPool)
-    , commandBuffer(_commandBuffer)
     , commandBufferHandle(_commandBufferHandle)
     , vulkanResourceManager(_vulkanResourceManager)
     , deviceHandle(_deviceHandle)
 {
+    VulkanCommandBuffer *vulkanCommandBuffer = vulkanResourceManager->getCommandBuffer(commandBufferHandle);
+    commandBuffer = vulkanCommandBuffer->commandBuffer;
+}
+
+void VulkanCommandRecorder::begin()
+{
+    VulkanCommandBuffer *commandBuffer = vulkanResourceManager->getCommandBuffer(commandBufferHandle);
+    commandBuffer->begin();
 }
 
 void VulkanCommandRecorder::copyBuffer(const BufferCopy &copy)
@@ -59,12 +66,16 @@ void VulkanCommandRecorder::memoryBarrier(const MemoryBarrierOptions &options)
                          0, nullptr);
 }
 
+void VulkanCommandRecorder::executeSecondaryCommandBuffer(const Handle<CommandBuffer_t> &secondaryCommandBuffer)
+{
+    VulkanCommandBuffer *vulkanSecondaryCommandBuffer = vulkanResourceManager->getCommandBuffer(secondaryCommandBuffer);
+    vkCmdExecuteCommands(commandBuffer, 1, &vulkanSecondaryCommandBuffer->commandBuffer);
+}
+
 Handle<CommandBuffer_t> VulkanCommandRecorder::finish()
 {
-    if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
-        // TODO: Log failure to end recording
-        return {};
-    }
+    VulkanCommandBuffer *commandBuffer = vulkanResourceManager->getCommandBuffer(commandBufferHandle);
+    commandBuffer->finish();
     return commandBufferHandle;
 }
 

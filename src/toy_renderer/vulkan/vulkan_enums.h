@@ -92,4 +92,6 @@ VkPipelineStageFlagBits pipelineStageFlagsToVkPipelineStageFlagBits(PipelineStag
 VkIndexType indexTypeToVkIndexType(IndexType type);
 IndexType vkIndexTypeToIndexType(VkIndexType type);
 
+VkCommandBufferLevel commandBufferLevelToVkCommandBufferLevel(CommandBufferLevel level);
+
 } // namespace ToyRenderer

@@ -54,4 +54,5 @@ private:
     Sampler m_colorOutputSampler;
     RenderPassCommandRecorderOptions m_opaquePassOptions;
     RenderPassCommandRecorderOptions m_finalPassOptions;
+    CommandBuffer m_commandBuffer;
 };

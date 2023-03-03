@@ -304,6 +304,65 @@ TEST_CASE("CommandRecorder")
         }
     }
 
+    SUBCASE("Execute Secondary Command Buffer")
+    {
+        // GIVEN
+        const BufferOptions cpuGpuBufferOptions = {
+            .size = 4 * sizeof(float),
+            .usage = BufferUsageFlags(BufferUsageFlagBits::TransferSrcBit),
+            .memoryUsage = MemoryUsage::CpuToGpu
+        };
+        const BufferOptions gpuCpuBufferOptions = {
+            .size = 4 * sizeof(float),
+            .usage = BufferUsageFlags(BufferUsageFlagBits::TransferSrcBit) | BufferUsageFlags(BufferUsageFlagBits::TransferDstBit),
+            .memoryUsage = MemoryUsage::GpuToCpu
+        };
+        const float initialData[] = { 1.0f, 2.0f, 3.0f, 4.0f };
+        Buffer cpuToGpu = device.createBuffer(cpuGpuBufferOptions, initialData);
+        Buffer gpuToCpu = device.createBuffer(gpuCpuBufferOptions);
+
+        CHECK(cpuToGpu.isValid());
+        CHECK(gpuToCpu.isValid());
+
+        CommandRecorder primaryCommandRecorder = device.createCommandRecorder();
+
+        // WHEN
+
+        // 1) Record Commands Into a secondary CommandBuffer
+        CommandRecorder secondaryCommandRecorder = device.createCommandRecorder(CommandRecorderOptions{ .level = CommandBufferLevel::Secondary });
+
+        secondaryCommandRecorder.copyBuffer(BufferCopy{
+                .src = cpuToGpu,
+                .srcOffset = 0,
+                .dst = gpuToCpu,
+                .dstOffset = 0,
+                .byteSize = 4 * sizeof(float) });
+
+        CommandBuffer secondaryCommandBuffer = secondaryCommandRecorder.finish();
+
+        // 2) Execute SecondaryCommand Buffer on Primary CommandBuffer
+        primaryCommandRecorder.executeSecondaryCommandBuffer(secondaryCommandBuffer);
+
+        // 3) Submit Primary Command Buffer and Wait for Completion
+        CommandBuffer primaryCommandBuffer = primaryCommandRecorder.finish();
+
+        transferQueue.submit(SubmitOptions{
+                .commandBuffers = { primaryCommandBuffer } });
+
+        device.waitUntilIdle();
+
+        // THEN
+        const float *m = reinterpret_cast<const float *>(gpuToCpu.map());
+
+        CHECK(m != nullptr);
+        CHECK(m[0] == initialData[0]);
+        CHECK(m[1] == initialData[1]);
+        CHECK(m[2] == initialData[2]);
+        CHECK(m[3] == initialData[3]);
+
+        gpuToCpu.unmap();
+    }
+
     SUBCASE("Destruction - Going Out of Scope")
     {
         Handle<CommandRecorder_t> recorderHandle;

@@ -177,6 +177,7 @@ void RotatingTriangle::cleanupScene()
     m_indexBuffer = {};
     m_transformBindGroup = {};
     m_transformBuffer = {};
+    m_commandBuffer = {};
 }
 
 void RotatingTriangle::updateScene()
@@ -209,10 +210,10 @@ void RotatingTriangle::render()
     const DrawIndexedCommand drawCmd = { .indexCount = 3 };
     opaquePass.drawIndexed(drawCmd);
     opaquePass.end();
-    auto commands = commandRecorder.finish();
+    m_commandBuffer = commandRecorder.finish();
 
     SubmitOptions submitOptions = {
-        .commandBuffers = { commands },
+        .commandBuffers = { m_commandBuffer },
         .waitSemaphores = { m_presentCompleteSemaphores[m_inFlightIndex] },
         .signalSemaphores = { m_renderCompleteSemaphores[m_inFlightIndex] }
     };

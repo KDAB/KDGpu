@@ -31,6 +31,9 @@ private:
     PipelineLayout m_graphicsPipelineLayout;
     PipelineLayout m_computePipelineLayout;
     RenderPassCommandRecorderOptions m_opaquePassOptions;
+    CommandBuffer m_graphicsCommands;
+    CommandBuffer m_computeCommands;
+    CommandBuffer m_graphicsAndComputeCommands;
 
     BindGroup m_particleBindGroup;
     GpuSemaphore m_computeSemaphoreComplete;

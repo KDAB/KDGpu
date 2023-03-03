@@ -31,4 +31,5 @@ private:
     const PushConstantRange m_transformPushConstantRange{ .offset = 0,
                                                           .size = 16 * sizeof(float),
                                                           .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit) };
+    std::array<CommandBuffer, MAX_FRAMES_IN_FLIGHT> m_commandBuffers;
 };

@@ -157,9 +157,10 @@ public:
     virtual void deleteComputePassCommandRecorder(const Handle<ComputePassCommandRecorder_t> &handle) = 0;
     virtual ApiComputePassCommandRecorder *getComputePassCommandRecorder(const Handle<ComputePassCommandRecorder_t> &handle) const = 0;
 
-    // Command buffers are not created by the api. It is up to the concrete subclasses to insert the command buffers
-    // by whatever mechanism they wish. They also do not need to be destroyed as they are cleaned up by the owning
-    // command pool (command recorder).
+    virtual Handle<CommandBuffer_t> createCommandBuffer(const Handle<Device_t> &deviceHandle,
+                                                        const QueueDescription &queueDescription,
+                                                        CommandBufferLevel commandLevel) = 0;
+    virtual void deleteCommandBuffer(const Handle<CommandBuffer_t> &handle) = 0;
     virtual ApiCommandBuffer *getCommandBuffer(const Handle<CommandBuffer_t> &handle) const = 0;
 
     // virtual Handle<Shader> createShader(ShaderDescription desc) = 0;
