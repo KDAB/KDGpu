@@ -139,7 +139,7 @@ void RenderPassCommandRecorder::drawIndexedIndirect(const std::vector<DrawIndexe
     apiRenderPassCommandRecorder->drawIndexedIndirect(drawCommands);
 }
 
-void RenderPassCommandRecorder::pushConstant(const PushConstantRange &constantRange, const std::vector<uint8_t> &data)
+void RenderPassCommandRecorder::pushConstant(const PushConstantRange &constantRange, const void *data)
 {
     auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->pushConstant(constantRange, data);

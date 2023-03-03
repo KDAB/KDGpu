@@ -84,7 +84,7 @@ void ComputePassCommandRecorder::dispatchComputeIndirect(const std::vector<Compu
     apiComputePassCommandRecorder->dispatchComputeIndirect(commands);
 }
 
-void ComputePassCommandRecorder::pushConstant(const PushConstantRange &constantRange, const std::vector<uint8_t> &data)
+void ComputePassCommandRecorder::pushConstant(const PushConstantRange &constantRange, const void *data)
 {
     auto apiComputePassCommandRecorder = m_api->resourceManager()->getComputePassCommandRecorder(m_computePassCommandRecorder);
     apiComputePassCommandRecorder->pushConstant(constantRange, data);

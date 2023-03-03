@@ -157,7 +157,7 @@ void VulkanRenderPassCommandRecorder::drawIndexedIndirect(const std::vector<Draw
         drawIndexedIndirect(drawCommand);
 }
 
-void VulkanRenderPassCommandRecorder::pushConstant(const PushConstantRange &constantRange, const std::vector<uint8_t> &data)
+void VulkanRenderPassCommandRecorder::pushConstant(const PushConstantRange &constantRange, const void *data)
 {
     VulkanGraphicsPipeline *vulkanPipeline = vulkanResourceManager->getGraphicsPipeline(pipeline);
     VulkanPipelineLayout *pLayout = vulkanResourceManager->getPipelineLayout(vulkanPipeline->pipelineLayoutHandle);
@@ -168,7 +168,7 @@ void VulkanRenderPassCommandRecorder::pushConstant(const PushConstantRange &cons
                        shaderStageFlagBitsToVkShaderStageFlagBits(static_cast<ShaderStageFlagBits>(constantRange.shaderStages)),
                        constantRange.offset,
                        constantRange.size,
-                       data.data());
+                       data);
 }
 
 void VulkanRenderPassCommandRecorder::end()

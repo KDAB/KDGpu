@@ -88,7 +88,7 @@ public:
     void drawIndexedIndirect(const DrawIndexedIndirectCommand &drawCommand);
     void drawIndexedIndirect(const std::vector<DrawIndexedIndirectCommand> &drawCommands);
 
-    void pushConstant(const PushConstantRange &constantRange, const std::vector<uint8_t> &data);
+    void pushConstant(const PushConstantRange &constantRange, const void *data);
 
     void end();
 

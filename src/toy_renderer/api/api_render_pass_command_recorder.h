@@ -30,7 +30,7 @@ struct ApiRenderPassCommandRecorder {
     virtual void drawIndirect(const std::vector<DrawIndirectCommand> &drawCommands) = 0;
     virtual void drawIndexedIndirect(const DrawIndexedIndirectCommand &drawCommand) = 0;
     virtual void drawIndexedIndirect(const std::vector<DrawIndexedIndirectCommand> &drawCommands) = 0;
-    virtual void pushConstant(const PushConstantRange &constantRange, const std::vector<uint8_t> &data) = 0;
+    virtual void pushConstant(const PushConstantRange &constantRange, const void *data) = 0;
     virtual void end() = 0;
 };
 

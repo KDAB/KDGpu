@@ -23,7 +23,7 @@ struct VulkanComputePassCommandRecorder : public ApiComputePassCommandRecorder {
     void dispatchCompute(const std::vector<ComputeCommand> &commands) final;
     void dispatchComputeIndirect(const ComputeCommandIndirect &command) final;
     void dispatchComputeIndirect(const std::vector<ComputeCommandIndirect> &commands) final;
-    void pushConstant(const PushConstantRange &constantRange, const std::vector<uint8_t> &data) final;
+    void pushConstant(const PushConstantRange &constantRange, const void *data) final;
     void end() final;
 
     VkCommandBuffer commandBuffer{ VK_NULL_HANDLE };

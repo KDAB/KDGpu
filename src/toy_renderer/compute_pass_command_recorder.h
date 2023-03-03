@@ -55,7 +55,7 @@ public:
     void dispatchComputeIndirect(const ComputeCommandIndirect &command);
     void dispatchComputeIndirect(const std::vector<ComputeCommandIndirect> &commands);
 
-    void pushConstant(const PushConstantRange &constantRange, const std::vector<uint8_t> &data);
+    void pushConstant(const PushConstantRange &constantRange, const void *data);
 
     void end();
 

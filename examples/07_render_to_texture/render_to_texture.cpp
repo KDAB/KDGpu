@@ -364,7 +364,7 @@ void RenderToTexture::render()
     finalPass.setPipeline(m_postProcessPipeline);
     finalPass.setVertexBuffer(0, m_fullScreenQuad);
     finalPass.setBindGroup(0, m_colorBindGroup);
-    finalPass.pushConstant(m_filterPosPushConstantRange, m_filterPosData);
+    finalPass.pushConstant(m_filterPosPushConstantRange, m_filterPosData.data());
     finalPass.draw(DrawCommand{ .vertexCount = 4 });
     finalPass.end();
 

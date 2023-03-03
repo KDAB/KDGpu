@@ -64,7 +64,7 @@ void VulkanComputePassCommandRecorder::dispatchComputeIndirect(const std::vector
         dispatchComputeIndirect(c);
 }
 
-void VulkanComputePassCommandRecorder::pushConstant(const PushConstantRange &constantRange, const std::vector<uint8_t> &data)
+void VulkanComputePassCommandRecorder::pushConstant(const PushConstantRange &constantRange, const void *data)
 {
     VulkanComputePipeline *vulkanPipeline = vulkanResourceManager->getComputePipeline(pipeline);
     VulkanPipelineLayout *pLayout = vulkanResourceManager->getPipelineLayout(vulkanPipeline->pipelineLayoutHandle);
@@ -75,7 +75,7 @@ void VulkanComputePassCommandRecorder::pushConstant(const PushConstantRange &con
                        shaderStageFlagBitsToVkShaderStageFlagBits(static_cast<ShaderStageFlagBits>(constantRange.shaderStages)),
                        constantRange.offset,
                        constantRange.size,
-                       data.data());
+                       data);
 }
 
 void VulkanComputePassCommandRecorder::end()

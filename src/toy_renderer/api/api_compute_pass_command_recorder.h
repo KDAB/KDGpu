@@ -17,7 +17,7 @@ struct ApiComputePassCommandRecorder {
     virtual void dispatchCompute(const std::vector<ComputeCommand> &commands) = 0;
     virtual void dispatchComputeIndirect(const ComputeCommandIndirect &command) = 0;
     virtual void dispatchComputeIndirect(const std::vector<ComputeCommandIndirect> &commands) = 0;
-    virtual void pushConstant(const PushConstantRange &constantRange, const std::vector<uint8_t> &data) = 0;
+    virtual void pushConstant(const PushConstantRange &constantRange, const void *data) = 0;
     virtual void end() = 0;
 };
 
