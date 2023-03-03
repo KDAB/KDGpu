@@ -1,0 +1,56 @@
+{
+    "version": 3,
+    "configurePresets": [
+        {
+            "name": "configure-base",
+            "hidden": true,
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_FIND_DEBUG_MODE": "OFF",
+                "CMAKE_VERBOSE_MAKEFILE": "OFF",
+                "FETCHCONTENT_QUIET": "OFF"
+            }
+        },
+        {
+            "name": "install-base",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_INSTALL_PREFIX": "${env.HOME}/work/toy-renderer/build/install"
+            }
+        },
+        {
+            "name": "debug",
+            "displayName": "Debug",
+            "inherits": [
+                "configure-base"
+            ],
+            "binaryDir": "${sourceDir}/build/Debug",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "debug-install",
+            "displayName": "Debug-Install",
+            "inherits": [
+                "debug",
+                "install-base"
+            ]
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "build-install-base",
+            "targets": [
+                "install"
+            ]
+        },
+        {
+            "name": "debug-install",
+            "configurePreset": "debug-install",
+            "inherits": [
+                "build-install-base"
+            ]
+        }
+    ]
+}
