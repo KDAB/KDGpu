@@ -200,6 +200,24 @@ TEST_SUITE("BindGroup")
 
         Handle<BindGroup_t> bindGroupHandle;
 
+        SUBCASE("Going Out Of Scope")
+        {
+            {
+                // WHEN
+                BindGroup bindGroup = device.createBindGroup(bindGroupOptions);
+                bindGroupHandle = bindGroup.handle();
+
+                // THEN
+                CHECK(bindGroup.isValid());
+                CHECK(bindGroup.isValid());
+                CHECK(api->resourceManager()->getBindGroup(bindGroupHandle) != nullptr);
+            }
+
+            // THEN
+            CHECK(api->resourceManager()->getBindGroup(bindGroupHandle) == nullptr);
+        }
+
+        SUBCASE("Move assigment")
         {
             // WHEN
             BindGroup bindGroup = device.createBindGroup(bindGroupOptions);
@@ -209,10 +227,13 @@ TEST_SUITE("BindGroup")
             CHECK(bindGroup.isValid());
             CHECK(bindGroup.isValid());
             CHECK(api->resourceManager()->getBindGroup(bindGroupHandle) != nullptr);
-        }
 
-        // THEN
-        CHECK(api->resourceManager()->getBindGroup(bindGroupHandle) == nullptr);
+            // WHEN
+            bindGroup = {};
+
+            // THEN
+            CHECK(api->resourceManager()->getBindGroup(bindGroupHandle) == nullptr);
+        }
     }
 
     TEST_CASE("Comparison")

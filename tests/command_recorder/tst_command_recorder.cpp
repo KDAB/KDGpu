@@ -304,7 +304,7 @@ TEST_CASE("CommandRecorder")
         }
     }
 
-    SUBCASE("Destruction")
+    SUBCASE("Destruction - Going Out of Scope")
     {
         Handle<CommandRecorder_t> recorderHandle;
 
@@ -318,6 +318,26 @@ TEST_CASE("CommandRecorder")
             CHECK(recorderHandle.isValid());
             CHECK(api->resourceManager()->getCommandRecorder(recorderHandle) != nullptr);
         }
+
+        // THEN
+        CHECK(api->resourceManager()->getCommandRecorder(recorderHandle) == nullptr);
+    }
+
+    SUBCASE("Destruction - Move assigmnent")
+    {
+        Handle<CommandRecorder_t> recorderHandle;
+
+        // WHEN
+        CommandRecorder commandRecorder = device.createCommandRecorder();
+        recorderHandle = commandRecorder.handle();
+
+        // THEN
+        CHECK(commandRecorder.isValid());
+        CHECK(recorderHandle.isValid());
+        CHECK(api->resourceManager()->getCommandRecorder(recorderHandle) != nullptr);
+
+        // WHEN
+        commandRecorder = device.createCommandRecorder();
 
         // THEN
         CHECK(api->resourceManager()->getCommandRecorder(recorderHandle) == nullptr);

@@ -82,6 +82,24 @@ TEST_SUITE("ComputePipeline")
 
         Handle<ComputePipeline_t> pipelineHandle;
 
+        SUBCASE("Going Out Of Scope")
+        {
+            {
+                // WHEN
+                ComputePipeline c = device.createComputePipeline(computePipelineOptions);
+                pipelineHandle = c.handle();
+
+                // THEN
+                CHECK(c.isValid());
+                CHECK(pipelineHandle.isValid());
+                CHECK(api->resourceManager()->getComputePipeline(pipelineHandle) != nullptr);
+            }
+
+            // THEN
+            CHECK(api->resourceManager()->getComputePipeline(pipelineHandle) == nullptr);
+        }
+
+        SUBCASE("Move assigment")
         {
             // WHEN
             ComputePipeline c = device.createComputePipeline(computePipelineOptions);
@@ -91,10 +109,13 @@ TEST_SUITE("ComputePipeline")
             CHECK(c.isValid());
             CHECK(pipelineHandle.isValid());
             CHECK(api->resourceManager()->getComputePipeline(pipelineHandle) != nullptr);
-        }
 
-        // THEN
-        CHECK(api->resourceManager()->getComputePipeline(pipelineHandle) == nullptr);
+            // WHEN
+            c = {};
+
+            // THEN
+            CHECK(api->resourceManager()->getComputePipeline(pipelineHandle) == nullptr);
+        }
     }
 
     TEST_CASE("Comparison")

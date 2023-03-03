@@ -52,6 +52,24 @@ TEST_SUITE("PipelineLayout")
 
         Handle<PipelineLayout_t> pipelineLayoutHandle;
 
+        SUBCASE("Going Out Of Scope")
+        {
+            {
+                // WHEN
+                PipelineLayout pipelineLayout = device.createPipelineLayout(pipelineLayoutOptions);
+                pipelineLayoutHandle = pipelineLayout.handle();
+
+                // THEN
+                CHECK(pipelineLayout.isValid());
+                CHECK(pipelineLayoutHandle.isValid());
+                CHECK(api->resourceManager()->getPipelineLayout(pipelineLayoutHandle) != nullptr);
+            }
+
+            // THEN
+            CHECK(api->resourceManager()->getPipelineLayout(pipelineLayoutHandle) == nullptr);
+        }
+
+        SUBCASE("Move assigment")
         {
             // WHEN
             PipelineLayout pipelineLayout = device.createPipelineLayout(pipelineLayoutOptions);
@@ -61,10 +79,13 @@ TEST_SUITE("PipelineLayout")
             CHECK(pipelineLayout.isValid());
             CHECK(pipelineLayoutHandle.isValid());
             CHECK(api->resourceManager()->getPipelineLayout(pipelineLayoutHandle) != nullptr);
-        }
 
-        // THEN
-        CHECK(api->resourceManager()->getPipelineLayout(pipelineLayoutHandle) == nullptr);
+            // WHEN
+            pipelineLayout = {};
+
+            // THEN
+            CHECK(api->resourceManager()->getPipelineLayout(pipelineLayoutHandle) == nullptr);
+        }
     }
 
     TEST_CASE("Comparison")

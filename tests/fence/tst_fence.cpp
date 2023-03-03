@@ -47,6 +47,24 @@ TEST_SUITE("Fence")
 
         Handle<Fence_t> fenceHandle;
 
+        SUBCASE("Going Out Of Scope")
+        {
+            {
+                // WHEN
+                Fence s = device.createFence(fenceOptions);
+                fenceHandle = s.handle();
+
+                // THEN
+                CHECK(s.isValid());
+                CHECK(fenceHandle.isValid());
+                CHECK(api->resourceManager()->getFence(fenceHandle) != nullptr);
+            }
+
+            // THEN
+            CHECK(api->resourceManager()->getFence(fenceHandle) == nullptr);
+        }
+
+        SUBCASE("Move assigment")
         {
             // WHEN
             Fence s = device.createFence(fenceOptions);
@@ -56,10 +74,13 @@ TEST_SUITE("Fence")
             CHECK(s.isValid());
             CHECK(fenceHandle.isValid());
             CHECK(api->resourceManager()->getFence(fenceHandle) != nullptr);
-        }
 
-        // THEN
-        CHECK(api->resourceManager()->getFence(fenceHandle) == nullptr);
+            // WHEN
+            s = {};
+
+            // THEN
+            CHECK(api->resourceManager()->getFence(fenceHandle) == nullptr);
+        }
     }
 
     TEST_CASE("Comparison")

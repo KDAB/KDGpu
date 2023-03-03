@@ -72,6 +72,25 @@ TEST_SUITE("TextureView")
 
         Handle<TextureView_t> textureViewHandle;
 
+        SUBCASE("Going Out Of Scope")
+        {
+            {
+                // WHEN
+                TextureView tv = t.createView();
+                textureViewHandle = tv.handle();
+
+                // THEN
+                CHECK(t.isValid());
+                CHECK(tv.isValid());
+                CHECK(textureViewHandle.isValid());
+                CHECK(api->resourceManager()->getTextureView(textureViewHandle) != nullptr);
+            }
+
+            // THEN
+            CHECK(api->resourceManager()->getTextureView(textureViewHandle) == nullptr);
+        }
+
+        SUBCASE("Move assigment")
         {
             // WHEN
             TextureView tv = t.createView();
@@ -82,10 +101,13 @@ TEST_SUITE("TextureView")
             CHECK(tv.isValid());
             CHECK(textureViewHandle.isValid());
             CHECK(api->resourceManager()->getTextureView(textureViewHandle) != nullptr);
-        }
 
-        // THEN
-        CHECK(api->resourceManager()->getTextureView(textureViewHandle) == nullptr);
+            // WHEN
+            tv = {};
+
+            // THEN
+            CHECK(api->resourceManager()->getTextureView(textureViewHandle) == nullptr);
+        }
     }
 
     TEST_CASE("Comparison")

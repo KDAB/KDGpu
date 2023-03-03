@@ -64,6 +64,24 @@ TEST_SUITE("Texture")
 
         Handle<Texture_t> textureHandle;
 
+        SUBCASE("Going Out Of Scope")
+        {
+            {
+                // WHEN
+                Texture t = device.createTexture(textureOptions);
+                textureHandle = t.handle();
+
+                // THEN
+                CHECK(t.isValid());
+                CHECK(textureHandle.isValid());
+                CHECK(api->resourceManager()->getTexture(textureHandle) != nullptr);
+            }
+
+            // THEN
+            CHECK(api->resourceManager()->getTexture(textureHandle) == nullptr);
+        }
+
+        SUBCASE("Move assigment")
         {
             // WHEN
             Texture t = device.createTexture(textureOptions);
@@ -73,10 +91,13 @@ TEST_SUITE("Texture")
             CHECK(t.isValid());
             CHECK(textureHandle.isValid());
             CHECK(api->resourceManager()->getTexture(textureHandle) != nullptr);
-        }
 
-        // THEN
-        CHECK(api->resourceManager()->getTexture(textureHandle) == nullptr);
+            // WHEN
+            t = {};
+
+            // THEN
+            CHECK(api->resourceManager()->getTexture(textureHandle) == nullptr);
+        }
     }
 
     TEST_CASE("Comparison")

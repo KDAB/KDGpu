@@ -125,7 +125,26 @@ TEST_SUITE("GraphicsPipeline")
 
         Handle<GraphicsPipeline_t> pipelineHandle;
 
+        SUBCASE("Going Out Of Scope")
         {
+            {
+                // WHEN
+                GraphicsPipeline g = device.createGraphicsPipeline(pipelineOptions);
+                pipelineHandle = g.handle();
+
+                // THEN
+                CHECK(g.isValid());
+                CHECK(pipelineHandle.isValid());
+                CHECK(api->resourceManager()->getGraphicsPipeline(pipelineHandle) != nullptr);
+            }
+
+            // THEN
+            CHECK(api->resourceManager()->getGraphicsPipeline(pipelineHandle) == nullptr);
+        }
+
+        SUBCASE("Move assigment")
+        {
+
             // WHEN
             GraphicsPipeline g = device.createGraphicsPipeline(pipelineOptions);
             pipelineHandle = g.handle();
@@ -134,10 +153,13 @@ TEST_SUITE("GraphicsPipeline")
             CHECK(g.isValid());
             CHECK(pipelineHandle.isValid());
             CHECK(api->resourceManager()->getGraphicsPipeline(pipelineHandle) != nullptr);
-        }
 
-        // THEN
-        CHECK(api->resourceManager()->getGraphicsPipeline(pipelineHandle) == nullptr);
+            // WHEN
+            g = {};
+
+            // THEN
+            CHECK(api->resourceManager()->getGraphicsPipeline(pipelineHandle) == nullptr);
+        }
     }
 
     TEST_CASE("Comparison")

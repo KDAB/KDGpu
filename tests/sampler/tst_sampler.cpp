@@ -48,6 +48,24 @@ TEST_SUITE("Sampler")
 
         Handle<Sampler_t> samplerHandle;
 
+        SUBCASE("Going Out Of Scope")
+        {
+            {
+                // WHEN
+                Sampler s = device.createSampler(samplerOptions);
+                samplerHandle = s.handle();
+
+                // THEN
+                CHECK(s.isValid());
+                CHECK(samplerHandle.isValid());
+                CHECK(api->resourceManager()->getSampler(samplerHandle) != nullptr);
+            }
+
+            // THEN
+            CHECK(api->resourceManager()->getSampler(samplerHandle) == nullptr);
+        }
+
+        SUBCASE("Move assigment")
         {
             // WHEN
             Sampler s = device.createSampler(samplerOptions);
@@ -57,10 +75,13 @@ TEST_SUITE("Sampler")
             CHECK(s.isValid());
             CHECK(samplerHandle.isValid());
             CHECK(api->resourceManager()->getSampler(samplerHandle) != nullptr);
-        }
 
-        // THEN
-        CHECK(api->resourceManager()->getSampler(samplerHandle) == nullptr);
+            // WHEN
+            s = {};
+
+            // THEN
+            CHECK(api->resourceManager()->getSampler(samplerHandle) == nullptr);
+        }
     }
 
     TEST_CASE("Comparison")

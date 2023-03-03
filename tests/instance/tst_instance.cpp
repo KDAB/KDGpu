@@ -84,4 +84,52 @@ TEST_SUITE("Instance")
             CHECK(aAndD.device.isValid());
         }
     }
+
+    TEST_CASE("Destruction")
+    {
+        // GIVEN
+        std::unique_ptr<GraphicsApi> api = std::make_unique<VulkanGraphicsApi>();
+
+        const InstanceOptions options{
+            .applicationName = "instance",
+            .applicationVersion = SERENITY_MAKE_API_VERSION(0, 1, 0, 0)
+        };
+
+        Handle<Instance_t> handle;
+
+        SUBCASE("Going Out Of Scope")
+        {
+            {
+                // WHEN
+                Instance instance = api->createInstance(options);
+                handle = instance.handle();
+
+                // THEN
+                CHECK(instance.isValid());
+                CHECK(handle.isValid());
+                CHECK(api->resourceManager()->getInstance(handle) != nullptr);
+            }
+
+            // THEN
+            CHECK(api->resourceManager()->getInstance(handle) == nullptr);
+        }
+
+        SUBCASE("Move assigment")
+        {
+            // WHEN
+            Instance instance = api->createInstance(options);
+            handle = instance.handle();
+
+            // THEN
+            CHECK(instance.isValid());
+            CHECK(handle.isValid());
+            CHECK(api->resourceManager()->getInstance(handle) != nullptr);
+
+            // WHEN
+            instance = {};
+
+            // THEN
+            CHECK(api->resourceManager()->getInstance(handle) == nullptr);
+        }
+    }
 }

@@ -84,6 +84,24 @@ TEST_SUITE("Buffer")
 
         Handle<Buffer_t> bufferHandle;
 
+        SUBCASE("Going Out Of Scope")
+        {
+            {
+                // WHEN
+                Buffer b = device.createBuffer(bufferOptions, vertexData.data());
+                bufferHandle = b.handle();
+
+                // THEN
+                CHECK(b.isValid());
+                CHECK(bufferHandle.isValid());
+                CHECK(api->resourceManager()->getBuffer(bufferHandle) != nullptr);
+            }
+
+            // THEN
+            CHECK(api->resourceManager()->getBuffer(bufferHandle) == nullptr);
+        }
+
+        SUBCASE("Move assigment")
         {
             // WHEN
             Buffer b = device.createBuffer(bufferOptions, vertexData.data());
@@ -93,10 +111,13 @@ TEST_SUITE("Buffer")
             CHECK(b.isValid());
             CHECK(bufferHandle.isValid());
             CHECK(api->resourceManager()->getBuffer(bufferHandle) != nullptr);
-        }
 
-        // THEN
-        CHECK(api->resourceManager()->getBuffer(bufferHandle) == nullptr);
+            // WHEN
+            b = {};
+
+            // THEN
+            CHECK(api->resourceManager()->getBuffer(bufferHandle) == nullptr);
+        }
     }
 
     TEST_CASE("Map/Unmap")

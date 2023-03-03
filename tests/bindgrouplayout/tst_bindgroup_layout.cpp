@@ -64,19 +64,40 @@ TEST_SUITE("BindGroupLayout")
 
         Handle<BindGroupLayout_t> bindGroupLayoutHandle;
 
+        SUBCASE("Going Out Of Scope")
+        {
+            {
+                // WHEN
+                const BindGroupLayout bindGroupLayout = device.createBindGroupLayout(bindGroupLayoutOptions);
+                bindGroupLayoutHandle = bindGroupLayout.handle();
+
+                // THEN
+                CHECK(bindGroupLayout.isValid());
+                CHECK(bindGroupLayoutHandle.isValid());
+                CHECK(api->resourceManager()->getBindGroupLayout(bindGroupLayoutHandle) != nullptr);
+            }
+
+            // THEN
+            CHECK(api->resourceManager()->getBindGroupLayout(bindGroupLayoutHandle) == nullptr);
+        }
+
+        SUBCASE("Move assigment")
         {
             // WHEN
-            const BindGroupLayout bindGroupLayout = device.createBindGroupLayout(bindGroupLayoutOptions);
+            BindGroupLayout bindGroupLayout = device.createBindGroupLayout(bindGroupLayoutOptions);
             bindGroupLayoutHandle = bindGroupLayout.handle();
 
             // THEN
             CHECK(bindGroupLayout.isValid());
             CHECK(bindGroupLayoutHandle.isValid());
             CHECK(api->resourceManager()->getBindGroupLayout(bindGroupLayoutHandle) != nullptr);
-        }
 
-        // THEN
-        CHECK(api->resourceManager()->getBindGroupLayout(bindGroupLayoutHandle) == nullptr);
+            // WHEN
+            bindGroupLayout = {};
+
+            // THEN
+            CHECK(api->resourceManager()->getBindGroupLayout(bindGroupLayoutHandle) == nullptr);
+        }
     }
 
     TEST_CASE("Comparison")
