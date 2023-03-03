@@ -3,6 +3,7 @@ find_package(Vulkan REQUIRED)
 set(SOURCES
     engine.cpp
     engine_layer.cpp
+    advanced_example_engine_layer.cpp
     simple_example_engine_layer.cpp
     view.cpp
 )
@@ -10,6 +11,7 @@ set(SOURCES
 set(HEADERS
     engine.h
     engine_layer.h
+    advanced_example_engine_layer.h
     simple_example_engine_layer.h
     view.h
 )
