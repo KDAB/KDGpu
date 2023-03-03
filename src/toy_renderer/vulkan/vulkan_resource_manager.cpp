@@ -1648,6 +1648,7 @@ Handle<Fence_t> VulkanResourceManager::createFence(const Handle<Device_t> &devic
 
     VkFenceCreateInfo fenceInfo{};
     fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
     VkFence fence{ VK_NULL_HANDLE };
     if (vkCreateFence(vulkanDevice->device, &fenceInfo, nullptr, &fence) != VK_SUCCESS)
