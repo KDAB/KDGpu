@@ -14,6 +14,7 @@ struct ShaderModule_t;
 class TOY_RENDERER_EXPORT ShaderModule
 {
 public:
+    ShaderModule();
     ~ShaderModule();
 
     ShaderModule(ShaderModule &&);
