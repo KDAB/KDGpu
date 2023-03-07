@@ -53,20 +53,32 @@ void VulkanRenderPassCommandRecorder::setIndexBuffer(const Handle<Buffer_t> &buf
     vkCmdBindIndexBuffer(commandBuffer, vulkanBuffer->buffer, offset, indexTypeToVkIndexType(indexType));
 }
 
-void VulkanRenderPassCommandRecorder::setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroupH)
+void VulkanRenderPassCommandRecorder::setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroupH, const Handle<PipelineLayout_t> &pipelineLayout)
 {
     VulkanBindGroup *bindGroup = vulkanResourceManager->getBindGroup(bindGroupH);
     VkDescriptorSet set = bindGroup->descriptorSet;
 
+    // Use the pipeline layout provided, otherwise fallback to the one from the currently
+    // bound pipeline (if any).
+    VkPipelineLayout vkPipelineLayout{ VK_NULL_HANDLE };
+    if (pipelineLayout.isValid()) {
+        VulkanPipelineLayout *vulkanPipelineLayout = vulkanResourceManager->getPipelineLayout(pipelineLayout);
+        if (vulkanPipelineLayout)
+            vkPipelineLayout = vulkanPipelineLayout->pipelineLayout;
+    } else if (pipeline.isValid()) {
+        VulkanGraphicsPipeline *vulkanPipeline = vulkanResourceManager->getGraphicsPipeline(pipeline);
+        if (vulkanPipeline) {
+            VulkanPipelineLayout *vulkanPipelineLayout = vulkanResourceManager->getPipelineLayout(vulkanPipeline->pipelineLayoutHandle);
+            if (vulkanPipelineLayout)
+                vkPipelineLayout = vulkanPipelineLayout->pipelineLayout;
+        }
+    }
+
+    assert(vkPipelineLayout != VK_NULL_HANDLE); // The PipelineLayout should outlive the pipelines
+
     // Bind Descriptor Set
-    VulkanGraphicsPipeline *p = vulkanResourceManager->getGraphicsPipeline(pipeline);
-    VulkanPipelineLayout *pLayout = vulkanResourceManager->getPipelineLayout(p->pipelineLayoutHandle);
-
-    assert(pLayout != nullptr); // The PipelineLayout should outlive the pipelines
-
-    VkPipelineLayout pipelineLayout = pLayout->pipelineLayout;
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                            pipelineLayout,
+                            vkPipelineLayout,
                             group,
                             1, &set,
                             0, nullptr);

@@ -12,6 +12,7 @@ struct BindGroup_t;
 struct Buffer_t;
 struct Device_t;
 struct GraphicsPipeline_t;
+struct PipelineLayout_t;
 struct RenderPassCommandRecorder_t;
 
 struct Rect2D;
@@ -71,7 +72,9 @@ public:
     void setVertexBuffer(uint32_t index, const Handle<Buffer_t> &buffer);
     void setIndexBuffer(const Handle<Buffer_t> &buffer, DeviceSize offset = 0, IndexType indexType = IndexType::Uint32);
 
-    void setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroup);
+    void setBindGroup(uint32_t group,
+                      const Handle<BindGroup_t> &bindGroup,
+                      const Handle<PipelineLayout_t> &pipelineLayout = Handle<PipelineLayout_t>());
 
     void setViewport(const Viewport &viewport);
     void setScissor(const Rect2D &scissor);
