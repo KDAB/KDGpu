@@ -19,7 +19,7 @@ struct VulkanRenderPassCommandRecorder : public ApiRenderPassCommandRecorder {
                                              const Handle<Device_t> &_deviceHandle);
 
     void setPipeline(const Handle<GraphicsPipeline_t> &pipeline) final;
-    void setVertexBuffer(uint32_t index, const Handle<Buffer_t> &buffer) final;
+    void setVertexBuffer(uint32_t index, const Handle<Buffer_t> &buffer, DeviceSize offset) final;
     void setIndexBuffer(const Handle<Buffer_t> &buffer, DeviceSize offset, IndexType indexType) final;
     void setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroup, const Handle<PipelineLayout_t> &pipelineLayout) final;
     void setViewport(const Viewport &viewport) final;

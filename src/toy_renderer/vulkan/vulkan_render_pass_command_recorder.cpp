@@ -38,11 +38,11 @@ void VulkanRenderPassCommandRecorder::setPipeline(const Handle<GraphicsPipeline_
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanGraphicsPipeline->pipeline);
 }
 
-void VulkanRenderPassCommandRecorder::setVertexBuffer(uint32_t index, const Handle<Buffer_t> &buffer)
+void VulkanRenderPassCommandRecorder::setVertexBuffer(uint32_t index, const Handle<Buffer_t> &buffer, DeviceSize offset)
 {
     VulkanBuffer *vulkanBuffer = vulkanResourceManager->getBuffer(buffer);
-    std::array<VkBuffer, 1> buffers = { vulkanBuffer->buffer };
-    std::array<VkDeviceSize, 1> offsets = { 0 };
+    const std::array<VkBuffer, 1> buffers = { vulkanBuffer->buffer };
+    const std::array<VkDeviceSize, 1> offsets = { offset };
 
     vkCmdBindVertexBuffers(commandBuffer, index, 1, buffers.data(), offsets.data());
 }

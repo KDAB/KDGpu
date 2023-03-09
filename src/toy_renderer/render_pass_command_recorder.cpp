@@ -55,10 +55,10 @@ void RenderPassCommandRecorder::setPipeline(const Handle<GraphicsPipeline_t> &pi
     apiRenderPassCommandRecorder->setPipeline(pipeline);
 }
 
-void RenderPassCommandRecorder::setVertexBuffer(uint32_t index, const Handle<Buffer_t> &buffer)
+void RenderPassCommandRecorder::setVertexBuffer(uint32_t index, const Handle<Buffer_t> &buffer, DeviceSize offset)
 {
     auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
-    apiRenderPassCommandRecorder->setVertexBuffer(index, buffer);
+    apiRenderPassCommandRecorder->setVertexBuffer(index, buffer, offset);
 }
 
 void RenderPassCommandRecorder::setIndexBuffer(const Handle<Buffer_t> &buffer, DeviceSize offset, IndexType indexType)

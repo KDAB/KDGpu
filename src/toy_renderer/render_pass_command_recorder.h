@@ -69,7 +69,7 @@ public:
     void setPipeline(const Handle<GraphicsPipeline_t> &pipeline);
 
     // TODO: Add overload for setting many vertex buffers at once
-    void setVertexBuffer(uint32_t index, const Handle<Buffer_t> &buffer);
+    void setVertexBuffer(uint32_t index, const Handle<Buffer_t> &buffer, DeviceSize offset = 0);
     void setIndexBuffer(const Handle<Buffer_t> &buffer, DeviceSize offset = 0, IndexType indexType = IndexType::Uint32);
 
     void setBindGroup(uint32_t group,
