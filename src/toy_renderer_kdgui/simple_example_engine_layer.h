@@ -36,6 +36,8 @@ public:
     SimpleExampleEngineLayer();
     ~SimpleExampleEngineLayer();
 
+    View *window() { return m_window.get(); }
+
 protected:
     virtual void initializeScene() = 0;
     virtual void cleanupScene() = 0;
