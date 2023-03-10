@@ -1,4 +1,4 @@
-project(08_hello_triangle_kdgui_fence VERSION 0.1 LANGUAGES CXX)
+project(08_toy-renderer_hello_triangle_kdgui_fence VERSION 0.1 LANGUAGES CXX)
 
 find_package(Vulkan REQUIRED)
 

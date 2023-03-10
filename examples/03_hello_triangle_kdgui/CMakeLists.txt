@@ -1,4 +1,4 @@
-project(03_hello_triangle_kdgui VERSION 0.1 LANGUAGES CXX)
+project(03_toy-renderer_hello_triangle_kdgui VERSION 0.1 LANGUAGES CXX)
 
 find_package(Vulkan REQUIRED)
 

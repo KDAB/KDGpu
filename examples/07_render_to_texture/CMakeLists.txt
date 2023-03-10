@@ -1,4 +1,4 @@
-project(07_render_to_texture VERSION 0.1 LANGUAGES CXX)
+project(07_toy-renderer_render_to_texture VERSION 0.1 LANGUAGES CXX)
 
 find_package(Vulkan REQUIRED)
 

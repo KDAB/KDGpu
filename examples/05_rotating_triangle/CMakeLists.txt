@@ -1,4 +1,4 @@
-project(05_rotating_triangle VERSION 0.1 LANGUAGES CXX)
+project(05_toy-renderer_rotating_triangle VERSION 0.1 LANGUAGES CXX)
 
 find_package(Vulkan REQUIRED)
 

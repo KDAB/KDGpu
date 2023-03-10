@@ -1,4 +1,4 @@
-project(04_hello_indexed_triangle VERSION 0.1 LANGUAGES CXX)
+project(04_toy-renderer_hello_indexed_triangle VERSION 0.1 LANGUAGES CXX)
 
 find_package(Vulkan REQUIRED)
 

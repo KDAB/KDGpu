@@ -1,4 +1,4 @@
-project(06_compute_particles VERSION 0.1 LANGUAGES CXX)
+project(06_toy-renderer_compute_particles VERSION 0.1 LANGUAGES CXX)
 
 find_package(Vulkan REQUIRED)
 

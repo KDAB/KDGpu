@@ -4,28 +4,30 @@ project(Toy-Renderer-Tests)
 include_directories(./doctest)
 
 function(add_toy_renderer_test NAME SOURCES)
-    add_executable(${NAME} ${SOURCES})
+    set(TARGET_NAME toy-renderer-${NAME})
+    add_executable(${TARGET_NAME} ${SOURCES})
 
-    target_link_libraries(${NAME} toy-renderer)
+    target_link_libraries(${TARGET_NAME} toy-renderer)
 
-    add_test(NAME ${NAME} COMMAND $<TARGET_FILE:${NAME}>)
-    set_tests_properties(${NAME} PROPERTIES LABELS "ToyRenderer")
+    add_test(NAME ${TARGET_NAME} COMMAND $<TARGET_FILE:${TARGET_NAME}>)
+    set_tests_properties(${TARGET_NAME} PROPERTIES LABELS "ToyRenderer")
 
     if(APPLE)
-        target_compile_options(${NAME} PRIVATE -Wno-deprecated-declarations)
+        target_compile_options(${TARGET_NAME} PRIVATE -Wno-deprecated-declarations)
     endif()
 endfunction()
 
 function(add_toy_renderer_kdgui_test NAME SOURCES)
-    add_executable(${NAME} ${SOURCES})
+    set(TARGET_NAME toy-renderer-kdgui-${NAME})
+    add_executable(${TARGET_NAME} ${SOURCES})
 
-    target_link_libraries(${NAME} toy-renderer toy-renderer-kdgui)
+    target_link_libraries(${TARGET_NAME} toy-renderer toy-renderer-kdgui)
 
-    add_test(NAME ${NAME} COMMAND $<TARGET_FILE:${NAME}>)
-    set_tests_properties(${NAME} PROPERTIES LABELS "ToyRendererKDGui")
+    add_test(NAME ${TARGET_NAME} COMMAND $<TARGET_FILE:${TARGET_NAME}>)
+    set_tests_properties(${TARGET_NAME} PROPERTIES LABELS "ToyRendererKDGui")
 
     if(APPLE)
-        target_compile_options(${NAME} PRIVATE -Wno-deprecated-declarations)
+        target_compile_options(${TARGET_NAME} PRIVATE -Wno-deprecated-declarations)
     endif()
 endfunction()
 

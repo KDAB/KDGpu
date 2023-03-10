@@ -1,4 +1,4 @@
-project(01_bind_group VERSION 0.1 LANGUAGES CXX)
+project(01_toy-renderer_bind_group VERSION 0.1 LANGUAGES CXX)
 
 add_executable(
     ${PROJECT_NAME}
