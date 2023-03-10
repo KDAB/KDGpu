@@ -1,0 +1,1 @@
+CompileShaderSet(ToyRendererGradientBlobs gradient_blobs)
