@@ -9,6 +9,7 @@
 #include <toy_renderer/texture_options.h>
 
 #include <glm/gtx/transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <cmath>
 #include <fstream>
@@ -57,8 +58,22 @@ void GradientBlobs::initializeScene()
     const auto fragmentShaderPath = ToyRenderer::assetPath() + "/shaders/examples/09_gradient_blobs/gradient_blobs.frag.spv";
     auto fragmentShader = m_device.createShaderModule(ToyRenderer::readShaderFile(fragmentShaderPath));
 
+    // Create a bind group layout for the color stops UBO
+    // clang-format off
+    const BindGroupLayoutOptions bindGroupLayoutOptions = {
+        .bindings = {{
+            .binding = 0,
+            .resourceType = ResourceBindingType::UniformBuffer,
+            .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit)
+        }}
+    };
+    // clang-format on
+    const BindGroupLayout bindGroupLayout = m_device.createBindGroupLayout(bindGroupLayoutOptions);
+
     // Create a pipeline layout (array of bind group layouts)
-    const PipelineLayoutOptions pipelineLayoutOptions = {};
+    const PipelineLayoutOptions pipelineLayoutOptions = {
+        .bindGroupLayouts = { bindGroupLayout }
+    };
     m_pipelineLayout = m_device.createPipelineLayout(pipelineLayoutOptions);
 
     // Create a pipeline
@@ -93,6 +108,51 @@ void GradientBlobs::initializeScene()
     // clang-format on
     m_pipeline = m_device.createGraphicsPipeline(pipelineOptions);
 
+    // Create a buffer to hold the color stops
+    {
+        BufferOptions bufferOptions = {
+            .size = 8 * sizeof(glm::vec4), // 4 x vec4 + 4 x vec2 (padded to vec4 by std140)
+            .usage = BufferUsageFlags(BufferUsageFlagBits::UniformBufferBit),
+            .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
+        };
+        m_colorStopsBuffer = m_device.createBuffer(bufferOptions);
+
+        // Upload the color stops
+        const glm::vec4 color0(0.918, 0.824, 0.573, 1.0);
+        const glm::vec4 color1(0.494, 0.694, 0.659, 1.0);
+        const glm::vec4 color2(0.992, 0.671, 0.537, 1.0);
+        const glm::vec4 color3(0.859, 0.047, 0.212, 1.0);
+        const glm::vec2 p0(0.31, 0.3);
+        const glm::vec2 p1(0.7, 0.32);
+        const glm::vec2 p2(0.28, 0.71);
+        const glm::vec2 p3(0.72, 0.75);
+
+        // clang-format off
+        auto bufferData = static_cast<float *>(m_colorStopsBuffer.map());
+        std::memcpy(bufferData,      glm::value_ptr(color0), sizeof(glm::vec4));
+        std::memcpy(bufferData + 4,  glm::value_ptr(color1), sizeof(glm::vec4));
+        std::memcpy(bufferData + 8,  glm::value_ptr(color2), sizeof(glm::vec4));
+        std::memcpy(bufferData + 12, glm::value_ptr(color3), sizeof(glm::vec4));
+        std::memcpy(bufferData + 16, glm::value_ptr(p0), sizeof(glm::vec2));
+        std::memcpy(bufferData + 20, glm::value_ptr(p1), sizeof(glm::vec2));
+        std::memcpy(bufferData + 24, glm::value_ptr(p2), sizeof(glm::vec2));
+        std::memcpy(bufferData + 28, glm::value_ptr(p3), sizeof(glm::vec2));
+        m_colorStopsBuffer.unmap();
+        // clang-format on
+    }
+
+    // Create a bind group for the color stops buffer
+    // clang-format off
+    BindGroupOptions bindGroupOptions = {
+        .layout = bindGroupLayout,
+        .resources = {{
+            .binding = 0,
+            .resource = BindingResource(UniformBufferBinding{ .buffer = m_colorStopsBuffer })
+        }}
+    };
+    // clang-format on
+    m_colorStopsBindGroup = m_device.createBindGroup(bindGroupOptions);
+
     // clang-format off
     m_renderPassOptions = {
         .colorAttachments = {
@@ -114,6 +174,8 @@ void GradientBlobs::cleanupScene()
     m_pipeline = {};
     m_pipelineLayout = {};
     m_fullScreenQuad = {};
+    m_colorStopsBindGroup = {};
+    m_colorStopsBuffer = {};
     m_commandBuffer = {};
 }
 
@@ -127,6 +189,7 @@ void GradientBlobs::render()
     m_renderPassOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex);
     auto renderPass = commandRecorder.beginRenderPass(m_renderPassOptions);
     renderPass.setPipeline(m_pipeline);
+    renderPass.setBindGroup(0, m_colorStopsBindGroup);
     renderPass.setVertexBuffer(0, m_fullScreenQuad);
     renderPass.draw(DrawCommand{ .vertexCount = 4 });
     renderPass.end();

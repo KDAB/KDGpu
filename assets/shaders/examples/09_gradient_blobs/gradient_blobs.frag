@@ -6,21 +6,18 @@ layout(location = 1) in vec2 texCoord;
 
 layout(location = 0) out vec4 fragColor;
 
-const vec4 color0 = vec4(0.918, 0.824, 0.573, 1.0);
-const vec4 color1 = vec4(0.494, 0.694, 0.659, 1.0);
-const vec4 color2 = vec4(0.992, 0.671, 0.537, 1.0);
-const vec4 color3 = vec4(0.859, 0.047, 0.212, 1.0);
-const vec2 p0 = vec2(0.31,0.3);
-const vec2 p1 = vec2(0.7,0.32);
-const vec2 p2 = vec2(0.28,0.71);
-const vec2 p3 = vec2(0.72,0.75);
+layout(set = 0, binding = 0) uniform GradientStops
+{
+    vec4 colors[4];
+    vec2 positions[4]; // Padded out to vec4 by std140 rules
+} gradientStops;
 
 void main()
 {
-    vec2 Q = p0 - p2;
-    vec2 R = p1 - p0;
-    vec2 S = R + p2 - p3;
-    vec2 T = p0 - texCoord;
+    vec2 Q = gradientStops.positions[0] - gradientStops.positions[2];
+    vec2 R = gradientStops.positions[1] - gradientStops.positions[0];
+    vec2 S = R + gradientStops.positions[2] - gradientStops.positions[3];
+    vec2 T = gradientStops.positions[0] - texCoord;
     float u;
     float t;
 
@@ -49,7 +46,7 @@ void main()
     t = smoothstep(0.0, 1.0, t);
     u = smoothstep(0.0, 1.0, u);
 
-    vec4 colorA = mix(color0, color1, u);
-    vec4 colorB = mix(color2, color3, u);
+    vec4 colorA = mix(gradientStops.colors[0], gradientStops.colors[1], u);
+    vec4 colorB = mix(gradientStops.colors[2], gradientStops.colors[3], u);
     fragColor = mix(colorA, colorB, t);
 }

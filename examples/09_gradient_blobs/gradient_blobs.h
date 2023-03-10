@@ -22,6 +22,8 @@ protected:
 
 private:
     Buffer m_fullScreenQuad;
+    Buffer m_colorStopsBuffer;
+    BindGroup m_colorStopsBindGroup;
     PipelineLayout m_pipelineLayout;
     GraphicsPipeline m_pipeline;
     RenderPassCommandRecorderOptions m_renderPassOptions;
