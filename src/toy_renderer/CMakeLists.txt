@@ -167,6 +167,12 @@ set(TOY_RENDERER_PUBLIC_LIBS
     spdlog::spdlog
 )
 
+set(
+    TOY_RENDERER_EXPORT_TARGETS
+    toy-renderer
+    vulkan_memory_allocator
+)
+
 target_link_libraries(toy-renderer
     PUBLIC
     ${TOY_RENDERER_PUBLIC_LIBS}
@@ -220,3 +226,33 @@ foreach(file ${HEADERS})
     get_filename_component(dir ${file} DIRECTORY)
     install(FILES ${file} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/toy_renderer/${dir})
 endforeach()
+
+install(
+    TARGETS ${TOY_RENDERER_EXPORT_TARGETS}
+    EXPORT toy-renderer
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+install(EXPORT toy-renderer DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/toy-renderer NAMESPACE ToyRenderer:: FILE ToyRendererTargets.cmake)
+
+include(CMakePackageConfigHelpers)
+
+configure_package_config_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/toy-rendererConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/toy-rendererConfig.cmake
+    INSTALL_DESTINATION
+    ${CMAKE_INSTALL_LIBDIR}/cmake/toy-renderer
+)
+
+write_basic_package_version_file(toy-rendererConfigVersion.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/toy-rendererConfig.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/toy-rendererConfigVersion.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/toy-renderer
+)
