@@ -1,0 +1,3 @@
+CompileShaderSet(ToyRendererStyledRectanglesGradientBlobs gradient_blobs)
+
+CompileShaderSet(ToyRendererStyledRectangles styled_rectangles)
