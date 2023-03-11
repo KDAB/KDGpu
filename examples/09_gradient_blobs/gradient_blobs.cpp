@@ -118,14 +118,14 @@ void GradientBlobs::initializeScene()
         m_colorStopsBuffer = m_device.createBuffer(bufferOptions);
 
         // Upload the color stops
-        const glm::vec4 color0(0.918, 0.824, 0.573, 1.0);
-        const glm::vec4 color1(0.494, 0.694, 0.659, 1.0);
-        const glm::vec4 color2(0.992, 0.671, 0.537, 1.0);
-        const glm::vec4 color3(0.859, 0.047, 0.212, 1.0);
-        const glm::vec2 p0(0.31, 0.3);
-        const glm::vec2 p1(0.7, 0.32);
-        const glm::vec2 p2(0.28, 0.71);
-        const glm::vec2 p3(0.72, 0.75);
+        const glm::vec4 color0(190.0f / 255.0f, 186.0f / 255.0f, 255.0f / 255.0f, 1.0); // Top-left
+        const glm::vec4 color1(230.0f / 255.0f, 161.0f / 255.0f, 243.0f / 255.0f, 1.0); // Top-right
+        const glm::vec4 color2(143.0f / 255.0f, 143.0f / 255.0f, 245.0f / 255.0f, 1.0); // Bottom-left
+        const glm::vec4 color3(189.0f / 255.0f, 153.0f / 255.0f, 246.0f / 255.0f, 1.0); // Bottom-right
+        const glm::vec2 p0(0.35f, 0.20f); // Top-left
+        const glm::vec2 p1(0.95f, 0.05f); // Top-right
+        const glm::vec2 p2(0.05f, 0.90f); // Bottom-left
+        const glm::vec2 p3(0.80f, 0.85f); // Bottom-right
 
         // clang-format off
         auto bufferData = static_cast<float *>(m_colorStopsBuffer.map());
