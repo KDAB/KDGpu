@@ -108,7 +108,7 @@ void GradientBlobs::initializeScene()
     // clang-format on
     m_pipeline = m_device.createGraphicsPipeline(pipelineOptions);
 
-    // Create a buffer to hold the color stops
+    // Create a buffer to hold the color stops. The data will be uploaded in updateScene()
     {
         BufferOptions bufferOptions = {
             .size = 8 * sizeof(glm::vec4), // 4 x vec4 + 4 x vec2 (padded to vec4 by std140)
@@ -116,29 +116,6 @@ void GradientBlobs::initializeScene()
             .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
         };
         m_colorStopsBuffer = m_device.createBuffer(bufferOptions);
-
-        // Upload the color stops
-        const glm::vec4 color0(190.0f / 255.0f, 186.0f / 255.0f, 255.0f / 255.0f, 1.0); // Top-left
-        const glm::vec4 color1(230.0f / 255.0f, 161.0f / 255.0f, 243.0f / 255.0f, 1.0); // Top-right
-        const glm::vec4 color2(143.0f / 255.0f, 143.0f / 255.0f, 245.0f / 255.0f, 1.0); // Bottom-left
-        const glm::vec4 color3(189.0f / 255.0f, 153.0f / 255.0f, 246.0f / 255.0f, 1.0); // Bottom-right
-        const glm::vec2 p0(0.35f, 0.20f); // Top-left
-        const glm::vec2 p1(0.95f, 0.05f); // Top-right
-        const glm::vec2 p2(0.05f, 0.90f); // Bottom-left
-        const glm::vec2 p3(0.80f, 0.85f); // Bottom-right
-
-        // clang-format off
-        auto bufferData = static_cast<float *>(m_colorStopsBuffer.map());
-        std::memcpy(bufferData,      glm::value_ptr(color0), sizeof(glm::vec4));
-        std::memcpy(bufferData + 4,  glm::value_ptr(color1), sizeof(glm::vec4));
-        std::memcpy(bufferData + 8,  glm::value_ptr(color2), sizeof(glm::vec4));
-        std::memcpy(bufferData + 12, glm::value_ptr(color3), sizeof(glm::vec4));
-        std::memcpy(bufferData + 16, glm::value_ptr(p0), sizeof(glm::vec2));
-        std::memcpy(bufferData + 20, glm::value_ptr(p1), sizeof(glm::vec2));
-        std::memcpy(bufferData + 24, glm::value_ptr(p2), sizeof(glm::vec2));
-        std::memcpy(bufferData + 28, glm::value_ptr(p3), sizeof(glm::vec2));
-        m_colorStopsBuffer.unmap();
-        // clang-format on
     }
 
     // Create a bind group for the color stops buffer
@@ -181,6 +158,26 @@ void GradientBlobs::cleanupScene()
 
 void GradientBlobs::updateScene()
 {
+    // Calculate the new color stop positions from the animation data
+    const float t = engine()->simulationTime().count() / 1.0e9;
+    m_p0 = m_p0Anim.evaluate(t);
+    m_p1 = m_p1Anim.evaluate(t);
+    m_p2 = m_p2Anim.evaluate(t);
+    m_p3 = m_p3Anim.evaluate(t);
+
+    // Upload the color stops
+    // clang-format off
+    auto bufferData = static_cast<float *>(m_colorStopsBuffer.map());
+    std::memcpy(bufferData,      glm::value_ptr(m_color0), sizeof(glm::vec4));
+    std::memcpy(bufferData +  4, glm::value_ptr(m_color1), sizeof(glm::vec4));
+    std::memcpy(bufferData +  8, glm::value_ptr(m_color2), sizeof(glm::vec4));
+    std::memcpy(bufferData + 12, glm::value_ptr(m_color3), sizeof(glm::vec4));
+    std::memcpy(bufferData + 16, glm::value_ptr(m_p0), sizeof(glm::vec2));
+    std::memcpy(bufferData + 20, glm::value_ptr(m_p1), sizeof(glm::vec2));
+    std::memcpy(bufferData + 24, glm::value_ptr(m_p2), sizeof(glm::vec2));
+    std::memcpy(bufferData + 28, glm::value_ptr(m_p3), sizeof(glm::vec2));
+    m_colorStopsBuffer.unmap();
+    // clang-format on
 }
 
 void GradientBlobs::render()
