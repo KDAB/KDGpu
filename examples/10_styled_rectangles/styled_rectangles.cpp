@@ -120,7 +120,16 @@ void StyledRectangles::initializeRectangles()
             }
         },
         .renderTargets = {
-            { .format = m_swapchainFormat }
+            {
+                .format = m_swapchainFormat,
+                .blending = { // Enable typical alpha blending
+                    .blendingEnabled = true,
+                    .color = {
+                        .srcFactor = BlendFactor::SrcAlpha,
+                        .dstFactor = BlendFactor::OneMinusSrcAlpha
+                    }
+                }
+            }
         },
         .depthStencil = {
             .format = m_depthFormat,
@@ -338,17 +347,18 @@ void StyledRectangles::render()
     m_renderPassOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex);
     auto renderPass = commandRecorder.beginRenderPass(m_renderPassOptions);
 
-    // Draw the rectangle
-    renderPass.setPipeline(m_rectPipeline);
-    renderPass.setBindGroup(0, m_rectBindGroup);
-    renderPass.setVertexBuffer(0, m_normalizedQuad);
-    renderPass.draw(DrawCommand{ .vertexCount = 4 });
-
     // Draw the background
     renderPass.setPipeline(m_bgPipeline);
     renderPass.setBindGroup(0, m_colorStopsBindGroup);
     renderPass.setVertexBuffer(0, m_fullScreenQuad);
     renderPass.draw(DrawCommand{ .vertexCount = 4 });
+
+    // Draw the rectangle last (as we are alpha blending)
+    renderPass.setPipeline(m_rectPipeline);
+    renderPass.setBindGroup(0, m_rectBindGroup);
+    renderPass.setVertexBuffer(0, m_normalizedQuad);
+    renderPass.draw(DrawCommand{ .vertexCount = 4 });
+
     renderPass.end();
 
     m_commandBuffer = commandRecorder.finish();
