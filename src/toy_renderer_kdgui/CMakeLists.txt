@@ -28,6 +28,11 @@ set(TOY_RENDERER_KDGUI_PUBLIC_LIBS
     KDUtils::Gui
 )
 
+set(
+    TOY_RENDERER_KDGUI_EXPORT_TARGETS
+    toy-renderer-kdgui
+)
+
 target_link_libraries(toy-renderer-kdgui
     PUBLIC
     ${TOY_RENDERER_KDGUI_PUBLIC_LIBS}
@@ -59,3 +64,33 @@ foreach(file ${HEADERS})
     get_filename_component(dir ${file} DIRECTORY)
     install(FILES ${file} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/toy_renderer_kdgui/${dir})
 endforeach()
+
+install(
+    TARGETS ${TOY_RENDERER_KDGUI_EXPORT_TARGETS}
+    EXPORT toy-renderer-kdgui
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+install(EXPORT toy-renderer-kdgui DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/toy-renderer-kdgui NAMESPACE ToyRendererKDGui:: FILE ToyRendererKDGuiTargets.cmake)
+
+include(CMakePackageConfigHelpers)
+
+configure_package_config_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/toy-renderer-kdguiConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/toy-renderer-kdguiConfig.cmake
+    INSTALL_DESTINATION
+    ${CMAKE_INSTALL_LIBDIR}/cmake/toy-renderer-kdgui
+)
+
+write_basic_package_version_file(toy-renderer-kdguiConfigVersion.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/toy-renderer-kdguiConfig.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/toy-renderer-kdguiConfigVersion.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/toy-renderer-kdgui
+)
