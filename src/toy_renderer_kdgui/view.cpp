@@ -33,17 +33,17 @@ View::~View()
 {
 }
 
-ToyRenderer::SurfaceOptions View::surfaceOptions() const
+ToyRenderer::SurfaceOptions View::surfaceOptions(KDGui::Window *w)
 {
 #if defined(KD_PLATFORM_WIN32)
-    auto win32Window = dynamic_cast<KDGui::Win32PlatformWindow *>(platformWindow());
+    auto win32Window = dynamic_cast<KDGui::Win32PlatformWindow *>(w->platformWindow());
     return ToyRenderer::SurfaceOptions{
         .hWnd = win32Window->handle()
     };
 #endif
 
 #if defined(KD_PLATFORM_LINUX)
-    auto xcbWindow = dynamic_cast<KDGui::LinuxXcbPlatformWindow *>(platformWindow());
+    auto xcbWindow = dynamic_cast<KDGui::LinuxXcbPlatformWindow *>(w->platformWindow());
     return ToyRenderer::SurfaceOptions{
         .connection = xcbWindow->connection(),
         .window = xcbWindow->handle()
@@ -55,7 +55,7 @@ ToyRenderer::SurfaceOptions View::surfaceOptions() const
 
 ToyRenderer::Surface View::createSurface(ToyRenderer::Instance &instance)
 {
-    ToyRenderer::Surface surface = instance.createSurface(surfaceOptions());
+    ToyRenderer::Surface surface = instance.createSurface(View::surfaceOptions(this));
     return surface;
 }
 

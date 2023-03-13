@@ -61,7 +61,7 @@ TEST_SUITE("Instance")
             View v;
 
             // WHEN
-            const SurfaceOptions surfaceOptions = v.surfaceOptions();
+            const SurfaceOptions surfaceOptions = View::surfaceOptions(&v);
             Surface s = instance.createSurface(surfaceOptions);
 
             // THEN
@@ -73,7 +73,7 @@ TEST_SUITE("Instance")
             // GIVEN
             GuiApplication app;
             View v;
-            const SurfaceOptions surfaceOptions = v.surfaceOptions();
+            const SurfaceOptions surfaceOptions = View::surfaceOptions(&v);
             Surface s = instance.createSurface(surfaceOptions);
 
             // WHEN

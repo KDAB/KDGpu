@@ -126,7 +126,7 @@ int main()
 
     // Rendering Surface
     View v;
-    const SurfaceOptions surfaceOptions = v.surfaceOptions();
+    const SurfaceOptions surfaceOptions = View::surfaceOptions(&v);
     Surface s = instance.createSurface(surfaceOptions);
 
     // Select best device to render on surface

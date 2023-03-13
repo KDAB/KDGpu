@@ -19,7 +19,7 @@ public:
     View();
     ~View();
 
-    ToyRenderer::SurfaceOptions surfaceOptions() const;
+    static ToyRenderer::SurfaceOptions surfaceOptions(KDGui::Window *w);
     ToyRenderer::Surface createSurface(ToyRenderer::Instance &instance);
 };
 
