@@ -91,6 +91,8 @@ public:
 
     Fence createFence(const FenceOptions &options = FenceOptions());
 
+    GraphicsApi *graphicsApi() const;
+
 private:
     Device(Adapter *adapter, GraphicsApi *api, const DeviceOptions &options);
 

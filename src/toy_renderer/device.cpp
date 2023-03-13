@@ -137,4 +137,9 @@ Fence Device::createFence(const FenceOptions &options)
     return Fence(m_api, m_device, options);
 }
 
+GraphicsApi *Device::graphicsApi() const
+{
+    return m_api;
+}
+
 } // namespace ToyRenderer
