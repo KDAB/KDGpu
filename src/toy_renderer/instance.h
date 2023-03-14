@@ -42,7 +42,7 @@ struct InstanceOptions {
 };
 
 struct AdapterAndDevice {
-    Adapter adapter;
+    Adapter *adapter;
     Device device;
 };
 
@@ -66,8 +66,8 @@ public:
     AdapterAndDevice createDefaultDevice(const Surface &surface,
                                          AdapterDeviceType deviceType = AdapterDeviceType::DiscreteGpu) const;
 
-    std::span<Adapter> adapters() const;
-    std::optional<Adapter> selectAdapter(AdapterDeviceType deviceType) const;
+    std::vector<Adapter *> adapters() const;
+    Adapter *selectAdapter(AdapterDeviceType deviceType) const;
 
     // TODO: Support Serenity::Window, QWindow etc
     //

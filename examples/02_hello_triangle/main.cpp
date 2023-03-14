@@ -99,34 +99,24 @@ int main()
 
     // Enumerate the adapters (physical devices) and select one to use. Here we look for
     // a discrete GPU. In a real app, we could fallback to an integrated one.
-    Adapter selectedAdapter;
-    auto adapters = instance.adapters();
-    for (auto &adapter : adapters) {
-        const auto properties = adapter.properties();
-        spdlog::critical("Found device: Name: {}, Type: {}", properties.deviceName, properties.deviceType);
+    Adapter *selectedAdapter = instance.selectAdapter(AdapterDeviceType::DiscreteGpu);
 
-        if (properties.deviceType == AdapterDeviceType::DiscreteGpu) {
-            selectedAdapter = adapter;
-            break;
-        }
-    }
-
-    if (!selectedAdapter.isValid()) {
+    if (!selectedAdapter) {
         spdlog::critical("Unable to find a discrete GPU. Aborting...");
         return -1;
     }
 
     // We can easily query the adapter for various features, properties and limits.
-    spdlog::critical("maxBoundDescriptorSets = {}", selectedAdapter.properties().limits.maxBoundDescriptorSets);
-    spdlog::critical("multiDrawIndirect = {}", selectedAdapter.features().multiDrawIndirect);
+    spdlog::critical("maxBoundDescriptorSets = {}", selectedAdapter->properties().limits.maxBoundDescriptorSets);
+    spdlog::critical("multiDrawIndirect = {}", selectedAdapter->features().multiDrawIndirect);
 
-    auto queueTypes = selectedAdapter.queueTypes();
+    auto queueTypes = selectedAdapter->queueTypes();
     const bool hasGraphicsAndCompute = queueTypes[0].supportsFeature(QueueFlags(QueueFlagBits::GraphicsBit) | QueueFlags(QueueFlagBits::ComputeBit));
     spdlog::critical("Queue family 0 graphics and compute support: {}", hasGraphicsAndCompute);
 
     // We are now able to query the adapter for swapchain properties and presentation support with the window surface
-    const auto swapchainProperties = selectedAdapter.swapchainProperties(surface);
-    const bool supportsPresentation = selectedAdapter.supportsPresentation(surface, 0); // Query about the 1st queue type
+    const auto swapchainProperties = selectedAdapter->swapchainProperties(surface);
+    const bool supportsPresentation = selectedAdapter->supportsPresentation(surface, 0); // Query about the 1st queue type
     spdlog::critical("Queue family 0 supports presentation: {}", supportsPresentation);
 
     if (!supportsPresentation || !hasGraphicsAndCompute) {
@@ -135,7 +125,7 @@ int main()
     }
 
     // Now we can create a device from the selected adapter that we can then use to interact with the GPU.
-    auto device = selectedAdapter.createDevice();
+    auto device = selectedAdapter->createDevice();
     auto queue = device.queues()[0];
 
     // Create a swapchain of images that we will render to.

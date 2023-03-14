@@ -42,13 +42,14 @@ TEST_SUITE("Instance")
         SUBCASE("Can create Device")
         {
             // WHEN
-            Adapter discreteGPUAdapter = instance.selectAdapter(AdapterDeviceType::DiscreteGpu).value_or(Adapter());
+            Adapter *discreteGPUAdapter = instance.selectAdapter(AdapterDeviceType::DiscreteGpu);
 
             // THEN
-            CHECK(discreteGPUAdapter.isValid());
+            CHECK(discreteGPUAdapter);
+            CHECK(discreteGPUAdapter->isValid());
 
             // WHEN
-            Device device = discreteGPUAdapter.createDevice();
+            Device device = discreteGPUAdapter->createDevice();
 
             // THEN
             CHECK(device.isValid());
@@ -80,7 +81,8 @@ TEST_SUITE("Instance")
             AdapterAndDevice aAndD = instance.createDefaultDevice(s);
 
             // THEN
-            CHECK(aAndD.adapter.isValid());
+            CHECK(aAndD.adapter);
+            CHECK(aAndD.adapter->isValid());
             CHECK(aAndD.device.isValid());
         }
     }

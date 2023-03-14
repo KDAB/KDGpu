@@ -30,7 +30,6 @@ struct AdapterOptions {
 class TOY_RENDERER_EXPORT Adapter
 {
 public:
-    Adapter();
     ~Adapter();
 
     Handle<Adapter_t> handle() const noexcept { return m_adapter; }

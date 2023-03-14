@@ -33,10 +33,10 @@ TEST_CASE("ComputePassCommandRecorder")
             .applicationName = "ComputePassCommandRecorder",
             .applicationVersion = SERENITY_MAKE_API_VERSION(0, 1, 0, 0) });
 
-    Adapter computeAdapter;
+    Adapter *computeAdapter;
     // Select Adapter that supports Compute
-    for (const auto &adapter : instance.adapters()) {
-        const auto &queueTypes = adapter.queueTypes();
+    for (auto &adapter : instance.adapters()) {
+        const auto &queueTypes = adapter->queueTypes();
         for (const auto &queueType : queueTypes) {
             const bool hasCompute = queueType.supportsFeature(QueueFlags(QueueFlagBits::ComputeBit));
             if (hasCompute) {
@@ -45,9 +45,10 @@ TEST_CASE("ComputePassCommandRecorder")
             }
         }
     }
-    REQUIRE(computeAdapter.isValid());
+    REQUIRE(computeAdapter);
+    REQUIRE(computeAdapter->isValid());
 
-    Device device = computeAdapter.createDevice();
+    Device device = computeAdapter->createDevice();
 
     Queue computeQueue;
     const auto &queues = device.queues();

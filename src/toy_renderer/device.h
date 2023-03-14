@@ -26,10 +26,9 @@
 
 namespace ToyRenderer {
 
-class Adapter;
 class GraphicsApi;
+class Adapter;
 
-struct Adapter_t;
 struct Device_t;
 
 struct BufferOptions;
@@ -61,6 +60,8 @@ public:
     std::span<Queue> queues() { return m_queues; }
 
     void waitUntilIdle();
+
+    const Adapter *adapter() const;
 
     Swapchain createSwapchain(const SwapchainOptions &options);
     Texture createTexture(const TextureOptions &options);
@@ -97,6 +98,7 @@ private:
     Device(Adapter *adapter, GraphicsApi *api, const DeviceOptions &options);
 
     GraphicsApi *m_api{ nullptr };
+    Adapter *m_adapter{ nullptr };
     Handle<Device_t> m_device;
     std::vector<Queue> m_queues;
 

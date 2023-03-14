@@ -7,10 +7,6 @@
 
 namespace ToyRenderer {
 
-Adapter::Adapter()
-{
-}
-
 Adapter::Adapter(GraphicsApi *api, const Handle<Adapter_t> &adapter)
     : m_api(api)
     , m_adapter(adapter)

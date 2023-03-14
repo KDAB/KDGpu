@@ -20,8 +20,8 @@ TEST_SUITE("BindGroupLayout")
     Instance instance = api->createInstance(InstanceOptions{
             .applicationName = "BindGroupLayout",
             .applicationVersion = SERENITY_MAKE_API_VERSION(0, 1, 0, 0) });
-    Adapter discreteGPUAdapter = instance.selectAdapter(AdapterDeviceType::DiscreteGpu).value_or(Adapter());
-    Device device = discreteGPUAdapter.createDevice();
+    Adapter *discreteGPUAdapter = instance.selectAdapter(AdapterDeviceType::DiscreteGpu);
+    Device device = discreteGPUAdapter->createDevice();
 
     TEST_CASE("Construction")
     {

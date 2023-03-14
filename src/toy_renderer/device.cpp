@@ -16,6 +16,7 @@ Device::Device()
 
 Device::Device(Adapter *adapter, GraphicsApi *api, const DeviceOptions &options)
     : m_api(api)
+    , m_adapter(adapter)
 {
     // Pass in a vector of queue requests which will be populated with the actual set of
     // queues requested by the device creation.
@@ -37,10 +38,12 @@ Device::Device(Device &&other)
     m_api = other.m_api;
     m_device = other.m_device;
     m_queues = std::move(other.m_queues);
+    m_adapter = other.m_adapter;
 
     other.m_api = nullptr;
     other.m_device = {};
     other.m_queues = {};
+    other.m_adapter = {};
 }
 
 Device &Device::operator=(Device &&other)
@@ -52,10 +55,12 @@ Device &Device::operator=(Device &&other)
         m_api = other.m_api;
         m_device = other.m_device;
         m_queues = std::move(other.m_queues);
+        m_adapter = other.m_adapter;
 
         other.m_api = nullptr;
         other.m_device = {};
         other.m_queues = {};
+        other.m_adapter = {};
     }
     return *this;
 }
@@ -64,6 +69,11 @@ Device::~Device()
 {
     if (isValid())
         m_api->resourceManager()->deleteDevice(handle());
+}
+
+const Adapter *Device::adapter() const
+{
+    return m_adapter;
 }
 
 void Device::waitUntilIdle()

@@ -59,23 +59,23 @@ AdapterAndDevice Instance::createDefaultDevice(const Surface &surface,
 {
     // Enumerate the adapters (physical devices) and select one to use. Here we look for
     // a discrete GPU. In a real app, we could fallback to an integrated one.
-    Adapter selectedAdapter = selectAdapter(deviceType).value_or(Adapter());
-    if (!selectedAdapter.isValid()) {
+    Adapter *selectedAdapter = selectAdapter(deviceType);
+    if (!selectedAdapter) {
         spdlog::critical("Unable to find a suitable Adapter. Aborting...");
         return {};
     }
 
     // We can easily query the adapter for various features, properties and limits.
-    spdlog::critical("maxBoundDescriptorSets = {}", selectedAdapter.properties().limits.maxBoundDescriptorSets);
-    spdlog::critical("multiDrawIndirect = {}", selectedAdapter.features().multiDrawIndirect);
+    spdlog::critical("maxBoundDescriptorSets = {}", selectedAdapter->properties().limits.maxBoundDescriptorSets);
+    spdlog::critical("multiDrawIndirect = {}", selectedAdapter->features().multiDrawIndirect);
 
-    auto queueTypes = selectedAdapter.queueTypes();
+    auto queueTypes = selectedAdapter->queueTypes();
     const bool hasGraphicsAndCompute = queueTypes[0].supportsFeature(QueueFlags(QueueFlagBits::GraphicsBit) | QueueFlags(QueueFlagBits::ComputeBit));
     spdlog::critical("Queue family 0 graphics and compute support: {}", hasGraphicsAndCompute);
 
     // We are now able to query the adapter for swapchain properties and presentation support with the window surface
-    const auto swapchainProperties = selectedAdapter.swapchainProperties(surface);
-    const bool supportsPresentation = selectedAdapter.supportsPresentation(surface, 0); // Query about the 1st queue type
+    const auto swapchainProperties = selectedAdapter->swapchainProperties(surface);
+    const bool supportsPresentation = selectedAdapter->supportsPresentation(surface, 0); // Query about the 1st queue type
     spdlog::critical("Queue family 0 supports presentation: {}", supportsPresentation);
 
     if (!supportsPresentation || !hasGraphicsAndCompute) {
@@ -84,12 +84,12 @@ AdapterAndDevice Instance::createDefaultDevice(const Surface &surface,
     }
 
     // Now we can create a device from the selected adapter that we can then use to interact with the GPU.
-    auto device = selectedAdapter.createDevice();
+    auto device = selectedAdapter->createDevice();
 
     return { selectedAdapter, std::move(device) };
 }
 
-std::span<Adapter> Instance::adapters() const
+std::vector<Adapter *> Instance::adapters() const
 {
     if (m_adapters.empty()) {
         auto apiInstance = m_api->resourceManager()->getInstance(m_instance);
@@ -102,19 +102,24 @@ std::span<Adapter> Instance::adapters() const
         for (uint32_t adapterIndex = 0; adapterIndex < adapterCount; ++adapterIndex)
             m_adapters.emplace_back(Adapter{ m_api, adapterHandles[adapterIndex] });
     }
-    return std::span{ m_adapters };
+
+    std::vector<Adapter *> adapterPtrs;
+    adapterPtrs.resize(m_adapters.size());
+    for (size_t i = 0, m = m_adapters.size(); i < m; ++i)
+        adapterPtrs[i] = m_adapters.data() + i;
+
+    return adapterPtrs;
 }
 
-std::optional<Adapter> Instance::selectAdapter(AdapterDeviceType deviceType) const
+Adapter *Instance::selectAdapter(AdapterDeviceType deviceType) const
 {
-    const auto &adaptersList = adapters();
-    for (const Adapter &adapter : adaptersList) {
-        const AdapterProperties &properties = adapter.properties();
-
+    std::vector<Adapter *> adaptersList = adapters();
+    for (Adapter *adapter : adaptersList) {
+        const AdapterProperties &properties = adapter->properties();
         if (properties.deviceType == deviceType)
-            return { adapter };
+            return adapter;
     }
-    return {};
+    return nullptr;
 }
 
 Surface Instance::createSurface(const SurfaceOptions &options)

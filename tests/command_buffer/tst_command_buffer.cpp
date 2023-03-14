@@ -31,10 +31,10 @@ TEST_CASE("CommandBuffer")
             .applicationName = "CommandBuffer",
             .applicationVersion = SERENITY_MAKE_API_VERSION(0, 1, 0, 0) });
 
-    Adapter transferAdapter;
+    Adapter *transferAdapter = nullptr;
     // Select Adapter that supports Transfers
-    for (const auto &adapter : instance.adapters()) {
-        const auto &queueTypes = adapter.queueTypes();
+    for (auto &adapter : instance.adapters()) {
+        const auto &queueTypes = adapter->queueTypes();
         for (const auto &queueType : queueTypes) {
             const bool hasTransfer = queueType.supportsFeature(QueueFlags(QueueFlagBits::TransferBit));
             if (hasTransfer) {
@@ -43,9 +43,10 @@ TEST_CASE("CommandBuffer")
             }
         }
     }
-    REQUIRE(transferAdapter.isValid());
+    REQUIRE(transferAdapter);
+    REQUIRE(transferAdapter->isValid());
 
-    Device device = transferAdapter.createDevice();
+    Device device = transferAdapter->createDevice();
 
     Queue transferQueue;
     const auto &queues = device.queues();
