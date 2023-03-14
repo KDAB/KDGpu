@@ -258,12 +258,12 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
 AdapterSwapchainProperties VulkanAdapter::querySwapchainProperties(const Handle<Surface_t> &surfaceHandle)
 {
     AdapterSwapchainProperties properties = {};
-    
+
     // Get the capabilities
     VulkanSurface surface = *vulkanResourceManager->getSurface(surfaceHandle);
     VkSurfaceCapabilitiesKHR capabilities;
     vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface.surface, &capabilities);
-    
+
     properties.capabilities = {
         .minImageCount = capabilities.minImageCount,
         .maxImageCount = capabilities.maxImageCount,
@@ -276,7 +276,7 @@ AdapterSwapchainProperties VulkanAdapter::querySwapchainProperties(const Handle<
         .supportedCompositeAlpha = capabilities.supportedCompositeAlpha,
         .supportedUsageFlags = capabilities.supportedUsageFlags
     };
-    
+
     // Get the supported formats and colorspaces
     uint32_t formatCount;
     std::vector<VkSurfaceFormatKHR> vkFormats;
@@ -285,17 +285,17 @@ AdapterSwapchainProperties VulkanAdapter::querySwapchainProperties(const Handle<
         vkFormats.resize(formatCount);
         vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface.surface, &formatCount, vkFormats.data());
     }
-    
+
     std::vector<SurfaceFormat> formats;
     formats.reserve(formatCount);
     for (uint32_t i = 0; i < formatCount; ++i) {
-        formats.emplace_back(SurfaceFormat { 
+        formats.emplace_back(SurfaceFormat {
             vkFormatToFormat(vkFormats[i].format),
             vkColorSpaceKHRToColorSpace(vkFormats[i].colorSpace)
         });
     }
     properties.formats = std::move(formats);
-    
+
     // Get the supported present modes
     uint32_t presentModeCount;
     std::vector<VkPresentModeKHR> vkPresentModes;
@@ -304,13 +304,13 @@ AdapterSwapchainProperties VulkanAdapter::querySwapchainProperties(const Handle<
         vkPresentModes.resize(presentModeCount);
         vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface.surface, &presentModeCount, vkPresentModes.data());
     }
-    
+
     std::vector<PresentMode> presentModes;
     presentModes.reserve(presentModeCount);
     for (uint32_t i = 0; i < presentModeCount; ++i)
         presentModes.emplace_back(vkPresentModeKHRToPresentMode(vkPresentModes[i]));
     properties.presentModes = std::move(presentModes);
-    
+
     return properties;
 }
 
@@ -320,7 +320,7 @@ std::vector<AdapterQueueType> VulkanAdapter::queryQueueTypes()
     vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, nullptr);
     std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
     vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, queueFamilies.data());
-    
+
     queueTypes.clear();
     queueTypes.reserve(queueFamilyCount);
     for (uint32_t i = 0; i < queueFamilyCount; ++i) {
@@ -338,7 +338,7 @@ std::vector<AdapterQueueType> VulkanAdapter::queryQueueTypes()
             }
         );
     }
-    
+
     return queueTypes;
 }
 
