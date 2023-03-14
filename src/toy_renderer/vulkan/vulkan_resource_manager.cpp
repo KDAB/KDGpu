@@ -1491,9 +1491,10 @@ Handle<BindGroup_t> VulkanResourceManager::createBindGroup(const Handle<Device_t
 
     auto createDescriptorSetPool = [](VkDevice device) {
         const std::vector<VkDescriptorPoolSize> poolSizes{
-            { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 64 },
+            { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 512 },
             { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 16 },
-            { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 2 }
+            { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 512 },
+            { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 128 }
         };
 
         VkDescriptorPool pool{ VK_NULL_HANDLE };
@@ -1502,7 +1503,7 @@ Handle<BindGroup_t> VulkanResourceManager::createBindGroup(const Handle<Device_t
         poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
         poolInfo.pPoolSizes = poolSizes.data();
 
-        poolInfo.maxSets = 82;
+        poolInfo.maxSets = 1024;
         poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 
         const VkResult result = vkCreateDescriptorPool(device, &poolInfo, nullptr, &pool);
