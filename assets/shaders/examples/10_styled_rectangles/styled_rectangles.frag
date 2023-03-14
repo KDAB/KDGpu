@@ -37,17 +37,17 @@ void main()
     vec2 borderCorner = rectFragmentData.rectCorner;
     if (rectFragmentData.pixelPosition.y >= rectFragmentData.rectCenter.y) {
         borderCorner.y -= borderBottom;
-    } else {   
+    } else {
         borderCorner.y -= borderTop;
     }
-   
+
     if (rectFragmentData.pixelPosition.x >= rectFragmentData.rectCenter.x) {
         borderCorner.x -= borderRight;
     } else {
         borderCorner.x -= borderLeft;
     }
-    
-    
+
+
     if (rectFragmentData.pixelPosition.x > rectFragmentData.rectCenter.x + borderCorner.x)
         fragColor = pink500;
     else if (rectFragmentData.pixelPosition.x < rectFragmentData.rectCenter.x - borderCorner.x)
@@ -56,15 +56,15 @@ void main()
         fragColor = violet500;
     else if (rectFragmentData.pixelPosition.y < rectFragmentData.rectCenter.y - borderCorner.y)
         fragColor = emerald500;
-    else 
+    else
         fragColor = gray200;
-        
+
     float shapeDistance = distanceFromRect(
         rectFragmentData.pixelPosition.xy,
         rectFragmentData.rectCenter,
         rectFragmentData.rectCorner,
         cornerRadius);
-    
+
     // If there's a corner radius we need to do some anti aliasing to smooth out the rounded corner effect.
     if (cornerRadius > 0) {
         fragColor.a *= 1.0 - smoothstep(-0.75, -0.1, shapeDistance);
