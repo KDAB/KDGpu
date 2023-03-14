@@ -17,10 +17,10 @@
 namespace ToyRenderer {
 
 class GraphicsApi;
-class Surface;
 
 struct Adapter_t;
 struct Instance_t;
+struct Surface_t;
 
 struct AdapterOptions {
     std::vector<std::string> layers;
@@ -41,8 +41,8 @@ public:
     const AdapterFeatures &features() const noexcept;
     std::span<AdapterQueueType> queueTypes() const;
 
-    AdapterSwapchainProperties swapchainProperties(const Surface &surface) const;
-    bool supportsPresentation(const Surface &surface, uint32_t queueTypeIndex) const noexcept;
+    AdapterSwapchainProperties swapchainProperties(const Handle<Surface_t> &surface) const;
+    bool supportsPresentation(const Handle<Surface_t> &surface, uint32_t queueTypeIndex) const noexcept;
 
     Device createDevice(const DeviceOptions &options = DeviceOptions());
 

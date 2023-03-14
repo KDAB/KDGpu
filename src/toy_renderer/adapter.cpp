@@ -50,16 +50,16 @@ std::span<AdapterQueueType> Adapter::queueTypes() const
     return m_queueTypes;
 }
 
-AdapterSwapchainProperties Adapter::swapchainProperties(const Surface &surface) const
+AdapterSwapchainProperties Adapter::swapchainProperties(const Handle<Surface_t> &surface) const
 {
     auto apiAdapter = m_api->resourceManager()->getAdapter(m_adapter);
-    return apiAdapter->querySwapchainProperties(surface.handle());
+    return apiAdapter->querySwapchainProperties(surface);
 }
 
-bool Adapter::supportsPresentation(const Surface &surface, uint32_t queueTypeIndex) const noexcept
+bool Adapter::supportsPresentation(const Handle<Surface_t> &surface, uint32_t queueTypeIndex) const noexcept
 {
     auto apiAdapter = m_api->resourceManager()->getAdapter(m_adapter);
-    return apiAdapter->supportsPresentation(surface.handle(), queueTypeIndex);
+    return apiAdapter->supportsPresentation(surface, queueTypeIndex);
 }
 
 Device Adapter::createDevice(const DeviceOptions &options)
