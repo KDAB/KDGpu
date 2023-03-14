@@ -62,6 +62,12 @@ bool Adapter::supportsPresentation(const Handle<Surface_t> &surface, uint32_t qu
     return apiAdapter->supportsPresentation(surface, queueTypeIndex);
 }
 
+FormatProperties Adapter::formatProperties(Format format) const
+{
+    auto apiAdapter = m_api->resourceManager()->getAdapter(m_adapter);
+    return apiAdapter->formatProperties(format);
+}
+
 Device Adapter::createDevice(const DeviceOptions &options)
 {
     return Device(this, m_api, options);

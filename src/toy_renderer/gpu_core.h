@@ -856,4 +856,33 @@ enum class CommandBufferLevel {
     MaxEnum = 0x7FFFFFFF
 };
 
+enum class FormatFeatureFlagBit {
+    SampledImageBit = 0x00000001,
+    StorageImageBit = 0x00000002,
+    StorageAtomicBit = 0x00000004,
+    UniformTexelBufferBit = 0x00000008,
+    StorageTexelBufferBit = 0x00000010,
+    StorageTexelBufferAtomicBit = 0x00000020,
+    VertexBufferBit = 0x00000040,
+    ColorAttachmentBit = 0x00000080,
+    ColorAttachmentBlendBit = 0x00000100,
+    DepthStencilAttachmentBit = 0x00000200,
+    BlitSrcBit = 0x00000400,
+    BlitDstBit = 0x00000800,
+    SampledImageFilterLinearBit = 0x00001000,
+    TransferSrcBit = 0x00004000,
+    TransferDstBit = 0x00008000,
+    MidpointChromaSampleBit = 0x00020000,
+    SampledImageYCBCRConversionLinearFilterBit = 0x00040000,
+    SampledImageYCBCRConversionSeparateReconstructionFilterBit = 0x00080000,
+    SampledImageYCBCRConversionChromaReconstructionExplicitBit = 0x00100000,
+    SampledImageYCBCRConversionChromaReconstructionExplicitForceableBit = 0x00200000,
+    DisjointBit = 0x00400000,
+    CositedChromaSampledBit = 0x00800000,
+    SampledImageFilterMinMaxBit = 0x00010000,
+    SampledImageFilterCubicBit = 0x00002000,
+    MaxEnum = 0x7FFFFFFF
+};
+using FormatFeatureFlags = Flags;
+
 } // namespace ToyRenderer

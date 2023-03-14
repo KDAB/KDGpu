@@ -44,6 +44,8 @@ public:
     AdapterSwapchainProperties swapchainProperties(const Handle<Surface_t> &surface) const;
     bool supportsPresentation(const Handle<Surface_t> &surface, uint32_t queueTypeIndex) const noexcept;
 
+    FormatProperties formatProperties(Format format) const;
+
     Device createDevice(const DeviceOptions &options = DeviceOptions());
 
 private:

@@ -136,4 +136,10 @@ struct AdapterProperties {
     AdapterSparseProperties sparseProperties;
 };
 
+struct FormatProperties {
+    FormatFeatureFlags linearTilingFeatures;
+    FormatFeatureFlags optimalTilingFeatures;
+    FormatFeatureFlags bufferFeatures;
+};
+
 } // namespace ToyRenderer

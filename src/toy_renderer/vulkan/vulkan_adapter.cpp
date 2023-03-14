@@ -350,4 +350,16 @@ bool VulkanAdapter::supportsPresentation(const Handle<Surface_t> surfaceHandle, 
     return canPresent;
 }
 
+FormatProperties VulkanAdapter::formatProperties(Format format) const
+{
+    VkFormatProperties props;
+    vkGetPhysicalDeviceFormatProperties(physicalDevice, static_cast<VkFormat>(format), &props);
+
+    return FormatProperties {
+        .linearTilingFeatures = props.linearTilingFeatures,
+        .optimalTilingFeatures = props.optimalTilingFeatures,
+        .bufferFeatures = props.bufferFeatures
+    };
+}
+
 } // namespace ToyRenderer
