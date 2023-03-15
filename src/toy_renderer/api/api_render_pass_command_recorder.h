@@ -20,7 +20,8 @@ struct ApiRenderPassCommandRecorder {
     virtual void setPipeline(const Handle<GraphicsPipeline_t> &pipeline) = 0;
     virtual void setVertexBuffer(uint32_t index, const Handle<Buffer_t> &buffer, DeviceSize offset) = 0;
     virtual void setIndexBuffer(const Handle<Buffer_t> &buffer, DeviceSize offset, IndexType indexType) = 0;
-    virtual void setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroup, const Handle<PipelineLayout_t> &pipelineLayout) = 0;
+    virtual void setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroup,
+                              const Handle<PipelineLayout_t> &pipelineLayout, const std::vector<uint32_t> &dynamicBufferOffsets) = 0;
     virtual void setViewport(const Viewport &viewport) = 0;
     virtual void setScissor(const Rect2D &scissor) = 0;
     virtual void draw(const DrawCommand &drawCommand) = 0;

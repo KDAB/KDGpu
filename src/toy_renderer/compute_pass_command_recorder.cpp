@@ -54,10 +54,12 @@ void ComputePassCommandRecorder::setPipeline(const Handle<ComputePipeline_t> &pi
     apiComputePassCommandRecorder->setPipeline(pipeline);
 }
 
-void ComputePassCommandRecorder::setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroup)
+void ComputePassCommandRecorder::setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroup,
+                                              const Handle<PipelineLayout_t> &pipelineLayout,
+                                              const std::vector<uint32_t> &dynamicBufferOffsets)
 {
     auto apiComputePassCommandRecorder = m_api->resourceManager()->getComputePassCommandRecorder(m_computePassCommandRecorder);
-    apiComputePassCommandRecorder->setBindGroup(group, bindGroup);
+    apiComputePassCommandRecorder->setBindGroup(group, bindGroup, pipelineLayout, dynamicBufferOffsets);
 }
 
 void ComputePassCommandRecorder::dispatchCompute(const ComputeCommand &command)

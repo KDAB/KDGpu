@@ -38,6 +38,13 @@ struct StorageBufferBinding {
     uint32_t size{ WholeSize };
 };
 
+struct DynamicUniformBufferBinding {
+    static constexpr uint32_t WholeSize = 0xffffffff;
+    Handle<Buffer_t> buffer{};
+    uint32_t offset{ 0 };
+    uint32_t size{ WholeSize };
+};
+
 class BindingResource
 {
 public:
@@ -65,11 +72,18 @@ public:
         m_resource.storageBuffer = buffer;
     }
 
+    BindingResource(const DynamicUniformBufferBinding &buffer)
+        : m_type(ResourceBindingType::DynamicUniformBuffer)
+    {
+        m_resource.dynamicUniformBuffer = buffer;
+    }
+
     ResourceBindingType type() const { return m_type; }
     const UniformBufferBinding &uniformBufferBinding() const { return m_resource.uniformBuffer; }
     const StorageBufferBinding &storageBufferBinding() const { return m_resource.storageBuffer; }
     const ImageBinding &imageBinding() const { return m_resource.image; }
     const TextureViewBinding &textureViewBinding() const { return m_resource.textureView; }
+    const DynamicUniformBufferBinding &dynamicUniformBufferBinding() const { return m_resource.dynamicUniformBuffer; }
 
 private:
     union Resource {
@@ -79,6 +93,7 @@ private:
         ImageBinding image;
         UniformBufferBinding uniformBuffer;
         StorageBufferBinding storageBuffer;
+        DynamicUniformBufferBinding dynamicUniformBuffer;
     } m_resource;
     ResourceBindingType m_type;
 };

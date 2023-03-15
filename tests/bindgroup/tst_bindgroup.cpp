@@ -168,6 +168,44 @@ TEST_SUITE("BindGroup")
             // WHEN
             b.update(BindGroupEntry{ .binding = 0, .resource = BindingResource(TextureViewBinding{ .textureView = tv, .sampler = s }) });
         }
+
+        SUBCASE("Dynamic UBO")
+        {
+            // GIVEN
+            BufferOptions uboOptions = {
+                .size = 16 * sizeof(float),
+                .usage = BufferUsageFlags(BufferUsageFlagBits::UniformBufferBit),
+                .memoryUsage = MemoryUsage::CpuToGpu
+            };
+            auto ubo = device.createBuffer(uboOptions);
+
+            const BindGroupLayoutOptions bindGroupLayoutOptions = {
+                .bindings = { { // Camera uniforms
+                                .binding = 0,
+                                .count = 1,
+                                .resourceType = ResourceBindingType::DynamicUniformBuffer,
+                                .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit) } }
+            };
+
+            const BindGroupLayout bindGroupLayout = device.createBindGroupLayout(bindGroupLayoutOptions);
+
+            const BindGroupOptions bindGroupOptions = {
+                .layout = bindGroupLayout,
+                .resources = {
+                        { .binding = 0,
+                          .resource = DynamicUniformBufferBinding{ .buffer = ubo } },
+                }
+            };
+
+            // WHEN
+            BindGroup t = device.createBindGroup(bindGroupOptions);
+
+            // THEN
+            CHECK(t.isValid());
+
+            // WHEN
+            t.update(BindGroupEntry{ .binding = 0, .resource = BindingResource(DynamicUniformBufferBinding{ .buffer = ubo }) });
+        }
     }
 
     TEST_CASE("Destruction")

@@ -18,7 +18,8 @@ struct VulkanComputePassCommandRecorder : public ApiComputePassCommandRecorder {
                                               const Handle<Device_t> &_deviceHandle);
 
     void setPipeline(const Handle<ComputePipeline_t> &pipeline) final;
-    void setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroup) final;
+    void setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroup,
+                      const Handle<PipelineLayout_t> &pipelineLayout, const std::vector<uint32_t> &dynamicBufferOffsets) final;
     void dispatchCompute(const ComputeCommand &command) final;
     void dispatchCompute(const std::vector<ComputeCommand> &commands) final;
     void dispatchComputeIndirect(const ComputeCommandIndirect &command) final;

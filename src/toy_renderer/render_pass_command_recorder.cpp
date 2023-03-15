@@ -67,10 +67,12 @@ void RenderPassCommandRecorder::setIndexBuffer(const Handle<Buffer_t> &buffer, D
     apiRenderPassCommandRecorder->setIndexBuffer(buffer, offset, indexType);
 }
 
-void RenderPassCommandRecorder::setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroup, const Handle<PipelineLayout_t> &pipelineLayout)
+void RenderPassCommandRecorder::setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroup,
+                                             const Handle<PipelineLayout_t> &pipelineLayout,
+                                             const std::vector<uint32_t> &dynamicBufferOffsets)
 {
     auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
-    apiRenderPassCommandRecorder->setBindGroup(group, bindGroup, pipelineLayout);
+    apiRenderPassCommandRecorder->setBindGroup(group, bindGroup, pipelineLayout, dynamicBufferOffsets);
 }
 
 void RenderPassCommandRecorder::setViewport(const Viewport &viewport)

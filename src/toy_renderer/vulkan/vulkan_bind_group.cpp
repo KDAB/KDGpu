@@ -71,6 +71,18 @@ void VulkanBindGroup::update(const BindGroupEntry &entry)
         descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         break;
     }
+    case ResourceBindingType::DynamicUniformBuffer: {
+        const DynamicUniformBufferBinding &bufferBinding = entry.resource.dynamicUniformBufferBinding();
+        VulkanBuffer *buffer = vulkanResourceManager->getBuffer(bufferBinding.buffer);
+        bufferInfo.buffer = buffer->buffer; // VkBuffer
+        bufferInfo.offset = bufferBinding.offset;
+        bufferInfo.range = (bufferBinding.size == StorageBufferBinding::WholeSize) ? VK_WHOLE_SIZE : bufferBinding.size;
+
+        descriptorWrite.descriptorCount = 1;
+        descriptorWrite.pBufferInfo = &bufferInfo;
+        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+        break;
+    }
     default:
         break;
     }

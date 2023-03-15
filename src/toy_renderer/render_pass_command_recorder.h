@@ -74,7 +74,8 @@ public:
 
     void setBindGroup(uint32_t group,
                       const Handle<BindGroup_t> &bindGroup,
-                      const Handle<PipelineLayout_t> &pipelineLayout = Handle<PipelineLayout_t>());
+                      const Handle<PipelineLayout_t> &pipelineLayout = Handle<PipelineLayout_t>(),
+                      const std::vector<uint32_t> &dynamicBufferOffsets = {});
 
     void setViewport(const Viewport &viewport);
     void setScissor(const Rect2D &scissor);

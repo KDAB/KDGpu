@@ -53,7 +53,8 @@ void VulkanRenderPassCommandRecorder::setIndexBuffer(const Handle<Buffer_t> &buf
     vkCmdBindIndexBuffer(commandBuffer, vulkanBuffer->buffer, offset, indexTypeToVkIndexType(indexType));
 }
 
-void VulkanRenderPassCommandRecorder::setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroupH, const Handle<PipelineLayout_t> &pipelineLayout)
+void VulkanRenderPassCommandRecorder::setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroupH,
+                                                   const Handle<PipelineLayout_t> &pipelineLayout, const std::vector<uint32_t> &dynamicBufferOffsets)
 {
     VulkanBindGroup *bindGroup = vulkanResourceManager->getBindGroup(bindGroupH);
     VkDescriptorSet set = bindGroup->descriptorSet;
@@ -81,7 +82,7 @@ void VulkanRenderPassCommandRecorder::setBindGroup(uint32_t group, const Handle<
                             vkPipelineLayout,
                             group,
                             1, &set,
-                            0, nullptr);
+                            dynamicBufferOffsets.size(), dynamicBufferOffsets.data());
 }
 
 void VulkanRenderPassCommandRecorder::setViewport(const Viewport &viewport)

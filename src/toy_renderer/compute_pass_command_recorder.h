@@ -11,6 +11,7 @@ struct Buffer_t;
 struct Device_t;
 struct ComputePipeline_t;
 struct ComputePassCommandRecorder_t;
+struct PipelineLayout_t;
 
 struct PushConstantRange;
 class GraphicsApi;
@@ -47,7 +48,9 @@ public:
 
     void setPipeline(const Handle<ComputePipeline_t> &pipeline);
 
-    void setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroup);
+    void setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroup,
+                      const Handle<PipelineLayout_t> &pipelineLayout = Handle<PipelineLayout_t>(),
+                      const std::vector<uint32_t> &dynamicBufferOffsets = {});
 
     void dispatchCompute(const ComputeCommand &command);
     void dispatchCompute(const std::vector<ComputeCommand> &commands);

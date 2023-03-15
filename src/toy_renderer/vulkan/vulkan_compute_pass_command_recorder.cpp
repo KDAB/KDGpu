@@ -22,23 +22,36 @@ void VulkanComputePassCommandRecorder::setPipeline(const Handle<ComputePipeline_
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, vulkanPipeline->pipeline);
 }
 
-void VulkanComputePassCommandRecorder::setBindGroup(uint32_t group, const Handle<BindGroup_t> &_bindGroup)
+void VulkanComputePassCommandRecorder::setBindGroup(uint32_t group, const Handle<BindGroup_t> &_bindGroup,
+                                                    const Handle<PipelineLayout_t> &pipelineLayout, const std::vector<uint32_t> &dynamicBufferOffsets)
 {
     VulkanBindGroup *bindGroup = vulkanResourceManager->getBindGroup(_bindGroup);
     VkDescriptorSet set = bindGroup->descriptorSet;
 
+    // Use the pipeline layout provided, otherwise fallback to the one from the currently
+    // bound pipeline (if any).
+    VkPipelineLayout vkPipelineLayout{ VK_NULL_HANDLE };
+    if (pipelineLayout.isValid()) {
+        VulkanPipelineLayout *vulkanPipelineLayout = vulkanResourceManager->getPipelineLayout(pipelineLayout);
+        if (vulkanPipelineLayout)
+            vkPipelineLayout = vulkanPipelineLayout->pipelineLayout;
+    } else if (pipeline.isValid()) {
+        VulkanComputePipeline *vulkanPipeline = vulkanResourceManager->getComputePipeline(pipeline);
+        if (vulkanPipeline) {
+            VulkanPipelineLayout *vulkanPipelineLayout = vulkanResourceManager->getPipelineLayout(vulkanPipeline->pipelineLayoutHandle);
+            if (vulkanPipelineLayout)
+                vkPipelineLayout = vulkanPipelineLayout->pipelineLayout;
+        }
+    }
+
+    assert(vkPipelineLayout != VK_NULL_HANDLE); // The PipelineLayout should outlive the pipelines
+
     // Bind Descriptor Set
-    VulkanComputePipeline *p = vulkanResourceManager->getComputePipeline(pipeline);
-    VulkanPipelineLayout *pLayout = vulkanResourceManager->getPipelineLayout(p->pipelineLayoutHandle);
-
-    assert(pLayout != nullptr); // The PipelineLayout should outlive the pipelines
-
-    VkPipelineLayout pipelineLayout = pLayout->pipelineLayout;
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE,
-                            pipelineLayout,
+                            vkPipelineLayout,
                             group,
                             1, &set,
-                            0, nullptr);
+                            dynamicBufferOffsets.size(), dynamicBufferOffsets.data());
 }
 
 void VulkanComputePassCommandRecorder::dispatchCompute(const ComputeCommand &command)
