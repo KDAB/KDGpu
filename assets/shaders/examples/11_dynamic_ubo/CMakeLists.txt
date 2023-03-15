@@ -1,0 +1,1 @@
+CompileShaderSet(ToyRendererDynamicUBO dynamic_ubo)
