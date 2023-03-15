@@ -58,6 +58,7 @@ struct AdapterFeatures {
     bool sparseResidencyAliased;
     bool variableMultisampleRate;
     bool inheritedQueries;
+    bool uniformBufferStandardLayout;
 };
 
 } // namespace ToyRenderer

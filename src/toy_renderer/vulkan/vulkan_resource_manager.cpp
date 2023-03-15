@@ -124,12 +124,83 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
         queueCreateInfos.push_back(queueCreateInfo);
     }
 
+    // Request the physical device features that Serenity typically wants
+    VkPhysicalDeviceFeatures deviceFeatures = {};
+    {
+        deviceFeatures.robustBufferAccess = options.requestedFeatures.robustBufferAccess;
+        deviceFeatures.fullDrawIndexUint32 = options.requestedFeatures.fullDrawIndexUint32;
+        deviceFeatures.imageCubeArray = options.requestedFeatures.imageCubeArray;
+        deviceFeatures.independentBlend = options.requestedFeatures.independentBlend;
+        deviceFeatures.geometryShader = options.requestedFeatures.geometryShader;
+        deviceFeatures.tessellationShader = options.requestedFeatures.tessellationShader;
+        deviceFeatures.sampleRateShading = options.requestedFeatures.sampleRateShading;
+        deviceFeatures.dualSrcBlend = options.requestedFeatures.dualSrcBlend;
+        deviceFeatures.logicOp = options.requestedFeatures.logicOp;
+        deviceFeatures.multiDrawIndirect = options.requestedFeatures.multiDrawIndirect;
+        deviceFeatures.drawIndirectFirstInstance = options.requestedFeatures.drawIndirectFirstInstance;
+        deviceFeatures.depthClamp = options.requestedFeatures.depthClamp;
+        deviceFeatures.depthBiasClamp = options.requestedFeatures.depthBiasClamp;
+        deviceFeatures.fillModeNonSolid = options.requestedFeatures.fillModeNonSolid;
+        deviceFeatures.depthBounds = options.requestedFeatures.depthBounds;
+        deviceFeatures.wideLines = options.requestedFeatures.wideLines;
+        deviceFeatures.largePoints = options.requestedFeatures.largePoints;
+        deviceFeatures.alphaToOne = options.requestedFeatures.alphaToOne;
+        deviceFeatures.multiViewport = options.requestedFeatures.multiViewport;
+        deviceFeatures.samplerAnisotropy = options.requestedFeatures.samplerAnisotropy;
+        deviceFeatures.textureCompressionETC2 = options.requestedFeatures.textureCompressionETC2;
+        deviceFeatures.textureCompressionASTC_LDR = options.requestedFeatures.textureCompressionASTC_LDR;
+        deviceFeatures.textureCompressionBC = options.requestedFeatures.textureCompressionBC;
+        deviceFeatures.occlusionQueryPrecise = options.requestedFeatures.occlusionQueryPrecise;
+        deviceFeatures.pipelineStatisticsQuery = options.requestedFeatures.pipelineStatisticsQuery;
+        deviceFeatures.vertexPipelineStoresAndAtomics = options.requestedFeatures.vertexPipelineStoresAndAtomics;
+        deviceFeatures.fragmentStoresAndAtomics = options.requestedFeatures.fragmentStoresAndAtomics;
+        deviceFeatures.shaderTessellationAndGeometryPointSize = options.requestedFeatures.shaderTessellationAndGeometryPointSize;
+        deviceFeatures.shaderImageGatherExtended = options.requestedFeatures.shaderImageGatherExtended;
+        deviceFeatures.shaderStorageImageExtendedFormats = options.requestedFeatures.shaderStorageImageExtendedFormats;
+        deviceFeatures.shaderStorageImageMultisample = options.requestedFeatures.shaderStorageImageMultisample;
+        deviceFeatures.shaderStorageImageReadWithoutFormat = options.requestedFeatures.shaderStorageImageReadWithoutFormat;
+        deviceFeatures.shaderStorageImageWriteWithoutFormat = options.requestedFeatures.shaderStorageImageWriteWithoutFormat;
+        deviceFeatures.shaderUniformBufferArrayDynamicIndexing = options.requestedFeatures.shaderUniformBufferArrayDynamicIndexing;
+        deviceFeatures.shaderSampledImageArrayDynamicIndexing = options.requestedFeatures.shaderSampledImageArrayDynamicIndexing;
+        deviceFeatures.shaderStorageBufferArrayDynamicIndexing = options.requestedFeatures.shaderStorageBufferArrayDynamicIndexing;
+        deviceFeatures.shaderStorageImageArrayDynamicIndexing = options.requestedFeatures.shaderStorageImageArrayDynamicIndexing;
+        deviceFeatures.shaderClipDistance = options.requestedFeatures.shaderClipDistance;
+        deviceFeatures.shaderCullDistance = options.requestedFeatures.shaderCullDistance;
+        deviceFeatures.shaderFloat64 = options.requestedFeatures.shaderFloat64;
+        deviceFeatures.shaderInt64 = options.requestedFeatures.shaderInt64;
+        deviceFeatures.shaderInt16 = options.requestedFeatures.shaderInt16;
+        deviceFeatures.shaderResourceResidency = options.requestedFeatures.shaderResourceResidency;
+        deviceFeatures.shaderResourceMinLod = options.requestedFeatures.shaderResourceMinLod;
+        deviceFeatures.sparseBinding = options.requestedFeatures.sparseBinding;
+        deviceFeatures.sparseResidencyBuffer = options.requestedFeatures.sparseResidencyBuffer;
+        deviceFeatures.sparseResidencyImage2D = options.requestedFeatures.sparseResidencyImage2D;
+        deviceFeatures.sparseResidencyImage3D = options.requestedFeatures.sparseResidencyImage3D;
+        deviceFeatures.sparseResidency2Samples = options.requestedFeatures.sparseResidency2Samples;
+        deviceFeatures.sparseResidency4Samples = options.requestedFeatures.sparseResidency4Samples;
+        deviceFeatures.sparseResidency8Samples = options.requestedFeatures.sparseResidency8Samples;
+        deviceFeatures.sparseResidency16Samples = options.requestedFeatures.sparseResidency16Samples;
+        deviceFeatures.sparseResidencyAliased = options.requestedFeatures.sparseResidencyAliased;
+        deviceFeatures.variableMultisampleRate = options.requestedFeatures.variableMultisampleRate;
+        deviceFeatures.inheritedQueries = options.requestedFeatures.inheritedQueries;
+    }
+
+    // Some newer features we have to request via VkPhysicalDeviceFeatures2
+    VkPhysicalDeviceFeatures2 physicalDeviceFeatures2 = {};
+    physicalDeviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+    physicalDeviceFeatures2.features = deviceFeatures;
+
+    // Allows to use std430 for uniform buffers which gives much nicer packing of data
+    VkPhysicalDeviceUniformBufferStandardLayoutFeatures stdLayoutFeatures = {};
+    stdLayoutFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_UNIFORM_BUFFER_STANDARD_LAYOUT_FEATURES;
+    stdLayoutFeatures.uniformBufferStandardLayout = options.requestedFeatures.uniformBufferStandardLayout;
+    physicalDeviceFeatures2.pNext = &stdLayoutFeatures;
+
     VkDeviceCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-    createInfo.pNext = nullptr; // TODO: Use VkPhysicalDeviceFeatures2
+    createInfo.pNext = &physicalDeviceFeatures2;
     createInfo.pQueueCreateInfos = queueCreateInfos.data();
     createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
-    createInfo.pEnabledFeatures = nullptr;
+    createInfo.pEnabledFeatures = nullptr; // we use VkPhysicalDeviceFeatures2 set on pNext
     createInfo.enabledLayerCount = 0;
     createInfo.ppEnabledLayerNames = nullptr;
     createInfo.enabledExtensionCount = 0;

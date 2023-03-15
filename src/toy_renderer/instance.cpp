@@ -84,7 +84,8 @@ AdapterAndDevice Instance::createDefaultDevice(const Surface &surface,
     }
 
     // Now we can create a device from the selected adapter that we can then use to interact with the GPU.
-    auto device = selectedAdapter->createDevice();
+    auto device = selectedAdapter->createDevice(DeviceOptions{
+            .requestedFeatures = selectedAdapter->features() });
 
     return { selectedAdapter, std::move(device) };
 }

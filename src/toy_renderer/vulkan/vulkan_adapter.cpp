@@ -192,8 +192,15 @@ AdapterProperties VulkanAdapter::queryAdapterProperties()
 
 AdapterFeatures VulkanAdapter::queryAdapterFeatures()
 {
-    VkPhysicalDeviceFeatures deviceFeatures;
-    vkGetPhysicalDeviceFeatures(physicalDevice, &deviceFeatures);
+    VkPhysicalDeviceFeatures2 deviceFeatures2 {};
+    deviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+
+    vkGetPhysicalDeviceFeatures2(physicalDevice, &deviceFeatures2);
+    const VkPhysicalDeviceFeatures &deviceFeatures = deviceFeatures2.features;
+
+    const VkPhysicalDeviceUniformBufferStandardLayoutFeatures *stdLayoutFeatures {nullptr};
+    if (deviceFeatures2.pNext)
+        stdLayoutFeatures = reinterpret_cast<const VkPhysicalDeviceUniformBufferStandardLayoutFeatures *>(deviceFeatures2.pNext);
 
     AdapterFeatures features = {
         .robustBufferAccess = static_cast<bool>(deviceFeatures.robustBufferAccess),
@@ -250,7 +257,8 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
         .sparseResidency16Samples = static_cast<bool>(deviceFeatures.sparseResidency16Samples),
         .sparseResidencyAliased = static_cast<bool>(deviceFeatures.sparseResidencyAliased),
         .variableMultisampleRate = static_cast<bool>(deviceFeatures.variableMultisampleRate),
-        .inheritedQueries = static_cast<bool>(deviceFeatures.inheritedQueries)
+        .inheritedQueries = static_cast<bool>(deviceFeatures.inheritedQueries),
+        .uniformBufferStandardLayout = stdLayoutFeatures ? static_cast<bool>(stdLayoutFeatures->uniformBufferStandardLayout) : false,
     };
     return features;
 }
