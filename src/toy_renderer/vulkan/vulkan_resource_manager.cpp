@@ -303,7 +303,9 @@ Handle<Swapchain_t> VulkanResourceManager::createSwapchain(const Handle<Device_t
     createInfo.compositeAlpha = compositeAlphaFlagBitsToVkCompositeAlphaFlagBitsKHR(options.compositeAlpha);
     createInfo.presentMode = presentModeToVkPresentModeKHR(options.presentMode);
     createInfo.clipped = options.clipped;
-    createInfo.oldSwapchain = VK_NULL_HANDLE;
+
+    VulkanSwapchain *oldSwapchain = m_swapchains.get(options.oldSwapchain);
+    createInfo.oldSwapchain = oldSwapchain ? oldSwapchain->swapchain : VK_NULL_HANDLE;
 
     VkSwapchainKHR vkSwapchain{ VK_NULL_HANDLE };
     const VkResult result = vkCreateSwapchainKHR(vulkanDevice.device, &createInfo, nullptr, &vkSwapchain);

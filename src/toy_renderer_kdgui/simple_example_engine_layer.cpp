@@ -21,13 +21,11 @@ void SimpleExampleEngineLayer::recreateSwapChain()
     SwapchainOptions swapchainOptions = {
         .surface = m_surface,
         .format = m_swapchainFormat,
-        .imageExtent = { .width = m_window->width(), .height = m_window->height() }
+        .imageExtent = { .width = m_window->width(), .height = m_window->height() },
+        .oldSwapchain = m_swapchain,
     };
 
-    // Destroy Swapchain as we can't rely on the move assignment to destroy the swapchain
-    // prior to creating the new one (Vulkan errors out when we have 2 swapchains for the same surface)
-    if (m_swapchain.isValid())
-        m_swapchain = {};
+    // Create swapchain and destroy previous one implicitly
     m_swapchain = m_device.createSwapchain(swapchainOptions);
 
     const auto &swapchainTextures = m_swapchain.textures();

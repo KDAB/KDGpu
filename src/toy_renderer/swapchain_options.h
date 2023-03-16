@@ -6,6 +6,8 @@
 
 namespace ToyRenderer {
 
+struct Swapchain_t;
+
 struct SwapchainOptions {
     Handle<Surface_t> surface;
     Format format{ Format::B8G8R8A8_UNORM };
@@ -20,6 +22,7 @@ struct SwapchainOptions {
     CompositeAlphaFlagBits compositeAlpha{ CompositeAlphaFlagBits::OpaqueBit };
     PresentMode presentMode{ PresentMode::Mailbox };
     bool clipped{ true };
+    Handle<Swapchain_t> oldSwapchain; // Optional, can be useful when recreating a swapchain
 };
 
 } // namespace ToyRenderer
