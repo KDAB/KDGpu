@@ -2,6 +2,7 @@
 
 #include <toy_renderer_kdgui/engine.h>
 
+#include <toy_renderer/buffer_options.h>
 #include <toy_renderer/swapchain_options.h>
 #include <toy_renderer/texture_options.h>
 
@@ -49,6 +50,39 @@ void SimpleExampleEngineLayer::recreateSwapChain()
     };
     m_depthTexture = m_device.createTexture(depthTextureOptions);
     m_depthTextureView = m_depthTexture.createView();
+}
+
+// TODO: Implement a non-blocking buffer upload by way of a memory barrier
+// TODO: Later implement a non-blocking buffer upload via staging buffer on transfer queue and transfer of ownership.
+void SimpleExampleEngineLayer::waitForUploadBufferData(const Handle<Buffer_t> &destinationBuffer,
+                                                       void *data,
+                                                       DeviceSize byteSize,
+                                                       DeviceSize dstOffset)
+{
+    // Buffer upload via a staging buffer using our main queue
+    // Create a staging buffer and upload initial data to it by map(), memcpy(), unmap().
+    BufferOptions bufferOptions = {
+        .size = byteSize,
+        .usage = BufferUsageFlags(BufferUsageFlagBits::TransferSrcBit),
+        .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
+    };
+    auto stagingBuffer = m_device.createBuffer(bufferOptions, data);
+
+    auto commandRecorder = m_device.createCommandRecorder();
+    const BufferCopy copyCmd = {
+        .src = stagingBuffer,
+        .srcOffset = 0,
+        .dst = destinationBuffer,
+        .dstOffset = dstOffset,
+        .byteSize = byteSize
+    };
+    commandRecorder.copyBuffer(copyCmd);
+    auto commandBuffer = commandRecorder.finish();
+
+    m_queue.submit({ .commandBuffers = { commandBuffer } });
+
+    // TODO: Replace with m_queue.waitUntilIdle()
+    m_device.waitUntilIdle();
 }
 
 void SimpleExampleEngineLayer::onAttached()

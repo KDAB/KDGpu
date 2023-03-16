@@ -35,22 +35,20 @@ void RotatingTriangle::initializeScene()
 
     // Create a buffer to hold triangle vertex data
     {
-        BufferOptions bufferOptions = {
-            .size = 3 * sizeof(Vertex), // 3 vertices * 2 attributes * 3 float components
-            .usage = BufferUsageFlags(BufferUsageFlagBits::VertexBufferBit), // TODO: Use a nice Flags template class
-            .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
-        };
-        m_buffer = m_device.createBuffer(bufferOptions);
-
         const float r = 0.8f;
         std::array<Vertex, 3> vertexData;
         vertexData[0] = { { r * std::cos(7.0f * M_PI / 6.0f), -r * std::sin(7.0f * M_PI / 6.0f), 0.0f }, { 1.0f, 0.0, 0.0f } }; // Bottom-left, red
         vertexData[1] = { { r * std::cos(11.0f * M_PI / 6.0f), -r * std::sin(11.0f * M_PI / 6.0f), 0.0f }, { 0.0f, 1.0, 0.0f } }; // Bottom-right, green
         vertexData[2] = { { 0.0f, -r, 0.0f }, { 0.0f, 0.0, 1.0f } }; // Top, blue
 
-        auto bufferData = m_buffer.map();
-        std::memcpy(bufferData, vertexData.data(), vertexData.size() * sizeof(Vertex));
-        m_buffer.unmap();
+        const DeviceSize dataByteSize = vertexData.size() * sizeof(Vertex);
+        BufferOptions bufferOptions = {
+            .size = dataByteSize,
+            .usage = BufferUsageFlags(BufferUsageFlagBits::VertexBufferBit) | BufferUsageFlags(BufferUsageFlagBits::TransferDstBit), // TODO: Use a nice Flags template class
+            .memoryUsage = MemoryUsage::GpuOnly
+        };
+        m_buffer = m_device.createBuffer(bufferOptions);
+        waitForUploadBufferData(m_buffer, vertexData.data(), dataByteSize);
     }
 
     // Create a buffer to hold the geometry index data

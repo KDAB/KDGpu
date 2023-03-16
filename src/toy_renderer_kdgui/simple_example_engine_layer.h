@@ -50,6 +50,10 @@ protected:
     void update() override;
 
     void recreateSwapChain();
+    void waitForUploadBufferData(const Handle<Buffer_t> &destinationBuffer,
+                                 void *data,
+                                 DeviceSize byteSize,
+                                 DeviceSize dstOffset = 0);
 
     std::unique_ptr<GraphicsApi> m_api;
     std::unique_ptr<View> m_window;
