@@ -58,12 +58,12 @@ std::vector<Handle<Texture_t>> VulkanSwapchain::getTextures()
     return textureHandles;
 }
 
-bool VulkanSwapchain::getNextImageIndex(uint32_t &imageIndex, const Handle<GpuSemaphore_t> &semaphore)
+AcquireImageResult VulkanSwapchain::getNextImageIndex(uint32_t &imageIndex, const Handle<GpuSemaphore_t> &semaphore)
 {
     VulkanDevice *vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
     if (!vulkanDevice) {
         // TODO: Log could not find device
-        return false;
+        return AcquireImageResult::DeviceLost;
     }
     VkDevice device = vulkanDevice->device;
 
@@ -78,13 +78,26 @@ bool VulkanSwapchain::getNextImageIndex(uint32_t &imageIndex, const Handle<GpuSe
             device, swapchain, std::numeric_limits<uint64_t>::max(),
             vkSemaphore, VK_NULL_HANDLE, &imageIndex);
 
-    if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR) {
-        return true;
-    } else if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-        // TODO: Indicate we need to resize
-        return false;
-    }
-    return false;
+    auto mapVkResultToAcquireImageResult = [](const VkResult r) {
+        switch (r) {
+        case VK_ERROR_OUT_OF_HOST_MEMORY:
+        case VK_ERROR_OUT_OF_DEVICE_MEMORY:
+            return AcquireImageResult::OutOfMemory;
+        case VK_ERROR_DEVICE_LOST:
+            return AcquireImageResult::DeviceLost;
+        case VK_ERROR_OUT_OF_DATE_KHR:
+            return AcquireImageResult::OutOfDate;
+        case VK_ERROR_SURFACE_LOST_KHR:
+        case VK_ERROR_FULL_SCREEN_EXCLUSIVE_MODE_LOST_EXT:
+            return AcquireImageResult::SurfaceLost;
+        case VK_SUBOPTIMAL_KHR:
+        case VK_SUCCESS:
+        default:
+            return AcquireImageResult::Success;
+        }
+    };
+
+    return mapVkResultToAcquireImageResult(result);
 }
 
 } // namespace ToyRenderer

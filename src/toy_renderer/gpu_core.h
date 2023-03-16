@@ -896,4 +896,6 @@ enum class PresentResult {
     Success,
 };
 
+using AcquireImageResult = PresentResult;
+
 } // namespace ToyRenderer

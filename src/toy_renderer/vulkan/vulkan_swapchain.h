@@ -24,7 +24,7 @@ struct VulkanSwapchain : public ApiSwapchain {
 
     std::vector<Handle<Texture_t>> getTextures() final;
 
-    bool getNextImageIndex(uint32_t &imageIndex, const Handle<GpuSemaphore_t> &semaphore) final;
+    AcquireImageResult getNextImageIndex(uint32_t &imageIndex, const Handle<GpuSemaphore_t> &semaphore) final;
 
     VkSwapchainKHR swapchain{ VK_NULL_HANDLE };
     Format format;

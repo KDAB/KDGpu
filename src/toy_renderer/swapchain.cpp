@@ -61,7 +61,7 @@ Swapchain::~Swapchain()
         m_api->resourceManager()->deleteSwapchain(handle());
 }
 
-bool Swapchain::getNextImageIndex(uint32_t &imageIndex, const Handle<GpuSemaphore_t> &semaphore)
+AcquireImageResult Swapchain::getNextImageIndex(uint32_t &imageIndex, const Handle<GpuSemaphore_t> &semaphore)
 {
     auto apiSwapchain = m_api->resourceManager()->getSwapchain(m_swapchain);
     return apiSwapchain->getNextImageIndex(imageIndex, semaphore);

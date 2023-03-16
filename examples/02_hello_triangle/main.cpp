@@ -277,7 +277,7 @@ int main()
         // Acquire next swapchain image
         uint32_t currentImageIndex = 0;
         const auto result = swapchain.getNextImageIndex(currentImageIndex);
-        if (result != true) {
+        if (result != AcquireImageResult::Success) {
             // Do we need to recreate the swapchain and dependent resources?
         }
 

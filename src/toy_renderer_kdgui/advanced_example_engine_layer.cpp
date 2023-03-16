@@ -112,7 +112,7 @@ void AdvancedExampleEngineLayer::update()
 
     const auto result = m_swapchain.getNextImageIndex(m_currentSwapchainImageIndex,
                                                       m_presentCompleteSemaphores[m_inFlightIndex]);
-    if (result != true) {
+    if (result != AcquireImageResult::Success) {
         // Do we need to recreate the swapchain and dependent resources?
         return;
     }

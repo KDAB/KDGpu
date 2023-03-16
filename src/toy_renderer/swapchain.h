@@ -34,8 +34,7 @@ public:
 
     const std::vector<Texture> &textures() const { return m_textures; }
 
-    // TODO: More informative return value
-    bool getNextImageIndex(uint32_t &imageIndex, const Handle<GpuSemaphore_t> &semaphore = Handle<GpuSemaphore_t>());
+    AcquireImageResult getNextImageIndex(uint32_t &imageIndex, const Handle<GpuSemaphore_t> &semaphore = Handle<GpuSemaphore_t>());
 
 private:
     explicit Swapchain(GraphicsApi *api, const Handle<Device_t> &device, const SwapchainOptions &options);
