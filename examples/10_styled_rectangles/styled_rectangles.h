@@ -33,6 +33,7 @@ protected:
     void cleanupScene() override;
     void updateScene() override;
     void render() override;
+    void resize() override;
 
 private:
     void initializeRectangles();

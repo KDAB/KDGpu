@@ -122,6 +122,12 @@ void HelloTriangle::updateScene()
     updateTransform();
 }
 
+void HelloTriangle::resize()
+{
+    // Swapchain might have been resized and texture views recreated. Ensure we update the PassOptions accordingly
+    m_opaquePassOptions.depthStencilAttachment.view = m_depthTextureView;
+}
+
 void HelloTriangle::render()
 {
     // Create a command encoder/recorder
@@ -129,9 +135,7 @@ void HelloTriangle::render()
 
     // Begin render pass - oscillate the clear color just to show something changing.
     updateClearColor();
-    // Swapchain might have been resized and texture views recreated. Ensure we update the PassOptions accordingly
     m_opaquePassOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex);
-    m_opaquePassOptions.depthStencilAttachment.view = m_depthTextureView;
     auto opaquePass = commandRecorder.beginRenderPass(m_opaquePassOptions);
 
     // Bind pipeline
@@ -156,10 +160,15 @@ void HelloTriangle::render()
     // End recording
     m_commandBuffers[m_inFlightIndex] = commandRecorder.finish();
 
+    // Only await presentation completion if we have indeed presented
+    std::vector<Handle<GpuSemaphore_t>> waitSemaphores;
+    if (m_waitForPresentation)
+        waitSemaphores.emplace_back(m_presentCompleteSemaphores[m_inFlightIndex]);
+
     // Submit command buffer to queue
     SubmitOptions submitOptions = {
         .commandBuffers = { m_commandBuffers[m_inFlightIndex] },
-        .waitSemaphores = { m_presentCompleteSemaphores[m_inFlightIndex] },
+        .waitSemaphores = waitSemaphores,
         .signalSemaphores = { m_renderCompleteSemaphores[m_inFlightIndex] },
         .signalFence = m_frameFences[m_inFlightIndex] // Signal Fence once submission and execution is complete
     };

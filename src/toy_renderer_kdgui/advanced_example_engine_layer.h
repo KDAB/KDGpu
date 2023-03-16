@@ -43,10 +43,13 @@ protected:
     virtual void cleanupScene() = 0;
     virtual void updateScene() = 0;
     virtual void render() = 0;
+    virtual void resize() = 0;
 
     void onAttached() override;
     void onDetached() override;
     void update() override;
+
+    void recreateSwapChain();
 
     std::unique_ptr<GraphicsApi> m_api;
     std::unique_ptr<View> m_window;
@@ -62,6 +65,7 @@ protected:
 
     uint32_t m_currentSwapchainImageIndex{ 0 };
     uint32_t m_inFlightIndex{ 0 };
+    bool m_waitForPresentation{ true };
     std::array<GpuSemaphore, MAX_FRAMES_IN_FLIGHT> m_presentCompleteSemaphores;
     std::array<GpuSemaphore, MAX_FRAMES_IN_FLIGHT> m_renderCompleteSemaphores;
     std::array<Fence, MAX_FRAMES_IN_FLIGHT> m_frameFences;

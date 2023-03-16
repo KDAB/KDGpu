@@ -221,16 +221,7 @@ void RenderToTexture::initializePostProcess()
     }
 
     // Create a color texture we can render to in the 1st pass
-    TextureOptions colorTextureOptions = {
-        .type = TextureType::TextureType2D,
-        .format = m_colorFormat,
-        .extent = { m_window->width(), m_window->height(), 1 },
-        .mipLevels = 1,
-        .usage = TextureUsageFlags(TextureUsageFlagBits::ColorAttachmentBit) | TextureUsageFlags(TextureUsageFlagBits::SampledBit),
-        .memoryUsage = MemoryUsage::GpuOnly
-    };
-    m_colorOutput = m_device.createTexture(colorTextureOptions);
-    m_colorOutputView = m_colorOutput.createView();
+    createOffscreenTexture();
 
     // Create a sampler we can use to sample from the color texture in the final pass
     m_colorOutputSampler = m_device.createSampler();
@@ -252,12 +243,12 @@ void RenderToTexture::initializePostProcess()
         }}
     };
     // clang-format on
-    const BindGroupLayout bindGroupLayout = m_device.createBindGroupLayout(bindGroupLayoutOptions);
+    m_colorBindGroupLayout = m_device.createBindGroupLayout(bindGroupLayoutOptions);
 
     // Create a pipeline layout (array of bind group layouts)
     // clang-format off
     const PipelineLayoutOptions pipelineLayoutOptions = {
-        .bindGroupLayouts = { bindGroupLayout },
+        .bindGroupLayouts = { m_colorBindGroupLayout },
         .pushConstantRanges = { m_filterPosPushConstantRange }
     };
     // clang-format on
@@ -295,10 +286,30 @@ void RenderToTexture::initializePostProcess()
     // clang-format on
     m_postProcessPipeline = m_device.createGraphicsPipeline(pipelineOptions);
 
-    // Create a bindGroup to hold the UBO with the transform
+    // Create BindGroup to bind the ColorTexture to our final pass shader for sampling
+    updateColorBindGroup();
+}
+
+void RenderToTexture::createOffscreenTexture()
+{
+    const TextureOptions colorTextureOptions = {
+        .type = TextureType::TextureType2D,
+        .format = m_colorFormat,
+        .extent = { m_window->width(), m_window->height(), 1 },
+        .mipLevels = 1,
+        .usage = TextureUsageFlags(TextureUsageFlagBits::ColorAttachmentBit) | TextureUsageFlags(TextureUsageFlagBits::SampledBit),
+        .memoryUsage = MemoryUsage::GpuOnly
+    };
+    m_colorOutput = m_device.createTexture(colorTextureOptions);
+    m_colorOutputView = m_colorOutput.createView();
+}
+
+void RenderToTexture::updateColorBindGroup()
+{
+    // Create a bindGroup to hold the Offscreen Color Texture
     // clang-format off
-    BindGroupOptions bindGroupOptions = {
-        .layout = bindGroupLayout,
+    const BindGroupOptions bindGroupOptions = {
+        .layout = m_colorBindGroupLayout,
         .resources = {{
             .binding = 0,
             .resource = BindingResource(TextureViewBinding{ .textureView = m_colorOutputView, .sampler = m_colorOutputSampler })
@@ -318,6 +329,7 @@ void RenderToTexture::cleanupScene()
     m_transformBuffer = {};
     m_fullScreenQuad = {};
     m_colorBindGroup = {};
+    m_colorBindGroupLayout = {};
     m_colorOutputSampler = {};
     m_colorOutputView = {};
     m_colorOutput = {};
@@ -346,6 +358,22 @@ void RenderToTexture::updateScene()
     std::memcpy(m_filterPosData.data(), &m_filterPos, sizeof(float));
 }
 
+void RenderToTexture::resize()
+{
+    // Recreate Offscreen Color Texture and View with new size
+    createOffscreenTexture();
+
+    // Update OpaquePassOptions to reference new views
+    m_opaquePassOptions.colorAttachments[0].view = m_colorOutputView;
+    m_opaquePassOptions.depthStencilAttachment.view = m_depthTextureView;
+
+    // We need to update the ColorBindGroup so that it also references the new colorOutputView
+    updateColorBindGroup();
+
+    // Update FinalPass to reference new depthView (colorAttachment is handled in render)
+    m_finalPassOptions.depthStencilAttachment.view = m_depthTextureView;
+}
+
 void RenderToTexture::render()
 {
     auto commandRecorder = m_device.createCommandRecorder();
@@ -360,9 +388,7 @@ void RenderToTexture::render()
     opaquePass.end();
 
     // Pass 2: Post process
-    // Swapchain might have been resized and texture views recreated. Ensure we update the PassOptions accordingly
-    m_opaquePassOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex);
-    m_opaquePassOptions.depthStencilAttachment.view = m_depthTextureView;
+    m_finalPassOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex);
     auto finalPass = commandRecorder.beginRenderPass(m_finalPassOptions);
     finalPass.setPipeline(m_postProcessPipeline);
     finalPass.setVertexBuffer(0, m_fullScreenQuad);

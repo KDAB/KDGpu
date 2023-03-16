@@ -112,6 +112,8 @@ void SimpleExampleEngineLayer::update()
     if (result == AcquireImageResult::OutOfDate) {
         // We need to recreate swapchain
         recreateSwapChain();
+        // Handle any changes that would be needed when a swapchain resize occurs
+        resize();
         // Early return as we need to retry to retrieve the image index
         return;
     } else if (result != AcquireImageResult::Success) {

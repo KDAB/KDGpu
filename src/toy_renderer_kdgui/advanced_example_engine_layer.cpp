@@ -36,17 +36,35 @@ void AdvancedExampleEngineLayer::onAttached()
     m_device = std::move(defaultDevice.device);
     m_queue = m_device.queues()[0];
 
-    // TODO: Move swapchain handling to View?
+    recreateSwapChain();
+
+    // Create the present complete and render complete semaphores
+    for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+        m_presentCompleteSemaphores[i] = m_device.createGpuSemaphore();
+        m_renderCompleteSemaphores[i] = m_device.createGpuSemaphore();
+        m_frameFences[i] = m_device.createFence();
+    }
+
+    initializeScene();
+}
+
+void AdvancedExampleEngineLayer::recreateSwapChain()
+{
     // Create a swapchain of images that we will render to.
     SwapchainOptions swapchainOptions = {
         .surface = m_surface,
         .format = m_swapchainFormat,
-        .imageExtent = { .width = m_window->width(), .height = m_window->height() }
+        .imageExtent = { .width = m_window->width(), .height = m_window->height() },
+        .oldSwapchain = m_swapchain,
     };
+
+    // Create swapchain and destroy previous one implicitly
     m_swapchain = m_device.createSwapchain(swapchainOptions);
 
     const auto &swapchainTextures = m_swapchain.textures();
     const auto swapchainTextureCount = swapchainTextures.size();
+
+    m_swapchainViews.clear();
     m_swapchainViews.reserve(swapchainTextureCount);
     for (uint32_t i = 0; i < swapchainTextureCount; ++i) {
         auto view = swapchainTextures[i].createView({ .format = swapchainOptions.format });
@@ -64,15 +82,6 @@ void AdvancedExampleEngineLayer::onAttached()
     };
     m_depthTexture = m_device.createTexture(depthTextureOptions);
     m_depthTextureView = m_depthTexture.createView();
-
-    // Create the present complete and render complete semaphores
-    for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
-        m_presentCompleteSemaphores[i] = m_device.createGpuSemaphore();
-        m_renderCompleteSemaphores[i] = m_device.createGpuSemaphore();
-        m_frameFences[i] = m_device.createFence();
-    }
-
-    initializeScene();
 }
 
 void AdvancedExampleEngineLayer::onDetached()
@@ -110,15 +119,28 @@ void AdvancedExampleEngineLayer::update()
     // Call updateScene() function to update scene state.
     updateScene();
 
+    m_waitForPresentation = true;
+
     const auto result = m_swapchain.getNextImageIndex(m_currentSwapchainImageIndex,
                                                       m_presentCompleteSemaphores[m_inFlightIndex]);
-    if (result != AcquireImageResult::Success) {
-        // Do we need to recreate the swapchain and dependent resources?
+    if (result == AcquireImageResult::OutOfDate) {
+        // We need to recreate swapchain
+        recreateSwapChain();
+        // Handle any changes that would be needed when a swapchain resize occurs
+        resize();
+        // We need to call render (to signal the frameFence and prevent a deadlock)
+        // but we should not present this frame
+        m_waitForPresentation = false;
+    } else if (result != AcquireImageResult::Success) {
+        // Something went wrong and we can't recover from it
         return;
     }
 
     // Call subclass render() function to record and submit drawing commands
     render();
+
+    if (!m_waitForPresentation)
+        return;
 
     // Present the swapchain image
     // clang-format off

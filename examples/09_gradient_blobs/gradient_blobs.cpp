@@ -180,12 +180,16 @@ void GradientBlobs::updateScene()
     // clang-format on
 }
 
+void GradientBlobs::resize()
+{
+    // Swapchain might have been resized and texture views recreated. Ensure we update the PassOptions accordingly
+    m_renderPassOptions.depthStencilAttachment.view = m_depthTextureView;
+}
+
 void GradientBlobs::render()
 {
     auto commandRecorder = m_device.createCommandRecorder();
-    // Swapchain might have been resized and texture views recreated. Ensure we update the PassOptions accordingly
     m_renderPassOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex);
-    m_renderPassOptions.depthStencilAttachment.view = m_depthTextureView;
 
     auto renderPass = commandRecorder.beginRenderPass(m_renderPassOptions);
     renderPass.setPipeline(m_pipeline);

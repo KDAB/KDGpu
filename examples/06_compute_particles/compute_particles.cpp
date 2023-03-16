@@ -238,6 +238,12 @@ void ComputeParticles::updateScene()
 {
 }
 
+void ComputeParticles::resize()
+{
+    // Swapchain might have been resized and texture views recreated. Ensure we update the PassOptions accordingly
+    m_opaquePassOptions.depthStencilAttachment.view = m_depthTextureView;
+}
+
 void ComputeParticles::render()
 {
     constexpr bool useSingleCommandBuffer = true;
@@ -278,10 +284,7 @@ void ComputeParticles::renderSingleCommandBuffer()
         // clang-format on
 
         // Render
-
-        // Swapchain might have been resized and texture views recreated. Ensure we update the PassOptions accordingly
         m_opaquePassOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex);
-        m_opaquePassOptions.depthStencilAttachment.view = m_depthTextureView;
         auto opaquePass = commandRecorder.beginRenderPass(m_opaquePassOptions);
         opaquePass.setPipeline(m_graphicsPipeline);
         opaquePass.setVertexBuffer(0, m_triangleVertexBuffer);
@@ -319,9 +322,7 @@ void ComputeParticles::renderMultipleCommandBuffers()
     // Render
     auto graphicsCommandRecorder = m_device.createCommandRecorder();
     {
-        // Swapchain might have been resized and texture views recreated. Ensure we update the PassOptions accordingly
         m_opaquePassOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex);
-        m_opaquePassOptions.depthStencilAttachment.view = m_depthTextureView;
         auto opaquePass = graphicsCommandRecorder.beginRenderPass(m_opaquePassOptions);
         opaquePass.setPipeline(m_graphicsPipeline);
         opaquePass.setVertexBuffer(0, m_triangleVertexBuffer);

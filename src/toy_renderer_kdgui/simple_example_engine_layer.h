@@ -43,6 +43,7 @@ protected:
     virtual void cleanupScene() = 0;
     virtual void updateScene() = 0;
     virtual void render() = 0;
+    virtual void resize() = 0;
 
     void onAttached() override;
     void onDetached() override;

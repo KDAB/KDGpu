@@ -19,10 +19,13 @@ protected:
     void cleanupScene() override;
     void updateScene() override;
     void render() override;
+    void resize() override;
 
 private:
     void initializeMainScene();
     void initializePostProcess();
+    void createOffscreenTexture();
+    void updateColorBindGroup();
 
     // Main scene resources
     Buffer m_buffer;
@@ -39,6 +42,7 @@ private:
     PipelineLayout m_postProcessPipelineLayout;
     GraphicsPipeline m_postProcessPipeline;
     BindGroup m_colorBindGroup;
+    BindGroupLayout m_colorBindGroupLayout;
     const PushConstantRange m_filterPosPushConstantRange{
         .offset = 0,
         .size = sizeof(float),
