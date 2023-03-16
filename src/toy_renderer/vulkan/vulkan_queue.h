@@ -13,7 +13,7 @@ struct VulkanQueue : public ApiQueue {
                          VulkanResourceManager *_vulkanResourceManager);
 
     void submit(const SubmitOptions &options) final;
-    void present(const PresentOptions &options) final;
+    std::vector<PresentResult> present(const PresentOptions &options) final;
 
     VkQueue queue{ VK_NULL_HANDLE };
     VulkanResourceManager *vulkanResourceManager{ nullptr };

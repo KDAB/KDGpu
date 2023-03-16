@@ -885,4 +885,15 @@ enum class FormatFeatureFlagBit {
 };
 using FormatFeatureFlags = Flags;
 
+enum class PresentResult {
+    // Error nothing submitted
+    OutOfMemory,
+    DeviceLost,
+    // Error but commands submitted
+    OutOfDate,
+    SurfaceLost,
+    // Success
+    Success,
+};
+
 } // namespace ToyRenderer

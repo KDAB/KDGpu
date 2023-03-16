@@ -31,10 +31,10 @@ void Queue::submit(const SubmitOptions &options)
     apiQueue->submit(options);
 }
 
-void Queue::present(const PresentOptions &options)
+std::vector<PresentResult> Queue::present(const PresentOptions &options)
 {
     auto apiQueue = m_api->resourceManager()->getQueue(m_queue);
-    apiQueue->present(options);
+    return apiQueue->present(options);
 }
 
 } // namespace ToyRenderer

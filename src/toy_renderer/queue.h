@@ -53,8 +53,7 @@ public:
 
     void submit(const SubmitOptions &options);
 
-    // TODO: Return values of present operation
-    void present(const PresentOptions &options);
+    std::vector<PresentResult> present(const PresentOptions &options);
 
 private:
     Queue(GraphicsApi *api, const QueueDescription &queueDescription);

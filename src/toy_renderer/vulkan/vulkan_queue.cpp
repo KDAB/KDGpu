@@ -73,7 +73,7 @@ void VulkanQueue::submit(const SubmitOptions &options)
     VkResult result = vkQueueSubmit(queue, 1, &submitInfo, vkFenceToSignal);
 }
 
-void VulkanQueue::present(const PresentOptions &options)
+std::vector<PresentResult> VulkanQueue::present(const PresentOptions &options)
 {
     const uint32_t waitSemaphoreCount = static_cast<uint32_t>(options.waitSemaphores.size());
     std::vector<VkSemaphore> vkWaitSemaphores;
@@ -109,7 +109,36 @@ void VulkanQueue::present(const PresentOptions &options)
 
     const VkResult result = vkQueuePresentKHR(queue, &presentInfo);
 
-    // TODO: Map the return code to something api agnostic
+    // If result is success, then all swapchains were sucessfully presented
+    if (result == VK_SUCCESS)
+        return std::vector<PresentResult>(swapchainCount, PresentResult::Success);
+
+    std::vector<PresentResult> results;
+    results.reserve(swapchainCount);
+
+    auto mapVkResultToPresentResult = [](const VkResult r) {
+        switch (r) {
+        case VK_ERROR_OUT_OF_HOST_MEMORY:
+        case VK_ERROR_OUT_OF_DEVICE_MEMORY:
+            return PresentResult::OutOfMemory;
+        case VK_ERROR_DEVICE_LOST:
+            return PresentResult::DeviceLost;
+        case VK_ERROR_OUT_OF_DATE_KHR:
+            return PresentResult::OutOfDate;
+        case VK_ERROR_SURFACE_LOST_KHR:
+        case VK_ERROR_FULL_SCREEN_EXCLUSIVE_MODE_LOST_EXT:
+            return PresentResult::SurfaceLost;
+        case VK_SUBOPTIMAL_KHR:
+        case VK_SUCCESS:
+        default:
+            return PresentResult::Success;
+        }
+    };
+
+    for (VkResult r : presentResults)
+        results.emplace_back(mapVkResultToPresentResult(r));
+
+    return results;
 }
 
 } // namespace ToyRenderer
