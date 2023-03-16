@@ -117,6 +117,7 @@ set(HEADERS
     api/api_graphics_pipeline.h
     api/api_instance.h
     api/api_pipeline_layout.h
+    api/api_queue.h
     api/api_render_pass.h
     api/api_render_pass_command_recorder.h
     api/api_sampler.h
