@@ -306,8 +306,11 @@ Handle<Swapchain_t> VulkanResourceManager::createSwapchain(const Handle<Device_t
     createInfo.oldSwapchain = VK_NULL_HANDLE;
 
     VkSwapchainKHR vkSwapchain{ VK_NULL_HANDLE };
-    if (vkCreateSwapchainKHR(vulkanDevice.device, &createInfo, nullptr, &vkSwapchain) != VK_SUCCESS)
+    const VkResult result = vkCreateSwapchainKHR(vulkanDevice.device, &createInfo, nullptr, &vkSwapchain);
+    if (result != VK_SUCCESS) {
+        SPDLOG_WARN("Error creating swapchain {}", result);
         return {};
+    }
 
     const auto swapchainHandle = m_swapchains.emplace(VulkanSwapchain{
             vkSwapchain,

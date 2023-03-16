@@ -15,6 +15,44 @@ SimpleExampleEngineLayer::~SimpleExampleEngineLayer()
 {
 }
 
+void SimpleExampleEngineLayer::recreateSwapChain()
+{
+    // Create a swapchain of images that we will render to.
+    SwapchainOptions swapchainOptions = {
+        .surface = m_surface,
+        .format = m_swapchainFormat,
+        .imageExtent = { .width = m_window->width(), .height = m_window->height() }
+    };
+
+    // Destroy Swapchain as we can't rely on the move assignment to destroy the swapchain
+    // prior to creating the new one (Vulkan errors out when we have 2 swapchains for the same surface)
+    if (m_swapchain.isValid())
+        m_swapchain = {};
+    m_swapchain = m_device.createSwapchain(swapchainOptions);
+
+    const auto &swapchainTextures = m_swapchain.textures();
+    const auto swapchainTextureCount = swapchainTextures.size();
+
+    m_swapchainViews.clear();
+    m_swapchainViews.reserve(swapchainTextureCount);
+    for (uint32_t i = 0; i < swapchainTextureCount; ++i) {
+        auto view = swapchainTextures[i].createView({ .format = swapchainOptions.format });
+        m_swapchainViews.push_back(std::move(view));
+    }
+
+    // Create a depth texture to use for depth-correct rendering
+    TextureOptions depthTextureOptions = {
+        .type = TextureType::TextureType2D,
+        .format = Format::D24_UNORM_S8_UINT,
+        .extent = { m_window->width(), m_window->height(), 1 },
+        .mipLevels = 1,
+        .usage = TextureUsageFlags(TextureUsageFlagBits::DepthStencilAttachmentBit),
+        .memoryUsage = MemoryUsage::GpuOnly
+    };
+    m_depthTexture = m_device.createTexture(depthTextureOptions);
+    m_depthTextureView = m_depthTexture.createView();
+}
+
 void SimpleExampleEngineLayer::onAttached()
 {
     m_window = std::make_unique<View>();
@@ -36,33 +74,7 @@ void SimpleExampleEngineLayer::onAttached()
     m_queue = m_device.queues()[0];
 
     // TODO: Move swapchain handling to View?
-    // Create a swapchain of images that we will render to.
-    SwapchainOptions swapchainOptions = {
-        .surface = m_surface,
-        .format = m_swapchainFormat,
-        .imageExtent = { .width = m_window->width(), .height = m_window->height() }
-    };
-    m_swapchain = m_device.createSwapchain(swapchainOptions);
-
-    const auto &swapchainTextures = m_swapchain.textures();
-    const auto swapchainTextureCount = swapchainTextures.size();
-    m_swapchainViews.reserve(swapchainTextureCount);
-    for (uint32_t i = 0; i < swapchainTextureCount; ++i) {
-        auto view = swapchainTextures[i].createView({ .format = swapchainOptions.format });
-        m_swapchainViews.push_back(std::move(view));
-    }
-
-    // Create a depth texture to use for depth-correct rendering
-    TextureOptions depthTextureOptions = {
-        .type = TextureType::TextureType2D,
-        .format = Format::D24_UNORM_S8_UINT,
-        .extent = { m_window->width(), m_window->height(), 1 },
-        .mipLevels = 1,
-        .usage = TextureUsageFlags(TextureUsageFlagBits::DepthStencilAttachmentBit),
-        .memoryUsage = MemoryUsage::GpuOnly
-    };
-    m_depthTexture = m_device.createTexture(depthTextureOptions);
-    m_depthTextureView = m_depthTexture.createView();
+    recreateSwapChain();
 
     // Create the present complete and render complete semaphores
     for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
@@ -99,8 +111,13 @@ void SimpleExampleEngineLayer::update()
     m_inFlightIndex = engine()->frameNumber() % MAX_FRAMES_IN_FLIGHT;
     const auto result = m_swapchain.getNextImageIndex(m_currentSwapchainImageIndex,
                                                       m_presentCompleteSemaphores[m_inFlightIndex]);
-    if (result != AcquireImageResult::Success) {
-        // Do we need to recreate the swapchain and dependent resources?
+    if (result == AcquireImageResult::OutOfDate) {
+        // We need to recreate swapchain
+        recreateSwapChain();
+        // Early return as we need to retry to retrieve the image index
+        return;
+    } else if (result != AcquireImageResult::Success) {
+        // Something went wrong and we can't recover from it
         return;
     }
 

@@ -129,7 +129,9 @@ void HelloTriangle::render()
 
     // Begin render pass - oscillate the clear color just to show something changing.
     updateClearColor();
+    // Swapchain might have been resized and texture views recreated. Ensure we update the PassOptions accordingly
     m_opaquePassOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex);
+    m_opaquePassOptions.depthStencilAttachment.view = m_depthTextureView;
     auto opaquePass = commandRecorder.beginRenderPass(m_opaquePassOptions);
 
     // Bind pipeline

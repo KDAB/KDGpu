@@ -48,6 +48,8 @@ protected:
     void onDetached() override;
     void update() override;
 
+    void recreateSwapChain();
+
     std::unique_ptr<GraphicsApi> m_api;
     std::unique_ptr<View> m_window;
 

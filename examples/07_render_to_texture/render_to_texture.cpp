@@ -360,7 +360,9 @@ void RenderToTexture::render()
     opaquePass.end();
 
     // Pass 2: Post process
-    m_finalPassOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex);
+    // Swapchain might have been resized and texture views recreated. Ensure we update the PassOptions accordingly
+    m_opaquePassOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex);
+    m_opaquePassOptions.depthStencilAttachment.view = m_depthTextureView;
     auto finalPass = commandRecorder.beginRenderPass(m_finalPassOptions);
     finalPass.setPipeline(m_postProcessPipeline);
     finalPass.setVertexBuffer(0, m_fullScreenQuad);
