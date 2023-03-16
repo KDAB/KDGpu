@@ -21,7 +21,7 @@ add_library(toy-renderer-kdgui SHARED
     ${PUBLIC_HEADERS}
     ${PRIVATE_HEADERS}
 )
-add_library(Toy::RendererKDGui ALIAS toy-renderer-kdgui)
+add_library(ToyRendererKDGui ALIAS toy-renderer-kdgui)
 
 set(TOY_RENDERER_KDGUI_PUBLIC_LIBS
     ToyRenderer::ToyRenderer
