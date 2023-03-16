@@ -85,6 +85,7 @@ set(HEADERS
     memory_barrier.h
     pipeline_layout.h
     pipeline_layout_options.h
+    pool.h
     queue.h
     queue_description.h
     render_pass_command_recorder.h
