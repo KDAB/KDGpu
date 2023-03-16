@@ -13,6 +13,11 @@ VulkanQueue::VulkanQueue(VkQueue _queue,
 {
 }
 
+void VulkanQueue::waitUntilIdle()
+{
+    vkQueueWaitIdle(queue);
+}
+
 void VulkanQueue::submit(const SubmitOptions &options)
 {
     // TODO: Do we need to expose the wait stage flags to the public API or is waiting

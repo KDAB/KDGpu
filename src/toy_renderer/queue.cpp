@@ -25,6 +25,12 @@ Queue::~Queue()
 {
 }
 
+void Queue::waitUntilIdle()
+{
+    auto apiQueue = m_api->resourceManager()->getQueue(m_queue);
+    apiQueue->waitUntilIdle();
+}
+
 void Queue::submit(const SubmitOptions &options)
 {
     auto apiQueue = m_api->resourceManager()->getQueue(m_queue);

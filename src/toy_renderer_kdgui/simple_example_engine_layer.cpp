@@ -81,8 +81,8 @@ void SimpleExampleEngineLayer::waitForUploadBufferData(const Handle<Buffer_t> &d
 
     m_queue.submit({ .commandBuffers = { commandBuffer } });
 
-    // TODO: Replace with m_queue.waitUntilIdle()
-    m_device.waitUntilIdle();
+    // Block until the transfer is done
+    m_queue.waitUntilIdle();
 }
 
 void SimpleExampleEngineLayer::onAttached()

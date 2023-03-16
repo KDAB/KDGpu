@@ -51,6 +51,7 @@ public:
     Extent3D minImageTransferGranularity() const noexcept { return m_minImageTransferGranularity; }
     uint32_t queueTypeIndex() const noexcept { return m_queueTypeIndex; }
 
+    void waitUntilIdle();
     void submit(const SubmitOptions &options);
 
     std::vector<PresentResult> present(const PresentOptions &options);

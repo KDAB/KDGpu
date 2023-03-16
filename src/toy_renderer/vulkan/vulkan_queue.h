@@ -12,6 +12,7 @@ struct VulkanQueue : public ApiQueue {
     explicit VulkanQueue(VkQueue _queue,
                          VulkanResourceManager *_vulkanResourceManager);
 
+    void waitUntilIdle() final;
     void submit(const SubmitOptions &options) final;
     std::vector<PresentResult> present(const PresentOptions &options) final;
 
