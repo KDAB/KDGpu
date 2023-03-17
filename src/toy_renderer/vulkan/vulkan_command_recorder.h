@@ -22,6 +22,7 @@ struct VulkanCommandRecorder : public ApiCommandRecorder {
     void begin() final;
     void copyBuffer(const BufferCopy &copy) final;
     void memoryBarrier(const MemoryBarrierOptions &options) final;
+    void bufferMemoryBarrier(const BufferMemoryBarrierOptions &options) final;
     void executeSecondaryCommandBuffer(const Handle<CommandBuffer_t> &secondaryCommandBuffer) final;
     Handle<CommandBuffer_t> finish() final;
 

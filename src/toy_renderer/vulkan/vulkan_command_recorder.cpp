@@ -66,6 +66,35 @@ void VulkanCommandRecorder::memoryBarrier(const MemoryBarrierOptions &options)
                          0, nullptr);
 }
 
+void VulkanCommandRecorder::bufferMemoryBarrier(const BufferMemoryBarrierOptions &options)
+{
+    auto vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
+    if (vulkanDevice->vkCmdPipelineBarrier2 != nullptr) {
+        VkBufferMemoryBarrier2 vkBufferBarrier = {};
+        vkBufferBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2;
+        vkBufferBarrier.srcStageMask = pipelineStageFlagsToVkPipelineStageFlagBits(options.srcStages);
+        vkBufferBarrier.srcAccessMask = accessFlagsToVkAccessFlagBits(options.srcMask);
+        vkBufferBarrier.dstStageMask = pipelineStageFlagsToVkPipelineStageFlagBits(options.dstStages);
+        vkBufferBarrier.dstAccessMask = accessFlagsToVkAccessFlagBits(options.dstMask);
+        vkBufferBarrier.srcQueueFamilyIndex = options.srcQueueTypeIndex;
+        vkBufferBarrier.dstQueueFamilyIndex = options.dstQueueTypeIndex;
+
+        const auto vulkanBuffer = vulkanResourceManager->getBuffer(options.buffer);
+        vkBufferBarrier.buffer = vulkanBuffer->buffer;
+        vkBufferBarrier.offset = options.offset;
+        vkBufferBarrier.size = options.size;
+
+        VkDependencyInfo vkDependencyInfo = {};
+        vkDependencyInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+        vkDependencyInfo.bufferMemoryBarrierCount = 1;
+        vkDependencyInfo.pBufferMemoryBarriers = &vkBufferBarrier;
+
+        vulkanDevice->vkCmdPipelineBarrier2(commandBuffer, &vkDependencyInfo);
+    } else {
+        // Fallback to the Vulkan 1.0 approach
+    }
+}
+
 void VulkanCommandRecorder::executeSecondaryCommandBuffer(const Handle<CommandBuffer_t> &secondaryCommandBuffer)
 {
     VulkanCommandBuffer *vulkanSecondaryCommandBuffer = vulkanResourceManager->getCommandBuffer(secondaryCommandBuffer);

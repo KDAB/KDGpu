@@ -75,6 +75,12 @@ void CommandRecorder::memoryBarrier(const MemoryBarrierOptions &options)
     apiCommandRecorder->memoryBarrier(options);
 }
 
+void CommandRecorder::bufferMemoryBarrier(const BufferMemoryBarrierOptions &options)
+{
+    auto apiCommandRecorder = m_api->resourceManager()->getCommandRecorder(m_commandRecorder);
+    apiCommandRecorder->bufferMemoryBarrier(options);
+}
+
 CommandBuffer CommandRecorder::finish()
 {
     auto apiCommandRecorder = m_api->resourceManager()->getCommandRecorder(m_commandRecorder);

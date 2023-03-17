@@ -29,12 +29,6 @@ struct BufferCopy {
     size_t byteSize{ 0 };
 };
 
-struct MemoryBarrierOptions {
-    PipelineStageFlags srcStages;
-    PipelineStageFlags dstStages;
-    std::vector<MemoryBarrier> memoryBarriers;
-};
-
 class TOY_RENDERER_EXPORT CommandRecorder
 {
 public:
@@ -55,6 +49,7 @@ public:
     ComputePassCommandRecorder beginComputePass(const ComputePassCommandRecorderOptions &options = {});
     void copyBuffer(const BufferCopy &copy);
     void memoryBarrier(const MemoryBarrierOptions &options);
+    void bufferMemoryBarrier(const BufferMemoryBarrierOptions &options);
     void executeSecondaryCommandBuffer(const Handle<CommandBuffer_t> &secondaryCommandBuffer);
 
     CommandBuffer finish();
