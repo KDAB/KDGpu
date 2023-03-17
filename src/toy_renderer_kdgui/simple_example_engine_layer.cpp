@@ -110,14 +110,38 @@ void SimpleExampleEngineLayer::uploadBufferData(const Handle<Buffer_t> &destinat
     commandRecorder.copyBuffer(copyCmd);
 
     // Insert a buffer barrier
+    // TODO: Pass in suitable src + dst stages and access masks
     const BufferMemoryBarrierOptions bufferBarrierOptions = {
         .buffer = destinationBuffer
     };
     commandRecorder.bufferMemoryBarrier(bufferBarrierOptions);
 
     auto commandBuffer = commandRecorder.finish();
+    auto commandBufferHandle = commandBuffer.handle();
 
-    m_queue.submit({ .commandBuffers = { commandBuffer } });
+    // We will use a fence to know when it is safe to destroy the staging buffer
+    auto fence = m_device.createFence({ .createSignalled = false });
+    auto fenceHandle = fence.handle();
+    m_stagingBuffers.emplace_back(StagingBuffer{
+            .fence = std::move(fence),
+            .buffer = std::move(stagingBuffer),
+            .commandBuffer = std::move(commandBuffer) });
+
+    m_queue.submit({ .commandBuffers = { commandBufferHandle },
+                     .signalFence = fenceHandle });
+}
+
+void SimpleExampleEngineLayer::releaseStagingBuffers()
+{
+    // TODO: Recycle fences and use regions of a large persistent staging buffer
+
+    // Loop over any staging buffers and see if the corresponding fence has been signalled.
+    // If so, we can dispose of them
+    const auto removedCount = std::erase_if(m_stagingBuffers, [](const StagingBuffer &stagingBuffer) {
+        return stagingBuffer.fence.status() == FenceStatus::Signalled;
+    });
+    if (removedCount)
+        SPDLOG_INFO("Released {} staging buffers", removedCount);
 }
 
 void SimpleExampleEngineLayer::onAttached()
@@ -171,6 +195,9 @@ void SimpleExampleEngineLayer::onDetached()
 
 void SimpleExampleEngineLayer::update()
 {
+    // Release any staging buffers we are done with
+    releaseStagingBuffers();
+
     // Call updateScene() function to update scene state.
     updateScene();
 
