@@ -85,6 +85,41 @@ void SimpleExampleEngineLayer::waitForUploadBufferData(const Handle<Buffer_t> &d
     m_queue.waitUntilIdle();
 }
 
+void SimpleExampleEngineLayer::uploadBufferData(const Handle<Buffer_t> &destinationBuffer,
+                                                void *data,
+                                                DeviceSize byteSize,
+                                                DeviceSize dstOffset)
+{
+    // Buffer upload via a staging buffer using our main queue
+    // Create a staging buffer and upload initial data to it by map(), memcpy(), unmap().
+    BufferOptions bufferOptions = {
+        .size = byteSize,
+        .usage = BufferUsageFlags(BufferUsageFlagBits::TransferSrcBit),
+        .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
+    };
+    auto stagingBuffer = m_device.createBuffer(bufferOptions, data);
+
+    auto commandRecorder = m_device.createCommandRecorder();
+    const BufferCopy copyCmd = {
+        .src = stagingBuffer,
+        .srcOffset = 0,
+        .dst = destinationBuffer,
+        .dstOffset = dstOffset,
+        .byteSize = byteSize
+    };
+    commandRecorder.copyBuffer(copyCmd);
+
+    // Insert a buffer barrier
+    const BufferMemoryBarrierOptions bufferBarrierOptions = {
+        .buffer = destinationBuffer
+    };
+    commandRecorder.bufferMemoryBarrier(bufferBarrierOptions);
+
+    auto commandBuffer = commandRecorder.finish();
+
+    m_queue.submit({ .commandBuffers = { commandBuffer } });
+}
+
 void SimpleExampleEngineLayer::onAttached()
 {
     m_window = std::make_unique<View>();
