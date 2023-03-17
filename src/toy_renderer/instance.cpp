@@ -75,6 +75,11 @@ AdapterAndDevice Instance::createDefaultDevice(const Surface &surface,
 
     // We are now able to query the adapter for swapchain properties and presentation support with the window surface
     const auto swapchainProperties = selectedAdapter->swapchainProperties(surface);
+    SPDLOG_INFO("Supported swapchain present modes:");
+    for (const auto &mode : swapchainProperties.presentModes) {
+        SPDLOG_INFO("  - {}", presentModeToString(mode));
+    }
+
     const bool supportsPresentation = selectedAdapter->supportsPresentation(surface, 0); // Query about the 1st queue type
     spdlog::critical("Queue family 0 supports presentation: {}", supportsPresentation);
 

@@ -128,6 +128,26 @@ enum class PresentMode {
     MaxEnum = 0x7FFFFFFF
 };
 
+inline std::string presentModeToString(PresentMode presentMode)
+{
+    switch (presentMode) {
+    case PresentMode::Immediate:
+        return "Immediate";
+    case PresentMode::Mailbox:
+        return "Mailbox";
+    case PresentMode::Fifo:
+        return "Fifo";
+    case PresentMode::FifoRelaxed:
+        return "Fifo Relaxed";
+    case PresentMode::SharedDemandRefresh:
+        return "Shared Demand Refresh";
+    case PresentMode::SharedContinuousRefresh:
+        return "Shared Continuous Refresh";
+    default:
+        return "Unknown";
+    }
+}
+
 enum class ColorSpace {
     SRgbNonlinear = 0,
     DisplayP3Nonlinear = 1000104001,
