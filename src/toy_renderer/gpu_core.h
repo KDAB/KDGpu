@@ -924,4 +924,10 @@ enum class PresentResult {
 
 using AcquireImageResult = PresentResult;
 
+enum class FenceStatus {
+    Signalled = 0,
+    Unsignalled = 1,
+    Error = 2
+};
+
 } // namespace ToyRenderer

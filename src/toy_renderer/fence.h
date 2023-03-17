@@ -1,5 +1,6 @@
 #pragma once
 
+#include <toy_renderer/gpu_core.h>
 #include <toy_renderer/handle.h>
 #include <toy_renderer/toy_renderer_export.h>
 
@@ -11,6 +12,7 @@ struct Fence_t;
 class GraphicsApi;
 
 struct FenceOptions {
+    bool createSignalled{ true };
 };
 
 class TOY_RENDERER_EXPORT Fence
@@ -32,6 +34,7 @@ public:
 
     void reset();
     void wait();
+    FenceStatus status() const;
 
 private:
     explicit Fence(GraphicsApi *api, const Handle<Device_t> &device, const FenceOptions &options);

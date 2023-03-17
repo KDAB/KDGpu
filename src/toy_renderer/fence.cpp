@@ -62,6 +62,11 @@ void Fence::wait()
         m_api->resourceManager()->getFence(handle())->wait();
 }
 
+FenceStatus Fence::status() const
+{
+    return m_api->resourceManager()->getFence(handle())->status();
+}
+
 bool operator==(const Fence &a, const Fence &b)
 {
     return a.m_api == b.m_api && a.m_device == b.m_device && a.m_fence == b.m_fence;

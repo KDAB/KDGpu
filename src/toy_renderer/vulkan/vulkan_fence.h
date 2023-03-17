@@ -23,6 +23,7 @@ struct VulkanFence : public ApiFence {
 
     void wait() final;
     void reset() final;
+    FenceStatus status() final;
 };
 
 } // namespace ToyRenderer

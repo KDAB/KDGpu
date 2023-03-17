@@ -26,4 +26,18 @@ void VulkanFence::reset()
     vkResetFences(vulkanDevice->device, 1, &fence);
 }
 
+FenceStatus VulkanFence::status()
+{
+    auto vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
+    VkResult vkResult = vkGetFenceStatus(vulkanDevice->device, fence);
+    switch (vkResult) {
+    case VK_SUCCESS:
+        return FenceStatus::Signalled;
+    case VK_NOT_READY:
+        return FenceStatus::Unsignalled;
+    default:
+        return FenceStatus::Error;
+    }
+}
+
 } // namespace ToyRenderer
