@@ -85,6 +85,12 @@ AdapterAndDevice Instance::createDefaultDevice(const Surface &surface,
     const bool supportsPresentation = selectedAdapter->supportsPresentation(surface, 0); // Query about the 1st queue type
     SPDLOG_INFO("Queue family 0 supports presentation: {}", supportsPresentation);
 
+    const auto adapterExtensions = selectedAdapter->extensions();
+    SPDLOG_DEBUG("Supported adapter extensions:");
+    for (const auto &extension : adapterExtensions) {
+        SPDLOG_DEBUG("  - {} Version {}", extension.name, extension.version);
+    }
+
     if (!supportsPresentation || !hasGraphicsAndCompute) {
         SPDLOG_CRITICAL("Selected adapter queue family 0 does not meet requirements. Aborting.");
         return {};

@@ -16,6 +16,31 @@ VulkanAdapter::VulkanAdapter(VkPhysicalDevice _physicalDevice,
 {
 }
 
+std::vector<Extension> VulkanAdapter::extensions() const
+{
+    uint32_t extensionCount{ 0 };
+    if (vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, nullptr) != VK_SUCCESS) {
+        SPDLOG_CRITICAL("Unable to enumerate instance extensions");
+        return {};
+    }
+
+    std::vector<VkExtensionProperties> vkExtensions(extensionCount);
+    if (vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, vkExtensions.data()) != VK_SUCCESS) {
+        SPDLOG_CRITICAL("Unable to query instance extensions");
+        return {};
+    }
+
+    std::vector<Extension> extensions;
+    extensions.reserve(extensionCount);
+    for (const auto &vkExtension : vkExtensions) {
+        extensions.emplace_back(Extension{
+                .name = vkExtension.extensionName,
+                .version = vkExtension.specVersion });
+    }
+
+    return extensions;
+}
+
 AdapterProperties VulkanAdapter::queryAdapterProperties()
 {
     VkPhysicalDeviceProperties deviceProperties;

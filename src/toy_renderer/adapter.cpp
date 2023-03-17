@@ -17,6 +17,12 @@ Adapter::~Adapter()
 {
 }
 
+std::vector<Extension> Adapter::extensions() const
+{
+    auto apiAdapter = m_api->resourceManager()->getAdapter(m_adapter);
+    return apiAdapter->extensions();
+}
+
 const AdapterProperties &Adapter::properties() const noexcept
 {
     if (!m_propertiesQueried) {

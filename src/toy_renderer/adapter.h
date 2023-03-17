@@ -37,6 +37,7 @@ public:
 
     operator Handle<Adapter_t>() const noexcept { return m_adapter; }
 
+    std::vector<Extension> extensions() const;
     const AdapterProperties &properties() const noexcept;
     const AdapterFeatures &features() const noexcept;
     std::span<AdapterQueueType> queueTypes() const;

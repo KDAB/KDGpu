@@ -18,6 +18,7 @@ struct VulkanAdapter : public ApiAdapter {
                            VulkanResourceManager *_vulkanResourceManager,
                            const Handle<Instance_t> &_instanceHandle);
 
+    std::vector<Extension> extensions() const final;
     AdapterProperties queryAdapterProperties() final;
     AdapterFeatures queryAdapterFeatures() final;
     AdapterSwapchainProperties querySwapchainProperties(const Handle<Surface_t> &surfaceHandle) final;
