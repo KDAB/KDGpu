@@ -34,6 +34,17 @@ VulkanDevice::VulkanDevice(VkDevice _device,
     commandPools.resize(queueTypeCount);
     for (uint32_t i = 0; i < queueTypeCount; ++i)
         commandPools[i] = VK_NULL_HANDLE;
+
+    // Check to see if we have the VK_KHR_synchronization2 extension or not
+    const auto adapterExtensions = vulkanAdapter->extensions();
+    for (const auto &extension : adapterExtensions) {
+        if (extension.name == "VK_KHR_synchronization2") {
+            PFN_vkCmdPipelineBarrier2KHR vkCmdPipelineBarrier2KHR = PFN_vkCmdPipelineBarrier2KHR(
+                    vkGetDeviceProcAddr(device, "vkCmdPipelineBarrier2KHR"));
+            this->vkCmdPipelineBarrier2 = vkCmdPipelineBarrier2KHR;
+            break;
+        }
+    }
 }
 
 std::vector<QueueDescription> VulkanDevice::getQueues(ResourceManager *resourceManager,

@@ -189,11 +189,17 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     physicalDeviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
     physicalDeviceFeatures2.features = deviceFeatures;
 
+    // Enable the VK_KHR_Synchronization2 extension features by chaining this into the createInfo chain.
+    VkPhysicalDeviceSynchronization2Features sync2Features = {};
+    sync2Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES;
+    sync2Features.synchronization2 = true;
+    physicalDeviceFeatures2.pNext = &sync2Features;
+
     // Allows to use std430 for uniform buffers which gives much nicer packing of data
     VkPhysicalDeviceUniformBufferStandardLayoutFeatures stdLayoutFeatures = {};
     stdLayoutFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_UNIFORM_BUFFER_STANDARD_LAYOUT_FEATURES;
     stdLayoutFeatures.uniformBufferStandardLayout = options.requestedFeatures.uniformBufferStandardLayout;
-    physicalDeviceFeatures2.pNext = &stdLayoutFeatures;
+    sync2Features.pNext = &stdLayoutFeatures;
 
     VkDeviceCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;

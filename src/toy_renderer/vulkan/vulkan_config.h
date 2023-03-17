@@ -50,6 +50,7 @@ std::vector<const char *> getDefaultRequestedDeviceExtensions()
 {
     std::vector<const char *> extensions;
     extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+    extensions.push_back(VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME);
 #if defined(PLATFORM_MACOS)
     extensions.push_back("VK_KHR_portability_subset");
 #endif

@@ -38,6 +38,8 @@ struct VulkanDevice : public ApiDevice {
     VkDescriptorPool descriptorSetPool{ VK_NULL_HANDLE };
     std::unordered_map<VulkanRenderPassKey, Handle<RenderPass_t>> renderPasses;
     std::unordered_map<VulkanFramebufferKey, Handle<Framebuffer_t>> framebuffers;
+
+    PFN_vkCmdPipelineBarrier2KHR vkCmdPipelineBarrier2{ nullptr };
 };
 
 } // namespace ToyRenderer
