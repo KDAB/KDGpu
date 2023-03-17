@@ -19,6 +19,11 @@ using DeviceSize = uint64_t;
 using Flags = uint32_t;
 using SampleMask = uint32_t;
 
+struct Extension {
+    std::string name;
+    uint32_t version{ 0 };
+};
+
 struct Extent2D {
     uint32_t width;
     uint32_t height;

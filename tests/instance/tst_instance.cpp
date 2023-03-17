@@ -39,6 +39,16 @@ TEST_SUITE("Instance")
             CHECK(!adapters.empty());
         }
 
+        SUBCASE("Can query instance extensions")
+        {
+            // WHEN
+            const auto extensions = instance.extensions();
+
+            // THEN
+            // In theory this could be empty if a driver really doesn't have any extensions
+            CHECK(!extensions.empty());
+        }
+
         SUBCASE("Can create Device")
         {
             // WHEN

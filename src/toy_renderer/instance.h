@@ -63,6 +63,8 @@ public:
 
     operator Handle<Instance_t>() const noexcept { return m_instance; }
 
+    std::vector<Extension> extensions() const;
+
     AdapterAndDevice createDefaultDevice(const Surface &surface,
                                          AdapterDeviceType deviceType = AdapterDeviceType::DiscreteGpu) const;
 

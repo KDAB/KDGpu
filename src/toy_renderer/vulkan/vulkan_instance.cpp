@@ -3,6 +3,8 @@
 #include <toy_renderer/vulkan/vulkan_adapter.h>
 #include <toy_renderer/vulkan/vulkan_resource_manager.h>
 
+#include <spdlog/spdlog.h>
+
 #if defined(TOY_RENDERER_PLATFORM_WIN32)
 #include <vulkan/vulkan_win32.h>
 #endif
@@ -18,6 +20,31 @@ VulkanInstance::VulkanInstance(VulkanResourceManager *_vulkanResourceManager, Vk
     , vulkanResourceManager(_vulkanResourceManager)
     , instance(_instance)
 {
+}
+
+std::vector<Extension> VulkanInstance::extensions() const
+{
+    uint32_t extensionCount{ 0 };
+    if (vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr) != VK_SUCCESS) {
+        SPDLOG_CRITICAL("Unable to enumerate instance extensions");
+        return {};
+    }
+
+    std::vector<VkExtensionProperties> vkExtensions(extensionCount);
+    if (vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, vkExtensions.data()) != VK_SUCCESS) {
+        SPDLOG_CRITICAL("Unable to query instance extensions");
+        return {};
+    }
+
+    std::vector<Extension> extensions;
+    extensions.reserve(extensionCount);
+    for (const auto &vkExtension : vkExtensions) {
+        extensions.emplace_back(Extension{
+                .name = vkExtension.extensionName,
+                .version = vkExtension.specVersion });
+    }
+
+    return extensions;
 }
 
 std::vector<Handle<Adapter_t>> VulkanInstance::queryAdapters(const Handle<Instance_t> &instanceHandle)

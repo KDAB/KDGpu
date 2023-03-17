@@ -54,6 +54,12 @@ Instance &Instance::operator=(Instance &&other)
     return *this;
 }
 
+std::vector<Extension> Instance::extensions() const
+{
+    auto apiInstance = m_api->resourceManager()->getInstance(m_instance);
+    return apiInstance->extensions();
+}
+
 AdapterAndDevice Instance::createDefaultDevice(const Surface &surface,
                                                AdapterDeviceType deviceType) const
 {
