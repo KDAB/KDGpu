@@ -61,17 +61,13 @@ AdapterAndDevice Instance::createDefaultDevice(const Surface &surface,
     // a discrete GPU. In a real app, we could fallback to an integrated one.
     Adapter *selectedAdapter = selectAdapter(deviceType);
     if (!selectedAdapter) {
-        spdlog::critical("Unable to find a suitable Adapter. Aborting...");
+        SPDLOG_CRITICAL("Unable to find a suitable Adapter. Aborting...");
         return {};
     }
 
-    // We can easily query the adapter for various features, properties and limits.
-    spdlog::critical("maxBoundDescriptorSets = {}", selectedAdapter->properties().limits.maxBoundDescriptorSets);
-    spdlog::critical("multiDrawIndirect = {}", selectedAdapter->features().multiDrawIndirect);
-
     auto queueTypes = selectedAdapter->queueTypes();
     const bool hasGraphicsAndCompute = queueTypes[0].supportsFeature(QueueFlags(QueueFlagBits::GraphicsBit) | QueueFlags(QueueFlagBits::ComputeBit));
-    spdlog::critical("Queue family 0 graphics and compute support: {}", hasGraphicsAndCompute);
+    SPDLOG_INFO("Queue family 0 graphics and compute support: {}", hasGraphicsAndCompute);
 
     // We are now able to query the adapter for swapchain properties and presentation support with the window surface
     const auto swapchainProperties = selectedAdapter->swapchainProperties(surface);
@@ -81,10 +77,10 @@ AdapterAndDevice Instance::createDefaultDevice(const Surface &surface,
     }
 
     const bool supportsPresentation = selectedAdapter->supportsPresentation(surface, 0); // Query about the 1st queue type
-    spdlog::critical("Queue family 0 supports presentation: {}", supportsPresentation);
+    SPDLOG_INFO("Queue family 0 supports presentation: {}", supportsPresentation);
 
     if (!supportsPresentation || !hasGraphicsAndCompute) {
-        spdlog::critical("Selected adapter queue family 0 does not meet requirements. Aborting.");
+        SPDLOG_CRITICAL("Selected adapter queue family 0 does not meet requirements. Aborting.");
         return {};
     }
 
