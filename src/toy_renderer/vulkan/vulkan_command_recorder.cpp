@@ -73,10 +73,10 @@ void VulkanCommandRecorder::bufferMemoryBarrier(const BufferMemoryBarrierOptions
     if (vulkanDevice->vkCmdPipelineBarrier2 != nullptr) {
         VkBufferMemoryBarrier2 vkBufferBarrier = {};
         vkBufferBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2;
-        vkBufferBarrier.srcStageMask = pipelineStageFlagsToVkPipelineStageFlagBits(options.srcStages);
-        vkBufferBarrier.srcAccessMask = accessFlagsToVkAccessFlagBits(options.srcMask);
-        vkBufferBarrier.dstStageMask = pipelineStageFlagsToVkPipelineStageFlagBits(options.dstStages);
-        vkBufferBarrier.dstAccessMask = accessFlagsToVkAccessFlagBits(options.dstMask);
+        vkBufferBarrier.srcStageMask = pipelineStageFlagsToVkPipelineStageFlagBits2(options.srcStages);
+        vkBufferBarrier.srcAccessMask = accessFlagsToVkAccessFlagBits2(options.srcMask);
+        vkBufferBarrier.dstStageMask = pipelineStageFlagsToVkPipelineStageFlagBits2(options.dstStages);
+        vkBufferBarrier.dstAccessMask = accessFlagsToVkAccessFlagBits2(options.dstMask);
         vkBufferBarrier.srcQueueFamilyIndex = options.srcQueueTypeIndex;
         vkBufferBarrier.dstQueueFamilyIndex = options.dstQueueTypeIndex;
 
