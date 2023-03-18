@@ -87,6 +87,7 @@ VkSamplerAddressMode addressModeToVkSamplerAddressMode(AddressMode mode);
 
 VkAccessFlagBits accessFlagsToVkAccessFlagBits(AccessFlags accessFlags);
 
+// TODO: Implement the extended enums used by VK_KHR_synchronization2
 VkPipelineStageFlagBits pipelineStageFlagsToVkPipelineStageFlagBits(PipelineStageFlags pipelineFlags);
 
 VkIndexType indexTypeToVkIndexType(IndexType type);

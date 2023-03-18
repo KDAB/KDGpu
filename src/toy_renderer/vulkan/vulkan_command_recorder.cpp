@@ -66,6 +66,7 @@ void VulkanCommandRecorder::memoryBarrier(const MemoryBarrierOptions &options)
                          0, nullptr);
 }
 
+// TODO: Implement an array version
 void VulkanCommandRecorder::bufferMemoryBarrier(const BufferMemoryBarrierOptions &options)
 {
     auto vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
@@ -92,6 +93,23 @@ void VulkanCommandRecorder::bufferMemoryBarrier(const BufferMemoryBarrierOptions
         vulkanDevice->vkCmdPipelineBarrier2(commandBuffer, &vkDependencyInfo);
     } else {
         // Fallback to the Vulkan 1.0 approach
+        VkBufferMemoryBarrier vkBufferBarrier = {};
+        vkBufferBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+        vkBufferBarrier.srcAccessMask = accessFlagsToVkAccessFlagBits(options.srcMask);
+        vkBufferBarrier.dstAccessMask = accessFlagsToVkAccessFlagBits(options.dstMask);
+
+        const auto vulkanBuffer = vulkanResourceManager->getBuffer(options.buffer);
+        vkBufferBarrier.buffer = vulkanBuffer->buffer;
+        vkBufferBarrier.offset = options.offset;
+        vkBufferBarrier.size = options.size;
+
+        vkCmdPipelineBarrier(commandBuffer,
+                             pipelineStageFlagsToVkPipelineStageFlagBits(options.srcStages),
+                             pipelineStageFlagsToVkPipelineStageFlagBits(options.dstStages),
+                             0, // None
+                             0, nullptr,
+                             1, &vkBufferBarrier,
+                             0, nullptr);
     }
 }
 
