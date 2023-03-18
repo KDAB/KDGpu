@@ -36,10 +36,17 @@ void RotatingTriangle::initializeScene()
     // Create a buffer to hold triangle vertex data
     {
         const float r = 0.8f;
-        std::array<Vertex, 3> vertexData;
-        vertexData[0] = { { r * std::cos(7.0f * M_PI / 6.0f), -r * std::sin(7.0f * M_PI / 6.0f), 0.0f }, { 1.0f, 0.0, 0.0f } }; // Bottom-left, red
-        vertexData[1] = { { r * std::cos(11.0f * M_PI / 6.0f), -r * std::sin(11.0f * M_PI / 6.0f), 0.0f }, { 0.0f, 1.0, 0.0f } }; // Bottom-right, green
-        vertexData[2] = { { 0.0f, -r, 0.0f }, { 0.0f, 0.0, 1.0f } }; // Top, blue
+        const std::array<Vertex, 3> vertexData = {
+            Vertex{ // Bottom-left, red
+                    .position = { r * std::cosf(7.0f * M_PI / 6.0f), -r * std::sinf(7.0f * M_PI / 6.0f), 0.0f },
+                    .color = { 1.0f, 0.0f, 0.0f } },
+            Vertex{ // Bottom-right, green
+                    .position = { r * std::cosf(11.0f * M_PI / 6.0f), -r * std::sinf(11.0f * M_PI / 6.0f), 0.0f },
+                    .color = { 0.0f, 1.0f, 0.0f } },
+            Vertex{ // Top, blue
+                    .position = { 0.0f, -r, 0.0f },
+                    .color = { 0.0f, 0.0f, 1.0f } }
+        };
 
         const DeviceSize dataByteSize = vertexData.size() * sizeof(Vertex);
         BufferOptions bufferOptions = {

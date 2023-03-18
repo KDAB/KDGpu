@@ -51,11 +51,11 @@ protected:
 
     void recreateSwapChain();
     void waitForUploadBufferData(const Handle<Buffer_t> &destinationBuffer,
-                                 void *data,
+                                 const void *data,
                                  DeviceSize byteSize,
                                  DeviceSize dstOffset = 0);
     void uploadBufferData(const Handle<Buffer_t> &destinationBuffer,
-                          void *data,
+                          const void *data,
                           DeviceSize byteSize,
                           DeviceSize dstOffset = 0);
     void releaseStagingBuffers();

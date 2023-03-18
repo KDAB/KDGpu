@@ -55,7 +55,7 @@ void SimpleExampleEngineLayer::recreateSwapChain()
 // TODO: Implement a non-blocking buffer upload by way of a memory barrier
 // TODO: Later implement a non-blocking buffer upload via staging buffer on transfer queue and transfer of ownership.
 void SimpleExampleEngineLayer::waitForUploadBufferData(const Handle<Buffer_t> &destinationBuffer,
-                                                       void *data,
+                                                       const void *data,
                                                        DeviceSize byteSize,
                                                        DeviceSize dstOffset)
 {
@@ -86,7 +86,7 @@ void SimpleExampleEngineLayer::waitForUploadBufferData(const Handle<Buffer_t> &d
 }
 
 void SimpleExampleEngineLayer::uploadBufferData(const Handle<Buffer_t> &destinationBuffer,
-                                                void *data,
+                                                const void *data,
                                                 DeviceSize byteSize,
                                                 DeviceSize dstOffset)
 {
