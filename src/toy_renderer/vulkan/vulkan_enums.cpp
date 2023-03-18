@@ -300,7 +300,15 @@ VkAccessFlagBits accessFlagsToVkAccessFlagBits(AccessFlags accessFlags)
 
 VkPipelineStageFlagBits pipelineStageFlagsToVkPipelineStageFlagBits(PipelineStageFlags pipelineFlags)
 {
+    if (static_cast<uint64_t>(pipelineFlags) > VK_PIPELINE_STAGE_FLAG_BITS_MAX_ENUM) {
+        SPDLOG_WARN("The requested PipelineStageFlags are not supported with the VK_KHR_Synchronization2 extension.");
+    }
     return static_cast<VkPipelineStageFlagBits>(static_cast<uint32_t>(pipelineFlags));
+}
+
+VkPipelineStageFlagBits2 pipelineStageFlagsToVkPipelineStageFlagBits2(PipelineStageFlags pipelineFlags)
+{
+    return static_cast<VkPipelineStageFlagBits2>(static_cast<uint64_t>(pipelineFlags));
 }
 
 VkCommandBufferLevel commandBufferLevelToVkCommandBufferLevel(CommandBufferLevel level)

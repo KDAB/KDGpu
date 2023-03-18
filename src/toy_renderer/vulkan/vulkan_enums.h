@@ -85,10 +85,11 @@ VkFilter filterModeToVkFilterMode(FilterMode mode);
 VkSamplerMipmapMode mipMapFilterModeToVkSamplerMipmapMode(MipmapFilterMode mode);
 VkSamplerAddressMode addressModeToVkSamplerAddressMode(AddressMode mode);
 
+// TODO: Support VkAccessFlags2 features
 VkAccessFlagBits accessFlagsToVkAccessFlagBits(AccessFlags accessFlags);
 
-// TODO: Implement the extended enums used by VK_KHR_synchronization2
 VkPipelineStageFlagBits pipelineStageFlagsToVkPipelineStageFlagBits(PipelineStageFlags pipelineFlags);
+VkPipelineStageFlagBits2 pipelineStageFlagsToVkPipelineStageFlagBits2(PipelineStageFlags pipelineFlags);
 
 VkIndexType indexTypeToVkIndexType(IndexType type);
 IndexType vkIndexTypeToIndexType(VkIndexType type);

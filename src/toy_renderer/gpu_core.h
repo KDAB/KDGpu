@@ -18,6 +18,7 @@ constexpr uint64_t WholeSize = (~0ULL);
 
 using DeviceSize = uint64_t;
 using Flags = uint32_t;
+using Flags64 = uint64_t;
 using SampleMask = uint32_t;
 
 struct Extension {
@@ -854,27 +855,49 @@ enum class AccessFlagBit {
 };
 using AccessFlags = Flags;
 
-enum class PipelineStageFlagBit {
-    TopOfPipeBit = 0x00000001,
-    DrawIndirectBit = 0x00000002,
-    VertexInputBit = 0x00000004,
-    VertexShaderBit = 0x00000008,
-    TessellationControlShaderBit = 0x00000010,
-    TessellationEvaluationShaderBit = 0x00000020,
-    GeometryShaderBit = 0x00000040,
-    FragmentShaderBit = 0x00000080,
-    EarlyFragmentTestBit = 0x00000100,
-    LateFragmentTestBit = 0x00000200,
-    ColorAttachmentOutputBit = 0x00000400,
-    ComputeShaderBit = 0x00000800,
-    TransferBit = 0x00001000,
-    BottomOfPitBit = 0x00002000,
-    HostBit = 0x00004000,
-    AllGraphicsBit = 0x00008000,
-    AllCommandsBit = 0x00010000,
+enum class PipelineStageFlagBit : uint64_t {
     None = 0,
+    TopOfPipeBit = 0x00000001ULL,
+    DrawIndirectBit = 0x00000002ULL,
+    VertexInputBit = 0x00000004ULL,
+    VertexShaderBit = 0x00000008ULL,
+    TessellationControlShaderBit = 0x00000010ULL,
+    TessellationEvaluationShaderBit = 0x00000020ULL,
+    GeometryShaderBit = 0x00000040ULL,
+    FragmentShaderBit = 0x00000080ULL,
+    EarlyFragmentTestBit = 0x00000100ULL,
+    LateFragmentTestBit = 0x00000200ULL,
+    ColorAttachmentOutputBit = 0x00000400ULL,
+    ComputeShaderBit = 0x00000800ULL,
+    TransferBit = 0x00001000ULL,
+    BottomOfPipeBit = 0x00002000ULL,
+    HostBit = 0x00004000ULL,
+    AllGraphicsBit = 0x00008000ULL,
+    AllCommandsBit = 0x00010000ULL,
+    CopyBit = 0x100000000ULL,
+    ResolveBit = 0x200000000ULL,
+    BlitBit = 0x400000000ULL,
+    ClearBit = 0x800000000ULL,
+    IndexInputBit = 0x1000000000ULL,
+    VertexAttributeInputBit = 0x2000000000ULL,
+    PreRasterizationShadersBit = 0x4000000000ULL,
+    VideoDecodeBit = 0x04000000ULL,
+    VideoEncodeBit = 0x08000000ULL,
+    TransformFeedbackBit = 0x01000000ULL,
+    ConditionalRenderingBit = 0x00040000ULL,
+    CommandPreprocessBit = 0x00020000ULL,
+    FragmentShadingRateAttachmentBit = 0x00400000ULL,
+    ShadingRateImageBit = 0x00400000ULL,
+    AccelerationStructureBuildBit = 0x02000000ULL,
+    RayTracingShaderBit = 0x00200000ULL,
+    FragmentDensityProcessBit = 0x00800000ULL,
+    TaskShaderBit = 0x00080000ULL,
+    MeshShaderBit = 0x00100000ULL,
+    AccelerationStructureCopyBit = 0x10000000ULL,
+    MicromapBuildBit = 0x40000000ULL,
+    OpticalFlowBit = 0x20000000ULL
 };
-using PipelineStageFlags = Flags;
+using PipelineStageFlags = Flags64;
 
 enum class CommandBufferLevel {
     Primary = 0,
