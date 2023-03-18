@@ -832,7 +832,8 @@ enum class MipmapFilterMode {
     MaxEnum = 0x7fffffff
 };
 
-enum class AccessFlagBit {
+enum class AccessFlagBit : uint64_t {
+    None = 0,
     IndirectCommandReadBit = 0x00000001,
     IndexReadBit = 0x00000002,
     VertexAttributeReadBit = 0x00000004,
@@ -850,10 +851,33 @@ enum class AccessFlagBit {
     HostWriteBit = 0x00004000,
     MemoryReadBit = 0x00008000,
     MemoryWriteBit = 0x00010000,
-    None = 0,
-    MaxEnum = 0x7FFFFFFF
+    ShaderSampledReadBit = 0x100000000ULL,
+    ShaderStorageReadBit = 0x200000000ULL,
+    ShaderStorageWriteBit = 0x400000000ULL,
+    VideoDecodeReadBit = 0x800000000ULL,
+    VideoDecodeWriteBit = 0x1000000000ULL,
+    VideoEncodeReadBit = 0x2000000000ULL,
+    VideoEncodeWriteBit = 0x4000000000ULL,
+    TransformFeedbackWriteBit = 0x02000000ULL,
+    TransformFeedbackCounterReadBit = 0x04000000ULL,
+    TransformFeedbackCounterWriteBit = 0x08000000ULL,
+    ConditionalRenderingReadBit = 0x00100000ULL,
+    CommandPreprocessReadBit = 0x00020000ULL,
+    CommandPreprocessWriteBit = 0x00040000ULL,
+    FragmentShadingRateAttachmentReadBit = 0x00800000ULL,
+    ShadingRateImageReadBit = 0x00800000ULL,
+    AccelerationStructureReadBit = 0x00200000ULL,
+    AccelerationStructureWriteBit = 0x00400000ULL,
+    FragmentDensityMapReadBit = 0x01000000ULL,
+    ColorAttachmentReadNoncoherentBit = 0x00080000ULL,
+    DescriptorBufferReadBit = 0x20000000000ULL,
+    ShaderBindingTableReadBit = 0x10000000000ULL,
+    MicromapReadBit = 0x100000000000ULL,
+    MicromapWriteBit = 0x200000000000ULL,
+    OpticalFlowReadBit = 0x40000000000ULL,
+    OpticalFlowWriteBit = 0x80000000000ULL
 };
-using AccessFlags = Flags;
+using AccessFlags = Flags64;
 
 enum class PipelineStageFlagBit : uint64_t {
     None = 0,
