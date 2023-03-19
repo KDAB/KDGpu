@@ -9,6 +9,34 @@
 #undef MemoryBarrier
 #endif
 
+namespace {
+
+std::vector<VkBufferImageCopy> buildRegions(const std::vector<ToyRenderer::BufferImageCopyRegion> &regions)
+{
+    const uint32_t regionCount = regions.size();
+    std::vector<VkBufferImageCopy> vkRegions;
+    vkRegions.reserve(regionCount);
+    for (uint32_t i = 0; i < regionCount; ++i) {
+        const auto &region = regions.at(i);
+        const VkBufferImageCopy vkRegion = {
+            .bufferOffset = region.bufferOffset,
+            .bufferRowLength = region.bufferRowLength,
+            .bufferImageHeight = region.bufferImageHeight,
+            .imageSubresource = {
+                    .aspectMask = region.imageSubResource.aspectMask,
+                    .mipLevel = region.imageSubResource.mipLevel,
+                    .baseArrayLayer = region.imageSubResource.baseArrayLayer,
+                    .layerCount = region.imageSubResource.layerCount },
+            .imageOffset = { .x = region.imageOffset.x, .y = region.imageOffset.y, .z = region.imageOffset.z },
+            .imageExtent = { .width = region.imageExtent.width, .height = region.imageExtent.height, .depth = region.imageExtent.depth }
+        };
+        vkRegions.emplace_back(std::move(vkRegion));
+    }
+    return vkRegions;
+}
+
+} // namespace
+
 namespace ToyRenderer {
 
 VulkanCommandRecorder::VulkanCommandRecorder(VkCommandPool _commandPool,
@@ -42,6 +70,34 @@ void VulkanCommandRecorder::copyBuffer(const BufferCopy &copy)
     bufferCopy.srcOffset = copy.srcOffset;
 
     vkCmdCopyBuffer(commandBuffer, srcBuf->buffer, dstBuf->buffer, 1, &bufferCopy);
+}
+
+void VulkanCommandRecorder::copyBufferToTexture(const BufferToTextureCopy &copy)
+{
+    VulkanBuffer *srcVulkanBuffer = vulkanResourceManager->getBuffer(copy.srcBuffer);
+    VulkanTexture *dstVulkanTexture = vulkanResourceManager->getTexture(copy.dstTexture);
+    const std::vector<VkBufferImageCopy> vkRegions = buildRegions(copy.regions);
+
+    vkCmdCopyBufferToImage(commandBuffer,
+                           srcVulkanBuffer->buffer,
+                           dstVulkanTexture->image,
+                           textureLayoutToVkImageLayout(copy.dstImageLayout),
+                           static_cast<uint32_t>(vkRegions.size()),
+                           vkRegions.data());
+}
+
+void VulkanCommandRecorder::copyTextureToBuffer(const TextureToBufferCopy &copy)
+{
+    VulkanTexture *srcVulkanTexture = vulkanResourceManager->getTexture(copy.srcTexture);
+    VulkanBuffer *dstVulkanBuffer = vulkanResourceManager->getBuffer(copy.dstBuffer);
+    const std::vector<VkBufferImageCopy> vkRegions = buildRegions(copy.regions);
+
+    vkCmdCopyImageToBuffer(commandBuffer,
+                           srcVulkanTexture->image,
+                           textureLayoutToVkImageLayout(copy.srcImageLayout),
+                           dstVulkanBuffer->buffer,
+                           static_cast<uint32_t>(vkRegions.size()),
+                           vkRegions.data());
 }
 
 void VulkanCommandRecorder::memoryBarrier(const MemoryBarrierOptions &options)

@@ -21,6 +21,8 @@ struct VulkanCommandRecorder : public ApiCommandRecorder {
 
     void begin() final;
     void copyBuffer(const BufferCopy &copy) final;
+    void copyBufferToTexture(const BufferToTextureCopy &copy) final;
+    void copyTextureToBuffer(const TextureToBufferCopy &copy) final;
     void memoryBarrier(const MemoryBarrierOptions &options) final;
     void bufferMemoryBarrier(const BufferMemoryBarrierOptions &options) final;
     void textureMemoryBarrier(const TextureMemoryBarrierOptions &options) final;

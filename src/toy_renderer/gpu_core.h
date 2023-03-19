@@ -560,6 +560,13 @@ struct TextureSubresourceRange {
     uint32_t layerCount{ remainingArrayLayers };
 };
 
+struct TextureSubresourceLayers {
+    TextureAspectFlags aspectMask{ static_cast<uint32_t>(TextureAspectFlagBits::None) };
+    uint32_t mipLevel{ 0 };
+    uint32_t baseArrayLayer{ 0 };
+    uint32_t layerCount{ 0 };
+};
+
 enum class BufferUsageFlagBits {
     TransferSrcBit = 0x00000001,
     TransferDstBit = 0x00000002,

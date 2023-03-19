@@ -29,6 +29,29 @@ struct BufferCopy {
     size_t byteSize{ 0 };
 };
 
+struct BufferImageCopyRegion {
+    DeviceSize bufferOffset{ 0 };
+    uint32_t bufferRowLength{ 0 };
+    uint32_t bufferImageHeight{ 0 };
+    TextureSubresourceLayers imageSubResource{};
+    Offset3D imageOffset{};
+    Extent3D imageExtent{};
+};
+
+struct BufferToTextureCopy {
+    Handle<Buffer_t> srcBuffer;
+    Handle<Texture_t> dstTexture;
+    TextureLayout dstImageLayout;
+    std::vector<BufferImageCopyRegion> regions;
+};
+
+struct TextureToBufferCopy {
+    Handle<Texture_t> srcTexture;
+    TextureLayout srcImageLayout;
+    Handle<Buffer_t> dstBuffer;
+    std::vector<BufferImageCopyRegion> regions;
+};
+
 class TOY_RENDERER_EXPORT CommandRecorder
 {
 public:
@@ -48,6 +71,8 @@ public:
     RenderPassCommandRecorder beginRenderPass(const RenderPassCommandRecorderOptions &options);
     ComputePassCommandRecorder beginComputePass(const ComputePassCommandRecorderOptions &options = {});
     void copyBuffer(const BufferCopy &copy);
+    void copyBufferToTexture(const BufferToTextureCopy &copy);
+    void copyTextureToBuffer(const TextureToBufferCopy &copy);
     void memoryBarrier(const MemoryBarrierOptions &options);
     void bufferMemoryBarrier(const BufferMemoryBarrierOptions &options);
     void textureMemoryBarrier(const TextureMemoryBarrierOptions &options);
