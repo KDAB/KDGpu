@@ -16,6 +16,7 @@ struct ApiCommandRecorder {
     virtual void copyBuffer(const BufferCopy &copy) = 0;
     virtual void memoryBarrier(const MemoryBarrierOptions &options) = 0;
     virtual void bufferMemoryBarrier(const BufferMemoryBarrierOptions &options) = 0;
+    virtual void textureMemoryBarrier(const TextureMemoryBarrierOptions &options) = 0;
     virtual void executeSecondaryCommandBuffer(const Handle<CommandBuffer_t> &secondaryCommandBuffer) = 0;
     virtual Handle<CommandBuffer_t> finish() = 0;
 };

@@ -66,7 +66,8 @@ void VulkanCommandRecorder::memoryBarrier(const MemoryBarrierOptions &options)
                          0, nullptr);
 }
 
-// TODO: Implement an array version
+// TODO: Implement an array version. Perhaps also a way to refer to the set of arguments via a
+// handle to a backend type if we find we keep issuing barriers in the same way many times.
 void VulkanCommandRecorder::bufferMemoryBarrier(const BufferMemoryBarrierOptions &options)
 {
     auto vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
@@ -110,6 +111,64 @@ void VulkanCommandRecorder::bufferMemoryBarrier(const BufferMemoryBarrierOptions
                              0, nullptr,
                              1, &vkBufferBarrier,
                              0, nullptr);
+    }
+}
+
+// TODO: Implement an array version. Perhaps also a way to refer to the set of arguments via a
+// handle to a backend type if we find we keep issuing barriers in the same way many times.
+void VulkanCommandRecorder::textureMemoryBarrier(const TextureMemoryBarrierOptions &options)
+{
+    auto vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
+    if (vulkanDevice->vkCmdPipelineBarrier2 != nullptr) {
+        VkImageMemoryBarrier2 vkImageBarrier = {};
+        vkImageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
+        vkImageBarrier.srcStageMask = pipelineStageFlagsToVkPipelineStageFlagBits2(options.srcStages);
+        vkImageBarrier.srcAccessMask = accessFlagsToVkAccessFlagBits2(options.srcMask);
+        vkImageBarrier.dstStageMask = pipelineStageFlagsToVkPipelineStageFlagBits2(options.dstStages);
+        vkImageBarrier.dstAccessMask = accessFlagsToVkAccessFlagBits2(options.dstMask);
+        vkImageBarrier.srcQueueFamilyIndex = options.srcQueueTypeIndex;
+        vkImageBarrier.dstQueueFamilyIndex = options.dstQueueTypeIndex;
+
+        const auto vulkanTexture = vulkanResourceManager->getTexture(options.texture);
+        vkImageBarrier.image = vulkanTexture->image;
+        vkImageBarrier.subresourceRange = {
+            .aspectMask = options.range.aspectMask,
+            .baseMipLevel = options.range.baseMipLevel,
+            .levelCount = options.range.levelCount,
+            .baseArrayLayer = options.range.baseArrayLayer,
+            .layerCount = options.range.layerCount
+        };
+
+        VkDependencyInfo vkDependencyInfo = {};
+        vkDependencyInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+        vkDependencyInfo.imageMemoryBarrierCount = 1;
+        vkDependencyInfo.pImageMemoryBarriers = &vkImageBarrier;
+
+        vulkanDevice->vkCmdPipelineBarrier2(commandBuffer, &vkDependencyInfo);
+    } else {
+        // Fallback to the Vulkan 1.0 approach
+        VkImageMemoryBarrier vkImageBarrier = {};
+        vkImageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+        vkImageBarrier.srcAccessMask = accessFlagsToVkAccessFlagBits(options.srcMask);
+        vkImageBarrier.dstAccessMask = accessFlagsToVkAccessFlagBits(options.dstMask);
+
+        const auto vulkanTexture = vulkanResourceManager->getTexture(options.texture);
+        vkImageBarrier.image = vulkanTexture->image;
+        vkImageBarrier.subresourceRange = {
+            .aspectMask = options.range.aspectMask,
+            .baseMipLevel = options.range.baseMipLevel,
+            .levelCount = options.range.levelCount,
+            .baseArrayLayer = options.range.baseArrayLayer,
+            .layerCount = options.range.layerCount
+        };
+
+        vkCmdPipelineBarrier(commandBuffer,
+                             pipelineStageFlagsToVkPipelineStageFlagBits(options.srcStages),
+                             pipelineStageFlagsToVkPipelineStageFlagBits(options.dstStages),
+                             0, // None
+                             0, nullptr,
+                             0, nullptr,
+                             1, &vkImageBarrier);
     }
 }
 

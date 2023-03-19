@@ -50,6 +50,7 @@ public:
     void copyBuffer(const BufferCopy &copy);
     void memoryBarrier(const MemoryBarrierOptions &options);
     void bufferMemoryBarrier(const BufferMemoryBarrierOptions &options);
+    void textureMemoryBarrier(const TextureMemoryBarrierOptions &options);
     void executeSecondaryCommandBuffer(const Handle<CommandBuffer_t> &secondaryCommandBuffer);
 
     CommandBuffer finish();
