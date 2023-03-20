@@ -564,7 +564,7 @@ struct TextureSubresourceLayers {
     TextureAspectFlags aspectMask{ static_cast<uint32_t>(TextureAspectFlagBits::None) };
     uint32_t mipLevel{ 0 };
     uint32_t baseArrayLayer{ 0 };
-    uint32_t layerCount{ 0 };
+    uint32_t layerCount{ 1 };
 };
 
 enum class BufferUsageFlagBits {
