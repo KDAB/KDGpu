@@ -38,10 +38,10 @@ void RotatingTriangle::initializeScene()
         const float r = 0.8f;
         const std::array<Vertex, 3> vertexData = {
             Vertex{ // Bottom-left, red
-                    .position = { r * std::cosf(7.0f * M_PI / 6.0f), -r * std::sinf(7.0f * M_PI / 6.0f), 0.0f },
+                    .position = { r * cosf(7.0f * M_PI / 6.0f), -r * sinf(7.0f * M_PI / 6.0f), 0.0f },
                     .color = { 1.0f, 0.0f, 0.0f } },
             Vertex{ // Bottom-right, green
-                    .position = { r * std::cosf(11.0f * M_PI / 6.0f), -r * std::sinf(11.0f * M_PI / 6.0f), 0.0f },
+                    .position = { r * cosf(11.0f * M_PI / 6.0f), -r * sinf(11.0f * M_PI / 6.0f), 0.0f },
                     .color = { 0.0f, 1.0f, 0.0f } },
             Vertex{ // Top, blue
                     .position = { 0.0f, -r, 0.0f },
