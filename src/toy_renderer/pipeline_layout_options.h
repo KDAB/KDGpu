@@ -4,6 +4,8 @@
 #include <toy_renderer/bind_group_layout.h>
 #include <toy_renderer/handle.h>
 
+#include <vector>
+
 namespace ToyRenderer {
 
 struct PushConstantRange {

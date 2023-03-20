@@ -4,6 +4,8 @@
 #include <toy_renderer/handle.h>
 #include <toy_renderer/toy_renderer_export.h>
 
+#include <vector>
+
 namespace ToyRenderer {
 
 struct BindGroup_t;

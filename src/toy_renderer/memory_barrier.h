@@ -3,6 +3,8 @@
 #include <toy_renderer/handle.h>
 #include <toy_renderer/gpu_core.h>
 
+#include <vector>
+
 namespace ToyRenderer {
 
 struct Buffer_t;
