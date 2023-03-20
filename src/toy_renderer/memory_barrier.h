@@ -26,8 +26,8 @@ struct BufferMemoryBarrierOptions {
     AccessFlags srcMask;
     PipelineStageFlags dstStages;
     AccessFlags dstMask;
-    uint32_t srcQueueTypeIndex{ 0 };
-    uint32_t dstQueueTypeIndex{ 0 };
+    uint32_t srcQueueTypeIndex{ IgnoreQueueType };
+    uint32_t dstQueueTypeIndex{ IgnoreQueueType };
     Handle<Buffer_t> buffer;
     DeviceSize offset{ 0 };
     DeviceSize size{ WholeSize };
@@ -35,13 +35,13 @@ struct BufferMemoryBarrierOptions {
 
 struct TextureMemoryBarrierOptions {
     PipelineStageFlags srcStages;
-    AccessFlags srcMask;
+    AccessFlags srcMask{ AccessFlags(AccessFlagBit::None) };
     PipelineStageFlags dstStages;
-    AccessFlags dstMask;
+    AccessFlags dstMask{ AccessFlags(AccessFlagBit::None) };
     TextureLayout oldLayout{ TextureLayout::Undefined };
     TextureLayout newLayout{ TextureLayout::Undefined };
-    uint32_t srcQueueTypeIndex{ 0 };
-    uint32_t dstQueueTypeIndex{ 0 };
+    uint32_t srcQueueTypeIndex{ IgnoreQueueType };
+    uint32_t dstQueueTypeIndex{ IgnoreQueueType };
     Handle<Texture_t> texture;
     TextureSubresourceRange range{};
 };

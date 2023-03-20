@@ -14,6 +14,7 @@ constexpr uint32_t maxAdapterNameSize = 256U;
 constexpr uint32_t UuidSize = 16U;
 constexpr uint32_t remainingArrayLayers = (~0U);
 constexpr uint32_t remainingMipLevels = (~0U);
+constexpr uint32_t IgnoreQueueType = (~0U);
 constexpr uint64_t WholeSize = (~0ULL);
 
 using DeviceSize = uint64_t;
