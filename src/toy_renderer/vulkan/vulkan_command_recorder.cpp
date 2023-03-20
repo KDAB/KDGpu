@@ -184,6 +184,8 @@ void VulkanCommandRecorder::textureMemoryBarrier(const TextureMemoryBarrierOptio
         vkImageBarrier.dstAccessMask = accessFlagsToVkAccessFlagBits2(options.dstMask);
         vkImageBarrier.srcQueueFamilyIndex = options.srcQueueTypeIndex;
         vkImageBarrier.dstQueueFamilyIndex = options.dstQueueTypeIndex;
+        vkImageBarrier.oldLayout = textureLayoutToVkImageLayout(options.oldLayout);
+        vkImageBarrier.newLayout = textureLayoutToVkImageLayout(options.newLayout);
 
         const auto vulkanTexture = vulkanResourceManager->getTexture(options.texture);
         vkImageBarrier.image = vulkanTexture->image;
@@ -207,6 +209,10 @@ void VulkanCommandRecorder::textureMemoryBarrier(const TextureMemoryBarrierOptio
         vkImageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
         vkImageBarrier.srcAccessMask = accessFlagsToVkAccessFlagBits(options.srcMask);
         vkImageBarrier.dstAccessMask = accessFlagsToVkAccessFlagBits(options.dstMask);
+        vkImageBarrier.srcQueueFamilyIndex = options.srcQueueTypeIndex;
+        vkImageBarrier.dstQueueFamilyIndex = options.dstQueueTypeIndex;
+        vkImageBarrier.oldLayout = textureLayoutToVkImageLayout(options.oldLayout);
+        vkImageBarrier.newLayout = textureLayoutToVkImageLayout(options.newLayout);
 
         const auto vulkanTexture = vulkanResourceManager->getTexture(options.texture);
         vkImageBarrier.image = vulkanTexture->image;
