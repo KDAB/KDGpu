@@ -55,6 +55,8 @@ protected:
                                  DeviceSize byteSize,
                                  DeviceSize dstOffset = 0);
     void uploadBufferData(const Handle<Buffer_t> &destinationBuffer,
+                          PipelineStageFlags dstStages,
+                          AccessFlags dstMask,
                           const void *data,
                           DeviceSize byteSize,
                           DeviceSize dstOffset = 0);

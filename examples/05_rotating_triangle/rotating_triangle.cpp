@@ -55,7 +55,11 @@ void RotatingTriangle::initializeScene()
             .memoryUsage = MemoryUsage::GpuOnly
         };
         m_buffer = m_device.createBuffer(bufferOptions);
-        uploadBufferData(m_buffer, vertexData.data(), dataByteSize);
+        uploadBufferData(m_buffer,
+                         PipelineStageFlags(PipelineStageFlagBit::VertexAttributeInputBit),
+                         AccessFlags(AccessFlagBit::VertexAttributeReadBit),
+                         vertexData.data(),
+                         dataByteSize);
     }
 
     // Create a buffer to hold the geometry index data

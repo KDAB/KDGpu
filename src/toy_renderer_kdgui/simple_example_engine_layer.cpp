@@ -86,6 +86,8 @@ void SimpleExampleEngineLayer::waitForUploadBufferData(const Handle<Buffer_t> &d
 }
 
 void SimpleExampleEngineLayer::uploadBufferData(const Handle<Buffer_t> &destinationBuffer,
+                                                PipelineStageFlags dstStages,
+                                                AccessFlags dstMask,
                                                 const void *data,
                                                 DeviceSize byteSize,
                                                 DeviceSize dstOffset)
@@ -110,8 +112,11 @@ void SimpleExampleEngineLayer::uploadBufferData(const Handle<Buffer_t> &destinat
     commandRecorder.copyBuffer(copyCmd);
 
     // Insert a buffer barrier
-    // TODO: Pass in suitable src + dst stages and access masks
     const BufferMemoryBarrierOptions bufferBarrierOptions = {
+        .srcStages = PipelineStageFlags(PipelineStageFlagBit::TransferBit),
+        .srcMask = AccessFlags(AccessFlagBit::TransferWriteBit),
+        .dstStages = dstStages,
+        .dstMask = dstMask,
         .buffer = destinationBuffer
     };
     commandRecorder.bufferMemoryBarrier(bufferBarrierOptions);
