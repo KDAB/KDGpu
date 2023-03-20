@@ -1,0 +1,1 @@
+CompileShaderSet(ToyRendererTexturedQuad textured_quad)

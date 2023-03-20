@@ -60,6 +60,15 @@ protected:
                           const void *data,
                           DeviceSize byteSize,
                           DeviceSize dstOffset = 0);
+
+    void waitForUploadTextureData(const Handle<Texture_t> &destinationTexture,
+                                  const void *data,
+                                  DeviceSize byteSize,
+                                  Extent3D textureExtent,
+                                  Offset3D textureOffset,
+                                  TextureLayout oldLayout,
+                                  TextureLayout newLayout);
+
     void releaseStagingBuffers();
 
     std::unique_ptr<GraphicsApi> m_api;

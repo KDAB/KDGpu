@@ -136,6 +136,85 @@ void SimpleExampleEngineLayer::uploadBufferData(const Handle<Buffer_t> &destinat
                      .signalFence = fenceHandle });
 }
 
+void SimpleExampleEngineLayer::waitForUploadTextureData(const Handle<Texture_t> &destinationTexture,
+                                                        const void *data,
+                                                        DeviceSize byteSize,
+                                                        Extent3D textureExtent,
+                                                        Offset3D textureOffset,
+                                                        TextureLayout oldLayout,
+                                                        TextureLayout newLayout)
+{
+    // Buffer upload via a staging buffer using our main queue
+    // Create a staging buffer and upload initial data to it by map(), memcpy(), unmap().
+    BufferOptions bufferOptions = {
+        .size = byteSize,
+        .usage = BufferUsageFlags(BufferUsageFlagBits::TransferSrcBit),
+        .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
+    };
+    auto stagingBuffer = m_device.createBuffer(bufferOptions, data);
+
+    auto commandRecorder = m_device.createCommandRecorder();
+
+    // Specify which subresource we will be copying and transitioning
+    const TextureSubresourceRange range = {
+        .aspectMask = TextureAspectFlags(TextureAspectFlagBits::ColorBit),
+        .levelCount = 1
+    };
+
+    // We first need to transition the texture into the TextureLayout::TransferDstOptimal layout
+    const TextureMemoryBarrierOptions toTransferDstOptimal = {
+        .srcStages = PipelineStageFlags(PipelineStageFlagBit::TopOfPipeBit),
+        .dstStages = PipelineStageFlags(PipelineStageFlagBit::TransferBit),
+        .dstMask = AccessFlags(AccessFlagBit::TransferWriteBit),
+        .oldLayout = oldLayout,
+        .newLayout = TextureLayout::TransferDstOptimal,
+        .texture = destinationTexture,
+        .range = range
+    };
+    commandRecorder.textureMemoryBarrier(toTransferDstOptimal);
+
+    // Now we perform the staging buffer to texture copy operation
+    // clang-format off
+    const BufferToTextureCopy copyCmd = {
+        .srcBuffer = stagingBuffer,
+        .dstTexture = destinationTexture,
+        .dstImageLayout = TextureLayout::TransferDstOptimal,
+        .regions = {{
+            .imageSubResource = { .aspectMask = TextureAspectFlags(TextureAspectFlagBits::ColorBit) },
+            .imageOffset = {
+                .x = textureOffset.x,
+                .y = textureOffset.y,
+                .z = textureOffset.z },
+            .imageExtent = {
+                .width = textureExtent.width,
+                .height = textureExtent.height,
+                .depth = textureExtent.depth
+            }
+        }},
+    };
+    // clang-format on
+    commandRecorder.copyBufferToTexture(copyCmd);
+
+    // Finally, we transition the texture to the specified final layout
+    const TextureMemoryBarrierOptions toFinalLayout = {
+        .srcStages = PipelineStageFlags(PipelineStageFlagBit::TransferBit),
+        .srcMask = AccessFlags(AccessFlagBit::TransferWriteBit),
+        .dstStages = PipelineStageFlags(PipelineStageFlagBit::AllGraphicsBit), // Could be used anywhere in pipeline
+        .dstMask = AccessFlags(AccessFlagBit::MemoryReadBit),
+        .oldLayout = TextureLayout::TransferDstOptimal,
+        .newLayout = newLayout,
+        .texture = destinationTexture,
+        .range = range
+    };
+    commandRecorder.textureMemoryBarrier(toFinalLayout);
+
+    auto commandBuffer = commandRecorder.finish();
+    m_queue.submit({ .commandBuffers = { commandBuffer } });
+
+    // Block until the transfer is done
+    m_queue.waitUntilIdle();
+}
+
 void SimpleExampleEngineLayer::releaseStagingBuffers()
 {
     // TODO: Recycle fences and use regions of a large persistent staging buffer
