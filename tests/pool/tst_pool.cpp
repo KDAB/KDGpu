@@ -6,7 +6,7 @@
 #include <doctest.h>
 
 struct int_tag;
-using IntPool = Pool<int, int_tag>;
+using IntPool = ToyRenderer::Pool<int, int_tag>;
 
 static_assert(std::is_nothrow_destructible<IntPool>{});
 static_assert(std::is_nothrow_default_constructible<IntPool>{});
@@ -226,7 +226,7 @@ private:
 bool MyType::ms_destructorCalled = false;
 
 struct MyType_tag;
-using MyTypePool = Pool<MyType, MyType_tag>;
+using MyTypePool = ToyRenderer::Pool<MyType, MyType_tag>;
 
 TEST_CASE("Non-trivial types")
 {

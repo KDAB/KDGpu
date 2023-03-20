@@ -4,6 +4,8 @@
 
 #include <stdint.h>
 
+namespace ToyRenderer {
+
 template<typename T>
 class Handle
 {
@@ -34,22 +36,24 @@ private:
 };
 
 template<typename T>
-bool operator==(const Handle<T> &lhs, const Handle<T> &rhs)
+bool operator==(const ToyRenderer::Handle<T> &lhs, const ToyRenderer::Handle<T> &rhs)
 {
     return lhs.index() == rhs.index() && lhs.generation() == rhs.generation();
 }
 
 template<typename T>
-bool operator!=(const Handle<T> &lhs, const Handle<T> &rhs)
+bool operator!=(const ToyRenderer::Handle<T> &lhs, const ToyRenderer::Handle<T> &rhs)
 {
     return !(lhs == rhs);
 }
 
+} // namespace ToyRenderer
+
 namespace std {
 
 template<typename T>
-struct hash<Handle<T>> {
-    size_t operator()(const Handle<T> &handle) const
+struct hash<ToyRenderer::Handle<T>> {
+    size_t operator()(const ToyRenderer::Handle<T> &handle) const
     {
         uint64_t hash = 0;
 

@@ -7,6 +7,8 @@
 #include <vector>
 #include <spdlog/spdlog.h>
 
+namespace ToyRenderer {
+
 /*
     The templated Pool class allows to store a collection of objects of type T
     in a contiguous array and reference them via a typed index object of type
@@ -184,3 +186,5 @@ void Pool<T, H>::growCapacity()
     m_generations.reserve(m_capacity);
     m_freeIndices.reserve(m_capacity);
 }
+
+} // namespace ToyRenderer
