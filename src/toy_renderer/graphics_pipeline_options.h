@@ -22,6 +22,8 @@ struct VertexBufferLayout {
     uint32_t binding;
     uint32_t stride;
     VertexRate inputRate{ VertexRate::Vertex };
+
+    friend bool operator==(const VertexBufferLayout &, const VertexBufferLayout &) = default;
 };
 
 struct VertexAttribute {
@@ -29,11 +31,15 @@ struct VertexAttribute {
     uint32_t binding;
     Format format;
     DeviceSize offset{ 0 };
+
+    friend bool operator==(const VertexAttribute &, const VertexAttribute &) = default;
 };
 
 struct VertexOptions {
     std::vector<VertexBufferLayout> buffers;
     std::vector<VertexAttribute> attributes;
+
+    friend bool operator==(const VertexOptions &, const VertexOptions &) = default;
 };
 
 struct StencilOperationOptions {
@@ -44,24 +50,32 @@ struct StencilOperationOptions {
     uint32_t compareMask{ 0 };
     uint32_t writeMask{ 0 };
     uint32_t reference{ 0 };
+
+    friend bool operator==(const StencilOperationOptions &, const StencilOperationOptions &) = default;
 };
 
 struct BlendComponent {
     BlendOperation operation{ BlendOperation::Add };
     BlendFactor srcFactor{ BlendFactor::One };
     BlendFactor dstFactor{ BlendFactor::Zero };
+
+    friend bool operator==(const BlendComponent &, const BlendComponent &) = default;
 };
 
 struct BlendOptions {
     bool blendingEnabled{ false };
     BlendComponent color;
     BlendComponent alpha;
+
+    friend bool operator==(const BlendOptions &, const BlendOptions &) = default;
 };
 
 struct RenderTargetOptions {
     Format format{ Format::R8G8B8A8_UNORM };
     ColorComponentFlags writeMask{ ColorComponentFlags(ColorComponentFlagBits::AllComponents) };
     BlendOptions blending;
+
+    friend bool operator==(const RenderTargetOptions &, const RenderTargetOptions &) = default;
 };
 
 struct DepthStencilOptions {
@@ -72,6 +86,8 @@ struct DepthStencilOptions {
     bool stencilTestEnabled{ false };
     StencilOperationOptions stencilFront;
     StencilOperationOptions stencilBack;
+
+    friend bool operator==(const DepthStencilOptions &, const DepthStencilOptions &) = default;
 };
 
 struct PrimitiveOptions {
@@ -81,12 +97,16 @@ struct PrimitiveOptions {
     FrontFace frontFace{ FrontFace::CounterClockwise };
     PolygonMode polygonMode{ PolygonMode::Fill };
     uint32_t patchControlPoints{ 0 };
+
+    friend bool operator==(const PrimitiveOptions &, const PrimitiveOptions &) = default;
 };
 
 struct MultisampleOptions {
     SampleCountFlagBits samples{ SampleCountFlagBits::Samples1Bit };
     std::vector<SampleMask> sampleMasks{ 0xFF'FF'FF'FF }; // Must have number of entries equal to number of samples
     bool alphaToCoverageEnabled{ false };
+
+    friend bool operator==(const MultisampleOptions &, const MultisampleOptions &) = default;
 };
 
 struct GraphicsPipelineOptions {
