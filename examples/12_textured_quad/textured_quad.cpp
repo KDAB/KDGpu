@@ -119,13 +119,15 @@ void TexturedQuad::initializeScene()
         m_texture = m_device.createTexture(textureOptions);
 
         // Upload the texture data and transition to ShaderReadOnlyOptimal
-        waitForUploadTextureData(m_texture,
-                                 image.pixelData,
-                                 image.byteSize,
-                                 Extent3D{ .width = image.width, .height = image.height, .depth = 1 },
-                                 Offset3D{},
-                                 TextureLayout::Undefined,
-                                 TextureLayout::ShaderReadOnlyOptimal);
+        uploadTextureData(m_texture,
+                          PipelineStageFlags(PipelineStageFlagBit::AllGraphicsBit),
+                          AccessFlags(AccessFlagBit::MemoryReadBit),
+                          image.pixelData,
+                          image.byteSize,
+                          Extent3D{ .width = image.width, .height = image.height, .depth = 1 },
+                          Offset3D{},
+                          TextureLayout::Undefined,
+                          TextureLayout::ShaderReadOnlyOptimal);
 
         // Create a view and sampler
         const TextureViewOptions viewOptions = {

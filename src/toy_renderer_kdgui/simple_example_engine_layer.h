@@ -68,6 +68,15 @@ protected:
                                   Offset3D textureOffset,
                                   TextureLayout oldLayout,
                                   TextureLayout newLayout);
+    void uploadTextureData(const Handle<Texture_t> &destinationTexture,
+                           PipelineStageFlags dstStages,
+                           AccessFlags dstMask,
+                           const void *data,
+                           DeviceSize byteSize,
+                           Extent3D textureExtent,
+                           Offset3D textureOffset,
+                           TextureLayout oldLayout,
+                           TextureLayout newLayout);
 
     void releaseStagingBuffers();
 
