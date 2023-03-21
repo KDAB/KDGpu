@@ -12,6 +12,8 @@ struct PushConstantRange {
     uint32_t offset;
     uint32_t size;
     ShaderStageFlags shaderStages;
+
+    friend bool operator==(const PushConstantRange &, const PushConstantRange &) = default;
 };
 
 struct BindGroupLayout_t;
