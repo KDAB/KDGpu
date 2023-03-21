@@ -87,6 +87,7 @@ protected:
     Surface m_surface;
     Device m_device;
     Queue m_queue;
+    PresentMode m_presentMode;
     Swapchain m_swapchain;
     std::vector<TextureView> m_swapchainViews;
     Texture m_depthTexture;

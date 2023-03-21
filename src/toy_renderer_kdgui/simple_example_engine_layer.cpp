@@ -6,6 +6,8 @@
 #include <toy_renderer/swapchain_options.h>
 #include <toy_renderer/texture_options.h>
 
+#include <algorithm>
+
 SimpleExampleEngineLayer::SimpleExampleEngineLayer()
     : EngineLayer()
     , m_api(std::make_unique<VulkanGraphicsApi>())
@@ -23,6 +25,7 @@ void SimpleExampleEngineLayer::recreateSwapChain()
         .surface = m_surface,
         .format = m_swapchainFormat,
         .imageExtent = { .width = m_window->width(), .height = m_window->height() },
+        .presentMode = m_presentMode,
         .oldSwapchain = m_swapchain,
     };
 
@@ -335,6 +338,22 @@ void SimpleExampleEngineLayer::onAttached()
     auto defaultDevice = m_instance.createDefaultDevice(m_surface);
     m_device = std::move(defaultDevice.device);
     m_queue = m_device.queues()[0];
+
+    // Choose a presentation mode from the ones supported
+    constexpr std::array<PresentMode, 4> preferredPresentModes = {
+        PresentMode::Mailbox,
+        PresentMode::FifoRelaxed,
+        PresentMode::Fifo,
+        PresentMode::Immediate
+    };
+    const auto &availableModes = defaultDevice.adapter->swapchainProperties(m_surface).presentModes;
+    for (const auto &presentMode : preferredPresentModes) {
+        const auto it = std::find(availableModes.begin(), availableModes.end(), presentMode);
+        if (it != availableModes.end()) {
+            m_presentMode = presentMode;
+            break;
+        }
+    }
 
     // TODO: Move swapchain handling to View?
     recreateSwapChain();
