@@ -81,7 +81,7 @@ enum class SampleCountFlagBits {
     Samples64Bit = 0x00000040,
     MaxEnum = 0x7FFFFFFF
 };
-using SampleCountFlags = Flags;
+using SampleCountFlags = KDUtils::Flags<SampleCountFlagBits>;
 
 enum class AdapterDeviceType {
     Other = 0,
