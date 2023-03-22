@@ -27,11 +27,9 @@ private:
     Texture m_texture;
     TextureView m_textureView;
     Sampler m_sampler;
+    BindGroup m_textureBindGroup;
     PipelineLayout m_pipelineLayout;
     GraphicsPipeline m_pipeline;
     RenderPassCommandRecorderOptions m_opaquePassOptions;
     CommandBuffer m_commandBuffer;
-
-    glm::mat4 m_transform;
-    BindGroup m_textureBindGroup;
 };
