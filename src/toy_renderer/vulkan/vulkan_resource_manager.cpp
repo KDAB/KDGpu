@@ -604,8 +604,7 @@ Handle<PipelineLayout_t> VulkanResourceManager::createPipelineLayout(const Handl
         const auto &pushConstantRange = options.pushConstantRanges.at(i);
 
         VkPushConstantRange vkPushConstantRange = {
-            .stageFlags = static_cast<VkShaderStageFlags>(shaderStageFlagBitsToVkShaderStageFlagBits(
-                    static_cast<ShaderStageFlagBits>(pushConstantRange.shaderStages))),
+            .stageFlags = pushConstantRange.shaderStages.toInt(),
             .offset = pushConstantRange.offset,
             .size = pushConstantRange.size
         };
@@ -1656,7 +1655,7 @@ Handle<BindGroupLayout_t> VulkanResourceManager::createBindGroupLayout(const Han
         vkBindingLayout.binding = bindingLayout.binding;
         vkBindingLayout.descriptorCount = bindingLayout.count;
         vkBindingLayout.descriptorType = resourceBindingTypeToVkDescriptorType(bindingLayout.resourceType);
-        vkBindingLayout.stageFlags = bindingLayout.shaderStages;
+        vkBindingLayout.stageFlags = bindingLayout.shaderStages.toInt();
         vkBindingLayout.pImmutableSamplers = nullptr; // TODO: Expose immutable samplers?
 
         vkBindingLayouts.emplace_back(std::move(vkBindingLayout));

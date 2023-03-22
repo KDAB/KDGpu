@@ -622,7 +622,7 @@ enum class MemoryUsage {
     MaxEnum = 0x7fffffff
 };
 
-enum class ShaderStageFlagBits {
+enum class ShaderStageFlagBits : uint32_t {
     VertexBit = 0x00000001,
     TessellationControlBit = 0x00000002,
     TessellationEvaluationBit = 0x00000004,
@@ -641,7 +641,7 @@ enum class ShaderStageFlagBits {
     MeshBit = 0x00000080,
     MaxEnum = 0x7fffffff
 };
-using ShaderStageFlags = Flags;
+using ShaderStageFlags = KDUtils::Flags<ShaderStageFlagBits>;
 
 enum class ResourceBindingType {
     Sampler = 0,
@@ -991,3 +991,4 @@ enum class FenceStatus {
 OPERATORS_FOR_FLAGS(ToyRenderer::QueueFlags)
 OPERATORS_FOR_FLAGS(ToyRenderer::TextureUsageFlags)
 OPERATORS_FOR_FLAGS(ToyRenderer::BufferUsageFlags)
+OPERATORS_FOR_FLAGS(ToyRenderer::ShaderStageFlags)

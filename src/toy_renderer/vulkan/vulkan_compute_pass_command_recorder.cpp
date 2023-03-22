@@ -85,7 +85,7 @@ void VulkanComputePassCommandRecorder::pushConstant(const PushConstantRange &con
     assert(pLayout != nullptr); // The PipelineLayout should outlive the pipelines
     vkCmdPushConstants(commandBuffer,
                        pLayout->pipelineLayout,
-                       shaderStageFlagBitsToVkShaderStageFlagBits(static_cast<ShaderStageFlagBits>(constantRange.shaderStages)),
+                       constantRange.shaderStages.toInt(),
                        constantRange.offset,
                        constantRange.size,
                        data);
