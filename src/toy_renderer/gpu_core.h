@@ -680,7 +680,7 @@ enum class CullModeFlagBits {
     FrontAndBack = 0x00000003,
     MaxEnum = 0x7fffffff
 };
-using CullModeFlags = Flags;
+using CullModeFlags = KDUtils::Flags<CullModeFlagBits>;
 
 enum class FrontFace {
     CounterClockwise = 0,
@@ -992,3 +992,4 @@ OPERATORS_FOR_FLAGS(ToyRenderer::QueueFlags)
 OPERATORS_FOR_FLAGS(ToyRenderer::TextureUsageFlags)
 OPERATORS_FOR_FLAGS(ToyRenderer::BufferUsageFlags)
 OPERATORS_FOR_FLAGS(ToyRenderer::ShaderStageFlags)
+OPERATORS_FOR_FLAGS(ToyRenderer::CullModeFlags)

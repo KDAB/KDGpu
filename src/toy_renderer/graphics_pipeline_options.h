@@ -93,7 +93,7 @@ struct DepthStencilOptions {
 struct PrimitiveOptions {
     PrimitiveTopology topology{ PrimitiveTopology::TriangleList };
     bool primitiveRestart{ false };
-    CullModeFlags cullMode{ CullModeFlags(CullModeFlagBits::BackBit) };
+    CullModeFlags cullMode{ CullModeFlagBits::BackBit };
     FrontFace frontFace{ FrontFace::CounterClockwise };
     PolygonMode polygonMode{ PolygonMode::Fill };
     uint32_t patchControlPoints{ 0 };

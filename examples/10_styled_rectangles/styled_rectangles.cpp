@@ -138,7 +138,7 @@ void StyledRectangles::initializeRectangles()
         },
         .primitive = {
             .topology = PrimitiveTopology::TriangleStrip,
-            .cullMode = CullModeFlags(CullModeFlagBits::None)
+            .cullMode = CullModeFlagBits::None
         }
     };
     // clang-format on
