@@ -23,7 +23,7 @@ std::vector<VkBufferImageCopy> buildRegions(const std::vector<ToyRenderer::Buffe
             .bufferRowLength = region.bufferRowLength,
             .bufferImageHeight = region.bufferImageHeight,
             .imageSubresource = {
-                    .aspectMask = region.imageSubResource.aspectMask,
+                    .aspectMask = region.imageSubResource.aspectMask.toInt(),
                     .mipLevel = region.imageSubResource.mipLevel,
                     .baseArrayLayer = region.imageSubResource.baseArrayLayer,
                     .layerCount = region.imageSubResource.layerCount },
@@ -190,7 +190,7 @@ void VulkanCommandRecorder::textureMemoryBarrier(const TextureMemoryBarrierOptio
         const auto vulkanTexture = vulkanResourceManager->getTexture(options.texture);
         vkImageBarrier.image = vulkanTexture->image;
         vkImageBarrier.subresourceRange = {
-            .aspectMask = options.range.aspectMask,
+            .aspectMask = options.range.aspectMask.toInt(),
             .baseMipLevel = options.range.baseMipLevel,
             .levelCount = options.range.levelCount,
             .baseArrayLayer = options.range.baseArrayLayer,
@@ -217,7 +217,7 @@ void VulkanCommandRecorder::textureMemoryBarrier(const TextureMemoryBarrierOptio
         const auto vulkanTexture = vulkanResourceManager->getTexture(options.texture);
         vkImageBarrier.image = vulkanTexture->image;
         vkImageBarrier.subresourceRange = {
-            .aspectMask = options.range.aspectMask,
+            .aspectMask = options.range.aspectMask.toInt(),
             .baseMipLevel = options.range.baseMipLevel,
             .levelCount = options.range.levelCount,
             .baseArrayLayer = options.range.baseArrayLayer,

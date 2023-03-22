@@ -459,7 +459,7 @@ Handle<TextureView_t> VulkanResourceManager::createTextureView(const Handle<Devi
 
     // Specify which subset of the texture the view exposes
     createInfo.subresourceRange = {
-        .aspectMask = options.range.aspectMask,
+        .aspectMask = options.range.aspectMask.toInt(),
         .baseMipLevel = options.range.baseMipLevel,
         .levelCount = options.range.levelCount,
         .baseArrayLayer = options.range.baseArrayLayer,
@@ -467,7 +467,7 @@ Handle<TextureView_t> VulkanResourceManager::createTextureView(const Handle<Devi
     };
 
     // If no aspect is set, default to Color or Depth depending upon the texture usage
-    if (options.range.aspectMask == static_cast<uint32_t>(TextureAspectFlagBits::None)) {
+    if (options.range.aspectMask == TextureAspectFlagBits::None) {
         if (vulkanTexture.usage.testFlag(TextureUsageFlagBits::DepthStencilAttachmentBit))
             createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
 

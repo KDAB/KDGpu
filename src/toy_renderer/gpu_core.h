@@ -537,7 +537,7 @@ enum class ViewType {
     MaxEnum = 0x7fffffff
 };
 
-enum class TextureAspectFlagBits {
+enum class TextureAspectFlagBits : uint32_t {
     None = 0,
     ColorBit = 0x00000001,
     DepthBit = 0x00000002,
@@ -552,10 +552,10 @@ enum class TextureAspectFlagBits {
     MemoryPlane3Bit = 0x00000400,
     MaxEnum = 0x7fffffff
 };
-using TextureAspectFlags = Flags;
+using TextureAspectFlags = KDUtils::Flags<TextureAspectFlagBits>;
 
 struct TextureSubresourceRange {
-    TextureAspectFlags aspectMask{ static_cast<uint32_t>(TextureAspectFlagBits::None) };
+    TextureAspectFlags aspectMask{ TextureAspectFlagBits::None };
     uint32_t baseMipLevel{ 0 };
     uint32_t levelCount{ remainingMipLevels };
     uint32_t baseArrayLayer{ 0 };
@@ -563,7 +563,7 @@ struct TextureSubresourceRange {
 };
 
 struct TextureSubresourceLayers {
-    TextureAspectFlags aspectMask{ static_cast<uint32_t>(TextureAspectFlagBits::None) };
+    TextureAspectFlags aspectMask{ TextureAspectFlagBits::None };
     uint32_t mipLevel{ 0 };
     uint32_t baseArrayLayer{ 0 };
     uint32_t layerCount{ 1 };
