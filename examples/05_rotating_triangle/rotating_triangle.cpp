@@ -56,8 +56,8 @@ void RotatingTriangle::initializeScene()
         };
         m_buffer = m_device.createBuffer(bufferOptions);
         uploadBufferData(m_buffer,
-                         PipelineStageFlags(PipelineStageFlagBit::VertexAttributeInputBit),
-                         AccessFlags(AccessFlagBit::VertexAttributeReadBit),
+                         PipelineStageFlagBit::VertexAttributeInputBit,
+                         AccessFlagBit::VertexAttributeReadBit,
                          vertexData.data(),
                          dataByteSize);
     }

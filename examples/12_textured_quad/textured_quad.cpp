@@ -96,8 +96,8 @@ void TexturedQuad::initializeScene()
         };
         m_buffer = m_device.createBuffer(bufferOptions);
         uploadBufferData(m_buffer,
-                         PipelineStageFlags(PipelineStageFlagBit::VertexAttributeInputBit),
-                         AccessFlags(AccessFlagBit::VertexAttributeReadBit),
+                         PipelineStageFlagBit::VertexAttributeInputBit,
+                         AccessFlagBit::VertexAttributeReadBit,
                          vertexData.data(),
                          dataByteSize);
     }
@@ -120,8 +120,8 @@ void TexturedQuad::initializeScene()
 
         // Upload the texture data and transition to ShaderReadOnlyOptimal
         uploadTextureData(m_texture,
-                          PipelineStageFlags(PipelineStageFlagBit::AllGraphicsBit),
-                          AccessFlags(AccessFlagBit::MemoryReadBit),
+                          PipelineStageFlagBit::AllGraphicsBit,
+                          AccessFlagBit::MemoryReadBit,
                           image.pixelData,
                           image.byteSize,
                           Extent3D{ .width = image.width, .height = image.height, .depth = 1 },
