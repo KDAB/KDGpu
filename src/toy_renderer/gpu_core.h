@@ -930,7 +930,7 @@ enum class PipelineStageFlagBit : uint64_t {
     MicromapBuildBit = 0x40000000ULL,
     OpticalFlowBit = 0x20000000ULL
 };
-using PipelineStageFlags = Flags64;
+using PipelineStageFlags = KDUtils::Flags<PipelineStageFlagBit>;
 
 enum class CommandBufferLevel {
     Primary = 0,
@@ -995,3 +995,4 @@ OPERATORS_FOR_FLAGS(ToyRenderer::ShaderStageFlags)
 OPERATORS_FOR_FLAGS(ToyRenderer::CullModeFlags)
 OPERATORS_FOR_FLAGS(ToyRenderer::ColorComponentFlags)
 OPERATORS_FOR_FLAGS(ToyRenderer::AccessFlags)
+OPERATORS_FOR_FLAGS(ToyRenderer::PipelineStageFlags)

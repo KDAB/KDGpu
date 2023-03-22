@@ -308,15 +308,15 @@ VkAccessFlagBits2 accessFlagsToVkAccessFlagBits2(AccessFlags accessFlags)
 
 VkPipelineStageFlagBits pipelineStageFlagsToVkPipelineStageFlagBits(PipelineStageFlags pipelineFlags)
 {
-    if (static_cast<uint64_t>(pipelineFlags) > VK_PIPELINE_STAGE_FLAG_BITS_MAX_ENUM) {
+    if (pipelineFlags.toInt() > VK_PIPELINE_STAGE_FLAG_BITS_MAX_ENUM) {
         SPDLOG_WARN("The requested PipelineStageFlags are not supported without the VK_KHR_Synchronization2 extension.");
     }
-    return static_cast<VkPipelineStageFlagBits>(static_cast<uint32_t>(pipelineFlags));
+    return static_cast<VkPipelineStageFlagBits>(static_cast<uint32_t>(pipelineFlags.toInt()));
 }
 
 VkPipelineStageFlagBits2 pipelineStageFlagsToVkPipelineStageFlagBits2(PipelineStageFlags pipelineFlags)
 {
-    return static_cast<VkPipelineStageFlagBits2>(static_cast<uint64_t>(pipelineFlags));
+    return static_cast<VkPipelineStageFlagBits2>(pipelineFlags.toInt());
 }
 
 VkCommandBufferLevel commandBufferLevelToVkCommandBufferLevel(CommandBufferLevel level)
