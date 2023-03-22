@@ -164,6 +164,7 @@ add_library(toy-renderer SHARED
 add_library(ToyRenderer::ToyRenderer ALIAS toy-renderer)
 
 set(TOY_RENDERER_PUBLIC_LIBS
+    KDUtils::Utils
     Vulkan::Vulkan
     ToyRenderer::vulkan_memory_allocator
     spdlog::spdlog

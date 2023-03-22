@@ -360,7 +360,7 @@ std::vector<AdapterQueueType> VulkanAdapter::queryQueueTypes()
         const auto &queueFamily = queueFamilies[i];
         queueTypes.emplace_back(
             AdapterQueueType {
-                .flags = queueFamily.queueFlags,
+                .flags = QueueFlags::fromInt(queueFamily.queueFlags),
                 .availableQueues = queueFamily.queueCount,
                 .timestampValidBits = queueFamily.timestampValidBits,
                 .minImageTransferGranularity = {

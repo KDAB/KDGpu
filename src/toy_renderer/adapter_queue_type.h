@@ -5,7 +5,7 @@
 namespace ToyRenderer {
 
 struct AdapterQueueType {
-    bool supportsFeature(QueueFlags featureFlags) const noexcept { return flags & featureFlags; }
+    bool supportsFeature(QueueFlags featureFlags) const noexcept { return (flags & featureFlags) == featureFlags; }
 
     QueueFlags flags;
     uint32_t availableQueues;

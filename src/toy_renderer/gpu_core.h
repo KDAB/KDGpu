@@ -1,5 +1,7 @@
 #pragma once
 
+#include <KDUtils/flags.h>
+
 #include <stdint.h>
 #include <string>
 
@@ -123,8 +125,8 @@ enum class QueueFlagBits {
     VideoEncodeBit = 0x00000040,
     MaxEnum = 0x7FFFFFFF
 };
-using QueueFlags = Flags;
-// TODO: Use Flags<QueueFlagBits>
+// using QueueFlags = Flags;
+using QueueFlags = KDUtils::Flags<QueueFlagBits>;
 
 enum class PresentMode {
     Immediate = 0,
@@ -986,3 +988,5 @@ enum class FenceStatus {
 };
 
 } // namespace ToyRenderer
+
+OPERATORS_FOR_FLAGS(ToyRenderer::QueueFlags)
