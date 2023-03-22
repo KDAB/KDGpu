@@ -886,7 +886,7 @@ enum class AccessFlagBit : uint64_t {
     OpticalFlowReadBit = 0x40000000000ULL,
     OpticalFlowWriteBit = 0x80000000000ULL
 };
-using AccessFlags = Flags64;
+using AccessFlags = KDUtils::Flags<AccessFlagBit>;
 
 enum class PipelineStageFlagBit : uint64_t {
     None = 0,
@@ -994,3 +994,4 @@ OPERATORS_FOR_FLAGS(ToyRenderer::BufferUsageFlags)
 OPERATORS_FOR_FLAGS(ToyRenderer::ShaderStageFlags)
 OPERATORS_FOR_FLAGS(ToyRenderer::CullModeFlags)
 OPERATORS_FOR_FLAGS(ToyRenderer::ColorComponentFlags)
+OPERATORS_FOR_FLAGS(ToyRenderer::AccessFlags)

@@ -295,15 +295,15 @@ IndexType vkIndexTypeToIndexType(VkIndexType type)
 
 VkAccessFlagBits accessFlagsToVkAccessFlagBits(AccessFlags accessFlags)
 {
-    if (static_cast<uint64_t>(accessFlags) > VK_ACCESS_FLAG_BITS_MAX_ENUM) {
+    if (accessFlags.toInt() > VK_ACCESS_FLAG_BITS_MAX_ENUM) {
         SPDLOG_WARN("The requested AccessFlags are not supported without the VK_KHR_Synchronization2 extension.");
     }
-    return static_cast<VkAccessFlagBits>(static_cast<uint32_t>(accessFlags));
+    return static_cast<VkAccessFlagBits>(static_cast<uint32_t>(accessFlags.toInt()));
 }
 
 VkAccessFlagBits2 accessFlagsToVkAccessFlagBits2(AccessFlags accessFlags)
 {
-    return static_cast<VkAccessFlagBits2>(static_cast<uint64_t>(accessFlags));
+    return static_cast<VkAccessFlagBits2>(accessFlags.toInt());
 }
 
 VkPipelineStageFlagBits pipelineStageFlagsToVkPipelineStageFlagBits(PipelineStageFlags pipelineFlags)
