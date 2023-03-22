@@ -15,7 +15,7 @@ struct SwapchainOptions {
     uint32_t minImageCount{ 3 };
     Extent2D imageExtent;
     uint32_t imageLayers{ 1 };
-    TextureUsageFlags imageUsageFlags{ static_cast<TextureUsageFlags>(TextureUsageFlagBits::ColorAttachmentBit) };
+    TextureUsageFlags imageUsageFlags{ TextureUsageFlagBits::ColorAttachmentBit };
     SharingMode imageSharingMode{ SharingMode::Exclusive };
     std::vector<uint32_t> queueTypeIndices;
     SurfaceTransformFlagBits transform{ SurfaceTransformFlagBits::IdentityBit };

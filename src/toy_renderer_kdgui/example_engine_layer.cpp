@@ -52,7 +52,7 @@ void ExampleEngineLayer::recreateSwapChain()
         .format = Format::D24_UNORM_S8_UINT,
         .extent = { m_window->width(), m_window->height(), 1 },
         .mipLevels = 1,
-        .usage = TextureUsageFlags(TextureUsageFlagBits::DepthStencilAttachmentBit),
+        .usage = TextureUsageFlagBits::DepthStencilAttachmentBit,
         .memoryUsage = MemoryUsage::GpuOnly
     };
     m_depthTexture = m_device.createTexture(depthTextureOptions);

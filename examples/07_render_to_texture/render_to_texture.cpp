@@ -297,7 +297,7 @@ void RenderToTexture::createOffscreenTexture()
         .format = m_colorFormat,
         .extent = { m_window->width(), m_window->height(), 1 },
         .mipLevels = 1,
-        .usage = TextureUsageFlags(TextureUsageFlagBits::ColorAttachmentBit) | TextureUsageFlags(TextureUsageFlagBits::SampledBit),
+        .usage = TextureUsageFlagBits::ColorAttachmentBit | TextureUsageFlagBits::SampledBit,
         .memoryUsage = MemoryUsage::GpuOnly
     };
     m_colorOutput = m_device.createTexture(colorTextureOptions);

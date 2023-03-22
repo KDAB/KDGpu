@@ -112,7 +112,7 @@ void TexturedQuad::initializeScene()
             .format = image.format,
             .extent = { .width = image.width, .height = image.height, .depth = 1 },
             .mipLevels = 1,
-            .usage = TextureUsageFlags(TextureUsageFlagBits::SampledBit) | TextureUsageFlags(TextureUsageFlagBits::TransferDstBit),
+            .usage = TextureUsageFlagBits::SampledBit | TextureUsageFlagBits::TransferDstBit,
             .memoryUsage = MemoryUsage::GpuOnly,
             .initialLayout = TextureLayout::Undefined
         };
