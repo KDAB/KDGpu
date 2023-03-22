@@ -299,7 +299,7 @@ Handle<Swapchain_t> VulkanResourceManager::createSwapchain(const Handle<Device_t
     createInfo.imageColorSpace = colorSpaceToVkColorSpaceKHR(options.colorSpace);
     createInfo.imageExtent = { .width = options.imageExtent.width, .height = options.imageExtent.height };
     createInfo.imageArrayLayers = options.imageLayers;
-    createInfo.imageUsage = options.imageUsageFlags;
+    createInfo.imageUsage = options.imageUsageFlags.toInt();
     createInfo.imageSharingMode = sharingModeToVkSharingMode(options.imageSharingMode);
     if (!options.queueTypeIndices.empty()) {
         createInfo.queueFamilyIndexCount = options.queueTypeIndices.size();
@@ -390,7 +390,7 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
     createInfo.arrayLayers = options.arrayLayers;
     createInfo.samples = sampleCountFlagBitsToVkSampleFlagBits(options.samples);
     createInfo.tiling = textureTilingToVkImageTiling(options.tiling);
-    createInfo.usage = options.usage;
+    createInfo.usage = options.usage.toInt();
     createInfo.sharingMode = sharingModeToVkSharingMode(options.sharingMode);
     if (!options.queueTypeIndices.empty()) {
         createInfo.queueFamilyIndexCount = options.queueTypeIndices.size();
@@ -468,10 +468,10 @@ Handle<TextureView_t> VulkanResourceManager::createTextureView(const Handle<Devi
 
     // If no aspect is set, default to Color or Depth depending upon the texture usage
     if (options.range.aspectMask == static_cast<uint32_t>(TextureAspectFlagBits::None)) {
-        if (vulkanTexture.usage & static_cast<uint32_t>(TextureUsageFlagBits::DepthStencilAttachmentBit))
+        if (vulkanTexture.usage.testFlag(TextureUsageFlagBits::DepthStencilAttachmentBit))
             createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
 
-        if (vulkanTexture.usage & static_cast<uint32_t>(TextureUsageFlagBits::ColorAttachmentBit))
+        if (vulkanTexture.usage.testFlag(TextureUsageFlagBits::ColorAttachmentBit))
             createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     }
 

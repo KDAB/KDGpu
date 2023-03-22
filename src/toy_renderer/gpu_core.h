@@ -473,7 +473,7 @@ enum class TextureUsageFlagBits {
     InvocationMaskBit = 0x00040000,
     MaxEnum = 0x7fffffff
 };
-using TextureUsageFlags = Flags;
+using TextureUsageFlags = KDUtils::Flags<TextureUsageFlagBits>;
 
 enum class TextureTiling {
     Optimal = 0,
@@ -989,3 +989,4 @@ enum class FenceStatus {
 } // namespace ToyRenderer
 
 OPERATORS_FOR_FLAGS(ToyRenderer::QueueFlags)
+OPERATORS_FOR_FLAGS(ToyRenderer::TextureUsageFlags)

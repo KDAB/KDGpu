@@ -307,7 +307,7 @@ AdapterSwapchainProperties VulkanAdapter::querySwapchainProperties(const Handle<
         .supportedTransforms = SurfaceTransformFlags::fromInt(capabilities.supportedTransforms),
         .currentTransform = vkSurfaceTransformFlagBitsKHRToSurfaceTransformFlagBits(capabilities.currentTransform),
         .supportedCompositeAlpha = CompositeAlphaFlags::fromInt(capabilities.supportedCompositeAlpha),
-        .supportedUsageFlags = capabilities.supportedUsageFlags
+        .supportedUsageFlags = TextureUsageFlags::fromInt(capabilities.supportedUsageFlags)
     };
 
     // Get the supported formats and colorspaces

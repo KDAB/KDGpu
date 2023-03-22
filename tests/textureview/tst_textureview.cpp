@@ -38,7 +38,7 @@ TEST_SUITE("TextureView")
                 .format = Format::R8G8B8A8_SNORM,
                 .extent = { 512, 512, 1 },
                 .mipLevels = 1,
-                .usage = TextureUsageFlags(static_cast<uint32_t>(TextureUsageFlagBits::SampledBit) | static_cast<uint32_t>(TextureUsageFlagBits::ColorAttachmentBit)),
+                .usage = TextureUsageFlagBits::SampledBit | TextureUsageFlagBits::ColorAttachmentBit,
                 .memoryUsage = MemoryUsage::GpuOnly
             };
 
@@ -130,7 +130,7 @@ TEST_SUITE("TextureView")
                 .format = Format::R8G8B8A8_SNORM,
                 .extent = { 512, 512, 1 },
                 .mipLevels = 1,
-                .usage = TextureUsageFlags(static_cast<uint32_t>(TextureUsageFlagBits::SampledBit) | static_cast<uint32_t>(TextureUsageFlagBits::ColorAttachmentBit)),
+                .usage = TextureUsageFlagBits::SampledBit | TextureUsageFlagBits::ColorAttachmentBit,
                 .memoryUsage = MemoryUsage::GpuOnly
             };
 
