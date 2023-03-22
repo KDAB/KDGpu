@@ -125,7 +125,6 @@ enum class QueueFlagBits {
     VideoEncodeBit = 0x00000040,
     MaxEnum = 0x7FFFFFFF
 };
-// using QueueFlags = Flags;
 using QueueFlags = KDUtils::Flags<QueueFlagBits>;
 
 enum class PresentMode {
@@ -443,7 +442,7 @@ enum class SurfaceTransformFlagBits {
     InheritBit = 0x00000100,
     MaxEnum = 0x7fffffff
 };
-using SurfaceTransformFlags = Flags;
+using SurfaceTransformFlags = KDUtils::Flags<SurfaceTransformFlagBits>;
 
 enum class CompositeAlphaFlagBits {
     OpaqueBit = 0x00000001,
@@ -452,7 +451,7 @@ enum class CompositeAlphaFlagBits {
     InheritBit = 0x00000008,
     MaxEnum = 0x7FFFFFFF
 };
-using CompositeAlphaFlags = Flags;
+using CompositeAlphaFlags = KDUtils::Flags<CompositeAlphaFlagBits>;
 
 enum class TextureUsageFlagBits {
     TransferSrcBit = 0x00000001,

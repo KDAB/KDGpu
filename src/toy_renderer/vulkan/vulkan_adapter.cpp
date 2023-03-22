@@ -304,9 +304,9 @@ AdapterSwapchainProperties VulkanAdapter::querySwapchainProperties(const Handle<
         .minImageExtent = { capabilities.minImageExtent.width, capabilities.minImageExtent.height },
         .maxImageExtent = { capabilities.maxImageExtent.width, capabilities.maxImageExtent.height },
         .maxImageArrayLayers = capabilities.maxImageArrayLayers,
-        .supportedTransforms = capabilities.supportedTransforms,
+        .supportedTransforms = SurfaceTransformFlags::fromInt(capabilities.supportedTransforms),
         .currentTransform = vkSurfaceTransformFlagBitsKHRToSurfaceTransformFlagBits(capabilities.currentTransform),
-        .supportedCompositeAlpha = capabilities.supportedCompositeAlpha,
+        .supportedCompositeAlpha = CompositeAlphaFlags::fromInt(capabilities.supportedCompositeAlpha),
         .supportedUsageFlags = capabilities.supportedUsageFlags
     };
 
