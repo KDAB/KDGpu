@@ -186,10 +186,10 @@ void StyledRectangles::initializeRectangles()
         .layout = bindGroupLayout,
         .resources = {{
             .binding = 0,
-            .resource = BindingResource(UniformBufferBinding{ .buffer = m_globalBuffer })
+            .resource = UniformBufferBinding{ .buffer = m_globalBuffer }
         }, {
             .binding = 1,
-            .resource = BindingResource(UniformBufferBinding{ .buffer = m_rectBuffer })
+            .resource = UniformBufferBinding{ .buffer = m_rectBuffer }
         }}
     };
     // clang-format on
@@ -293,7 +293,7 @@ void StyledRectangles::initializeBackground()
         .layout = bindGroupLayout,
         .resources = {{
             .binding = 0,
-            .resource = BindingResource(UniformBufferBinding{ .buffer = m_colorStopsBuffer })
+            .resource = UniformBufferBinding{ .buffer = m_colorStopsBuffer }
         }}
     };
     // clang-format on

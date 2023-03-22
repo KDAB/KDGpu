@@ -153,7 +153,7 @@ void RotatingTriangle::initializeScene()
         .layout = bindGroupLayout,
         .resources = {{
             .binding = 0,
-            .resource = BindingResource(UniformBufferBinding{ .buffer = m_transformBuffer })
+            .resource = UniformBufferBinding{ .buffer = m_transformBuffer }
         }}
     };
     // clang-format on

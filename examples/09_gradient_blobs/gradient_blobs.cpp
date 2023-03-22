@@ -124,7 +124,7 @@ void GradientBlobs::initializeScene()
         .layout = bindGroupLayout,
         .resources = {{
             .binding = 0,
-            .resource = BindingResource(UniformBufferBinding{ .buffer = m_colorStopsBuffer })
+            .resource = UniformBufferBinding{ .buffer = m_colorStopsBuffer }
         }}
     };
     // clang-format on

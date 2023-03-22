@@ -135,7 +135,7 @@ void ComputeParticles::initializeScene()
             .layout = bindGroupLayout,
             .resources = {{
                 .binding = 0,
-                .resource = BindingResource(StorageBufferBinding{ .buffer = m_particleDataBuffer })
+                .resource = StorageBufferBinding{ .buffer = m_particleDataBuffer }
             }}
         };
         // clang-format on

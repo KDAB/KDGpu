@@ -389,9 +389,9 @@ FormatProperties VulkanAdapter::formatProperties(Format format) const
     vkGetPhysicalDeviceFormatProperties(physicalDevice, static_cast<VkFormat>(format), &props);
 
     return FormatProperties {
-        .linearTilingFeatures = props.linearTilingFeatures,
-        .optimalTilingFeatures = props.optimalTilingFeatures,
-        .bufferFeatures = props.bufferFeatures
+        .linearTilingFeatures = FormatFeatureFlags::fromInt(props.linearTilingFeatures),
+        .optimalTilingFeatures = FormatFeatureFlags::fromInt(props.optimalTilingFeatures),
+        .bufferFeatures = FormatFeatureFlags::fromInt(props.bufferFeatures)
     };
 }
 

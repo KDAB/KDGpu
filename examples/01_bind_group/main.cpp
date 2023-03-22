@@ -211,13 +211,13 @@ int main()
     BindGroupOptions bindGroupOptions = { .layout = bindGroupLayout,
                                           .resources = {
                                                   { .binding = 0,
-                                                    .resource = BindingResource(TextureViewBinding{ .textureView = textureBaseColor /*, .sampler = sampler */ }) },
+                                                    .resource = TextureViewBinding{ .textureView = textureBaseColor /*, .sampler = sampler */ } },
                                                   { .binding = 1,
-                                                    .resource = BindingResource(TextureViewBinding{ .textureView = textureMetalRough /*, .sampler = sampler */ }) },
+                                                    .resource = TextureViewBinding{ .textureView = textureMetalRough /*, .sampler = sampler */ } },
                                                   { .binding = 2,
-                                                    .resource = BindingResource(TextureViewBinding{ .textureView = textureNormal /*, .sampler = sampler */ }) },
+                                                    .resource = TextureViewBinding{ .textureView = textureNormal /*, .sampler = sampler */ } },
                                                   { .binding = 3,
-                                                    .resource = BindingResource(UniformBufferBinding{ .buffer = materialUniforms }) },
+                                                    .resource = UniformBufferBinding{ .buffer = materialUniforms } },
                                           } };
 
     // Create the bind group

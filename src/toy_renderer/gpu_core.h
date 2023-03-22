@@ -938,7 +938,7 @@ enum class CommandBufferLevel {
     MaxEnum = 0x7FFFFFFF
 };
 
-enum class FormatFeatureFlagBit {
+enum class FormatFeatureFlagBit : uint32_t {
     SampledImageBit = 0x00000001,
     StorageImageBit = 0x00000002,
     StorageAtomicBit = 0x00000004,
@@ -965,7 +965,7 @@ enum class FormatFeatureFlagBit {
     SampledImageFilterCubicBit = 0x00002000,
     MaxEnum = 0x7FFFFFFF
 };
-using FormatFeatureFlags = Flags;
+using FormatFeatureFlags = KDUtils::Flags<FormatFeatureFlagBit>;
 
 enum class PresentResult {
     // Error nothing submitted
@@ -996,3 +996,4 @@ OPERATORS_FOR_FLAGS(ToyRenderer::CullModeFlags)
 OPERATORS_FOR_FLAGS(ToyRenderer::ColorComponentFlags)
 OPERATORS_FOR_FLAGS(ToyRenderer::AccessFlags)
 OPERATORS_FOR_FLAGS(ToyRenderer::PipelineStageFlags)
+OPERATORS_FOR_FLAGS(ToyRenderer::FormatFeatureFlags)

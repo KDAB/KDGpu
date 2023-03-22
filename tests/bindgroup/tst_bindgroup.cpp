@@ -61,7 +61,7 @@ TEST_SUITE("BindGroup")
                 .layout = bindGroupLayout,
                 .resources = {
                         { .binding = 0,
-                          .resource = BindingResource(UniformBufferBinding{ .buffer = ubo }) },
+                          .resource = UniformBufferBinding{ .buffer = ubo } },
                 }
             };
 
@@ -99,7 +99,7 @@ TEST_SUITE("BindGroup")
                 .layout = bindGroupLayout,
                 .resources = {
                         { .binding = 0,
-                          .resource = BindingResource(UniformBufferBinding{ .buffer = ubo }) },
+                          .resource = UniformBufferBinding{ .buffer = ubo } },
                 }
             };
 
@@ -110,7 +110,7 @@ TEST_SUITE("BindGroup")
             CHECK(t.isValid());
 
             // WHEN
-            t.update(BindGroupEntry{ .binding = 0, .resource = BindingResource(UniformBufferBinding{ .buffer = ubo }) });
+            t.update(BindGroupEntry{ .binding = 0, .resource = UniformBufferBinding{ .buffer = ubo } });
         }
 
         SUBCASE("TextureView")
@@ -155,7 +155,7 @@ TEST_SUITE("BindGroup")
                 .layout = bindGroupLayout,
                 .resources = {
                         { .binding = 0,
-                          .resource = BindingResource(TextureViewBinding{ .textureView = tv, .sampler = s }) },
+                          .resource = TextureViewBinding{ .textureView = tv, .sampler = s } },
                 }
             };
 
@@ -166,7 +166,7 @@ TEST_SUITE("BindGroup")
             CHECK(b.isValid());
 
             // WHEN
-            b.update(BindGroupEntry{ .binding = 0, .resource = BindingResource(TextureViewBinding{ .textureView = tv, .sampler = s }) });
+            b.update(BindGroupEntry{ .binding = 0, .resource = TextureViewBinding{ .textureView = tv, .sampler = s } });
         }
 
         SUBCASE("Dynamic UBO")
@@ -204,7 +204,7 @@ TEST_SUITE("BindGroup")
             CHECK(t.isValid());
 
             // WHEN
-            t.update(BindGroupEntry{ .binding = 0, .resource = BindingResource(DynamicUniformBufferBinding{ .buffer = ubo }) });
+            t.update(BindGroupEntry{ .binding = 0, .resource = DynamicUniformBufferBinding{ .buffer = ubo } });
         }
     }
 
@@ -232,7 +232,7 @@ TEST_SUITE("BindGroup")
             .layout = bindGroupLayout,
             .resources = {
                     { .binding = 0,
-                      .resource = BindingResource(UniformBufferBinding{ .buffer = ubo }) },
+                      .resource = UniformBufferBinding{ .buffer = ubo } },
             }
         };
 
@@ -310,7 +310,7 @@ TEST_SUITE("BindGroup")
                 .layout = bindGroupLayout,
                 .resources = {
                         { .binding = 0,
-                          .resource = BindingResource(UniformBufferBinding{ .buffer = ubo }) },
+                          .resource = UniformBufferBinding{ .buffer = ubo } },
                 }
             };
 
