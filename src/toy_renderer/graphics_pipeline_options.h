@@ -72,7 +72,7 @@ struct BlendOptions {
 
 struct RenderTargetOptions {
     Format format{ Format::R8G8B8A8_UNORM };
-    ColorComponentFlags writeMask{ ColorComponentFlags(ColorComponentFlagBits::AllComponents) };
+    ColorComponentFlags writeMask{ ColorComponentFlagBits::AllComponents };
     BlendOptions blending;
 
     friend bool operator==(const RenderTargetOptions &, const RenderTargetOptions &) = default;

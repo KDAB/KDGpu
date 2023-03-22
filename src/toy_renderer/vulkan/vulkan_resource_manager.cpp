@@ -777,7 +777,7 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
         const auto &renderTarget = options.renderTargets.at(i);
 
         VkPipelineColorBlendAttachmentState vkAttachmentBlend = {};
-        vkAttachmentBlend.colorWriteMask = renderTarget.writeMask;
+        vkAttachmentBlend.colorWriteMask = renderTarget.writeMask.toInt();
         vkAttachmentBlend.blendEnable = renderTarget.blending.blendingEnabled;
         vkAttachmentBlend.srcColorBlendFactor = blendFactorToVkBlendFactor(renderTarget.blending.color.srcFactor);
         vkAttachmentBlend.dstColorBlendFactor = blendFactorToVkBlendFactor(renderTarget.blending.color.dstFactor);

@@ -727,7 +727,7 @@ enum ColorComponentFlagBits {
     AllComponents = RedBit | GreenBit | BlueBit | AlphaBit,
     MaxEnum = 0x7fffffff
 };
-using ColorComponentFlags = Flags;
+using ColorComponentFlags = KDUtils::Flags<ColorComponentFlagBits>;
 
 enum class BlendOperation {
     Add = 0,
@@ -993,3 +993,4 @@ OPERATORS_FOR_FLAGS(ToyRenderer::TextureUsageFlags)
 OPERATORS_FOR_FLAGS(ToyRenderer::BufferUsageFlags)
 OPERATORS_FOR_FLAGS(ToyRenderer::ShaderStageFlags)
 OPERATORS_FOR_FLAGS(ToyRenderer::CullModeFlags)
+OPERATORS_FOR_FLAGS(ToyRenderer::ColorComponentFlags)
