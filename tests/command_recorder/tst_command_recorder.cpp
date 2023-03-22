@@ -79,17 +79,17 @@ TEST_CASE("CommandRecorder")
         // GIVEN
         const BufferOptions cpuGpuBufferOptions = {
             .size = 4 * sizeof(float),
-            .usage = BufferUsageFlags(BufferUsageFlagBits::TransferSrcBit),
+            .usage = BufferUsageFlagBits::TransferSrcBit,
             .memoryUsage = MemoryUsage::CpuToGpu
         };
         const BufferOptions gpuGpuBufferOptions = {
             .size = 4 * sizeof(float),
-            .usage = BufferUsageFlags(BufferUsageFlagBits::TransferSrcBit) | BufferUsageFlags(BufferUsageFlagBits::TransferDstBit),
+            .usage = BufferUsageFlagBits::TransferSrcBit | BufferUsageFlagBits::TransferDstBit,
             .memoryUsage = MemoryUsage::GpuOnly
         };
         const BufferOptions gpuCpuBufferOptions = {
             .size = 4 * sizeof(float),
-            .usage = BufferUsageFlags(BufferUsageFlagBits::TransferSrcBit) | BufferUsageFlags(BufferUsageFlagBits::TransferDstBit),
+            .usage = BufferUsageFlagBits::TransferSrcBit | BufferUsageFlagBits::TransferDstBit,
             .memoryUsage = MemoryUsage::GpuToCpu
         };
 
@@ -199,17 +199,17 @@ TEST_CASE("CommandRecorder")
         // GIVEN
         const BufferOptions cpuGpuBufferOptions = {
             .size = 4 * sizeof(float),
-            .usage = BufferUsageFlags(BufferUsageFlagBits::TransferSrcBit),
+            .usage = BufferUsageFlagBits::TransferSrcBit,
             .memoryUsage = MemoryUsage::CpuToGpu
         };
         const BufferOptions gpuGpuBufferOptions = {
             .size = 4 * sizeof(float),
-            .usage = BufferUsageFlags(BufferUsageFlagBits::TransferSrcBit) | BufferUsageFlags(BufferUsageFlagBits::TransferDstBit),
+            .usage = BufferUsageFlagBits::TransferSrcBit | BufferUsageFlagBits::TransferDstBit,
             .memoryUsage = MemoryUsage::GpuOnly
         };
         const BufferOptions gpuCpuBufferOptions = {
             .size = 4 * sizeof(float),
-            .usage = BufferUsageFlags(BufferUsageFlagBits::TransferSrcBit) | BufferUsageFlags(BufferUsageFlagBits::TransferDstBit),
+            .usage = BufferUsageFlagBits::TransferSrcBit | BufferUsageFlagBits::TransferDstBit,
             .memoryUsage = MemoryUsage::GpuToCpu
         };
 
@@ -310,12 +310,12 @@ TEST_CASE("CommandRecorder")
         // GIVEN
         const BufferOptions cpuGpuBufferOptions = {
             .size = 4 * sizeof(float),
-            .usage = BufferUsageFlags(BufferUsageFlagBits::TransferSrcBit),
+            .usage = BufferUsageFlagBits::TransferSrcBit,
             .memoryUsage = MemoryUsage::CpuToGpu
         };
         const BufferOptions gpuCpuBufferOptions = {
             .size = 4 * sizeof(float),
-            .usage = BufferUsageFlags(BufferUsageFlagBits::TransferSrcBit) | BufferUsageFlags(BufferUsageFlagBits::TransferDstBit),
+            .usage = BufferUsageFlagBits::TransferSrcBit | BufferUsageFlagBits::TransferDstBit,
             .memoryUsage = MemoryUsage::GpuToCpu
         };
         const float initialData[] = { 1.0f, 2.0f, 3.0f, 4.0f };

@@ -158,7 +158,7 @@ int main()
     // Create a buffer to hold triangle vertex data
     BufferOptions vertexBufferOptions = {
         .size = 3 * 2 * 4 * sizeof(float), // 3 vertices * 2 attributes * 4 float components
-        .usage = BufferUsageFlags(BufferUsageFlagBits::VertexBufferBit), // TODO: Use a nice Flags template class
+        .usage = BufferUsageFlagBits::VertexBufferBit,
         .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
     };
     auto vertexBuffer = device.createBuffer(vertexBufferOptions);
@@ -182,7 +182,7 @@ int main()
 
     BufferOptions cameraUboBufferOptions = {
         .size = 16 * sizeof(float), // 1 * mat4x4
-        .usage = BufferUsageFlags(BufferUsageFlagBits::VertexBufferBit), // TODO: Use a nice Flags template class
+        .usage = BufferUsageFlagBits::VertexBufferBit,
         .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
     };
     auto cameraUBOBuffer = device.createBuffer(cameraUboBufferOptions);

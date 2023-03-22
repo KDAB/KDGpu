@@ -34,7 +34,7 @@ void GradientBlobs::initializeScene()
     {
         BufferOptions bufferOptions = {
             .size = 4 * (3 + 2) * sizeof(float),
-            .usage = BufferUsageFlags(BufferUsageFlagBits::VertexBufferBit), // TODO: Use a nice Flags template class
+            .usage = BufferUsageFlagBits::VertexBufferBit,
             .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
         };
         m_fullScreenQuad = m_device.createBuffer(bufferOptions);
@@ -112,7 +112,7 @@ void GradientBlobs::initializeScene()
     {
         BufferOptions bufferOptions = {
             .size = 8 * sizeof(glm::vec4), // 4 x vec4 + 4 x vec2 (padded to vec4 by std140)
-            .usage = BufferUsageFlags(BufferUsageFlagBits::UniformBufferBit),
+            .usage = BufferUsageFlagBits::UniformBufferBit,
             .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
         };
         m_colorStopsBuffer = m_device.createBuffer(bufferOptions);

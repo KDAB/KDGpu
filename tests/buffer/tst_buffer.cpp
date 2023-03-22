@@ -37,7 +37,7 @@ TEST_SUITE("Buffer")
             // GIVEN
             const BufferOptions bufferOptions = {
                 .size = 4 * sizeof(float),
-                .usage = BufferUsageFlags(BufferUsageFlagBits::VertexBufferBit),
+                .usage = BufferUsageFlagBits::VertexBufferBit,
                 .memoryUsage = MemoryUsage::CpuToGpu
             };
 
@@ -53,7 +53,7 @@ TEST_SUITE("Buffer")
             // GIVEN
             const BufferOptions bufferOptions = {
                 .size = 4 * sizeof(float),
-                .usage = BufferUsageFlags(BufferUsageFlagBits::VertexBufferBit),
+                .usage = BufferUsageFlagBits::VertexBufferBit,
                 .memoryUsage = MemoryUsage::CpuToGpu
             };
 
@@ -74,7 +74,7 @@ TEST_SUITE("Buffer")
         // GIVEN
         const BufferOptions bufferOptions = {
             .size = 4 * sizeof(float),
-            .usage = BufferUsageFlags(BufferUsageFlagBits::VertexBufferBit),
+            .usage = BufferUsageFlagBits::VertexBufferBit,
             .memoryUsage = MemoryUsage::CpuToGpu
         };
 
@@ -144,7 +144,7 @@ TEST_SUITE("Buffer")
             // GIVEN
             const BufferOptions bufferOptions = {
                 .size = 4 * sizeof(float),
-                .usage = BufferUsageFlags(BufferUsageFlagBits::VertexBufferBit),
+                .usage = BufferUsageFlagBits::VertexBufferBit,
                 .memoryUsage = MemoryUsage::CpuToGpu
             };
 
@@ -192,7 +192,7 @@ TEST_SUITE("Buffer")
             // GIVEN
             const BufferOptions bufferOptions = {
                 .size = 4 * sizeof(float),
-                .usage = BufferUsageFlags(BufferUsageFlagBits::VertexBufferBit),
+                .usage = BufferUsageFlagBits::VertexBufferBit,
                 .memoryUsage = MemoryUsage::CpuToGpu
             };
 

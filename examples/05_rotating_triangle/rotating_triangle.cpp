@@ -51,7 +51,7 @@ void RotatingTriangle::initializeScene()
         const DeviceSize dataByteSize = vertexData.size() * sizeof(Vertex);
         BufferOptions bufferOptions = {
             .size = dataByteSize,
-            .usage = BufferUsageFlags(BufferUsageFlagBits::VertexBufferBit) | BufferUsageFlags(BufferUsageFlagBits::TransferDstBit), // TODO: Use a nice Flags template class
+            .usage = BufferUsageFlagBits::VertexBufferBit | BufferUsageFlagBits::TransferDstBit,
             .memoryUsage = MemoryUsage::GpuOnly
         };
         m_buffer = m_device.createBuffer(bufferOptions);
@@ -66,7 +66,7 @@ void RotatingTriangle::initializeScene()
     {
         BufferOptions bufferOptions = {
             .size = 3 * sizeof(uint32_t),
-            .usage = BufferUsageFlags(BufferUsageFlagBits::IndexBufferBit),
+            .usage = BufferUsageFlagBits::IndexBufferBit,
             .memoryUsage = MemoryUsage::CpuToGpu
         };
         m_indexBuffer = m_device.createBuffer(bufferOptions);
@@ -80,7 +80,7 @@ void RotatingTriangle::initializeScene()
     {
         BufferOptions bufferOptions = {
             .size = sizeof(glm::mat4),
-            .usage = BufferUsageFlags(BufferUsageFlagBits::UniformBufferBit),
+            .usage = BufferUsageFlagBits::UniformBufferBit,
             .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
         };
         m_transformBuffer = m_device.createBuffer(bufferOptions);

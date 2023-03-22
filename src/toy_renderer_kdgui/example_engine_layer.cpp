@@ -68,7 +68,7 @@ void ExampleEngineLayer::waitForUploadBufferData(const Handle<Buffer_t> &destina
     // Create a staging buffer and upload initial data to it by map(), memcpy(), unmap().
     BufferOptions bufferOptions = {
         .size = byteSize,
-        .usage = BufferUsageFlags(BufferUsageFlagBits::TransferSrcBit),
+        .usage = BufferUsageFlagBits::TransferSrcBit,
         .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
     };
     auto stagingBuffer = m_device.createBuffer(bufferOptions, data);
@@ -101,7 +101,7 @@ void ExampleEngineLayer::uploadBufferData(const Handle<Buffer_t> &destinationBuf
     // Create a staging buffer and upload initial data to it by map(), memcpy(), unmap().
     BufferOptions bufferOptions = {
         .size = byteSize,
-        .usage = BufferUsageFlags(BufferUsageFlagBits::TransferSrcBit),
+        .usage = BufferUsageFlagBits::TransferSrcBit,
         .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
     };
     auto stagingBuffer = m_device.createBuffer(bufferOptions, data);
@@ -153,7 +153,7 @@ void ExampleEngineLayer::waitForUploadTextureData(const Handle<Texture_t> &desti
     // Create a staging buffer and upload initial data to it by map(), memcpy(), unmap().
     BufferOptions bufferOptions = {
         .size = byteSize,
-        .usage = BufferUsageFlags(BufferUsageFlagBits::TransferSrcBit),
+        .usage = BufferUsageFlagBits::TransferSrcBit,
         .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
     };
     auto stagingBuffer = m_device.createBuffer(bufferOptions, data);
@@ -234,7 +234,7 @@ void ExampleEngineLayer::uploadTextureData(const Handle<Texture_t> &destinationT
     // Create a staging buffer and upload initial data to it by map(), memcpy(), unmap().
     BufferOptions bufferOptions = {
         .size = byteSize,
-        .usage = BufferUsageFlags(BufferUsageFlagBits::TransferSrcBit),
+        .usage = BufferUsageFlagBits::TransferSrcBit,
         .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
     };
     auto stagingBuffer = m_device.createBuffer(bufferOptions, data);

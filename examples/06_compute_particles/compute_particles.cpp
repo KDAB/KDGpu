@@ -78,7 +78,7 @@ void ComputeParticles::initializeScene()
         {
             const BufferOptions particlesBufferOptions = {
                 .size = ParticlesCount * sizeof(ParticleData),
-                .usage = BufferUsageFlags(BufferUsageFlagBits::VertexBufferBit) | BufferUsageFlags(BufferUsageFlagBits::StorageBufferBit), // TODO: Use a nice Flags template class
+                .usage = BufferUsageFlagBits::VertexBufferBit | BufferUsageFlagBits::StorageBufferBit,
                 .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
             };
             const std::vector<ParticleData> particles = initializeParticles(ParticlesCount);
@@ -89,7 +89,7 @@ void ComputeParticles::initializeScene()
         {
             const BufferOptions triangleBufferOptions = {
                 .size = 3 * sizeof(Vertex),
-                .usage = BufferUsageFlags(BufferUsageFlagBits::VertexBufferBit),
+                .usage = BufferUsageFlagBits::VertexBufferBit,
                 .memoryUsage = MemoryUsage::CpuToGpu
             };
 

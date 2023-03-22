@@ -27,7 +27,7 @@ void HelloIndexedTriangle::initializeScene()
     {
         BufferOptions bufferOptions = {
             .size = 3 * 2 * 4 * sizeof(float), // 3 vertices * 2 attributes * 4 float components
-            .usage = BufferUsageFlags(BufferUsageFlagBits::VertexBufferBit), // TODO: Use a nice Flags template class
+            .usage = BufferUsageFlagBits::VertexBufferBit,
             .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
         };
         m_buffer = m_device.createBuffer(bufferOptions);
@@ -51,7 +51,7 @@ void HelloIndexedTriangle::initializeScene()
     {
         BufferOptions bufferOptions = {
             .size = 3 * sizeof(uint32_t),
-            .usage = BufferUsageFlags(BufferUsageFlagBits::IndexBufferBit),
+            .usage = BufferUsageFlagBits::IndexBufferBit,
             .memoryUsage = MemoryUsage::CpuToGpu
         };
         m_indexBuffer = m_device.createBuffer(bufferOptions);

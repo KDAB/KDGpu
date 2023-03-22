@@ -43,7 +43,7 @@ TEST_SUITE("BindGroup")
             // GIVEN
             BufferOptions uboOptions = {
                 .size = 16 * sizeof(float),
-                .usage = BufferUsageFlags(BufferUsageFlagBits::UniformBufferBit),
+                .usage = BufferUsageFlagBits::UniformBufferBit,
                 .memoryUsage = MemoryUsage::CpuToGpu
             };
             auto ubo = device.createBuffer(uboOptions);
@@ -80,7 +80,7 @@ TEST_SUITE("BindGroup")
             // GIVEN
             BufferOptions uboOptions = {
                 .size = 16 * sizeof(float),
-                .usage = BufferUsageFlags(BufferUsageFlagBits::UniformBufferBit),
+                .usage = BufferUsageFlagBits::UniformBufferBit,
                 .memoryUsage = MemoryUsage::CpuToGpu
             };
             auto ubo = device.createBuffer(uboOptions);
@@ -174,7 +174,7 @@ TEST_SUITE("BindGroup")
             // GIVEN
             BufferOptions uboOptions = {
                 .size = 16 * sizeof(float),
-                .usage = BufferUsageFlags(BufferUsageFlagBits::UniformBufferBit),
+                .usage = BufferUsageFlagBits::UniformBufferBit,
                 .memoryUsage = MemoryUsage::CpuToGpu
             };
             auto ubo = device.createBuffer(uboOptions);
@@ -213,7 +213,7 @@ TEST_SUITE("BindGroup")
         // GIVEN
         BufferOptions uboOptions = {
             .size = 16 * sizeof(float),
-            .usage = BufferUsageFlags(BufferUsageFlagBits::UniformBufferBit),
+            .usage = BufferUsageFlagBits::UniformBufferBit,
             .memoryUsage = MemoryUsage::CpuToGpu
         };
         auto ubo = device.createBuffer(uboOptions);
@@ -291,7 +291,7 @@ TEST_SUITE("BindGroup")
             // GIVEN
             BufferOptions uboOptions = {
                 .size = 16 * sizeof(float),
-                .usage = BufferUsageFlags(BufferUsageFlagBits::UniformBufferBit),
+                .usage = BufferUsageFlagBits::UniformBufferBit,
                 .memoryUsage = MemoryUsage::CpuToGpu
             };
             auto ubo = device.createBuffer(uboOptions);

@@ -91,7 +91,7 @@ void TexturedQuad::initializeScene()
         const DeviceSize dataByteSize = vertexData.size() * sizeof(Vertex);
         BufferOptions bufferOptions = {
             .size = dataByteSize,
-            .usage = BufferUsageFlags(BufferUsageFlagBits::VertexBufferBit) | BufferUsageFlags(BufferUsageFlagBits::TransferDstBit), // TODO: Use a nice Flags template class
+            .usage = BufferUsageFlagBits::VertexBufferBit | BufferUsageFlagBits::TransferDstBit,
             .memoryUsage = MemoryUsage::GpuOnly
         };
         m_buffer = m_device.createBuffer(bufferOptions);

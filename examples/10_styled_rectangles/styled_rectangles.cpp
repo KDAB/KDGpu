@@ -57,7 +57,7 @@ void StyledRectangles::initializeRectangles()
     {
         BufferOptions bufferOptions = {
             .size = 4 * 2 * sizeof(float),
-            .usage = BufferUsageFlags(BufferUsageFlagBits::VertexBufferBit),
+            .usage = BufferUsageFlagBits::VertexBufferBit,
             .memoryUsage = MemoryUsage::CpuToGpu
         };
         m_normalizedQuad = m_device.createBuffer(bufferOptions);
@@ -148,7 +148,7 @@ void StyledRectangles::initializeRectangles()
     {
         BufferOptions bufferOptions = {
             .size = sizeof(glm::vec4), // 1 x vec2 (padded to vec4 by std140)
-            .usage = BufferUsageFlags(BufferUsageFlagBits::UniformBufferBit),
+            .usage = BufferUsageFlagBits::UniformBufferBit,
             .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
         };
         m_globalBuffer = m_device.createBuffer(bufferOptions);
@@ -164,7 +164,7 @@ void StyledRectangles::initializeRectangles()
     {
         BufferOptions bufferOptions = {
             .size = 3 * sizeof(glm::vec2), // 2 x vec2 + float (padded to vec2 by std140)
-            .usage = BufferUsageFlags(BufferUsageFlagBits::UniformBufferBit),
+            .usage = BufferUsageFlagBits::UniformBufferBit,
             .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
         };
         m_rectBuffer = m_device.createBuffer(bufferOptions);
@@ -202,7 +202,7 @@ void StyledRectangles::initializeBackground()
     {
         BufferOptions bufferOptions = {
             .size = 4 * (3 + 2) * sizeof(float),
-            .usage = BufferUsageFlags(BufferUsageFlagBits::VertexBufferBit), // TODO: Use a nice Flags template class
+            .usage = BufferUsageFlagBits::VertexBufferBit,
             .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
         };
         m_fullScreenQuad = m_device.createBuffer(bufferOptions);
@@ -281,7 +281,7 @@ void StyledRectangles::initializeBackground()
     {
         BufferOptions bufferOptions = {
             .size = 8 * sizeof(glm::vec4), // 4 x vec4 + 4 x vec2 (padded to vec4 by std140)
-            .usage = BufferUsageFlags(BufferUsageFlagBits::UniformBufferBit),
+            .usage = BufferUsageFlagBits::UniformBufferBit,
             .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
         };
         m_colorStopsBuffer = m_device.createBuffer(bufferOptions);

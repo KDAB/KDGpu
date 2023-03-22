@@ -504,7 +504,7 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
     VkBufferCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     createInfo.size = options.size;
-    createInfo.usage = options.usage;
+    createInfo.usage = options.usage.toInt();
     createInfo.sharingMode = sharingModeToVkSharingMode(options.sharingMode);
     if (!options.queueTypeIndices.empty()) {
         createInfo.queueFamilyIndexCount = options.queueTypeIndices.size();

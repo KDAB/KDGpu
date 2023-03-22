@@ -597,7 +597,7 @@ enum class BufferUsageFlagBits {
     MicromapStorageBit = 0x01000000,
     MaxEnum = 0x7fffffff
 };
-using BufferUsageFlags = Flags;
+using BufferUsageFlags = KDUtils::Flags<BufferUsageFlagBits>;
 
 enum class VertexRate {
     Vertex = 0,
@@ -990,3 +990,4 @@ enum class FenceStatus {
 
 OPERATORS_FOR_FLAGS(ToyRenderer::QueueFlags)
 OPERATORS_FOR_FLAGS(ToyRenderer::TextureUsageFlags)
+OPERATORS_FOR_FLAGS(ToyRenderer::BufferUsageFlags)
