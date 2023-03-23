@@ -190,8 +190,8 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     physicalDeviceFeatures2.features = deviceFeatures;
 
     // Enable the VK_KHR_Synchronization2 extension features by chaining this into the createInfo chain.
-    VkPhysicalDeviceSynchronization2Features sync2Features = {};
-    sync2Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES;
+    VkPhysicalDeviceSynchronization2FeaturesKHR sync2Features = {};
+    sync2Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES_KHR;
     sync2Features.synchronization2 = true;
     physicalDeviceFeatures2.pNext = &sync2Features;
 

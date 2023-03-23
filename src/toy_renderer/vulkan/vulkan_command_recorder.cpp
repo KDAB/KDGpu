@@ -128,8 +128,8 @@ void VulkanCommandRecorder::bufferMemoryBarrier(const BufferMemoryBarrierOptions
 {
     auto vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
     if (vulkanDevice->vkCmdPipelineBarrier2 != nullptr) {
-        VkBufferMemoryBarrier2 vkBufferBarrier = {};
-        vkBufferBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2;
+        VkBufferMemoryBarrier2KHR vkBufferBarrier = {};
+        vkBufferBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2_KHR;
         vkBufferBarrier.srcStageMask = pipelineStageFlagsToVkPipelineStageFlagBits2(options.srcStages);
         vkBufferBarrier.srcAccessMask = accessFlagsToVkAccessFlagBits2(options.srcMask);
         vkBufferBarrier.dstStageMask = pipelineStageFlagsToVkPipelineStageFlagBits2(options.dstStages);
@@ -142,8 +142,8 @@ void VulkanCommandRecorder::bufferMemoryBarrier(const BufferMemoryBarrierOptions
         vkBufferBarrier.offset = options.offset;
         vkBufferBarrier.size = options.size;
 
-        VkDependencyInfo vkDependencyInfo = {};
-        vkDependencyInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+        VkDependencyInfoKHR vkDependencyInfo = {};
+        vkDependencyInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO_KHR;
         vkDependencyInfo.bufferMemoryBarrierCount = 1;
         vkDependencyInfo.pBufferMemoryBarriers = &vkBufferBarrier;
 
@@ -176,8 +176,8 @@ void VulkanCommandRecorder::textureMemoryBarrier(const TextureMemoryBarrierOptio
 {
     auto vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
     if (vulkanDevice->vkCmdPipelineBarrier2 != nullptr) {
-        VkImageMemoryBarrier2 vkImageBarrier = {};
-        vkImageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
+        VkImageMemoryBarrier2KHR vkImageBarrier = {};
+        vkImageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2_KHR;
         vkImageBarrier.srcStageMask = pipelineStageFlagsToVkPipelineStageFlagBits2(options.srcStages);
         vkImageBarrier.srcAccessMask = accessFlagsToVkAccessFlagBits2(options.srcMask);
         vkImageBarrier.dstStageMask = pipelineStageFlagsToVkPipelineStageFlagBits2(options.dstStages);
@@ -197,8 +197,8 @@ void VulkanCommandRecorder::textureMemoryBarrier(const TextureMemoryBarrierOptio
             .layerCount = options.range.layerCount
         };
 
-        VkDependencyInfo vkDependencyInfo = {};
-        vkDependencyInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+        VkDependencyInfoKHR vkDependencyInfo = {};
+        vkDependencyInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO_KHR;
         vkDependencyInfo.imageMemoryBarrierCount = 1;
         vkDependencyInfo.pImageMemoryBarriers = &vkImageBarrier;
 

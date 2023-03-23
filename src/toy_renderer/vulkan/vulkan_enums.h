@@ -87,10 +87,10 @@ VkSamplerAddressMode addressModeToVkSamplerAddressMode(AddressMode mode);
 
 // TODO: Support VkAccessFlags2 features
 VkAccessFlagBits accessFlagsToVkAccessFlagBits(AccessFlags accessFlags);
-VkAccessFlagBits2 accessFlagsToVkAccessFlagBits2(AccessFlags accessFlags);
+VkAccessFlagBits2KHR accessFlagsToVkAccessFlagBits2(AccessFlags accessFlags);
 
 VkPipelineStageFlagBits pipelineStageFlagsToVkPipelineStageFlagBits(PipelineStageFlags pipelineFlags);
-VkPipelineStageFlagBits2 pipelineStageFlagsToVkPipelineStageFlagBits2(PipelineStageFlags pipelineFlags);
+VkPipelineStageFlagBits2KHR pipelineStageFlagsToVkPipelineStageFlagBits2(PipelineStageFlags pipelineFlags);
 
 VkIndexType indexTypeToVkIndexType(IndexType type);
 IndexType vkIndexTypeToIndexType(VkIndexType type);
