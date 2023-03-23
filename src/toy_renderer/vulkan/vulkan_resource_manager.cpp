@@ -939,7 +939,7 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
                     VkAttachmentReference resolveAttachmentRef = {};
                     resolveAttachmentRef.attachment = attachmentIndex++;
                     resolveAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-                    colorAttachmentRefs.emplace_back(resolveAttachmentRef);
+                    resolveAttachmentRefs.emplace_back(resolveAttachmentRef);
                 }
             }
         }
@@ -1285,12 +1285,16 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
     }
     VkRenderPass vkRenderPass = vulkanRenderPass->renderPass;
 
-    // TODO: Find or create a framebuffer as per the render pass above
-    // TODO: Include resolve attachments if using MSAA.
+    // Find or create a framebuffer as per the render pass above
+    const bool usingMsaa = options.samples > SampleCountFlagBits::Samples1Bit;
     std::vector<Handle<TextureView_t>> attachments;
     attachments.reserve(2 * options.colorAttachments.size() + 1); // (Color + Resolve) + DepthStencil
-    for (const auto &colorAttachment : options.colorAttachments)
+    for (const auto &colorAttachment : options.colorAttachments) {
         attachments.push_back(colorAttachment.view);
+        // Include resolve attachments if using MSAA.
+        if (usingMsaa)
+            attachments.push_back(colorAttachment.resolveView);
+    }
     if (options.depthStencilAttachment.view.isValid())
         attachments.push_back(options.depthStencilAttachment.view);
 
@@ -1349,7 +1353,6 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
     };
 
     // Clear values
-    // TODO: Include resolve clear colors if using MSAA.
     std::vector<VkClearValue> vkClearValues;
     vkClearValues.reserve(2 * options.colorAttachments.size() + 1);
     for (const auto &colorAttachment : options.colorAttachments) {
@@ -1358,7 +1361,11 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
         vkClearValue.color.uint32[1] = colorAttachment.clearValue.uint32[1];
         vkClearValue.color.uint32[2] = colorAttachment.clearValue.uint32[2];
         vkClearValue.color.uint32[3] = colorAttachment.clearValue.uint32[3];
-        vkClearValues.emplace_back(vkClearValue);
+        vkClearValues.push_back(vkClearValue);
+
+        // Include resolve clear color again if using MSAA. Must match number of attachments.
+        if (usingMsaa)
+            vkClearValues.push_back(vkClearValue);
     }
     if (options.depthStencilAttachment.view.isValid()) {
         VkClearValue vkClearValue = {};
@@ -1440,8 +1447,8 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
     VkAttachmentReference depthStencilAttachmentRef = {};
 
     // TODO: Handle multisampling
-    const bool usingMultisampling = false; // options.multisample.samples > SampleCountFlagBits::Samples1Bit;
-    const VkSampleCountFlagBits sampleCount = VK_SAMPLE_COUNT_1_BIT; // sampleCountFlagBitsToVkSampleFlagBits(options.multisample.samples);
+    const bool usingMultisampling = options.samples > SampleCountFlagBits::Samples1Bit;
+    const VkSampleCountFlagBits sampleCount = sampleCountFlagBitsToVkSampleFlagBits(options.samples);
 
     // Color and resolve attachments
     {
@@ -1474,7 +1481,6 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
             colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
             colorAttachment.initialLayout = textureLayoutToVkImageLayout(renderTarget.initialLayout);
             colorAttachment.finalLayout = textureLayoutToVkImageLayout(renderTarget.finalLayout);
-            // colorAttachment.finalLayout = usingMultisampling ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
             allAttachments.emplace_back(colorAttachment);
 
             VkAttachmentReference colorAttachmentRef = {};
@@ -1483,23 +1489,34 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
             colorAttachmentRefs.emplace_back(colorAttachmentRef);
 
             // If using multisampling, then for each color attachment we need a resolve attachment
-            // if (usingMultisampling) {
-            //     VkAttachmentDescription resolveAttachment = {};
-            //     resolveAttachment.format = formatToVkFormat(renderTarget.format);
-            //     resolveAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-            //     resolveAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-            //     resolveAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-            //     resolveAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-            //     resolveAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-            //     resolveAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-            //     resolveAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-            //     allAttachments.emplace_back(resolveAttachment);
+            if (usingMultisampling) {
+                VulkanTextureView *view = getTextureView(renderTarget.resolveView);
+                if (!view) {
+                    // Log invalid view requested
+                    return {};
+                }
+                VulkanTexture *texture = getTexture(view->textureHandle);
+                if (!texture) {
+                    // Log invalid texture requested
+                    return {};
+                }
 
-            //     VkAttachmentReference resolveAttachmentRef = {};
-            //     resolveAttachmentRef.attachment = attachmentIndex++;
-            //     resolveAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-            //     colorAttachmentRefs.emplace_back(resolveAttachmentRef);
-            // }
+                VkAttachmentDescription resolveAttachment = {};
+                resolveAttachment.format = formatToVkFormat(texture->format);
+                resolveAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+                resolveAttachment.loadOp = attachmentLoadOperationToVkAttachmentLoadOp(renderTarget.loadOperation);
+                resolveAttachment.storeOp = attachmentStoreOperationToVkAttachmentStoreOp(renderTarget.storeOperation);
+                resolveAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+                resolveAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+                resolveAttachment.initialLayout = textureLayoutToVkImageLayout(renderTarget.initialLayout);
+                resolveAttachment.finalLayout = textureLayoutToVkImageLayout(renderTarget.finalLayout);
+                allAttachments.emplace_back(resolveAttachment);
+
+                VkAttachmentReference resolveAttachmentRef = {};
+                resolveAttachmentRef.attachment = attachmentIndex++;
+                resolveAttachmentRef.layout = textureLayoutToVkImageLayout(renderTarget.layout);
+                resolveAttachmentRefs.emplace_back(resolveAttachmentRef);
+            }
         }
     }
 
