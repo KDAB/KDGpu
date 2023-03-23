@@ -26,7 +26,7 @@ TEST_SUITE("GraphicsPipeline")
     Instance instance = api->createInstance(InstanceOptions{
             .applicationName = "GraphicsPipeline",
             .applicationVersion = SERENITY_MAKE_API_VERSION(0, 1, 0, 0) });
-    Adapter *discreteGPUAdapter = instance.selectAdapter(AdapterDeviceType::DiscreteGpu);
+    Adapter *discreteGPUAdapter = instance.selectAdapter(AdapterDeviceType::Default);
     Device device = discreteGPUAdapter->createDevice();
 
     const auto vertexShaderPath = assetPath() + "/shaders/tests/graphics_pipeline/triangle.vert.spv";

@@ -109,7 +109,7 @@ int main()
 
     // Enumerate the adapters (physical devices) and select one to use. Here we look for
     // a discrete GPU. In a real app, we could fallback to an integrated one.
-    Adapter *selectedAdapter = instance.selectAdapter(AdapterDeviceType::DiscreteGpu);
+    Adapter *selectedAdapter = instance.selectAdapter(AdapterDeviceType::Default);
 
     if (!selectedAdapter) {
         spdlog::critical("Unable to find a discrete GPU. Aborting...");

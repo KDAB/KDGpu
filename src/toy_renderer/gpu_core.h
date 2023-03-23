@@ -89,6 +89,7 @@ enum class AdapterDeviceType {
     DiscreteGpu = 2,
     VirtualGpu = 3,
     Cpu = 4,
+    Default = 0x7FFFFFFE,
     MaxEnum = 0x7FFFFFFF
 };
 
@@ -97,6 +98,9 @@ inline std::string adapterDeviceTypeToString(AdapterDeviceType deviceType)
     switch (deviceType) {
     case ToyRenderer::AdapterDeviceType::Other:
         return "Other Device Type";
+
+    case ToyRenderer::AdapterDeviceType::Default:
+        return "Default (platform) GPU";
 
     case ToyRenderer::AdapterDeviceType::IntegratedGpu:
         return "Integrated GPU";

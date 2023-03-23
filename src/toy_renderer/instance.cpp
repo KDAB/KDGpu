@@ -4,6 +4,8 @@
 #include <toy_renderer/resource_manager.h>
 #include <toy_renderer/api/api_instance.h>
 
+#include <KDFoundation/config.h>
+
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 
@@ -127,11 +129,20 @@ std::vector<Adapter *> Instance::adapters() const
 
 Adapter *Instance::selectAdapter(AdapterDeviceType deviceType) const
 {
+    std::vector<AdapterDeviceType> lookupTypes;
+    if (deviceType == ToyRenderer::AdapterDeviceType::Default) {
+        lookupTypes.push_back(AdapterDeviceType::DiscreteGpu);
+        lookupTypes.push_back(AdapterDeviceType::IntegratedGpu);
+    } else {
+        lookupTypes.push_back(deviceType);
+    }
     std::vector<Adapter *> adaptersList = adapters();
-    for (Adapter *adapter : adaptersList) {
-        const AdapterProperties &properties = adapter->properties();
-        if (properties.deviceType == deviceType)
-            return adapter;
+    for (auto t: lookupTypes) {
+        for (Adapter *adapter : adaptersList) {
+            const AdapterProperties &properties = adapter->properties();
+            if (properties.deviceType == t)
+                return adapter;
+        }
     }
     return nullptr;
 }

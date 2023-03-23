@@ -26,7 +26,7 @@ TEST_SUITE("ComputePipeline")
     Instance instance = api->createInstance(InstanceOptions{
             .applicationName = "ComputePipeline",
             .applicationVersion = SERENITY_MAKE_API_VERSION(0, 1, 0, 0) });
-    Adapter *discreteGPUAdapter = instance.selectAdapter(AdapterDeviceType::DiscreteGpu);
+    Adapter *discreteGPUAdapter = instance.selectAdapter(AdapterDeviceType::Default);
     Device device = discreteGPUAdapter->createDevice();
 
     const auto computeShaderPath = assetPath() + "/shaders/tests/compute_pipeline/empty_compute.comp.spv";

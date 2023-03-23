@@ -66,7 +66,7 @@ public:
     std::vector<Extension> extensions() const;
 
     AdapterAndDevice createDefaultDevice(const Surface &surface,
-                                         AdapterDeviceType deviceType = AdapterDeviceType::DiscreteGpu) const;
+                                         AdapterDeviceType deviceType = AdapterDeviceType::Default) const;
 
     std::vector<Adapter *> adapters() const;
     Adapter *selectAdapter(AdapterDeviceType deviceType) const;

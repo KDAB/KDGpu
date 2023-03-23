@@ -52,7 +52,7 @@ TEST_SUITE("Instance")
         SUBCASE("Can create Device")
         {
             // WHEN
-            Adapter *discreteGPUAdapter = instance.selectAdapter(AdapterDeviceType::DiscreteGpu);
+            Adapter *discreteGPUAdapter = instance.selectAdapter(AdapterDeviceType::Default);
 
             // THEN
             CHECK(discreteGPUAdapter);
