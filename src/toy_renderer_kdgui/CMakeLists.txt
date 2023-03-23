@@ -54,6 +54,10 @@ set_target_properties(toy-renderer-kdgui
     VISIBILITY_INLINES_HIDDEN 1
 )
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    target_sources(toy-renderer-kdgui PRIVATE view.mm)
+endif()
+
 include(GenerateExportHeader)
 generate_export_header(toy-renderer-kdgui BASE_NAME toy_renderer_kdgui)
 configure_file(${CMAKE_CURRENT_BINARY_DIR}/toy_renderer_kdgui_export.h ${CMAKE_BINARY_DIR}/include/toy_renderer_kdgui/toy_renderer_kdgui_export.h)

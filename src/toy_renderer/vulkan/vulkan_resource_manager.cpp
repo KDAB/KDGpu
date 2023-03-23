@@ -15,6 +15,31 @@
 #include <assert.h>
 #include <stdexcept>
 
+namespace {
+
+std::string getResultAsString(VkResult vulkan_result)
+{
+    switch (vulkan_result) {
+        case VK_SUCCESS:
+            return "SUCCESS";
+        case VK_ERROR_OUT_OF_HOST_MEMORY:
+            return "OUT OF HOST MEMORY";
+        case VK_ERROR_OUT_OF_DEVICE_MEMORY:
+            return "OUT OF DEVICE MEMORY";
+        case VK_ERROR_INITIALIZATION_FAILED:
+            return "INITIALIZATION FAILED";
+        case VK_ERROR_LAYER_NOT_PRESENT:
+            return "LAYER NOT PRESENT";
+        case VK_ERROR_EXTENSION_NOT_PRESENT:
+            return "EXTENSION NOT PRESENT";
+        case VK_ERROR_INCOMPATIBLE_DRIVER:
+            return "INCOMPATIBLE DRIVER";
+        default:
+            return "UNKNOWN RESULT";
+    }
+}
+
+}
 namespace ToyRenderer {
 
 VulkanResourceManager::VulkanResourceManager()
@@ -57,7 +82,7 @@ Handle<Instance_t> VulkanResourceManager::createInstance(const InstanceOptions &
     VkInstance instance = VK_NULL_HANDLE;
     const VkResult result = vkCreateInstance(&createInfo, nullptr, &instance);
     if (result != VK_SUCCESS) {
-        throw std::runtime_error("Failed to create Vulkan instance!");
+        throw std::runtime_error(std::string{"Failed to create Vulkan instance: "} + getResultAsString(result));
     }
 
     VulkanInstance vulkanInstance(this, instance);
@@ -223,8 +248,9 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
 
     VkDevice vkDevice{ VK_NULL_HANDLE };
     VulkanAdapter vulkanAdapter = *getAdapter(adapterHandle);
-    if (vkCreateDevice(vulkanAdapter.physicalDevice, &createInfo, nullptr, &vkDevice) != VK_SUCCESS)
-        throw std::runtime_error("Failed to create a logical device!");
+    VkResult result = vkCreateDevice(vulkanAdapter.physicalDevice, &createInfo, nullptr, &vkDevice);
+    if (result != VK_SUCCESS)
+        throw std::runtime_error(std::string{"Failed to create a logical device: "} + getResultAsString(result));
 
     const auto deviceHandle = m_devices.emplace(vkDevice, this, adapterHandle);
 

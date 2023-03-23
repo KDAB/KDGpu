@@ -13,6 +13,10 @@
 #include <vulkan/vulkan_xcb.h>
 #endif
 
+#if defined(TOY_RENDERER_PLATFORM_MACOS)
+extern VkSurfaceKHR createVulkanSurface(VkInstance instance, const ToyRenderer::SurfaceOptions &options);
+#endif
+
 namespace ToyRenderer {
 
 VulkanInstance::VulkanInstance(VulkanResourceManager *_vulkanResourceManager, VkInstance _instance)
@@ -101,6 +105,7 @@ Handle<Surface_t> VulkanInstance::createSurface(const SurfaceOptions &options)
 #endif
 
 #if defined(TOY_RENDERER_PLATFORM_MACOS)
+    vkSurface = createVulkanSurface(instance, options);
 #endif
 
     VulkanSurface vulkanSurface{ vkSurface, instance };

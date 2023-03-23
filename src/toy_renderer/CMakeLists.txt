@@ -198,6 +198,7 @@ endif()
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     target_compile_definitions(toy-renderer PUBLIC TOY_RENDERER_PLATFORM_MACOS)
     target_compile_definitions(toy-renderer PRIVATE PLATFORM_MACOS)
+    target_sources(toy-renderer PRIVATE vulkan/vulkan_utils.mm)
 endif()
 
 # Require >=C++20 for us and downstream projects

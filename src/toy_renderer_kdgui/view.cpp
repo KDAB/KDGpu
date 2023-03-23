@@ -11,6 +11,9 @@
 #if defined(KD_PLATFORM_LINUX)
 #include <KDGui/platform/linux/xcb/linux_xcb_platform_window.h>
 #endif
+#if defined(KD_PLATFORM_MACOS)
+extern CAMetalLayer *createMetalLayer(KDGui::Window *window);
+#endif
 
 namespace ToyRendererKDGui {
 
@@ -47,6 +50,12 @@ ToyRenderer::SurfaceOptions View::surfaceOptions(KDGui::Window *w)
     return ToyRenderer::SurfaceOptions{
         .connection = xcbWindow->connection(),
         .window = xcbWindow->handle()
+    };
+#endif
+
+#if defined(KD_PLATFORM_MACOS)
+    return ToyRenderer::SurfaceOptions{
+        .layer = createMetalLayer(w)
     };
 #endif
 

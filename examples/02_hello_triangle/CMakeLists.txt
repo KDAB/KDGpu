@@ -21,6 +21,7 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     target_compile_definitions(${PROJECT_NAME} PRIVATE UNICODE)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     target_compile_definitions(${PROJECT_NAME} PRIVATE PLATFORM_MACOS)
+    target_sources(${PROJECT_NAME} PRIVATE utils.mm)
 endif()
 
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)

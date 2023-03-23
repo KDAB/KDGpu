@@ -29,6 +29,9 @@
 #if defined(KD_PLATFORM_LINUX)
 #include <KDGui/platform/linux/xcb/linux_xcb_platform_window.h>
 #endif
+#if defined(KD_PLATFORM_MACOS)
+extern CAMetalLayer *createMetalLayer(KDGui::Window *window);
+#endif
 
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
@@ -95,6 +98,13 @@ int main()
         .window = xcbWindow->handle()
     };
 #endif
+
+#if defined(KD_PLATFORM_MACOS)
+    SurfaceOptions surfaceOptions = {
+        .layer = createMetalLayer(&window)
+    };
+#endif
+
     Surface surface = instance.createSurface(surfaceOptions);
 
     // Enumerate the adapters (physical devices) and select one to use. Here we look for

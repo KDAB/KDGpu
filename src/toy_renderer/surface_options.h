@@ -10,6 +10,11 @@
 #endif
 
 #if defined(TOY_RENDERER_PLATFORM_MACOS)
+#ifdef __OBJC__
+@class CAMetalLayer;
+#else
+typedef void CAMetalLayer;
+#endif
 #endif
 
 namespace ToyRenderer {
