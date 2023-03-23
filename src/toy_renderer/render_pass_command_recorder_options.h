@@ -28,6 +28,7 @@ struct TextureView_t;
 // can properly transition the image non-destructively.
 struct ColorAttachment {
     Handle<TextureView_t> view;
+    Handle<TextureView_t> resolveView;
     AttachmentLoadOperation loadOperation{ AttachmentLoadOperation::Clear };
     AttachmentStoreOperation storeOperation{ AttachmentStoreOperation::Store };
     ColorClearValue clearValue;
@@ -53,6 +54,7 @@ struct DepthStencilAttachment {
 struct RenderPassCommandRecorderOptions {
     std::vector<ColorAttachment> colorAttachments;
     DepthStencilAttachment depthStencilAttachment;
+    SampleCountFlagBits samples{ SampleCountFlagBits::Samples1Bit };
 };
 
 } // namespace ToyRenderer
