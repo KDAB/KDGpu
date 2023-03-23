@@ -274,6 +274,7 @@ void ExampleEngineLayer::uploadTextureData(const Handle<Texture_t> &destinationT
         .dstTexture = destinationTexture,
         .dstImageLayout = TextureLayout::TransferDstOptimal,
         .regions = {{
+            // TODO: Expose the aspect
             .imageSubResource = { .aspectMask = TextureAspectFlags(TextureAspectFlagBits::ColorBit) },
             .imageOffset = {
                 .x = textureOffset.x,

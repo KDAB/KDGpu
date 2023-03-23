@@ -130,10 +130,7 @@ void TexturedQuad::initializeScene()
                           TextureLayout::ShaderReadOnlyOptimal);
 
         // Create a view and sampler
-        const TextureViewOptions viewOptions = {
-            .range = { .aspectMask = TextureAspectFlags(TextureAspectFlagBits::ColorBit) }
-        };
-        m_textureView = m_texture.createView(viewOptions);
+        m_textureView = m_texture.createView();
         m_sampler = m_device.createSampler();
     }
 
