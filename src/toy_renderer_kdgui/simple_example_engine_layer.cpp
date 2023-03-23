@@ -15,6 +15,11 @@ SimpleExampleEngineLayer::SimpleExampleEngineLayer()
 {
 }
 
+SimpleExampleEngineLayer::SimpleExampleEngineLayer(const SampleCountFlagBits samples)
+    : ExampleEngineLayer(samples)
+{
+}
+
 SimpleExampleEngineLayer::~SimpleExampleEngineLayer()
 {
 }

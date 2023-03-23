@@ -33,6 +33,7 @@ class TOY_RENDERER_KDGUI_EXPORT ExampleEngineLayer : public EngineLayer
 {
 public:
     ExampleEngineLayer();
+    explicit ExampleEngineLayer(const SampleCountFlagBits samples);
     ~ExampleEngineLayer() override;
 
     View *window() { return m_window.get(); }
@@ -81,6 +82,7 @@ protected:
     std::unique_ptr<GraphicsApi> m_api;
     std::unique_ptr<View> m_window;
 
+    const SampleCountFlagBits m_samples{ SampleCountFlagBits::Samples1Bit };
     Instance m_instance;
     Surface m_surface;
     Device m_device;

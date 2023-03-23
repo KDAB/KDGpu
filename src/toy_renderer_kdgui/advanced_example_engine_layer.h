@@ -13,6 +13,7 @@ class TOY_RENDERER_KDGUI_EXPORT AdvancedExampleEngineLayer : public ExampleEngin
 {
 public:
     AdvancedExampleEngineLayer();
+    explicit AdvancedExampleEngineLayer(const SampleCountFlagBits samples);
     ~AdvancedExampleEngineLayer() override;
 
 protected:

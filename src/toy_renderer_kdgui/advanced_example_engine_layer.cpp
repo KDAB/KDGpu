@@ -9,6 +9,11 @@ AdvancedExampleEngineLayer::AdvancedExampleEngineLayer()
 {
 }
 
+AdvancedExampleEngineLayer::AdvancedExampleEngineLayer(const SampleCountFlagBits samples)
+    : ExampleEngineLayer(samples)
+{
+}
+
 AdvancedExampleEngineLayer::~AdvancedExampleEngineLayer()
 {
 }

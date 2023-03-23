@@ -18,6 +18,13 @@ ExampleEngineLayer::ExampleEngineLayer()
 {
 }
 
+ExampleEngineLayer::ExampleEngineLayer(const SampleCountFlagBits samples)
+    : EngineLayer()
+    , m_api(std::make_unique<VulkanGraphicsApi>())
+    , m_samples(samples)
+{
+}
+
 ExampleEngineLayer::~ExampleEngineLayer()
 {
 }
@@ -52,6 +59,7 @@ void ExampleEngineLayer::recreateSwapChain()
         .format = Format::D24_UNORM_S8_UINT,
         .extent = { m_window->width(), m_window->height(), 1 },
         .mipLevels = 1,
+        .samples = m_samples,
         .usage = TextureUsageFlagBits::DepthStencilAttachmentBit,
         .memoryUsage = MemoryUsage::GpuOnly
     };

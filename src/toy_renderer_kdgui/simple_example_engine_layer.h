@@ -11,6 +11,7 @@ class TOY_RENDERER_KDGUI_EXPORT SimpleExampleEngineLayer : public ExampleEngineL
 {
 public:
     SimpleExampleEngineLayer();
+    explicit SimpleExampleEngineLayer(const SampleCountFlagBits samples);
     ~SimpleExampleEngineLayer() override;
 
 protected:
