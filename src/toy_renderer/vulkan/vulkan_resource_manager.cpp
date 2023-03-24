@@ -275,8 +275,10 @@ void VulkanResourceManager::deleteDevice(const Handle<Device_t> &handle)
         m_framebuffers.remove(fbHandle);
     }
 
-    // Destroy Descriptor Pool
-    vkDestroyDescriptorPool(vulkanDevice->device, vulkanDevice->descriptorSetPool, nullptr);
+    // Destroy Descriptor Pools
+    for (VkDescriptorPool descriptorPool : vulkanDevice->descriptorSetPools)
+        vkDestroyDescriptorPool(vulkanDevice->device, descriptorPool, nullptr);
+    vulkanDevice->descriptorSetPools.clear();
 
     // Destroy Command Pool
     for (VkCommandPool commandPool : vulkanDevice->commandPools)
@@ -1638,28 +1640,39 @@ Handle<BindGroup_t> VulkanResourceManager::createBindGroup(const Handle<Device_t
         return pool;
     };
 
+    auto allocateDescriptorSet = [](VkDevice device, VkDescriptorPool descriptorPool,
+                                    VulkanBindGroupLayout *bindGroupLayout, VkDescriptorSet &descriptorSet) {
+        VkDescriptorSetAllocateInfo allocInfo = {};
+        allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        allocInfo.descriptorPool = descriptorPool;
+        allocInfo.descriptorSetCount = 1;
+        allocInfo.pSetLayouts = &bindGroupLayout->descriptorSetLayout;
+
+        return vkAllocateDescriptorSets(device, &allocInfo, &descriptorSet);
+    };
+
     // Have we create a DescriptorSet pool already?
-    if (vulkanDevice->descriptorSetPool == VK_NULL_HANDLE) {
-        vulkanDevice->descriptorSetPool = createDescriptorSetPool(vulkanDevice->device);
-    }
+    if (vulkanDevice->descriptorSetPools.empty())
+        vulkanDevice->descriptorSetPools.emplace_back(createDescriptorSetPool(vulkanDevice->device));
 
     VulkanBindGroupLayout *bindGroupLayout = getBindGroupLayout(options.layout);
-
-    VkDescriptorSetAllocateInfo allocInfo = {};
-    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    allocInfo.descriptorPool = vulkanDevice->descriptorSetPool;
-    allocInfo.descriptorSetCount = 1;
-    allocInfo.pSetLayouts = &bindGroupLayout->descriptorSetLayout;
-
     VkDescriptorSet descriptorSet{ VK_NULL_HANDLE };
-    const VkResult result = vkAllocateDescriptorSets(vulkanDevice->device, &allocInfo, &descriptorSet);
+
+    //  Create DescriptorSet
+    VkResult result = allocateDescriptorSet(vulkanDevice->device, vulkanDevice->descriptorSetPools.back(),
+                                            bindGroupLayout, descriptorSet);
+
+    // If we have run out of pool memory
     if (result == VK_ERROR_OUT_OF_POOL_MEMORY || result == VK_ERROR_FRAGMENTED_POOL) {
-        // TODO: We need to allocate a new DescriptorPool and retry
+        // We need to allocate a new DescriptorPool and retry
+        vulkanDevice->descriptorSetPools.emplace_back(createDescriptorSetPool(vulkanDevice->device));
+        result = allocateDescriptorSet(vulkanDevice->device, vulkanDevice->descriptorSetPools.back(),
+                                       bindGroupLayout, descriptorSet);
     }
     if (result != VK_SUCCESS)
         return {};
 
-    const auto vulkanBindGroupHandle = m_bindGroups.emplace(VulkanBindGroup(descriptorSet, this, deviceHandle));
+    const auto vulkanBindGroupHandle = m_bindGroups.emplace(VulkanBindGroup(descriptorSet, vulkanDevice->descriptorSetPools.back(), this, deviceHandle));
     auto vulkanBindGroup = m_bindGroups.get(vulkanBindGroupHandle);
 
     // Set up the initial bindings
@@ -1674,7 +1687,7 @@ void VulkanResourceManager::deleteBindGroup(const Handle<BindGroup_t> &handle)
     VulkanBindGroup *vulkanBindGroup = m_bindGroups.get(handle);
     VulkanDevice *vulkanDevice = m_devices.get(vulkanBindGroup->deviceHandle);
 
-    vkFreeDescriptorSets(vulkanDevice->device, vulkanDevice->descriptorSetPool, 1, &vulkanBindGroup->descriptorSet);
+    vkFreeDescriptorSets(vulkanDevice->device, vulkanBindGroup->descriptorPool, 1, &vulkanBindGroup->descriptorSet);
 
     m_bindGroups.remove(handle);
 }

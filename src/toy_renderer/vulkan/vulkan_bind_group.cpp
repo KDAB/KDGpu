@@ -6,9 +6,11 @@
 namespace ToyRenderer {
 
 VulkanBindGroup::VulkanBindGroup(VkDescriptorSet _descriptorSet,
+                                 VkDescriptorPool _descriptorPool,
                                  VulkanResourceManager *_vulkanResourceManager,
                                  const Handle<Device_t> &_deviceHandle)
     : descriptorSet(_descriptorSet)
+    , descriptorPool(_descriptorPool)
     , vulkanResourceManager(_vulkanResourceManager)
     , deviceHandle(_deviceHandle)
 {
