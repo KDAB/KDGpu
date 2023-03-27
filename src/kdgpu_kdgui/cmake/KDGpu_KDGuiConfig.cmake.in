@@ -7,4 +7,4 @@ find_dependency(KDUtils REQUIRED)
 find_dependency(KDGui REQUIRED)
 find_dependency(KDFoundation REQUIRED)
 
-include("${CMAKE_CURRENT_LIST_DIR}/KDGpuKDGuiTargets.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/KDGpu_KDGuiTargets.cmake")

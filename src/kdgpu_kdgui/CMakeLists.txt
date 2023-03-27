@@ -78,24 +78,24 @@ install(
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
-install(EXPORT KDGpu_KDGui DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/kdgpu_kdgui NAMESPACE KDGpu_KDGui:: FILE KDGpu_KDGuiTargets.cmake)
+install(EXPORT KDGpu_KDGui DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/KDGpu_KDGui NAMESPACE KDGpu:: FILE KDGpu_KDGuiTargets.cmake)
 
 include(CMakePackageConfigHelpers)
 
 configure_package_config_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/kdgpu_kdguiConfig.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/kdgpu_kdguiConfig.cmake
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/KDGpu_KDGuiConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/KDGpu_KDGuiConfig.cmake
     INSTALL_DESTINATION
-    ${CMAKE_INSTALL_LIBDIR}/cmake/kdgpu_kdgui
+    ${CMAKE_INSTALL_LIBDIR}/cmake/KDGpu_KDGui
 )
 
-write_basic_package_version_file(kdgpu_kdguiConfigVersion.cmake
+write_basic_package_version_file(KDGpu_KDGuiConfigVersion.cmake
     VERSION ${PROJECT_VERSION}
     COMPATIBILITY SameMajorVersion
 )
 
 install(FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/kdgpu_kdguiConfig.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/kdgpu_kdguiConfigVersion.cmake
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/kdgpu_kdgui
+    ${CMAKE_CURRENT_BINARY_DIR}/KDGpu_KDGuiConfig.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/KDGpu_KDGuiConfigVersion.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/KDGpu_KDGui
 )
