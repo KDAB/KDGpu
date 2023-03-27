@@ -1,7 +1,7 @@
 FetchContent_Declare(
     vulkan_memory_allocator
     GIT_REPOSITORY https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
-    GIT_TAG 55868965ae1fa956c07695d4642e1add8c9450f7
+    GIT_TAG 29d492b60c84ca784ea0943efc7d2e6e0f3bdaac
 )
 FetchContent_Populate(vulkan_memory_allocator)
 
@@ -14,7 +14,7 @@ find_package(Vulkan REQUIRED)
 add_library(vulkan_memory_allocator STATIC ${VULKAN_MEMORY_ALLOCATOR_LIBRARY_SOURCE_FILES})
 set_target_properties(vulkan_memory_allocator PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_link_libraries(vulkan_memory_allocator PUBLIC Vulkan::Vulkan)
-set_property(TARGET vulkan_memory_allocator PROPERTY CXX_STANDARD 11)
+set_property(TARGET vulkan_memory_allocator PROPERTY CXX_STANDARD 17)
 
 target_include_directories(vulkan_memory_allocator PRIVATE
     $<BUILD_INTERFACE:${vulkan_memory_allocator_SOURCE_DIR}/src>
