@@ -1,2 +1,2 @@
-add_subdirectory(toy_renderer)
-add_subdirectory(toy_renderer_kdgui)
+add_subdirectory(kdgpu)
+add_subdirectory(kdgpu_kdgui)

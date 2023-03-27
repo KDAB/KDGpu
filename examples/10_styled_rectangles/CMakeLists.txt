@@ -1,4 +1,4 @@
-project(10_toy-renderer_styled_rectangles VERSION 0.1 LANGUAGES CXX)
+project(10_kdgpu_styled_rectangles VERSION 0.1 LANGUAGES CXX)
 
 find_package(Vulkan REQUIRED)
 
@@ -10,7 +10,7 @@ add_executable(
 
 target_link_libraries(
     ${PROJECT_NAME}
-    toy-renderer-kdgui
+    KDGpu::KDGpu_KDGui
     glm::glm
 )
 

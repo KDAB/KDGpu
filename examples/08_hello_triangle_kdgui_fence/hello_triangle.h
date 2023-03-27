@@ -1,14 +1,14 @@
 #pragma once
 
-#include <toy_renderer_kdgui/advanced_example_engine_layer.h>
+#include <kdgpu_kdgui/advanced_example_engine_layer.h>
 
-#include <toy_renderer/buffer.h>
-#include <toy_renderer/graphics_pipeline.h>
-#include <toy_renderer/render_pass_command_recorder_options.h>
+#include <kdgpu/buffer.h>
+#include <kdgpu/graphics_pipeline.h>
+#include <kdgpu/render_pass_command_recorder_options.h>
 
 #include <glm/glm.hpp>
 
-using namespace ToyRendererKDGui;
+using namespace KDGpuKDGui;
 
 class HelloTriangle : public AdvancedExampleEngineLayer
 {

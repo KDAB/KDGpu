@@ -1,4 +1,4 @@
-project(07_toy-renderer_render_to_texture VERSION 0.1 LANGUAGES CXX)
+project(07_kdgpu_render_to_texture VERSION 0.1 LANGUAGES CXX)
 
 find_package(Vulkan REQUIRED)
 
@@ -10,7 +10,7 @@ add_executable(
 
 target_link_libraries(
     ${PROJECT_NAME}
-    toy-renderer-kdgui
+    KDGpu::KDGpu_KDGui
     glm::glm
 )
 

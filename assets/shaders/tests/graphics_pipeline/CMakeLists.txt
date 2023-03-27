@@ -1,1 +1,1 @@
-CompileShaderSet(ToyRendererGraphicsPipeline triangle)
+CompileShaderSet(KDGpu_GraphicsPipeline triangle)

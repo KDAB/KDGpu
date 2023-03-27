@@ -1,23 +1,23 @@
-#include <toy_renderer/bind_group.h>
-#include <toy_renderer/bind_group_options.h>
-#include <toy_renderer/bind_group_layout.h>
-#include <toy_renderer/bind_group_layout_options.h>
-#include <toy_renderer/bind_group_description.h>
-#include <toy_renderer/buffer_options.h>
-#include <toy_renderer/buffer.h>
-#include <toy_renderer/device.h>
-#include <toy_renderer/instance.h>
-#include <toy_renderer/texture_options.h>
-#include <toy_renderer/sampler_options.h>
-#include <toy_renderer/texture_view.h>
-#include <toy_renderer/sampler.h>
-#include <toy_renderer/texture.h>
-#include <toy_renderer/vulkan/vulkan_graphics_api.h>
+#include <kdgpu/bind_group.h>
+#include <kdgpu/bind_group_options.h>
+#include <kdgpu/bind_group_layout.h>
+#include <kdgpu/bind_group_layout_options.h>
+#include <kdgpu/bind_group_description.h>
+#include <kdgpu/buffer_options.h>
+#include <kdgpu/buffer.h>
+#include <kdgpu/device.h>
+#include <kdgpu/instance.h>
+#include <kdgpu/texture_options.h>
+#include <kdgpu/sampler_options.h>
+#include <kdgpu/texture_view.h>
+#include <kdgpu/sampler.h>
+#include <kdgpu/texture.h>
+#include <kdgpu/vulkan/vulkan_graphics_api.h>
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest.h>
 
-using namespace ToyRenderer;
+using namespace KDGpu;
 
 TEST_SUITE("BindGroup")
 {

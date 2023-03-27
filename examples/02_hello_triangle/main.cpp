@@ -1,20 +1,20 @@
-#include <toy_renderer/buffer_options.h>
-#include <toy_renderer/bind_group_layout_options.h>
-#include <toy_renderer/bind_group_layout.h>
-#include <toy_renderer/bind_group_options.h>
-#include <toy_renderer/device.h>
-#include <toy_renderer/instance.h>
-#include <toy_renderer/graphics_pipeline.h>
-#include <toy_renderer/graphics_pipeline_options.h>
-#include <toy_renderer/formatters.h>
-#include <toy_renderer/gpu_core.h>
-#include <toy_renderer/queue.h>
-#include <toy_renderer/render_pass_command_recorder_options.h>
-#include <toy_renderer/swapchain.h>
-#include <toy_renderer/swapchain_options.h>
-#include <toy_renderer/texture.h>
-#include <toy_renderer/texture_options.h>
-#include <toy_renderer/vulkan/vulkan_graphics_api.h>
+#include <kdgpu/buffer_options.h>
+#include <kdgpu/bind_group_layout_options.h>
+#include <kdgpu/bind_group_layout.h>
+#include <kdgpu/bind_group_options.h>
+#include <kdgpu/device.h>
+#include <kdgpu/instance.h>
+#include <kdgpu/graphics_pipeline.h>
+#include <kdgpu/graphics_pipeline_options.h>
+#include <kdgpu/formatters.h>
+#include <kdgpu/gpu_core.h>
+#include <kdgpu/queue.h>
+#include <kdgpu/render_pass_command_recorder_options.h>
+#include <kdgpu/swapchain.h>
+#include <kdgpu/swapchain_options.h>
+#include <kdgpu/texture.h>
+#include <kdgpu/texture_options.h>
+#include <kdgpu/vulkan/vulkan_graphics_api.h>
 
 #include <KDGui/gui_application.h>
 #include <KDGui/window.h>
@@ -42,20 +42,20 @@ extern CAMetalLayer *createMetalLayer(KDGui::Window *window);
 #include <vector>
 
 using namespace KDGui;
-using namespace ToyRenderer;
+using namespace KDGpu;
 
-namespace ToyRenderer {
+namespace KDGpu {
 
 inline std::string assetPath()
 {
-#if defined(TOY_RENDERER_ASSET_PATH)
-    return TOY_RENDERER_ASSET_PATH;
+#if defined(KDGPU_ASSET_PATH)
+    return KDGPU_ASSET_PATH;
 #else
     return "";
 #endif
 }
 
-} // namespace ToyRenderer
+} // namespace KDGpu
 
 int main()
 {
@@ -198,11 +198,11 @@ int main()
     auto cameraUBOBuffer = device.createBuffer(cameraUboBufferOptions);
 
     // Create a vertex shader and fragment shader (spir-v only for now)
-    const auto vertexShaderPath = ToyRenderer::assetPath() + "/shaders/examples/02_hello_triangle/hello_triangle.vert.spv";
-    auto vertexShader = device.createShaderModule(ToyRenderer::readShaderFile(vertexShaderPath));
+    const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/02_hello_triangle/hello_triangle.vert.spv";
+    auto vertexShader = device.createShaderModule(KDGpu::readShaderFile(vertexShaderPath));
 
-    const auto fragmentShaderPath = ToyRenderer::assetPath() + "/shaders/examples/02_hello_triangle/hello_triangle.frag.spv";
-    auto fragmentShader = device.createShaderModule(ToyRenderer::readShaderFile(fragmentShaderPath));
+    const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/02_hello_triangle/hello_triangle.frag.spv";
+    auto fragmentShader = device.createShaderModule(KDGpu::readShaderFile(fragmentShaderPath));
 
     BindGroupLayoutOptions bindGroupLayoutOptions = {
         .bindings = { { // Camera uniforms

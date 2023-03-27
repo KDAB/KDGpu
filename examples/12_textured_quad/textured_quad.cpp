@@ -1,12 +1,12 @@
 #include "textured_quad.h"
 
-#include <toy_renderer_kdgui/engine.h>
+#include <kdgpu_kdgui/engine.h>
 
-#include <toy_renderer/bind_group_layout_options.h>
-#include <toy_renderer/bind_group_options.h>
-#include <toy_renderer/buffer_options.h>
-#include <toy_renderer/graphics_pipeline_options.h>
-#include <toy_renderer/texture_options.h>
+#include <kdgpu/bind_group_layout_options.h>
+#include <kdgpu/bind_group_options.h>
+#include <kdgpu/buffer_options.h>
+#include <kdgpu/graphics_pipeline_options.h>
+#include <kdgpu/texture_options.h>
 
 #include <glm/gtx/transform.hpp>
 
@@ -25,12 +25,12 @@ struct ImageData {
     Format format{ Format::R8G8B8A8_UNORM };
 };
 
-namespace ToyRenderer {
+namespace KDGpu {
 
 inline std::string assetPath()
 {
-#if defined(TOY_RENDERER_ASSET_PATH)
-    return TOY_RENDERER_ASSET_PATH;
+#if defined(KDGPU_ASSET_PATH)
+    return KDGPU_ASSET_PATH;
 #else
     return "";
 #endif
@@ -61,7 +61,7 @@ ImageData loadImage(const std::string &path)
     };
 }
 
-} // namespace ToyRenderer
+} // namespace KDGpu
 
 void TexturedQuad::initializeScene()
 {
@@ -105,7 +105,7 @@ void TexturedQuad::initializeScene()
     // Create a texture to hold the image data
     {
         // Load the image data and size
-        ImageData image = loadImage(ToyRenderer::assetPath() + "/textures/samuel-ferrara-1527pjeb6jg-unsplash.jpg");
+        ImageData image = loadImage(KDGpu::assetPath() + "/textures/samuel-ferrara-1527pjeb6jg-unsplash.jpg");
 
         const TextureOptions textureOptions = {
             .type = TextureType::TextureType2D,
@@ -135,11 +135,11 @@ void TexturedQuad::initializeScene()
     }
 
     // Create a vertex shader and fragment shader (spir-v only for now)
-    const auto vertexShaderPath = ToyRenderer::assetPath() + "/shaders/examples/12_textured_quad/textured_quad.vert.spv";
-    auto vertexShader = m_device.createShaderModule(ToyRenderer::readShaderFile(vertexShaderPath));
+    const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/12_textured_quad/textured_quad.vert.spv";
+    auto vertexShader = m_device.createShaderModule(KDGpu::readShaderFile(vertexShaderPath));
 
-    const auto fragmentShaderPath = ToyRenderer::assetPath() + "/shaders/examples/12_textured_quad/textured_quad.frag.spv";
-    auto fragmentShader = m_device.createShaderModule(ToyRenderer::readShaderFile(fragmentShaderPath));
+    const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/12_textured_quad/textured_quad.frag.spv";
+    auto fragmentShader = m_device.createShaderModule(KDGpu::readShaderFile(fragmentShaderPath));
 
     // Create bind group layout consisting of a single binding holding a UBO
     // clang-format off

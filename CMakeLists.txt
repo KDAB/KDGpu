@@ -4,13 +4,13 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 cmake_policy(SET CMP0090 NEW) # Stop export(PACKAGE) from modifying the system-wide cmake package system
 cmake_policy(SET CMP0117 NEW) # Do not add /GR to CMAKE_CXX_FLAGS
 
-project(ToyRenderer VERSION 0.0.1)
+project(KDGpu VERSION 0.0.1)
 
 set(BUILD_SHARED_LIBS ON)
-add_definitions(-DTOY_RENDERER_ASSET_PATH="${CMAKE_CURRENT_BINARY_DIR}/assets")
+add_definitions(-DKDGPU_ASSET_PATH="${CMAKE_CURRENT_BINARY_DIR}/assets")
 
-if(TOY_RENDERER_LARGE_ASSETS)
-    add_definitions(-DTOY_RENDERER_LARGE_ASSET_PATH="${CMAKE_CURRENT_BINARY_DIR}/assets/large-assets")
+if(KDGPU_LARGE_ASSETS)
+    add_definitions(-DKDGPU_LARGE_ASSET_PATH="${CMAKE_CURRENT_BINARY_DIR}/assets/large-assets")
 endif()
 
 # Add a DEBUG define on DEBUG builds
@@ -55,9 +55,9 @@ add_subdirectory(dependencies)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    option(TOY_RENDERER_CODE_COVERAGE "Code Coverage" OFF)
+    option(KDGPU_CODE_COVERAGE "Code Coverage" OFF)
 
-    if(TOY_RENDERER_CODE_COVERAGE)
+    if(KDGPU_CODE_COVERAGE)
         include(cmake/CodeCoverage.cmake)
     endif()
 endif()
@@ -65,19 +65,18 @@ endif()
 add_subdirectory(src)
 add_subdirectory(assets)
 
-# add_subdirectory(assets)
-option(TOY_RENDERER_BUILD_TESTS "Build tests" ON)
+option(KDGPU_BUILD_TESTS "Build tests" ON)
 
-if(TOY_RENDERER_BUILD_TESTS)
-    add_feature_info(ToyRenderer-Tests ON "Build Tests")
+if(KDGPU_BUILD_TESTS)
+    add_feature_info(KDGpu-Tests ON "Build Tests")
     enable_testing()
     add_subdirectory(tests)
 endif()
 
-option(TOY_RENDERER_BUILD_EXAMPLES "Build examples" ON)
+option(KDGPU_BUILD_EXAMPLES "Build examples" ON)
 
-if(TOY_RENDERER_BUILD_EXAMPLES)
-    add_feature_info(ToyRenderer-Examples ON "Build Examples")
+if(KDGPU_BUILD_EXAMPLES)
+    add_feature_info(KDGpu-Examples ON "Build Examples")
     add_subdirectory(examples)
 endif()
 

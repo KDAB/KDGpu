@@ -1,17 +1,17 @@
 #pragma once
 
-#include <toy_renderer_kdgui/simple_example_engine_layer.h>
+#include <kdgpu_kdgui/simple_example_engine_layer.h>
 
-#include <toy_renderer/bind_group.h>
-#include <toy_renderer/buffer.h>
-#include <toy_renderer/graphics_pipeline.h>
-#include <toy_renderer/render_pass_command_recorder_options.h>
-#include <toy_renderer/texture.h>
-#include <toy_renderer/texture_view.h>
+#include <kdgpu/bind_group.h>
+#include <kdgpu/buffer.h>
+#include <kdgpu/graphics_pipeline.h>
+#include <kdgpu/render_pass_command_recorder_options.h>
+#include <kdgpu/texture.h>
+#include <kdgpu/texture_view.h>
 
 #include <glm/glm.hpp>
 
-using namespace ToyRendererKDGui;
+using namespace KDGpuKDGui;
 
 class RotatingTriangleMSAA : public SimpleExampleEngineLayer
 {

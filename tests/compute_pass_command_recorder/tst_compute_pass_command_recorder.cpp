@@ -1,24 +1,24 @@
-#include <toy_renderer/compute_pipeline.h>
-#include <toy_renderer/compute_pipeline_options.h>
-#include <toy_renderer/compute_pass_command_recorder.h>
-#include <toy_renderer/command_recorder.h>
-#include <toy_renderer/device.h>
-#include <toy_renderer/queue.h>
-#include <toy_renderer/instance.h>
-#include <toy_renderer/vulkan/vulkan_graphics_api.h>
+#include <kdgpu/compute_pipeline.h>
+#include <kdgpu/compute_pipeline_options.h>
+#include <kdgpu/compute_pass_command_recorder.h>
+#include <kdgpu/command_recorder.h>
+#include <kdgpu/device.h>
+#include <kdgpu/queue.h>
+#include <kdgpu/instance.h>
+#include <kdgpu/vulkan/vulkan_graphics_api.h>
 
 #include <type_traits>
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest.h>
 
-using namespace ToyRenderer;
+using namespace KDGpu;
 
 namespace {
 inline std::string assetPath()
 {
-#if defined(TOY_RENDERER_ASSET_PATH)
-    return TOY_RENDERER_ASSET_PATH;
+#if defined(KDGPU_ASSET_PATH)
+    return KDGPU_ASSET_PATH;
 #else
     return "";
 #endif
@@ -60,7 +60,7 @@ TEST_CASE("ComputePassCommandRecorder")
     }
 
     const auto computeShaderPath = assetPath() + "/shaders/tests/compute_pipeline/empty_compute.comp.spv";
-    auto computeShader = device.createShaderModule(ToyRenderer::readShaderFile(computeShaderPath));
+    auto computeShader = device.createShaderModule(KDGpu::readShaderFile(computeShaderPath));
 
     // THEN
     REQUIRE(device.isValid());

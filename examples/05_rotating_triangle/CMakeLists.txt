@@ -1,4 +1,4 @@
-project(05_toy-renderer_rotating_triangle VERSION 0.1 LANGUAGES CXX)
+project(05_kdgpu_rotating_triangle VERSION 0.1 LANGUAGES CXX)
 
 find_package(Vulkan REQUIRED)
 
@@ -10,7 +10,7 @@ add_executable(
 
 target_link_libraries(
     ${PROJECT_NAME}
-    toy-renderer-kdgui
+    KDGpu::KDGpu_KDGui
     glm::glm
 )
 

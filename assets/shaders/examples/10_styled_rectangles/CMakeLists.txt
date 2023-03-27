@@ -1,3 +1,3 @@
-CompileShaderSet(ToyRendererStyledRectanglesGradientBlobs gradient_blobs)
+CompileShaderSet(KDGpu_StyledRectanglesGradientBlobs gradient_blobs)
 
-CompileShaderSet(ToyRendererStyledRectangles styled_rectangles)
+CompileShaderSet(KDGpu_StyledRectangles styled_rectangles)
