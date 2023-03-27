@@ -1,4 +1,4 @@
-project(06_toy-renderer_compute_particles VERSION 0.1 LANGUAGES CXX)
+project(06_kdgpu_compute_particles VERSION 0.1 LANGUAGES CXX)
 
 find_package(Vulkan REQUIRED)
 
@@ -10,7 +10,7 @@ add_executable(
 
 target_link_libraries(
     ${PROJECT_NAME}
-    toy-renderer-kdgui
+    KDGpu::KDGpu_KDGui
     glm::glm
 )
 

@@ -1,15 +1,15 @@
-#include <toy_renderer/buffer.h>
-#include <toy_renderer/buffer_options.h>
-#include <toy_renderer/device.h>
-#include <toy_renderer/instance.h>
-#include <toy_renderer/vulkan/vulkan_graphics_api.h>
+#include <kdgpu/buffer.h>
+#include <kdgpu/buffer_options.h>
+#include <kdgpu/device.h>
+#include <kdgpu/instance.h>
+#include <kdgpu/vulkan/vulkan_graphics_api.h>
 
 #include <set>
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest.h>
 
-using namespace ToyRenderer;
+using namespace KDGpu;
 
 TEST_SUITE("Buffer")
 {

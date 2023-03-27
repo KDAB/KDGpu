@@ -1,12 +1,12 @@
 #include "compute_particles.h"
 
-#include <toy_renderer_kdgui/engine.h>
+#include <kdgpu_kdgui/engine.h>
 
-#include <toy_renderer/bind_group_layout_options.h>
-#include <toy_renderer/bind_group_options.h>
-#include <toy_renderer/buffer_options.h>
-#include <toy_renderer/graphics_pipeline_options.h>
-#include <toy_renderer/compute_pipeline_options.h>
+#include <kdgpu/bind_group_layout_options.h>
+#include <kdgpu/bind_group_options.h>
+#include <kdgpu/buffer_options.h>
+#include <kdgpu/graphics_pipeline_options.h>
+#include <kdgpu/compute_pipeline_options.h>
 
 #include <glm/glm.hpp>
 
@@ -14,18 +14,18 @@
 #include <random>
 #include <cassert>
 
-namespace ToyRenderer {
+namespace KDGpu {
 
 inline std::string assetPath()
 {
-#if defined(TOY_RENDERER_ASSET_PATH)
-    return TOY_RENDERER_ASSET_PATH;
+#if defined(KDGPU_ASSET_PATH)
+    return KDGPU_ASSET_PATH;
 #else
     return "";
 #endif
 }
 
-} // namespace ToyRenderer
+} // namespace KDGpu
 
 namespace {
 
@@ -108,8 +108,8 @@ void ComputeParticles::initializeScene()
 
     auto initializeComputePipeline = [this]() {
         // Create a compute shader (spir-v only for now)
-        const auto computeShaderPath = ToyRenderer::assetPath() + "/shaders/examples/06_compute_particles/particles.comp.spv";
-        auto computeShader = m_device.createShaderModule(ToyRenderer::readShaderFile(computeShaderPath));
+        const auto computeShaderPath = KDGpu::assetPath() + "/shaders/examples/06_compute_particles/particles.comp.spv";
+        auto computeShader = m_device.createShaderModule(KDGpu::readShaderFile(computeShaderPath));
 
         // Create bind group layout consisting of a single binding holding a SSBO
         // clang-format off
@@ -151,11 +151,11 @@ void ComputeParticles::initializeScene()
 
     auto initializeGraphicsPipeline = [this]() {
         // Create a vertex shader and fragment shader (spir-v only for now)
-        const auto vertexShaderPath = ToyRenderer::assetPath() + "/shaders/examples/06_compute_particles/triangle.vert.spv";
-        auto vertexShader = m_device.createShaderModule(ToyRenderer::readShaderFile(vertexShaderPath));
+        const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/06_compute_particles/triangle.vert.spv";
+        auto vertexShader = m_device.createShaderModule(KDGpu::readShaderFile(vertexShaderPath));
 
-        const auto fragmentShaderPath = ToyRenderer::assetPath() + "/shaders/examples/06_compute_particles/triangle.frag.spv";
-        auto fragmentShader = m_device.createShaderModule(ToyRenderer::readShaderFile(fragmentShaderPath));
+        const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/06_compute_particles/triangle.frag.spv";
+        auto fragmentShader = m_device.createShaderModule(KDGpu::readShaderFile(fragmentShaderPath));
 
         // Create a pipeline layout (array of bind group layouts)
         const PipelineLayoutOptions pipelineLayoutOptions = {};

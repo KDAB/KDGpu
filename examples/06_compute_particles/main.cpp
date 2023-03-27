@@ -1,12 +1,12 @@
 #include "compute_particles.h"
 
-#include <toy_renderer_kdgui/engine.h>
+#include <kdgpu_kdgui/engine.h>
 
 #include <KDGui/gui_application.h>
 
 using namespace KDGui;
-using namespace ToyRenderer;
-using namespace ToyRendererKDGui;
+using namespace KDGpu;
+using namespace KDGpuKDGui;
 
 int main()
 {

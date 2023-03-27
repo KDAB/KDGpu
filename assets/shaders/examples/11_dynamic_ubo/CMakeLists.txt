@@ -1,1 +1,1 @@
-CompileShaderSet(ToyRendererDynamicUBO dynamic_ubo)
+CompileShaderSet(KDGpu_DynamicUBO dynamic_ubo)

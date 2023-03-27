@@ -1,4 +1,4 @@
-project(02_toy-renderer_hello_triangle VERSION 0.1 LANGUAGES CXX)
+project(02_kdgpu_hello_triangle VERSION 0.1 LANGUAGES CXX)
 
 find_package(Vulkan REQUIRED)
 
@@ -9,7 +9,7 @@ add_executable(
 
 target_link_libraries(
     ${PROJECT_NAME}
-    toy-renderer
+    KDGpu::KDGpu
     KDUtils::Gui
     glm::glm
 )

@@ -1,1 +1,1 @@
-CompileShaderSet(ToyRendererGradientBlobs gradient_blobs)
+CompileShaderSet(KDGpu_GradientBlobs gradient_blobs)

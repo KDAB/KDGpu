@@ -1,1 +1,1 @@
-CompileShaderSet(ToyRendererRotatingTriangle rotating_triangle)
+CompileShaderSet(KDGpu_RotatingTriangle rotating_triangle)

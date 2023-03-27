@@ -1,8 +1,8 @@
-#include <toy_renderer/device.h>
-#include <toy_renderer/instance.h>
-#include <toy_renderer/vulkan/vulkan_graphics_api.h>
+#include <kdgpu/device.h>
+#include <kdgpu/instance.h>
+#include <kdgpu/vulkan/vulkan_graphics_api.h>
 
-#include <toy_renderer_kdgui/view.h>
+#include <kdgpu_kdgui/view.h>
 
 #include <KDGui/gui_application.h>
 
@@ -12,8 +12,8 @@
 #include <doctest.h>
 
 using namespace KDGui;
-using namespace ToyRenderer;
-using namespace ToyRendererKDGui;
+using namespace KDGpu;
+using namespace KDGpuKDGui;
 
 TEST_SUITE("Instance")
 {

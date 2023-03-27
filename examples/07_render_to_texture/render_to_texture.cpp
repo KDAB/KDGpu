@@ -1,12 +1,12 @@
 #include "render_to_texture.h"
 
-#include <toy_renderer_kdgui/engine.h>
+#include <kdgpu_kdgui/engine.h>
 
-#include <toy_renderer/bind_group_layout_options.h>
-#include <toy_renderer/bind_group_options.h>
-#include <toy_renderer/buffer_options.h>
-#include <toy_renderer/graphics_pipeline_options.h>
-#include <toy_renderer/texture_options.h>
+#include <kdgpu/bind_group_layout_options.h>
+#include <kdgpu/bind_group_options.h>
+#include <kdgpu/buffer_options.h>
+#include <kdgpu/graphics_pipeline_options.h>
+#include <kdgpu/texture_options.h>
 
 #include <glm/gtx/transform.hpp>
 
@@ -14,18 +14,18 @@
 #include <fstream>
 #include <string>
 
-namespace ToyRenderer {
+namespace KDGpu {
 
 inline std::string assetPath()
 {
-#if defined(TOY_RENDERER_ASSET_PATH)
-    return TOY_RENDERER_ASSET_PATH;
+#if defined(KDGPU_ASSET_PATH)
+    return KDGPU_ASSET_PATH;
 #else
     return "";
 #endif
 }
 
-} // namespace ToyRenderer
+} // namespace KDGpu
 
 void RenderToTexture::initializeScene()
 {
@@ -131,11 +131,11 @@ void RenderToTexture::initializeMainScene()
     }
 
     // Create a vertex shader and fragment shader (spir-v only for now)
-    const auto vertexShaderPath = ToyRenderer::assetPath() + "/shaders/examples/07_render_to_texture/rotating_triangle.vert.spv";
-    auto vertexShader = m_device.createShaderModule(ToyRenderer::readShaderFile(vertexShaderPath));
+    const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/07_render_to_texture/rotating_triangle.vert.spv";
+    auto vertexShader = m_device.createShaderModule(KDGpu::readShaderFile(vertexShaderPath));
 
-    const auto fragmentShaderPath = ToyRenderer::assetPath() + "/shaders/examples/07_render_to_texture/rotating_triangle.frag.spv";
-    auto fragmentShader = m_device.createShaderModule(ToyRenderer::readShaderFile(fragmentShaderPath));
+    const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/07_render_to_texture/rotating_triangle.frag.spv";
+    auto fragmentShader = m_device.createShaderModule(KDGpu::readShaderFile(fragmentShaderPath));
 
     // Create bind group layout consisting of a single binding holding a UBO
     // clang-format off
@@ -227,11 +227,11 @@ void RenderToTexture::initializePostProcess()
     m_colorOutputSampler = m_device.createSampler();
 
     // Create a vertex shader and fragment shader (spir-v only for now)
-    const auto vertexShaderPath = ToyRenderer::assetPath() + "/shaders/examples/07_render_to_texture/desaturate.vert.spv";
-    auto vertexShader = m_device.createShaderModule(ToyRenderer::readShaderFile(vertexShaderPath));
+    const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/07_render_to_texture/desaturate.vert.spv";
+    auto vertexShader = m_device.createShaderModule(KDGpu::readShaderFile(vertexShaderPath));
 
-    const auto fragmentShaderPath = ToyRenderer::assetPath() + "/shaders/examples/07_render_to_texture/desaturate.frag.spv";
-    auto fragmentShader = m_device.createShaderModule(ToyRenderer::readShaderFile(fragmentShaderPath));
+    const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/07_render_to_texture/desaturate.frag.spv";
+    auto fragmentShader = m_device.createShaderModule(KDGpu::readShaderFile(fragmentShaderPath));
 
     // Create bind group layout consisting of a single binding holding the texture the 1st pass rendered to
     // clang-format off

@@ -22,7 +22,7 @@ target_include_directories(vulkan_memory_allocator PRIVATE
 
 target_include_directories(vulkan_memory_allocator PUBLIC
     $<BUILD_INTERFACE:${vulkan_memory_allocator_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/toy_renderer/vulkan_memory_allocator>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/kdgpu/vulkan_memory_allocator>
 )
 
 option(VMA_RECORDING_ENABLED "Enable VMA memory recording for debugging" OFF)
@@ -47,6 +47,6 @@ target_compile_definitions(
     VMA_RECORDING_ENABLED=$<BOOL:${VMA_RECORDING_ENABLED}>
 )
 
-add_library(ToyRenderer::vulkan_memory_allocator ALIAS vulkan_memory_allocator)
+add_library(KDGpu::vulkan_memory_allocator ALIAS vulkan_memory_allocator)
 
-install(FILES ${vulkan_memory_allocator_SOURCE_DIR}/include/vk_mem_alloc.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/toy_renderer/vulkan_memory_allocator/)
+install(FILES ${vulkan_memory_allocator_SOURCE_DIR}/include/vk_mem_alloc.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/kdgpu/vulkan_memory_allocator/)

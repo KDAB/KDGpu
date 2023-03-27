@@ -1,13 +1,13 @@
-#include <toy_renderer/sampler.h>
-#include <toy_renderer/sampler_options.h>
-#include <toy_renderer/device.h>
-#include <toy_renderer/instance.h>
-#include <toy_renderer/vulkan/vulkan_graphics_api.h>
+#include <kdgpu/sampler.h>
+#include <kdgpu/sampler_options.h>
+#include <kdgpu/device.h>
+#include <kdgpu/instance.h>
+#include <kdgpu/vulkan/vulkan_graphics_api.h>
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest.h>
 
-using namespace ToyRenderer;
+using namespace KDGpu;
 
 TEST_SUITE("Sampler")
 {

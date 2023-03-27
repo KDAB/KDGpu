@@ -1,23 +1,23 @@
-#include <toy_renderer/command_buffer.h>
-#include <toy_renderer/command_recorder.h>
-#include <toy_renderer/device.h>
-#include <toy_renderer/instance.h>
-#include <toy_renderer/buffer_options.h>
-#include <toy_renderer/buffer.h>
-#include <toy_renderer/vulkan/vulkan_graphics_api.h>
+#include <kdgpu/command_buffer.h>
+#include <kdgpu/command_recorder.h>
+#include <kdgpu/device.h>
+#include <kdgpu/instance.h>
+#include <kdgpu/buffer_options.h>
+#include <kdgpu/buffer.h>
+#include <kdgpu/vulkan/vulkan_graphics_api.h>
 
 #include <type_traits>
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest.h>
 
-using namespace ToyRenderer;
+using namespace KDGpu;
 
 namespace {
 inline std::string assetPath()
 {
-#if defined(TOY_RENDERER_ASSET_PATH)
-    return TOY_RENDERER_ASSET_PATH;
+#if defined(KDGPU_ASSET_PATH)
+    return KDGPU_ASSET_PATH;
 #else
     return "";
 #endif

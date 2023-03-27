@@ -1,1 +1,1 @@
-CompileShaderSet(ToyRendererHelloTriangle hello_triangle)
+CompileShaderSet(KDGpu_HelloTriangle hello_triangle)

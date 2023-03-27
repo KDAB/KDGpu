@@ -1,12 +1,12 @@
 #include "styled_rectangles.h"
 
-#include <toy_renderer_kdgui/engine.h>
+#include <kdgpu_kdgui/engine.h>
 
-#include <toy_renderer/bind_group_layout_options.h>
-#include <toy_renderer/bind_group_options.h>
-#include <toy_renderer/buffer_options.h>
-#include <toy_renderer/graphics_pipeline_options.h>
-#include <toy_renderer/texture_options.h>
+#include <kdgpu/bind_group_layout_options.h>
+#include <kdgpu/bind_group_options.h>
+#include <kdgpu/buffer_options.h>
+#include <kdgpu/graphics_pipeline_options.h>
+#include <kdgpu/texture_options.h>
 
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -15,18 +15,18 @@
 #include <fstream>
 #include <string>
 
-namespace ToyRenderer {
+namespace KDGpu {
 
 inline std::string assetPath()
 {
-#if defined(TOY_RENDERER_ASSET_PATH)
-    return TOY_RENDERER_ASSET_PATH;
+#if defined(KDGPU_ASSET_PATH)
+    return KDGPU_ASSET_PATH;
 #else
     return "";
 #endif
 }
 
-} // namespace ToyRenderer
+} // namespace KDGpu
 
 void StyledRectangles::initializeScene()
 {
@@ -75,11 +75,11 @@ void StyledRectangles::initializeRectangles()
     }
 
     // Create a vertex shader and fragment shader (spir-v only for now)
-    const auto vertexShaderPath = ToyRenderer::assetPath() + "/shaders/examples/10_styled_rectangles/styled_rectangles.vert.spv";
-    auto vertexShader = m_device.createShaderModule(ToyRenderer::readShaderFile(vertexShaderPath));
+    const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/10_styled_rectangles/styled_rectangles.vert.spv";
+    auto vertexShader = m_device.createShaderModule(KDGpu::readShaderFile(vertexShaderPath));
 
-    const auto fragmentShaderPath = ToyRenderer::assetPath() + "/shaders/examples/10_styled_rectangles/styled_rectangles.frag.spv";
-    auto fragmentShader = m_device.createShaderModule(ToyRenderer::readShaderFile(fragmentShaderPath));
+    const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/10_styled_rectangles/styled_rectangles.frag.spv";
+    auto fragmentShader = m_device.createShaderModule(KDGpu::readShaderFile(fragmentShaderPath));
 
     // Create a bind group layout for the rectangle data UBO
     // clang-format off
@@ -221,11 +221,11 @@ void StyledRectangles::initializeBackground()
     }
 
     // Create a vertex shader and fragment shader (spir-v only for now)
-    const auto vertexShaderPath = ToyRenderer::assetPath() + "/shaders/examples/10_styled_rectangles/gradient_blobs.vert.spv";
-    auto vertexShader = m_device.createShaderModule(ToyRenderer::readShaderFile(vertexShaderPath));
+    const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/10_styled_rectangles/gradient_blobs.vert.spv";
+    auto vertexShader = m_device.createShaderModule(KDGpu::readShaderFile(vertexShaderPath));
 
-    const auto fragmentShaderPath = ToyRenderer::assetPath() + "/shaders/examples/10_styled_rectangles/gradient_blobs.frag.spv";
-    auto fragmentShader = m_device.createShaderModule(ToyRenderer::readShaderFile(fragmentShaderPath));
+    const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/10_styled_rectangles/gradient_blobs.frag.spv";
+    auto fragmentShader = m_device.createShaderModule(KDGpu::readShaderFile(fragmentShaderPath));
 
     // Create a bind group layout for the color stops UBO
     // clang-format off

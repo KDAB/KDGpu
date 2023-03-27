@@ -1,4 +1,4 @@
-project(03_toy-renderer_hello_triangle_kdgui VERSION 0.1 LANGUAGES CXX)
+project(03_kdgpu_hello_triangle_kdgui VERSION 0.1 LANGUAGES CXX)
 
 find_package(Vulkan REQUIRED)
 
@@ -10,7 +10,7 @@ add_executable(
 
 target_link_libraries(
     ${PROJECT_NAME}
-    toy-renderer-kdgui
+    KDGpu::KDGpu_KDGui
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")

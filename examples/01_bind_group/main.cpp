@@ -1,16 +1,16 @@
-#include <toy_renderer/device.h>
-#include <toy_renderer/instance.h>
-#include <toy_renderer/bind_group_description.h>
-#include <toy_renderer/bind_group.h>
-#include <toy_renderer/bind_group_options.h>
-#include <toy_renderer/bind_group_layout.h>
-#include <toy_renderer/bind_group_layout_options.h>
-#include <toy_renderer/graphics_pipeline.h>
-#include <toy_renderer/graphics_pipeline_options.h>
+#include <kdgpu/device.h>
+#include <kdgpu/instance.h>
+#include <kdgpu/bind_group_description.h>
+#include <kdgpu/bind_group.h>
+#include <kdgpu/bind_group_options.h>
+#include <kdgpu/bind_group_layout.h>
+#include <kdgpu/bind_group_layout_options.h>
+#include <kdgpu/graphics_pipeline.h>
+#include <kdgpu/graphics_pipeline_options.h>
 
-#include <toy_renderer/vulkan/vulkan_graphics_api.h>
+#include <kdgpu/vulkan/vulkan_graphics_api.h>
 
-#include <toy_renderer_kdgui/view.h>
+#include <kdgpu_kdgui/view.h>
 
 #include <KDGui/gui_application.h>
 
@@ -21,13 +21,13 @@
 #include <vector>
 
 using namespace KDGui;
-using namespace ToyRenderer;
-using namespace ToyRendererKDGui;
+using namespace KDGpu;
+using namespace KDGpuKDGui;
 
 inline std::string assetPath()
 {
-#if defined(TOY_RENDERER_ASSET_PATH)
-    return TOY_RENDERER_ASSET_PATH;
+#if defined(KDGPU_ASSET_PATH)
+    return KDGPU_ASSET_PATH;
 #else
     return "";
 #endif

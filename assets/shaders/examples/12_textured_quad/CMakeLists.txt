@@ -1,1 +1,1 @@
-CompileShaderSet(ToyRendererTexturedQuad textured_quad)
+CompileShaderSet(KDGpu_TexturedQuad textured_quad)

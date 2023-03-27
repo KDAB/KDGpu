@@ -1,2 +1,2 @@
-CompileShaderSet(ToyRendererRenderToTexture1 rotating_triangle)
-CompileShaderSet(ToyRendererRenderToTexture2 desaturate)
+CompileShaderSet(KDGpu_RenderToTexture1 rotating_triangle)
+CompileShaderSet(KDGpu_RenderToTexture2 desaturate)

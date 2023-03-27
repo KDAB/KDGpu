@@ -1,6 +1,6 @@
-CompileShaderSet(ToyRendererComputeParticles triangle)
+CompileShaderSet(KDGpu_ComputeParticles triangle)
 
-CompileShader(ToyRendererComputeParticles particles.comp particles.comp.spv)
-add_custom_target(ToyRendererComputeParticleTmp ALL
-    DEPENDS ToyRendererComputeParticles
+CompileShader(KDGpu_ComputeParticles particles.comp particles.comp.spv)
+add_custom_target(KDGpu_ComputeParticleTmp ALL
+    DEPENDS KDGpu_ComputeParticles
 )
