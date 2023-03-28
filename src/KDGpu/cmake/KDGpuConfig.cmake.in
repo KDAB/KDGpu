@@ -2,7 +2,6 @@
 
 include(CMakeFindDependencyMacro)
 
-find_dependency(spdlog REQUIRED)
 find_dependency(Vulkan REQUIRED)
 find_dependency(KDUtils REQUIRED)
 
