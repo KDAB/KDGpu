@@ -9,21 +9,21 @@ message(STATUS "Checking/updating dependencies. This may take a little while...
 ")
 
 # KDUtils
-include(cmake/dependencies/kdutils.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/kdutils.cmake)
 
 # VMA
-include(cmake/dependencies/vulkan_memory_allocator.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/vulkan_memory_allocator.cmake)
 
 # glm
-include(cmake/dependencies/glm.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/glm.cmake)
 
 # stb (for stb image)
-include(cmake/dependencies/stb.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/stb.cmake)
 
 if(TOYRENDERER_BUILD_TESTS)
     # doctest
-    include(cmake/dependencies/doctest.cmake)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/doctest.cmake)
 
     # trompeloeil
-    include(cmake/dependencies/trompeloeil.cmake)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/trompeloeil.cmake)
 endif()
