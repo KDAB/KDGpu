@@ -1,6 +1,7 @@
 #pragma once
 
 #include <KDGpu/gpu_core.h>
+#include <KDGpu/kdgpu_export.h>
 
 #include <vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
@@ -9,7 +10,7 @@ namespace KDGpu {
 
 AdapterDeviceType vkPhysicalDeviceTypeToAdapterDeviceType(VkPhysicalDeviceType deviceType);
 
-Format vkFormatToFormat(VkFormat format);
+KDGPU_EXPORT Format vkFormatToFormat(VkFormat format);
 VkFormat formatToVkFormat(Format format);
 
 VkSampleCountFlagBits sampleCountFlagBitsToVkSampleFlagBits(SampleCountFlagBits samples);
