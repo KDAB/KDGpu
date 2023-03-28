@@ -1,0 +1,101 @@
+#include "compute_pass_command_recorder.h"
+#include <KDGpu/graphics_api.h>
+#include <KDGpu/resource_manager.h>
+#include <KDGpu/api/api_compute_pass_command_recorder.h>
+
+namespace KDGpu {
+
+ComputePassCommandRecorder::ComputePassCommandRecorder(GraphicsApi *api,
+                                                       const Handle<Device_t> &device,
+                                                       const Handle<ComputePassCommandRecorder_t> &computePassCommandRecorder)
+    : m_api(api)
+    , m_device(device)
+    , m_computePassCommandRecorder(computePassCommandRecorder)
+{
+}
+
+ComputePassCommandRecorder::~ComputePassCommandRecorder()
+{
+    if (isValid())
+        m_api->resourceManager()->deleteComputePassCommandRecorder(handle());
+}
+
+ComputePassCommandRecorder::ComputePassCommandRecorder(ComputePassCommandRecorder &&other)
+{
+    m_api = other.m_api;
+    m_device = other.m_device;
+    m_computePassCommandRecorder = other.m_computePassCommandRecorder;
+
+    other.m_api = nullptr;
+    other.m_device = {};
+    other.m_computePassCommandRecorder = {};
+}
+
+ComputePassCommandRecorder &ComputePassCommandRecorder::operator=(ComputePassCommandRecorder &&other)
+{
+    if (this != &other) {
+        if (isValid())
+            m_api->resourceManager()->deleteComputePassCommandRecorder(handle());
+
+        m_api = other.m_api;
+        m_device = other.m_device;
+        m_computePassCommandRecorder = other.m_computePassCommandRecorder;
+
+        other.m_api = nullptr;
+        other.m_device = {};
+        other.m_computePassCommandRecorder = {};
+    }
+    return *this;
+}
+
+void ComputePassCommandRecorder::setPipeline(const Handle<ComputePipeline_t> &pipeline)
+{
+    auto apiComputePassCommandRecorder = m_api->resourceManager()->getComputePassCommandRecorder(m_computePassCommandRecorder);
+    apiComputePassCommandRecorder->setPipeline(pipeline);
+}
+
+void ComputePassCommandRecorder::setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroup,
+                                              const Handle<PipelineLayout_t> &pipelineLayout,
+                                              const std::vector<uint32_t> &dynamicBufferOffsets)
+{
+    auto apiComputePassCommandRecorder = m_api->resourceManager()->getComputePassCommandRecorder(m_computePassCommandRecorder);
+    apiComputePassCommandRecorder->setBindGroup(group, bindGroup, pipelineLayout, dynamicBufferOffsets);
+}
+
+void ComputePassCommandRecorder::dispatchCompute(const ComputeCommand &command)
+{
+    auto apiComputePassCommandRecorder = m_api->resourceManager()->getComputePassCommandRecorder(m_computePassCommandRecorder);
+    apiComputePassCommandRecorder->dispatchCompute(command);
+}
+
+void ComputePassCommandRecorder::dispatchCompute(const std::vector<ComputeCommand> &commands)
+{
+    auto apiComputePassCommandRecorder = m_api->resourceManager()->getComputePassCommandRecorder(m_computePassCommandRecorder);
+    apiComputePassCommandRecorder->dispatchCompute(commands);
+}
+
+void ComputePassCommandRecorder::dispatchComputeIndirect(const ComputeCommandIndirect &command)
+{
+    auto apiComputePassCommandRecorder = m_api->resourceManager()->getComputePassCommandRecorder(m_computePassCommandRecorder);
+    apiComputePassCommandRecorder->dispatchComputeIndirect(command);
+}
+
+void ComputePassCommandRecorder::dispatchComputeIndirect(const std::vector<ComputeCommandIndirect> &commands)
+{
+    auto apiComputePassCommandRecorder = m_api->resourceManager()->getComputePassCommandRecorder(m_computePassCommandRecorder);
+    apiComputePassCommandRecorder->dispatchComputeIndirect(commands);
+}
+
+void ComputePassCommandRecorder::pushConstant(const PushConstantRange &constantRange, const void *data)
+{
+    auto apiComputePassCommandRecorder = m_api->resourceManager()->getComputePassCommandRecorder(m_computePassCommandRecorder);
+    apiComputePassCommandRecorder->pushConstant(constantRange, data);
+}
+
+void ComputePassCommandRecorder::end()
+{
+    auto apiComputePassCommandRecorder = m_api->resourceManager()->getComputePassCommandRecorder(m_computePassCommandRecorder);
+    apiComputePassCommandRecorder->end();
+}
+
+} // namespace KDGpu

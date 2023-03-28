@@ -1,8 +1,8 @@
-#include <kdgpu/pipeline_layout.h>
-#include <kdgpu/pipeline_layout_options.h>
-#include <kdgpu/device.h>
-#include <kdgpu/instance.h>
-#include <kdgpu/vulkan/vulkan_graphics_api.h>
+#include <KDGpu/pipeline_layout.h>
+#include <KDGpu/pipeline_layout_options.h>
+#include <KDGpu/device.h>
+#include <KDGpu/instance.h>
+#include <KDGpu/vulkan/vulkan_graphics_api.h>
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest.h>

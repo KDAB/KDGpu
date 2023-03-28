@@ -1,8 +1,8 @@
-#include <kdgpu/texture.h>
-#include <kdgpu/texture_options.h>
-#include <kdgpu/device.h>
-#include <kdgpu/instance.h>
-#include <kdgpu/vulkan/vulkan_graphics_api.h>
+#include <KDGpu/texture.h>
+#include <KDGpu/texture_options.h>
+#include <KDGpu/device.h>
+#include <KDGpu/instance.h>
+#include <KDGpu/vulkan/vulkan_graphics_api.h>
 
 #include <set>
 

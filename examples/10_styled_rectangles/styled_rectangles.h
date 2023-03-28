@@ -1,11 +1,11 @@
 #pragma once
 
-#include <kdgpu_kdgui/simple_example_engine_layer.h>
+#include <KDGpu_KDGui/simple_example_engine_layer.h>
 
-#include <kdgpu/bind_group.h>
-#include <kdgpu/buffer.h>
-#include <kdgpu/graphics_pipeline.h>
-#include <kdgpu/render_pass_command_recorder_options.h>
+#include <KDGpu/bind_group.h>
+#include <KDGpu/buffer.h>
+#include <KDGpu/graphics_pipeline.h>
+#include <KDGpu/render_pass_command_recorder_options.h>
 
 #include <glm/glm.hpp>
 

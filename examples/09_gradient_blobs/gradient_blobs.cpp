@@ -1,12 +1,12 @@
 #include "gradient_blobs.h"
 
-#include <kdgpu_kdgui/engine.h>
+#include <KDGpu_KDGui/engine.h>
 
-#include <kdgpu/bind_group_layout_options.h>
-#include <kdgpu/bind_group_options.h>
-#include <kdgpu/buffer_options.h>
-#include <kdgpu/graphics_pipeline_options.h>
-#include <kdgpu/texture_options.h>
+#include <KDGpu/bind_group_layout_options.h>
+#include <KDGpu/bind_group_options.h>
+#include <KDGpu/buffer_options.h>
+#include <KDGpu/graphics_pipeline_options.h>
+#include <KDGpu/texture_options.h>
 
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/type_ptr.hpp>

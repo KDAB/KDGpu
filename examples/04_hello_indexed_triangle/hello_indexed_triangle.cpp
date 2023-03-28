@@ -1,9 +1,9 @@
 #include "hello_indexed_triangle.h"
 
-#include <kdgpu_kdgui/engine.h>
+#include <KDGpu_KDGui/engine.h>
 
-#include <kdgpu/buffer_options.h>
-#include <kdgpu/graphics_pipeline_options.h>
+#include <KDGpu/buffer_options.h>
+#include <KDGpu/graphics_pipeline_options.h>
 
 #include <fstream>
 #include <string>

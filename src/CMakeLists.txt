@@ -1,2 +1,2 @@
-add_subdirectory(KDGpu_tmp)
-add_subdirectory(KDGpu_KDGui_tmp)
+add_subdirectory(KDGpu)
+add_subdirectory(KDGpu_KDGui)

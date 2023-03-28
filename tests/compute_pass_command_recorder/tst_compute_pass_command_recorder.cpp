@@ -1,11 +1,11 @@
-#include <kdgpu/compute_pipeline.h>
-#include <kdgpu/compute_pipeline_options.h>
-#include <kdgpu/compute_pass_command_recorder.h>
-#include <kdgpu/command_recorder.h>
-#include <kdgpu/device.h>
-#include <kdgpu/queue.h>
-#include <kdgpu/instance.h>
-#include <kdgpu/vulkan/vulkan_graphics_api.h>
+#include <KDGpu/compute_pipeline.h>
+#include <KDGpu/compute_pipeline_options.h>
+#include <KDGpu/compute_pass_command_recorder.h>
+#include <KDGpu/command_recorder.h>
+#include <KDGpu/device.h>
+#include <KDGpu/queue.h>
+#include <KDGpu/instance.h>
+#include <KDGpu/vulkan/vulkan_graphics_api.h>
 
 #include <type_traits>
 

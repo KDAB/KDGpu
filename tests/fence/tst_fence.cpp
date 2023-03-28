@@ -1,7 +1,7 @@
-#include <kdgpu/fence.h>
-#include <kdgpu/device.h>
-#include <kdgpu/instance.h>
-#include <kdgpu/vulkan/vulkan_graphics_api.h>
+#include <KDGpu/fence.h>
+#include <KDGpu/device.h>
+#include <KDGpu/instance.h>
+#include <KDGpu/vulkan/vulkan_graphics_api.h>
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest.h>

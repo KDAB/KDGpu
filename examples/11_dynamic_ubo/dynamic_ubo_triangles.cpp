@@ -1,11 +1,11 @@
 #include "dynamic_ubo_triangles.h"
 
-#include <kdgpu_kdgui/engine.h>
+#include <KDGpu_KDGui/engine.h>
 
-#include <kdgpu/bind_group_layout_options.h>
-#include <kdgpu/bind_group_options.h>
-#include <kdgpu/buffer_options.h>
-#include <kdgpu/graphics_pipeline_options.h>
+#include <KDGpu/bind_group_layout_options.h>
+#include <KDGpu/bind_group_options.h>
+#include <KDGpu/buffer_options.h>
+#include <KDGpu/graphics_pipeline_options.h>
 
 #include <glm/gtx/transform.hpp>
 

@@ -1,8 +1,8 @@
-#include <kdgpu/device.h>
-#include <kdgpu/instance.h>
-#include <kdgpu/vulkan/vulkan_graphics_api.h>
+#include <KDGpu/device.h>
+#include <KDGpu/instance.h>
+#include <KDGpu/vulkan/vulkan_graphics_api.h>
 
-#include <kdgpu_kdgui/view.h>
+#include <KDGpu_KDGui/view.h>
 
 #include <KDGui/gui_application.h>
 

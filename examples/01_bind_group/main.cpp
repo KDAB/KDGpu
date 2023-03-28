@@ -1,16 +1,16 @@
-#include <kdgpu/device.h>
-#include <kdgpu/instance.h>
-#include <kdgpu/bind_group_description.h>
-#include <kdgpu/bind_group.h>
-#include <kdgpu/bind_group_options.h>
-#include <kdgpu/bind_group_layout.h>
-#include <kdgpu/bind_group_layout_options.h>
-#include <kdgpu/graphics_pipeline.h>
-#include <kdgpu/graphics_pipeline_options.h>
+#include <KDGpu/device.h>
+#include <KDGpu/instance.h>
+#include <KDGpu/bind_group_description.h>
+#include <KDGpu/bind_group.h>
+#include <KDGpu/bind_group_options.h>
+#include <KDGpu/bind_group_layout.h>
+#include <KDGpu/bind_group_layout_options.h>
+#include <KDGpu/graphics_pipeline.h>
+#include <KDGpu/graphics_pipeline_options.h>
 
-#include <kdgpu/vulkan/vulkan_graphics_api.h>
+#include <KDGpu/vulkan/vulkan_graphics_api.h>
 
-#include <kdgpu_kdgui/view.h>
+#include <KDGpu_KDGui/view.h>
 
 #include <KDGui/gui_application.h>
 

@@ -1,6 +1,6 @@
 #include "compute_particles.h"
 
-#include <kdgpu_kdgui/engine.h>
+#include <KDGpu_KDGui/engine.h>
 
 #include <KDGui/gui_application.h>
 
