@@ -164,7 +164,7 @@ add_library(KDGpu SHARED
 add_library(KDGpu::KDGpu ALIAS KDGpu)
 
 set(KDGPU_PUBLIC_LIBS
-    KDUtils::Utils
+    KDUtils::KDUtils
     Vulkan::Vulkan
     KDGpu::vulkan_memory_allocator
     spdlog::spdlog

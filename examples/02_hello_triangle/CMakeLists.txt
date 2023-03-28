@@ -10,7 +10,7 @@ add_executable(
 target_link_libraries(
     ${PROJECT_NAME}
     KDGpu::KDGpu
-    KDUtils::Gui
+    KDUtils::KDGui
     glm::glm
 )
 

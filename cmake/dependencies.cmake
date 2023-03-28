@@ -9,24 +9,21 @@ message(STATUS "Checking/updating dependencies. This may take a little while...
 ")
 
 # KDUtils
-add_subdirectory(kdutils)
-
-# spdlog Logging Library
-add_subdirectory(spdlog)
+include(cmake/dependencies/kdutils.cmake)
 
 # VMA
-add_subdirectory(vulkan_memory_allocator)
+include(cmake/dependencies/vulkan_memory_allocator.cmake)
 
 # glm
-add_subdirectory(glm)
+include(cmake/dependencies/glm.cmake)
 
 # stb (for stb image)
-add_subdirectory(stb)
+include(cmake/dependencies/stb.cmake)
 
 if(TOYRENDERER_BUILD_TESTS)
     # doctest
-    add_subdirectory(doctest)
+    include(cmake/dependencies/doctest.cmake)
 
     # trompeloeil
-    add_subdirectory(trompeloeil)
+    include(cmake/dependencies/trompeloeil.cmake)
 endif()

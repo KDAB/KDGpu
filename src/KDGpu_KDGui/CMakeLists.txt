@@ -26,7 +26,7 @@ add_library(KDGpu::KDGpu_KDGui ALIAS KDGpu_KDGui)
 
 set(KDGPU_KDGUI_PUBLIC_LIBS
     KDGpu::KDGpu
-    KDUtils::Gui
+    KDUtils::KDGui
 )
 
 set(
