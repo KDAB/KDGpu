@@ -527,6 +527,7 @@ enum class TextureType {
     TextureType1D = 0,
     TextureType2D = 1,
     TextureType3D = 2,
+    TextureTypeCube = 3,
     MaxEnum = 0x7fffffff
 };
 

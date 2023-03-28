@@ -100,6 +100,8 @@ VkSharingMode sharingModeToVkSharingMode(SharingMode sharingMode)
 
 VkImageType textureTypeToVkImageType(TextureType textureType)
 {
+    if (textureType == TextureType::TextureTypeCube)
+        return VK_IMAGE_TYPE_2D;
     return static_cast<VkImageType>(static_cast<uint32_t>(textureType));
 }
 

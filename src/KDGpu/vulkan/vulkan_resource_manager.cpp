@@ -426,6 +426,9 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
     }
     createInfo.initialLayout = textureLayoutToVkImageLayout(options.initialLayout);
 
+    if (options.type == TextureType::TextureTypeCube)
+        createInfo.flags |= VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
+
     VmaAllocationCreateInfo allocInfo = {};
     allocInfo.usage = memoryUsageToVmaMemoryUsage(options.memoryUsage);
 
