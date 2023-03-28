@@ -152,10 +152,9 @@ void ExampleEngineLayer::uploadBufferData(const Handle<Buffer_t> &destinationBuf
 void ExampleEngineLayer::waitForUploadTextureData(const Handle<Texture_t> &destinationTexture,
                                                   const void *data,
                                                   DeviceSize byteSize,
-                                                  Extent3D textureExtent,
-                                                  Offset3D textureOffset,
                                                   TextureLayout oldLayout,
-                                                  TextureLayout newLayout)
+                                                  TextureLayout newLayout,
+                                                  const std::vector<BufferImageCopyRegion> &regions)
 {
     // Buffer upload via a staging buffer using our main queue
     // Create a staging buffer and upload initial data to it by map(), memcpy(), unmap().
@@ -192,18 +191,7 @@ void ExampleEngineLayer::waitForUploadTextureData(const Handle<Texture_t> &desti
         .srcBuffer = stagingBuffer,
         .dstTexture = destinationTexture,
         .dstImageLayout = TextureLayout::TransferDstOptimal,
-        .regions = {{
-            .imageSubResource = { .aspectMask = TextureAspectFlags(TextureAspectFlagBits::ColorBit) },
-            .imageOffset = {
-                .x = textureOffset.x,
-                .y = textureOffset.y,
-                .z = textureOffset.z },
-            .imageExtent = {
-                .width = textureExtent.width,
-                .height = textureExtent.height,
-                .depth = textureExtent.depth
-            }
-        }},
+        .regions = regions
     };
     // clang-format on
     commandRecorder.copyBufferToTexture(copyCmd);
@@ -233,10 +221,9 @@ void ExampleEngineLayer::uploadTextureData(const Handle<Texture_t> &destinationT
                                            AccessFlags dstMask,
                                            const void *data,
                                            DeviceSize byteSize,
-                                           Extent3D textureExtent,
-                                           Offset3D textureOffset,
                                            TextureLayout oldLayout,
-                                           TextureLayout newLayout)
+                                           TextureLayout newLayout,
+                                           const std::vector<BufferImageCopyRegion> &regions)
 {
     // Buffer upload via a staging buffer using our main queue
     // Create a staging buffer and upload initial data to it by map(), memcpy(), unmap().
@@ -273,19 +260,7 @@ void ExampleEngineLayer::uploadTextureData(const Handle<Texture_t> &destinationT
         .srcBuffer = stagingBuffer,
         .dstTexture = destinationTexture,
         .dstImageLayout = TextureLayout::TransferDstOptimal,
-        .regions = {{
-            // TODO: Expose the aspect
-            .imageSubResource = { .aspectMask = TextureAspectFlags(TextureAspectFlagBits::ColorBit) },
-            .imageOffset = {
-                .x = textureOffset.x,
-                .y = textureOffset.y,
-                .z = textureOffset.z },
-            .imageExtent = {
-                .width = textureExtent.width,
-                .height = textureExtent.height,
-                .depth = textureExtent.depth
-            }
-        }},
+        .regions = regions
     };
     // clang-format on
     commandRecorder.copyBufferToTexture(copyCmd);

@@ -63,19 +63,17 @@ protected:
     void waitForUploadTextureData(const Handle<Texture_t> &destinationTexture,
                                   const void *data,
                                   DeviceSize byteSize,
-                                  Extent3D textureExtent,
-                                  Offset3D textureOffset,
                                   TextureLayout oldLayout,
-                                  TextureLayout newLayout);
+                                  TextureLayout newLayout,
+                                  const std::vector<BufferImageCopyRegion> &regions);
     void uploadTextureData(const Handle<Texture_t> &destinationTexture,
                            PipelineStageFlags dstStages,
                            AccessFlags dstMask,
                            const void *data,
                            DeviceSize byteSize,
-                           Extent3D textureExtent,
-                           Offset3D textureOffset,
                            TextureLayout oldLayout,
-                           TextureLayout newLayout);
+                           TextureLayout newLayout,
+                           const std::vector<BufferImageCopyRegion> &regions);
 
     void releaseStagingBuffers();
 

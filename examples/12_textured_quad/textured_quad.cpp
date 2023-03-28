@@ -119,15 +119,20 @@ void TexturedQuad::initializeScene()
         m_texture = m_device.createTexture(textureOptions);
 
         // Upload the texture data and transition to ShaderReadOnlyOptimal
+        // clang-format off
+        const std::vector<BufferImageCopyRegion> regions = {{
+            .imageSubResource = { .aspectMask = TextureAspectFlagBits::ColorBit },
+            .imageExtent = { .width = image.width, .height = image.height, .depth = 1 }
+        }};
+        // clang-format on
         uploadTextureData(m_texture,
                           PipelineStageFlagBit::AllGraphicsBit,
                           AccessFlagBit::MemoryReadBit,
                           image.pixelData,
                           image.byteSize,
-                          Extent3D{ .width = image.width, .height = image.height, .depth = 1 },
-                          Offset3D{},
                           TextureLayout::Undefined,
-                          TextureLayout::ShaderReadOnlyOptimal);
+                          TextureLayout::ShaderReadOnlyOptimal,
+                          regions);
 
         // Create a view and sampler
         m_textureView = m_texture.createView();
