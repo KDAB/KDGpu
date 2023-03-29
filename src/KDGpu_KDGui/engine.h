@@ -13,7 +13,6 @@
 #include <memory>
 #include <vector>
 
-using namespace KDBindings;
 using TimePoint = std::chrono::time_point<std::chrono::high_resolution_clock>;
 
 namespace KDGpuKDGui {
@@ -21,8 +20,8 @@ namespace KDGpuKDGui {
 class KDGPU_KDGUI_EXPORT Engine : public KDFoundation::Object
 {
 public:
-    Property<bool> running{ false };
-    Property<double> fps{ 0.0 };
+    KDBindings::Property<bool> running{ false };
+    KDBindings::Property<double> fps{ 0.0 };
 
     Engine();
     ~Engine() override;

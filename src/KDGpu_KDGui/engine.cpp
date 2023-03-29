@@ -5,6 +5,8 @@
 
 namespace KDGpuKDGui {
 
+using namespace KDBindings;
+
 Engine::Engine()
     : KDFoundation::Object()
 {
