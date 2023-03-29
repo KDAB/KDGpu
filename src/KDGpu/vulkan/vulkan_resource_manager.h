@@ -35,7 +35,7 @@
 
 namespace KDGpu {
 
-class KDGPU_EXPORT VulkanResourceManager : public ResourceManager
+class KDGPU_EXPORT VulkanResourceManager final : public ResourceManager
 {
 public:
     VulkanResourceManager();

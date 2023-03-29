@@ -8,7 +8,7 @@
 
 namespace KDGpu {
 
-class KDGPU_EXPORT VulkanGraphicsApi : public GraphicsApi
+class KDGPU_EXPORT VulkanGraphicsApi final : public GraphicsApi
 {
 public:
     VulkanGraphicsApi();
