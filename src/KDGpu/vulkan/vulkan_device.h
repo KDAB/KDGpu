@@ -5,6 +5,7 @@
 #include <KDGpu/vulkan/vulkan_render_pass.h>
 
 #include <KDGpu/handle.h>
+#include <KDGpu/kdgpu_export.h>
 
 #include <vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
@@ -17,7 +18,7 @@ class VulkanResourceManager;
 
 struct Adapter_t;
 
-struct VulkanDevice : public ApiDevice {
+struct KDGPU_EXPORT VulkanDevice : public ApiDevice {
     explicit VulkanDevice(VkDevice _device,
                           VulkanResourceManager *_vulkanResourceManager,
                           const Handle<Adapter_t> &_adapterHandle);

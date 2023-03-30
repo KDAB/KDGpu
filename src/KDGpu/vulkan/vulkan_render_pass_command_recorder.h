@@ -1,7 +1,7 @@
 #pragma once
 
 #include <KDGpu/api/api_render_pass_command_recorder.h>
-
+#include <KDGpu/kdgpu_export.h>
 #include <KDGpu/handle.h>
 
 #include <vulkan/vulkan.h>
@@ -12,7 +12,7 @@ class VulkanResourceManager;
 
 struct Device_t;
 
-struct VulkanRenderPassCommandRecorder : public ApiRenderPassCommandRecorder {
+struct KDGPU_EXPORT VulkanRenderPassCommandRecorder : public ApiRenderPassCommandRecorder {
     explicit VulkanRenderPassCommandRecorder(VkCommandBuffer _commandBuffer,
                                              VkRect2D _renderArea,
                                              VulkanResourceManager *_vulkanResourceManager,

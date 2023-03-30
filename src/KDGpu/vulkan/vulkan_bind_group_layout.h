@@ -2,6 +2,7 @@
 
 #include <KDGpu/api/api_bind_group_layout.h>
 #include <KDGpu/handle.h>
+#include <KDGpu/kdgpu_export.h>
 #include <vulkan/vulkan.h>
 
 namespace KDGpu {
@@ -9,7 +10,7 @@ namespace KDGpu {
 class VulkanResourceManager;
 struct Device_t;
 
-struct VulkanBindGroupLayout : public ApiBindGroupLayout {
+struct KDGPU_EXPORT VulkanBindGroupLayout : public ApiBindGroupLayout {
     explicit VulkanBindGroupLayout(VkDescriptorSetLayout _descriptorSetLayout,
                                    const Handle<Device_t> &_deviceHandle);
 

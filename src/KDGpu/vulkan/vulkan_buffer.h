@@ -1,7 +1,7 @@
 #pragma once
 
 #include <KDGpu/api/api_buffer.h>
-
+#include <KDGpu/kdgpu_export.h>
 #include <KDGpu/handle.h>
 
 #include <vk_mem_alloc.h>
@@ -12,7 +12,7 @@ namespace KDGpu {
 class VulkanResourceManager;
 
 struct Device_t;
-struct VulkanBuffer : public ApiBuffer {
+struct KDGPU_EXPORT VulkanBuffer : public ApiBuffer {
     explicit VulkanBuffer(VkBuffer _buffer,
                           VmaAllocation _allocation,
                           VulkanResourceManager *_vulkanResourceManager,

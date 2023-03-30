@@ -2,6 +2,7 @@
 
 #include <KDGpu/api/api_command_buffer.h>
 #include <KDGpu/handle.h>
+#include <KDGpu/kdgpu_export.h>
 
 #include <vulkan/vulkan.h>
 
@@ -10,7 +11,7 @@ namespace KDGpu {
 struct Device_t;
 class VulkanResourceManager;
 
-struct VulkanCommandBuffer : public ApiCommandBuffer {
+struct KDGPU_EXPORT VulkanCommandBuffer : public ApiCommandBuffer {
     explicit VulkanCommandBuffer(VkCommandBuffer _commandBuffer,
                                  VkCommandPool _commandPool,
                                  VkCommandBufferLevel _commandLevel,

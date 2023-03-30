@@ -2,6 +2,7 @@
 
 #include <KDGpu/api/api_compute_pass_command_recorder.h>
 #include <KDGpu/handle.h>
+#include <KDGpu/kdgpu_export.h>
 #include <vulkan/vulkan.h>
 
 namespace KDGpu {
@@ -11,7 +12,7 @@ class VulkanResourceManager;
 struct ComputePipeline_t;
 struct Device_t;
 
-struct VulkanComputePassCommandRecorder : public ApiComputePassCommandRecorder {
+struct KDGPU_EXPORT VulkanComputePassCommandRecorder : public ApiComputePassCommandRecorder {
 
     explicit VulkanComputePassCommandRecorder(VkCommandBuffer _commandBuffer,
                                               VulkanResourceManager *_vulkanResourceManager,

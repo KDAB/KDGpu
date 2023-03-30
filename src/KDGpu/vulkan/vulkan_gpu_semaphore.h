@@ -4,6 +4,7 @@
 
 #include <KDGpu/gpu_core.h>
 #include <KDGpu/handle.h>
+#include <KDGpu/kdgpu_export.h>
 
 #include <vulkan/vulkan.h>
 
@@ -13,7 +14,7 @@ class VulkanResourceManager;
 
 struct Device_t;
 
-struct VulkanGpuSemaphore : public ApiGpuSemaphore {
+struct KDGPU_EXPORT VulkanGpuSemaphore : public ApiGpuSemaphore {
     explicit VulkanGpuSemaphore(VkSemaphore _semaphore,
                                 VulkanResourceManager *_vulkanResourceManager,
                                 const Handle<Device_t> &_deviceHandle);

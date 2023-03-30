@@ -1,14 +1,14 @@
 #pragma once
 
 #include <KDGpu/api/api_instance.h>
-
+#include <KDGpu/kdgpu_export.h>
 #include <vulkan/vulkan.h>
 
 namespace KDGpu {
 
 class VulkanResourceManager;
 
-struct VulkanInstance : public ApiInstance {
+struct KDGPU_EXPORT VulkanInstance : public ApiInstance {
     explicit VulkanInstance(VulkanResourceManager *_vulkanResourceManager, VkInstance _instance);
 
     std::vector<Extension> extensions() const final;

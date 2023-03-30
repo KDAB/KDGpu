@@ -1,7 +1,7 @@
 #pragma once
 
 #include <KDGpu/api/api_fence.h>
-
+#include <KDGpu/kdgpu_export.h>
 #include <KDGpu/handle.h>
 
 #include <vulkan/vulkan.h>
@@ -12,7 +12,7 @@ class VulkanResourceManager;
 
 struct Device_t;
 
-struct VulkanFence : public ApiFence {
+struct KDGPU_EXPORT VulkanFence : public ApiFence {
     explicit VulkanFence(VkFence _fence,
                          VulkanResourceManager *_vulkanResourceManager,
                          const Handle<Device_t> &_deviceHandle);

@@ -1,14 +1,14 @@
 #pragma once
 
 #include <KDGpu/api/api_queue.h>
-
+#include <KDGpu/kdgpu_export.h>
 #include <vulkan/vulkan.h>
 
 namespace KDGpu {
 
 class VulkanResourceManager;
 
-struct VulkanQueue : public ApiQueue {
+struct KDGPU_EXPORT VulkanQueue : public ApiQueue {
     explicit VulkanQueue(VkQueue _queue,
                          VulkanResourceManager *_vulkanResourceManager);
 

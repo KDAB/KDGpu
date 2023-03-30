@@ -4,6 +4,7 @@
 
 #include <KDGpu/gpu_core.h>
 #include <KDGpu/handle.h>
+#include <KDGpu/kdgpu_export.h>
 
 #include <vulkan/vulkan.h>
 
@@ -13,7 +14,7 @@ class VulkanResourceManager;
 
 struct Device_t;
 
-struct VulkanSwapchain : public ApiSwapchain {
+struct KDGPU_EXPORT VulkanSwapchain : public ApiSwapchain {
     explicit VulkanSwapchain(VkSwapchainKHR _swapchain,
                              Format _format,
                              Extent3D _extent,

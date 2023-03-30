@@ -3,6 +3,7 @@
 #include <KDGpu/api/api_shader_module.h>
 
 #include <KDGpu/handle.h>
+#include <KDGpu/kdgpu_export.h>
 
 #include <vulkan/vulkan.h>
 
@@ -12,7 +13,7 @@ class VulkanResourceManager;
 
 struct Device_t;
 
-struct VulkanShaderModule : public ApiShaderModule {
+struct KDGPU_EXPORT VulkanShaderModule : public ApiShaderModule {
     explicit VulkanShaderModule(VkShaderModule _shaderModule,
                                 VulkanResourceManager *_vulkanResourceManager,
                                 const Handle<Device_t> _deviceHandle);

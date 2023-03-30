@@ -4,6 +4,7 @@
 
 #include <KDGpu/gpu_core.h>
 #include <KDGpu/handle.h>
+#include <KDGpu/kdgpu_export.h>
 
 #include <vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
@@ -14,7 +15,7 @@ class VulkanResourceManager;
 
 struct Device_t;
 
-struct VulkanTexture : public ApiTexture {
+struct KDGPU_EXPORT VulkanTexture : public ApiTexture {
     explicit VulkanTexture(VkImage _image,
                            VmaAllocation _allocation,
                            Format _format,

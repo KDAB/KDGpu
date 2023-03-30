@@ -1,7 +1,7 @@
 #pragma once
 
 #include <KDGpu/api/api_adapter.h>
-
+#include <KDGpu/kdgpu_export.h>
 #include <KDGpu/handle.h>
 
 #include <vulkan/vulkan.h>
@@ -13,7 +13,7 @@ class VulkanResourceManager;
 
 struct Instance_t;
 
-struct VulkanAdapter : public ApiAdapter {
+struct KDGPU_EXPORT VulkanAdapter : public ApiAdapter {
     explicit VulkanAdapter(VkPhysicalDevice _physicalDevice,
                            VulkanResourceManager *_vulkanResourceManager,
                            const Handle<Instance_t> &_instanceHandle);

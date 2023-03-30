@@ -1,7 +1,7 @@
 #pragma once
 
 #include <KDGpu/api/api_graphics_pipeline.h>
-
+#include <KDGpu/kdgpu_export.h>
 #include <KDGpu/handle.h>
 
 #include <vulkan/vulkan.h>
@@ -13,7 +13,7 @@ class VulkanResourceManager;
 struct Device_t;
 struct PipelineLayout_t;
 
-struct VulkanGraphicsPipeline : public ApiGraphicsPipeline {
+struct KDGPU_EXPORT VulkanGraphicsPipeline : public ApiGraphicsPipeline {
     explicit VulkanGraphicsPipeline(VkPipeline _pipeline,
                                     VkRenderPass _renderPass,
                                     VulkanResourceManager *_vulkanResourceManager,
