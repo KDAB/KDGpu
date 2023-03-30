@@ -27,39 +27,53 @@ using SampleMask = uint32_t;
 struct Extension {
     std::string name;
     uint32_t version{ 0 };
+
+    friend bool operator==(const Extension &, const Extension &) = default;
 };
 
 struct Extent2D {
     uint32_t width;
     uint32_t height;
+
+    friend bool operator==(const Extent2D &, const Extent2D &) = default;
 };
 
 struct Extent3D {
     uint32_t width;
     uint32_t height;
     uint32_t depth;
+
+    friend bool operator==(const Extent3D &, const Extent3D &) = default;
 };
 
 struct Offset2D {
     int32_t x;
     int32_t y;
+
+    friend bool operator==(const Offset2D &, const Offset2D &) = default;
 };
 
 struct Offset3D {
     int32_t x;
     int32_t y;
     int32_t z;
+
+    friend bool operator==(const Offset3D &, const Offset3D &) = default;
 };
 
 struct Rect2D {
     Offset2D offset;
     Extent2D extent;
+
+    friend bool operator==(const Rect2D &, const Rect2D &) = default;
 };
 
 union ColorClearValue {
     float float32[4];
     int32_t int32[4];
     uint32_t uint32[4];
+
+    friend bool operator==(const ColorClearValue &, const ColorClearValue &) = default;
 };
 
 struct Viewport {
@@ -69,6 +83,8 @@ struct Viewport {
     float height;
     float minDepth{ 0.0f };
     float maxDepth{ 1.0f };
+
+    friend bool operator==(const Viewport &, const Viewport &) = default;
 };
 
 enum class SampleCountFlagBits {
