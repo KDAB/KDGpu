@@ -19,7 +19,7 @@ extern VkSurfaceKHR createVulkanSurface(VkInstance instance, const KDGpu::Surfac
 
 namespace KDGpu {
 
-VulkanInstance::VulkanInstance(VulkanResourceManager *_vulkanResourceManager, VkInstance _instance)
+VulkanInstance::VulkanInstance(VulkanResourceManager *_vulkanResourceManager, VkInstance _instance) noexcept
     : ApiInstance()
     , vulkanResourceManager(_vulkanResourceManager)
     , instance(_instance)

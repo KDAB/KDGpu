@@ -10,7 +10,7 @@ namespace KDGpu {
 
 VulkanDevice::VulkanDevice(VkDevice _device,
                            VulkanResourceManager *_vulkanResourceManager,
-                           const Handle<Adapter_t> &_adapterHandle)
+                           const Handle<Adapter_t> &_adapterHandle) noexcept
     : ApiDevice()
     , device(_device)
     , vulkanResourceManager(_vulkanResourceManager)
@@ -27,7 +27,7 @@ VulkanDevice::VulkanDevice(VkDevice _device,
     allocatorInfo.device = device;
 
     if (vmaCreateAllocator(&allocatorInfo, &allocator) != VK_SUCCESS)
-        throw std::runtime_error("Failed to create Vulkan memory allocator!");
+        SPDLOG_CRITICAL("Failed to create Vulkan memory allocator!");
 
     // Resize the vector of command pools to have one for each queue family
     const auto queueTypeCount = vulkanAdapter->queueTypes.size();

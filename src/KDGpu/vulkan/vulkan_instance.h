@@ -9,7 +9,7 @@ namespace KDGpu {
 class VulkanResourceManager;
 
 struct KDGPU_EXPORT VulkanInstance : public ApiInstance {
-    explicit VulkanInstance(VulkanResourceManager *_vulkanResourceManager, VkInstance _instance);
+    explicit VulkanInstance(VulkanResourceManager *_vulkanResourceManager, VkInstance _instance) noexcept;
 
     std::vector<Extension> extensions() const final;
     std::vector<Handle<Adapter_t>> queryAdapters(const Handle<Instance_t> &instanceHandle) final;

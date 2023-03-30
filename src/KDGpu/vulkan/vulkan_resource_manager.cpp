@@ -316,12 +316,12 @@ VulkanQueue *VulkanResourceManager::getQueue(const Handle<Queue_t> &handle) cons
 Handle<Swapchain_t> VulkanResourceManager::createSwapchain(const Handle<Device_t> &deviceHandle,
                                                            const SwapchainOptions &options)
 {
-    VulkanDevice vulkanDevice = *m_devices.get(deviceHandle);
-    VulkanSurface vulkanSurface = *m_surfaces.get(options.surface);
+    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
+    VulkanSurface *vulkanSurface = m_surfaces.get(options.surface);
 
     VkSwapchainCreateInfoKHR createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-    createInfo.surface = vulkanSurface.surface;
+    createInfo.surface = vulkanSurface->surface;
     createInfo.minImageCount = options.minImageCount;
     createInfo.imageFormat = formatToVkFormat(options.format);
     createInfo.imageColorSpace = colorSpaceToVkColorSpaceKHR(options.colorSpace);
@@ -342,7 +342,7 @@ Handle<Swapchain_t> VulkanResourceManager::createSwapchain(const Handle<Device_t
     createInfo.oldSwapchain = oldSwapchain ? oldSwapchain->swapchain : VK_NULL_HANDLE;
 
     VkSwapchainKHR vkSwapchain{ VK_NULL_HANDLE };
-    const VkResult result = vkCreateSwapchainKHR(vulkanDevice.device, &createInfo, nullptr, &vkSwapchain);
+    const VkResult result = vkCreateSwapchainKHR(vulkanDevice->device, &createInfo, nullptr, &vkSwapchain);
     if (result != VK_SUCCESS) {
         SPDLOG_WARN("Error creating swapchain {}", result);
         return {};
@@ -403,7 +403,7 @@ void VulkanResourceManager::removeTexture(const Handle<Texture_t> &handle)
 
 Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &deviceHandle, const TextureOptions &options)
 {
-    VulkanDevice vulkanDevice = *m_devices.get(deviceHandle);
+    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
 
     VkImageCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -435,7 +435,7 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
     VkImage vkImage;
     VmaAllocation vmaAllocation;
 
-    if (vmaCreateImage(vulkanDevice.allocator, &createInfo, &allocInfo, &vkImage, &vmaAllocation, nullptr) != VK_SUCCESS)
+    if (vmaCreateImage(vulkanDevice->allocator, &createInfo, &allocInfo, &vkImage, &vmaAllocation, nullptr) != VK_SUCCESS)
         return {};
 
     const auto vulkanTextureHandle = m_textures.emplace(VulkanTexture(
@@ -473,17 +473,17 @@ Handle<TextureView_t> VulkanResourceManager::createTextureView(const Handle<Devi
                                                                const Handle<Texture_t> &textureHandle,
                                                                const TextureViewOptions &options)
 {
-    VulkanDevice vulkanDevice = *m_devices.get(deviceHandle);
-    VulkanTexture vulkanTexture = *m_textures.get(textureHandle);
+    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
+    VulkanTexture *vulkanTexture = m_textures.get(textureHandle);
 
     VkImageViewCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-    createInfo.image = vulkanTexture.image;
+    createInfo.image = vulkanTexture->image;
     createInfo.viewType = viewTypeToVkImageViewType(options.viewType);
 
     // Specify the format. If none specified, default to the source texture's format
     if (options.format == Format::UNDEFINED) {
-        createInfo.format = formatToVkFormat(vulkanTexture.format);
+        createInfo.format = formatToVkFormat(vulkanTexture->format);
     } else {
         createInfo.format = formatToVkFormat(options.format);
     }
@@ -499,17 +499,17 @@ Handle<TextureView_t> VulkanResourceManager::createTextureView(const Handle<Devi
 
     // If no aspect is set, default to Color or Depth depending upon the texture usage
     if (options.range.aspectMask == TextureAspectFlagBits::None) {
-        if (vulkanTexture.usage.testFlag(TextureUsageFlagBits::DepthStencilAttachmentBit))
+        if (vulkanTexture->usage.testFlag(TextureUsageFlagBits::DepthStencilAttachmentBit))
             createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
 
-        if (vulkanTexture.usage.testFlag(TextureUsageFlagBits::ColorAttachmentBit) || //
-            vulkanTexture.usage.testFlag(TextureUsageFlagBits::SampledBit)) {
+        if (vulkanTexture->usage.testFlag(TextureUsageFlagBits::ColorAttachmentBit) || //
+            vulkanTexture->usage.testFlag(TextureUsageFlagBits::SampledBit)) {
             createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         }
     }
 
     VkImageView imageView;
-    if (vkCreateImageView(vulkanDevice.device, &createInfo, nullptr, &imageView) != VK_SUCCESS)
+    if (vkCreateImageView(vulkanDevice->device, &createInfo, nullptr, &imageView) != VK_SUCCESS)
         return {};
 
     const auto vulkanTextureViewHandle = m_textureViews.emplace(VulkanTextureView(imageView, textureHandle, deviceHandle));
@@ -532,7 +532,7 @@ VulkanTextureView *VulkanResourceManager::getTextureView(const Handle<TextureVie
 
 Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &deviceHandle, const BufferOptions &options, const void *initialData)
 {
-    VulkanDevice vulkanDevice = *m_devices.get(deviceHandle);
+    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
 
     VkBufferCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -549,7 +549,7 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
 
     VkBuffer vkBuffer;
     VmaAllocation vmaAllocation;
-    if (vmaCreateBuffer(vulkanDevice.allocator, &createInfo, &allocInfo, &vkBuffer, &vmaAllocation, nullptr) != VK_SUCCESS)
+    if (vmaCreateBuffer(vulkanDevice->allocator, &createInfo, &allocInfo, &vkBuffer, &vmaAllocation, nullptr) != VK_SUCCESS)
         return {};
 
     const auto vulkanBufferHandle = m_buffers.emplace(VulkanBuffer(vkBuffer, vmaAllocation, this, deviceHandle));
@@ -581,7 +581,7 @@ VulkanBuffer *VulkanResourceManager::getBuffer(const Handle<Buffer_t> &handle) c
 
 Handle<ShaderModule_t> VulkanResourceManager::createShaderModule(const Handle<Device_t> &deviceHandle, const std::vector<uint32_t> &code)
 {
-    VulkanDevice vulkanDevice = *m_devices.get(deviceHandle);
+    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
 
     VkShaderModuleCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -589,7 +589,7 @@ Handle<ShaderModule_t> VulkanResourceManager::createShaderModule(const Handle<De
     createInfo.pCode = code.data();
 
     VkShaderModule vkShaderModule;
-    if (vkCreateShaderModule(vulkanDevice.device, &createInfo, nullptr, &vkShaderModule) != VK_SUCCESS)
+    if (vkCreateShaderModule(vulkanDevice->device, &createInfo, nullptr, &vkShaderModule) != VK_SUCCESS)
         return {};
 
     const auto vulkanShaderModuleHandle = m_shaderModules.emplace(vkShaderModule, this, deviceHandle);
@@ -613,7 +613,7 @@ VulkanShaderModule *VulkanResourceManager::getShaderModule(const Handle<ShaderMo
 
 Handle<PipelineLayout_t> VulkanResourceManager::createPipelineLayout(const Handle<Device_t> &deviceHandle, const PipelineLayoutOptions &options)
 {
-    VulkanDevice vulkanDevice = *m_devices.get(deviceHandle);
+    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
 
     // TODO: Extract the VkDescriptorSetLayout creation into a Device::createBindGroupLayout as we will need
     // to use the VkDescriptorSetLayout when creating the PipelineLayout as well as when creating the BindGroup
@@ -653,7 +653,7 @@ Handle<PipelineLayout_t> VulkanResourceManager::createPipelineLayout(const Handl
     createInfo.pPushConstantRanges = vkPushConstantRanges.data();
 
     VkPipelineLayout vkPipelineLayout{ VK_NULL_HANDLE };
-    if (vkCreatePipelineLayout(vulkanDevice.device, &createInfo, nullptr, &vkPipelineLayout) != VK_SUCCESS) {
+    if (vkCreatePipelineLayout(vulkanDevice->device, &createInfo, nullptr, &vkPipelineLayout) != VK_SUCCESS) {
         // TODO: Log problem
         return {};
     }
@@ -685,7 +685,7 @@ VulkanPipelineLayout *VulkanResourceManager::getPipelineLayout(const Handle<Pipe
 
 Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const Handle<Device_t> &deviceHandle, const GraphicsPipelineOptions &options)
 {
-    VulkanDevice vulkanDevice = *m_devices.get(deviceHandle);
+    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
 
     // Shader stages
     std::vector<VkPipelineShaderStageCreateInfo> shaderInfos;
@@ -986,7 +986,7 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
         renderPassInfo.dependencyCount = 0;
         renderPassInfo.pDependencies = nullptr;
 
-        if (vkCreateRenderPass(vulkanDevice.device, &renderPassInfo, nullptr, &vkRenderPass) != VK_SUCCESS) {
+        if (vkCreateRenderPass(vulkanDevice->device, &renderPassInfo, nullptr, &vkRenderPass) != VK_SUCCESS) {
             // TODO: Log failure to create a render pass
             return {};
         }
@@ -1013,7 +1013,7 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     pipelineInfo.subpass = 0;
 
     VkPipeline vkPipeline{ VK_NULL_HANDLE };
-    if (vkCreateGraphicsPipelines(vulkanDevice.device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &vkPipeline) != VK_SUCCESS) {
+    if (vkCreateGraphicsPipelines(vulkanDevice->device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &vkPipeline) != VK_SUCCESS) {
         // TODO: Log failure to create a pipeline
         return {};
     }
@@ -1047,7 +1047,7 @@ VulkanGraphicsPipeline *VulkanResourceManager::getGraphicsPipeline(const Handle<
 
 Handle<ComputePipeline_t> VulkanResourceManager::createComputePipeline(const Handle<Device_t> &deviceHandle, const ComputePipelineOptions &options)
 {
-    VulkanDevice vulkanDevice = *m_devices.get(deviceHandle);
+    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
 
     // Fetch the specified pipeline layout
     VulkanPipelineLayout *vulkanPipelineLayout = getPipelineLayout(options.layout);
@@ -1075,7 +1075,7 @@ Handle<ComputePipeline_t> VulkanResourceManager::createComputePipeline(const Han
 
     VkPipeline vkPipeline{ VK_NULL_HANDLE };
 
-    if (vkCreateComputePipelines(vulkanDevice.device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &vkPipeline) != VK_SUCCESS) {
+    if (vkCreateComputePipelines(vulkanDevice->device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &vkPipeline) != VK_SUCCESS) {
         return {};
     }
 
@@ -1105,13 +1105,13 @@ VulkanComputePipeline *VulkanResourceManager::getComputePipeline(const Handle<Co
 
 Handle<GpuSemaphore_t> VulkanResourceManager::createGpuSemaphore(const Handle<Device_t> &deviceHandle, const GpuSemaphoreOptions &options)
 {
-    VulkanDevice vulkanDevice = *m_devices.get(deviceHandle);
+    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
 
     VkSemaphoreCreateInfo semaphoreInfo = {};
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
     VkSemaphore vkSemaphore{ VK_NULL_HANDLE };
-    if (vkCreateSemaphore(vulkanDevice.device, &semaphoreInfo, nullptr, &vkSemaphore) != VK_SUCCESS) {
+    if (vkCreateSemaphore(vulkanDevice->device, &semaphoreInfo, nullptr, &vkSemaphore) != VK_SUCCESS) {
         // TODO: Log failure to create a pipeline
         return {};
     }

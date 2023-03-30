@@ -21,7 +21,15 @@ struct Adapter_t;
 struct KDGPU_EXPORT VulkanDevice : public ApiDevice {
     explicit VulkanDevice(VkDevice _device,
                           VulkanResourceManager *_vulkanResourceManager,
-                          const Handle<Adapter_t> &_adapterHandle);
+                          const Handle<Adapter_t> &_adapterHandle) noexcept;
+
+    // Non Copyable
+    VulkanDevice(VulkanDevice &) noexcept = delete;
+    VulkanDevice &operator=(VulkanDevice &) noexcept = delete;
+
+    // Movable
+    VulkanDevice(VulkanDevice &&) noexcept = default;
+    VulkanDevice &operator=(VulkanDevice &&) noexcept = default;
 
     std::vector<QueueDescription> getQueues(ResourceManager *resourceManager,
                                             const std::vector<QueueRequest> &queueRequests,
