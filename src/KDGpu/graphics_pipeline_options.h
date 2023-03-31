@@ -90,6 +90,15 @@ struct DepthStencilOptions {
     friend bool operator==(const DepthStencilOptions &, const DepthStencilOptions &) = default;
 };
 
+struct DepthBiasOptions {
+    bool enabled{ false };
+    float biasConstantFactor{ 0.0f };
+    float biasClamp = { 0.0f };
+    float biasSlopeFactor = { 0.0f };
+
+    friend bool operator==(const DepthBiasOptions &, const DepthBiasOptions &) = default;
+};
+
 struct PrimitiveOptions {
     PrimitiveTopology topology{ PrimitiveTopology::TriangleList };
     bool primitiveRestart{ false };
@@ -97,6 +106,7 @@ struct PrimitiveOptions {
     FrontFace frontFace{ FrontFace::CounterClockwise };
     PolygonMode polygonMode{ PolygonMode::Fill };
     uint32_t patchControlPoints{ 0 };
+    DepthBiasOptions depthBias{};
 
     friend bool operator==(const PrimitiveOptions &, const PrimitiveOptions &) = default;
 };

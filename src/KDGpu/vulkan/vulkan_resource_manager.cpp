@@ -762,10 +762,10 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     rasterizer.lineWidth = 1.0f;
     rasterizer.cullMode = options.primitive.cullMode.toInt();
     rasterizer.frontFace = frontFaceToVkFrontFace(options.primitive.frontFace);
-    rasterizer.depthBiasEnable = VK_FALSE;
-    rasterizer.depthBiasConstantFactor = 0.0f;
-    rasterizer.depthBiasClamp = 0.0f;
-    rasterizer.depthBiasSlopeFactor = 0.0f;
+    rasterizer.depthBiasEnable = options.primitive.depthBias.enabled;
+    rasterizer.depthBiasConstantFactor = options.primitive.depthBias.biasConstantFactor;
+    rasterizer.depthBiasClamp = options.primitive.depthBias.biasClamp;
+    rasterizer.depthBiasSlopeFactor = options.primitive.depthBias.biasSlopeFactor;
 
     // Multisampling
     VkPipelineMultisampleStateCreateInfo multisampling = {};
