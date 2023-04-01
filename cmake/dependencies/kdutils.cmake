@@ -9,6 +9,9 @@ if(NOT KDUtils_FOUND)
         USES_TERMINAL_DOWNLOAD YES
         USES_TERMINAL_UPDATE YES
     )
+
+    option(KDUTILS_BUILD_TESTS "Build the tests" OFF)
+
     FetchContent_MakeAvailable(KDUtils)
 endif()
 
