@@ -37,6 +37,8 @@ std::vector<const char *> getDefaultRequestedInstanceExtensions()
     extensions.push_back("VK_KHR_win32_surface");
 #elif defined(PLATFORM_MACOS)
     extensions.push_back("VK_EXT_metal_surface");
+    extensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
+    extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
 #endif
     if (enableValidationLayers)
         extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);

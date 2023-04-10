@@ -65,6 +65,15 @@ Handle<Instance_t> VulkanResourceManager::createInstance(const InstanceOptions &
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     createInfo.pApplicationInfo = &appInfo;
 
+    // On macOS we need to enable the VK_KHR_PORTABILITY_subset instance extension so that
+    // the MoltenVK driver is allowed to be used even though it is technically non-conformant
+    // at present. Also see vulkan_config.h. For more detail see the
+    // Encountered VK_ERROR_INCOMPATIBLE_DRIVER section of
+    // https://vulkan.lunarg.com/doc/sdk/1.3.216.0/mac/getting_started.html
+#if defined(PLATFORM_MACOS)
+    createInfo.flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+#endif
+
     if (!requestedInstanceLayers.empty()) {
         createInfo.enabledLayerCount = static_cast<uint32_t>(requestedInstanceLayers.size());
         assert(requestedInstanceLayers.size() <= std::numeric_limits<uint32_t>::max());
