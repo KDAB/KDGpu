@@ -56,7 +56,7 @@ void ExampleEngineLayer::recreateSwapChain()
     // Create a depth texture to use for depth-correct rendering
     TextureOptions depthTextureOptions = {
         .type = TextureType::TextureType2D,
-        .format = Format::D24_UNORM_S8_UINT,
+        .format = m_depthFormat,
         .extent = { m_window->width(), m_window->height(), 1 },
         .mipLevels = 1,
         .samples = m_samples,
