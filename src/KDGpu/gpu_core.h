@@ -73,8 +73,16 @@ union ColorClearValue {
     int32_t int32[4];
     uint32_t uint32[4];
 
-    friend bool operator==(const ColorClearValue &, const ColorClearValue &) = default;
+    friend bool operator==(const ColorClearValue &, const ColorClearValue &);
 };
+
+inline bool operator==(const ColorClearValue &lhs, const ColorClearValue &rhs)
+{
+    return lhs.uint32[0] == rhs.uint32[0] //
+            && lhs.uint32[1] == rhs.uint32[1] //
+            && lhs.uint32[2] == rhs.uint32[2] //
+            && lhs.uint32[3] == rhs.uint32[3];
+}
 
 struct Viewport {
     float x{ 0.0f };
