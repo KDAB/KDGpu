@@ -17,6 +17,9 @@ const std::vector<const char *> requestedInstanceLayers = {};
 constexpr bool enableValidationLayers = true;
 const std::vector<const char *> requestedInstanceLayers = {
     "VK_LAYER_KHRONOS_validation",
+#if defined(PLATFORM_MACOS)
+    "VK_LAYER_KHRONOS_synchronization2"
+#endif
 };
 #endif
 
@@ -52,10 +55,9 @@ std::vector<const char *> getDefaultRequestedDeviceExtensions()
 {
     std::vector<const char *> extensions;
     extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+    extensions.push_back(VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME);
 #if defined(PLATFORM_MACOS)
     extensions.push_back("VK_KHR_portability_subset");
-#else
-    extensions.push_back(VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME);
 #endif
     return extensions;
 }
