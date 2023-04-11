@@ -6,6 +6,10 @@ if(NOT TARGET KDGpu::vulkan_memory_allocator)
     )
     FetchContent_Populate(vulkan_memory_allocator)
 
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|AppleClang|GNU")
+        add_compile_options(-Wno-implicit-fallthrough)
+    endif()
+
     set(VULKAN_MEMORY_ALLOCATOR_LIBRARY_SOURCE_FILES
         ${vulkan_memory_allocator_SOURCE_DIR}/src/VmaUsage.cpp
     )

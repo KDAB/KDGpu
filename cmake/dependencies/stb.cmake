@@ -8,7 +8,7 @@ if(NOT TARGET stb::stb)
     FetchContent_MakeAvailable(stb)
 
     add_library(stb INTERFACE)
-    target_include_directories(stb INTERFACE
+    target_include_directories(stb SYSTEM INTERFACE
         $<BUILD_INTERFACE:${stb_SOURCE_DIR}>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/stb>
     )
