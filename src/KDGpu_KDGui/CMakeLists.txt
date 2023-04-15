@@ -1,18 +1,21 @@
 find_package(Vulkan REQUIRED)
 
 set(SOURCES
+    advanced_example_engine_layer.cpp
     engine.cpp
     engine_layer.cpp
     example_engine_layer.cpp
-    advanced_example_engine_layer.cpp
+    imgui_input_handler.cpp
     simple_example_engine_layer.cpp
     view.cpp
 )
 
 set(HEADERS
+    advanced_example_engine_layer.h
     engine.h
     engine_layer.h
-    advanced_example_engine_layer.h
+    example_engine_layer.h
+    imgui_input_handler.h
     simple_example_engine_layer.h
     view.h
 )
@@ -27,11 +30,13 @@ add_library(KDGpu::KDGpu_KDGui ALIAS KDGpu_KDGui)
 set(KDGPU_KDGUI_PUBLIC_LIBS
     KDGpu::KDGpu
     KDUtils::KDGui
+    KDGpuKDGui::imgui
 )
 
 set(
     KDGPU_KDGUI_EXPORT_TARGETS
     KDGpu_KDGui
+    imgui
 )
 
 target_link_libraries(KDGpu_KDGui

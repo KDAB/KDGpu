@@ -20,6 +20,9 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/glm.cmake)
 # stb (for stb image)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/stb.cmake)
 
+# imgui (for 2D UI)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/imgui.cmake)
+
 if(TOYRENDERER_BUILD_TESTS)
     # doctest
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/doctest.cmake)

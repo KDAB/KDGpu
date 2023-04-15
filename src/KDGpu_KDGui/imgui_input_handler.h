@@ -1,0 +1,46 @@
+#pragma once
+
+#include <KDFoundation/object.h>
+
+#include <KDGui/gui_events.h>
+#include <KDGui/kdgui_keys.h>
+
+#include <kdbindings/property.h>
+
+#include <KDGpu_KDGui/kdgpu_kdgui_export.h>
+
+namespace KDGpuKDGui {
+
+class KDGPU_KDGUI_EXPORT ImGuiInputHandler : public KDFoundation::Object
+{
+public:
+    KDBindings::Property<bool> enabled{ true };
+
+    ImGuiInputHandler();
+    ~ImGuiInputHandler() override;
+
+protected:
+    void event(KDFoundation::EventReceiver *target, KDFoundation::Event *ev) override;
+    void updateInputState();
+
+private:
+    int mapSpecialKey(KDGui::Key key) const
+    {
+        return 256 + static_cast<int>(key) - ms_firstSpecialKey;
+    }
+
+    int32_t m_mousePos[2];
+    KDGui::MouseButtons m_mouseButtons{ KDGui::NoButton };
+    float m_yWheelValue{ 0.0f };
+    float m_xWheelValue{ 0.0f };
+    bool m_keys[512];
+    KDGui::KeyboardModifiers m_modifiers{ KDGui::Mod_NoModifiers };
+    std::string m_capturedText;
+
+    static constexpr int ms_firstSpecialKey{ KDGui::Key_Escape };
+    static constexpr int ms_lastSpecialKey{ KDGui::Key_Menu };
+
+    friend class OverlayRenderer;
+};
+
+} // namespace KDGpuKDGui
