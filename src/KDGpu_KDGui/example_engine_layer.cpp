@@ -1,6 +1,9 @@
 #include "example_engine_layer.h"
 
 #include <KDGpu_KDGui/engine.h>
+#include <KDGpu_KDGui/imgui_input_handler.h>
+#include <KDGpu_KDGui/imgui_item.h>
+#include <KDGpu_KDGui/imgui_renderer.h>
 
 #include <KDGpu/buffer_options.h>
 #include <KDGpu/swapchain_options.h>
@@ -338,6 +341,9 @@ void ExampleEngineLayer::onAttached()
         }
     }
 
+    // Create the ImGui overlay item
+    m_imguiOverlay = std::make_unique<ImGuiItem>(&m_device);
+
     // TODO: Move swapchain handling to View?
     recreateSwapChain();
 
@@ -351,6 +357,8 @@ void ExampleEngineLayer::onAttached()
 void ExampleEngineLayer::onDetached()
 {
     cleanupScene();
+
+    m_imguiOverlay = {};
 
     m_presentCompleteSemaphores = {};
     m_renderCompleteSemaphores = {};

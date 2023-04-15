@@ -23,6 +23,8 @@ using namespace KDGpu;
 
 namespace KDGpuKDGui {
 
+class ImGuiItem;
+
 // This determines the maximum number of frames that can be in-flight at any one time.
 // With the default setting of 2, we can be recording the commands for frame N+1 whilst
 // the GPU is executing those for frame N. We cannot then record commands for frame N+2
@@ -90,6 +92,8 @@ protected:
     std::vector<TextureView> m_swapchainViews;
     Texture m_depthTexture;
     TextureView m_depthTextureView;
+
+    std::unique_ptr<ImGuiItem> m_imguiOverlay;
 
     uint32_t m_currentSwapchainImageIndex{ 0 };
     uint32_t m_inFlightIndex{ 0 };
