@@ -2,6 +2,7 @@ project(shaders)
 
 add_subdirectory(examples)
 add_subdirectory(tests)
+add_subdirectory(kdgpu_kdgui)
 
 add_custom_target(kdgpu_assets ALL)
 
