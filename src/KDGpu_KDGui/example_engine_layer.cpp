@@ -11,6 +11,8 @@
 
 #include <KDGui/gui_application.h>
 
+#include <imgui.h>
+
 #include <algorithm>
 
 namespace KDGpuKDGui {
@@ -306,6 +308,20 @@ void ExampleEngineLayer::releaseStagingBuffers()
         SPDLOG_INFO("Released {} staging buffers", removedCount);
 }
 
+void ExampleEngineLayer::drawImGuiOverlay(ImGuiContext *ctx)
+{
+    // Do-nothing default
+    ImGui::ShowDemoWindow();
+}
+
+void ExampleEngineLayer::renderImGuiOverlay(RenderPassCommandRecorder *recorder, uint32_t inFlightIndex)
+{
+    // Updates the geometry buffers used by ImGui and records the commands needed to
+    // get the ui into a render target.
+    const Extent2D extent{ m_window->width(), m_window->height() };
+    m_imguiOverlay->render(recorder, extent, inFlightIndex);
+}
+
 void ExampleEngineLayer::onAttached()
 {
     m_window = std::make_unique<View>();
@@ -341,9 +357,6 @@ void ExampleEngineLayer::onAttached()
         }
     }
 
-    // Create the ImGui overlay item
-    m_imguiOverlay = std::make_unique<ImGuiItem>(&m_device);
-
     // TODO: Move swapchain handling to View?
     recreateSwapChain();
 
@@ -352,10 +365,17 @@ void ExampleEngineLayer::onAttached()
         m_presentCompleteSemaphores[i] = m_device.createGpuSemaphore();
         m_renderCompleteSemaphores[i] = m_device.createGpuSemaphore();
     }
+
+    // Create the ImGui overlay item
+    m_imguiOverlay = std::make_unique<ImGuiItem>(&m_device);
+    m_imguiOverlay->initialize(m_samples, m_swapchainFormat, m_depthFormat);
+
+    initializeScene();
 }
 
 void ExampleEngineLayer::onDetached()
 {
+    m_imguiOverlay->cleanup();
     cleanupScene();
 
     m_imguiOverlay = {};
@@ -371,6 +391,30 @@ void ExampleEngineLayer::onDetached()
     m_surface = {};
     m_instance = {};
     m_window = {};
+}
+
+void ExampleEngineLayer::update()
+{
+    ImGuiContext *context = m_imguiOverlay->context();
+    ImGui::SetCurrentContext(context);
+
+    // Set frame time and display size.
+    ImGuiIO &io = ImGui::GetIO();
+    io.DeltaTime = engine()->deltaTimeSeconds();
+    io.DisplaySize = ImVec2(static_cast<float>(m_window->width()), static_cast<float>(m_window->height()));
+
+    // Process the input events for ImGui
+    m_imguiOverlay->updateInputState();
+
+    // Call our imgui drawing function
+    ImGui::NewFrame();
+    drawImGuiOverlay(context);
+
+    // TODO: Draw any additional registered imgui drawing callbacks
+
+    // Process the ImGui drawing functions to generate geometry and commands. The actual buffers will be updated
+    // and commands translated by the ImGuiRenderer later in the frame.
+    ImGui::Render();
 }
 
 } // namespace KDGpuKDGui

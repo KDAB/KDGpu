@@ -19,6 +19,12 @@
 #include <memory>
 #include <vector>
 
+struct ImGuiContext;
+
+namespace KDGpu {
+class RenderPassCommandRecorder;
+}
+
 using namespace KDGpu;
 
 namespace KDGpuKDGui {
@@ -47,8 +53,12 @@ protected:
     virtual void render() = 0;
     virtual void resize() = 0;
 
+    virtual void drawImGuiOverlay(ImGuiContext *ctx);
+    virtual void renderImGuiOverlay(RenderPassCommandRecorder *recorder, uint32_t inFlightIndex);
+
     void onAttached() override;
     void onDetached() override;
+    void update() override;
 
     void recreateSwapChain();
     void waitForUploadBufferData(const Handle<Buffer_t> &destinationBuffer,

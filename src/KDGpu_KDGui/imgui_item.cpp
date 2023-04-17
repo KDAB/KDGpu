@@ -22,4 +22,27 @@ ImGuiItem::~ImGuiItem()
     ImGui::DestroyContext(m_context);
 }
 
+void ImGuiItem::initialize(KDGpu::SampleCountFlagBits samples, KDGpu::Format colorFormat, KDGpu::Format depthFormat)
+{
+    m_renderer->initialize(samples, colorFormat, depthFormat);
+}
+
+void ImGuiItem::cleanup()
+{
+    m_renderer->cleanup();
+}
+
+void ImGuiItem::updateInputState()
+{
+    m_input->updateInputState();
+}
+
+void ImGuiItem::render(KDGpu::RenderPassCommandRecorder *recorder, const KDGpu::Extent2D &extent, uint32_t inFlightIndex)
+{
+    // TODO: Should we split this out and call it as part of the updateScene() phase?
+    // Update the geometry buffers
+    if (m_renderer->updateGeometryBuffers(inFlightIndex))
+        m_renderer->recordCommands(recorder, extent, inFlightIndex);
+}
+
 } // namespace KDGpuKDGui

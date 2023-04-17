@@ -19,9 +19,10 @@ public:
     ImGuiInputHandler();
     ~ImGuiInputHandler() override;
 
+    void updateInputState();
+
 protected:
     void event(KDFoundation::EventReceiver *target, KDFoundation::Event *ev) override;
-    void updateInputState();
 
 private:
     int mapSpecialKey(KDGui::Key key) const
@@ -39,8 +40,6 @@ private:
 
     static constexpr int ms_firstSpecialKey{ KDGui::Key_Escape };
     static constexpr int ms_lastSpecialKey{ KDGui::Key_Menu };
-
-    friend class OverlayRenderer;
 };
 
 } // namespace KDGpuKDGui

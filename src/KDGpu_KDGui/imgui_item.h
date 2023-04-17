@@ -2,13 +2,17 @@
 
 #include <KDGpu_KDGui/kdgpu_kdgui_export.h>
 
+#include <KDGpu/gpu_core.h>
+
 #include <memory>
 
 struct ImGuiContext;
 
 namespace KDGpu {
 class Device;
-}
+struct Extent2D;
+class RenderPassCommandRecorder;
+} // namespace KDGpu
 
 namespace KDGpuKDGui {
 
@@ -26,6 +30,14 @@ public:
 
     ImGuiItem(ImGuiItem &&other) noexcept = default;
     ImGuiItem &operator=(ImGuiItem &&other) noexcept = default;
+
+    ImGuiContext *context() noexcept { return m_context; }
+
+    void initialize(KDGpu::SampleCountFlagBits samples, KDGpu::Format colorFormat, KDGpu::Format depthFormat);
+    void cleanup();
+
+    void updateInputState();
+    void render(KDGpu::RenderPassCommandRecorder *recorder, const KDGpu::Extent2D &extent, uint32_t inFlightIndex = 0);
 
 private:
     KDGpu::Device *m_device{ nullptr };

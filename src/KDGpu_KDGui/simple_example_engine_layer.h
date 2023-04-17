@@ -15,7 +15,6 @@ public:
     ~SimpleExampleEngineLayer() override;
 
 protected:
-    void onAttached() override;
     void update() override;
 };
 

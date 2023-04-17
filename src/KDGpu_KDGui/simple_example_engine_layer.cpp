@@ -24,14 +24,11 @@ SimpleExampleEngineLayer::~SimpleExampleEngineLayer()
 {
 }
 
-void SimpleExampleEngineLayer::onAttached()
-{
-    ExampleEngineLayer::onAttached();
-    initializeScene();
-}
-
 void SimpleExampleEngineLayer::update()
 {
+    // Call the base class to delegate any ImGui overlay drawing
+    ExampleEngineLayer::update();
+
     // Release any staging buffers we are done with
     releaseStagingBuffers();
 
