@@ -135,6 +135,7 @@ set(HEADERS
     vulkan/vulkan_command_recorder.h
     vulkan/vulkan_compute_pass_command_recorder.h
     vulkan/vulkan_compute_pipeline.h
+    vulkan/vulkan_config.h
     vulkan/vulkan_device.h
     vulkan/vulkan_enums.h
     vulkan/vulkan_fence.h
