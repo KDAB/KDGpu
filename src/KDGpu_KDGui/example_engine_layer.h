@@ -11,7 +11,6 @@
 #include <KDGpu/swapchain.h>
 #include <KDGpu/texture.h>
 #include <KDGpu/texture_view.h>
-#include <KDGpu/upload.h>
 #include <KDGpu/vulkan/vulkan_graphics_api.h>
 
 #include <KDGpu_KDGui/kdgpu_kdgui_export.h>

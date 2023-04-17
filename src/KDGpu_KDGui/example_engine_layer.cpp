@@ -77,7 +77,13 @@ void ExampleEngineLayer::waitForUploadBufferData(const Handle<Buffer_t> &destina
                                                  DeviceSize byteSize,
                                                  DeviceSize dstOffset)
 {
-    KDGpu::waitForUploadBufferData(&m_device, &m_queue, destinationBuffer, data, byteSize, dstOffset);
+    WaitForBufferUploadOptions options = {
+        .destinationBuffer = destinationBuffer,
+        .data = data,
+        .byteSize = byteSize,
+        .dstOffset = dstOffset
+    };
+    m_queue.waitForUploadBufferData(options);
 }
 
 void ExampleEngineLayer::uploadBufferData(const Handle<Buffer_t> &destinationBuffer,
@@ -87,8 +93,15 @@ void ExampleEngineLayer::uploadBufferData(const Handle<Buffer_t> &destinationBuf
                                           DeviceSize byteSize,
                                           DeviceSize dstOffset)
 {
-    m_stagingBuffers.emplace_back(
-            KDGpu::uploadBufferData(&m_device, &m_queue, destinationBuffer, dstStages, dstMask, data, byteSize, dstOffset));
+    BufferUploadOptions options = {
+        .destinationBuffer = destinationBuffer,
+        .dstStages = dstStages,
+        .dstMask = dstMask,
+        .data = data,
+        .byteSize = byteSize,
+        .dstOffset = dstOffset
+    };
+    m_stagingBuffers.emplace_back(m_queue.uploadBufferData(options));
 }
 
 void ExampleEngineLayer::waitForUploadTextureData(const Handle<Texture_t> &destinationTexture,
@@ -98,7 +111,15 @@ void ExampleEngineLayer::waitForUploadTextureData(const Handle<Texture_t> &desti
                                                   TextureLayout newLayout,
                                                   const std::vector<BufferImageCopyRegion> &regions)
 {
-    KDGpu::waitForUploadTextureData(&m_device, &m_queue, destinationTexture, data, byteSize, oldLayout, newLayout, regions);
+    WaitForTextureUploadOptions options = {
+        .destinationTexture = destinationTexture,
+        .data = data,
+        .byteSize = byteSize,
+        .oldLayout = oldLayout,
+        .newLayout = newLayout,
+        .regions = regions
+    };
+    m_queue.waitForUploadTextureData(options);
 }
 
 void ExampleEngineLayer::uploadTextureData(const Handle<Texture_t> &destinationTexture,
@@ -110,8 +131,17 @@ void ExampleEngineLayer::uploadTextureData(const Handle<Texture_t> &destinationT
                                            TextureLayout newLayout,
                                            const std::vector<BufferImageCopyRegion> &regions)
 {
-    m_stagingBuffers.emplace_back(
-            KDGpu::uploadTextureData(&m_device, &m_queue, destinationTexture, dstStages, dstMask, data, byteSize, oldLayout, newLayout, regions));
+    TextureUploadOptions options = {
+        .destinationTexture = destinationTexture,
+        .dstStages = dstStages,
+        .dstMask = dstMask,
+        .data = data,
+        .byteSize = byteSize,
+        .oldLayout = oldLayout,
+        .newLayout = newLayout,
+        .regions = regions
+    };
+    m_stagingBuffers.emplace_back(m_queue.uploadTextureData(options));
 }
 
 void ExampleEngineLayer::releaseStagingBuffers()

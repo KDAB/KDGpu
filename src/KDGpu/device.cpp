@@ -30,7 +30,7 @@ Device::Device(Adapter *adapter, GraphicsApi *api, const DeviceOptions &options)
     const uint32_t queueCount = queueDescriptions.size();
     m_queues.reserve(queueCount);
     for (uint32_t i = 0; i < queueCount; ++i)
-        m_queues.emplace_back(Queue(m_api, queueDescriptions[i]));
+        m_queues.emplace_back(Queue(m_api, m_device, queueDescriptions[i]));
 }
 
 Device::Device(Device &&other)

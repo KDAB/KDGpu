@@ -40,6 +40,7 @@ private:
     void *m_mapped{ nullptr };
 
     friend class Device;
+    friend class Queue;
     friend KDGPU_EXPORT bool operator==(const Buffer &, const Buffer &);
 };
 

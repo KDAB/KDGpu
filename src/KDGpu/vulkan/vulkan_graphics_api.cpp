@@ -36,10 +36,11 @@ Adapter VulkanGraphicsApi::createAdapterFromExistingVkPhysicalDevice(const Handl
                            VulkanAdapter(vkPhysicalDevice, m_vulkanResourceManager.get(), instanceH)));
 }
 
-Queue VulkanGraphicsApi::createQueueFromExistingVkQueue(VkQueue vkQueue, const QueueFlags queueFlags)
+Queue VulkanGraphicsApi::createQueueFromExistingVkQueue(const Handle<Device_t> &deviceH, VkQueue vkQueue, const QueueFlags queueFlags)
 {
     const Handle<Queue_t> queueHandle = m_vulkanResourceManager->insertQueue(VulkanQueue(vkQueue, m_vulkanResourceManager.get()));
     return Queue(this,
+                 deviceH,
                  QueueDescription{
                          .queue = queueHandle,
                          .flags = queueFlags,
@@ -48,9 +49,9 @@ Queue VulkanGraphicsApi::createQueueFromExistingVkQueue(VkQueue vkQueue, const Q
                  });
 }
 
-Device VulkanGraphicsApi::createDeviceFromExisitingVkDevice(Adapter *adapter,
-                                                            VkDevice vkDevice,
-                                                            std::vector<Queue> &&queues)
+Device VulkanGraphicsApi::createDeviceFromExistingVkDevice(Adapter *adapter,
+                                                           VkDevice vkDevice,
+                                                           std::vector<Queue> &&queues)
 {
     Device device;
     device.m_api = this;

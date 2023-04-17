@@ -1,5 +1,9 @@
 #pragma once
 
+#include <KDGpu/buffer.h>
+#include <KDGpu/command_buffer.h>
+#include <KDGpu/command_recorder.h>
+#include <KDGpu/fence.h>
 #include <KDGpu/gpu_core.h>
 #include <KDGpu/handle.h>
 #include <KDGpu/queue_description.h>
@@ -13,10 +17,13 @@ class GraphicsApi;
 class Surface;
 
 struct Adapter_t;
+struct Buffer_t;
 struct CommandBuffer_t;
+struct Device_t;
+struct Fence_t;
 struct GpuSemaphore_t;
 struct Swapchain_t;
-struct Fence_t;
+struct Texture_t;
 
 struct SubmitOptions {
     std::vector<Handle<CommandBuffer_t>> commandBuffers;
@@ -33,6 +40,48 @@ struct SwapchainPresentInfo {
 struct PresentOptions {
     std::vector<Handle<GpuSemaphore_t>> waitSemaphores;
     std::vector<SwapchainPresentInfo> swapchainInfos;
+};
+
+struct WaitForBufferUploadOptions {
+    Handle<Buffer_t> destinationBuffer;
+    const void *data{ nullptr };
+    DeviceSize byteSize{ 0 };
+    DeviceSize dstOffset{ 0 };
+};
+
+struct BufferUploadOptions {
+    Handle<Buffer_t> destinationBuffer;
+    PipelineStageFlags dstStages;
+    AccessFlags dstMask;
+    const void *data{ nullptr };
+    DeviceSize byteSize{ 0 };
+    DeviceSize dstOffset{ 0 };
+};
+
+struct WaitForTextureUploadOptions {
+    Handle<Texture_t> destinationTexture;
+    const void *data{ nullptr };
+    DeviceSize byteSize{ 0 };
+    TextureLayout oldLayout{ TextureLayout::Undefined };
+    TextureLayout newLayout{ TextureLayout::Undefined };
+    std::vector<BufferImageCopyRegion> regions;
+};
+
+struct TextureUploadOptions {
+    Handle<Texture_t> destinationTexture;
+    PipelineStageFlags dstStages;
+    AccessFlags dstMask;
+    const void *data{ nullptr };
+    DeviceSize byteSize{ 0 };
+    TextureLayout oldLayout{ TextureLayout::Undefined };
+    TextureLayout newLayout{ TextureLayout::Undefined };
+    std::vector<BufferImageCopyRegion> regions;
+};
+
+struct UploadStagingBuffer {
+    Fence fence;
+    Buffer buffer;
+    CommandBuffer commandBuffer;
 };
 
 class KDGPU_EXPORT Queue
@@ -56,11 +105,16 @@ public:
 
     std::vector<PresentResult> present(const PresentOptions &options);
 
+    void waitForUploadBufferData(const WaitForBufferUploadOptions &options);
+    UploadStagingBuffer uploadBufferData(const BufferUploadOptions &options);
+    void waitForUploadTextureData(const WaitForTextureUploadOptions &options);
+    UploadStagingBuffer uploadTextureData(const TextureUploadOptions &options);
+
 private:
-    Queue(GraphicsApi *api, const QueueDescription &queueDescription);
+    Queue(GraphicsApi *api, const Handle<Device_t> &device, const QueueDescription &queueDescription);
 
     GraphicsApi *m_api{ nullptr };
-
+    Handle<Device_t> m_device;
     Handle<Queue_t> m_queue;
     QueueFlags m_flags;
     uint32_t m_timestampValidBits;

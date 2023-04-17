@@ -45,6 +45,7 @@ private:
 
     friend KDGPU_EXPORT bool operator==(const Fence &, const Fence &);
     friend class Device;
+    friend class Queue;
 };
 
 KDGPU_EXPORT bool operator==(const Fence &a, const Fence &b);

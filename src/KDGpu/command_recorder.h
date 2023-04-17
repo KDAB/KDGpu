@@ -89,6 +89,7 @@ protected:
     CommandBufferLevel m_level;
 
     friend class Device;
+    friend class Queue;
 };
 
 } // namespace KDGpu

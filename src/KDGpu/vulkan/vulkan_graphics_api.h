@@ -17,10 +17,10 @@ public:
     Instance createInstanceFromExistingVkInstance(VkInstance vkInstance);
     Surface createSurfaceFromExistingVkSurface(const Handle<Instance_t> &instanceH, VkSurfaceKHR vkSurface);
     Adapter createAdapterFromExistingVkPhysicalDevice(const Handle<Instance_t> &instanceH, VkPhysicalDevice vkPhysicalDevice);
-    Queue createQueueFromExistingVkQueue(VkQueue vkQueue, const QueueFlags queueFlags);
-    Device createDeviceFromExisitingVkDevice(Adapter *adapter,
-                                             VkDevice vkDevice,
-                                             std::vector<Queue> &&queues);
+    Queue createQueueFromExistingVkQueue(const Handle<Device_t> &deviceH, VkQueue vkQueue, const QueueFlags queueFlags);
+    Device createDeviceFromExistingVkDevice(Adapter *adapter,
+                                            VkDevice vkDevice,
+                                            std::vector<Queue> &&queues);
     VkImage vkImageFromTexture(const Handle<Texture_t> textureH) const;
 
 private:
