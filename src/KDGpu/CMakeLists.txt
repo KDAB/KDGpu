@@ -25,6 +25,7 @@ set(SOURCES
     surface.cpp
     texture.cpp
     texture_view.cpp
+    upload.cpp
     vulkan/vulkan_adapter.cpp
     vulkan/vulkan_bind_group.cpp
     vulkan/vulkan_bind_group_layout.cpp
@@ -102,6 +103,7 @@ set(HEADERS
     texture_options.h
     texture_view.h
     texture_view_options.h
+    upload.h
     api/api_adapter.h
     api/api_bind_group.h
     api/api_bind_group_layout.h

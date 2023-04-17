@@ -11,6 +11,7 @@
 #include <KDGpu/swapchain.h>
 #include <KDGpu/texture.h>
 #include <KDGpu/texture_view.h>
+#include <KDGpu/upload.h>
 #include <KDGpu/vulkan/vulkan_graphics_api.h>
 
 #include <KDGpu_KDGui/kdgpu_kdgui_export.h>
@@ -110,12 +111,7 @@ protected:
     std::array<GpuSemaphore, MAX_FRAMES_IN_FLIGHT> m_presentCompleteSemaphores;
     std::array<GpuSemaphore, MAX_FRAMES_IN_FLIGHT> m_renderCompleteSemaphores;
 
-    struct StagingBuffer {
-        Fence fence;
-        Buffer buffer;
-        CommandBuffer commandBuffer;
-    };
-    std::vector<StagingBuffer> m_stagingBuffers;
+    std::vector<UploadStagingBuffer> m_stagingBuffers;
 
     const Format m_swapchainFormat{ Format::B8G8R8A8_UNORM };
 #if defined(KDGPU_PLATFORM_MACOS)
