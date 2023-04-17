@@ -36,7 +36,6 @@ Instance::Instance(Instance &&other)
 
     other.m_api = nullptr;
     other.m_instance = {};
-    other.m_adapters = {};
 }
 
 Instance &Instance::operator=(Instance &&other)
@@ -51,7 +50,6 @@ Instance &Instance::operator=(Instance &&other)
 
         other.m_api = nullptr;
         other.m_instance = {};
-        other.m_adapters = {};
     }
     return *this;
 }

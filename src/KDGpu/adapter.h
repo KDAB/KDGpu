@@ -32,6 +32,12 @@ class KDGPU_EXPORT Adapter
 public:
     ~Adapter();
 
+    Adapter(Adapter &&);
+    Adapter &operator=(Adapter &&);
+
+    Adapter(const Adapter &) = delete;
+    Adapter &operator=(const Adapter &) = delete;
+
     Handle<Adapter_t> handle() const noexcept { return m_adapter; }
     bool isValid() const noexcept { return m_adapter.isValid(); }
 

@@ -15,6 +15,32 @@ Adapter::Adapter(GraphicsApi *api, const Handle<Adapter_t> &adapter)
 
 Adapter::~Adapter()
 {
+    if (isValid())
+        m_api->resourceManager()->removeAdapter(m_adapter);
+}
+
+Adapter::Adapter(Adapter &&other)
+{
+    m_api = other.m_api;
+    m_adapter = other.m_adapter;
+
+    other.m_api = nullptr;
+    other.m_adapter = {};
+}
+
+Adapter &Adapter::operator=(Adapter &&other)
+{
+    if (this != &other) {
+        if (isValid())
+            m_api->resourceManager()->removeAdapter(m_adapter);
+
+        m_api = other.m_api;
+        m_adapter = other.m_adapter;
+
+        other.m_api = nullptr;
+        other.m_adapter = {};
+    }
+    return *this;
 }
 
 std::vector<Extension> Adapter::extensions() const
