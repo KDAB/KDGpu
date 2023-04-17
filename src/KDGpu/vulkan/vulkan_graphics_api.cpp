@@ -80,4 +80,12 @@ Device VulkanGraphicsApi::createDeviceFromExisitingVkDevice(Adapter *adapter,
     return device;
 }
 
+VkImage VulkanGraphicsApi::vkImageFromTexture(const Handle<Texture_t> textureH) const
+{
+    VulkanTexture *vulkanTexture = m_vulkanResourceManager->getTexture(textureH);
+    if (vulkanTexture)
+        return vulkanTexture->image;
+    return VK_NULL_HANDLE;
+}
+
 } // namespace KDGpu

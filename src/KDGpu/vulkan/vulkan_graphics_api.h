@@ -21,6 +21,7 @@ public:
     Device createDeviceFromExisitingVkDevice(Adapter *adapter,
                                              VkDevice vkDevice,
                                              std::vector<Queue> &&queues);
+    VkImage vkImageFromTexture(const Handle<Texture_t> textureH) const;
 
 private:
     std::unique_ptr<VulkanResourceManager> m_vulkanResourceManager;
