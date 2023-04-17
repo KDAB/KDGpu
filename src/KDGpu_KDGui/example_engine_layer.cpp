@@ -72,75 +72,13 @@ void ExampleEngineLayer::recreateSwapChain()
     m_depthTextureView = m_depthTexture.createView();
 }
 
-void ExampleEngineLayer::waitForUploadBufferData(const Handle<Buffer_t> &destinationBuffer,
-                                                 const void *data,
-                                                 DeviceSize byteSize,
-                                                 DeviceSize dstOffset)
+void ExampleEngineLayer::uploadBufferData(const BufferUploadOptions &options)
 {
-    WaitForBufferUploadOptions options = {
-        .destinationBuffer = destinationBuffer,
-        .data = data,
-        .byteSize = byteSize,
-        .dstOffset = dstOffset
-    };
-    m_queue.waitForUploadBufferData(options);
-}
-
-void ExampleEngineLayer::uploadBufferData(const Handle<Buffer_t> &destinationBuffer,
-                                          PipelineStageFlags dstStages,
-                                          AccessFlags dstMask,
-                                          const void *data,
-                                          DeviceSize byteSize,
-                                          DeviceSize dstOffset)
-{
-    BufferUploadOptions options = {
-        .destinationBuffer = destinationBuffer,
-        .dstStages = dstStages,
-        .dstMask = dstMask,
-        .data = data,
-        .byteSize = byteSize,
-        .dstOffset = dstOffset
-    };
     m_stagingBuffers.emplace_back(m_queue.uploadBufferData(options));
 }
 
-void ExampleEngineLayer::waitForUploadTextureData(const Handle<Texture_t> &destinationTexture,
-                                                  const void *data,
-                                                  DeviceSize byteSize,
-                                                  TextureLayout oldLayout,
-                                                  TextureLayout newLayout,
-                                                  const std::vector<BufferImageCopyRegion> &regions)
+void ExampleEngineLayer::uploadTextureData(const TextureUploadOptions &options)
 {
-    WaitForTextureUploadOptions options = {
-        .destinationTexture = destinationTexture,
-        .data = data,
-        .byteSize = byteSize,
-        .oldLayout = oldLayout,
-        .newLayout = newLayout,
-        .regions = regions
-    };
-    m_queue.waitForUploadTextureData(options);
-}
-
-void ExampleEngineLayer::uploadTextureData(const Handle<Texture_t> &destinationTexture,
-                                           PipelineStageFlags dstStages,
-                                           AccessFlags dstMask,
-                                           const void *data,
-                                           DeviceSize byteSize,
-                                           TextureLayout oldLayout,
-                                           TextureLayout newLayout,
-                                           const std::vector<BufferImageCopyRegion> &regions)
-{
-    TextureUploadOptions options = {
-        .destinationTexture = destinationTexture,
-        .dstStages = dstStages,
-        .dstMask = dstMask,
-        .data = data,
-        .byteSize = byteSize,
-        .oldLayout = oldLayout,
-        .newLayout = newLayout,
-        .regions = regions
-    };
     m_stagingBuffers.emplace_back(m_queue.uploadTextureData(options));
 }
 

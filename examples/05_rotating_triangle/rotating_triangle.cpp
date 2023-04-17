@@ -55,11 +55,14 @@ void RotatingTriangle::initializeScene()
             .memoryUsage = MemoryUsage::GpuOnly
         };
         m_buffer = m_device.createBuffer(bufferOptions);
-        uploadBufferData(m_buffer,
-                         PipelineStageFlagBit::VertexAttributeInputBit,
-                         AccessFlagBit::VertexAttributeReadBit,
-                         vertexData.data(),
-                         dataByteSize);
+        const BufferUploadOptions uploadOptions = {
+            .destinationBuffer = m_buffer,
+            .dstStages = PipelineStageFlagBit::VertexAttributeInputBit,
+            .dstMask = AccessFlagBit::VertexAttributeReadBit,
+            .data = vertexData.data(),
+            .byteSize = dataByteSize
+        };
+        uploadBufferData(uploadOptions);
     }
 
     // Create a buffer to hold the geometry index data

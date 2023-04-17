@@ -61,32 +61,9 @@ protected:
     void update() override;
 
     void recreateSwapChain();
-    void waitForUploadBufferData(const Handle<Buffer_t> &destinationBuffer,
-                                 const void *data,
-                                 DeviceSize byteSize,
-                                 DeviceSize dstOffset = 0);
-    void uploadBufferData(const Handle<Buffer_t> &destinationBuffer,
-                          PipelineStageFlags dstStages,
-                          AccessFlags dstMask,
-                          const void *data,
-                          DeviceSize byteSize,
-                          DeviceSize dstOffset = 0);
 
-    void waitForUploadTextureData(const Handle<Texture_t> &destinationTexture,
-                                  const void *data,
-                                  DeviceSize byteSize,
-                                  TextureLayout oldLayout,
-                                  TextureLayout newLayout,
-                                  const std::vector<BufferImageCopyRegion> &regions);
-    void uploadTextureData(const Handle<Texture_t> &destinationTexture,
-                           PipelineStageFlags dstStages,
-                           AccessFlags dstMask,
-                           const void *data,
-                           DeviceSize byteSize,
-                           TextureLayout oldLayout,
-                           TextureLayout newLayout,
-                           const std::vector<BufferImageCopyRegion> &regions);
-
+    void uploadBufferData(const BufferUploadOptions &options);
+    void uploadTextureData(const TextureUploadOptions &options);
     void releaseStagingBuffers();
 
     std::unique_ptr<GraphicsApi> m_api;

@@ -95,11 +95,14 @@ void TexturedQuad::initializeScene()
             .memoryUsage = MemoryUsage::GpuOnly
         };
         m_buffer = m_device.createBuffer(bufferOptions);
-        uploadBufferData(m_buffer,
-                         PipelineStageFlagBit::VertexAttributeInputBit,
-                         AccessFlagBit::VertexAttributeReadBit,
-                         vertexData.data(),
-                         dataByteSize);
+        const BufferUploadOptions uploadOptions = {
+            .destinationBuffer = m_buffer,
+            .dstStages = PipelineStageFlagBit::VertexAttributeInputBit,
+            .dstMask = AccessFlagBit::VertexAttributeReadBit,
+            .data = vertexData.data(),
+            .byteSize = dataByteSize
+        };
+        uploadBufferData(uploadOptions);
     }
 
     // Create a texture to hold the image data
@@ -125,14 +128,17 @@ void TexturedQuad::initializeScene()
             .imageExtent = { .width = image.width, .height = image.height, .depth = 1 }
         }};
         // clang-format on
-        uploadTextureData(m_texture,
-                          PipelineStageFlagBit::AllGraphicsBit,
-                          AccessFlagBit::MemoryReadBit,
-                          image.pixelData,
-                          image.byteSize,
-                          TextureLayout::Undefined,
-                          TextureLayout::ShaderReadOnlyOptimal,
-                          regions);
+        const TextureUploadOptions uploadOptions = {
+            .destinationTexture = m_texture,
+            .dstStages = PipelineStageFlagBit::AllGraphicsBit,
+            .dstMask = AccessFlagBit::MemoryReadBit,
+            .data = image.pixelData,
+            .byteSize = image.byteSize,
+            .oldLayout = TextureLayout::Undefined,
+            .newLayout = TextureLayout::ShaderReadOnlyOptimal,
+            .regions = regions
+        };
+        uploadTextureData(uploadOptions);
 
         // Create a view and sampler
         m_textureView = m_texture.createView();
