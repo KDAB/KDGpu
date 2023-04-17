@@ -68,6 +68,7 @@ private:
     uint32_t m_queueTypeIndex;
 
     friend class Device;
+    friend class VulkanGraphicsApi;
 };
 
 } // namespace KDGpu

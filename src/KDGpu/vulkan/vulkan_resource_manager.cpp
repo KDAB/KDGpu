@@ -276,6 +276,13 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     return deviceHandle;
 }
 
+Handle<Device_t> VulkanResourceManager::createDeviceFromExisitingVkDevice(const Handle<Adapter_t> &adapterHandle, VkDevice vkDevice)
+{
+    const auto deviceHandle = m_devices.emplace(vkDevice, this, adapterHandle, false);
+
+    return deviceHandle;
+}
+
 void VulkanResourceManager::deleteDevice(const Handle<Device_t> &handle)
 {
     VulkanDevice *vulkanDevice = m_devices.get(handle);
@@ -306,8 +313,9 @@ void VulkanResourceManager::deleteDevice(const Handle<Device_t> &handle)
     // Destroy Memory Allocator
     vmaDestroyAllocator(vulkanDevice->allocator);
 
-    // At last, destroy device
-    vkDestroyDevice(vulkanDevice->device, nullptr);
+    // At last, destroy device if we allocated it
+    if (vulkanDevice->isOwned)
+        vkDestroyDevice(vulkanDevice->device, nullptr);
 
     m_devices.remove(handle);
 }

@@ -103,6 +103,7 @@ private:
     std::vector<Queue> m_queues;
 
     friend class Adapter;
+    friend class VulkanGraphicsApi;
 };
 
 } // namespace KDGpu

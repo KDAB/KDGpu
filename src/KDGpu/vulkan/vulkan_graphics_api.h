@@ -17,6 +17,10 @@ public:
     Instance createInstanceFromExistingVkInstance(VkInstance vkInstance);
     Surface createSurfaceFromExistingVkSurface(const Handle<Instance_t> &instanceH, VkSurfaceKHR vkSurface);
     Adapter createAdapterFromExistingVkPhysicalDevice(const Handle<Instance_t> &instanceH, VkPhysicalDevice vkPhysicalDevice);
+    Queue createQueueFromExistingVkQueue(VkQueue vkQueue, const QueueFlags queueFlags);
+    Device createDeviceFromExisitingVkDevice(Adapter *adapter,
+                                             VkDevice vkDevice,
+                                             std::vector<Queue> &&queues);
 
 private:
     std::unique_ptr<VulkanResourceManager> m_vulkanResourceManager;

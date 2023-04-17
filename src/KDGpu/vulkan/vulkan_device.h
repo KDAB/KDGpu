@@ -21,7 +21,8 @@ struct Adapter_t;
 struct KDGPU_EXPORT VulkanDevice : public ApiDevice {
     explicit VulkanDevice(VkDevice _device,
                           VulkanResourceManager *_vulkanResourceManager,
-                          const Handle<Adapter_t> &_adapterHandle) noexcept;
+                          const Handle<Adapter_t> &_adapterHandle,
+                          bool _isOwned = true) noexcept;
 
     // Non Copyable
     VulkanDevice(VulkanDevice &) noexcept = delete;
@@ -49,6 +50,7 @@ struct KDGPU_EXPORT VulkanDevice : public ApiDevice {
     std::unordered_map<VulkanFramebufferKey, Handle<Framebuffer_t>> framebuffers;
 
     PFN_vkCmdPipelineBarrier2KHR vkCmdPipelineBarrier2{ nullptr };
+    bool isOwned{ true };
 };
 
 } // namespace KDGpu
