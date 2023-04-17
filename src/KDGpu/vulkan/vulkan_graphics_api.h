@@ -15,6 +15,7 @@ public:
     ~VulkanGraphicsApi() final;
 
     Instance createInstanceFromExistingVkInstance(VkInstance vkInstance);
+    Surface createSurfaceFromExistingVkSurface(const Handle<Instance_t> &instanceH, VkSurfaceKHR vkSurface);
 
 private:
     std::unique_ptr<VulkanResourceManager> m_vulkanResourceManager;

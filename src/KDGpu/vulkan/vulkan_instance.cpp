@@ -109,7 +109,14 @@ Handle<Surface_t> VulkanInstance::createSurface(const SurfaceOptions &options)
     vkSurface = createVulkanSurface(instance, options);
 #endif
 
-    VulkanSurface vulkanSurface{ vkSurface, instance };
+    VulkanSurface vulkanSurface(vkSurface, instance);
+    auto surfaceHandle = vulkanResourceManager->insertSurface(vulkanSurface);
+    return surfaceHandle;
+}
+
+Handle<Surface_t> VulkanInstance::createSurface(VkSurfaceKHR vkSurface)
+{
+    VulkanSurface vulkanSurface(vkSurface, instance, false);
     auto surfaceHandle = vulkanResourceManager->insertSurface(vulkanSurface);
     return surfaceHandle;
 }

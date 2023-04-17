@@ -401,7 +401,9 @@ void VulkanResourceManager::deleteSurface(const Handle<Surface_t> &handle)
     VulkanSurface *vulkanSurface = m_surfaces.get(handle);
     if (vulkanSurface == nullptr)
         return;
-    vkDestroySurfaceKHR(vulkanSurface->instance, vulkanSurface->surface, nullptr);
+    // Only destroy vkSurfaces we have allocated ourselves
+    if (vulkanSurface->isOwned)
+        vkDestroySurfaceKHR(vulkanSurface->instance, vulkanSurface->surface, nullptr);
     m_surfaces.remove(handle);
 }
 

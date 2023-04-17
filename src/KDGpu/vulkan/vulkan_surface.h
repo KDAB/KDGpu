@@ -8,10 +8,11 @@
 namespace KDGpu {
 
 struct KDGPU_EXPORT VulkanSurface : public ApiSurface {
-    explicit VulkanSurface(VkSurfaceKHR _surface, VkInstance _instance);
+    explicit VulkanSurface(VkSurfaceKHR _surface, VkInstance _instance, bool _isOwned = true);
 
     VkSurfaceKHR surface{ VK_NULL_HANDLE };
     VkInstance instance{ VK_NULL_HANDLE };
+    bool isOwned{ true };
 };
 
 } // namespace KDGpu

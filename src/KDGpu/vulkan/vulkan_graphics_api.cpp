@@ -23,4 +23,10 @@ Instance VulkanGraphicsApi::createInstanceFromExistingVkInstance(VkInstance vkIn
     return instance;
 }
 
+Surface VulkanGraphicsApi::createSurfaceFromExistingVkSurface(const Handle<Instance_t> &instanceH, VkSurfaceKHR vkSurface)
+{
+    VulkanInstance *instance = m_vulkanResourceManager->getInstance(instanceH);
+    return Surface(this, instance->createSurface(vkSurface));
+}
+
 } // namespace KDGpu

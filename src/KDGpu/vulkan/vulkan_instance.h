@@ -14,6 +14,7 @@ struct KDGPU_EXPORT VulkanInstance : public ApiInstance {
     std::vector<Extension> extensions() const final;
     std::vector<Handle<Adapter_t>> queryAdapters(const Handle<Instance_t> &instanceHandle) final;
     Handle<Surface_t> createSurface(const SurfaceOptions &options) final;
+    Handle<Surface_t> createSurface(VkSurfaceKHR surface);
 
     VulkanResourceManager *vulkanResourceManager{ nullptr };
     VkInstance instance{ VK_NULL_HANDLE };

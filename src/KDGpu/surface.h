@@ -33,6 +33,7 @@ private:
     Handle<Surface_t> m_surface;
 
     friend class Instance;
+    friend class VulkanGraphicsApi;
 };
 
 } // namespace KDGpu
