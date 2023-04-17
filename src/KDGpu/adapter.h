@@ -70,6 +70,7 @@ private:
     mutable std::vector<AdapterQueueType> m_queueTypes;
 
     friend class Instance;
+    friend class VulkanGraphicsApi;
 };
 
 } // namespace KDGpu

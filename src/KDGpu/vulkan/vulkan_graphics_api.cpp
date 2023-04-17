@@ -29,4 +29,11 @@ Surface VulkanGraphicsApi::createSurfaceFromExistingVkSurface(const Handle<Insta
     return Surface(this, instance->createSurface(vkSurface));
 }
 
+Adapter VulkanGraphicsApi::createAdapterFromExistingVkPhysicalDevice(const Handle<Instance_t> &instanceH, VkPhysicalDevice vkPhysicalDevice)
+{
+    return Adapter(this,
+                   m_vulkanResourceManager->insertAdapter(
+                           VulkanAdapter(vkPhysicalDevice, m_vulkanResourceManager.get(), instanceH)));
+}
+
 } // namespace KDGpu

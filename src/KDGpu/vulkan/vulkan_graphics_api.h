@@ -16,6 +16,7 @@ public:
 
     Instance createInstanceFromExistingVkInstance(VkInstance vkInstance);
     Surface createSurfaceFromExistingVkSurface(const Handle<Instance_t> &instanceH, VkSurfaceKHR vkSurface);
+    Adapter createAdapterFromExistingVkPhysicalDevice(const Handle<Instance_t> &instanceH, VkPhysicalDevice vkPhysicalDevice);
 
 private:
     std::unique_ptr<VulkanResourceManager> m_vulkanResourceManager;
