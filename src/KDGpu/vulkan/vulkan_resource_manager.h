@@ -42,6 +42,7 @@ public:
     ~VulkanResourceManager() final;
 
     Handle<Instance_t> createInstance(const InstanceOptions &options) final;
+    Handle<Instance_t> createInstanceFromExistingVkInstance(VkInstance vkInstance);
     void deleteInstance(const Handle<Instance_t> &handle) final;
     VulkanInstance *getInstance(const Handle<Instance_t> &handle) const final;
 

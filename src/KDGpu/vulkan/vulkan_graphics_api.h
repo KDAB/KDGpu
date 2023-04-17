@@ -14,6 +14,8 @@ public:
     VulkanGraphicsApi();
     ~VulkanGraphicsApi() final;
 
+    Instance createInstanceFromExistingVkInstance(VkInstance vkInstance);
+
 private:
     std::unique_ptr<VulkanResourceManager> m_vulkanResourceManager;
 };

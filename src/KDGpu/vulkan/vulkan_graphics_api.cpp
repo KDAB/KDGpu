@@ -15,4 +15,12 @@ VulkanGraphicsApi::~VulkanGraphicsApi()
 {
 }
 
+Instance VulkanGraphicsApi::createInstanceFromExistingVkInstance(VkInstance vkInstance)
+{
+    Instance instance;
+    instance.m_api = this;
+    instance.m_instance = m_vulkanResourceManager->createInstanceFromExistingVkInstance(vkInstance);
+    return instance;
+}
+
 } // namespace KDGpu

@@ -95,6 +95,40 @@ TEST_SUITE("Instance")
             CHECK(aAndD.adapter->isValid());
             CHECK(aAndD.device.isValid());
         }
+
+        SUBCASE("Can create an Instance from an existing vkInstance")
+        {
+            // GIVEN
+            VkApplicationInfo appInfo = {};
+            appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+            appInfo.pApplicationName = "createInstanceFromExistingVkInstance";
+            appInfo.applicationVersion = 0;
+            appInfo.pEngineName = "KDGpu";
+            appInfo.engineVersion = VK_MAKE_VERSION(0, 1, 0);
+            appInfo.apiVersion = VK_API_VERSION_1_2;
+
+            VkInstanceCreateInfo createInfo = {};
+            createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+            createInfo.pApplicationInfo = &appInfo;
+
+            VkInstance vkInstance = VK_NULL_HANDLE;
+
+            // WHEN
+            {
+                const VkResult result = vkCreateInstance(&createInfo, nullptr, &vkInstance);
+                CHECK(result == VK_SUCCESS);
+                Instance instanceFromExistingVkInstance = static_cast<VulkanGraphicsApi *>(api.get())->createInstanceFromExistingVkInstance(vkInstance);
+
+                // THEN
+                CHECK(instanceFromExistingVkInstance.isValid());
+
+                // WHEN
+                CHECK(instanceFromExistingVkInstance.adapters().size() > 0);
+            }
+
+            // THEN -> Shouldn't have crashed when Instance went out of scope and was destroyed
+            vkDestroyInstance(vkInstance, nullptr);
+        }
     }
 
     TEST_CASE("Destruction")

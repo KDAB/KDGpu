@@ -72,6 +72,7 @@ private:
     mutable std::vector<Adapter> m_adapters;
 
     friend class GraphicsApi;
+    friend class VulkanGraphicsApi;
 };
 
 } // namespace KDGpu

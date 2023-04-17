@@ -57,7 +57,7 @@ Handle<Instance_t> VulkanResourceManager::createInstance(const InstanceOptions &
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
     appInfo.pApplicationName = options.applicationName.data();
     appInfo.applicationVersion = options.applicationVersion;
-    appInfo.pEngineName = "Serenity Prototype";
+    appInfo.pEngineName = "KDGpu";
     appInfo.engineVersion = VK_MAKE_VERSION(0, 1, 0);
     appInfo.apiVersion = VK_API_VERSION_1_2;
 
@@ -99,10 +99,20 @@ Handle<Instance_t> VulkanResourceManager::createInstance(const InstanceOptions &
     return h;
 }
 
+Handle<Instance_t> VulkanResourceManager::createInstanceFromExistingVkInstance(VkInstance vkInstance)
+{
+    VulkanInstance vulkanInstance(this, vkInstance, false);
+    auto h = m_instances.emplace(vulkanInstance);
+    return h;
+}
+
 void VulkanResourceManager::deleteInstance(const Handle<Instance_t> &handle)
 {
     VulkanInstance *instance = m_instances.get(handle);
-    vkDestroyInstance(instance->instance, nullptr);
+
+    // Only destroy instances that we have allocated
+    if (instance->isOwned)
+        vkDestroyInstance(instance->instance, nullptr);
 
     m_instances.remove(handle);
 }
