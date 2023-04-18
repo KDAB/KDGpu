@@ -95,8 +95,19 @@ void ExampleEngineLayer::releaseStagingBuffers()
 
 void ExampleEngineLayer::drawImGuiOverlay(ImGuiContext *ctx)
 {
-    // Do-nothing default
-    ImGui::ShowDemoWindow();
+    ImGui::SetCurrentContext(ctx);
+    ImGui::SetNextWindowPos(ImVec2(10, 20));
+    ImGui::SetNextWindowSize(ImVec2(0, 0), ImGuiCond_FirstUseEver);
+    ImGui::Begin(
+            "Basic Info",
+            nullptr,
+            ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize);
+
+    ImGui::Text("App: %s", KDGui::GuiApplication::instance()->applicationName().data());
+    ImGui::Text("GPU: %s", m_device.adapter()->properties().deviceName.c_str());
+    const auto fps = engine()->fps();
+    ImGui::Text("%.2f ms/frame (%.1f fps)", (1000.0f / fps), fps);
+    ImGui::End();
 }
 
 void ExampleEngineLayer::renderImGuiOverlay(RenderPassCommandRecorder *recorder, uint32_t inFlightIndex)
@@ -113,7 +124,7 @@ void ExampleEngineLayer::onAttached()
 
     // Request an instance of the api with whatever layers and extensions we wish to request.
     InstanceOptions instanceOptions = {
-        .applicationName = KDGui::GuiApplication::instance()->objectName(),
+        .applicationName = KDGui::GuiApplication::instance()->applicationName(),
         .applicationVersion = SERENITY_MAKE_API_VERSION(0, 1, 0, 0)
     };
     m_instance = m_api->createInstance(instanceOptions);
