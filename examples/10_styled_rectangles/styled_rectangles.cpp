@@ -365,6 +365,7 @@ void StyledRectangles::render()
     renderPass.setVertexBuffer(0, m_normalizedQuad);
     renderPass.draw(DrawCommand{ .vertexCount = 4 });
 
+    renderImGuiOverlay(&renderPass);
     renderPass.end();
 
     m_commandBuffer = commandRecorder.finish();

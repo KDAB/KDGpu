@@ -290,6 +290,7 @@ void ComputeParticles::renderSingleCommandBuffer()
         opaquePass.setVertexBuffer(0, m_triangleVertexBuffer);
         opaquePass.setVertexBuffer(1, m_particleDataBuffer); // Per instance Data
         opaquePass.draw(DrawCommand{ .vertexCount = 3, .instanceCount = ParticlesCount });
+        renderImGuiOverlay(&opaquePass);
         opaquePass.end();
     }
     m_graphicsAndComputeCommands = commandRecorder.finish();
@@ -328,6 +329,7 @@ void ComputeParticles::renderMultipleCommandBuffers()
         opaquePass.setVertexBuffer(0, m_triangleVertexBuffer);
         opaquePass.setVertexBuffer(1, m_particleDataBuffer); // Per instance Data
         opaquePass.draw(DrawCommand{ .vertexCount = 3, .instanceCount = ParticlesCount });
+        renderImGuiOverlay(&opaquePass);
         opaquePass.end();
     }
     m_graphicsCommands = graphicsCommandRecorder.finish();

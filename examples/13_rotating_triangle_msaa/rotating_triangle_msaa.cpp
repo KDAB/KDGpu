@@ -265,6 +265,7 @@ void RotatingTriangleMSAA::render()
     opaquePass.setBindGroup(0, m_transformBindGroup);
     const DrawIndexedCommand drawCmd = { .indexCount = 3 };
     opaquePass.drawIndexed(drawCmd);
+    renderImGuiOverlay(&opaquePass);
     opaquePass.end();
     m_commandBuffer = commandRecorder.finish();
 

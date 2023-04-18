@@ -49,6 +49,12 @@ void AdvancedExampleEngineLayer::update()
     // Reset Fence so that we can submit it again
     m_frameFences[m_inFlightIndex].reset();
 
+    // Call the base class to delegate any ImGui overlay drawing
+    ExampleEngineLayer::update();
+
+    // Release any staging buffers we are done with
+    releaseStagingBuffers();
+
     // Call updateScene() function to update scene state.
     updateScene();
 

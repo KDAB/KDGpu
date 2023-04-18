@@ -196,6 +196,7 @@ void GradientBlobs::render()
     renderPass.setBindGroup(0, m_colorStopsBindGroup);
     renderPass.setVertexBuffer(0, m_fullScreenQuad);
     renderPass.draw(DrawCommand{ .vertexCount = 4 });
+    renderImGuiOverlay(&renderPass);
     renderPass.end();
 
     m_commandBuffer = commandRecorder.finish();

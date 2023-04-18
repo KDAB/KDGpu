@@ -143,6 +143,9 @@ void HelloTriangle::render()
     const DrawCommand drawCmd = { .vertexCount = 3 };
     opaquePass.draw(drawCmd);
 
+    // Call helper to record the ImGui overlay commands
+    renderImGuiOverlay(&opaquePass);
+
     // End render pass
     opaquePass.end();
 

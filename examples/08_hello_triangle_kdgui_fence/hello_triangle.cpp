@@ -155,6 +155,7 @@ void HelloTriangle::render()
     opaquePass.draw(drawCmd);
 
     // End render pass
+    renderImGuiOverlay(&opaquePass, m_inFlightIndex);
     opaquePass.end();
 
     // End recording

@@ -396,10 +396,7 @@ void RenderToTexture::render()
     finalPass.setBindGroup(0, m_colorBindGroup);
     finalPass.pushConstant(m_filterPosPushConstantRange, m_filterPosData.data());
     finalPass.draw(DrawCommand{ .vertexCount = 4 });
-
-    // Draw the ImGui overlay
     renderImGuiOverlay(&finalPass);
-
     finalPass.end();
 
     // Finalize the command recording

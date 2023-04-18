@@ -266,6 +266,7 @@ void TexturedQuad::render()
     opaquePass.setVertexBuffer(0, m_buffer);
     opaquePass.setBindGroup(0, m_textureBindGroup);
     opaquePass.draw(DrawCommand{ .vertexCount = 4 });
+    renderImGuiOverlay(&opaquePass);
     opaquePass.end();
     m_commandBuffer = commandRecorder.finish();
 

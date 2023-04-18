@@ -231,6 +231,7 @@ void DynamicUBOTriangles::render()
         opaquePass.drawIndexed(drawCmd);
     }
 
+    renderImGuiOverlay(&opaquePass);
     opaquePass.end();
     m_commandBuffer = commandRecorder.finish();
 
