@@ -20,8 +20,6 @@ public:
     ~ImGuiInputHandler() override;
 
     void updateInputState();
-
-protected:
     void event(KDFoundation::EventReceiver *target, KDFoundation::Event *ev) override;
 
 private:

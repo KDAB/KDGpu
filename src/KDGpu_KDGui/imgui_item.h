@@ -4,6 +4,8 @@
 
 #include <KDGpu/gpu_core.h>
 
+#include <KDFoundation/object.h>
+
 #include <memory>
 
 struct ImGuiContext;
@@ -11,6 +13,7 @@ struct ImGuiContext;
 namespace KDGpu {
 class Device;
 struct Extent2D;
+class Queue;
 class RenderPassCommandRecorder;
 } // namespace KDGpu
 
@@ -19,10 +22,10 @@ namespace KDGpuKDGui {
 class ImGuiInputHandler;
 class ImGuiRenderer;
 
-class KDGPU_KDGUI_EXPORT ImGuiItem
+class KDGPU_KDGUI_EXPORT ImGuiItem : public KDFoundation::Object
 {
 public:
-    ImGuiItem(KDGpu::Device *device);
+    ImGuiItem(KDGpu::Device *device, KDGpu::Queue *queue);
     ~ImGuiItem();
 
     ImGuiItem(const ImGuiItem &other) noexcept = delete;
@@ -37,10 +40,11 @@ public:
     void cleanup();
 
     void updateInputState();
+    void event(KDFoundation::EventReceiver *target, KDFoundation::Event *ev);
+
     void render(KDGpu::RenderPassCommandRecorder *recorder, const KDGpu::Extent2D &extent, uint32_t inFlightIndex = 0);
 
 private:
-    KDGpu::Device *m_device{ nullptr };
     ImGuiContext *m_context{ nullptr };
     std::unique_ptr<ImGuiInputHandler> m_input;
     std::unique_ptr<ImGuiRenderer> m_renderer;

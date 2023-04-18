@@ -152,7 +152,7 @@ void ExampleEngineLayer::onAttached()
     }
 
     // Create the ImGui overlay item
-    m_imguiOverlay = std::make_unique<ImGuiItem>(&m_device);
+    m_imguiOverlay = std::make_unique<ImGuiItem>(&m_device, &m_queue);
     m_imguiOverlay->initialize(m_samples, m_swapchainFormat, m_depthFormat);
 
     initializeScene();
@@ -200,6 +200,13 @@ void ExampleEngineLayer::update()
     // Process the ImGui drawing functions to generate geometry and commands. The actual buffers will be updated
     // and commands translated by the ImGuiRenderer later in the frame.
     ImGui::Render();
+}
+
+void ExampleEngineLayer::event(KDFoundation::EventReceiver *target, KDFoundation::Event *ev)
+{
+    // Forward window events to the ImGui overlay
+    if (target == m_window.get())
+        m_imguiOverlay->event(target, ev);
 }
 
 } // namespace KDGpuKDGui

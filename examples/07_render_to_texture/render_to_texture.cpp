@@ -1,6 +1,7 @@
 #include "render_to_texture.h"
 
 #include <KDGpu_KDGui/engine.h>
+#include <KDGpu_KDGui/imgui_item.h>
 
 #include <KDGpu/bind_group_layout_options.h>
 #include <KDGpu/bind_group_options.h>
@@ -395,6 +396,10 @@ void RenderToTexture::render()
     finalPass.setBindGroup(0, m_colorBindGroup);
     finalPass.pushConstant(m_filterPosPushConstantRange, m_filterPosData.data());
     finalPass.draw(DrawCommand{ .vertexCount = 4 });
+
+    // Draw the ImGui overlay
+    renderImGuiOverlay(&finalPass);
+
     finalPass.end();
 
     // Finalize the command recording

@@ -1,5 +1,6 @@
 #include "imgui_renderer.h"
 
+#include <KDGpu/bind_group_options.h>
 #include <KDGpu/bind_group_layout_options.h>
 #include <KDGpu/buffer_options.h>
 #include <KDGpu/device.h>
@@ -39,7 +40,7 @@ struct VertexImGui {
         }, {
             .location = 2,
             .binding = 0,
-            .format = KDGpu::Format::R8G8B8_UNORM,
+            .format = KDGpu::Format::R8G8B8A8_UNORM,
             .offset = offsetof(ImDrawVert, col),
         }};
         // clang-format on
@@ -60,8 +61,9 @@ inline std::string assetPath()
 #endif
 }
 
-ImGuiRenderer::ImGuiRenderer(KDGpu::Device *device, ImGuiContext *imGuiContext)
+ImGuiRenderer::ImGuiRenderer(KDGpu::Device *device, KDGpu::Queue *queue, ImGuiContext *imGuiContext)
     : m_device(device)
+    , m_queue(queue)
     , m_imGuiContext(imGuiContext)
 {
     ImGui::SetCurrentContext(m_imGuiContext);
@@ -78,14 +80,10 @@ ImGuiRenderer::ImGuiRenderer(KDGpu::Device *device, ImGuiContext *imGuiContext)
     style.ItemInnerSpacing = ImVec2(6.0f, 6.0f);
     // TODO: Create a constexpr hex -> rgb/rgba helper that works with templated vector types e.g. imgui and glm.
     style.Colors[ImGuiCol_Text] = ImVec4(226.0f / 255.0f, 232.0f / 255.0f, 240.0f / 255.0f, 1.0f);
-    style.Colors[ImGuiCol_WindowBg] = ImVec4(15.0f / 255.0f, 23.0f / 255.0f, 42.0f / 255.0f, 1.0f);
+    style.Colors[ImGuiCol_WindowBg] = ImVec4(15.0f / 255.0f, 23.0f / 255.0f, 42.0f / 255.0f, 0.85f);
     style.Colors[ImGuiCol_TitleBg] = ImVec4(30.0f / 255.0f, 41.0f / 255.0f, 59.0f / 255.0f, 1.0f);
     style.Colors[ImGuiCol_TitleBgActive] = ImVec4(51.0f / 255.0f, 65.0f / 255.0f, 85.0f / 255.0f, 1.0f);
     style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(30.0f / 255.0f, 41.0f / 255.0f, 59.0f / 255.0f, 1.0f);
-    style.Colors[ImGuiCol_FrameBg] = ImVec4(14.0f / 255.0f, 165.0f / 255.0f, 233.0f / 255.0f, 1.0f);
-    style.Colors[ImGuiCol_Button] = ImVec4(14.0f / 255.0f, 165.0f / 255.0f, 233.0f / 255.0f, 1.0f);
-    style.Colors[ImGuiCol_ButtonActive] = ImVec4(14.0f / 255.0f, 165.0f / 255.0f, 233.0f / 255.0f, 1.0f);
-    style.Colors[ImGuiCol_ButtonHovered] = ImVec4(14.0f / 255.0f, 165.0f / 255.0f, 233.0f / 255.0f, 1.0f);
 }
 
 ImGuiRenderer::~ImGuiRenderer()
@@ -138,7 +136,22 @@ void ImGuiRenderer::initialize(KDGpu::SampleCountFlagBits samples, KDGpu::Format
     };
     m_texture = m_device->createTexture(textureOptions);
 
-    // TODO: Upload the texture data once we have refactored the upload helpers to free functions
+    // Upload the font texture data
+    // clang-format off
+    const std::vector<BufferImageCopyRegion> regions = {{
+        .imageSubResource = { .aspectMask = TextureAspectFlagBits::ColorBit },
+        .imageExtent = { .width = static_cast<uint32_t>(texWidth), .height = static_cast<uint32_t>(texHeight), .depth = 1 }
+    }};
+    // clang-format on
+    const WaitForTextureUploadOptions uploadOptions = {
+        .destinationTexture = m_texture,
+        .data = fontData,
+        .byteSize = uploadSize,
+        .oldLayout = TextureLayout::Undefined,
+        .newLayout = TextureLayout::ShaderReadOnlyOptimal,
+        .regions = regions
+    };
+    m_queue->waitForUploadTextureData(uploadOptions);
 
     m_textureView = m_texture.createView();
 
@@ -147,6 +160,18 @@ void ImGuiRenderer::initialize(KDGpu::SampleCountFlagBits samples, KDGpu::Format
         .minFilter = FilterMode::Linear
     };
     m_sampler = m_device->createSampler(samplerOptions);
+
+    // Create a bind group for the font texture
+    // clang-format off
+    const BindGroupOptions bindGroupOptions = {
+        .layout = m_bindGroupLayout,
+        .resources = {{
+            .binding = 0,
+            .resource = TextureViewBinding{ .textureView = m_textureView, .sampler = m_sampler }
+        }}
+    };
+    // clang-format on
+    m_bindGroup = m_device->createBindGroup(bindGroupOptions);
 
     createPipeline(samples, colorFormat, depthFormat);
 }
@@ -186,10 +211,6 @@ void ImGuiRenderer::createPipeline(KDGpu::SampleCountFlagBits samples, KDGpu::Fo
                 .color = {
                     .srcFactor = BlendFactor::SrcAlpha,
                     .dstFactor = BlendFactor::OneMinusSrcAlpha,
-                },
-                .alpha = {
-                    .srcFactor = BlendFactor::OneMinusSrcAlpha,
-                    .dstFactor = BlendFactor::Zero
                 }
             },
         }},
@@ -225,7 +246,7 @@ bool ImGuiRenderer::updateGeometryBuffers(uint32_t inFlightIndex)
         return false;
 
     if (m_meshes.size() <= inFlightIndex) {
-        m_meshes.resize(inFlightIndex);
+        m_meshes.resize(inFlightIndex + 1);
     }
     m_mesh = &m_meshes[inFlightIndex];
 

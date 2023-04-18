@@ -17,6 +17,7 @@
 
 namespace KDGpu {
 class Device;
+class Queue;
 class RenderPassCommandRecorder;
 } // namespace KDGpu
 
@@ -27,7 +28,7 @@ namespace KDGpuKDGui {
 class KDGPU_KDGUI_EXPORT ImGuiRenderer
 {
 public:
-    ImGuiRenderer(KDGpu::Device *device, ImGuiContext *imGuiContext);
+    ImGuiRenderer(KDGpu::Device *device, KDGpu::Queue *queue, ImGuiContext *imGuiContext);
     ~ImGuiRenderer();
 
     ImGuiRenderer(const ImGuiRenderer &other) noexcept = delete;
@@ -71,6 +72,7 @@ private:
     PushConstantBlock m_pushConstantBlock;
 
     KDGpu::Device *m_device{ nullptr };
+    KDGpu::Queue *m_queue{ nullptr };
     ImGuiContext *m_imGuiContext{ nullptr };
 
     KDGpu::ShaderModule m_vertexShader;

@@ -54,11 +54,12 @@ protected:
     virtual void resize() = 0;
 
     virtual void drawImGuiOverlay(ImGuiContext *ctx);
-    virtual void renderImGuiOverlay(RenderPassCommandRecorder *recorder, uint32_t inFlightIndex);
+    virtual void renderImGuiOverlay(RenderPassCommandRecorder *recorder, uint32_t inFlightIndex = 0);
 
     void onAttached() override;
     void onDetached() override;
     void update() override;
+    void event(KDFoundation::EventReceiver *target, KDFoundation::Event *ev) override;
 
     void recreateSwapChain();
 

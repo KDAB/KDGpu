@@ -9,12 +9,11 @@
 
 namespace KDGpuKDGui {
 
-ImGuiItem::ImGuiItem(KDGpu::Device *device)
-    : m_device(device)
+ImGuiItem::ImGuiItem(KDGpu::Device *device, KDGpu::Queue *queue)
 {
     m_context = ImGui::CreateContext();
     m_input = std::make_unique<ImGuiInputHandler>();
-    m_renderer = std::make_unique<ImGuiRenderer>(m_device, m_context);
+    m_renderer = std::make_unique<ImGuiRenderer>(device, queue, m_context);
 }
 
 ImGuiItem::~ImGuiItem()
@@ -35,6 +34,11 @@ void ImGuiItem::cleanup()
 void ImGuiItem::updateInputState()
 {
     m_input->updateInputState();
+}
+
+void ImGuiItem::event(KDFoundation::EventReceiver *target, KDFoundation::Event *ev)
+{
+    m_input->event(target, ev);
 }
 
 void ImGuiItem::render(KDGpu::RenderPassCommandRecorder *recorder, const KDGpu::Extent2D &extent, uint32_t inFlightIndex)
