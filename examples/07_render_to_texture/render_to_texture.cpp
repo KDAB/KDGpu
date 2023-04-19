@@ -9,6 +9,8 @@
 #include <KDGpu/graphics_pipeline_options.h>
 #include <KDGpu/texture_options.h>
 
+#include <imgui.h>
+
 #include <glm/gtx/transform.hpp>
 
 #include <cmath>
@@ -30,6 +32,10 @@ inline std::string assetPath()
 
 void RenderToTexture::initializeScene()
 {
+    using std::placeholders::_1;
+    auto func = std::bind(&RenderToTexture::drawControls, this, _1);
+    registerImGuiOverlayDrawFunction(func);
+
     initializeMainScene();
     initializePostProcess();
 
@@ -318,6 +324,19 @@ void RenderToTexture::updateColorBindGroup()
     };
     // clang-format on
     m_colorBindGroup = m_device.createBindGroup(bindGroupOptions);
+}
+
+void RenderToTexture::drawControls(ImGuiContext *ctx)
+{
+    ImGui::SetCurrentContext(ctx);
+    ImGui::SetNextWindowPos(ImVec2(10, 150));
+    ImGui::SetNextWindowSize(ImVec2(0, 0), ImGuiCond_FirstUseEver);
+    ImGui::Begin(
+            "About",
+            nullptr,
+            ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize);
+    ImGui::Text("Renders a colorful triangle and then post-processes it.");
+    ImGui::End();
 }
 
 void RenderToTexture::cleanupScene()

@@ -16,6 +16,7 @@
 #include <KDGpu_KDGui/kdgpu_kdgui_export.h>
 
 #include <array>
+#include <functional>
 #include <memory>
 #include <vector>
 
@@ -55,6 +56,8 @@ protected:
 
     virtual void drawImGuiOverlay(ImGuiContext *ctx);
     virtual void renderImGuiOverlay(RenderPassCommandRecorder *recorder, uint32_t inFlightIndex = 0);
+    void registerImGuiOverlayDrawFunction(const std::function<void(ImGuiContext *)> &func);
+    void clearImGuiOverlayDrawFunctions();
 
     void onAttached() override;
     void onDetached() override;
@@ -82,6 +85,7 @@ protected:
     TextureView m_depthTextureView;
 
     std::unique_ptr<ImGuiItem> m_imguiOverlay;
+    std::vector<std::function<void(ImGuiContext *)>> m_imGuiOverlayDrawFunctions;
 
     uint32_t m_currentSwapchainImageIndex{ 0 };
     uint32_t m_inFlightIndex{ 0 };

@@ -26,6 +26,7 @@ private:
     void initializePostProcess();
     void createOffscreenTexture();
     void updateColorBindGroup();
+    void drawControls(ImGuiContext *ctx);
 
     // Main scene resources
     Buffer m_buffer;

@@ -108,6 +108,9 @@ void ExampleEngineLayer::drawImGuiOverlay(ImGuiContext *ctx)
     const auto fps = engine()->fps();
     ImGui::Text("%.2f ms/frame (%.1f fps)", (1000.0f / fps), fps);
     ImGui::End();
+
+    for (const auto &func : m_imGuiOverlayDrawFunctions)
+        func(ctx);
 }
 
 void ExampleEngineLayer::renderImGuiOverlay(RenderPassCommandRecorder *recorder, uint32_t inFlightIndex)
@@ -116,6 +119,16 @@ void ExampleEngineLayer::renderImGuiOverlay(RenderPassCommandRecorder *recorder,
     // get the ui into a render target.
     const Extent2D extent{ m_window->width(), m_window->height() };
     m_imguiOverlay->render(recorder, extent, inFlightIndex);
+}
+
+void ExampleEngineLayer::registerImGuiOverlayDrawFunction(const std::function<void(ImGuiContext *)> &func)
+{
+    m_imGuiOverlayDrawFunctions.push_back(func);
+}
+
+void ExampleEngineLayer::clearImGuiOverlayDrawFunctions()
+{
+    m_imGuiOverlayDrawFunctions.clear();
 }
 
 void ExampleEngineLayer::onAttached()
