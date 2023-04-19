@@ -42,7 +42,6 @@ target_compile_definitions(KDGpu_KDGui PRIVATE KDGPU_KDGUI_ASSET_PATH="${CMAKE_B
 set(
     KDGPU_KDGUI_EXPORT_TARGETS
     KDGpu_KDGui
-    imgui
 )
 
 target_link_libraries(KDGpu_KDGui
