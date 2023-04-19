@@ -11,6 +11,7 @@ using namespace KDGpuKDGui;
 int main()
 {
     GuiApplication app;
+    app.applicationName = "Hello Indexed Triangle";
     Engine engine;
     auto exampleLayer = engine.createEngineLayer<HelloIndexedTriangle>();
     engine.running = true;

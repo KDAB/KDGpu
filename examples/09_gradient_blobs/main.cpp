@@ -11,6 +11,7 @@ using namespace KDGpuKDGui;
 int main()
 {
     GuiApplication app;
+    app.applicationName = "Gradient Blobs";
     Engine engine;
     auto exampleLayer = engine.createEngineLayer<GradientBlobs>();
     engine.running = true;

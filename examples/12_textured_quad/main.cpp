@@ -11,6 +11,7 @@ using namespace KDGpuKDGui;
 int main()
 {
     GuiApplication app;
+    app.applicationName = "Textured Quad";
     Engine engine;
     auto exampleLayer = engine.createEngineLayer<TexturedQuad>();
     engine.running = true;

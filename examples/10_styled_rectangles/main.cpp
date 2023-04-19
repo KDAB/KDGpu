@@ -11,6 +11,7 @@ using namespace KDGpuKDGui;
 int main()
 {
     GuiApplication app;
+    app.applicationName = "Styled Rectangles";
     Engine engine;
     auto exampleLayer = engine.createEngineLayer<StyledRectangles>();
     engine.running = true;

@@ -121,6 +121,7 @@ void ExampleEngineLayer::renderImGuiOverlay(RenderPassCommandRecorder *recorder,
 void ExampleEngineLayer::onAttached()
 {
     m_window = std::make_unique<View>();
+    m_window->title = KDGui::GuiApplication::instance()->applicationName();
 
     // Request an instance of the api with whatever layers and extensions we wish to request.
     InstanceOptions instanceOptions = {

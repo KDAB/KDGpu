@@ -11,6 +11,7 @@ using namespace KDGpuKDGui;
 int main()
 {
     GuiApplication app;
+    app.applicationName = "Compute Particles";
     Engine engine;
     auto exampleLayer = engine.createEngineLayer<ComputeParticles>();
     engine.running = true;

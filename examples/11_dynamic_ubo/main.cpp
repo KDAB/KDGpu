@@ -11,6 +11,7 @@ using namespace KDGpuKDGui;
 int main()
 {
     GuiApplication app;
+    app.applicationName = "Dynamic UBO";
     Engine engine;
     auto exampleLayer = engine.createEngineLayer<DynamicUBOTriangles>();
     engine.running = true;

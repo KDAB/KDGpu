@@ -11,6 +11,7 @@ using namespace KDGpuKDGui;
 int main()
 {
     GuiApplication app;
+    app.applicationName = "MSAA Rotating Triangle";
     Engine engine;
     auto exampleLayer = engine.createEngineLayer<RotatingTriangleMSAA>();
     engine.running = true;

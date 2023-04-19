@@ -11,6 +11,7 @@ using namespace KDGpuKDGui;
 int main()
 {
     GuiApplication app;
+    app.applicationName = "Render to Texture";
     Engine engine;
     auto exampleLayer = engine.createEngineLayer<RenderToTexture>();
     engine.running = true;
