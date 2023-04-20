@@ -27,7 +27,7 @@ if(NOT TARGET KDGpu::vulkan_memory_allocator)
 
     target_include_directories(vulkan_memory_allocator PUBLIC
         $<BUILD_INTERFACE:${vulkan_memory_allocator_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/kdgpu/vulkan_memory_allocator>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/KDGpu/vulkan_memory_allocator>
     )
 
     option(VMA_RECORDING_ENABLED "Enable VMA memory recording for debugging" OFF)
@@ -54,5 +54,5 @@ if(NOT TARGET KDGpu::vulkan_memory_allocator)
 
     add_library(KDGpu::vulkan_memory_allocator ALIAS vulkan_memory_allocator)
 
-    install(FILES ${vulkan_memory_allocator_SOURCE_DIR}/include/vk_mem_alloc.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/kdgpu/vulkan_memory_allocator/)
+    install(FILES ${vulkan_memory_allocator_SOURCE_DIR}/include/vk_mem_alloc.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/KDGpu/vulkan_memory_allocator/)
 endif()
