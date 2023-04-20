@@ -1804,7 +1804,12 @@ Handle<Sampler_t> VulkanResourceManager::createSampler(const Handle<Device_t> &d
     samplerInfo.mipmapMode = mipMapFilterModeToVkSamplerMipmapMode(options.mipmapFilter);
     samplerInfo.mipLodBias = 0.0f;
     samplerInfo.minLod = options.lodMinClamp;
-    samplerInfo.maxLod = options.lodMaxClamp;
+    samplerInfo.maxLod =
+            options.lodMaxClamp == MipmapLodClamping::NoClamping
+            ? VK_LOD_CLAMP_NONE
+            : options.lodMaxClamp;
+
+    samplerInfo.unnormalizedCoordinates = !options.normalizedCoordinates;
 
     VkSampler sampler{ VK_NULL_HANDLE };
     if (vkCreateSampler(vulkanDevice->device, &samplerInfo, nullptr, &sampler) != VK_SUCCESS)

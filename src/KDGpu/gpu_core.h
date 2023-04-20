@@ -870,6 +870,10 @@ enum class MipmapFilterMode {
     MaxEnum = 0x7fffffff
 };
 
+namespace MipmapLodClamping {
+constexpr float NoClamping = 0x7fffffff;
+}
+
 enum class AccessFlagBit : uint64_t {
     None = 0,
     IndirectCommandReadBit = 0x00000001,

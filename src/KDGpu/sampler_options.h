@@ -15,13 +15,15 @@ struct SamplerOptions {
     AddressMode w{ AddressMode::Repeat };
 
     float lodMinClamp{ 0.0f };
-    float lodMaxClamp{ 32.0f };
+    float lodMaxClamp{ MipmapLodClamping::NoClamping };
 
     bool anisotropyEnabled{ false };
     float maxAnisotropy{ 1.0f };
 
     bool compareEnabled{ false };
     CompareOperation compare{ CompareOperation::Never };
+
+    bool normalizedCoordinates{ true };
 };
 
 } // namespace KDGpu
