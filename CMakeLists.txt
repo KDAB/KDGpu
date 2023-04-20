@@ -54,9 +54,9 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies.cmake)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    option(KDGPU_CODE_COVERAGE "Code Coverage" OFF)
+option(KDGPU_CODE_COVERAGE "Code Coverage" OFF)
 
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     if(KDGPU_CODE_COVERAGE)
         include(cmake/CodeCoverage.cmake)
     endif()
