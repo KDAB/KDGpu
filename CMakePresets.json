@@ -35,6 +35,9 @@
         "CMAKE_BUILD_TYPE": "Debug",
         "KDGPU_BUILD_TESTS": "ON",
         "KDGPU_CODE_COVERAGE": "ON"
+      },
+      "environment": {
+        "KDGPU_KDGUI_ASSET_PATH": "${sourceDir}/build/Debug/assets"
       }
     },
     {
@@ -45,6 +48,9 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "KDGPU_BUILD_TESTS": "ON"
+      },
+      "environment": {
+        "KDGPU_KDGUI_ASSET_PATH": "${sourceDir}/build/Debug/assets"
       }
     },
     {
@@ -54,6 +60,9 @@
       "binaryDir": "${sourceDir}/build/Release",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
+      },
+      "environment": {
+        "KDGPU_KDGUI_ASSET_PATH": "${sourceDir}/build/Release/assets"
       }
     },
     {
@@ -63,6 +72,9 @@
       "binaryDir": "${sourceDir}/build/Release",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
+      },
+      "environment": {
+        "KDGPU_KDGUI_ASSET_PATH": "${sourceDir}/build/Release/assets"
       }
     },
     {
@@ -72,6 +84,9 @@
       "binaryDir": "${sourceDir}/build/Profile",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+      },
+      "environment": {
+        "KDGPU_KDGUI_ASSET_PATH": "${sourceDir}/build/Profile/assets"
       }
     },
     {
@@ -81,6 +96,9 @@
       "binaryDir": "${sourceDir}/build/Profile",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+      },
+      "environment": {
+        "KDGPU_KDGUI_ASSET_PATH": "${sourceDir}/build/Profile/assets"
       }
     }
   ],

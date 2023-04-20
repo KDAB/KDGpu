@@ -1,5 +1,7 @@
 #include "imgui_renderer.h"
 
+#include <KDGpu_KDGui/kdgpu_kdgui.h>
+
 #include <KDGpu/bind_group_options.h>
 #include <KDGpu/bind_group_layout_options.h>
 #include <KDGpu/buffer_options.h>
@@ -51,15 +53,6 @@ struct VertexImGui {
 } // namespace
 
 namespace KDGpuKDGui {
-
-inline std::string assetPath()
-{
-#if defined(KDGPU_KDGUI_ASSET_PATH)
-    return KDGPU_KDGUI_ASSET_PATH;
-#else
-    return "";
-#endif
-}
 
 ImGuiRenderer::ImGuiRenderer(KDGpu::Device *device, KDGpu::Queue *queue, ImGuiContext *imGuiContext)
     : m_device(device)

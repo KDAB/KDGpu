@@ -5,6 +5,7 @@ set(SOURCES
     engine.cpp
     engine_layer.cpp
     example_engine_layer.cpp
+    kdgpu_kdgui.cpp
     imgui_input_handler.cpp
     imgui_item.cpp
     imgui_renderer.cpp
@@ -17,6 +18,7 @@ set(HEADERS
     engine.h
     engine_layer.h
     example_engine_layer.h
+    kdgpu_kdgui.h
     imgui_input_handler.h
     imgui_item.h
     imgui_renderer.h
@@ -37,7 +39,7 @@ set(KDGPU_KDGUI_PUBLIC_LIBS
     KDGpuKDGui::imgui
 )
 
-target_compile_definitions(KDGpu_KDGui PRIVATE KDGPU_KDGUI_ASSET_PATH="${CMAKE_BINARY_DIR}/assets")
+target_compile_definitions(KDGpu_KDGui PRIVATE KDGPU_KDGUI_ASSET_PATH="${CMAKE_INSTALL_FULL_DATADIR}/assets")
 
 set(
     KDGPU_KDGUI_EXPORT_TARGETS
