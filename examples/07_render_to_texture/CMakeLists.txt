@@ -1,26 +1,7 @@
 project(07_kdgpu_render_to_texture VERSION 0.1 LANGUAGES CXX)
 
-find_package(Vulkan REQUIRED)
-
-add_executable(
-    ${PROJECT_NAME}
-    main.cpp
-    render_to_texture.cpp
+add_kdgpu_example(
+    NAME ${PROJECT_NAME}
+    SOURCES main.cpp render_to_texture.cpp
+    LIBS KDGpu::KDGpu_KDGui glm::glm
 )
-
-target_link_libraries(
-    ${PROJECT_NAME}
-    KDGpu::KDGpu_KDGui
-    glm::glm
-)
-
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    target_compile_definitions(${PROJECT_NAME} PRIVATE PLATFORM_LINUX)
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    target_compile_definitions(${PROJECT_NAME} PRIVATE PLATFORM_WIN32)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE UNICODE)
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    target_compile_definitions(${PROJECT_NAME} PRIVATE PLATFORM_MACOS)
-endif()
-
-target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
