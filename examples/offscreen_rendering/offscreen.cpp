@@ -6,6 +6,7 @@
 
 #include <spdlog/spdlog.h>
 
+#include <fstream>
 #include <string>
 
 namespace KDGpu {
@@ -236,6 +237,31 @@ void Offscreen::render()
     };
     m_queue.submit(submitOptions);
     m_queue.waitUntilIdle();
+
+    // Map the host texture to cpu address space so we can save it to disk
+    const auto subresourceLayout = m_cpuColorTexture.getSubresourceLayout();
+    const uint8_t *data = static_cast<uint8_t *>(m_cpuColorTexture.map());
+    data += subresourceLayout.offset;
+
+    const std::string filename("test.ppm");
+    std::ofstream file(filename, std::ios::out | std::ios::binary);
+    file << "P6\n"
+         << m_width << "\n"
+         << m_height << "\n"
+         << 255 << "\n"; // PPM file header
+
+    for (uint32_t y = 0; y < m_height; ++y) {
+        uint32_t *texel = (uint32_t *)data;
+        for (uint32_t x = 0; x < m_width; ++x) {
+            file.write((char *)texel, 3); // Output RGB for current texel
+            ++texel;
+        }
+        data += subresourceLayout.rowPitch;
+    }
+    file.close();
+
+    SPDLOG_INFO("Saved image to disk as {}", filename);
+    m_cpuColorTexture.unmap();
 }
 
 void Offscreen::createRenderTargets()
