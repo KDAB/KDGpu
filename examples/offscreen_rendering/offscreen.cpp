@@ -187,7 +187,19 @@ void Offscreen::render()
     };
     commandRecorder.textureMemoryBarrier(copyDestinationPrepareBarrierOptions);
 
-    // TODO: Perform the copy operation
+    // Perform the copy operation
+    // clang-format off
+    const TextureToTextureCopy copyOptions = {
+        .srcTexture = m_colorTexture,
+        .srcLayout = TextureLayout::TransferSrcOptimal,
+        .dstTexture = m_cpuColorTexture,
+        .dstLayout = TextureLayout::TransferDstOptimal,
+        .regions = {{
+            .extent = { .width = m_width, .height = m_height, .depth = 1 }
+        }}
+    };
+    // clang-format on
+    commandRecorder.copyTextureToTexture(copyOptions);
 
     // Transition the destination texture to general layout so that we can map it to the cpu
     // address space later.
