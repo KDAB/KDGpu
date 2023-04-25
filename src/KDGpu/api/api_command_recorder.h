@@ -12,12 +12,14 @@ struct MemoryBarrierOptions;
 struct BufferCopy;
 struct BufferToTextureCopy;
 struct TextureToBufferCopy;
+struct TextureToTextureCopy;
 
 struct ApiCommandRecorder {
     virtual void begin() = 0;
     virtual void copyBuffer(const BufferCopy &copy) = 0;
     virtual void copyBufferToTexture(const BufferToTextureCopy &copy) = 0;
     virtual void copyTextureToBuffer(const TextureToBufferCopy &copy) = 0;
+    virtual void copyTextureToTexture(const TextureToTextureCopy &copy) = 0;
     virtual void memoryBarrier(const MemoryBarrierOptions &options) = 0;
     virtual void bufferMemoryBarrier(const BufferMemoryBarrierOptions &options) = 0;
     virtual void textureMemoryBarrier(const TextureMemoryBarrierOptions &options) = 0;

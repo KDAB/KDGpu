@@ -81,6 +81,12 @@ void CommandRecorder::copyTextureToBuffer(const TextureToBufferCopy &copy)
     apiCommandRecorder->copyTextureToBuffer(copy);
 }
 
+void CommandRecorder::copyTextureToTexture(const TextureToTextureCopy &copy)
+{
+    auto apiCommandRecorder = m_api->resourceManager()->getCommandRecorder(m_commandRecorder);
+    apiCommandRecorder->copyTextureToTexture(copy);
+}
+
 void CommandRecorder::memoryBarrier(const MemoryBarrierOptions &options)
 {
     auto apiCommandRecorder = m_api->resourceManager()->getCommandRecorder(m_commandRecorder);

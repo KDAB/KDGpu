@@ -52,6 +52,22 @@ struct TextureToBufferCopy {
     std::vector<BufferImageCopyRegion> regions;
 };
 
+struct TextureCopyRegion {
+    TextureSubresourceLayers srcSubresource{ .aspectMask = TextureAspectFlagBits::ColorBit };
+    Offset3D srcOffset{};
+    TextureSubresourceLayers dstSubresource{ .aspectMask = TextureAspectFlagBits::ColorBit };
+    Offset3D dstOffset{};
+    Extent3D extent;
+};
+
+struct TextureToTextureCopy {
+    Handle<Texture_t> srcTexture;
+    TextureLayout srcLayout;
+    Handle<Texture_t> dstTexture;
+    TextureLayout dstLayout;
+    std::vector<TextureCopyRegion> regions;
+};
+
 class KDGPU_EXPORT CommandRecorder
 {
 public:
@@ -73,6 +89,7 @@ public:
     void copyBuffer(const BufferCopy &copy);
     void copyBufferToTexture(const BufferToTextureCopy &copy);
     void copyTextureToBuffer(const TextureToBufferCopy &copy);
+    void copyTextureToTexture(const TextureToTextureCopy &copy);
     void memoryBarrier(const MemoryBarrierOptions &options);
     void bufferMemoryBarrier(const BufferMemoryBarrierOptions &options);
     void textureMemoryBarrier(const TextureMemoryBarrierOptions &options);
