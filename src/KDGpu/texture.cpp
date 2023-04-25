@@ -81,6 +81,12 @@ void Texture::unmap()
     m_mapped = nullptr;
 }
 
+SubresourceLayout Texture::getSubresourceLayout(const TextureSubresource &subresource) const
+{
+    auto apiTexture = m_api->resourceManager()->getTexture(m_texture);
+    return apiTexture->getSubresourceLayout(subresource);
+}
+
 bool operator==(const Texture &a, const Texture &b)
 {
     return a.m_api == b.m_api && a.m_device == b.m_device && a.m_texture == b.m_texture;

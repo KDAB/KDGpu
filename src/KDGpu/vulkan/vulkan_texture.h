@@ -39,6 +39,7 @@ struct KDGPU_EXPORT VulkanTexture : public ApiTexture {
 
     void *map() final;
     void unmap() final;
+    SubresourceLayout getSubresourceLayout(const TextureSubresource &subresource) const final;
 
     VkImage image{ VK_NULL_HANDLE };
     VmaAllocation allocation{ VK_NULL_HANDLE };

@@ -65,4 +65,26 @@ void VulkanTexture::unmap()
     mapped = nullptr;
 }
 
+SubresourceLayout VulkanTexture::getSubresourceLayout(const TextureSubresource &subresource) const
+{
+    auto vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
+    VkImageSubresource vkSubresource = {
+        .aspectMask = subresource.aspectMask.toInt(),
+        .mipLevel = subresource.mipLevel,
+        .arrayLayer = subresource.arrayLayer
+    };
+
+    VkSubresourceLayout vkLayout;
+    vkGetImageSubresourceLayout(vulkanDevice->device, image, &vkSubresource, &vkLayout);
+
+    SubresourceLayout layout = {
+        .offset = vkLayout.offset,
+        .size = vkLayout.size,
+        .rowPitch = vkLayout.rowPitch,
+        .arrayPitch = vkLayout.arrayPitch,
+        .depthPitch = vkLayout.depthPitch
+    };
+    return layout;
+}
+
 } // namespace KDGpu

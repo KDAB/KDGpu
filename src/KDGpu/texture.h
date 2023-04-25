@@ -13,6 +13,20 @@ struct Texture_t;
 class GraphicsApi;
 struct TextureOptions;
 
+struct TextureSubresource {
+    TextureAspectFlags aspectMask{ TextureAspectFlagBits::ColorBit };
+    uint32_t mipLevel{ 0 };
+    uint32_t arrayLayer{ 0 };
+};
+
+struct SubresourceLayout {
+    DeviceSize offset{ 0 };
+    DeviceSize size{ 0 };
+    DeviceSize rowPitch{ 0 };
+    DeviceSize arrayPitch{ 0 };
+    DeviceSize depthPitch{ 0 };
+};
+
 class KDGPU_EXPORT Texture
 {
 public:
@@ -34,6 +48,8 @@ public:
 
     void *map();
     void unmap();
+
+    SubresourceLayout getSubresourceLayout(const TextureSubresource &subresource = TextureSubresource()) const;
 
 private:
     explicit Texture(GraphicsApi *api, const Handle<Device_t> &device, const TextureOptions &options);
