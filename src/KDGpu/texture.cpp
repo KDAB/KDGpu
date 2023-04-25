@@ -63,6 +63,24 @@ TextureView Texture::createView(const TextureViewOptions &options) const
     return TextureView(m_api, textureViewHandle);
 }
 
+void *Texture::map()
+{
+    if (!m_mapped && isValid()) {
+        auto apiTexture = m_api->resourceManager()->getTexture(m_texture);
+        m_mapped = apiTexture->map();
+    }
+    return m_mapped;
+}
+
+void Texture::unmap()
+{
+    if (!m_mapped)
+        return;
+    auto apiTexture = m_api->resourceManager()->getTexture(m_texture);
+    apiTexture->unmap();
+    m_mapped = nullptr;
+}
+
 bool operator==(const Texture &a, const Texture &b)
 {
     return a.m_api == b.m_api && a.m_device == b.m_device && a.m_texture == b.m_texture;

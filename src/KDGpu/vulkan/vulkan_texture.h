@@ -37,8 +37,12 @@ struct KDGPU_EXPORT VulkanTexture : public ApiTexture {
                            VulkanResourceManager *_vulkanResourceManager,
                            const Handle<Device_t> &_deviceHandle);
 
+    void *map() final;
+    void unmap() final;
+
     VkImage image{ VK_NULL_HANDLE };
     VmaAllocation allocation{ VK_NULL_HANDLE };
+    void *mapped{ nullptr };
     Format format;
     Extent3D extent;
     uint32_t mipLevels;

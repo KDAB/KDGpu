@@ -32,6 +32,9 @@ public:
 
     TextureView createView(const TextureViewOptions &options = TextureViewOptions()) const;
 
+    void *map();
+    void unmap();
+
 private:
     explicit Texture(GraphicsApi *api, const Handle<Device_t> &device, const TextureOptions &options);
     explicit Texture(GraphicsApi *api, const Handle<Device_t> &device, const Handle<Texture_t> &handle); // From Swapchain
@@ -39,6 +42,8 @@ private:
     GraphicsApi *m_api{ nullptr };
     Handle<Device_t> m_device;
     Handle<Texture_t> m_texture;
+
+    void *m_mapped{ nullptr };
 
     friend class Swapchain;
     friend class Device;

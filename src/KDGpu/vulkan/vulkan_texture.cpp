@@ -1,5 +1,8 @@
 #include "vulkan_texture.h"
 
+#include <KDGpu/vulkan/vulkan_device.h>
+#include <KDGpu/vulkan/vulkan_resource_manager.h>
+
 namespace KDGpu {
 
 VulkanTexture::VulkanTexture(VkImage _image,
@@ -46,6 +49,20 @@ VulkanTexture::VulkanTexture(VkImage _image,
     , vulkanResourceManager(_vulkanResourceManager)
     , deviceHandle(_deviceHandle)
 {
+}
+
+void *VulkanTexture::map()
+{
+    auto vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
+    vmaMapMemory(vulkanDevice->allocator, allocation, &mapped);
+    return mapped;
+}
+
+void VulkanTexture::unmap()
+{
+    auto vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
+    vmaUnmapMemory(vulkanDevice->allocator, allocation);
+    mapped = nullptr;
 }
 
 } // namespace KDGpu
