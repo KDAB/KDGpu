@@ -29,7 +29,6 @@ private:
     // Rendering resources
     std::unique_ptr<GraphicsApi> m_api;
     Instance m_instance;
-    Surface m_surface;
     Device m_device;
     Queue m_queue;
 
