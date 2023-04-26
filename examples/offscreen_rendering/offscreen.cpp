@@ -13,13 +13,17 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
+#define STBI_MSC_SECURE_CRT
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb_image_write.h>
+
 #include <fstream>
 #include <string>
 
 struct ImageData {
     uint32_t width{ 0 };
     uint32_t height{ 0 };
-    uint8_t *pixelData{ nullptr };
+    const uint8_t *pixelData{ nullptr };
     DeviceSize byteSize{ 0 };
     Format format{ Format::R8G8B8A8_UNORM };
 };
@@ -58,6 +62,12 @@ ImageData loadImage(const std::string &path)
         .pixelData = static_cast<uint8_t *>(_data),
         .byteSize = 4 * static_cast<DeviceSize>(_width) * static_cast<DeviceSize>(_height)
     };
+}
+
+void writeImage(const std::string &path, const ImageData &image)
+{
+    const uint32_t channelCount = 4;
+    stbi_write_png(path.c_str(), image.width, image.height, channelCount, image.pixelData, image.width * channelCount);
 }
 
 } // namespace KDGpu
@@ -329,6 +339,7 @@ void Offscreen::render()
 
     SPDLOG_INFO("Mapping completed in {} s", elapsed.nsecElapsed() / 1.0e9);
 
+#if defined(KDGPU_OFFSCREEN_SAVE_AS_PPM)
     // For this example we just output the RGB channels to disk as a PPM file.
     const std::string filename("test.ppm");
     std::ofstream file(filename, std::ios::out | std::ios::binary);
@@ -346,8 +357,21 @@ void Offscreen::render()
         data += subresourceLayout.rowPitch;
     }
     file.close();
+#else
+    // Save as PNG
+    const std::string filename("test.png");
+    const ImageData imageData = {
+        .width = m_width,
+        .height = m_height,
+        .pixelData = data,
+        .byteSize = subresourceLayout.size,
+    };
+    writeImage(filename, imageData);
+#endif
+
     SPDLOG_INFO("Saving completed in {} s", elapsed.nsecElapsed() / 1.0e9);
     SPDLOG_INFO("Saved image to disk as {}", filename);
+
     m_cpuColorTexture.unmap();
 
     // See if we can release any staging buffers used for uploads. As we are waiting
