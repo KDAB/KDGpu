@@ -4,6 +4,8 @@
 #include <KDGpu/graphics_pipeline_options.h>
 #include <KDGpu/texture_options.h>
 
+#include <KDUtils/elapsedtimer.h>
+
 #include <spdlog/spdlog.h>
 
 #include <fstream>
@@ -150,6 +152,9 @@ void Offscreen::updateScene()
 
 void Offscreen::render()
 {
+    KDUtils::ElapsedTimer elapsed;
+    elapsed.start();
+
     // Render the scene to the offscreen color texture target
     auto commandRecorder = m_device.createCommandRecorder();
     auto opaquePass = commandRecorder.beginRenderPass(m_opaquePassOptions);
@@ -177,10 +182,14 @@ void Offscreen::render()
     m_queue.submit(submitOptions);
     m_queue.waitUntilIdle();
 
+    SPDLOG_INFO("Render and copy completed in {} s", elapsed.nsecElapsed() / 1.0e9);
+
     // Map the host texture to cpu address space so we can save it to disk
     const auto subresourceLayout = m_cpuColorTexture.getSubresourceLayout();
     const uint8_t *data = static_cast<uint8_t *>(m_cpuColorTexture.map());
     data += subresourceLayout.offset;
+
+    SPDLOG_INFO("Mapping completed in {} s", elapsed.nsecElapsed() / 1.0e9);
 
     // For this example we just output the RGB channels to disk as a PPM file.
     const std::string filename("test.ppm");
@@ -199,7 +208,7 @@ void Offscreen::render()
         data += subresourceLayout.rowPitch;
     }
     file.close();
-
+    SPDLOG_INFO("Saving completed in {} s", elapsed.nsecElapsed() / 1.0e9);
     SPDLOG_INFO("Saved image to disk as {}", filename);
     m_cpuColorTexture.unmap();
 }
