@@ -84,7 +84,7 @@ Offscreen::Offscreen()
     SPDLOG_INFO("Using adapter: {}", adapterProperties.deviceName);
 
     // Create a device and grab the first queue
-    m_device = adapter->createDevice();
+    m_device = adapter->createDevice(DeviceOptions{ .requestedFeatures = adapter->features() });
     m_queue = m_device.queues()[0];
 
     createRenderTargets();
@@ -214,28 +214,11 @@ void Offscreen::initializeScene()
             .topology = PrimitiveTopology::PointList
         },
         .multisample = {
-            .samples = SampleCountFlagBits::Samples1Bit
+            .samples = m_samples
         }
     };
     // clang-format on
     m_pipeline = m_device.createGraphicsPipeline(pipelineOptions);
-
-    // Most of the render pass is the same between frames. The only thing that changes, is which image
-    // of the swapchain we wish to render to. So set up what we can here, and in the render loop we will
-    // just update the color texture view.
-    // clang-format off
-    m_renderPassOptions = {
-        .colorAttachments = {
-            {
-                .view = m_colorTextureView,
-                .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f }
-            }
-        },
-        .depthStencilAttachment = {
-            .view = m_depthTextureView,
-        }
-    };
-    // clang-format on
 }
 
 void Offscreen::cleanupScene()
@@ -244,6 +227,12 @@ void Offscreen::cleanupScene()
     m_pointSampler = {};
     m_pointTextureView = {};
     m_pointTexture = {};
+    m_msaaColorTextureView = {};
+    m_msaaColorTexture = {};
+    m_colorTextureView = {};
+    m_colorTexture = {};
+    m_depthTextureView = {};
+    m_depthTexture = {};
     m_pipeline = {};
     m_pipelineLayout = {};
     m_dataBuffer = {};
@@ -339,6 +328,7 @@ void Offscreen::render()
 
     SPDLOG_INFO("Mapping completed in {} s", elapsed.nsecElapsed() / 1.0e9);
 
+#define KDGPU_OFFSCREEN_SAVE_AS_PPM
 #if defined(KDGPU_OFFSCREEN_SAVE_AS_PPM)
     // For this example we just output the RGB channels to disk as a PPM file.
     const std::string filename("test.ppm");
@@ -381,13 +371,26 @@ void Offscreen::render()
 
 void Offscreen::createRenderTargets()
 {
-    // Create a color texture to use as our render target
+    // Create a color texture to use as our color render target
+    TextureOptions msaaColorTextureOptions = {
+        .type = TextureType::TextureType2D,
+        .format = m_colorFormat,
+        .extent = { m_width, m_height, 1 },
+        .mipLevels = 1,
+        .samples = m_samples,
+        .usage = TextureUsageFlagBits::ColorAttachmentBit,
+        .memoryUsage = MemoryUsage::GpuOnly
+    };
+    m_msaaColorTexture = m_device.createTexture(msaaColorTextureOptions);
+    m_msaaColorTextureView = m_msaaColorTexture.createView();
+
+    // Create a color texture to use as our resolve render target
     TextureOptions colorTextureOptions = {
         .type = TextureType::TextureType2D,
         .format = m_colorFormat,
         .extent = { m_width, m_height, 1 },
         .mipLevels = 1,
-        .samples = SampleCountFlagBits::Samples1Bit, // TODO: Expose samples setting?
+        .samples = SampleCountFlagBits::Samples1Bit,
         .usage = TextureUsageFlagBits::ColorAttachmentBit | TextureUsageFlagBits::TransferSrcBit,
         .memoryUsage = MemoryUsage::GpuOnly
     };
@@ -400,12 +403,28 @@ void Offscreen::createRenderTargets()
         .format = m_depthFormat,
         .extent = { m_width, m_height, 1 },
         .mipLevels = 1,
-        .samples = SampleCountFlagBits::Samples1Bit, // TODO: Expose samples setting?
+        .samples = m_samples,
         .usage = TextureUsageFlagBits::DepthStencilAttachmentBit,
         .memoryUsage = MemoryUsage::GpuOnly
     };
     m_depthTexture = m_device.createTexture(depthTextureOptions);
     m_depthTextureView = m_depthTexture.createView();
+
+    // clang-format off
+    m_renderPassOptions = {
+        .colorAttachments = {
+            {
+                .view = m_msaaColorTextureView,
+                .resolveView = m_colorTextureView,
+                .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f }
+            }
+        },
+        .depthStencilAttachment = {
+            .view = m_depthTextureView,
+        },
+        .samples = m_samples
+    };
+    // clang-format on
 
     // Create a color texture that is host visible and in linear layout. We will copy into this.
     TextureOptions cpuColorTextureOptions = {

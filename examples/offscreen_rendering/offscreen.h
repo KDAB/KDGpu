@@ -42,6 +42,9 @@ private:
     uint32_t m_width{ 1920 };
     uint32_t m_height{ 1280 };
 
+    SampleCountFlagBits m_samples{ SampleCountFlagBits::Samples8Bit };
+    Texture m_msaaColorTexture;
+    TextureView m_msaaColorTextureView;
     Texture m_colorTexture;
     TextureView m_colorTextureView;
     Texture m_depthTexture;
