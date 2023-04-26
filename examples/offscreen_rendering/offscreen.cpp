@@ -1,5 +1,7 @@
 #include "offscreen.h"
 
+#include <KDGpu/bind_group_options.h>
+#include <KDGpu/bind_group_layout_options.h>
 #include <KDGpu/buffer_options.h>
 #include <KDGpu/graphics_pipeline_options.h>
 #include <KDGpu/texture_options.h>
@@ -8,8 +10,19 @@
 
 #include <spdlog/spdlog.h>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
 #include <fstream>
 #include <string>
+
+struct ImageData {
+    uint32_t width{ 0 };
+    uint32_t height{ 0 };
+    uint8_t *pixelData{ nullptr };
+    DeviceSize byteSize{ 0 };
+    Format format{ Format::R8G8B8A8_UNORM };
+};
 
 namespace KDGpu {
 
@@ -20,6 +33,31 @@ inline std::string assetPath()
 #else
     return "";
 #endif
+}
+
+ImageData loadImage(const std::string &path)
+{
+    int texChannels;
+    int _width = 0, _height = 0;
+    std::string texturePath = path;
+#ifdef PLATFORM_WIN32
+    // STB fails to load if path is /C:/... instead of C:/...
+    if (texturePath.rfind("/", 0) == 0)
+        texturePath = texturePath.substr(1);
+#endif
+    auto _data = stbi_load(texturePath.c_str(), &_width, &_height, &texChannels, STBI_rgb_alpha);
+    if (_data == nullptr) {
+        SPDLOG_WARN("Failed to load texture {} {}", path, stbi_failure_reason());
+        return {};
+    }
+    SPDLOG_DEBUG("Texture dimensions: {} x {}", _width, _height);
+
+    return ImageData{
+        .width = static_cast<uint32_t>(_width),
+        .height = static_cast<uint32_t>(_height),
+        .pixelData = static_cast<uint8_t *>(_data),
+        .byteSize = 4 * static_cast<DeviceSize>(_width) * static_cast<DeviceSize>(_height)
+    };
 }
 
 } // namespace KDGpu
@@ -49,6 +87,46 @@ Offscreen::~Offscreen()
 
 void Offscreen::initializeScene()
 {
+    // Create a texture to hold the image data
+    {
+        // Load the image data and size
+        ImageData image = loadImage(KDGpu::assetPath() + "/textures/point-64x64.png");
+
+        const TextureOptions textureOptions = {
+            .type = TextureType::TextureType2D,
+            .format = image.format,
+            .extent = { .width = image.width, .height = image.height, .depth = 1 },
+            .mipLevels = 1,
+            .usage = TextureUsageFlagBits::SampledBit | TextureUsageFlagBits::TransferDstBit,
+            .memoryUsage = MemoryUsage::GpuOnly,
+            .initialLayout = TextureLayout::Undefined
+        };
+        m_pointTexture = m_device.createTexture(textureOptions);
+
+        // Upload the texture data and transition to ShaderReadOnlyOptimal
+        // clang-format off
+        const std::vector<BufferImageCopyRegion> regions = {{
+            .imageSubResource = { .aspectMask = TextureAspectFlagBits::ColorBit },
+            .imageExtent = { .width = image.width, .height = image.height, .depth = 1 }
+        }};
+        // clang-format on
+        const TextureUploadOptions uploadOptions = {
+            .destinationTexture = m_pointTexture,
+            .dstStages = PipelineStageFlagBit::AllGraphicsBit,
+            .dstMask = AccessFlagBit::MemoryReadBit,
+            .data = image.pixelData,
+            .byteSize = image.byteSize,
+            .oldLayout = TextureLayout::Undefined,
+            .newLayout = TextureLayout::ShaderReadOnlyOptimal,
+            .regions = regions
+        };
+        m_stagingBuffers.emplace_back(m_queue.uploadTextureData(uploadOptions));
+
+        // Create a view and sampler
+        m_pointTextureView = m_pointTexture.createView();
+        m_pointSampler = m_device.createSampler(SamplerOptions{ .magFilter = FilterMode::Linear, .minFilter = FilterMode::Linear });
+    }
+
     // Create a vertex shader and fragment shader (spir-v only for now)
     const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/offscreen_rendering/plot.vert.spv";
     auto vertexShader = m_device.createShaderModule(KDGpu::readShaderFile(vertexShaderPath));
@@ -56,8 +134,35 @@ void Offscreen::initializeScene()
     const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/offscreen_rendering/plot.frag.spv";
     auto fragmentShader = m_device.createShaderModule(KDGpu::readShaderFile(fragmentShaderPath));
 
+    // Create bind group layout consisting of a single binding holding a combined texture-sampler
+    // clang-format off
+    const BindGroupLayoutOptions bindGroupLayoutOptions = {
+        .bindings = {{
+            .binding = 0,
+            .resourceType = ResourceBindingType::CombinedImageSampler,
+            .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit)
+        }}
+    };
+    // clang-format on
+    const BindGroupLayout bindGroupLayout = m_device.createBindGroupLayout(bindGroupLayoutOptions);
+
+    // Create a bindGroup to hold the uniform containing the texture and sampler
+    // clang-format off
+    const BindGroupOptions bindGroupOptions = {
+        .layout = bindGroupLayout,
+        .resources = {{
+            .binding = 0,
+            .resource = TextureViewBinding{ .textureView = m_pointTextureView, .sampler = m_pointSampler }
+        }}
+    };
+    // clang-format on
+    m_pointTextureBindGroup = m_device.createBindGroup(bindGroupOptions);
+
     // Create a pipeline layout (array of bind group layouts)
-    m_pipelineLayout = m_device.createPipelineLayout();
+    const PipelineLayoutOptions pipelineLayoutOptions = {
+        .bindGroupLayouts = { bindGroupLayout }
+    };
+    m_pipelineLayout = m_device.createPipelineLayout(pipelineLayoutOptions);
 
     // Create a pipeline
     // clang-format off
@@ -125,6 +230,10 @@ void Offscreen::initializeScene()
 
 void Offscreen::cleanupScene()
 {
+    m_pointTextureBindGroup = {};
+    m_pointSampler = {};
+    m_pointTextureView = {};
+    m_pointTexture = {};
     m_pipeline = {};
     m_pipelineLayout = {};
     m_dataBuffer = {};
@@ -187,6 +296,7 @@ void Offscreen::render()
     auto commandRecorder = m_device.createCommandRecorder();
     auto renderPass = commandRecorder.beginRenderPass(m_renderPassOptions);
     renderPass.setPipeline(m_pipeline);
+    renderPass.setBindGroup(0, m_pointTextureBindGroup);
     renderPass.setVertexBuffer(0, m_dataBuffer);
     const DrawCommand drawCmd = { .vertexCount = m_pointCount };
     renderPass.draw(drawCmd);

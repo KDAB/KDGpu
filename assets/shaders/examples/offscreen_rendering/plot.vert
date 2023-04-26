@@ -1,4 +1,5 @@
 #version 450
+#extension GL_ARB_separate_shader_objects : enable
 
 layout(location = 0) in vec4 vertexPos;
 
@@ -10,6 +11,6 @@ out gl_PerVertex
 
 void main()
 {
-    gl_PointSize = 2.0;
+    gl_PointSize = 32.0;
     gl_Position = vertexPos;
 }

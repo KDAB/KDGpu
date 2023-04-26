@@ -1,8 +1,10 @@
 #pragma once
 
+#include <KDGpu/bind_group.h>
 #include <KDGpu/device.h>
 #include <KDGpu/instance.h>
 #include <KDGpu/queue.h>
+#include <KDGpu/sampler.h>
 #include <KDGpu/texture.h>
 #include <KDGpu/texture_view.h>
 #include <KDGpu/vulkan/vulkan_graphics_api.h>
@@ -35,6 +37,7 @@ private:
     Instance m_instance;
     Device m_device;
     Queue m_queue;
+    std::vector<UploadStagingBuffer> m_stagingBuffers;
 
     uint32_t m_width{ 1920 };
     uint32_t m_height{ 1280 };
@@ -66,7 +69,12 @@ private:
     // Scene Resources
     Buffer m_dataBuffer;
     uint32_t m_pointCount{ 0 };
-    std::vector<UploadStagingBuffer> m_stagingBuffers;
+
+    Texture m_pointTexture;
+    TextureView m_pointTextureView;
+    Sampler m_pointSampler;
+    BindGroup m_pointTextureBindGroup;
+
     GraphicsPipeline m_pipeline;
     PipelineLayout m_pipelineLayout;
     RenderPassCommandRecorderOptions m_renderPassOptions;

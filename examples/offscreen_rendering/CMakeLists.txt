@@ -12,6 +12,7 @@ target_link_libraries(
     ${PROJECT_NAME}
     KDGpu::KDGpu
     glm::glm
+    stb::stb
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
