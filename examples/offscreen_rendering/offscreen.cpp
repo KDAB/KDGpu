@@ -150,6 +150,7 @@ void Offscreen::updateScene()
 
 void Offscreen::render()
 {
+    // Render the scene to the offscreen color texture target
     auto commandRecorder = m_device.createCommandRecorder();
     auto opaquePass = commandRecorder.beginRenderPass(m_opaquePassOptions);
     opaquePass.setPipeline(m_pipeline);
@@ -158,80 +159,18 @@ void Offscreen::render()
     opaquePass.draw(drawCmd);
     opaquePass.end();
 
-    // Copy from the color render target to the CPU visible color texture
+    // Copy from the color render target to the CPU visible color texture. The barriers ensure
+    // that we correctly serialize the operations performed on the GPU and also act to transition
+    // the textures into the correct layout for each step. See the explanations in the
+    // createRenderTargets() function for more information.
+    commandRecorder.textureMemoryBarrier(m_barriers[uint8_t(TextureBarriers::CopySrcPre)]);
+    commandRecorder.textureMemoryBarrier(m_barriers[uint8_t(TextureBarriers::CopyDstPre)]);
+    commandRecorder.copyTextureToTexture(m_copyOptions);
+    commandRecorder.textureMemoryBarrier(m_barriers[uint8_t(TextureBarriers::CopyDstPost)]);
+    commandRecorder.textureMemoryBarrier(m_barriers[uint8_t(TextureBarriers::CopySrcPost)]);
 
-    // Insert a texture memory barrier to ensure the rendering to the color render target
-    // is completed and to transition it into a layout suitable for copying from
-    const TextureMemoryBarrierOptions copySourcePrepareBarrierOptions = {
-        .srcStages = PipelineStageFlagBit::TransferBit,
-        .srcMask = AccessFlagBit::MemoryReadBit,
-        .dstStages = PipelineStageFlagBit::TransferBit,
-        .dstMask = AccessFlagBit::TransferReadBit,
-        .oldLayout = TextureLayout::ColorAttachmentOptimal,
-        .newLayout = TextureLayout::TransferSrcOptimal,
-        .texture = m_colorTexture,
-        .range = { .aspectMask = TextureAspectFlagBits::ColorBit }
-    };
-    commandRecorder.textureMemoryBarrier(copySourcePrepareBarrierOptions);
-
-    // Insert another texture memory barrier to transition the destination cpu visible
-    // texture into a suitable layout for copying into
-    const TextureMemoryBarrierOptions copyDestinationPrepareBarrierOptions = {
-        .srcStages = PipelineStageFlagBit::TransferBit,
-        .srcMask = AccessFlagBit::None,
-        .dstStages = PipelineStageFlagBit::TransferBit,
-        .dstMask = AccessFlagBit::TransferWriteBit,
-        .oldLayout = TextureLayout::Undefined,
-        .newLayout = TextureLayout::TransferDstOptimal,
-        .texture = m_cpuColorTexture,
-        .range = { .aspectMask = TextureAspectFlagBits::ColorBit }
-    };
-    commandRecorder.textureMemoryBarrier(copyDestinationPrepareBarrierOptions);
-
-    // Perform the copy operation
-    // clang-format off
-    const TextureToTextureCopy copyOptions = {
-        .srcTexture = m_colorTexture,
-        .srcLayout = TextureLayout::TransferSrcOptimal,
-        .dstTexture = m_cpuColorTexture,
-        .dstLayout = TextureLayout::TransferDstOptimal,
-        .regions = {{
-            .extent = { .width = m_width, .height = m_height, .depth = 1 }
-        }}
-    };
-    // clang-format on
-    commandRecorder.copyTextureToTexture(copyOptions);
-
-    // Transition the destination texture to general layout so that we can map it to the cpu
-    // address space later.
-    const TextureMemoryBarrierOptions copyDestinationCleanupBarrierOptions = {
-        .srcStages = PipelineStageFlagBit::TransferBit,
-        .srcMask = AccessFlagBit::TransferWriteBit,
-        .dstStages = PipelineStageFlagBit::TransferBit,
-        .dstMask = AccessFlagBit::MemoryReadBit,
-        .oldLayout = TextureLayout::TransferDstOptimal,
-        .newLayout = TextureLayout::General,
-        .texture = m_cpuColorTexture,
-        .range = { .aspectMask = TextureAspectFlagBits::ColorBit }
-    };
-    commandRecorder.textureMemoryBarrier(copyDestinationCleanupBarrierOptions);
-
-    // Transition the color target back to the color attachment optimal layout, ready
-    // to render again later.
-    const TextureMemoryBarrierOptions copySourceCleanupBarrierOptions = {
-        .srcStages = PipelineStageFlagBit::TransferBit,
-        .srcMask = AccessFlagBit::TransferReadBit,
-        .dstStages = PipelineStageFlagBit::TransferBit,
-        .dstMask = AccessFlagBit::MemoryReadBit,
-        .oldLayout = TextureLayout::TransferSrcOptimal,
-        .newLayout = TextureLayout::ColorAttachmentOptimal,
-        .texture = m_colorTexture,
-        .range = { .aspectMask = TextureAspectFlagBits::ColorBit }
-    };
-    commandRecorder.textureMemoryBarrier(copySourceCleanupBarrierOptions);
-
+    // Finish recording and submit
     m_commandBuffer = commandRecorder.finish();
-
     SubmitOptions submitOptions = {
         .commandBuffers = { m_commandBuffer }
     };
@@ -243,6 +182,7 @@ void Offscreen::render()
     const uint8_t *data = static_cast<uint8_t *>(m_cpuColorTexture.map());
     data += subresourceLayout.offset;
 
+    // For this example we just output the RGB channels to disk as a PPM file.
     const std::string filename("test.ppm");
     std::ofstream file(filename, std::ios::out | std::ios::binary);
     file << "P6\n"
@@ -304,4 +244,75 @@ void Offscreen::createRenderTargets()
         .memoryUsage = MemoryUsage::CpuOnly
     };
     m_cpuColorTexture = m_device.createTexture(cpuColorTextureOptions);
+
+    // Setup the options for the memory barriers that will be used to serialize the
+    // memory accesses and transition the textures into the correct layouts for each step.
+    // These will be the same for every call to render() unless we have to resize and
+    // hence recreate the textures we are rendering to and copying between.
+
+    // Insert a texture memory barrier to ensure the rendering to the color render target
+    // is completed and to transition it into a layout suitable for copying from
+    m_barriers[uint8_t(TextureBarriers::CopySrcPre)] = {
+        .srcStages = PipelineStageFlagBit::TransferBit,
+        .srcMask = AccessFlagBit::MemoryReadBit,
+        .dstStages = PipelineStageFlagBit::TransferBit,
+        .dstMask = AccessFlagBit::TransferReadBit,
+        .oldLayout = TextureLayout::ColorAttachmentOptimal,
+        .newLayout = TextureLayout::TransferSrcOptimal,
+        .texture = m_colorTexture,
+        .range = { .aspectMask = TextureAspectFlagBits::ColorBit }
+    };
+
+    // Insert another texture memory barrier to transition the destination cpu visible
+    // texture into a suitable layout for copying into
+    m_barriers[uint8_t(TextureBarriers::CopyDstPre)] = {
+        .srcStages = PipelineStageFlagBit::TransferBit,
+        .srcMask = AccessFlagBit::None,
+        .dstStages = PipelineStageFlagBit::TransferBit,
+        .dstMask = AccessFlagBit::TransferWriteBit,
+        .oldLayout = TextureLayout::Undefined,
+        .newLayout = TextureLayout::TransferDstOptimal,
+        .texture = m_cpuColorTexture,
+        .range = { .aspectMask = TextureAspectFlagBits::ColorBit }
+    };
+
+    // Transition the destination texture to general layout so that we can map it to the cpu
+    // address space later.
+    m_barriers[uint8_t(TextureBarriers::CopyDstPost)] = {
+        .srcStages = PipelineStageFlagBit::TransferBit,
+        .srcMask = AccessFlagBit::TransferWriteBit,
+        .dstStages = PipelineStageFlagBit::TransferBit,
+        .dstMask = AccessFlagBit::MemoryReadBit,
+        .oldLayout = TextureLayout::TransferDstOptimal,
+        .newLayout = TextureLayout::General,
+        .texture = m_cpuColorTexture,
+        .range = { .aspectMask = TextureAspectFlagBits::ColorBit }
+    };
+
+    // Transition the color target back to the color attachment optimal layout, ready
+    // to render again later.
+    m_barriers[uint8_t(TextureBarriers::CopySrcPost)] = {
+        .srcStages = PipelineStageFlagBit::TransferBit,
+        .srcMask = AccessFlagBit::TransferReadBit,
+        .dstStages = PipelineStageFlagBit::TransferBit,
+        .dstMask = AccessFlagBit::MemoryReadBit,
+        .oldLayout = TextureLayout::TransferSrcOptimal,
+        .newLayout = TextureLayout::ColorAttachmentOptimal,
+        .texture = m_colorTexture,
+        .range = { .aspectMask = TextureAspectFlagBits::ColorBit }
+    };
+
+    // Likewise, we can specify the copy operation parameters once here and reuse them many
+    // times in calls to render().
+    // clang-format off
+    m_copyOptions = {
+        .srcTexture = m_colorTexture,
+        .srcLayout = TextureLayout::TransferSrcOptimal,
+        .dstTexture = m_cpuColorTexture,
+        .dstLayout = TextureLayout::TransferDstOptimal,
+        .regions = {{
+            .extent = { .width = m_width, .height = m_height, .depth = 1 }
+        }}
+    };
+    // clang-format on
 }

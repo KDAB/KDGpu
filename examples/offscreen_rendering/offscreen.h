@@ -42,6 +42,16 @@ private:
 
     Texture m_cpuColorTexture;
 
+    enum class TextureBarriers : uint8_t {
+        CopySrcPre = 0,
+        CopyDstPre,
+        CopyDstPost,
+        CopySrcPost,
+        Count
+    };
+    TextureMemoryBarrierOptions m_barriers[uint8_t(TextureBarriers::Count)];
+    TextureToTextureCopy m_copyOptions;
+
     const Format m_colorFormat{ Format::R8G8B8A8_UNORM };
 #if defined(KDGPU_PLATFORM_MACOS)
     const Format m_depthFormat{ Format::D32_SFLOAT_S8_UINT };
