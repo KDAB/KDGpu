@@ -45,7 +45,7 @@ private:
     std::vector<UploadStagingBuffer> m_stagingBuffers;
 
     uint32_t m_width{ 1920 };
-    uint32_t m_height{ 1280 };
+    uint32_t m_height{ 1080 };
 
     SampleCountFlagBits m_samples{ SampleCountFlagBits::Samples8Bit };
     Texture m_msaaColorTexture;

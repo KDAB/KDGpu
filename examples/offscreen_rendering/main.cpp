@@ -50,6 +50,9 @@ int main()
 
     Offscreen offscreen;
     offscreen.initializeScene();
+    // Uncomment to do an 8k offscreen render
+    // const uint32_t fullHdScale = 4;
+    // offscreen.resize(fullHdScale * 1920, fullHdScale * 1080);
     offscreen.setData(data);
     offscreen.render();
 }
