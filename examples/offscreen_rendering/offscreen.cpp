@@ -100,7 +100,7 @@ void Offscreen::initializeScene()
     // Create a texture to hold the image data
     {
         // Load the image data and size
-        ImageData image = loadImage(KDGpu::assetPath() + "/textures/point-64x64.png");
+        ImageData image = loadImage(KDGpu::assetPath() + "/textures/point-simple-large.png");
 
         const TextureOptions textureOptions = {
             .type = TextureType::TextureType2D,

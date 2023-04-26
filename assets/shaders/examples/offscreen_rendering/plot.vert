@@ -11,6 +11,6 @@ out gl_PerVertex
 
 void main()
 {
-    gl_PointSize = 32.0;
+    gl_PointSize = 16.0;
     gl_Position = vertexPos;
 }
