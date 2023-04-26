@@ -7,7 +7,10 @@
 #include <KDGpu/texture_view.h>
 #include <KDGpu/vulkan/vulkan_graphics_api.h>
 
+#include <glm/glm.hpp>
+
 #include <memory>
+#include <vector>
 
 using namespace KDGpu;
 
@@ -20,10 +23,11 @@ public:
     void initializeScene();
     void cleanupScene();
     void resize(uint32_t width, uint32_t height);
-    void updateScene(); // Pass in data here?
+    void updateScene(const std::vector<glm::vec2> &data); // Pass in data here?
     void render(); // Return the image data?
 
 private:
+    void releaseStagingBuffers();
     void createRenderTargets();
 
     // Rendering resources
@@ -60,6 +64,9 @@ private:
 #endif
 
     // Scene Resources
+    Buffer m_dataBuffer;
+    std::vector<UploadStagingBuffer> m_stagingBuffers;
+
     Buffer m_buffer;
     GraphicsPipeline m_pipeline;
     PipelineLayout m_pipelineLayout;

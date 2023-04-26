@@ -11,6 +11,7 @@ add_executable(
 target_link_libraries(
     ${PROJECT_NAME}
     KDGpu::KDGpu
+    glm::glm
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")

@@ -146,8 +146,38 @@ void Offscreen::resize(uint32_t width, uint32_t height)
     createRenderTargets();
 }
 
-void Offscreen::updateScene()
+void Offscreen::updateScene(const std::vector<glm::vec2> &data)
 {
+    const DeviceSize dataByteSize = data.size() * sizeof(glm::vec2);
+    BufferOptions bufferOptions = {
+        .size = dataByteSize,
+        .usage = BufferUsageFlagBits::VertexBufferBit | BufferUsageFlagBits::TransferDstBit,
+        .memoryUsage = MemoryUsage::GpuOnly
+    };
+    m_dataBuffer = m_device.createBuffer(bufferOptions);
+    const BufferUploadOptions uploadOptions = {
+        .destinationBuffer = m_dataBuffer,
+        .dstStages = PipelineStageFlagBit::VertexAttributeInputBit,
+        .dstMask = AccessFlagBit::VertexAttributeReadBit,
+        .data = data.data(),
+        .byteSize = dataByteSize
+    };
+
+    // Initiate the data upload. We note the upload details so that we can
+    // test to see when it is safe to destroy the staging buffer. We will check
+    // at the end of each render function.
+    m_stagingBuffers.emplace_back(m_queue.uploadBufferData(uploadOptions));
+}
+
+void Offscreen::releaseStagingBuffers()
+{
+    // Loop over any staging buffers and see if the corresponding fence has been signalled.
+    // If so, we can dispose of them
+    const auto removedCount = std::erase_if(m_stagingBuffers, [](const UploadStagingBuffer &stagingBuffer) {
+        return stagingBuffer.fence.status() == FenceStatus::Signalled;
+    });
+    if (removedCount)
+        SPDLOG_INFO("Released {} staging buffers", removedCount);
 }
 
 void Offscreen::render()
@@ -211,6 +241,10 @@ void Offscreen::render()
     SPDLOG_INFO("Saving completed in {} s", elapsed.nsecElapsed() / 1.0e9);
     SPDLOG_INFO("Saved image to disk as {}", filename);
     m_cpuColorTexture.unmap();
+
+    // See if we can release any staging buffers used for uploads. As we are waiting
+    // for the queue to become idle above, we should always be able to release here.
+    releaseStagingBuffers();
 }
 
 void Offscreen::createRenderTargets()
