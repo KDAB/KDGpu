@@ -1,6 +1,7 @@
 #include "offscreen.h"
 
 #include <glm/glm.hpp>
+#include <glm/gtx/color_space.hpp>
 
 #include <spdlog/spdlog.h>
 
@@ -8,9 +9,9 @@
 
 using namespace KDGpu;
 
-std::vector<glm::vec2> generateData(uint32_t count)
+std::vector<Offscreen::Vertex> generateData(uint32_t count)
 {
-    std::vector<glm::vec2> data;
+    std::vector<Offscreen::Vertex> data;
     data.reserve(count);
 
     // Quadratic function with some added noise. Useful to test directly in NDC (-1, -1) to (1, 1)
@@ -25,9 +26,17 @@ std::vector<glm::vec2> generateData(uint32_t count)
     for (uint32_t i = 0; i < count; ++i) {
         double x = xMin + double(i) * dx;
         double y = 2.0 * x * x - 1.0 + rndDist(rndEngine) * noiseScale;
-        // SPDLOG_INFO("{}, {}", x, y);
 
-        data.emplace_back(float(x), float(y));
+        // Hue goes from 0->360
+        const glm::vec3 hsv = { 360.0f * (0.5f + x / (xMax - xMin)), 0.71f, 0.9f };
+        const glm::vec3 rgb = glm::rgbColor(hsv);
+
+        Offscreen::Vertex v = {
+            .pos = { float(x), float(y) },
+            .color = { rgb, 1.0f }
+        };
+
+        data.emplace_back(v);
     }
 
     return data;
@@ -36,8 +45,8 @@ std::vector<glm::vec2> generateData(uint32_t count)
 int main()
 {
     // Let's prepare some data to plot
-    const uint32_t dataPointCount = 300;
-    const std::vector<glm::vec2> data = generateData(dataPointCount);
+    const uint32_t dataPointCount = 1000;
+    const std::vector<Offscreen::Vertex> data = generateData(dataPointCount);
 
     Offscreen offscreen;
     offscreen.initializeScene();

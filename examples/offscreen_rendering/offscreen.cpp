@@ -184,10 +184,11 @@ void Offscreen::initializeScene()
         .layout = m_pipelineLayout,
         .vertex = {
             .buffers = {
-                { .binding = 0, .stride = sizeof(glm::vec2) }
+                { .binding = 0, .stride = sizeof(Offscreen::Vertex) }
             },
             .attributes = {
-                { .location = 0, .binding = 0, .format = Format::R32G32_SFLOAT } // Position
+                { .location = 0, .binding = 0, .format = Format::R32G32_SFLOAT }, // Position
+                { .location = 1, .binding = 0, .format = Format::R32G32B32A32_SFLOAT, .offset = sizeof(glm::vec2) } // Color
             }
         },
         .renderTargets = {{
@@ -195,12 +196,12 @@ void Offscreen::initializeScene()
             .blending = {
                 .blendingEnabled = true,
                 .color = {
-                    .srcFactor = BlendFactor::One,
-                    .dstFactor = BlendFactor::One
+                    .srcFactor = BlendFactor::SrcAlpha,
+                    .dstFactor = BlendFactor::OneMinusSrcAlpha
                 },
                 .alpha = {
                     .srcFactor = BlendFactor::SrcAlpha,
-                    .dstFactor = BlendFactor::DstAlpha
+                    .dstFactor = BlendFactor::OneMinusSrcAlpha
                 }
             }
         }},
@@ -250,11 +251,11 @@ void Offscreen::resize(uint32_t width, uint32_t height)
     createRenderTargets();
 }
 
-void Offscreen::setData(const std::vector<glm::vec2> &data)
+void Offscreen::setData(const std::vector<Offscreen::Vertex> &data)
 {
     m_pointCount = data.size();
 
-    const DeviceSize dataByteSize = data.size() * sizeof(glm::vec2);
+    const DeviceSize dataByteSize = data.size() * sizeof(Offscreen::Vertex);
     BufferOptions bufferOptions = {
         .size = dataByteSize,
         .usage = BufferUsageFlagBits::VertexBufferBit | BufferUsageFlagBits::TransferDstBit,
@@ -328,7 +329,7 @@ void Offscreen::render()
 
     SPDLOG_INFO("Mapping completed in {} s", elapsed.nsecElapsed() / 1.0e9);
 
-#define KDGPU_OFFSCREEN_SAVE_AS_PPM
+// #define KDGPU_OFFSCREEN_SAVE_AS_PPM
 #if defined(KDGPU_OFFSCREEN_SAVE_AS_PPM)
     // For this example we just output the RGB channels to disk as a PPM file.
     const std::string filename("test.ppm");

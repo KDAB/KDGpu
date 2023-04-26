@@ -19,13 +19,18 @@ using namespace KDGpu;
 class Offscreen
 {
 public:
+    struct Vertex {
+        glm::vec2 pos;
+        glm::vec4 color;
+    };
+
     Offscreen();
     ~Offscreen();
 
     void initializeScene();
     void cleanupScene();
     void resize(uint32_t width, uint32_t height);
-    void setData(const std::vector<glm::vec2> &data); // Pass in data here?
+    void setData(const std::vector<Offscreen::Vertex> &data); // Pass in data here?
     void render(); // Return the image data?
 
 private:

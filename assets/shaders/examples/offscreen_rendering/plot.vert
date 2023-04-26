@@ -2,6 +2,9 @@
 #extension GL_ARB_separate_shader_objects : enable
 
 layout(location = 0) in vec4 vertexPos;
+layout(location = 1) in vec4 vertexCol;
+
+layout(location = 0) out vec4 color;
 
 out gl_PerVertex
 {
@@ -11,6 +14,7 @@ out gl_PerVertex
 
 void main()
 {
+    color = vertexCol;
     gl_PointSize = 16.0;
     gl_Position = vertexPos;
 }
