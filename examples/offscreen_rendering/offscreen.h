@@ -23,7 +23,7 @@ public:
     void initializeScene();
     void cleanupScene();
     void resize(uint32_t width, uint32_t height);
-    void updateScene(const std::vector<glm::vec2> &data); // Pass in data here?
+    void setData(const std::vector<glm::vec2> &data); // Pass in data here?
     void render(); // Return the image data?
 
 private:
@@ -65,11 +65,10 @@ private:
 
     // Scene Resources
     Buffer m_dataBuffer;
+    uint32_t m_pointCount{ 0 };
     std::vector<UploadStagingBuffer> m_stagingBuffers;
-
-    Buffer m_buffer;
     GraphicsPipeline m_pipeline;
     PipelineLayout m_pipelineLayout;
-    RenderPassCommandRecorderOptions m_opaquePassOptions;
+    RenderPassCommandRecorderOptions m_renderPassOptions;
     CommandBuffer m_commandBuffer;
 };
