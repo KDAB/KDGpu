@@ -1,3 +1,12 @@
+# This file is part of KDGpu.
+#
+# SPDX-FileCopyrightText: 2022-2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+#
+# SPDX-License-Identifier: MIT
+#
+# Contact KDAB at <info@kdab.com> for commercial licensing options.
+#
+
 # Note: Starting with CMake version 3.21 FindVulkan.cmake will search for
 # Vulkan_GLSLANG_VALIDATOR_EXECUTABLE by itself When requiring this version we
 # can remove the next block then

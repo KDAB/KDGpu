@@ -1,0 +1,42 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: KDGpu
+Upstream-Contact: Sean Harmer <sean.harmer@kdab.com>
+Source:
+
+#misc source code
+Files: CMakePresets.json CMakeUserPresets-example.json
+Copyright: 2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+License: MIT
+
+#misc documentation
+Files: README.md
+Copyright: 2022-2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+License: MIT
+
+#assets (shaders, textures)
+Files: assets/shaders assets/textures/*.png
+Copyright: 2022-2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+License: MIT
+
+#assets (contributed fonts)
+Files: assets/fonts/Roboto-Medium.ttf assets/fonts/Roboto-Medium-license.txt
+Copyright: Christian Robertson
+License: Apache-2.0
+
+#misc config files
+Files: .krazy .clang-format .clang-tidy .cmake-format.py .codespellrc .gitignore .gitreview .mdlrc .mdlrc.rb .pre-commit-config.yaml
+Copyright: 2022-2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+License: BSD-3-Clause
+
+#3rdparty
+Files: cmake/CodeCoverage.cmake
+Copyright: Copyright (c) 2012 - 2017, Lars Bilke
+License: BSD-3-Clause
+
+Files: assets/textures/samuel-ferrara-1527pjeb6jg-unsplash.jpg assets/textures/License.txt
+Copyright: Samuel Ferrara
+License: LicenseRef-Longform
+
+Files: tests/doctest/doctest.h
+Copyright: 2016-2021 Viktor Kirilov <vik.kirilov@gmail.com>
+License: MIT

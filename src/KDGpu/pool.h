@@ -10,24 +10,13 @@
 namespace KDGpu {
 
 /*
-    The templated Pool class allows to store a collection of objects of type T
-    in a contiguous array and reference them via a typed index object of type
-    Handle<H> where H is a simple tag type.
+  This file is part of KDGpu.
 
-    This is useful for example if we have user-facing platform-independent code
-    that wants to manage a set of Buffer objects say. If we create a pool in our
-    backend Vulkan-specific code like:
+  SPDX-FileCopyrightText: 2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
 
-    struct Buffer_t;
-    using BufferPool = Pool<VkBuffer, Buffer_t>;
+  SPDX-License-Identifier: MIT
 
-    Then in user-facing code we can work entirely with Handle<Buffer_t> index
-    objects. This can then be used in the Vulkan-specific backend code to lookup
-    the corresponding Vulkan-specific object e.g. the VkBuffer.
-
-    Different platform-specific backends can then just use different Pool
-    specializations as needed. The user-facing code will remain unchanged if
-    we introduce a new graphics API backend such as Metal or Direct3D 12.
+  Contact KDAB at <info@kdab.com> for commercial licensing options.
 */
 template<typename T, typename H>
 class Pool

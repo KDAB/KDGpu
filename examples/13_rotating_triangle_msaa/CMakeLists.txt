@@ -1,3 +1,11 @@
+# This file is part of KDGpu.
+#
+# SPDX-FileCopyrightText: 2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+#
+# SPDX-License-Identifier: MIT
+#
+# Contact KDAB at <info@kdab.com> for commercial licensing options.
+#
 project(
     13_kdgpu_rotating_triangle_msaa
     VERSION 0.1

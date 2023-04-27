@@ -1,3 +1,11 @@
+# This file is part of KDGpu.
+#
+# SPDX-FileCopyrightText: 2022-2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+#
+# SPDX-License-Identifier: MIT
+#
+# Contact KDAB at <info@kdab.com> for commercial licensing options.
+#
 find_package(spdlog 1.8.5 QUIET)
 if(NOT TARGET spdlog::spdlog)
     get_property(tmp GLOBAL PROPERTY PACKAGES_NOT_FOUND)
