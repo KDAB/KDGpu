@@ -1,6 +1,6 @@
 #include "imgui_renderer.h"
 
-#include <KDGpu_KDGui/kdgpu_kdgui.h>
+#include <KDGpuExample/kdgpuexample.h>
 
 #include <KDGpu/bind_group_options.h>
 #include <KDGpu/bind_group_layout_options.h>
@@ -52,7 +52,7 @@ struct VertexImGui {
 
 } // namespace
 
-namespace KDGpuKDGui {
+namespace KDGpuExample {
 
 ImGuiRenderer::ImGuiRenderer(KDGpu::Device *device, KDGpu::Queue *queue, ImGuiContext *imGuiContext)
     : m_device(device)
@@ -85,9 +85,9 @@ ImGuiRenderer::~ImGuiRenderer()
 
 void ImGuiRenderer::initialize(KDGpu::SampleCountFlagBits samples, KDGpu::Format colorFormat, KDGpu::Format depthFormat)
 {
-    const auto vertShaderCode = KDGpu::readShaderFile(KDGpuKDGui::assetPath() + "/shaders/kdgpu_kdgui/imgui.vert.spv");
+    const auto vertShaderCode = KDGpu::readShaderFile(KDGpuExample::assetPath() + "/shaders/kdgpu_kdgui/imgui.vert.spv");
     m_vertexShader = m_device->createShaderModule(vertShaderCode);
-    const auto fragShaderCode = KDGpu::readShaderFile(KDGpuKDGui::assetPath() + "/shaders/kdgpu_kdgui/imgui.frag.spv");
+    const auto fragShaderCode = KDGpu::readShaderFile(KDGpuExample::assetPath() + "/shaders/kdgpu_kdgui/imgui.frag.spv");
     m_fragmentShader = m_device->createShaderModule(fragShaderCode);
 
     m_bindGroupLayout = m_device->createBindGroupLayout(
@@ -116,7 +116,7 @@ void ImGuiRenderer::initialize(KDGpu::SampleCountFlagBits samples, KDGpu::Format
     ImGuiIO &io = ImGui::GetIO();
     unsigned char *fontData;
     int texWidth, texHeight;
-    io.Fonts->AddFontFromFileTTF((KDGpuKDGui::assetPath() + "/fonts/Roboto-Medium.ttf").data(), 18.0f);
+    io.Fonts->AddFontFromFileTTF((KDGpuExample::assetPath() + "/fonts/Roboto-Medium.ttf").data(), 18.0f);
     io.Fonts->GetTexDataAsRGBA32(&fontData, &texWidth, &texHeight);
     DeviceSize uploadSize = texWidth * texHeight * 4 * sizeof(char);
 
@@ -369,4 +369,4 @@ void ImGuiRenderer::recordCommands(KDGpu::RenderPassCommandRecorder *recorder, K
     }
 }
 
-} // namespace KDGpuKDGui
+} // namespace KDGpuExample

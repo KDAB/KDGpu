@@ -1,13 +1,13 @@
 #pragma once
 
-#include <KDGpu_KDGui/example_engine_layer.h>
-#include <KDGpu_KDGui/kdgpu_kdgui_export.h>
+#include <KDGpuExample/example_engine_layer.h>
+#include <KDGpuExample/kdgpuexample_export.h>
 
 using namespace KDGpu;
 
-namespace KDGpuKDGui {
+namespace KDGpuExample {
 
-class KDGPU_KDGUI_EXPORT SimpleExampleEngineLayer : public ExampleEngineLayer
+class KDGPUEXAMPLE_EXPORT SimpleExampleEngineLayer : public ExampleEngineLayer
 {
 public:
     SimpleExampleEngineLayer();
@@ -18,4 +18,4 @@ protected:
     void update() override;
 };
 
-} // namespace KDGpuKDGui
+} // namespace KDGpuExample

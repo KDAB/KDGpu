@@ -17,14 +17,14 @@ function(add_kdgpu_test NAME SOURCES)
     endif()
 endfunction()
 
-function(add_kdgpu_kdgui_test NAME SOURCES)
-    set(TARGET_NAME test_kdgpu_kdgui_${NAME})
+function(add_kdgpuexample_test NAME SOURCES)
+    set(TARGET_NAME test_kdgpuexample_${NAME})
     add_executable(${TARGET_NAME} ${SOURCES})
 
-    target_link_libraries(${TARGET_NAME} KDGpu KDGpu_KDGui)
+    target_link_libraries(${TARGET_NAME} KDGpu::KDGpu KDGpu::KDGpuExample)
 
     add_test(NAME ${TARGET_NAME} COMMAND $<TARGET_FILE:${TARGET_NAME}>)
-    set_tests_properties(${TARGET_NAME} PROPERTIES LABELS "KDGpu_KDGui")
+    set_tests_properties(${TARGET_NAME} PROPERTIES LABELS "KDGpuExample")
 
     if(APPLE)
         target_compile_options(${TARGET_NAME} PRIVATE -Wno-deprecated-declarations)

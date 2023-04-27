@@ -1,13 +1,13 @@
 #include "imgui_item.h"
 
-#include <KDGpu_KDGui/imgui_input_handler.h>
-#include <KDGpu_KDGui/imgui_renderer.h>
+#include <KDGpuExample/imgui_input_handler.h>
+#include <KDGpuExample/imgui_renderer.h>
 
 #include <KDGpu/device.h>
 
 #include <imgui.h>
 
-namespace KDGpuKDGui {
+namespace KDGpuExample {
 
 ImGuiItem::ImGuiItem(KDGpu::Device *device, KDGpu::Queue *queue)
 {
@@ -49,4 +49,4 @@ void ImGuiItem::render(KDGpu::RenderPassCommandRecorder *recorder, const KDGpu::
         m_renderer->recordCommands(recorder, extent, inFlightIndex);
 }
 
-} // namespace KDGpuKDGui
+} // namespace KDGpuExample

@@ -1,9 +1,9 @@
 #include "example_engine_layer.h"
 
-#include <KDGpu_KDGui/engine.h>
-#include <KDGpu_KDGui/imgui_input_handler.h>
-#include <KDGpu_KDGui/imgui_item.h>
-#include <KDGpu_KDGui/imgui_renderer.h>
+#include <KDGpuExample/engine.h>
+#include <KDGpuExample/imgui_input_handler.h>
+#include <KDGpuExample/imgui_item.h>
+#include <KDGpuExample/imgui_renderer.h>
 
 #include <KDGpu/buffer_options.h>
 #include <KDGpu/swapchain_options.h>
@@ -15,7 +15,7 @@
 
 #include <algorithm>
 
-namespace KDGpuKDGui {
+namespace KDGpuExample {
 
 ExampleEngineLayer::ExampleEngineLayer()
     : EngineLayer()
@@ -234,4 +234,4 @@ void ExampleEngineLayer::event(KDFoundation::EventReceiver *target, KDFoundation
         m_imguiOverlay->event(target, ev);
 }
 
-} // namespace KDGpuKDGui
+} // namespace KDGpuExample

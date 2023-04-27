@@ -1,7 +1,7 @@
 #pragma once
 
-#include <KDGpu_KDGui/engine_layer.h>
-#include <KDGpu_KDGui/view.h>
+#include <KDGpuExample/engine_layer.h>
+#include <KDGpuExample/view.h>
 
 #include <KDGpu/device.h>
 #include <KDGpu/gpu_semaphore.h>
@@ -13,7 +13,7 @@
 #include <KDGpu/texture_view.h>
 #include <KDGpu/vulkan/vulkan_graphics_api.h>
 
-#include <KDGpu_KDGui/kdgpu_kdgui_export.h>
+#include <KDGpuExample/kdgpuexample_export.h>
 
 #include <array>
 #include <functional>
@@ -28,7 +28,7 @@ class RenderPassCommandRecorder;
 
 using namespace KDGpu;
 
-namespace KDGpuKDGui {
+namespace KDGpuExample {
 
 class ImGuiItem;
 
@@ -38,7 +38,7 @@ class ImGuiItem;
 // until the GPU signals it is done with frame N.
 constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;
 
-class KDGPU_KDGUI_EXPORT ExampleEngineLayer : public EngineLayer
+class KDGPUEXAMPLE_EXPORT ExampleEngineLayer : public EngineLayer
 {
 public:
     ExampleEngineLayer();
@@ -102,4 +102,4 @@ protected:
 #endif
 };
 
-} // namespace KDGpuKDGui
+} // namespace KDGpuExample

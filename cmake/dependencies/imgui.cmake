@@ -1,4 +1,4 @@
-if(NOT TARGET KDGpuKDGui::imgui)
+if(NOT TARGET KDGpuExample::imgui)
     FetchContent_Declare(
         imgui
         GIT_REPOSITORY https://github.com/ocornut/imgui.git
@@ -25,12 +25,12 @@ if(NOT TARGET KDGpuKDGui::imgui)
         POSITION_INDEPENDENT_CODE ON
         CXX_STANDARD 11
     )
-    add_library(KDGpuKDGui::imgui ALIAS imgui)
+    add_library(KDGpu::imgui ALIAS imgui)
 
     install(DIRECTORY ${imgui_SOURCE_DIR}/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/imgui)
 
     # Create CMake Package File for imgui so that it can be found with find_package(imgui)
-    # and exports target KDGpuKDGui::imgui to link against
+    # and exports target KDGpu::imgui to link against
     install(TARGETS imgui
         EXPORT imguiConfig
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -43,6 +43,6 @@ if(NOT TARGET KDGpuKDGui::imgui)
     install(EXPORT imguiConfig
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/imgui
         EXPORT_LINK_INTERFACE_LIBRARIES
-        NAMESPACE KDGpuKDGui::
+        NAMESPACE KDGpu::
     )
 endif()

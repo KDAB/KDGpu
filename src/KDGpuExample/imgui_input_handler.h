@@ -7,11 +7,11 @@
 
 #include <kdbindings/property.h>
 
-#include <KDGpu_KDGui/kdgpu_kdgui_export.h>
+#include <KDGpuExample/kdgpuexample_export.h>
 
-namespace KDGpuKDGui {
+namespace KDGpuExample {
 
-class KDGPU_KDGUI_EXPORT ImGuiInputHandler : public KDFoundation::Object
+class KDGPUEXAMPLE_EXPORT ImGuiInputHandler : public KDFoundation::Object
 {
 public:
     KDBindings::Property<bool> enabled{ true };
@@ -40,4 +40,4 @@ private:
     static constexpr int ms_lastSpecialKey{ KDGui::Key_Menu };
 };
 
-} // namespace KDGpuKDGui
+} // namespace KDGpuExample

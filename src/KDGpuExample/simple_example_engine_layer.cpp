@@ -1,6 +1,6 @@
 #include "simple_example_engine_layer.h"
 
-#include <KDGpu_KDGui/engine.h>
+#include <KDGpuExample/engine.h>
 
 #include <KDGpu/buffer_options.h>
 #include <KDGpu/swapchain_options.h>
@@ -8,7 +8,7 @@
 
 #include <algorithm>
 
-namespace KDGpuKDGui {
+namespace KDGpuExample {
 
 SimpleExampleEngineLayer::SimpleExampleEngineLayer()
     : ExampleEngineLayer()
@@ -70,4 +70,4 @@ void SimpleExampleEngineLayer::update()
     m_device.waitUntilIdle();
 }
 
-} // namespace KDGpuKDGui
+} // namespace KDGpuExample

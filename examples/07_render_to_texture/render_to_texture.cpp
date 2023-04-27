@@ -1,7 +1,7 @@
 #include "render_to_texture.h"
 
-#include <KDGpu_KDGui/engine.h>
-#include <KDGpu_KDGui/imgui_item.h>
+#include <KDGpuExample/engine.h>
+#include <KDGpuExample/imgui_item.h>
 
 #include <KDGpu/bind_group_layout_options.h>
 #include <KDGpu/bind_group_options.h>

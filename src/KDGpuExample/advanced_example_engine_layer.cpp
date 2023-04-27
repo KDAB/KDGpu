@@ -1,8 +1,8 @@
 #include "advanced_example_engine_layer.h"
 
-#include <KDGpu_KDGui/engine.h>
+#include <KDGpuExample/engine.h>
 
-namespace KDGpuKDGui {
+namespace KDGpuExample {
 
 AdvancedExampleEngineLayer::AdvancedExampleEngineLayer()
     : ExampleEngineLayer()
@@ -97,4 +97,4 @@ void AdvancedExampleEngineLayer::update()
     // us preparing more frames than MAX_FRAMES_IN_FLIGHT
 }
 
-} // namespace KDGpuKDGui
+} // namespace KDGpuExample

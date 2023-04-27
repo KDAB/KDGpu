@@ -1,6 +1,6 @@
 #include "rotating_triangle_msaa.h"
 
-#include <KDGpu_KDGui/engine.h>
+#include <KDGpuExample/engine.h>
 
 #include <KDGpu/bind_group_layout_options.h>
 #include <KDGpu/bind_group_options.h>

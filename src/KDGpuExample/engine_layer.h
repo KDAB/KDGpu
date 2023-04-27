@@ -2,13 +2,13 @@
 
 #include <KDFoundation/object.h>
 
-#include <KDGpu_KDGui/kdgpu_kdgui_export.h>
+#include <KDGpuExample/kdgpuexample_export.h>
 
-namespace KDGpuKDGui {
+namespace KDGpuExample {
 
 class Engine;
 
-class KDGPU_KDGUI_EXPORT EngineLayer : public KDFoundation::Object
+class KDGPUEXAMPLE_EXPORT EngineLayer : public KDFoundation::Object
 {
 public:
     ~EngineLayer() override;
@@ -26,4 +26,4 @@ private:
     friend class Engine;
 };
 
-} // namespace KDGpuKDGui
+} // namespace KDGpuExample

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <KDGpu_KDGui/advanced_example_engine_layer.h>
+#include <KDGpuExample/advanced_example_engine_layer.h>
 
 #include <KDGpu/buffer.h>
 #include <KDGpu/graphics_pipeline.h>
@@ -8,7 +8,7 @@
 
 #include <glm/glm.hpp>
 
-using namespace KDGpuKDGui;
+using namespace KDGpuExample;
 
 class HelloTriangle : public AdvancedExampleEngineLayer
 {

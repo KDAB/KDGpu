@@ -3,7 +3,7 @@
 #include <KDFoundation/core_application.h>
 #include <KDFoundation/postman.h>
 
-namespace KDGpuKDGui {
+namespace KDGpuExample {
 
 using namespace KDBindings;
 
@@ -156,4 +156,4 @@ void Engine::doFrame()
     }
 }
 
-} // namespace KDGpuKDGui
+} // namespace KDGpuExample

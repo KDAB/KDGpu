@@ -2,7 +2,7 @@
 
 #include <imgui.h>
 
-namespace KDGpuKDGui {
+namespace KDGpuExample {
 
 using namespace KDFoundation;
 using namespace KDGui;
@@ -161,4 +161,4 @@ void ImGuiInputHandler::updateInputState()
     m_capturedText.clear();
 }
 
-} // namespace KDGpuKDGui
+} // namespace KDGpuExample

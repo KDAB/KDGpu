@@ -1,15 +1,15 @@
 #pragma once
 
-#include <KDGpu_KDGui/example_engine_layer.h>
-#include <KDGpu_KDGui/kdgpu_kdgui_export.h>
+#include <KDGpuExample/example_engine_layer.h>
+#include <KDGpuExample/kdgpuexample_export.h>
 
 #include <array>
 
 using namespace KDGpu;
 
-namespace KDGpuKDGui {
+namespace KDGpuExample {
 
-class KDGPU_KDGUI_EXPORT AdvancedExampleEngineLayer : public ExampleEngineLayer
+class KDGPUEXAMPLE_EXPORT AdvancedExampleEngineLayer : public ExampleEngineLayer
 {
 public:
     AdvancedExampleEngineLayer();
@@ -25,4 +25,4 @@ protected:
     std::array<Fence, MAX_FRAMES_IN_FLIGHT> m_frameFences;
 };
 
-} // namespace KDGpuKDGui
+} // namespace KDGpuExample

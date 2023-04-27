@@ -1,12 +1,12 @@
 #pragma once
 
-#include <KDGpu_KDGui/simple_example_engine_layer.h>
+#include <KDGpuExample/simple_example_engine_layer.h>
 
 #include <KDGpu/buffer.h>
 #include <KDGpu/graphics_pipeline.h>
 #include <KDGpu/render_pass_command_recorder_options.h>
 
-using namespace KDGpuKDGui;
+using namespace KDGpuExample;
 
 class HelloIndexedTriangle : public SimpleExampleEngineLayer
 {

@@ -10,7 +10,7 @@
 
 #include <KDGpu/vulkan/vulkan_graphics_api.h>
 
-#include <KDGpu_KDGui/view.h>
+#include <KDGpuExample/view.h>
 
 #include <KDGui/gui_application.h>
 
@@ -22,7 +22,7 @@
 
 using namespace KDGui;
 using namespace KDGpu;
-using namespace KDGpuKDGui;
+using namespace KDGpuExample;
 
 inline std::string assetPath()
 {

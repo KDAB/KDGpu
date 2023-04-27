@@ -1,6 +1,6 @@
 #pragma once
 
-#include <KDGpu_KDGui/simple_example_engine_layer.h>
+#include <KDGpuExample/simple_example_engine_layer.h>
 
 #include <KDGpu/bind_group.h>
 #include <KDGpu/buffer.h>
@@ -10,7 +10,7 @@
 
 #include <glm/glm.hpp>
 
-using namespace KDGpuKDGui;
+using namespace KDGpuExample;
 
 class TexturedQuad : public SimpleExampleEngineLayer
 {

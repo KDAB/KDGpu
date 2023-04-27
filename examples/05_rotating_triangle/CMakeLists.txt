@@ -5,5 +5,5 @@ find_package(Vulkan REQUIRED)
 add_kdgpu_example(
     NAME ${PROJECT_NAME}
     SOURCES main.cpp rotating_triangle.cpp
-    LIBS KDGpu::KDGpu_KDGui glm::glm
+    LIBS KDGpu::KDGpuExample glm::glm
 )

@@ -1,6 +1,6 @@
 #include "engine_layer.h"
 
-namespace KDGpuKDGui {
+namespace KDGpuExample {
 
 EngineLayer::~EngineLayer()
 {
@@ -18,4 +18,4 @@ void EngineLayer::update()
 {
 }
 
-} // namespace KDGpuKDGui
+} // namespace KDGpuExample

@@ -1,6 +1,6 @@
 #include "hello_triangle.h"
 
-#include <KDGpu_KDGui/engine.h>
+#include <KDGpuExample/engine.h>
 
 #include <KDGpu/buffer_options.h>
 #include <KDGpu/graphics_pipeline_options.h>

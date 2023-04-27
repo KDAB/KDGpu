@@ -1,6 +1,6 @@
 #pragma once
 
-#include <KDGpu_KDGui/kdgpu_kdgui_export.h>
+#include <KDGpuExample/kdgpuexample_export.h>
 
 #include <KDGpu/bind_group.h>
 #include <KDGpu/bind_group_layout.h>
@@ -23,9 +23,9 @@ class RenderPassCommandRecorder;
 
 struct ImGuiContext;
 
-namespace KDGpuKDGui {
+namespace KDGpuExample {
 
-class KDGPU_KDGUI_EXPORT ImGuiRenderer
+class KDGPUEXAMPLE_EXPORT ImGuiRenderer
 {
 public:
     ImGuiRenderer(KDGpu::Device *device, KDGpu::Queue *queue, ImGuiContext *imGuiContext);
@@ -81,4 +81,4 @@ private:
     KDGpu::PipelineLayout m_pipelineLayout;
 };
 
-} // namespace KDGpuKDGui
+} // namespace KDGpuExample

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <KDGpu_KDGui/simple_example_engine_layer.h>
+#include <KDGpuExample/simple_example_engine_layer.h>
 
 #include <KDGpu/bind_group.h>
 #include <KDGpu/buffer.h>
@@ -11,7 +11,7 @@
 
 #include <cmath>
 
-using namespace KDGpuKDGui;
+using namespace KDGpuExample;
 
 struct Vec2DAnimation {
     glm::vec2 start{ 0.0f, 0.0f }; // Start

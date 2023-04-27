@@ -2,7 +2,7 @@
 
 #include "engine_layer.h"
 
-#include <KDGpu_KDGui/kdgpu_kdgui_export.h>
+#include <KDGpuExample/kdgpuexample_export.h>
 
 #include <KDFoundation/object.h>
 #include <KDFoundation/logging.h>
@@ -15,9 +15,9 @@
 
 using TimePoint = std::chrono::time_point<std::chrono::high_resolution_clock>;
 
-namespace KDGpuKDGui {
+namespace KDGpuExample {
 
-class KDGPU_KDGUI_EXPORT Engine : public KDFoundation::Object
+class KDGPUEXAMPLE_EXPORT Engine : public KDFoundation::Object
 {
 public:
     KDBindings::Property<bool> running{ false };
@@ -90,4 +90,4 @@ private:
     TimePoint m_lastFpsTimestamp;
 };
 
-} // namespace KDGpuKDGui
+} // namespace KDGpuExample

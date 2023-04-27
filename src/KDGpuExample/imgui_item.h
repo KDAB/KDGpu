@@ -1,6 +1,6 @@
 #pragma once
 
-#include <KDGpu_KDGui/kdgpu_kdgui_export.h>
+#include <KDGpuExample/kdgpuexample_export.h>
 
 #include <KDGpu/gpu_core.h>
 
@@ -17,12 +17,12 @@ class Queue;
 class RenderPassCommandRecorder;
 } // namespace KDGpu
 
-namespace KDGpuKDGui {
+namespace KDGpuExample {
 
 class ImGuiInputHandler;
 class ImGuiRenderer;
 
-class KDGPU_KDGUI_EXPORT ImGuiItem : public KDFoundation::Object
+class KDGPUEXAMPLE_EXPORT ImGuiItem : public KDFoundation::Object
 {
 public:
     ImGuiItem(KDGpu::Device *device, KDGpu::Queue *queue);
@@ -50,4 +50,4 @@ private:
     std::unique_ptr<ImGuiRenderer> m_renderer;
 };
 
-} // namespace KDGpuKDGui
+} // namespace KDGpuExample

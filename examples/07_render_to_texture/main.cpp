@@ -1,12 +1,12 @@
 #include "render_to_texture.h"
 
-#include <KDGpu_KDGui/engine.h>
+#include <KDGpuExample/engine.h>
 
 #include <KDGui/gui_application.h>
 
 using namespace KDGui;
 using namespace KDGpu;
-using namespace KDGpuKDGui;
+using namespace KDGpuExample;
 
 int main()
 {
