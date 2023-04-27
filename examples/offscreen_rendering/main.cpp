@@ -48,11 +48,23 @@ int main()
     const uint32_t dataPointCount = 1000;
     const std::vector<Offscreen::Vertex> data = generateData(dataPointCount);
 
+    // Set up the pipeline and other rendering resources (default is 1920x1080)
     Offscreen offscreen;
     offscreen.initializeScene();
+
     // Uncomment to do an 8k offscreen render
     // const uint32_t fullHdScale = 4;
     // offscreen.resize(fullHdScale * 1920, fullHdScale * 1080);
+
+    // Upload the data to the GPU
     offscreen.setData(data);
-    offscreen.render("test-01");
+
+    // Make some sample renders at different scales and save the results to disk
+    offscreen.render("test-default");
+
+    offscreen.setProjection(-3.0f, 3.0f, -3.0f, 3.0f);
+    offscreen.render("test-zoomed-out");
+
+    offscreen.setProjection(-0.5f, 0.0f, -1.1f, -0.5f);
+    offscreen.render("test-zoomed-in");
 }

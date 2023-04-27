@@ -31,6 +31,7 @@ public:
     void cleanupScene();
     void resize(uint32_t width, uint32_t height);
     void setData(const std::vector<Offscreen::Vertex> &data);
+    void setProjection(float left, float right, float bottom, float top);
     void render(const std::string &baseFilename);
 
 private:
@@ -77,6 +78,10 @@ private:
     // Scene Resources
     Buffer m_dataBuffer;
     uint32_t m_pointCount{ 0 };
+
+    glm::mat4 m_proj;
+    Buffer m_projBuffer;
+    BindGroup m_transformBindGroup;
 
     Texture m_pointTexture;
     TextureView m_pointTextureView;

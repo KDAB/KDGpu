@@ -8,6 +8,8 @@
 
 #include <KDUtils/elapsedtimer.h>
 
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <spdlog/spdlog.h>
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -146,7 +148,7 @@ void Offscreen::initializeScene()
 
     // Create bind group layout consisting of a single binding holding a combined texture-sampler
     // clang-format off
-    const BindGroupLayoutOptions bindGroupLayoutOptions = {
+    const BindGroupLayoutOptions pointTextureBindGroupLayoutOptions = {
         .bindings = {{
             .binding = 0,
             .resourceType = ResourceBindingType::CombinedImageSampler,
@@ -154,23 +156,56 @@ void Offscreen::initializeScene()
         }}
     };
     // clang-format on
-    const BindGroupLayout bindGroupLayout = m_device.createBindGroupLayout(bindGroupLayoutOptions);
+    const BindGroupLayout pointTextureBindGroupLayout = m_device.createBindGroupLayout(pointTextureBindGroupLayoutOptions);
 
     // Create a bindGroup to hold the uniform containing the texture and sampler
     // clang-format off
-    const BindGroupOptions bindGroupOptions = {
-        .layout = bindGroupLayout,
+    const BindGroupOptions pointTextureBindGroupOptions = {
+        .layout = pointTextureBindGroupLayout,
         .resources = {{
             .binding = 0,
             .resource = TextureViewBinding{ .textureView = m_pointTextureView, .sampler = m_pointSampler }
         }}
     };
     // clang-format on
-    m_pointTextureBindGroup = m_device.createBindGroup(bindGroupOptions);
+    m_pointTextureBindGroup = m_device.createBindGroup(pointTextureBindGroupOptions);
+
+    // Create a buffer to hold the transformation matrix
+    {
+        BufferOptions bufferOptions = {
+            .size = sizeof(glm::mat4),
+            .usage = BufferUsageFlagBits::UniformBufferBit,
+            .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
+        };
+        m_projBuffer = m_device.createBuffer(bufferOptions);
+
+        // Set the default to be NDC (but y up)
+        setProjection(-1.0f, 1.0f, -1.0f, 1.0f);
+    }
+
+    // Create bind group layout consisting of a single binding holding a UBO for the transform
+    // clang-format off
+    const BindGroupLayoutOptions transformBindGroupLayoutOptions = {
+        .bindings = {{
+            .binding = 0,
+            .resourceType = ResourceBindingType::UniformBuffer,
+            .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit)
+        }}
+    };
+    // clang-format on
+    const BindGroupLayout transformBindGroupLayout = m_device.createBindGroupLayout(transformBindGroupLayoutOptions);
+
+    const BindGroupOptions transformBindGroupOptions = {
+        .layout = transformBindGroupLayout,
+        .resources = { { .binding = 0,
+                         .resource = UniformBufferBinding{ .buffer = m_projBuffer } } }
+    };
+    // clang-format on
+    m_transformBindGroup = m_device.createBindGroup(transformBindGroupOptions);
 
     // Create a pipeline layout (array of bind group layouts)
     const PipelineLayoutOptions pipelineLayoutOptions = {
-        .bindGroupLayouts = { bindGroupLayout }
+        .bindGroupLayouts = { pointTextureBindGroupLayout, transformBindGroupLayout }
     };
     m_pipelineLayout = m_device.createPipelineLayout(pipelineLayoutOptions);
 
@@ -224,6 +259,8 @@ void Offscreen::initializeScene()
 
 void Offscreen::cleanupScene()
 {
+    m_transformBindGroup = {};
+    m_projBuffer = {};
     m_pointTextureBindGroup = {};
     m_pointSampler = {};
     m_pointTextureView = {};
@@ -276,6 +313,15 @@ void Offscreen::setData(const std::vector<Offscreen::Vertex> &data)
     m_stagingBuffers.emplace_back(m_queue.uploadBufferData(uploadOptions));
 }
 
+void Offscreen::setProjection(float left, float right, float bottom, float top)
+{
+    // NB: We flip bottom and top since Vulkan (and KDGpu) invert the y vs OpenGL
+    m_proj = glm::ortho(left, right, top, bottom);
+    auto bufferData = m_projBuffer.map();
+    std::memcpy(bufferData, &m_proj, sizeof(glm::mat4));
+    m_projBuffer.unmap();
+}
+
 void Offscreen::releaseStagingBuffers()
 {
     // Loop over any staging buffers and see if the corresponding fence has been signalled.
@@ -297,6 +343,7 @@ void Offscreen::render(const std::string &baseFilename)
     auto renderPass = commandRecorder.beginRenderPass(m_renderPassOptions);
     renderPass.setPipeline(m_pipeline);
     renderPass.setBindGroup(0, m_pointTextureBindGroup);
+    renderPass.setBindGroup(1, m_transformBindGroup);
     renderPass.setVertexBuffer(0, m_dataBuffer);
     const DrawCommand drawCmd = { .vertexCount = m_pointCount };
     renderPass.draw(drawCmd);

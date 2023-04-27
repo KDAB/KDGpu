@@ -12,9 +12,15 @@ out gl_PerVertex
     float gl_PointSize;
 };
 
+layout(set = 1, binding = 0) uniform Transform
+{
+    mat4 proj;
+}
+transform;
+
 void main()
 {
     color = vertexCol;
     gl_PointSize = 16.0;
-    gl_Position = vertexPos;
+    gl_Position = transform.proj * vertexPos;
 }
