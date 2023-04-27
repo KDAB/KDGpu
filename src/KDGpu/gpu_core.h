@@ -1023,6 +1023,7 @@ enum class FenceStatus {
 
 OPERATORS_FOR_FLAGS(KDGpu::QueueFlags)
 OPERATORS_FOR_FLAGS(KDGpu::TextureUsageFlags)
+OPERATORS_FOR_FLAGS(KDGpu::TextureAspectFlags)
 OPERATORS_FOR_FLAGS(KDGpu::BufferUsageFlags)
 OPERATORS_FOR_FLAGS(KDGpu::ShaderStageFlags)
 OPERATORS_FOR_FLAGS(KDGpu::CullModeFlags)
