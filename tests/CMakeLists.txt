@@ -4,7 +4,7 @@ project(KDGpu-Tests)
 include_directories(./doctest)
 
 function(add_kdgpu_test NAME SOURCES)
-    set(TARGET_NAME KDGpu_${NAME})
+    set(TARGET_NAME test_kdgpu_${NAME})
     add_executable(${TARGET_NAME} ${SOURCES})
 
     target_link_libraries(${TARGET_NAME} KDGpu)
@@ -18,7 +18,7 @@ function(add_kdgpu_test NAME SOURCES)
 endfunction()
 
 function(add_kdgpu_kdgui_test NAME SOURCES)
-    set(TARGET_NAME KDGpu_KDGui_${NAME})
+    set(TARGET_NAME test_kdgpu_kdgui_${NAME})
     add_executable(${TARGET_NAME} ${SOURCES})
 
     target_link_libraries(${TARGET_NAME} KDGpu KDGpu_KDGui)
