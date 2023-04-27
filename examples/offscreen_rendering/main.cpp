@@ -54,5 +54,5 @@ int main()
     // const uint32_t fullHdScale = 4;
     // offscreen.resize(fullHdScale * 1920, fullHdScale * 1080);
     offscreen.setData(data);
-    offscreen.render();
+    offscreen.render("test-01");
 }

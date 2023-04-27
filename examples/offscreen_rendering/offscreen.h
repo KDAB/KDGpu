@@ -30,8 +30,8 @@ public:
     void initializeScene();
     void cleanupScene();
     void resize(uint32_t width, uint32_t height);
-    void setData(const std::vector<Offscreen::Vertex> &data); // Pass in data here?
-    void render(); // Return the image data?
+    void setData(const std::vector<Offscreen::Vertex> &data);
+    void render(const std::string &baseFilename);
 
 private:
     void releaseStagingBuffers();

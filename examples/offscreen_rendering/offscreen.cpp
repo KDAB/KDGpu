@@ -287,7 +287,7 @@ void Offscreen::releaseStagingBuffers()
         SPDLOG_INFO("Released {} staging buffers", removedCount);
 }
 
-void Offscreen::render()
+void Offscreen::render(const std::string &baseFilename)
 {
     KDUtils::ElapsedTimer elapsed;
     elapsed.start();
@@ -332,7 +332,7 @@ void Offscreen::render()
 // #define KDGPU_OFFSCREEN_SAVE_AS_PPM
 #if defined(KDGPU_OFFSCREEN_SAVE_AS_PPM)
     // For this example we just output the RGB channels to disk as a PPM file.
-    const std::string filename("test.ppm");
+    const std::string filename = baseFilename + ".ppm";
     std::ofstream file(filename, std::ios::out | std::ios::binary);
     file << "P6\n"
          << m_width << "\n"
@@ -350,7 +350,7 @@ void Offscreen::render()
     file.close();
 #else
     // Save as PNG
-    const std::string filename("test.png");
+    const std::string filename = baseFilename + ".png";
     const ImageData imageData = {
         .width = m_width,
         .height = m_height,
