@@ -55,6 +55,7 @@ struct RenderPassCommandRecorderOptions {
     std::vector<ColorAttachment> colorAttachments;
     DepthStencilAttachment depthStencilAttachment;
     SampleCountFlagBits samples{ SampleCountFlagBits::Samples1Bit };
+    uint32_t viewCount{ 1 };
 };
 
 } // namespace KDGpu

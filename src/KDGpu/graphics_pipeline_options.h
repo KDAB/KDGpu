@@ -127,6 +127,7 @@ struct GraphicsPipelineOptions {
     DepthStencilOptions depthStencil;
     PrimitiveOptions primitive;
     MultisampleOptions multisample;
+    uint32_t viewCount{ 1 };
 };
 
 } // namespace KDGpu

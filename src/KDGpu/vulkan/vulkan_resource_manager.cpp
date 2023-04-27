@@ -12,7 +12,7 @@
 #include <KDGpu/vulkan/vulkan_config.h>
 #include <KDGpu/vulkan/vulkan_enums.h>
 
-#include <assert.h>
+#include <cassert>
 #include <stdexcept>
 
 namespace {
@@ -37,6 +37,20 @@ std::string getResultAsString(VkResult vulkan_result)
     default:
         return "UNKNOWN RESULT";
     }
+}
+
+void setupMultiViewInfo(VkRenderPassMultiviewCreateInfo &multiViewCreateInfo, uint32_t viewCount, const uint32_t *viewMask)
+{
+    multiViewCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_MULTIVIEW_CREATE_INFO;
+    multiViewCreateInfo.subpassCount = 1; // Must be > 0 to enable multiview
+    multiViewCreateInfo.dependencyCount = 0;
+    // CorrelationMasks sets the number of views to be rendered concurrently from a mask
+    // For now, we expect all of them to be rendered concurrently as we don't want to
+    // mess with subpass and view dependencies.
+    multiViewCreateInfo.correlationMaskCount = 1;
+    multiViewCreateInfo.pCorrelationMasks = viewMask;
+    // pViewMask is a bitfield of view indices describing which views rendering is broadcast to in each subpass
+    multiViewCreateInfo.pViewMasks = viewMask;
 }
 
 } // namespace
@@ -1030,6 +1044,14 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
         renderPassInfo.dependencyCount = 0;
         renderPassInfo.pDependencies = nullptr;
 
+        VkRenderPassMultiviewCreateInfo multiViewCreateInfo = {};
+        const uint32_t multiViewMaskMask = uint32_t(1 << options.viewCount) - 1;
+
+        if (options.viewCount > 1) {
+            setupMultiViewInfo(multiViewCreateInfo, options.viewCount, &multiViewMaskMask);
+            renderPassInfo.pNext = &multiViewCreateInfo;
+        }
+
         if (vkCreateRenderPass(vulkanDevice->device, &renderPassInfo, nullptr, &vkRenderPass) != VK_SUCCESS) {
             // TODO: Log failure to create a render pass
             return {};
@@ -1375,6 +1397,9 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
     framebufferKey.height = firstTexture->extent.height;
     framebufferKey.layers = firstTexture->arrayLayers;
 
+    if (options.viewCount > 1)
+        framebufferKey.layers = 1;
+
     auto itFramebuffer = vulkanDevice->framebuffers.find(framebufferKey);
     Handle<Framebuffer_t> vulkanFramebufferHandle;
     if (itFramebuffer == vulkanDevice->framebuffers.end()) {
@@ -1618,6 +1643,15 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
     renderPassInfo.pSubpasses = &subpass;
     renderPassInfo.dependencyCount = 0;
     renderPassInfo.pDependencies = nullptr;
+
+    assert(options.viewCount > 0);
+    VkRenderPassMultiviewCreateInfo multiViewCreateInfo = {};
+    const uint32_t multiViewMaskMask = uint32_t(1 << options.viewCount) - 1;
+
+    if (options.viewCount > 1) {
+        setupMultiViewInfo(multiViewCreateInfo, options.viewCount, &multiViewMaskMask);
+        renderPassInfo.pNext = &multiViewCreateInfo;
+    }
 
     VkRenderPass vkRenderPass{ VK_NULL_HANDLE };
     if (vkCreateRenderPass(vulkanDevice->device, &renderPassInfo, nullptr, &vkRenderPass) != VK_SUCCESS) {

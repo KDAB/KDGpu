@@ -1,0 +1,2 @@
+CompileShaderSet(KDGpu_RenderPassCommandRecorder triangle)
+CompileShaderSet(KDGpu_RenderPassCommandRecorderMultiView triangle-multi-view)

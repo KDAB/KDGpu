@@ -1,2 +1,3 @@
 add_subdirectory(compute_pipeline)
 add_subdirectory(graphics_pipeline)
+add_subdirectory(render_pass_command_recorder)
