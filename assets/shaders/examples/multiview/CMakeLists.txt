@@ -1,0 +1,2 @@
+CompileShaderSet(KDGpu_MultiView1 rotating_triangle)
+CompileShaderSet(KDGpu_MultiView2 fullscreenquad)
