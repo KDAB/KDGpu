@@ -59,6 +59,9 @@ struct AdapterFeatures {
     bool variableMultisampleRate;
     bool inheritedQueries;
     bool uniformBufferStandardLayout;
+    bool multiView;
+    bool multiViewGeometryShader;
+    bool multiViewTessellationShader;
 };
 
 } // namespace KDGpu

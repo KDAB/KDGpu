@@ -43,8 +43,17 @@ std::vector<Extension> VulkanAdapter::extensions() const
 
 AdapterProperties VulkanAdapter::queryAdapterProperties()
 {
-    VkPhysicalDeviceProperties deviceProperties;
-    vkGetPhysicalDeviceProperties(physicalDevice, &deviceProperties);
+    VkPhysicalDeviceProperties2 deviceProperties2{};
+    deviceProperties2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+
+    VkPhysicalDeviceMultiviewProperties multiViewProperties{};
+    multiViewProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTIVIEW_PROPERTIES;
+
+    deviceProperties2.pNext = &multiViewProperties;
+
+    vkGetPhysicalDeviceProperties2(physicalDevice, &deviceProperties2);
+
+    const VkPhysicalDeviceProperties &deviceProperties = deviceProperties2.properties;
 
     const auto &limits = deviceProperties.limits;
     const auto &sparseProperties = deviceProperties.sparseProperties;
@@ -209,7 +218,11 @@ AdapterProperties VulkanAdapter::queryAdapterProperties()
             .residencyStandard3DBlockShape = static_cast<bool>(sparseProperties.residencyStandard3DBlockShape),
             .residencyAlignedMipSize = static_cast<bool>(sparseProperties.residencyAlignedMipSize),
             .residencyNonResidentStrict = static_cast<bool>(sparseProperties.residencyNonResidentStrict)
-        }
+        },
+        .multiViewProperties = {
+            .maxMultiViewCount = multiViewProperties.maxMultiviewViewCount,
+            .maxMultiviewInstanceIndex = multiViewProperties.maxMultiviewInstanceIndex,
+        },
     };
     // clang-format-on
     return properties;
@@ -219,6 +232,10 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
 {
     VkPhysicalDeviceFeatures2 deviceFeatures2 {};
     deviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+
+    VkPhysicalDeviceMultiviewFeatures multiViewFeatures {};
+    multiViewFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTIVIEW_FEATURES;
+    deviceFeatures2.pNext = &multiViewFeatures; // So that it gets filled by the vkGetPhysicalDeviceFeatures2 call
 
     vkGetPhysicalDeviceFeatures2(physicalDevice, &deviceFeatures2);
     const VkPhysicalDeviceFeatures &deviceFeatures = deviceFeatures2.features;
@@ -284,6 +301,9 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
         .variableMultisampleRate = static_cast<bool>(deviceFeatures.variableMultisampleRate),
         .inheritedQueries = static_cast<bool>(deviceFeatures.inheritedQueries),
         .uniformBufferStandardLayout = stdLayoutFeatures ? static_cast<bool>(stdLayoutFeatures->uniformBufferStandardLayout) : false,
+        .multiView = static_cast<bool>(multiViewFeatures.multiview),
+        .multiViewGeometryShader = static_cast<bool>(multiViewFeatures.multiviewGeometryShader),
+        .multiViewTessellationShader = static_cast<bool>(multiViewFeatures.multiviewTessellationShader),
     };
     return features;
 }

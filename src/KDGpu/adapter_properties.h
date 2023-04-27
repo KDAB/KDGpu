@@ -124,6 +124,11 @@ struct AdapterSparseProperties {
     bool residencyNonResidentStrict;
 };
 
+struct AdapterMultiViewProperties {
+    uint32_t maxMultiViewCount;
+    uint32_t maxMultiviewInstanceIndex;
+};
+
 struct AdapterProperties {
     uint32_t apiVersion;
     uint32_t driverVersion;
@@ -134,6 +139,7 @@ struct AdapterProperties {
     uint8_t pipelineCacheUUID[UuidSize];
     AdapterLimits limits;
     AdapterSparseProperties sparseProperties;
+    AdapterMultiViewProperties multiViewProperties;
 };
 
 struct FormatProperties {

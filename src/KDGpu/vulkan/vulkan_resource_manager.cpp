@@ -245,6 +245,14 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     stdLayoutFeatures.uniformBufferStandardLayout = options.requestedFeatures.uniformBufferStandardLayout;
     sync2Features.pNext = &stdLayoutFeatures;
 
+    // Enable multiview rendering if requested
+    VkPhysicalDeviceMultiviewFeatures multiViewFeatures{};
+    multiViewFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTIVIEW_FEATURES;
+    multiViewFeatures.multiview = options.requestedFeatures.multiView;
+    multiViewFeatures.multiviewGeometryShader = options.requestedFeatures.multiViewGeometryShader;
+    multiViewFeatures.multiviewTessellationShader = options.requestedFeatures.multiViewTessellationShader;
+    stdLayoutFeatures.pNext = &multiViewFeatures;
+
     VkDeviceCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     createInfo.pNext = &physicalDeviceFeatures2;
