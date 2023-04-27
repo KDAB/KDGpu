@@ -261,7 +261,6 @@ void TexturedQuad::render()
 
     m_opaquePassOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex);
     auto opaquePass = commandRecorder.beginRenderPass(m_opaquePassOptions);
-
     opaquePass.setPipeline(m_pipeline);
     opaquePass.setVertexBuffer(0, m_buffer);
     opaquePass.setBindGroup(0, m_textureBindGroup);
