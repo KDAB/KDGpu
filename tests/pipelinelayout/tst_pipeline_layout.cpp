@@ -69,7 +69,7 @@ TEST_SUITE("PipelineLayout")
             CHECK(api->resourceManager()->getPipelineLayout(pipelineLayoutHandle) == nullptr);
         }
 
-        SUBCASE("Move assigment")
+        SUBCASE("Move assignment")
         {
             // WHEN
             PipelineLayout pipelineLayout = device.createPipelineLayout(pipelineLayoutOptions);
@@ -90,7 +90,7 @@ TEST_SUITE("PipelineLayout")
 
     TEST_CASE("Comparison")
     {
-        SUBCASE("Compare default contructed PipelineLayouts")
+        SUBCASE("Compare default constructed PipelineLayouts")
         {
             // GIVEN
             PipelineLayout a;

@@ -114,7 +114,7 @@ std::vector<PresentResult> VulkanQueue::present(const PresentOptions &options)
 
     const VkResult result = vkQueuePresentKHR(queue, &presentInfo);
 
-    // If result is success, then all swapchains were sucessfully presented
+    // If result is success, then all swapchains were successfully presented
     if (result == VK_SUCCESS)
         return std::vector<PresentResult>(swapchainCount, PresentResult::Success);
 

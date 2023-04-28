@@ -99,7 +99,7 @@ TEST_SUITE("ComputePipeline")
             CHECK(api->resourceManager()->getComputePipeline(pipelineHandle) == nullptr);
         }
 
-        SUBCASE("Move assigment")
+        SUBCASE("Move assignment")
         {
             // WHEN
             ComputePipeline c = device.createComputePipeline(computePipelineOptions);
@@ -120,7 +120,7 @@ TEST_SUITE("ComputePipeline")
 
     TEST_CASE("Comparison")
     {
-        SUBCASE("Compare default contructed ComputePipelines")
+        SUBCASE("Compare default constructed ComputePipelines")
         {
             // GIVEN
             ComputePipeline a;

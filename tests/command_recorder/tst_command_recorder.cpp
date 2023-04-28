@@ -383,7 +383,7 @@ TEST_CASE("CommandRecorder")
         CHECK(api->resourceManager()->getCommandRecorder(recorderHandle) == nullptr);
     }
 
-    SUBCASE("Destruction - Move assigmnent")
+    SUBCASE("Destruction - Move assignment")
     {
         Handle<CommandRecorder_t> recorderHandle;
 

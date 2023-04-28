@@ -81,7 +81,7 @@ TEST_SUITE("Texture")
             CHECK(api->resourceManager()->getTexture(textureHandle) == nullptr);
         }
 
-        SUBCASE("Move assigment")
+        SUBCASE("Move assignment")
         {
             // WHEN
             Texture t = device.createTexture(textureOptions);
@@ -102,7 +102,7 @@ TEST_SUITE("Texture")
 
     TEST_CASE("Comparison")
     {
-        SUBCASE("Compare default contructed Textures")
+        SUBCASE("Compare default constructed Textures")
         {
             // GIVEN
             Texture a;

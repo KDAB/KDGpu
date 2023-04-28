@@ -1,0 +1,5 @@
+[codespell]
+skip = ./build-*,.git,*.comp,*.frag,./cmake/ECMFindModuleHelpers.cmake,./tests/doctest/doctest.h
+interactive = 3
+#ignore camelCase, regardless. also mixed case words with correct spelling
+ignore-regex = \b([a-z]+[A-Z0-9][a-z0-9]*|te|fo)\b

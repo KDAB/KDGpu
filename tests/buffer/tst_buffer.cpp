@@ -101,7 +101,7 @@ TEST_SUITE("Buffer")
             CHECK(api->resourceManager()->getBuffer(bufferHandle) == nullptr);
         }
 
-        SUBCASE("Move assigment")
+        SUBCASE("Move assignment")
         {
             // WHEN
             Buffer b = device.createBuffer(bufferOptions, vertexData.data());
@@ -177,7 +177,7 @@ TEST_SUITE("Buffer")
 
     TEST_CASE("Comparison")
     {
-        SUBCASE("Compare default contructed Buffers")
+        SUBCASE("Compare default constructed Buffers")
         {
             // GIVEN
             Buffer a;

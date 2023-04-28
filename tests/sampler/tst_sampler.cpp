@@ -65,7 +65,7 @@ TEST_SUITE("Sampler")
             CHECK(api->resourceManager()->getSampler(samplerHandle) == nullptr);
         }
 
-        SUBCASE("Move assigment")
+        SUBCASE("Move assignment")
         {
             // WHEN
             Sampler s = device.createSampler(samplerOptions);
@@ -86,7 +86,7 @@ TEST_SUITE("Sampler")
 
     TEST_CASE("Comparison")
     {
-        SUBCASE("Compare default contructed Samplers")
+        SUBCASE("Compare default constructed Samplers")
         {
             // GIVEN
             Sampler a;

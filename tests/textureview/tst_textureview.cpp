@@ -90,7 +90,7 @@ TEST_SUITE("TextureView")
             CHECK(api->resourceManager()->getTextureView(textureViewHandle) == nullptr);
         }
 
-        SUBCASE("Move assigment")
+        SUBCASE("Move assignment")
         {
             // WHEN
             TextureView tv = t.createView();
@@ -112,7 +112,7 @@ TEST_SUITE("TextureView")
 
     TEST_CASE("Comparison")
     {
-        SUBCASE("Compare default contructed Textures")
+        SUBCASE("Compare default constructed Textures")
         {
             // GIVEN
             TextureView a;

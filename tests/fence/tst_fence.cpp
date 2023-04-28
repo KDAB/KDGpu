@@ -64,7 +64,7 @@ TEST_SUITE("Fence")
             CHECK(api->resourceManager()->getFence(fenceHandle) == nullptr);
         }
 
-        SUBCASE("Move assigment")
+        SUBCASE("Move assignment")
         {
             // WHEN
             Fence s = device.createFence(fenceOptions);
@@ -85,7 +85,7 @@ TEST_SUITE("Fence")
 
     TEST_CASE("Comparison")
     {
-        SUBCASE("Compare default contructed Fences")
+        SUBCASE("Compare default constructed Fences")
         {
             // GIVEN
             Fence a;

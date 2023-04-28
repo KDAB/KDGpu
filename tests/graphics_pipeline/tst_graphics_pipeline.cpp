@@ -142,7 +142,7 @@ TEST_SUITE("GraphicsPipeline")
             CHECK(api->resourceManager()->getGraphicsPipeline(pipelineHandle) == nullptr);
         }
 
-        SUBCASE("Move assigment")
+        SUBCASE("Move assignment")
         {
 
             // WHEN
@@ -164,7 +164,7 @@ TEST_SUITE("GraphicsPipeline")
 
     TEST_CASE("Comparison")
     {
-        SUBCASE("Compare default contructed ComputePipelines")
+        SUBCASE("Compare default constructed ComputePipelines")
         {
             // GIVEN
             GraphicsPipeline a;

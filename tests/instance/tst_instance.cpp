@@ -160,7 +160,7 @@ TEST_SUITE("Instance")
             CHECK(api->resourceManager()->getInstance(handle) == nullptr);
         }
 
-        SUBCASE("Move assigment")
+        SUBCASE("Move assignment")
         {
             // WHEN
             Instance instance = api->createInstance(options);

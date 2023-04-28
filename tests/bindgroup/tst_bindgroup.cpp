@@ -255,7 +255,7 @@ TEST_SUITE("BindGroup")
             CHECK(api->resourceManager()->getBindGroup(bindGroupHandle) == nullptr);
         }
 
-        SUBCASE("Move assigment")
+        SUBCASE("Move assignment")
         {
             // WHEN
             BindGroup bindGroup = device.createBindGroup(bindGroupOptions);
@@ -276,7 +276,7 @@ TEST_SUITE("BindGroup")
 
     TEST_CASE("Comparison")
     {
-        SUBCASE("Compare default contructed BindGroups")
+        SUBCASE("Compare default constructed BindGroups")
         {
             // GIVEN
             BindGroup a;

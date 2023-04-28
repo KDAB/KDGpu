@@ -102,7 +102,7 @@ TEST_CASE("CommandBuffer")
         CHECK(api->resourceManager()->getCommandBuffer(cbHandle) == nullptr);
     }
 
-    SUBCASE("Destruction - Move assigmnent")
+    SUBCASE("Destruction - Move assignment")
     {
         // GIVEN
         CommandRecorder commandRecorder = device.createCommandRecorder();
@@ -125,7 +125,7 @@ TEST_CASE("CommandBuffer")
         CHECK(api->resourceManager()->getCommandBuffer(cbHandle) == nullptr);
     }
 
-    SUBCASE("Compare default contructed Buffers")
+    SUBCASE("Compare default constructed Buffers")
     {
         // GIVEN
         CommandBuffer a;

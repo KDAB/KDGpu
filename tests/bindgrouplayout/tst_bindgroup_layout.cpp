@@ -81,7 +81,7 @@ TEST_SUITE("BindGroupLayout")
             CHECK(api->resourceManager()->getBindGroupLayout(bindGroupLayoutHandle) == nullptr);
         }
 
-        SUBCASE("Move assigment")
+        SUBCASE("Move assignment")
         {
             // WHEN
             BindGroupLayout bindGroupLayout = device.createBindGroupLayout(bindGroupLayoutOptions);
@@ -102,7 +102,7 @@ TEST_SUITE("BindGroupLayout")
 
     TEST_CASE("Comparison")
     {
-        SUBCASE("Compare default contructed BindGroupLayouts")
+        SUBCASE("Compare default constructed BindGroupLayouts")
         {
             // GIVEN
             BindGroupLayout a;

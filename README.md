@@ -13,7 +13,7 @@ the aim of making modern graphics available to mortals and to massively reduce t
 of verbosity involved.
 
 KDGpu also aims to make it easy to teach the concepts of modern graphics programming without
-having ot ge bogged down in the intricacies.
+having to be bogged down in the intricacies.
 
 KDGpu is independent of any particular windowing system. You can use it purely with platform
 native APIs or you can checkout the included KDGpuExample library which makes it trivial to
