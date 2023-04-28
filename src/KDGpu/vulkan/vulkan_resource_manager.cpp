@@ -74,13 +74,20 @@ Handle<Instance_t> VulkanResourceManager::createInstance(const InstanceOptions &
     createInfo.flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
 #endif
 
-    if (!requestedInstanceLayers.empty()) {
-        createInfo.enabledLayerCount = static_cast<uint32_t>(requestedInstanceLayers.size());
+    std::vector<const char *> layers = requestedInstanceLayers;
+    for (const std::string &userLayer : options.layers)
+        layers.push_back(userLayer.c_str());
+
+    if (!layers.empty()) {
+        createInfo.enabledLayerCount = static_cast<uint32_t>(layers.size());
         assert(requestedInstanceLayers.size() <= std::numeric_limits<uint32_t>::max());
-        createInfo.ppEnabledLayerNames = requestedInstanceLayers.data();
+        createInfo.ppEnabledLayerNames = layers.data();
     }
 
-    const auto requestedInstanceExtensions = getDefaultRequestedInstanceExtensions();
+    std::vector<const char *> requestedInstanceExtensions = getDefaultRequestedInstanceExtensions();
+    for (const std::string &userExtension : options.extensions)
+        requestedInstanceExtensions.push_back(userExtension.c_str());
+
     if (!requestedInstanceExtensions.empty()) {
         createInfo.enabledExtensionCount = static_cast<uint32_t>(requestedInstanceExtensions.size());
         assert(requestedInstanceExtensions.size() <= std::numeric_limits<uint32_t>::max());
