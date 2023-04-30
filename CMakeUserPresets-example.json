@@ -1,83 +1,113 @@
 {
-  "version": 3,
-  "configurePresets": [
-    {
-      "name": "install-base",
-      "hidden": true,
-      "cacheVariables": {
-        "CMAKE_INSTALL_PREFIX": "${env.HOME}/local/KDAB"
-      }
-    },
-    {
-      "name": "debug-install",
-      "displayName": "Debug-Install",
-      "inherits": ["debug", "install-base"]
-    },
-    {
-      "name": "debug-install-msvc_x64",
-      "displayName": "Debug-Install (msvc_x64)",
-      "inherits": ["debug-msvc_x64", "install-base"]
-    },
-    {
-      "name": "release-install",
-      "displayName": "Release-Install",
-      "inherits": ["release", "install-base"]
-    },
-    {
-      "name": "release-install-msvc_x64",
-      "displayName": "Release-Install (msvc_x64)",
-      "inherits": ["release-msvc_x64", "install-base"]
-    },
-    {
-      "name": "profile-install",
-      "displayName": "Profile-Install",
-      "inherits": ["profile", "install-base"]
-    },
-    {
-      "name": "profile-install-msvc_x64",
-      "displayName": "Profile-Install (msvc_x64)",
-      "inherits": ["profile-msvc_x86", "install-base"]
-    }
-  ],
-  "buildPresets": [
-    {
-      "name": "build-install-base"
-    },
-    {
-      "name": "debug-install",
-      "displayName": "Debug Install",
-      "configurePreset": "debug-install",
-      "inherits": ["build-install-base"]
-    },
-    {
-      "name": "debug-install-msvc_x64",
-      "displayName": "Debug Install (msvc_x64)",
-      "configurePreset": "debug-install-msvc_x64",
-      "inherits": ["build-install-base"]
-    },
-    {
-      "name": "release-install",
-      "displayName": "Release Install",
-      "configurePreset": "release-install",
-      "inherits": ["build-install-base"]
-    },
-    {
-      "name": "release-install-msvc_x64",
-      "displayName": "Release Install (msvc_x64)",
-      "configurePreset": "release-install-msvc_x64",
-      "inherits": ["build-install-base"]
-    },
-    {
-      "name": "profile",
-      "displayName": "Profile Install",
-      "configurePreset": "profile-install",
-      "inherits": ["build-install-base"]
-    },
-    {
-      "name": "profile-install-msvc_x64",
-      "displayName": "Profile Install (msvc_x64)",
-      "configurePreset": "profile-install-msvc_x64",
-      "inherits": ["build-install-base"]
-    }
-  ]
+    "version": 3,
+    "configurePresets": [
+        {
+            "name": "install-base",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_INSTALL_PREFIX": "${env.HOME}/local/KDAB"
+            }
+        },
+        {
+            "name": "debug-install",
+            "displayName": "Debug-Install",
+            "inherits": [
+                "debug",
+                "install-base"
+            ]
+        },
+        {
+            "name": "debug-install-msvc_x64",
+            "displayName": "Debug-Install (msvc_x64)",
+            "inherits": [
+                "debug-msvc_x64",
+                "install-base"
+            ]
+        },
+        {
+            "name": "release-install",
+            "displayName": "Release-Install",
+            "inherits": [
+                "release",
+                "install-base"
+            ]
+        },
+        {
+            "name": "release-install-msvc_x64",
+            "displayName": "Release-Install (msvc_x64)",
+            "inherits": [
+                "release-msvc_x64",
+                "install-base"
+            ]
+        },
+        {
+            "name": "profile-install",
+            "displayName": "Profile-Install",
+            "inherits": [
+                "profile",
+                "install-base"
+            ]
+        },
+        {
+            "name": "profile-install-msvc_x64",
+            "displayName": "Profile-Install (msvc_x64)",
+            "inherits": [
+                "profile-msvc_x86",
+                "install-base"
+            ]
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "build-install-base"
+        },
+        {
+            "name": "debug-install",
+            "displayName": "Debug Install",
+            "configurePreset": "debug-install",
+            "inherits": [
+                "build-install-base"
+            ]
+        },
+        {
+            "name": "debug-install-msvc_x64",
+            "displayName": "Debug Install (msvc_x64)",
+            "configurePreset": "debug-install-msvc_x64",
+            "inherits": [
+                "build-install-base"
+            ]
+        },
+        {
+            "name": "release-install",
+            "displayName": "Release Install",
+            "configurePreset": "release-install",
+            "inherits": [
+                "build-install-base"
+            ]
+        },
+        {
+            "name": "release-install-msvc_x64",
+            "displayName": "Release Install (msvc_x64)",
+            "configurePreset": "release-install-msvc_x64",
+            "inherits": [
+                "build-install-base"
+            ]
+        },
+        {
+            "name": "profile",
+            "displayName": "Profile Install",
+            "configurePreset": "profile-install",
+            "inherits": [
+                "build-install-base"
+            ]
+        },
+        {
+            "name": "profile-install-msvc_x64",
+            "displayName": "Profile Install (msvc_x64)",
+            "configurePreset": "profile-install-msvc_x64",
+            "inherits": [
+                "build-install-base"
+            ]
+        }
+    ]
 }
