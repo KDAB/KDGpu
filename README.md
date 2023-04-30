@@ -1,5 +1,7 @@
 # README
 
+## Introduction
+
 ### Is KDGpu for me?
 
 Have you ever wanted to be productive with Vulkan but can't get your head around the verbose
@@ -31,7 +33,8 @@ repository too for some more syntactic sugar.
 
 - Clone this repository
 - Open up the directory in VS Code with the CMakeTools extension loaded
-- Configure and Build - all of the dependencies will be pulled down via CMake's FetchContent feature (see cmake/dependencies.cmake)
+- Configure and Build - all of the dependencies will be pulled down via CMake's FetchContent feature
+  (see cmake/dependencies.cmake)
 - Try running the examples
 
 ### What does KDGpu code look like?
@@ -79,9 +82,9 @@ Uploading data to the above buffer is just as easy:
     m_queue.uploadBufferData(uploadOptions);
 ```
 
-# Contact
+## Contact
 
-- Visit us on GitHub: https://github.com/KDAB/KDGpu
+- Visit us on GitHub: <https://github.com/KDAB/KDGpu>
 - Email info@kdab.com for questions about copyright, licensing or commercial support.
 
 Stay up-to-date with KDAB product announcements:
@@ -90,7 +93,7 @@ Stay up-to-date with KDAB product announcements:
 - [KDAB Blogs](https://www.kdab.com/category/blogs)
 - [KDAB on Twitter](https://twitter.com/KDABQt)
 
-# Licensing
+## Licensing
 
 KDGpu is (C) 2022-2023, Klarälvdalens Datakonsult AB, and is available under the
 terms of the [MIT](https://github.com/KDAB/KDGpu/blob/main/LICENSES/MIT.txt) license.
@@ -99,16 +102,16 @@ Contact KDAB at <info@kdab.com> if you need different licensing options.
 
 KDGpu includes these source files, also available under the terms of the MIT license:
 
-- [doctest.h](https://github.com/onqtam/doctest) - the lightest feature-rich C++ single-header testing framework for unit tests and TDD (C) 2016-2021 Viktor Kirilov <vik.kirilov@gmail.com>
+[doctest.h](https://github.com/onqtam/doctest) - the lightest feature-rich C++ single-header testing
+framework for unit tests and TDD (C) 2016-2021 Viktor Kirilov <vik.kirilov@gmail.com>
 
-# Get Involved
+## Get Involved
 
-Please submit your contributions or issue reports from our GitHub space at
-https://github.com/KDAB/KDGpu
+Please submit your contributions or issue reports from our GitHub space at <https://github.com/KDAB/KDGpu>.
 
-Contact info@kdab.com for more information.
+Contact <info@kdab.com> for more information.
 
-# About KDAB
+## About KDAB
 
 KDBindings is supported and maintained by Klarälvdalens Datakonsult AB (KDAB).
 
@@ -121,4 +124,4 @@ We continue to help develop parts of Qt and are one of the major contributors
 to the Qt Project. We can give advanced or standard trainings anywhere
 around the globe on Qt as well as C++, OpenGL, 3D and more.
 
-Please visit https://www.kdab.com to meet the people who write code like this.
+Please visit <https://www.kdab.com> to meet the people who write code like this.
