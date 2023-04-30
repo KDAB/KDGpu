@@ -21,7 +21,7 @@ float luminance(vec3 color)
 void main()
 {
     vec3 color = texture(colorTexture, texCoord).rgb;
-    
+
     const float lineWidth = 0.001;
     if (texCoord.s > pushConstants.filterPosition + lineWidth) {
         float gray = luminance(texture(colorTexture, texCoord).rgb);
