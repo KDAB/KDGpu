@@ -34,6 +34,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|AppleClang|GNU")
 endif()
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    # cmake-lint: disable=C0301
     # Silences a warning on raspberry pi gcc. See:
     # https://stackoverflow.com/questions/48149323/what-does-the-gcc-warning-project-parameter-passing-for-x-changed-in-gcc-7-1-m
     add_compile_options(-Wno-psabi)

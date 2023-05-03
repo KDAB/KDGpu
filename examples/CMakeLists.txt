@@ -1,3 +1,4 @@
+# Build and example
 function(add_kdgpu_example)
     include(CMakeParseArguments)
     cmake_parse_arguments(

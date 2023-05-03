@@ -41,6 +41,7 @@ if(NOT TARGET KDGpu::vulkan_memory_allocator)
            "Never exceed VkPhysicalDeviceLimits::maxMemoryAllocationCount and return error" OFF
     )
 
+    # cmake-lint: disable=C0301
     target_compile_definitions(
         vulkan_memory_allocator
         PUBLIC

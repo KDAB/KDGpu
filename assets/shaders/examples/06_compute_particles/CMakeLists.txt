@@ -1,4 +1,8 @@
 CompileShaderSet(KDGpu_ComputeParticles triangle)
 
 CompileShader(KDGpu_ComputeParticles particles.comp particles.comp.spv)
-add_custom_target(KDGpu_ComputeParticleTmp ALL DEPENDS KDGpu_ComputeParticles)
+add_custom_target(
+    KDGpu_ComputeParticleTmp ALL
+    DEPENDS KDGpu_ComputeParticles
+    COMMENT "Target to compile the particle shader"
+)

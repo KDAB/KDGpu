@@ -3,6 +3,7 @@ project(KDGpu-Tests)
 
 include_directories(./doctest)
 
+# Build a test program
 function(add_kdgpu_test NAME SOURCES)
     set(TARGET_NAME test_kdgpu_${NAME})
     add_executable(${TARGET_NAME} ${SOURCES})
@@ -17,6 +18,7 @@ function(add_kdgpu_test NAME SOURCES)
     endif()
 endfunction()
 
+# Build an example test program
 function(add_kdgpuexample_test NAME SOURCES)
     set(TARGET_NAME test_kdgpuexample_${NAME})
     add_executable(${TARGET_NAME} ${SOURCES})

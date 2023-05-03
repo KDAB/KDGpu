@@ -1,2 +1,6 @@
 CompileShader(KDGpu_EmptyCompute empty_compute.comp empty_compute.comp.spv)
-add_custom_target(KDGpu_EmptyComputeTmp ALL DEPENDS KDGpu_EmptyCompute)
+add_custom_target(
+    KDGpu_EmptyComputeTmp ALL
+    DEPENDS KDGpu_EmptyCompute
+    COMMENT "Target to compile the empty shader"
+)
