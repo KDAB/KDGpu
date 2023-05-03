@@ -6,7 +6,8 @@ include(FetchContent)
 # MakeAvailable or Populate
 message(STATUS "Checking/updating dependencies. This may take a little while...
     Set the FETCHCONTENT_QUIET option to OFF to get verbose output.
-")
+"
+)
 
 # KDUtils
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/kdutils.cmake)

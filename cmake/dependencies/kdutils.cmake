@@ -6,8 +6,7 @@ if(NOT KDUtils_FOUND)
         KDUtils
         GIT_REPOSITORY ssh://codereview.kdab.com:29418/kdab/kdutils
         GIT_TAG master
-        USES_TERMINAL_DOWNLOAD YES
-        USES_TERMINAL_UPDATE YES
+        USES_TERMINAL_DOWNLOAD YES USES_TERMINAL_UPDATE YES
     )
 
     option(KDUTILS_BUILD_TESTS "Build the tests" OFF)

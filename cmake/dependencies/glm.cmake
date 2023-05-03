@@ -19,35 +19,30 @@ if(NOT TARGET glm::glm)
     # Target "glm" INTERFACE_INCLUDE_DIRECTORIES property contains path:
     #
     # "/home/kfunk/devel/src/kdab/serenity/android/build/_deps/glm-src/glm/../"
-    set_target_properties(glm PROPERTIES
-        INTERFACE_INCLUDE_DIRECTORIES ""
-    )
+    set_target_properties(glm PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "")
 
-    target_include_directories(glm INTERFACE
-        $<BUILD_INTERFACE:${glm_SOURCE_DIR}>
-        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/glm>
+    target_include_directories(
+        glm INTERFACE $<BUILD_INTERFACE:${glm_SOURCE_DIR}> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/glm>
     )
-    target_compile_definitions(glm INTERFACE
-        GLM_FORCE_RADIANS
-        GLM_FORCE_DEPTH_ZERO_TO_ONE
-        GLM_ENABLE_EXPERIMENTAL
-        GLM_LANG_STL11_FORCED
+    target_compile_definitions(
+        glm INTERFACE GLM_FORCE_RADIANS GLM_FORCE_DEPTH_ZERO_TO_ONE GLM_ENABLE_EXPERIMENTAL GLM_LANG_STL11_FORCED
     )
 
     install(DIRECTORY ${glm_SOURCE_DIR}/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/glm)
 
     # Create CMake Package File for glm so that it can be found with find_package(glm)
     # and exports glm with namespace glm:: to link against glm::glm
-    install(TARGETS glm
+    install(
+        TARGETS glm
         EXPORT glmConfig
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     )
-    export(TARGETS glm
-        FILE "${CMAKE_CURRENT_BINARY_DIR}/glmConfig.cmake")
+    export(TARGETS glm FILE "${CMAKE_CURRENT_BINARY_DIR}/glmConfig.cmake")
 
-    install(EXPORT glmConfig
+    install(
+        EXPORT glmConfig
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/glm
         EXPORT_LINK_INTERFACE_LIBRARIES
         NAMESPACE glm::

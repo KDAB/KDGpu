@@ -1,14 +1,13 @@
 find_program(GLSLANG_VALIDATOR glslangValidator)
 
 function(CompileShader target shader output)
-    add_custom_command(OUTPUT ${output}
+    add_custom_command(
+        OUTPUT ${output}
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${shader}
         COMMAND ${GLSLANG_VALIDATOR} -V ${CMAKE_CURRENT_SOURCE_DIR}/${shader} -o ${output}
     )
 
-    add_custom_target(${target}
-        DEPENDS ${output}
-    )
+    add_custom_target(${target} DEPENDS ${output})
 endfunction()
 
 function(CompileShaderSet target name)
@@ -17,7 +16,8 @@ function(CompileShaderSet target name)
     CompileShader(${target}FragmentShader ${name}.frag ${name}.frag.spv)
 
     # TODO: for now generate ALL, in future would be better to build on case by case
-    add_custom_target(${target}Shaders ALL
+    add_custom_target(
+        ${target}Shaders ALL
         DEPENDS ${target}VertexShader
         DEPENDS ${target}FragmentShader
     )

@@ -24,44 +24,38 @@ set(HEADERS
     view.h
 )
 
-add_library(KDGpuExample SHARED
-    ${SOURCES}
-    ${PUBLIC_HEADERS}
-    ${PRIVATE_HEADERS}
+add_library(
+    KDGpuExample SHARED
+    ${SOURCES} ${PUBLIC_HEADERS} ${PRIVATE_HEADERS}
 )
-add_library(KDGpu::KDGpuExample ALIAS KDGpuExample)
+add_library(
+    KDGpu::KDGpuExample ALIAS KDGpuExample
+)
 
-set(KDGPUEXAMPLE_PUBLIC_LIBS
-    KDGpu::KDGpu
-    KDUtils::KDGui
-    KDGpu::imgui
-)
+set(KDGPUEXAMPLE_PUBLIC_LIBS KDGpu::KDGpu KDUtils::KDGui KDGpu::imgui)
 
 target_compile_definitions(KDGpuExample PRIVATE KDGPUEXAMPLE_ASSET_PATH="${CMAKE_INSTALL_FULL_DATADIR}/assets")
 
-set(
-    KDGPUEXAMPLE_EXPORT_TARGETS
+set(KDGPUEXAMPLE_EXPORT_TARGETS KDGpuExample)
+
+target_link_libraries(
     KDGpuExample
+    PUBLIC ${KDGPUEXAMPLE_PUBLIC_LIBS}
 )
 
-target_link_libraries(KDGpuExample
-    PUBLIC
-    ${KDGPUEXAMPLE_PUBLIC_LIBS}
+target_include_directories(
+    KDGpuExample
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..> $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
+           $<INSTALL_INTERFACE:include>
 )
 
-target_include_directories(KDGpuExample PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
-    $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
-    $<INSTALL_INTERFACE:include>
-)
-
-set_target_properties(KDGpuExample
-    PROPERTIES
-    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-    CXX_VISIBILITY_PRESET hidden
-    VISIBILITY_INLINES_HIDDEN 1
+set_target_properties(
+    KDGpuExample
+    PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+               LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+               RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+               CXX_VISIBILITY_PRESET hidden
+               VISIBILITY_INLINES_HIDDEN 1
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
@@ -70,8 +64,13 @@ endif()
 
 include(GenerateExportHeader)
 generate_export_header(KDGpuExample BASE_NAME kdgpuexample)
-configure_file(${CMAKE_CURRENT_BINARY_DIR}/kdgpuexample_export.h ${CMAKE_BINARY_DIR}/include/KDGpuExample/kdgpuexample_export.h)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/kdgpuexample_export.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/KDGpuExample)
+configure_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/kdgpuexample_export.h ${CMAKE_BINARY_DIR}/include/KDGpuExample/kdgpuexample_export.h
+)
+install(
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/kdgpuexample_export.h
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/KDGpuExample
+)
 
 add_feature_info(KDGpuExample ON "Build KDGpuExample Library")
 
@@ -88,24 +87,28 @@ install(
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
-install(EXPORT KDGpuExample DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/KDGpuExample NAMESPACE KDGpu:: FILE KDGpuExampleTargets.cmake)
+install(
+    EXPORT KDGpuExample
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/KDGpuExample
+    NAMESPACE KDGpu::
+    FILE KDGpuExampleTargets.cmake
+)
 
 include(CMakePackageConfigHelpers)
 
 configure_package_config_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/KDGpuExampleConfig.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/KDGpuExampleConfig.cmake
-    INSTALL_DESTINATION
-    ${CMAKE_INSTALL_LIBDIR}/cmake/KDGpuExample
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/KDGpuExampleConfig.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/KDGpuExampleConfig.cmake
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/KDGpuExample
 )
 
-write_basic_package_version_file(KDGpuExampleConfigVersion.cmake
+write_basic_package_version_file(
+    KDGpuExampleConfigVersion.cmake
     VERSION ${PROJECT_VERSION}
     COMPATIBILITY SameMajorVersion
 )
 
-install(FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/KDGpuExampleConfig.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/KDGpuExampleConfigVersion.cmake
+install(
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/KDGpuExampleConfig.cmake
+          ${CMAKE_CURRENT_BINARY_DIR}/KDGpuExampleConfigVersion.cmake
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/KDGpuExample
 )

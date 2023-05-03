@@ -17,30 +17,27 @@ if(NOT TARGET KDGpuExample::imgui)
     )
 
     add_library(imgui STATIC ${IMGUI_SOURCES})
-    target_include_directories(imgui PUBLIC
-        $<BUILD_INTERFACE:${imgui_SOURCE_DIR}>
-        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/imgui>
+    target_include_directories(
+        imgui PUBLIC $<BUILD_INTERFACE:${imgui_SOURCE_DIR}> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/imgui>
     )
-    set_target_properties(imgui PROPERTIES
-        POSITION_INDEPENDENT_CODE ON
-        CXX_STANDARD 11
-    )
+    set_target_properties(imgui PROPERTIES POSITION_INDEPENDENT_CODE ON CXX_STANDARD 11)
     add_library(KDGpu::imgui ALIAS imgui)
 
     install(DIRECTORY ${imgui_SOURCE_DIR}/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/imgui)
 
     # Create CMake Package File for imgui so that it can be found with find_package(imgui)
     # and exports target KDGpu::imgui to link against
-    install(TARGETS imgui
+    install(
+        TARGETS imgui
         EXPORT imguiConfig
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     )
-    export(TARGETS imgui
-        FILE "${CMAKE_CURRENT_BINARY_DIR}/imguiConfig.cmake")
+    export(TARGETS imgui FILE "${CMAKE_CURRENT_BINARY_DIR}/imguiConfig.cmake")
 
-    install(EXPORT imguiConfig
+    install(
+        EXPORT imguiConfig
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/imgui
         EXPORT_LINK_INTERFACE_LIBRARIES
         NAMESPACE KDGpu::

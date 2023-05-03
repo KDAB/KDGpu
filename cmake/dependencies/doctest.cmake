@@ -13,9 +13,9 @@ if(NOT TARGET doctest::doctest)
         add_library(doctest INTERFACE)
     endif()
 
-    target_include_directories(doctest INTERFACE
-        $<BUILD_INTERFACE:${doctest_SOURCE_DIR}/doctest>
-        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/doctest>
+    target_include_directories(
+        doctest INTERFACE $<BUILD_INTERFACE:${doctest_SOURCE_DIR}/doctest>
+                          $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/doctest>
     )
     add_library(doctest::doctest ALIAS doctest)
 

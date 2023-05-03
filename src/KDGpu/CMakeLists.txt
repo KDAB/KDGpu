@@ -157,29 +157,21 @@ set(HEADERS
     vulkan/vulkan_texture_view.h
 )
 
-add_library(KDGpu SHARED
-    ${SOURCES}
-    ${PUBLIC_HEADERS}
-    ${PRIVATE_HEADERS}
+add_library(
+    KDGpu SHARED
+    ${SOURCES} ${PUBLIC_HEADERS} ${PRIVATE_HEADERS}
 )
-add_library(KDGpu::KDGpu ALIAS KDGpu)
-
-set(KDGPU_PUBLIC_LIBS
-    KDUtils::KDUtils
-    Vulkan::Vulkan
-    KDGpu::vulkan_memory_allocator
-    spdlog::spdlog
+add_library(
+    KDGpu::KDGpu ALIAS KDGpu
 )
 
-set(
-    KDGPU_EXPORT_TARGETS
+set(KDGPU_PUBLIC_LIBS KDUtils::KDUtils Vulkan::Vulkan KDGpu::vulkan_memory_allocator spdlog::spdlog)
+
+set(KDGPU_EXPORT_TARGETS KDGpu vulkan_memory_allocator)
+
+target_link_libraries(
     KDGpu
-    vulkan_memory_allocator
-)
-
-target_link_libraries(KDGpu
-    PUBLIC
-    ${KDGPU_PUBLIC_LIBS}
+    PUBLIC ${KDGPU_PUBLIC_LIBS}
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -205,25 +197,28 @@ endif()
 # Require >=C++20 for us and downstream projects
 target_compile_features(KDGpu PUBLIC cxx_std_20)
 
-target_include_directories(KDGpu PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
-    $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
-    $<INSTALL_INTERFACE:include>
+target_include_directories(
+    KDGpu
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..> $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
+           $<INSTALL_INTERFACE:include>
 )
 
-set_target_properties(KDGpu
-    PROPERTIES
-    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-    CXX_VISIBILITY_PRESET hidden
-    VISIBILITY_INLINES_HIDDEN 1
+set_target_properties(
+    KDGpu
+    PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+               LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+               RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+               CXX_VISIBILITY_PRESET hidden
+               VISIBILITY_INLINES_HIDDEN 1
 )
 
 include(GenerateExportHeader)
 generate_export_header(KDGpu BASE_NAME kdgpu)
 configure_file(${CMAKE_CURRENT_BINARY_DIR}/kdgpu_export.h ${CMAKE_BINARY_DIR}/include/KDGpu/kdgpu_export.h)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/kdgpu_export.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/KDGpu)
+install(
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/kdgpu_export.h
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/KDGpu
+)
 
 add_feature_info(KDGpu ON "Build Library")
 
@@ -240,24 +235,27 @@ install(
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
-install(EXPORT KDGpu DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/KDGpu NAMESPACE KDGpu:: FILE KDGpuTargets.cmake)
+install(
+    EXPORT KDGpu
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/KDGpu
+    NAMESPACE KDGpu::
+    FILE KDGpuTargets.cmake
+)
 
 include(CMakePackageConfigHelpers)
 
 configure_package_config_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/KDGpuConfig.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/KDGpuConfig.cmake
-    INSTALL_DESTINATION
-    ${CMAKE_INSTALL_LIBDIR}/cmake/KDGpu
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/KDGpuConfig.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/KDGpuConfig.cmake
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/KDGpu
 )
 
-write_basic_package_version_file(KDGpuConfigVersion.cmake
+write_basic_package_version_file(
+    KDGpuConfigVersion.cmake
     VERSION ${PROJECT_VERSION}
     COMPATIBILITY SameMajorVersion
 )
 
-install(FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/KDGpuConfig.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/KDGpuConfigVersion.cmake
+install(
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/KDGpuConfig.cmake ${CMAKE_CURRENT_BINARY_DIR}/KDGpuConfigVersion.cmake
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/KDGpu
 )

@@ -7,9 +7,9 @@ if(NOT TARGET trompeloeil::trompeloeil)
     FetchContent_Populate(trompeloeil)
 
     add_library(trompeloeil INTERFACE)
-    target_include_directories(trompeloeil INTERFACE
-        $<BUILD_INTERFACE:${trompeloeil_SOURCE_DIR}/include/>
-        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/trompeloeil>
+    target_include_directories(
+        trompeloeil INTERFACE $<BUILD_INTERFACE:${trompeloeil_SOURCE_DIR}/include/>
+                              $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/trompeloeil>
     )
     add_library(trompeloeil::trompeloeil ALIAS trompeloeil)
 

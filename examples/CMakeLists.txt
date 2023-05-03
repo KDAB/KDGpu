@@ -1,10 +1,12 @@
 function(add_kdgpu_example)
     include(CMakeParseArguments)
-    cmake_parse_arguments(KD_ARGS
+    cmake_parse_arguments(
+        KD_ARGS
         ""
         "NAME"
         "SOURCES;LIBS"
-        ${ARGN})
+        ${ARGN}
+    )
 
     add_executable(${KD_ARGS_NAME} ${KD_ARGS_SOURCES})
 
