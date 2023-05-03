@@ -1,4 +1,4 @@
-if(NOT TARGET KDGpuExample::imgui)
+if(NOT TARGET KDGpu::imgui)
     FetchContent_Declare(
         imgui
         GIT_REPOSITORY https://github.com/ocornut/imgui.git
