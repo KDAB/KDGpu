@@ -5,15 +5,15 @@
 #include <KDGpu/surface.h>
 #include <KDGpu/surface_options.h>
 
-#include <KDGpuExample/kdgpuexample_export.h>
+#include <KDGpuKDGui/kdgpukdgui_export.h>
 
 namespace KDGpu {
 class Instance;
 }
 
-namespace KDGpuExample {
+namespace KDGpuKDGui {
 
-class KDGPUEXAMPLE_EXPORT View : public KDGui::Window
+class KDGPUKDGUI_EXPORT View : public KDGui::Window
 {
 public:
     View();
@@ -23,4 +23,4 @@ public:
     KDGpu::Surface createSurface(KDGpu::Instance &instance);
 };
 
-} // namespace KDGpuExample
+} // namespace KDGpuKDGui

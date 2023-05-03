@@ -8,7 +8,6 @@ set(SOURCES
     imgui_item.cpp
     imgui_renderer.cpp
     simple_example_engine_layer.cpp
-    view.cpp
 )
 
 set(HEADERS
@@ -21,18 +20,20 @@ set(HEADERS
     imgui_item.h
     imgui_renderer.h
     simple_example_engine_layer.h
-    view.h
 )
 
 add_library(
     KDGpuExample SHARED
     ${SOURCES} ${PUBLIC_HEADERS} ${PRIVATE_HEADERS}
 )
-add_library(
-    KDGpu::KDGpuExample ALIAS KDGpuExample
-)
+add_library(KDGpu::KDGpuExample ALIAS KDGpuExample)
 
-set(KDGPUEXAMPLE_PUBLIC_LIBS KDGpu::KDGpu KDUtils::KDGui KDGpu::imgui)
+set(KDGPUEXAMPLE_PUBLIC_LIBS
+    KDGpu::KDGpu
+    KDUtils::KDGui
+    KDGpu::imgui
+    KDGpu::KDGpuKDGui
+)
 
 target_compile_definitions(KDGpuExample PRIVATE KDGPUEXAMPLE_ASSET_PATH="${CMAKE_INSTALL_FULL_DATADIR}/assets")
 
@@ -46,21 +47,17 @@ target_link_libraries(
 target_include_directories(
     KDGpuExample
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..> $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
-           $<INSTALL_INTERFACE:include>
+    $<INSTALL_INTERFACE:include>
 )
 
 set_target_properties(
     KDGpuExample
     PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-               LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-               RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-               CXX_VISIBILITY_PRESET hidden
-               VISIBILITY_INLINES_HIDDEN 1
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+    CXX_VISIBILITY_PRESET hidden
+    VISIBILITY_INLINES_HIDDEN 1
 )
-
-if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    target_sources(KDGpuExample PRIVATE view.mm)
-endif()
 
 include(GenerateExportHeader)
 generate_export_header(KDGpuExample BASE_NAME kdgpuexample)
@@ -109,6 +106,6 @@ write_basic_package_version_file(
 
 install(
     FILES ${CMAKE_CURRENT_BINARY_DIR}/KDGpuExampleConfig.cmake
-          ${CMAKE_CURRENT_BINARY_DIR}/KDGpuExampleConfigVersion.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/KDGpuExampleConfigVersion.cmake
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/KDGpuExample
 )

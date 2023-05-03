@@ -15,7 +15,7 @@
 extern CAMetalLayer *createMetalLayer(KDGui::Window *window);
 #endif
 
-namespace KDGpuExample {
+namespace KDGpuKDGui {
 
 View::View()
     : KDGui::Window()
@@ -68,4 +68,4 @@ KDGpu::Surface View::createSurface(KDGpu::Instance &instance)
     return surface;
 }
 
-} // namespace KDGpuExample
+} // namespace KDGpuKDGui

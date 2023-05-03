@@ -2,7 +2,7 @@
 #include <KDGpu/instance.h>
 #include <KDGpu/vulkan/vulkan_graphics_api.h>
 
-#include <KDGpuExample/view.h>
+#include <KDGpuKDGui/view.h>
 
 #include <KDGui/gui_application.h>
 
@@ -13,7 +13,7 @@
 
 using namespace KDGui;
 using namespace KDGpu;
-using namespace KDGpuExample;
+using namespace KDGpuKDGui;
 
 TEST_SUITE("Instance")
 {

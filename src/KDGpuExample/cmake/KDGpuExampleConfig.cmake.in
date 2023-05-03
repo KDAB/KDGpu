@@ -3,8 +3,7 @@
 include(CMakeFindDependencyMacro)
 
 find_dependency(KDGpu REQUIRED)
-find_dependency(KDUtils REQUIRED)
-find_dependency(KDGui REQUIRED)
+find_dependency(KDGpuKDGui REQUIRED)
 find_dependency(KDFoundation REQUIRED)
 find_dependency(imgui REQUIRED)
 

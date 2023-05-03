@@ -1,0 +1,10 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+find_dependency(KDGpu REQUIRED)
+find_dependency(KDUtils REQUIRED)
+find_dependency(KDGui REQUIRED)
+find_dependency(KDFoundation REQUIRED)
+
+include("${CMAKE_CURRENT_LIST_DIR}/KDGpuKDGuiTargets.cmake")

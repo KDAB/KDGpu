@@ -1,7 +1,7 @@
 #pragma once
 
 #include <KDGpuExample/engine_layer.h>
-#include <KDGpuExample/view.h>
+#include <KDGpuKDGui/view.h>
 
 #include <KDGpu/device.h>
 #include <KDGpu/gpu_semaphore.h>
@@ -45,7 +45,7 @@ public:
     explicit ExampleEngineLayer(const SampleCountFlagBits samples);
     ~ExampleEngineLayer() override;
 
-    View *window() { return m_window.get(); }
+    KDGpuKDGui::View *window() { return m_window.get(); }
 
 protected:
     virtual void initializeScene() = 0;
@@ -71,7 +71,7 @@ protected:
     void releaseStagingBuffers();
 
     std::unique_ptr<GraphicsApi> m_api;
-    std::unique_ptr<View> m_window;
+    std::unique_ptr<KDGpuKDGui::View> m_window;
 
     const SampleCountFlagBits m_samples{ SampleCountFlagBits::Samples1Bit };
     Instance m_instance;
