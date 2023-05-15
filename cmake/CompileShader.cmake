@@ -1,11 +1,22 @@
-find_program(GLSLANG_VALIDATOR glslangValidator)
+# Note: Starting with CMake version 3.21 FindVulkan.cmake will search for
+# Vulkan_GLSLANG_VALIDATOR_EXECUTABLE by itself When requiring this version we
+# can remove the next block then
+if(NOT Vulkan_GLSLANG_VALIDATOR_EXECUTABLE)
+  find_program(
+    Vulkan_GLSLANG_VALIDATOR_EXECUTABLE
+    NAMES glslangValidator
+    HINTS "$ENV{VULKAN_SDK}/bin")
+endif()
+if(NOT Vulkan_GLSLANG_VALIDATOR_EXECUTABLE)
+  message(FATAL_ERROR "glslangValidator executable not found")
+endif()
 
 # Compile a shader using glslangValidator
 function(CompileShader target shader output)
     add_custom_command(
         OUTPUT ${output}
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${shader}
-        COMMAND ${GLSLANG_VALIDATOR} -V ${CMAKE_CURRENT_SOURCE_DIR}/${shader} -o ${output}
+        COMMAND ${Vulkan_GLSLANG_VALIDATOR_EXECUTABLE} -V ${CMAKE_CURRENT_SOURCE_DIR}/${shader} -o ${output}
         COMMENT "Compile shader using glslangValidator"
     )
 
