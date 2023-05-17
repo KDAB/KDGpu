@@ -11,13 +11,14 @@
 # Vulkan_GLSLANG_VALIDATOR_EXECUTABLE by itself When requiring this version we
 # can remove the next block then
 if(NOT Vulkan_GLSLANG_VALIDATOR_EXECUTABLE)
-  find_program(
-    Vulkan_GLSLANG_VALIDATOR_EXECUTABLE
-    NAMES glslangValidator
-    HINTS "$ENV{VULKAN_SDK}/bin")
+    find_program(
+        Vulkan_GLSLANG_VALIDATOR_EXECUTABLE
+        NAMES glslangValidator
+        HINTS "$ENV{VULKAN_SDK}/bin"
+    )
 endif()
 if(NOT Vulkan_GLSLANG_VALIDATOR_EXECUTABLE)
-  message(FATAL_ERROR "glslangValidator executable not found")
+    message(FATAL_ERROR "glslangValidator executable not found")
 endif()
 
 # Compile a shader using glslangValidator

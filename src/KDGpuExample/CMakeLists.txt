@@ -36,14 +36,11 @@ add_library(
     KDGpuExample SHARED
     ${SOURCES} ${PUBLIC_HEADERS} ${PRIVATE_HEADERS}
 )
-add_library(KDGpu::KDGpuExample ALIAS KDGpuExample)
-
-set(KDGPUEXAMPLE_PUBLIC_LIBS
-    KDGpu::KDGpu
-    KDUtils::KDGui
-    KDGpu::imgui
-    KDGpu::KDGpuKDGui
+add_library(
+    KDGpu::KDGpuExample ALIAS KDGpuExample
 )
+
+set(KDGPUEXAMPLE_PUBLIC_LIBS KDGpu::KDGpu KDUtils::KDGui KDGpu::imgui KDGpu::KDGpuKDGui)
 
 target_compile_definitions(KDGpuExample PRIVATE KDGPUEXAMPLE_ASSET_PATH="${CMAKE_INSTALL_FULL_DATADIR}/assets")
 
@@ -57,16 +54,16 @@ target_link_libraries(
 target_include_directories(
     KDGpuExample
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..> $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
-    $<INSTALL_INTERFACE:include>
+           $<INSTALL_INTERFACE:include>
 )
 
 set_target_properties(
     KDGpuExample
     PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-    CXX_VISIBILITY_PRESET hidden
-    VISIBILITY_INLINES_HIDDEN 1
+               LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+               RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+               CXX_VISIBILITY_PRESET hidden
+               VISIBILITY_INLINES_HIDDEN 1
 )
 
 include(GenerateExportHeader)
@@ -116,6 +113,6 @@ write_basic_package_version_file(
 
 install(
     FILES ${CMAKE_CURRENT_BINARY_DIR}/KDGpuExampleConfig.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/KDGpuExampleConfigVersion.cmake
+          ${CMAKE_CURRENT_BINARY_DIR}/KDGpuExampleConfigVersion.cmake
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/KDGpuExample
 )

@@ -6,8 +6,19 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
-project(kdgpu_multiview VERSION 0.1 LANGUAGES CXX)
+project(
+    kdgpu_multiview
+    VERSION 0.1
+    LANGUAGES CXX
+)
 
-add_kdgpu_example(NAME ${PROJECT_NAME}
-    SOURCES main.cpp multiview.cpp
-    LIBS KDGpu::KDGpuExample glm::glm)
+add_kdgpu_example(
+    NAME
+    ${PROJECT_NAME}
+    SOURCES
+    main.cpp
+    multiview.cpp
+    LIBS
+    KDGpu::KDGpuExample
+    glm::glm
+)
