@@ -107,10 +107,10 @@ void RotatingTriangle::initializeScene()
     }
 
     // Create a vertex shader and fragment shader (spir-v only for now)
-    const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/05_rotating_triangle/rotating_triangle.vert.spv";
+    const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/rotating_triangle/rotating_triangle.vert.spv";
     auto vertexShader = m_device.createShaderModule(KDGpu::readShaderFile(vertexShaderPath));
 
-    const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/05_rotating_triangle/rotating_triangle.frag.spv";
+    const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/rotating_triangle/rotating_triangle.frag.spv";
     auto fragmentShader = m_device.createShaderModule(KDGpu::readShaderFile(fragmentShaderPath));
 
     // Create bind group layout consisting of a single binding holding a UBO

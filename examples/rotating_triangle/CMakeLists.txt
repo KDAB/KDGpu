@@ -7,17 +7,20 @@
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
 project(
-    04_kdgpu_hello_indexed_triangle
+    kdgpu_rotating_triangle
     VERSION 0.1
     LANGUAGES CXX
 )
+
+find_package(Vulkan REQUIRED)
 
 add_kdgpu_example(
     NAME
     ${PROJECT_NAME}
     SOURCES
     main.cpp
-    hello_indexed_triangle.cpp
+    rotating_triangle.cpp
     LIBS
     KDGpu::KDGpuExample
+    glm::glm
 )
