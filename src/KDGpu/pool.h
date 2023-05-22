@@ -5,7 +5,7 @@
 #include <assert.h>
 #include <limits>
 #include <vector>
-#include <spdlog/spdlog.h>
+#include <KDGpu/utils/logging.h>
 
 namespace KDGpu {
 
@@ -93,7 +93,7 @@ public:
             return handle;
         } else {
 
-            // SPDLOG_WARN("Grow {} {} {}", __FUNCTION__, typeid(T).name(), m_data.size());
+            // SPDLOG_LOGGER_WARN(Logger::logger(), "Grow {} {} {}", __FUNCTION__, typeid(T).name(), m_data.size());
 
             // No gaps in the m_data vector, add a new element at the end
             m_data.emplace_back(args...);

@@ -13,7 +13,7 @@
 #include <KDGpu/vulkan/vulkan_adapter.h>
 #include <KDGpu/vulkan/vulkan_resource_manager.h>
 
-#include <spdlog/spdlog.h>
+#include <KDGpu/utils/logging.h>
 
 #if defined(KDGPU_PLATFORM_WIN32)
 #include <vulkan/vulkan_win32.h>
@@ -41,13 +41,13 @@ std::vector<Extension> VulkanInstance::extensions() const
 {
     uint32_t extensionCount{ 0 };
     if (vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr) != VK_SUCCESS) {
-        SPDLOG_CRITICAL("Unable to enumerate instance extensions");
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Unable to enumerate instance extensions");
         return {};
     }
 
     std::vector<VkExtensionProperties> vkExtensions(extensionCount);
     if (vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, vkExtensions.data()) != VK_SUCCESS) {
-        SPDLOG_CRITICAL("Unable to query instance extensions");
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Unable to query instance extensions");
         return {};
     }
 

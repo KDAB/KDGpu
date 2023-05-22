@@ -10,7 +10,7 @@
 
 #include "vulkan_enums.h"
 
-#include <spdlog/spdlog.h>
+#include <KDGpu/utils/logging.h>
 
 namespace KDGpu {
 
@@ -33,7 +33,7 @@ AdapterDeviceType vkPhysicalDeviceTypeToAdapterDeviceType(VkPhysicalDeviceType d
         return AdapterDeviceType::Cpu;
 
     default:
-        spdlog::critical("Unknown adapter type");
+        SPDLOG_LOGGER_WARN(Logger::logger(), "Unknown adapter type");
         return AdapterDeviceType::MaxEnum;
     }
 }
@@ -308,7 +308,7 @@ IndexType vkIndexTypeToIndexType(VkIndexType type)
 VkAccessFlagBits accessFlagsToVkAccessFlagBits(AccessFlags accessFlags)
 {
     if (accessFlags.toInt() > VK_ACCESS_FLAG_BITS_MAX_ENUM) {
-        SPDLOG_WARN("The requested AccessFlags are not supported without the VK_KHR_Synchronization2 extension.");
+        SPDLOG_LOGGER_WARN(Logger::logger(), "The requested AccessFlags are not supported without the VK_KHR_Synchronization2 extension.");
     }
     return static_cast<VkAccessFlagBits>(static_cast<uint32_t>(accessFlags.toInt()));
 }
@@ -321,7 +321,7 @@ VkAccessFlagBits2KHR accessFlagsToVkAccessFlagBits2(AccessFlags accessFlags)
 VkPipelineStageFlagBits pipelineStageFlagsToVkPipelineStageFlagBits(PipelineStageFlags pipelineFlags)
 {
     if (pipelineFlags.toInt() > VK_PIPELINE_STAGE_FLAG_BITS_MAX_ENUM) {
-        SPDLOG_WARN("The requested PipelineStageFlags are not supported without the VK_KHR_Synchronization2 extension.");
+        SPDLOG_LOGGER_WARN(Logger::logger(), "The requested PipelineStageFlags are not supported without the VK_KHR_Synchronization2 extension.");
     }
     return static_cast<VkPipelineStageFlagBits>(static_cast<uint32_t>(pipelineFlags.toInt()));
 }

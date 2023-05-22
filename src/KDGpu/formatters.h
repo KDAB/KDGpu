@@ -13,7 +13,7 @@
 #include <KDGpu/gpu_core.h>
 #include <KDGpu/kdgpu_export.h>
 
-#include <spdlog/spdlog.h>
+#include <KDGpu/utils/logging.h>
 
 template<>
 struct KDGPU_EXPORT fmt::formatter<KDGpu::AdapterDeviceType> {

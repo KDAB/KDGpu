@@ -13,7 +13,7 @@
 #include <KDGpu/gpu_core.h>
 
 #include <vector>
-#include <spdlog/spdlog.h>
+#include <KDGpu/utils/logging.h>
 
 namespace KDGpu {
 

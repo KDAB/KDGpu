@@ -19,7 +19,7 @@ CAMetalLayer *createMetalLayer(KDGui::Window *window)
 {
     CAMetalLayer *layer = [CAMetalLayer layer];
     if (layer == nil) {
-        spdlog::critical("Failed to create Metal layer");
+        SPDLOG_WARN("Failed to create Metal layer");
         return nullptr;
     }
     auto cocoaWindow = dynamic_cast<KDGui::CocoaPlatformWindow *>(window->platformWindow());

@@ -39,7 +39,7 @@ VulkanDevice::VulkanDevice(VkDevice _device,
     allocatorInfo.device = device;
 
     if (vmaCreateAllocator(&allocatorInfo, &allocator) != VK_SUCCESS)
-        SPDLOG_CRITICAL("Failed to create Vulkan memory allocator!");
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to create Vulkan memory allocator!");
 
     // Resize the vector of command pools to have one for each queue family
     const auto queueTypes = vulkanAdapter->queryQueueTypes();

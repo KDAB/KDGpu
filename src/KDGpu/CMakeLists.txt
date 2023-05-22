@@ -135,6 +135,7 @@ set(HEADERS
     api/api_texture.h
     api/api_texture_view.h
     utils/hash_utils.h
+    utils/logging.h
     vulkan/vulkan_adapter.h
     vulkan/vulkan_bind_group.h
     vulkan/vulkan_bind_group_layout.h

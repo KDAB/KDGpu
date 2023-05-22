@@ -123,25 +123,25 @@ int main()
     Adapter *selectedAdapter = instance.selectAdapter(AdapterDeviceType::Default);
 
     if (!selectedAdapter) {
-        spdlog::critical("Unable to find a discrete GPU. Aborting...");
+        SPDLOG_WARN("Unable to find a discrete GPU. Aborting...");
         return -1;
     }
 
     // We can easily query the adapter for various features, properties and limits.
-    spdlog::critical("maxBoundDescriptorSets = {}", selectedAdapter->properties().limits.maxBoundDescriptorSets);
-    spdlog::critical("multiDrawIndirect = {}", selectedAdapter->features().multiDrawIndirect);
+    SPDLOG_WARN("maxBoundDescriptorSets = {}", selectedAdapter->properties().limits.maxBoundDescriptorSets);
+    SPDLOG_WARN("multiDrawIndirect = {}", selectedAdapter->features().multiDrawIndirect);
 
     auto queueTypes = selectedAdapter->queueTypes();
     const bool hasGraphicsAndCompute = queueTypes[0].supportsFeature(QueueFlags(QueueFlagBits::GraphicsBit) | QueueFlags(QueueFlagBits::ComputeBit));
-    spdlog::critical("Queue family 0 graphics and compute support: {}", hasGraphicsAndCompute);
+    SPDLOG_WARN("Queue family 0 graphics and compute support: {}", hasGraphicsAndCompute);
 
     // We are now able to query the adapter for swapchain properties and presentation support with the window surface
     const auto swapchainProperties = selectedAdapter->swapchainProperties(surface);
     const bool supportsPresentation = selectedAdapter->supportsPresentation(surface, 0); // Query about the 1st queue type
-    spdlog::critical("Queue family 0 supports presentation: {}", supportsPresentation);
+    SPDLOG_WARN("Queue family 0 supports presentation: {}", supportsPresentation);
 
     if (!supportsPresentation || !hasGraphicsAndCompute) {
-        spdlog::critical("Selected adapter queue family 0 does not meet requirements. Aborting.");
+        SPDLOG_WARN("Selected adapter queue family 0 does not meet requirements. Aborting.");
         return -1;
     }
 
@@ -313,7 +313,7 @@ int main()
             result = swapchain.getNextImageIndex(currentImageIndex, imageAvailableSemaphore);
         }
         if (result != AcquireImageResult::Success) {
-            SPDLOG_ERROR("Unable to acquire swapchain image");
+            SPDLOG_LOGGER_ERROR(Logger::logger(), "Unable to acquire swapchain image");
         }
 
         // Create a command encoder/recorder

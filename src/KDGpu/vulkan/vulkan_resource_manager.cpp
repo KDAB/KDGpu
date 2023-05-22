@@ -410,7 +410,7 @@ Handle<Swapchain_t> VulkanResourceManager::createSwapchain(const Handle<Device_t
     VkSwapchainKHR vkSwapchain{ VK_NULL_HANDLE };
     const VkResult result = vkCreateSwapchainKHR(vulkanDevice->device, &createInfo, nullptr, &vkSwapchain);
     if (result != VK_SUCCESS) {
-        SPDLOG_WARN("Error creating swapchain {}", result);
+        SPDLOG_LOGGER_WARN(Logger::logger(), "Error creating swapchain {}", result);
         return {};
     }
 
@@ -1819,7 +1819,7 @@ Handle<BindGroupLayout_t> VulkanResourceManager::createBindGroupLayout(const Han
     VkDescriptorSetLayout vkDescriptorSetLayout{ VK_NULL_HANDLE };
     if (vkCreateDescriptorSetLayout(vulkanDevice->device, &createInfo, nullptr, &vkDescriptorSetLayout) != VK_SUCCESS) {
         // TODO: Log problem
-        // SPDLOG_WARN("Failed to create DescriptorSetLayout");
+        // SPDLOG_LOGGER_WARN(Logger::logger(), "Failed to create DescriptorSetLayout");
     }
 
     const auto vulkanBindGroupLayoutHandle = m_bindGroupLayouts.emplace(VulkanBindGroupLayout(vkDescriptorSetLayout, deviceHandle));

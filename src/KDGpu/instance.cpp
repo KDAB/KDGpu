@@ -16,7 +16,7 @@
 
 #include <KDFoundation/config.h>
 
-#include <spdlog/spdlog.h>
+#include <KDGpu/utils/logging.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 
 namespace KDGpu {
@@ -77,32 +77,32 @@ AdapterAndDevice Instance::createDefaultDevice(const Surface &surface,
     // a discrete GPU. In a real app, we could fallback to an integrated one.
     Adapter *selectedAdapter = selectAdapter(deviceType);
     if (!selectedAdapter) {
-        SPDLOG_CRITICAL("Unable to find a suitable Adapter. Aborting...");
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Unable to find a suitable Adapter. Aborting...");
         return {};
     }
 
     auto queueTypes = selectedAdapter->queueTypes();
     const bool hasGraphicsAndCompute = queueTypes[0].supportsFeature(QueueFlags(QueueFlagBits::GraphicsBit) | QueueFlags(QueueFlagBits::ComputeBit));
-    SPDLOG_INFO("Queue family 0 graphics and compute support: {}", hasGraphicsAndCompute);
+    SPDLOG_LOGGER_INFO(Logger::logger(), "Queue family 0 graphics and compute support: {}", hasGraphicsAndCompute);
 
     // We are now able to query the adapter for swapchain properties and presentation support with the window surface
     const auto swapchainProperties = selectedAdapter->swapchainProperties(surface);
-    SPDLOG_INFO("Supported swapchain present modes:");
+    SPDLOG_LOGGER_INFO(Logger::logger(), "Supported swapchain present modes:");
     for (const auto &mode : swapchainProperties.presentModes) {
-        SPDLOG_INFO("  - {}", presentModeToString(mode));
+        SPDLOG_LOGGER_INFO(Logger::logger(), "  - {}", presentModeToString(mode));
     }
 
     const bool supportsPresentation = selectedAdapter->supportsPresentation(surface, 0); // Query about the 1st queue type
-    SPDLOG_INFO("Queue family 0 supports presentation: {}", supportsPresentation);
+    SPDLOG_LOGGER_INFO(Logger::logger(), "Queue family 0 supports presentation: {}", supportsPresentation);
 
     const auto adapterExtensions = selectedAdapter->extensions();
-    SPDLOG_DEBUG("Supported adapter extensions:");
+    SPDLOG_LOGGER_DEBUG(Logger::logger(), "Supported adapter extensions:");
     for (const auto &extension : adapterExtensions) {
-        SPDLOG_DEBUG("  - {} Version {}", extension.name, extension.version);
+        SPDLOG_LOGGER_DEBUG(Logger::logger(), "  - {} Version {}", extension.name, extension.version);
     }
 
     if (!supportsPresentation || !hasGraphicsAndCompute) {
-        SPDLOG_CRITICAL("Selected adapter queue family 0 does not meet requirements. Aborting.");
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Selected adapter queue family 0 does not meet requirements. Aborting.");
         return {};
     }
 

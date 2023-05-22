@@ -15,7 +15,7 @@
 #include <KDGpu/resource_manager.h>
 #include <KDGpu/api/api_shader_module.h>
 
-#include <spdlog/spdlog.h>
+#include <KDGpu/utils/logging.h>
 
 namespace KDGpu {
 
@@ -66,7 +66,7 @@ std::vector<uint32_t> readShaderFile(const std::string &filename)
 {
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
     if (!file.is_open()) {
-        SPDLOG_CRITICAL("Failed to open file {}", filename);
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to open file {}", filename);
         throw std::runtime_error("Failed to open file");
     }
 

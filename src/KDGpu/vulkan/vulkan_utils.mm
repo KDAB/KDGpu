@@ -15,7 +15,7 @@
 
 #include <KDGpu/surface_options.h>
 
-#include <spdlog/spdlog.h>
+#include <KDGpu/utils/logging.h>
 
 VkSurfaceKHR createVulkanSurface(VkInstance instance, const KDGpu::SurfaceOptions &options)
 {
@@ -25,7 +25,7 @@ VkSurfaceKHR createVulkanSurface(VkInstance instance, const KDGpu::SurfaceOption
     createInfo.sType = VK_STRUCTURE_TYPE_METAL_SURFACE_CREATE_INFO_EXT;
     createInfo.pLayer = options.layer;
     if (vkCreateMetalSurfaceEXT(instance, &createInfo, nullptr, &vkSurface) != VK_SUCCESS) {
-        spdlog::critical("Failed to create Vulkan surface for Metal layer");
+        SPDLOG_LOGGER_WARN(KDGpu::Logger::logger(), "Failed to create Vulkan surface for Metal layer");
         return {};
     }
 
