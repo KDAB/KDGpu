@@ -7,7 +7,7 @@
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
 project(
-    07_kdgpu_render_to_texture
+    kdgpu_render_to_texture
     VERSION 0.1
     LANGUAGES CXX
 )
