@@ -305,6 +305,9 @@ void MultiView::render()
     fsqPass.pushConstant(m_fsqLayerIdxPushConstantRange, &rightEyeLayer);
     fsqPass.draw(DrawCommand{ .vertexCount = 6 });
 
+    // Call helper to record the ImGui overlay commands
+    renderImGuiOverlay(&fsqPass);
+
     fsqPass.end();
 
     // End recording
