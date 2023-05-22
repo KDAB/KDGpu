@@ -47,7 +47,6 @@ function(add_kdgpu_example)
     install(TARGETS ${KD_ARGS_NAME} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 endfunction()
 
-add_subdirectory(01_bind_group)
 add_subdirectory(02_hello_triangle)
 add_subdirectory(03_hello_triangle_kdgui)
 add_subdirectory(04_hello_indexed_triangle)
