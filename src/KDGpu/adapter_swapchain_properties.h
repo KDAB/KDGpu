@@ -13,6 +13,7 @@
 #include <KDGpu/gpu_core.h>
 
 #include <vector>
+#include <spdlog/spdlog.h>
 
 namespace KDGpu {
 
@@ -28,6 +29,23 @@ struct SurfaceCapabilities {
     CompositeAlphaFlags supportedCompositeAlpha;
     TextureUsageFlags supportedUsageFlags;
 };
+
+inline std::string surfaceCapabilitiesToString(const SurfaceCapabilities &capabilities)
+{
+    const std::vector<std::string> surfaceCapabilitiesString = {
+        fmt::format("- minImageCount: {}", capabilities.minImageCount),
+        fmt::format("- maxImageCount: {}", capabilities.maxImageCount),
+        fmt::format("- currentExtent: {} x {}", capabilities.currentExtent.width, capabilities.currentExtent.height),
+        fmt::format("- minImageExtent: {} x {}", capabilities.minImageExtent.width, capabilities.minImageExtent.height),
+        fmt::format("- maxImageExtent: {} x {}", capabilities.maxImageExtent.width, capabilities.maxImageExtent.height),
+        fmt::format("- maxImageArrayLayers: {}", capabilities.maxImageArrayLayers),
+        fmt::format("- supportedTransforms: {:b}", capabilities.supportedTransforms.toInt()),
+        fmt::format("- currentTransform: {:b}", capabilities.currentTransform),
+        fmt::format("- supportedCompositeAlpha: {:b}", capabilities.supportedCompositeAlpha.toInt()),
+        fmt::format("- supportedUsageFlags: {:b}", capabilities.supportedUsageFlags.toInt()),
+    };
+    return fmt::format("SurfaceCapabilities:\n{}", fmt::join(surfaceCapabilitiesString, "\n"));
+}
 
 struct SurfaceFormat {
     Format format;
