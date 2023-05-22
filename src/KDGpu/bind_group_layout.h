@@ -20,6 +20,10 @@ struct Device_t;
 struct BindGroupLayoutOptions;
 class GraphicsApi;
 
+/**
+ * @brief BindGroupLayout
+ *
+ */
 class KDGPU_EXPORT BindGroupLayout
 {
 public:

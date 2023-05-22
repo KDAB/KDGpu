@@ -23,6 +23,10 @@ namespace KDGpu {
 
 struct Surface_t;
 
+/**
+ * @brief ApiAdapter
+ *
+ */
 struct ApiAdapter {
     virtual std::vector<Extension> extensions() const = 0;
     virtual AdapterProperties queryAdapterProperties() = 0;

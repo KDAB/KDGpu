@@ -25,6 +25,10 @@ struct GpuSemaphore_t;
 struct Swapchain_t;
 struct SwapchainOptions;
 
+/**
+ * @brief Swapchain
+ *
+ */
 class KDGPU_EXPORT Swapchain
 {
 public:

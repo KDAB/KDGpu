@@ -22,6 +22,10 @@ namespace KDGpu {
 
 class ResourceManager;
 
+/**
+ * @brief ApiDevice
+ *
+ */
 struct ApiDevice {
     virtual std::vector<QueueDescription> getQueues(ResourceManager *resourceManager,
                                                     const std::vector<QueueRequest> &queueRequests,

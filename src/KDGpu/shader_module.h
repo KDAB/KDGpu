@@ -21,6 +21,10 @@ class GraphicsApi;
 struct Device_t;
 struct ShaderModule_t;
 
+/**
+ * @brief ShaderModule
+ *
+ */
 class KDGPU_EXPORT ShaderModule
 {
 public:

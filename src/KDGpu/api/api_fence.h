@@ -14,6 +14,10 @@
 
 namespace KDGpu {
 
+/**
+ * @brief ApiFence
+ *
+ */
 struct ApiFence {
     virtual void wait() = 0;
     virtual void reset() = 0;

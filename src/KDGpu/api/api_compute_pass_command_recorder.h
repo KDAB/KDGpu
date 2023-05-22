@@ -21,6 +21,10 @@ struct ComputeCommandIndirect;
 struct PushConstantRange;
 struct PipelineLayout_t;
 
+/**
+ * @brief ApiComputePassCommandRecorder
+ *
+ */
 struct ApiComputePassCommandRecorder {
     virtual void setPipeline(const Handle<ComputePipeline_t> &pipeline) = 0;
     virtual void setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroup,

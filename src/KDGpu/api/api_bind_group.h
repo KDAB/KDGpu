@@ -14,6 +14,10 @@ namespace KDGpu {
 
 struct BindGroupEntry;
 
+/**
+ * @brief ApiBindGroup
+ *
+ */
 struct ApiBindGroup {
     virtual void update(const BindGroupEntry &entry) = 0;
 };

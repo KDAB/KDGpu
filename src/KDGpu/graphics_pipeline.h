@@ -22,6 +22,10 @@ struct Device_t;
 struct GraphicsPipeline_t;
 struct GraphicsPipelineOptions;
 
+/**
+ * @brief GraphicsPipeline
+ *
+ */
 class KDGPU_EXPORT GraphicsPipeline
 {
 public:

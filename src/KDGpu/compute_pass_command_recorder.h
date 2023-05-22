@@ -42,6 +42,10 @@ struct ComputeCommandIndirect {
 struct ComputePassCommandRecorderOptions {
 };
 
+/**
+ * @brief ComputePassCommandRecorder
+ *
+ */
 class KDGPU_EXPORT ComputePassCommandRecorder
 {
 public:

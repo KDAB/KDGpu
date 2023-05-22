@@ -24,6 +24,10 @@ struct BufferToTextureCopy;
 struct TextureToBufferCopy;
 struct TextureToTextureCopy;
 
+/**
+ * @brief ApiCommandRecorder
+ *
+ */
 struct ApiCommandRecorder {
     virtual void begin() = 0;
     virtual void copyBuffer(const BufferCopy &copy) = 0;

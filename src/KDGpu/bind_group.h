@@ -25,6 +25,10 @@ class GraphicsApi;
 // as web-gpu call them bind groups which to me helps with the mental model a little more.
 //
 
+/**
+ * @brief BindGroup
+ *
+ */
 class KDGPU_EXPORT BindGroup
 {
 public:

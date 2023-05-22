@@ -14,6 +14,10 @@
 
 namespace KDGpu {
 
+/**
+ * @brief ApiTexture
+ *
+ */
 struct ApiTexture {
     virtual void *map() = 0;
     virtual void unmap() = 0;

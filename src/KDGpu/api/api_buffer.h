@@ -12,6 +12,10 @@
 
 namespace KDGpu {
 
+/**
+ * @brief ApiBuffer
+ *
+ */
 struct ApiBuffer {
     virtual void *map() = 0;
     virtual void unmap() = 0;

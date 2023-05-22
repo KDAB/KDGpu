@@ -22,6 +22,10 @@ struct Adapter_t;
 struct Instance_t;
 struct Surface_t;
 
+/**
+ * @brief ApiInstance
+ *
+ */
 struct ApiInstance {
     virtual std::vector<Extension> extensions() const = 0;
     virtual std::vector<Handle<Adapter_t>> queryAdapters(const Handle<Instance_t> &instanceHandle) = 0;

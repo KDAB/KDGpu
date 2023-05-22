@@ -90,4 +90,11 @@ if(KDGPU_BUILD_EXAMPLES)
     add_subdirectory(examples)
 endif()
 
+option(KDGPU_DOCS "Build the API documentation" OFF)
+
+if(KDGPU_DOCS)
+    add_feature_info(KDGpu-Documentation ON "Build Documentation")
+    add_subdirectory(docs)
+endif()
+
 feature_summary(WHAT PACKAGES_FOUND ENABLED_FEATURES PACKAGES_NOT_FOUND DISABLED_FEATURES INCLUDE_QUIET_PACKAGES)

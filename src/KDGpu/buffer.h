@@ -20,6 +20,10 @@ struct Buffer_t;
 struct BufferOptions;
 class GraphicsApi;
 
+/**
+ * @brief Buffer
+ *
+ */
 class KDGPU_EXPORT Buffer
 {
 public:

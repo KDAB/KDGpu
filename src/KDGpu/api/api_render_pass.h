@@ -12,6 +12,10 @@
 
 namespace KDGpu {
 
+/**
+ * @brief ApiRenderPass
+ *
+ */
 struct ApiRenderPass {
 };
 

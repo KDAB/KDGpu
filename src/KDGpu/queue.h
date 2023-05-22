@@ -94,6 +94,10 @@ struct UploadStagingBuffer {
     CommandBuffer commandBuffer;
 };
 
+/**
+ * @brief Queue
+ *
+ */
 class KDGPU_EXPORT Queue
 {
 public:

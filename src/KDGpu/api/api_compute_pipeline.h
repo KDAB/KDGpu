@@ -12,6 +12,10 @@
 
 namespace KDGpu {
 
+/**
+ * @brief ApiComputePipeline
+ *
+ */
 struct ApiComputePipeline {
 };
 

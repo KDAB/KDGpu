@@ -19,6 +19,10 @@ struct Surface_t;
 
 class GraphicsApi;
 
+/**
+ * @brief Surface
+ *
+ */
 class KDGPU_EXPORT Surface
 {
 public:

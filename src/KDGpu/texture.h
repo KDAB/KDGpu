@@ -37,6 +37,10 @@ struct SubresourceLayout {
     DeviceSize depthPitch{ 0 };
 };
 
+/**
+ * @brief Texture
+ *
+ */
 class KDGPU_EXPORT Texture
 {
 public:

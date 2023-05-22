@@ -12,6 +12,10 @@
 
 namespace KDGpu {
 
+/**
+ * @brief ApiGpuSemaphore
+ *
+ */
 struct ApiGpuSemaphore {
 };
 

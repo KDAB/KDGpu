@@ -26,6 +26,10 @@ struct DrawIndirectCommand;
 struct DrawIndexedIndirectCommand;
 struct PushConstantRange;
 
+/**
+ * @brief ApiRenderPassCommandRecorder
+ *
+ */
 struct ApiRenderPassCommandRecorder {
     virtual void setPipeline(const Handle<GraphicsPipeline_t> &pipeline) = 0;
     virtual void setVertexBuffer(uint32_t index, const Handle<Buffer_t> &buffer, DeviceSize offset) = 0;

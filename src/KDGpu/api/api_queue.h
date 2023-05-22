@@ -18,6 +18,10 @@ namespace KDGpu {
 struct PresentOptions;
 struct SubmitOptions;
 
+/**
+ * @brief ApiQueue
+ *
+ */
 struct ApiQueue {
     virtual void waitUntilIdle() = 0;
     // TODO: Return type and arguments?

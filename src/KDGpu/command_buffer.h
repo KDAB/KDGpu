@@ -19,6 +19,10 @@ struct CommandBuffer_t;
 struct Device_t;
 class GraphicsApi;
 
+/**
+ * @brief CommandBuffer
+ *
+ */
 class KDGPU_EXPORT CommandBuffer
 {
 public:

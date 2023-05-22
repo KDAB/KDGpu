@@ -12,6 +12,10 @@
 
 namespace KDGpu {
 
+/**
+ * @brief ApiBindGroupLayout
+ *
+ */
 struct ApiBindGroupLayout {
     // TODO: Complete
 };

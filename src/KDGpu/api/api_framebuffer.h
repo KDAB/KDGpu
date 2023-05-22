@@ -12,6 +12,10 @@
 
 namespace KDGpu {
 
+/**
+ * @brief ApiFramebuffer
+ *
+ */
 struct ApiFramebuffer {
 };
 
