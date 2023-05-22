@@ -80,6 +80,8 @@ void ExampleEngineLayer::recreateSwapChain()
     };
     m_depthTexture = m_device.createTexture(depthTextureOptions);
     m_depthTextureView = m_depthTexture.createView();
+
+    m_capabilitiesString = surfaceCapabilitiesToString(m_device.adapter()->swapchainProperties(m_surface).capabilities);
 }
 
 void ExampleEngineLayer::uploadBufferData(const BufferUploadOptions &options)
@@ -124,8 +126,7 @@ void ExampleEngineLayer::drawImGuiOverlay(ImGuiContext *ctx)
 
     if (m_showSurfaceCapabilities) {
         ImGui::Begin("Capabilities:", &m_showSurfaceCapabilities);
-        const std::string capabilities = surfaceCapabilitiesToString(m_device.adapter()->swapchainProperties(m_surface).capabilities);
-        ImGui::Text("%s", capabilities.data());
+        ImGui::Text("%s", m_capabilitiesString.data());
         ImGui::End();
     }
 
