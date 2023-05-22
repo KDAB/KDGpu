@@ -110,6 +110,7 @@ protected:
 #else
     const Format m_depthFormat{ Format::D24_UNORM_S8_UINT };
 #endif
+    bool m_showSurfaceCapabilities{ false };
 };
 
 } // namespace KDGpuExample

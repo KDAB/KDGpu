@@ -117,7 +117,17 @@ void ExampleEngineLayer::drawImGuiOverlay(ImGuiContext *ctx)
     ImGui::Text("GPU: %s", m_device.adapter()->properties().deviceName.c_str());
     const auto fps = engine()->fps();
     ImGui::Text("%.2f ms/frame (%.1f fps)", (1000.0f / fps), fps);
+
+    if (ImGui::Button("Surface Capabilities"))
+        m_showSurfaceCapabilities = !m_showSurfaceCapabilities;
     ImGui::End();
+
+    if (m_showSurfaceCapabilities) {
+        ImGui::Begin("Capabilities:", &m_showSurfaceCapabilities);
+        const std::string capabilities = surfaceCapabilitiesToString(m_device.adapter()->swapchainProperties(m_surface).capabilities);
+        ImGui::Text("%s", capabilities.data());
+        ImGui::End();
+    }
 
     for (const auto &func : m_imGuiOverlayDrawFunctions)
         func(ctx);
