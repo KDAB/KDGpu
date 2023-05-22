@@ -7,7 +7,7 @@
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
 project(
-    06_kdgpu_compute_particles
+    kdgpu_compute_particles
     VERSION 0.1
     LANGUAGES CXX
 )

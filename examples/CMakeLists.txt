@@ -49,7 +49,7 @@ endfunction()
 
 add_subdirectory(hello_triangle_native)
 add_subdirectory(rotating_triangle)
-add_subdirectory(06_compute_particles)
+add_subdirectory(compute_particles)
 add_subdirectory(07_render_to_texture)
 add_subdirectory(08_hello_triangle_kdgui_fence)
 add_subdirectory(11_dynamic_ubo)
