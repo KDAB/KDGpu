@@ -72,21 +72,17 @@ inline std::string assetPath()
 int main()
 {
     GuiApplication app;
-
     std::unique_ptr<GraphicsApi> api = std::make_unique<VulkanGraphicsApi>();
-    // OR
-    // std::unique_ptr<GraphicsApi> api = std::make_unique<MetalGraphicsApi>();
-    // std::unique_ptr<GraphicsApi> api = std::make_unique<DX12GraphicsApi>();
-    // std::unique_ptr<GraphicsApi> api = std::make_unique<WebGpuApi>();
 
     // Request an instance of the api with whatever layers and extensions we wish to request.
     Instance instance = api->createInstance(InstanceOptions{
-            .applicationName = "02_hello_triangle",
+            .applicationName = "hello_triangle_native",
             .applicationVersion = SERENITY_MAKE_API_VERSION(0, 1, 0, 0),
     });
 
     // Create a window and platform surface from it suitable for use with our chosen graphics API.
     Window window;
+    window.title = "hello_triangle_native";
     window.width = 1920;
     window.height = 1080;
     window.visible = true;

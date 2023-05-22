@@ -7,7 +7,7 @@
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
 project(
-    02_kdgpu_hello_triangle
+    kdgpu_hello_triangle_native
     VERSION 0.1
     LANGUAGES CXX
 )
@@ -26,5 +26,5 @@ add_kdgpu_example(
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    target_sources(02_kdgpu_hello_triangle PRIVATE utils.mm)
+    target_sources(kdgpu_hello_triangle_native PRIVATE utils.mm)
 endif()
