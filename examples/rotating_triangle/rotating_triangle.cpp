@@ -206,7 +206,9 @@ void RotatingTriangle::updateScene()
 {
     // Each frame we want to rotate the triangle a little
     static float angle = 0.0f;
-    angle += 0.1f;
+    const float angularSpeed = 3.0f; // degrees per second
+    const float dt = engine()->deltaTimeSeconds();
+    angle += angularSpeed * dt;
     if (angle > 360.0f)
         angle -= 360.0f;
 
