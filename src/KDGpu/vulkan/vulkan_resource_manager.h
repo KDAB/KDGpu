@@ -133,7 +133,7 @@ public:
     // TODO: Should we make this part of the ResourceManager api? Or combine it with the public RenderPass api?
     // TODO: Should we pass in specific options types here for render passes and framebuffers?
     Handle<RenderPass_t> createRenderPass(const Handle<Device_t> &deviceHandle, const RenderPassCommandRecorderOptions &options);
-    Handle<Framebuffer_t> createFramebuffer(const Handle<Device_t> &deviceHandle, const VulkanFramebufferKey &options);
+    Handle<Framebuffer_t> createFramebuffer(const Handle<Device_t> &deviceHandle, const RenderPassCommandRecorderOptions &options, const VulkanFramebufferKey &frameBufferKey);
 
     // Command buffers are not created by the api. It is up to the concrete subclasses to insert the command buffers
     // by whatever mechanism they wish. They also do not need to be destroyed as they are cleaned up by the owning

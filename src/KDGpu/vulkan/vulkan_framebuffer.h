@@ -25,9 +25,29 @@ struct Framebuffer_t;
 struct RenderPass_t;
 struct TextureView_t;
 
+struct VulkanAttachmentKey {
+
+    bool operator==(const VulkanAttachmentKey &other) const noexcept
+    {
+        return hash == other.hash;
+    }
+
+    bool operator!=(const VulkanAttachmentKey &other) const noexcept
+    {
+        return !(*this == other);
+    }
+
+    void addAttachmentView(const Handle<TextureView_t> &view)
+    {
+        KDGpu::hash_combine(hash, view);
+    }
+
+    uint64_t hash{ 0 };
+};
+
 struct VulkanFramebufferKey {
     Handle<RenderPass_t> renderPass;
-    std::vector<Handle<TextureView_t>> attachments;
+    VulkanAttachmentKey attachmentsKey;
     uint32_t width{ 0 };
     uint32_t height{ 0 };
     uint32_t layers{ 0 };
@@ -36,7 +56,7 @@ struct VulkanFramebufferKey {
     {
         // clang-format off
         return renderPass == other.renderPass
-            && attachments == other.attachments
+            && attachmentsKey == other.attachmentsKey
             && width == other.width
             && height == other.height
             && layers == other.layers;
@@ -66,10 +86,7 @@ struct hash<KDGpu::VulkanFramebufferKey> {
         uint64_t hash = 0;
 
         KDGpu::hash_combine(hash, value.renderPass);
-
-        for (const auto &attachment : value.attachments)
-            KDGpu::hash_combine(hash, attachment);
-
+        KDGpu::hash_combine(hash, value.attachmentsKey.hash);
         KDGpu::hash_combine(hash, value.width);
         KDGpu::hash_combine(hash, value.height);
         KDGpu::hash_combine(hash, value.layers);

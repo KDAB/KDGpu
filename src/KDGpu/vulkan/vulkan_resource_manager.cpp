@@ -1370,22 +1370,21 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
 
     // Find or create a framebuffer as per the render pass above
     const bool usingMsaa = options.samples > SampleCountFlagBits::Samples1Bit;
-    std::vector<Handle<TextureView_t>> attachments;
-    attachments.reserve(2 * options.colorAttachments.size() + 1); // (Color + Resolve) + DepthStencil
+    VulkanAttachmentKey attachmnentKey;
     for (const auto &colorAttachment : options.colorAttachments) {
-        attachments.push_back(colorAttachment.view);
+        attachmnentKey.addAttachmentView(colorAttachment.view);
         // Include resolve attachments if using MSAA.
         if (usingMsaa)
-            attachments.push_back(colorAttachment.resolveView);
+            attachmnentKey.addAttachmentView(colorAttachment.resolveView);
     }
     if (options.depthStencilAttachment.view.isValid())
-        attachments.push_back(options.depthStencilAttachment.view);
+        attachmnentKey.addAttachmentView(options.depthStencilAttachment.view);
 
     // Take the dimensions of the first attachment as the framebuffer dimensions
     // TODO: Should this be the dimensions of the view rather than the texture itself? i.e. can we
     // use views to render to a subset of a texture?
-    assert(!attachments.empty());
-    VulkanTextureView *firstView = getTextureView(attachments.at(0));
+    assert(!options.colorAttachments.empty());
+    VulkanTextureView *firstView = getTextureView(options.colorAttachments.at(0).view);
     if (!firstView) {
         // TODO: Log invalid attachment
         return {};
@@ -1402,7 +1401,7 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
     // https://github.com/KhronosGroup/Vulkan-Guide/blob/main/chapters/extensions/VK_KHR_imageless_framebuffer.adoc
     VulkanFramebufferKey framebufferKey;
     framebufferKey.renderPass = vulkanRenderPassHandle;
-    framebufferKey.attachments = attachments;
+    framebufferKey.attachmentsKey = attachmnentKey;
     framebufferKey.width = firstTexture->extent.width;
     framebufferKey.height = firstTexture->extent.height;
     framebufferKey.layers = firstTexture->arrayLayers;
@@ -1414,7 +1413,7 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
     Handle<Framebuffer_t> vulkanFramebufferHandle;
     if (itFramebuffer == vulkanDevice->framebuffers.end()) {
         // Create the framebuffer and cache the handle for it
-        vulkanFramebufferHandle = createFramebuffer(deviceHandle, framebufferKey);
+        vulkanFramebufferHandle = createFramebuffer(deviceHandle, options, framebufferKey);
         vulkanDevice->framebuffers.insert({ framebufferKey, vulkanFramebufferHandle });
     } else {
         vulkanFramebufferHandle = itFramebuffer->second;
@@ -1439,28 +1438,30 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
     };
 
     // Clear values
-    std::vector<VkClearValue> vkClearValues;
-    vkClearValues.reserve(2 * options.colorAttachments.size() + 1);
+    constexpr size_t MaxAttachmentCount = 20;
+    assert(framebufferKey.attachments.size() <= MaxAttachmentCount);
+    std::array<VkClearValue, MaxAttachmentCount> vkClearValues;
+    size_t clearIdx = 0;
     for (const auto &colorAttachment : options.colorAttachments) {
         VkClearValue vkClearValue = {};
         vkClearValue.color.uint32[0] = colorAttachment.clearValue.uint32[0];
         vkClearValue.color.uint32[1] = colorAttachment.clearValue.uint32[1];
         vkClearValue.color.uint32[2] = colorAttachment.clearValue.uint32[2];
         vkClearValue.color.uint32[3] = colorAttachment.clearValue.uint32[3];
-        vkClearValues.push_back(vkClearValue);
+        vkClearValues[clearIdx++] = vkClearValue;
 
         // Include resolve clear color again if using MSAA. Must match number of attachments.
         if (usingMsaa)
-            vkClearValues.push_back(vkClearValue);
+            vkClearValues[clearIdx++] = vkClearValue;
     }
     if (options.depthStencilAttachment.view.isValid()) {
         VkClearValue vkClearValue = {};
         vkClearValue.depthStencil.depth = options.depthStencilAttachment.depthClearValue;
         vkClearValue.depthStencil.stencil = options.depthStencilAttachment.stencilClearValue;
-        vkClearValues.emplace_back(vkClearValue);
+        vkClearValues[clearIdx++] = vkClearValue;
     }
 
-    renderPassInfo.clearValueCount = static_cast<uint32_t>(vkClearValues.size());
+    renderPassInfo.clearValueCount = clearIdx;
     renderPassInfo.pClearValues = vkClearValues.data();
 
     VulkanCommandRecorder *vulkanCommandRecorder = m_commandRecorders.get(commandRecorderHandle);
@@ -1523,13 +1524,14 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
                                                              const RenderPassCommandRecorderOptions &options)
 {
     VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
-    std::vector<VkAttachmentDescription> allAttachments;
 
     // The subpass description will then index into the above vector of attachment
     // descriptions to specify which subpasses use which of the available attachments.
     uint32_t attachmentIndex = 0;
-    std::vector<VkAttachmentReference> colorAttachmentRefs;
-    std::vector<VkAttachmentReference> resolveAttachmentRefs;
+    constexpr size_t MaxAttachmentCount = 8;
+    std::array<VkAttachmentReference, MaxAttachmentCount> colorAttachmentRefs;
+    std::array<VkAttachmentReference, MaxAttachmentCount> resolveAttachmentRefs;
+    std::array<VkAttachmentDescription, MaxAttachmentCount * 2> allAttachments;
     VkAttachmentReference depthStencilAttachmentRef = {};
 
     // TODO: Handle multisampling
@@ -1537,11 +1539,9 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
     const VkSampleCountFlagBits sampleCount = sampleCountFlagBitsToVkSampleFlagBits(options.samples);
 
     // Color and resolve attachments
+    const uint32_t colorTargetsCount = options.colorAttachments.size();
+    assert(colorTargetsCount <= MaxAttachmentCount);
     {
-        const uint32_t colorTargetsCount = options.colorAttachments.size();
-        colorAttachmentRefs.reserve(colorTargetsCount);
-        resolveAttachmentRefs.reserve(colorTargetsCount);
-
         for (uint32_t i = 0; i < colorTargetsCount; ++i) {
             const auto &renderTarget = options.colorAttachments.at(i);
 
@@ -1567,12 +1567,11 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
             colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
             colorAttachment.initialLayout = textureLayoutToVkImageLayout(renderTarget.initialLayout);
             colorAttachment.finalLayout = textureLayoutToVkImageLayout(renderTarget.finalLayout);
-            allAttachments.emplace_back(colorAttachment);
+            allAttachments[attachmentIndex] = colorAttachment;
 
-            VkAttachmentReference colorAttachmentRef = {};
+            VkAttachmentReference &colorAttachmentRef = colorAttachmentRefs[i];
             colorAttachmentRef.attachment = attachmentIndex++;
             colorAttachmentRef.layout = textureLayoutToVkImageLayout(renderTarget.layout);
-            colorAttachmentRefs.emplace_back(colorAttachmentRef);
 
             // If using multisampling, then for each color attachment we need a resolve attachment
             if (usingMultisampling) {
@@ -1596,12 +1595,11 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
                 resolveAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
                 resolveAttachment.initialLayout = textureLayoutToVkImageLayout(renderTarget.initialLayout);
                 resolveAttachment.finalLayout = textureLayoutToVkImageLayout(renderTarget.finalLayout);
-                allAttachments.emplace_back(resolveAttachment);
+                allAttachments[attachmentIndex] = resolveAttachment;
 
-                VkAttachmentReference resolveAttachmentRef = {};
+                VkAttachmentReference &resolveAttachmentRef = resolveAttachmentRefs[i];
                 resolveAttachmentRef.attachment = attachmentIndex++;
                 resolveAttachmentRef.layout = textureLayoutToVkImageLayout(renderTarget.layout);
-                resolveAttachmentRefs.emplace_back(resolveAttachmentRef);
             }
         }
     }
@@ -1630,7 +1628,7 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
         depthStencilAttachment.stencilStoreOp = attachmentStoreOperationToVkAttachmentStoreOp(renderTarget.stencilStoreOperation);
         depthStencilAttachment.initialLayout = textureLayoutToVkImageLayout(renderTarget.initialLayout);
         depthStencilAttachment.finalLayout = textureLayoutToVkImageLayout(renderTarget.finalLayout);
-        allAttachments.emplace_back(depthStencilAttachment);
+        allAttachments[attachmentIndex] = depthStencilAttachment;
 
         depthStencilAttachmentRef.attachment = attachmentIndex++;
         depthStencilAttachmentRef.layout = textureLayoutToVkImageLayout(renderTarget.layout);
@@ -1640,14 +1638,14 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
     // stage as other graphics APIs do not have an equivalent to subpasses.
     VkSubpassDescription subpass = {};
     subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-    subpass.colorAttachmentCount = static_cast<uint32_t>(colorAttachmentRefs.size());
+    subpass.colorAttachmentCount = colorTargetsCount;
     subpass.pColorAttachments = colorAttachmentRefs.data();
     subpass.pResolveAttachments = usingMultisampling ? resolveAttachmentRefs.data() : nullptr;
     subpass.pDepthStencilAttachment = options.depthStencilAttachment.view.isValid() ? &depthStencilAttachmentRef : nullptr;
 
     VkRenderPassCreateInfo renderPassInfo = {};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    renderPassInfo.attachmentCount = static_cast<uint32_t>(allAttachments.size());
+    renderPassInfo.attachmentCount = attachmentIndex;
     renderPassInfo.pAttachments = allAttachments.data();
     renderPassInfo.subpassCount = 1;
     renderPassInfo.pSubpasses = &subpass;
@@ -1673,26 +1671,41 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
     return vulkanRenderPassHandle;
 }
 
-Handle<Framebuffer_t> VulkanResourceManager::createFramebuffer(const Handle<Device_t> &deviceHandle, const VulkanFramebufferKey &options)
+Handle<Framebuffer_t> VulkanResourceManager::createFramebuffer(const Handle<Device_t> &deviceHandle,
+                                                               const RenderPassCommandRecorderOptions &options,
+                                                               const VulkanFramebufferKey &frameBufferKey)
 {
     VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
 
-    VkRenderPass vkRenderPass = m_renderPasses.get(options.renderPass)->renderPass;
+    VkRenderPass vkRenderPass = m_renderPasses.get(frameBufferKey.renderPass)->renderPass;
 
-    const uint32_t attachmentCount = static_cast<uint32_t>(options.attachments.size());
-    std::vector<VkImageView> attachments;
-    attachments.reserve(attachmentCount);
+    const bool usingMsaa = options.samples > SampleCountFlagBits::Samples1Bit;
+    std::vector<Handle<TextureView_t>> attachments;
+    attachments.reserve(2 * options.colorAttachments.size() + 1); // (Color + Resolve) + DepthStencil
+
+    for (const auto &colorAttachment : options.colorAttachments) {
+        attachments.push_back(colorAttachment.view);
+        // Include resolve attachments if using MSAA.
+        if (usingMsaa)
+            attachments.push_back(colorAttachment.resolveView);
+    }
+    if (options.depthStencilAttachment.view.isValid())
+        attachments.push_back(options.depthStencilAttachment.view);
+
+    const uint32_t attachmentCount = static_cast<uint32_t>(attachments.size());
+    std::vector<VkImageView> vkAttachments;
+    vkAttachments.reserve(attachmentCount);
     for (uint32_t i = 0; i < attachmentCount; ++i)
-        attachments.push_back(m_textureViews.get(options.attachments.at(i))->imageView);
+        vkAttachments.push_back(m_textureViews.get(attachments.at(i))->imageView);
 
     VkFramebufferCreateInfo framebufferInfo = {};
     framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
     framebufferInfo.renderPass = vkRenderPass;
     framebufferInfo.attachmentCount = attachmentCount;
-    framebufferInfo.pAttachments = attachments.data();
-    framebufferInfo.width = options.width;
-    framebufferInfo.height = options.height;
-    framebufferInfo.layers = options.layers;
+    framebufferInfo.pAttachments = vkAttachments.data();
+    framebufferInfo.width = frameBufferKey.width;
+    framebufferInfo.height = frameBufferKey.height;
+    framebufferInfo.layers = frameBufferKey.layers;
 
     VkFramebuffer vkFramebuffer{ VK_NULL_HANDLE };
     if (vkCreateFramebuffer(vulkanDevice->device, &framebufferInfo, nullptr, &vkFramebuffer) != VK_SUCCESS) {
