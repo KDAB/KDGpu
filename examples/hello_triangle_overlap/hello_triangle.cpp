@@ -36,29 +36,64 @@ inline std::string assetPath()
 
 void HelloTriangle::initializeScene()
 {
+    struct Vertex {
+        glm::vec3 position;
+        glm::vec3 color;
+    };
+
     // Create a buffer to hold triangle vertex data
-    BufferOptions bufferOptions = {
-        .size = 3 * 2 * 4 * sizeof(float), // 3 vertices * 2 attributes * 4 float components
-        .usage = BufferUsageFlagBits::VertexBufferBit,
-        .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
-    };
-    m_buffer = m_device.createBuffer(bufferOptions);
+    {
+        const float r = 0.8f;
+        const std::array<Vertex, 3> vertexData = {
+            Vertex{ // Bottom-left, red
+                    .position = { r * cosf(7.0f * M_PI / 6.0f), -r * sinf(7.0f * M_PI / 6.0f), 0.0f },
+                    .color = { 1.0f, 0.0f, 0.0f } },
+            Vertex{ // Bottom-right, green
+                    .position = { r * cosf(11.0f * M_PI / 6.0f), -r * sinf(11.0f * M_PI / 6.0f), 0.0f },
+                    .color = { 0.0f, 1.0f, 0.0f } },
+            Vertex{ // Top, blue
+                    .position = { 0.0f, -r, 0.0f },
+                    .color = { 0.0f, 0.0f, 1.0f } }
+        };
 
-    // clang-format off
-    std::vector<float> vertexData = {
-         1.0f, -1.0f, 0.0f, 1.0f, // position
-         1.0f,  0.0f, 0.0f, 1.0f, // color
-        -1.0f, -1.0f, 0.0f, 1.0f, // position
-         0.0f,  1.0f, 0.0f, 1.0f, // color
-         0.0f,  1.0f, 0.0f, 1.0f, // position
-         0.0f,  0.0f, 1.0f, 1.0f, // color
-    };
-    // clang-format on
-    auto bufferData = m_buffer.map();
-    std::memcpy(bufferData, vertexData.data(), vertexData.size() * sizeof(float));
-    m_buffer.unmap();
+        const DeviceSize dataByteSize = vertexData.size() * sizeof(Vertex);
+        BufferOptions bufferOptions = {
+            .size = dataByteSize,
+            .usage = BufferUsageFlagBits::VertexBufferBit | BufferUsageFlagBits::TransferDstBit,
+            .memoryUsage = MemoryUsage::GpuOnly
+        };
+        m_buffer = m_device.createBuffer(bufferOptions);
+        const BufferUploadOptions uploadOptions = {
+            .destinationBuffer = m_buffer,
+            .dstStages = PipelineStageFlagBit::VertexAttributeInputBit,
+            .dstMask = AccessFlagBit::VertexAttributeReadBit,
+            .data = vertexData.data(),
+            .byteSize = dataByteSize
+        };
+        uploadBufferData(uploadOptions);
+    }
 
-    // Create a vertex shader and fragment shader (spir-v only for now)
+    // Create a buffer to hold the geometry index data
+    {
+        std::array<uint32_t, 3> indexData = { 0, 1, 2 };
+        const DeviceSize dataByteSize = indexData.size() * sizeof(uint32_t);
+        BufferOptions bufferOptions = {
+            .size = dataByteSize,
+            .usage = BufferUsageFlagBits::IndexBufferBit | BufferUsageFlagBits::TransferDstBit,
+            .memoryUsage = MemoryUsage::GpuOnly
+        };
+        m_indexBuffer = m_device.createBuffer(bufferOptions);
+        const BufferUploadOptions uploadOptions = {
+            .destinationBuffer = m_indexBuffer,
+            .dstStages = PipelineStageFlagBit::IndexInputBit,
+            .dstMask = AccessFlagBit::IndexReadBit,
+            .data = indexData.data(),
+            .byteSize = dataByteSize
+        };
+        uploadBufferData(uploadOptions);
+    }
+
+    // Create a vertex shader and fragment shader
     const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_triangle_overlap/hello_triangle.vert.spv";
     auto vertexShader = m_device.createShaderModule(KDGpu::readShaderFile(vertexShaderPath));
 
@@ -81,11 +116,11 @@ void HelloTriangle::initializeScene()
         .layout = m_pipelineLayout,
         .vertex = {
             .buffers = {
-                { .binding = 0, .stride = 2 * 4 * sizeof(float) }
+                { .binding = 0, .stride = sizeof(Vertex) }
             },
             .attributes = {
-                { .location = 0, .binding = 0, .format = Format::R32G32B32A32_SFLOAT }, // Position
-                { .location = 1, .binding = 0, .format = Format::R32G32B32A32_SFLOAT, .offset = 4 * sizeof(float) } // Color
+                { .location = 0, .binding = 0, .format = Format::R32G32B32_SFLOAT }, // Position
+                { .location = 1, .binding = 0, .format = Format::R32G32B32_SFLOAT, .offset = sizeof(glm::vec3) } // Color
             }
         },
         .renderTargets = {
@@ -123,13 +158,23 @@ void HelloTriangle::cleanupScene()
 {
     m_pipeline = {};
     m_pipelineLayout = {};
+    m_indexBuffer = {};
     m_buffer = {};
     m_commandBuffers = {};
 }
 
 void HelloTriangle::updateScene()
 {
-    updateTransform();
+    // Each frame we want to rotate the triangle a little
+    static float angle = 0.0f;
+    const float angularSpeed = 3.0f; // degrees per second
+    const float dt = engine()->deltaTimeSeconds();
+    angle += angularSpeed * dt;
+    if (angle > 360.0f)
+        angle -= 360.0f;
+
+    m_transform = glm::mat4(1.0f);
+    m_transform = glm::rotate(m_transform, glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
 }
 
 void HelloTriangle::resize()
@@ -140,35 +185,19 @@ void HelloTriangle::resize()
 
 void HelloTriangle::render()
 {
-    // Create a command encoder/recorder
     auto commandRecorder = m_device.createCommandRecorder();
 
-    // Begin render pass - oscillate the clear color just to show something changing.
-    updateClearColor();
     m_opaquePassOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex);
     auto opaquePass = commandRecorder.beginRenderPass(m_opaquePassOptions);
 
-    // Bind pipeline
     opaquePass.setPipeline(m_pipeline);
-
-    // Bind vertex buffer
     opaquePass.setVertexBuffer(0, m_buffer);
-
-    // Set Push Constant
-    static float angle = 0.0f;
-    angle = (angle + 0.1f);
-    opaquePass.pushConstant(m_transformPushConstantRange,
-                            glm::value_ptr(m_transform));
-
-    // Issue draw command
-    const DrawCommand drawCmd = { .vertexCount = 3 };
-    opaquePass.draw(drawCmd);
-
-    // End render pass
+    opaquePass.setIndexBuffer(m_indexBuffer);
+    opaquePass.pushConstant(m_transformPushConstantRange, glm::value_ptr(m_transform));
+    const DrawIndexedCommand drawCmd = { .indexCount = 3 };
+    opaquePass.drawIndexed(drawCmd);
     renderImGuiOverlay(&opaquePass, m_inFlightIndex);
     opaquePass.end();
-
-    // End recording
     m_commandBuffers[m_inFlightIndex] = commandRecorder.finish();
 
     // Only await presentation completion if we have indeed presented
@@ -176,7 +205,6 @@ void HelloTriangle::render()
     if (m_waitForPresentation)
         waitSemaphores.emplace_back(m_presentCompleteSemaphores[m_inFlightIndex]);
 
-    // Submit command buffer to queue
     SubmitOptions submitOptions = {
         .commandBuffers = { m_commandBuffers[m_inFlightIndex] },
         .waitSemaphores = waitSemaphores,
@@ -184,41 +212,4 @@ void HelloTriangle::render()
         .signalFence = m_frameFences[m_inFlightIndex] // Signal Fence once submission and execution is complete
     };
     m_queue.submit(submitOptions);
-}
-
-void HelloTriangle::updateClearColor()
-{
-    static constexpr int32_t color1[3] = { 30, 64, 175 };
-    static constexpr int32_t color2[3] = { 107, 33, 168 };
-    static constexpr int32_t deltaColor[3] = {
-        color2[0] - color1[0],
-        color2[1] - color1[1],
-        color2[2] - color1[2]
-    };
-
-    // Calculate a sinusoidal interpolation value with a period of 5s.
-    const auto timeNS = engine()->simulationTime();
-    const std::chrono::nanoseconds periodNS(5'000'000'000);
-    const double t = fmod(timeNS.count(), periodNS.count()) / double(periodNS.count());
-    const double lambda = 0.5 * (sin(t * 2 * M_PI) + 1.0);
-    const uint32_t color[3] = {
-        color1[0] + uint32_t(lambda * deltaColor[0]),
-        color1[1] + uint32_t(lambda * deltaColor[1]),
-        color1[2] + uint32_t(lambda * deltaColor[2])
-    };
-
-    m_opaquePassOptions.colorAttachments[0].clearValue.float32[0] = float(color[0]) / 255.0f;
-    m_opaquePassOptions.colorAttachments[0].clearValue.float32[1] = float(color[1]) / 255.0f;
-    m_opaquePassOptions.colorAttachments[0].clearValue.float32[2] = float(color[2]) / 255.0f;
-}
-
-void HelloTriangle::updateTransform()
-{
-    static float angle = 0.0f;
-    angle += 0.1f;
-    if (angle > 360.0f)
-        angle -= 360.0f;
-
-    m_transform = glm::mat4(1.0f);
-    m_transform = glm::rotate(m_transform, glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
 }

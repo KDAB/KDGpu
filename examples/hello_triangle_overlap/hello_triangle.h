@@ -31,11 +31,9 @@ protected:
     void resize() override;
 
 private:
-    void updateClearColor();
-    void updateTransform();
-
     glm::mat4 m_transform = glm::mat4(1.0f);
     Buffer m_buffer;
+    Buffer m_indexBuffer;
     GraphicsPipeline m_pipeline;
     PipelineLayout m_pipelineLayout;
     RenderPassCommandRecorderOptions m_opaquePassOptions;
