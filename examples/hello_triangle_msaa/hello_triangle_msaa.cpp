@@ -83,16 +83,22 @@ void HelloTriangleMSAA::initializeScene()
 
     // Create a buffer to hold the geometry index data
     {
+        std::array<uint32_t, 3> indexData = { 0, 1, 2 };
+        const DeviceSize dataByteSize = indexData.size() * sizeof(uint32_t);
         BufferOptions bufferOptions = {
-            .size = 3 * sizeof(uint32_t),
-            .usage = BufferUsageFlagBits::IndexBufferBit,
-            .memoryUsage = MemoryUsage::CpuToGpu
+            .size = dataByteSize,
+            .usage = BufferUsageFlagBits::IndexBufferBit | BufferUsageFlagBits::TransferDstBit,
+            .memoryUsage = MemoryUsage::GpuOnly
         };
         m_indexBuffer = m_device.createBuffer(bufferOptions);
-        std::vector<uint32_t> indexData = { 0, 1, 2 };
-        auto bufferData = m_indexBuffer.map();
-        std::memcpy(bufferData, indexData.data(), indexData.size() * sizeof(uint32_t));
-        m_indexBuffer.unmap();
+        const BufferUploadOptions uploadOptions = {
+            .destinationBuffer = m_indexBuffer,
+            .dstStages = PipelineStageFlagBit::IndexInputBit,
+            .dstMask = AccessFlagBit::IndexReadBit,
+            .data = indexData.data(),
+            .byteSize = dataByteSize
+        };
+        uploadBufferData(uploadOptions);
     }
 
     // Create a buffer to hold the transformation matrix
@@ -104,9 +110,8 @@ void HelloTriangleMSAA::initializeScene()
         };
         m_transformBuffer = m_device.createBuffer(bufferOptions);
 
-        // Upload identify matrix
+        // Upload identity matrix. Updated below in updateScene()
         m_transform = glm::mat4(1.0f);
-
         auto bufferData = m_transformBuffer.map();
         std::memcpy(bufferData, &m_transform, sizeof(glm::mat4));
         m_transformBuffer.unmap();
@@ -116,7 +121,7 @@ void HelloTriangleMSAA::initializeScene()
     // multi-sampled texture into the current swapchain image.
     createRenderTarget();
 
-    // Create a vertex shader and fragment shader (spir-v only for now)
+    // Create a vertex shader and fragment shader
     const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_triangle_msaa/hello_triangle.vert.spv";
     auto vertexShader = m_device.createShaderModule(KDGpu::readShaderFile(vertexShaderPath));
 
@@ -223,7 +228,9 @@ void HelloTriangleMSAA::updateScene()
 {
     // Each frame we want to rotate the triangle a little
     static float angle = 0.0f;
-    angle += 0.1f;
+    const float angularSpeed = 3.0f; // degrees per second
+    const float dt = engine()->deltaTimeSeconds();
+    angle += angularSpeed * dt;
     if (angle > 360.0f)
         angle -= 360.0f;
 
