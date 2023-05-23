@@ -1370,15 +1370,15 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
 
     // Find or create a framebuffer as per the render pass above
     const bool usingMsaa = options.samples > SampleCountFlagBits::Samples1Bit;
-    VulkanAttachmentKey attachmnentKey;
+    VulkanAttachmentKey attachmentKey;
     for (const auto &colorAttachment : options.colorAttachments) {
-        attachmnentKey.addAttachmentView(colorAttachment.view);
+        attachmentKey.addAttachmentView(colorAttachment.view);
         // Include resolve attachments if using MSAA.
         if (usingMsaa)
-            attachmnentKey.addAttachmentView(colorAttachment.resolveView);
+            attachmentKey.addAttachmentView(colorAttachment.resolveView);
     }
     if (options.depthStencilAttachment.view.isValid())
-        attachmnentKey.addAttachmentView(options.depthStencilAttachment.view);
+        attachmentKey.addAttachmentView(options.depthStencilAttachment.view);
 
     // Take the dimensions of the first attachment as the framebuffer dimensions
     // TODO: Should this be the dimensions of the view rather than the texture itself? i.e. can we
@@ -1401,7 +1401,7 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
     // https://github.com/KhronosGroup/Vulkan-Guide/blob/main/chapters/extensions/VK_KHR_imageless_framebuffer.adoc
     VulkanFramebufferKey framebufferKey;
     framebufferKey.renderPass = vulkanRenderPassHandle;
-    framebufferKey.attachmentsKey = attachmnentKey;
+    framebufferKey.attachmentsKey = attachmentKey;
     framebufferKey.width = firstTexture->extent.width;
     framebufferKey.height = firstTexture->extent.height;
     framebufferKey.layers = firstTexture->arrayLayers;
