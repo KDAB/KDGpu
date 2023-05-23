@@ -51,10 +51,16 @@ void Queue::submit(const SubmitOptions &options)
     apiQueue->submit(options);
 }
 
-std::vector<PresentResult> Queue::present(const PresentOptions &options)
+PresentResult Queue::present(const PresentOptions &options)
 {
     auto apiQueue = m_api->resourceManager()->getQueue(m_queue);
     return apiQueue->present(options);
+}
+
+std::vector<PresentResult> Queue::lastPerSwapchainPresentResults() const
+{
+    auto apiQueue = m_api->resourceManager()->getQueue(m_queue);
+    return apiQueue->lastPerSwapchainPresentResults();
 }
 
 void Queue::waitForUploadBufferData(const WaitForBufferUploadOptions &options)

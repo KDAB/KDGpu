@@ -26,7 +26,8 @@ struct ApiQueue {
     virtual void waitUntilIdle() = 0;
     // TODO: Return type and arguments?
     virtual void submit(const SubmitOptions &options) = 0;
-    virtual std::vector<PresentResult> present(const PresentOptions &options) = 0;
+    virtual PresentResult present(const PresentOptions &options) = 0;
+    virtual std::vector<PresentResult> lastPerSwapchainPresentResults() const = 0;
 };
 
 } // namespace KDGpu

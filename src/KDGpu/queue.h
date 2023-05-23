@@ -117,7 +117,8 @@ public:
     void waitUntilIdle();
     void submit(const SubmitOptions &options);
 
-    std::vector<PresentResult> present(const PresentOptions &options);
+    PresentResult present(const PresentOptions &options);
+    std::vector<PresentResult> lastPerSwapchainPresentResults() const;
 
     void waitForUploadBufferData(const WaitForBufferUploadOptions &options);
     UploadStagingBuffer uploadBufferData(const BufferUploadOptions &options);
