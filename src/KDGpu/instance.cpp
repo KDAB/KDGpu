@@ -21,6 +21,40 @@
 
 namespace KDGpu {
 
+/**
+    @class Instance
+    @brief Instance is used to initialize the Rendering API.
+    @ingroup public
+    @headerfile instance.h <KDGpu/instance.h>
+
+    @code{.cpp}
+    using namespace KDGpu;
+
+    std::unique_ptr<GraphicsApi> api = std::make_unique<VulkanGraphicsApi>();
+
+    Instance instance = api->createInstance(InstanceOptions{
+            .applicationName = "MyApplication",
+            .applicationVersion = 0,
+    });
+    @endcode
+
+    @sa InstanceOptions
+    @sa GraphicsApi::createInstance
+ */
+
+/**
+    @fn Instance::handle()
+    @brief Returns the handle used to retrieve the underlying Rendering API specific Instance
+
+    @return Handle<Instance_t>
+    @sa ResourceManager
+ */
+
+/**
+    @fn Instance::isValid()
+    @brief Convenience function to check whether the Instance is actually referencing a valid API specific resource
+ */
+
 Instance::Instance()
 {
 }
@@ -64,12 +98,18 @@ Instance &Instance::operator=(Instance &&other)
     return *this;
 }
 
+/**
+ * @brief Returns the extensions requested for the instance
+ */
 std::vector<Extension> Instance::extensions() const
 {
     auto apiInstance = m_api->resourceManager()->getInstance(m_instance);
     return apiInstance->extensions();
 }
 
+/**
+ * @brief Convenience function used to create a Device instance that supports presentation against Surface @a surface
+ */
 AdapterAndDevice Instance::createDefaultDevice(const Surface &surface,
                                                AdapterDeviceType deviceType) const
 {
@@ -113,6 +153,9 @@ AdapterAndDevice Instance::createDefaultDevice(const Surface &surface,
     return { selectedAdapter, std::move(device) };
 }
 
+/**
+ * @brief Returns a vector of the Adapter instances available for the instance
+ */
 std::vector<Adapter *> Instance::adapters() const
 {
     if (m_adapters.empty()) {
@@ -135,6 +178,9 @@ std::vector<Adapter *> Instance::adapters() const
     return adapterPtrs;
 }
 
+/**
+ * @brief Convenience function to easily select an Adapter instance
+ */
 Adapter *Instance::selectAdapter(AdapterDeviceType deviceType) const
 {
     std::vector<AdapterDeviceType> lookupTypes;
@@ -155,6 +201,10 @@ Adapter *Instance::selectAdapter(AdapterDeviceType deviceType) const
     return nullptr;
 }
 
+/**
+ * @brief Create a Surface instance based on the provided options
+ *
+ */
 Surface Instance::createSurface(const SurfaceOptions &options)
 {
     auto apiInstance = m_api->resourceManager()->getInstance(m_instance);

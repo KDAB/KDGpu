@@ -29,6 +29,11 @@ class GraphicsApi;
 class Surface;
 struct Instance_t;
 
+/**
+    @brief Holds option fields used for Instance creation
+    @ingroup public
+    @headerfile instance.h <KDGpu/instance.h>
+ */
 struct InstanceOptions {
     std::string applicationName{ "Serenity Application" };
     uint32_t applicationVersion{ SERENITY_MAKE_API_VERSION(0, 1, 0, 0) };
@@ -41,10 +46,6 @@ struct AdapterAndDevice {
     Device device;
 };
 
-/**
- * @brief Instance
- * @ingroup public
- */
 class KDGPU_EXPORT Instance
 {
 public:
@@ -68,14 +69,9 @@ public:
                                          AdapterDeviceType deviceType = AdapterDeviceType::Default) const;
 
     std::vector<Adapter *> adapters() const;
+
     Adapter *selectAdapter(AdapterDeviceType deviceType) const;
 
-    // TODO: Support Serenity::Window, QWindow etc
-    //
-    // We could provide a tiny library that links to both Serenity and ToyRenderer
-    // and exposed SerenityVulkanGraphicsApi which creates a SerenityInstance class that inherits
-    // Instance and which creates a Surface from a Serenity::Window. This approach would keep
-    // ToyRenderer separate from Serenity/Qt.
     Surface createSurface(const SurfaceOptions &options);
 
 private:
