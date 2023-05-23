@@ -891,7 +891,7 @@ enum class MipmapFilterMode {
 };
 
 namespace MipmapLodClamping {
-constexpr float NoClamping = 0x7fffffff;
+constexpr float NoClamping = float(0x7fffffff);
 }
 
 enum class AccessFlagBit : uint64_t {
