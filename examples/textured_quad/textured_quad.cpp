@@ -133,9 +133,9 @@ void TexturedQuad::initializeScene()
 
         // Upload the texture data and transition to ShaderReadOnlyOptimal
         // clang-format off
-        const std::vector<BufferImageCopyRegion> regions = {{
-            .imageSubResource = { .aspectMask = TextureAspectFlagBits::ColorBit },
-            .imageExtent = { .width = image.width, .height = image.height, .depth = 1 }
+        const std::vector<BufferTextureCopyRegion> regions = {{
+            .textureSubResource = { .aspectMask = TextureAspectFlagBits::ColorBit },
+            .textureExtent = { .width = image.width, .height = image.height, .depth = 1 }
         }};
         // clang-format on
         const TextureUploadOptions uploadOptions = {

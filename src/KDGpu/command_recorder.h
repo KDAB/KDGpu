@@ -39,27 +39,27 @@ struct BufferCopy {
     size_t byteSize{ 0 };
 };
 
-struct BufferImageCopyRegion {
+struct BufferTextureCopyRegion {
     DeviceSize bufferOffset{ 0 };
     uint32_t bufferRowLength{ 0 };
-    uint32_t bufferImageHeight{ 0 };
-    TextureSubresourceLayers imageSubResource{};
-    Offset3D imageOffset{};
-    Extent3D imageExtent{};
+    uint32_t bufferTextureHeight{ 0 };
+    TextureSubresourceLayers textureSubResource{};
+    Offset3D textureOffset{};
+    Extent3D textureExtent{};
 };
 
 struct BufferToTextureCopy {
     Handle<Buffer_t> srcBuffer;
     Handle<Texture_t> dstTexture;
-    TextureLayout dstImageLayout;
-    std::vector<BufferImageCopyRegion> regions;
+    TextureLayout dstTextureLayout;
+    std::vector<BufferTextureCopyRegion> regions;
 };
 
 struct TextureToBufferCopy {
     Handle<Texture_t> srcTexture;
-    TextureLayout srcImageLayout;
+    TextureLayout srcTextureLayout;
     Handle<Buffer_t> dstBuffer;
-    std::vector<BufferImageCopyRegion> regions;
+    std::vector<BufferTextureCopyRegion> regions;
 };
 
 struct TextureCopyRegion {

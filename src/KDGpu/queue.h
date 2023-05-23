@@ -74,7 +74,7 @@ struct WaitForTextureUploadOptions {
     DeviceSize byteSize{ 0 };
     TextureLayout oldLayout{ TextureLayout::Undefined };
     TextureLayout newLayout{ TextureLayout::Undefined };
-    std::vector<BufferImageCopyRegion> regions;
+    std::vector<BufferTextureCopyRegion> regions;
 };
 
 struct TextureUploadOptions {
@@ -85,7 +85,7 @@ struct TextureUploadOptions {
     DeviceSize byteSize{ 0 };
     TextureLayout oldLayout{ TextureLayout::Undefined };
     TextureLayout newLayout{ TextureLayout::Undefined };
-    std::vector<BufferImageCopyRegion> regions;
+    std::vector<BufferTextureCopyRegion> regions;
 };
 
 struct UploadStagingBuffer {

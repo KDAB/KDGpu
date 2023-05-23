@@ -182,7 +182,7 @@ void Queue::waitForUploadTextureData(const WaitForTextureUploadOptions &options)
     const BufferToTextureCopy copyCmd = {
         .srcBuffer = stagingBuffer,
         .dstTexture = options.destinationTexture,
-        .dstImageLayout = TextureLayout::TransferDstOptimal,
+        .dstTextureLayout = TextureLayout::TransferDstOptimal,
         .regions = options.regions
     };
     // clang-format on
@@ -246,7 +246,7 @@ UploadStagingBuffer Queue::uploadTextureData(const TextureUploadOptions &options
     const BufferToTextureCopy copyCmd = {
         .srcBuffer = stagingBuffer,
         .dstTexture = options.destinationTexture,
-        .dstImageLayout = TextureLayout::TransferDstOptimal,
+        .dstTextureLayout = TextureLayout::TransferDstOptimal,
         .regions = options.regions
     };
     // clang-format on

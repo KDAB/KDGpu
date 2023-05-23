@@ -141,9 +141,9 @@ void ImGuiRenderer::initialize(KDGpu::SampleCountFlagBits samples, KDGpu::Format
 
     // Upload the font texture data
     // clang-format off
-    const std::vector<BufferImageCopyRegion> regions = {{
-        .imageSubResource = { .aspectMask = TextureAspectFlagBits::ColorBit },
-        .imageExtent = { .width = static_cast<uint32_t>(texWidth), .height = static_cast<uint32_t>(texHeight), .depth = 1 }
+    const std::vector<BufferTextureCopyRegion> regions = {{
+        .textureSubResource = { .aspectMask = TextureAspectFlagBits::ColorBit },
+        .textureExtent = { .width = static_cast<uint32_t>(texWidth), .height = static_cast<uint32_t>(texHeight), .depth = 1 }
     }};
     // clang-format on
     const WaitForTextureUploadOptions uploadOptions = {

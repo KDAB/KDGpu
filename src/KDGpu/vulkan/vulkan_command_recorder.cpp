@@ -21,7 +21,7 @@
 
 namespace {
 
-std::vector<VkBufferImageCopy> buildRegions(const std::vector<KDGpu::BufferImageCopyRegion> &regions)
+std::vector<VkBufferImageCopy> buildRegions(const std::vector<KDGpu::BufferTextureCopyRegion> &regions)
 {
     const uint32_t regionCount = regions.size();
     std::vector<VkBufferImageCopy> vkRegions;
@@ -31,14 +31,14 @@ std::vector<VkBufferImageCopy> buildRegions(const std::vector<KDGpu::BufferImage
         const VkBufferImageCopy vkRegion = {
             .bufferOffset = region.bufferOffset,
             .bufferRowLength = region.bufferRowLength,
-            .bufferImageHeight = region.bufferImageHeight,
+            .bufferImageHeight = region.bufferTextureHeight,
             .imageSubresource = {
-                    .aspectMask = region.imageSubResource.aspectMask.toInt(),
-                    .mipLevel = region.imageSubResource.mipLevel,
-                    .baseArrayLayer = region.imageSubResource.baseArrayLayer,
-                    .layerCount = region.imageSubResource.layerCount },
-            .imageOffset = { .x = region.imageOffset.x, .y = region.imageOffset.y, .z = region.imageOffset.z },
-            .imageExtent = { .width = region.imageExtent.width, .height = region.imageExtent.height, .depth = region.imageExtent.depth }
+                    .aspectMask = region.textureSubResource.aspectMask.toInt(),
+                    .mipLevel = region.textureSubResource.mipLevel,
+                    .baseArrayLayer = region.textureSubResource.baseArrayLayer,
+                    .layerCount = region.textureSubResource.layerCount },
+            .imageOffset = { .x = region.textureOffset.x, .y = region.textureOffset.y, .z = region.textureOffset.z },
+            .imageExtent = { .width = region.textureExtent.width, .height = region.textureExtent.height, .depth = region.textureExtent.depth }
         };
         vkRegions.emplace_back(std::move(vkRegion));
     }
@@ -120,7 +120,7 @@ void VulkanCommandRecorder::copyBufferToTexture(const BufferToTextureCopy &copy)
     vkCmdCopyBufferToImage(commandBuffer,
                            srcVulkanBuffer->buffer,
                            dstVulkanTexture->image,
-                           textureLayoutToVkImageLayout(copy.dstImageLayout),
+                           textureLayoutToVkImageLayout(copy.dstTextureLayout),
                            static_cast<uint32_t>(vkRegions.size()),
                            vkRegions.data());
 }
@@ -133,7 +133,7 @@ void VulkanCommandRecorder::copyTextureToBuffer(const TextureToBufferCopy &copy)
 
     vkCmdCopyImageToBuffer(commandBuffer,
                            srcVulkanTexture->image,
-                           textureLayoutToVkImageLayout(copy.srcImageLayout),
+                           textureLayoutToVkImageLayout(copy.srcTextureLayout),
                            dstVulkanBuffer->buffer,
                            static_cast<uint32_t>(vkRegions.size()),
                            vkRegions.data());
