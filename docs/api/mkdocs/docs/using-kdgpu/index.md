@@ -5,6 +5,7 @@
 We use KDGui to conveniently create an Application and a Window and keep the code below
 streamlined.
 
+```cpp
     #include <KDGui/gui_application.h>
     #include <KDGui/window.h>
 
@@ -18,39 +19,44 @@ streamlined.
     window.width = 1920;
     window.height = 1080;
     window.visible = true;
-
+```
 
 ## Selecting a Rendering API
 
 At the moment, KDGpu only supports Vulkan:
 
+```cpp
     #include <KDGpu/vulkan/vulkan_graphics_api.h>
 
     std::unique_ptr<GraphicsApi> api = std::make_unique<VulkanGraphicsApi>();
-
+```
 
 ## Instance
 
+```cpp
     #include <KDGpu/instance.h>
 
     Instance instance = api->createInstance(InstanceOptions{
             .applicationName = "MyApplication",
             .applicationVersion = SERENITY_MAKE_API_VERSION(0, 1, 0, 0),
     });
+```
 
 ## Surface
 
 Since we are using KDGui, we can leverage KDGpuKDGui to simplify the Surface creation.
 
+```cpp
     #include <KDGpu/surface.h>
     #include <KDGpuKDGui/view.h>
 
     const SurfaceOptions surfaceOptions = KDGpuKDGui::surfaceOptions(&window);
     Surface surface = instance.createSurface(surfaceOptions);
-
+```
 
 ## Physical Device Selection and Device Creation
 
+```cpp
     #include <KDGpu/device.h>
     #include <KDGpu/queue.h>
 
@@ -58,10 +64,13 @@ Since we are using KDGui, we can leverage KDGpuKDGui to simplify the Surface cre
     Adapter *selectedAdapter = instance.selectAdapter(AdapterDeviceType::Default);
 
     Device device = selectedAdapter->createDevice();
+```
 
 ### Retrieve Queue
 
+```cpp
     Queue queue = device.queues()[0];
+```
 
 ## GPU Resources
 
@@ -69,6 +78,7 @@ Since we are using KDGui, we can leverage KDGpuKDGui to simplify the Surface cre
 
 #### Creation
 
+```cpp
     Buffer buffer = device.createBuffer(BufferOptions {
         .size = 3 * 2 * 4 * sizeof(float), // 3 vertices * 2 attributes * 4 float components
         .usage = BufferUsageFlags(BufferUsageFlagBits::VertexBufferBit),
@@ -79,9 +89,11 @@ Since we are using KDGui, we can leverage KDGpuKDGui to simplify the Surface cre
             .usage = BufferUsageFlagBits::UniformBufferBit,
             .memoryUsage = MemoryUsage::CpuToGpu, // So we can map it to CPU address space
     });
+```
 
 #### Data Upload
 
+```cpp
     {
         const std::vector<float> vertexData = {
         1.0f, -1.0f, 0.0f, 1.0f, // position
@@ -102,9 +114,11 @@ Since we are using KDGui, we can leverage KDGpuKDGui to simplify the Surface cre
         std::memcpy(bufferData, &m, 16 * sizeof(float));
         cameraUBOBuffer.unmap();
     }
+```
 
 ### Texture
 
+```cpp
     #include <KDGpu/texture.h>
     #include <KDGpu/texture_options.h>
 
@@ -118,9 +132,11 @@ Since we are using KDGui, we can leverage KDGpuKDGui to simplify the Surface cre
     });
 
     TextureView depthTextureView = depthTexture.createView();
+```
 
 ## Swapchain
 
+```cpp
     #include <KDGpu/swapchain.h>
     #include <KDGpu/swapchain_options.h>
 
@@ -139,20 +155,24 @@ Since we are using KDGui, we can leverage KDGpuKDGui to simplify the Surface cre
         auto view = swapchainTextures[i].createView({ .format = swapchainOptions.format });
         swapchainViews.push_back(std::move(view));
     }
+```
 
 ## Pipeline Creation
 
 ### Shader Modules
 
+```cpp
     // Create a vertex shader and fragment shader (spir-v only for now)
     const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/hello_triangle.vert.spv";
     ShaderModule vertexShader = device.createShaderModule(KDGpu::readShaderFile(vertexShaderPath));
 
     const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/hello_triangle.frag.spv";
     ShaderModule fragmentShader = device.createShaderModule(KDGpu::readShaderFile(fragmentShaderPath));
+```
 
 ### Bind Group Layout
 
+```cpp
     #include <KDGpu/bind_group_layout_options.h>
     #include <KDGpu/bind_group_layout.h>
 
@@ -165,15 +185,19 @@ Since we are using KDGui, we can leverage KDGpuKDGui to simplify the Surface cre
                       .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit) },
             },
     });
+```
 
 ### Pipeline Layout
 
+```cpp
     PipelineLayout pipelineLayout = device.createPipelineLayout(PipelineLayoutOptions{
             .bindGroupLayouts = { bindGroupLayout },
     });
+```
 
 ### Bind Group
 
+```cpp
     BindGroup bindGroup = device.createBindGroup(BindGroupOptions{
             .layout = bindGroupLayout,
             .resources = {
@@ -183,16 +207,22 @@ Since we are using KDGui, we can leverage KDGpuKDGui to simplify the Surface cre
                     },
             },
     });
+```
 
 ### Graphics Pipeline
 
+```cpp
     #include <KDGpu/graphics_pipeline.h>
     #include <KDGpu/graphics_pipeline_options.h>
 
     GraphicsPipeline pipeline = device.createGraphicsPipeline(GraphicsPipelineOptions{
             .shaderStages = {
-                    { .shaderModule = vertexShader.handle(), .stage = ShaderStageFlagBits::VertexBit },
-                    { .shaderModule = fragmentShader.handle(), .stage = ShaderStageFlagBits::FragmentBit },
+                    { .shaderModule = vertexShader.handle(),
+                      .stage = ShaderStageFlagBits::VertexBit
+                    },
+                    { .shaderModule = fragmentShader.handle(),
+                      .stage = ShaderStageFlagBits::FragmentBit
+                    },
             },
             .layout = pipelineLayout.handle(),
             .vertex = {
@@ -200,8 +230,11 @@ Since we are using KDGui, we can leverage KDGpuKDGui to simplify the Surface cre
                             { .binding = 0, .stride = 2 * 4 * sizeof(float) },
                     },
                     .attributes = {
-                            { .location = 0, .binding = 0, .format = Format::R32G32B32A32_SFLOAT }, // Position
-                            { .location = 1, .binding = 0, .format = Format::R32G32B32A32_SFLOAT, .offset = 4 * sizeof(float) }, // Color
+                            { .location = 0, .binding = 0, .format = Format::R32G32B32A32_SFLOAT // Position
+                            },
+                            { .location = 1, .binding = 0, .format = Format::R32G32B32A32_SFLOAT,
+                              .offset = 4 * sizeof(float) // Color
+                            },
                     },
             },
             .renderTargets = {
@@ -213,9 +246,11 @@ Since we are using KDGui, we can leverage KDGpuKDGui to simplify the Surface cre
                     .depthCompareOperation = CompareOperation::Less,
             },
     });
+```
 
 ## Command Recording
 
+```cpp
     #include <KDGpu/render_pass_command_recorder_options.h>
     #include <KDGpu/gpu_semaphore.h>
 
@@ -230,7 +265,9 @@ Since we are using KDGui, we can leverage KDGpuKDGui to simplify the Surface cre
     angle += 0.1f;
 
     auto cameraBufferData = cameraUBOBuffer.map();
-    glm::mat4 cameraMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
+    glm::mat4 cameraMatrix = glm::rotate(glm::mat4(1.0f),
+                             glm::radians(angle),
+                             glm::vec3(0.0f, 0.0f, 1.0f));
     std::memcpy(cameraBufferData, glm::value_ptr(cameraMatrix), 16 * sizeof(float));
     cameraUBOBuffer.unmap();
 
@@ -270,16 +307,20 @@ Since we are using KDGui, we can leverage KDGpuKDGui to simplify the Surface cre
 
     // End recording
     const CommandBuffer commands = commandRecorder.finish();
+```
 
 ## Queue Submission
 
+```cpp
         queue.submit(SubmitOptions{
             .commandBuffers = { commands },
             .signalSemaphores = { renderCompleteSemaphore },
         });
+```
 
 ## Presentation
 
+```cpp
         // Present and request next frame (need API for this)
         // - wait for the renderCompleteSemaphore to have been signalled as we only want to present once
         //   everything has been rendered
@@ -289,3 +330,4 @@ Since we are using KDGui, we can leverage KDGpuKDGui to simplify the Surface cre
         });
 
         queue.waitIdle();
+```

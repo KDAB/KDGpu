@@ -9,8 +9,8 @@
 * CMake, make sure it is in your PATH
 
 * [Vulkan SDK](https://www.lunarg.com/vulkan-sdk/)
-    * Make sure to install the additional debug libraries when prompted during the install process
-    * Make sure VULKAN_SDK is set accordingly in your environment
+  * Make sure to install the additional debug libraries when prompted during the install process
+  * Make sure VULKAN_SDK is set accordingly in your environment
 
 ### Linux
 
@@ -19,8 +19,10 @@
 * CMake
 
 * [Vulkan SDK](https://www.lunarg.com/vulkan-sdk/)
-    * Make sure VULKAN_SDK is set accordingly in your environment
-    * **Note:** We recommend installing the Vulkan SDK directly from [LunarG](https://www.lunarg.com/vulkan-sdk/) rather than relying on your distribution packages as those might not provide the shaderc library which Serenity relies on.
+  * Make sure VULKAN_SDK is set accordingly in your environment
+  * **Note:** We recommend installing the Vulkan SDK directly from [LunarG](https://www.lunarg.com/vulkan-sdk/)
+    rather than relying on your distribution packages as those might not provide the shaderc library
+    which Serenity relies on.
 
 ### Mac
 
@@ -53,11 +55,13 @@ If you wish to build the documentation locally, you'll need to install the follo
 
 KDGpu builds with CMake. Unpack or clone the KDGpu sources in the directory of your choosing.
 
+```bash
     mkdir build
     cd build
     cmake -DKDGPU_BUILD_EXAMPLES=ON -DCMAKE_INSTALL_PREFIX=/path/to/install/location/ ..
     cmake --build . --config Release
     cmake --install .
+```
 
 ### CMake Options
 
@@ -70,6 +74,7 @@ KDGpu builds with CMake. Unpack or clone the KDGpu sources in the directory of y
 
 ### Using KDGpu in your project
 
+```cmake
     find_package(KDGpu REQUIRED)
 
     set(SOURCES main.cpp ...)
@@ -78,14 +83,21 @@ KDGpu builds with CMake. Unpack or clone the KDGpu sources in the directory of y
 
     target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
     target_link_libraries(${PROJECT_NAME} PRIVATE  KDGpu::KDGpu)
+```
 
-##### Note:
+#### Notes
 
-  CMake will looks for a file named KDGpuConfig.cmake. This fill is located in <kdgpu_install_dir>/lib/cmake/Kuesa.  
-  If KDGpu was installed into a user defined location, you might have to set the CMAKE_PREFIX_PATH variable to contain the KDGpu intall path:  
+  CMake will looks for a file named KDGpuConfig.cmake. This fill is located in <kdgpu_install_dir>/lib/cmake/Kuesa.
+  If KDGpu was installed into a user defined location, you might have to set the
+  CMAKE_PREFIX_PATH variable to contain the KDGpu install path:
 
+```cmake
     cmake -DCMAKE_PREFIX_PATH=<kdgpu_install_dir> ..
+```
 
-  In case cmake is unable to locate the KDGpu CMake package, you could try to set CMAKE_FIND_DEBUG_MODE=ON to get more insight about where CMake is looking for.  
+  In case cmake is unable to locate the KDGpu CMake package, you could try to set CMAKE_FIND_DEBUG_MODE=ON
+  to get more insight about where CMake is looking for.
 
+```cmake
     cmake -DCMAKE_PREFIX_PATH=<kdgpu_install_dir> -DCMAKE_FIND_DEBUG_MODE=ON ..
+```
