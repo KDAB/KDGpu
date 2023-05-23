@@ -13,7 +13,6 @@
 #include <KDGpu/buffer_options.h>
 #include <KDGpu/command_recorder.h>
 #include <KDGpu/graphics_api.h>
-#include <KDGpu/queue.h>
 #include <KDGpu/resource_manager.h>
 #include <KDGpu/api/api_queue.h>
 #include <KDGpu/api/api_device.h>
