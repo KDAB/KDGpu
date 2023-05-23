@@ -1437,9 +1437,9 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
         .extent = { .width = firstTexture->extent.width, .height = firstTexture->extent.height }
     };
 
-    // Clear values
+    // Clear values - at most 2 x color attachments + depth
     constexpr size_t MaxAttachmentCount = 20;
-    assert(framebufferKey.attachments.size() <= MaxAttachmentCount);
+    assert(2 * options.colorAttachments.size() + 1 <= MaxAttachmentCount);
     std::array<VkClearValue, MaxAttachmentCount> vkClearValues;
     size_t clearIdx = 0;
     for (const auto &colorAttachment : options.colorAttachments) {
