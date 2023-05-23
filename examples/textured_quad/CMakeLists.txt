@@ -7,7 +7,7 @@
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
 project(
-    12_kdgpu_textured_quad
+    kdgpu_textured_quad
     VERSION 0.1
     LANGUAGES CXX
 )

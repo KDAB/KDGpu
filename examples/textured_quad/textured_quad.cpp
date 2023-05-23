@@ -156,10 +156,10 @@ void TexturedQuad::initializeScene()
     }
 
     // Create a vertex shader and fragment shader (spir-v only for now)
-    const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/12_textured_quad/textured_quad.vert.spv";
+    const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/textured_quad/textured_quad.vert.spv";
     auto vertexShader = m_device.createShaderModule(KDGpu::readShaderFile(vertexShaderPath));
 
-    const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/12_textured_quad/textured_quad.frag.spv";
+    const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/textured_quad/textured_quad.frag.spv";
     auto fragmentShader = m_device.createShaderModule(KDGpu::readShaderFile(fragmentShaderPath));
 
     // Create bind group layout consisting of a single binding holding a UBO
