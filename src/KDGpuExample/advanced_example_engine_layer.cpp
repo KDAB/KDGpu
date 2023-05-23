@@ -35,8 +35,6 @@ void AdvancedExampleEngineLayer::onAttached()
     // Create the present complete and render complete semaphores
     for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
         m_frameFences[i] = m_device.createFence();
-
-    initializeScene();
 }
 
 void AdvancedExampleEngineLayer::onDetached()
