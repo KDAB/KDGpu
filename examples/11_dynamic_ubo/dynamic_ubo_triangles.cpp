@@ -154,7 +154,7 @@ void DynamicUBOTriangles::initializeScene()
         .resources = {{
             .binding = 0,
             // We are dealing with a Dynamic UBO expected to hold
-            // a set of transform matrces. The size we specify for the binding is the size of a single entry in the buffer
+            // a set of transform matrices. The size we specify for the binding is the size of a single entry in the buffer
             .resource = DynamicUniformBufferBinding{ .buffer = m_transformDynamicUBOBuffer, .size = uint32_t(m_dynamicUBOByteStride) }
         }}
     };
