@@ -42,16 +42,28 @@ struct SubmitOptions {
     Handle<Fence_t> signalFence;
 };
 
+/**
+    @ingroup public
+    @headerfile queue.h <KDGpu/queue.h>
+*/
 struct SwapchainPresentInfo {
     Handle<Swapchain_t> swapchain;
     uint32_t imageIndex;
 };
 
+/**
+    @ingroup public
+    @headerfile queue.h <KDGpu/queue.h>
+*/
 struct PresentOptions {
     std::vector<Handle<GpuSemaphore_t>> waitSemaphores;
     std::vector<SwapchainPresentInfo> swapchainInfos;
 };
 
+/**
+    @ingroup public
+    @headerfile queue.h <KDGpu/queue.h>
+*/
 struct WaitForBufferUploadOptions {
     Handle<Buffer_t> destinationBuffer;
     const void *data{ nullptr };
@@ -59,6 +71,10 @@ struct WaitForBufferUploadOptions {
     DeviceSize dstOffset{ 0 };
 };
 
+/**
+    @ingroup public
+    @headerfile queue.h <KDGpu/queue.h>
+*/
 struct BufferUploadOptions {
     Handle<Buffer_t> destinationBuffer;
     PipelineStageFlags dstStages;
@@ -68,6 +84,10 @@ struct BufferUploadOptions {
     DeviceSize dstOffset{ 0 };
 };
 
+/**
+    @ingroup public
+    @headerfile queue.h <KDGpu/queue.h>
+*/
 struct WaitForTextureUploadOptions {
     Handle<Texture_t> destinationTexture;
     const void *data{ nullptr };
@@ -77,6 +97,10 @@ struct WaitForTextureUploadOptions {
     std::vector<BufferTextureCopyRegion> regions;
 };
 
+/**
+    @ingroup public
+    @headerfile queue.h <KDGpu/queue.h>
+*/
 struct TextureUploadOptions {
     Handle<Texture_t> destinationTexture;
     PipelineStageFlags dstStages;
@@ -88,16 +112,16 @@ struct TextureUploadOptions {
     std::vector<BufferTextureCopyRegion> regions;
 };
 
+/**
+    @ingroup public
+    @headerfile queue.h <KDGpu/queue.h>
+*/
 struct UploadStagingBuffer {
     Fence fence;
     Buffer buffer;
     CommandBuffer commandBuffer;
 };
 
-/**
- * @brief Queue
- * @ingroup public
- */
 class KDGPU_EXPORT Queue
 {
 public:

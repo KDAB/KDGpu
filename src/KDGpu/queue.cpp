@@ -19,6 +19,58 @@
 
 namespace KDGpu {
 
+/**
+    @class SubmitOptions
+    @brief Holds information required to perform a queue submission.
+
+    @var commandBuffers holds a vector of handles to the CommandBuffer instances that needs to be submitted for execution.
+    @var waitSemaphores holds a vector of handles to GpuSemaphore instances commands will have to wait for before execution begin
+    @var signalSemaphores holds a vector of handles to GpuSemaphore instances that will be signalled when execution of the commands completes
+    @var signalFence holds a handle to Fence instance to be signalled when execution of the commands completes
+
+    @ingroup public
+    @headerfile queue.h <KDGpu/queue.h>
+    @sa KDGpu::GpuSemaphore
+    @sa KDGpu::Fence
+    @sa KDGpu::CommandBuffer
+*/
+
+/**
+    @class Queue
+    @brief Queue is used to submit commands for execution and optionally present content
+    @ingroup public
+    @headerfile queue.h <KDGpu/queue.h>
+
+    @code{.cpp}
+    using namespace KDGpu;
+
+    Adapter *selectedAdapter = instance.selectAdapter(AdapterDeviceType::Default);
+    Device device = selectedAdapter->createDevice();
+    Queue queue = device.queues()[0];
+
+    CommandRecorder commandRecorder = device.createCommandRecorder();
+    ...
+    const CommandBuffer commands = commandRecorder.finish();
+
+    queue.submit(SubmitOptions{
+                .commandBuffers = { commands },
+    });
+
+    @endcode
+
+    @sa Device::queues
+ */
+
+/**
+    @fn Queue::handle()
+    @brief Returns the handle used to retrieve the underlying API specific Queue
+    @sa ResourceManager
+ */
+
+/**
+    @fn Queue::isValid()
+    @brief Convenience function to check whether the Queue is actually referencing a valid API specific resource
+ */
 Queue::Queue()
 {
 }
@@ -38,18 +90,27 @@ Queue::~Queue()
 {
 }
 
+/**
+ * @brief Forces a CPU side blocking wait until all pending commands on the queue have completed their execution.
+ */
 void Queue::waitUntilIdle()
 {
     auto apiQueue = m_api->resourceManager()->getQueue(m_queue);
     apiQueue->waitUntilIdle();
 }
 
+/**
+ * @brief Submit commands for execution based on the SubmitOptions @a options provided
+ */
 void Queue::submit(const SubmitOptions &options)
 {
     auto apiQueue = m_api->resourceManager()->getQueue(m_queue);
     apiQueue->submit(options);
 }
 
+/**
+ * @brief Request the Queue present content to the swapchains referenced in the PresentOptions @a options
+ */
 PresentResult Queue::present(const PresentOptions &options)
 {
     auto apiQueue = m_api->resourceManager()->getQueue(m_queue);
