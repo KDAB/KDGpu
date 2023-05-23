@@ -6,13 +6,13 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
+add_subdirectory(compute_particles)
+add_subdirectory(dynamic_ubo)
 add_subdirectory(hello_triangle_msaa)
 add_subdirectory(hello_triangle_native)
-add_subdirectory(hello_triangle)
-add_subdirectory(compute_particles)
-add_subdirectory(render_to_texture)
 add_subdirectory(hello_triangle_overlap)
-add_subdirectory(dynamic_ubo)
-add_subdirectory(textured_quad)
-add_subdirectory(offscreen_rendering)
+add_subdirectory(hello_triangle)
 add_subdirectory(multiview)
+add_subdirectory(offscreen_rendering)
+add_subdirectory(render_to_texture)
+add_subdirectory(textured_quad)
