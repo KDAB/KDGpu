@@ -94,10 +94,10 @@ void DynamicUBOTriangles::initializeScene()
     }
 
     // Create a vertex shader and fragment shader (spir-v only for now)
-    const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/11_dynamic_ubo/dynamic_ubo.vert.spv";
+    const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/dynamic_ubo/dynamic_ubo.vert.spv";
     auto vertexShader = m_device.createShaderModule(KDGpu::readShaderFile(vertexShaderPath));
 
-    const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/11_dynamic_ubo/dynamic_ubo.frag.spv";
+    const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/dynamic_ubo/dynamic_ubo.frag.spv";
     auto fragmentShader = m_device.createShaderModule(KDGpu::readShaderFile(fragmentShaderPath));
 
     // Create bind group layout consisting of a single binding holding a UBO

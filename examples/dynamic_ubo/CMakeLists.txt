@@ -7,7 +7,7 @@
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
 project(
-    11_kdgpu_dynamic_ubo
+    kdgpu_dynamic_ubo
     VERSION 0.1
     LANGUAGES CXX
 )
