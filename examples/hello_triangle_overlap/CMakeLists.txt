@@ -7,7 +7,7 @@
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
 project(
-    08_kdgpu_hello_triangle_kdgui_fence
+    kdgpu_hello_triangle_overlap
     VERSION 0.1
     LANGUAGES CXX
 )
