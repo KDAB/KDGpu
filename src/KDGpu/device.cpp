@@ -19,6 +19,39 @@
 
 namespace KDGpu {
 
+/**
+    @class Device
+    @brief Device is our main entry point to create Graphics Resources
+    @ingroup public
+    @headerfile device.h <KDGpu/device.h>
+
+    @code{.cpp}
+    using namespace KDGpu;
+
+    Adapter *selectedAdapter = instance.selectAdapter(AdapterDeviceType::Default);
+    Device device = selectedAdapter->createDevice();
+    @endcode
+
+    @sa Adapter::createDevice
+ */
+
+/**
+    @fn Device::handle()
+    @brief Returns the handle used to retrieve the underlying API specific Device
+
+    @sa ResourceManager
+ */
+
+/**
+    @fn Device::isValid()
+    @brief Convenience function to check whether the Device is actually referencing a valid API specific resource
+ */
+
+/**
+    @fn Device::queues()
+    @brief Returns the queues available on the device
+ */
+
 Device::Device()
     : m_api(nullptr)
 {
@@ -86,6 +119,9 @@ const Adapter *Device::adapter() const
     return m_adapter;
 }
 
+/**
+ * @brief Forces a CPU side blocking wait until the underlying device has completed execution of all its pending commands.
+ */
 void Device::waitUntilIdle()
 {
     auto apiDevice = m_api->resourceManager()->getDevice(m_device);
