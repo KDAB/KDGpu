@@ -8,7 +8,7 @@
   Contact KDAB at <info@kdab.com> for commercial licensing options.
 */
 
-#include "rotating_triangle_msaa.h"
+#include "hello_triangle_msaa.h"
 
 #include <KDGpuExample/engine.h>
 
@@ -37,12 +37,12 @@ inline std::string assetPath()
 
 } // namespace KDGpu
 
-RotatingTriangleMSAA::RotatingTriangleMSAA()
+HelloTriangleMSAA::HelloTriangleMSAA()
     : SimpleExampleEngineLayer(SampleCountFlagBits::Samples8Bit)
 {
 }
 
-void RotatingTriangleMSAA::initializeScene()
+void HelloTriangleMSAA::initializeScene()
 {
     struct Vertex {
         glm::vec3 position;
@@ -117,10 +117,10 @@ void RotatingTriangleMSAA::initializeScene()
     createRenderTarget();
 
     // Create a vertex shader and fragment shader (spir-v only for now)
-    const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/05_rotating_triangle/rotating_triangle.vert.spv";
+    const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_triangle_msaa/hello_triangle.vert.spv";
     auto vertexShader = m_device.createShaderModule(KDGpu::readShaderFile(vertexShaderPath));
 
-    const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/05_rotating_triangle/rotating_triangle.frag.spv";
+    const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_triangle_msaa/hello_triangle.frag.spv";
     auto fragmentShader = m_device.createShaderModule(KDGpu::readShaderFile(fragmentShaderPath));
 
     // Create bind group layout consisting of a single binding holding a UBO
@@ -206,7 +206,7 @@ void RotatingTriangleMSAA::initializeScene()
     // clang-format on
 }
 
-void RotatingTriangleMSAA::cleanupScene()
+void HelloTriangleMSAA::cleanupScene()
 {
     m_pipeline = {};
     m_pipelineLayout = {};
@@ -219,7 +219,7 @@ void RotatingTriangleMSAA::cleanupScene()
     m_commandBuffer = {};
 }
 
-void RotatingTriangleMSAA::updateScene()
+void HelloTriangleMSAA::updateScene()
 {
     // Each frame we want to rotate the triangle a little
     static float angle = 0.0f;
@@ -235,7 +235,7 @@ void RotatingTriangleMSAA::updateScene()
     m_transformBuffer.unmap();
 }
 
-void RotatingTriangleMSAA::resize()
+void HelloTriangleMSAA::resize()
 {
     // Recreate the msaa render target texture
     createRenderTarget();
@@ -245,7 +245,7 @@ void RotatingTriangleMSAA::resize()
     m_opaquePassOptions.depthStencilAttachment.view = m_depthTextureView;
 }
 
-void RotatingTriangleMSAA::createRenderTarget()
+void HelloTriangleMSAA::createRenderTarget()
 {
     const TextureOptions options = {
         .type = TextureType::TextureType2D,
@@ -261,7 +261,7 @@ void RotatingTriangleMSAA::createRenderTarget()
     m_msaaTextureView = m_msaaTexture.createView();
 }
 
-void RotatingTriangleMSAA::render()
+void HelloTriangleMSAA::render()
 {
     auto commandRecorder = m_device.createCommandRecorder();
 

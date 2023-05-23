@@ -8,7 +8,7 @@
   Contact KDAB at <info@kdab.com> for commercial licensing options.
 */
 
-#include "rotating_triangle_msaa.h"
+#include "hello_triangle_msaa.h"
 
 #include <KDGpuExample/engine.h>
 
@@ -23,7 +23,7 @@ int main()
     GuiApplication app;
     app.applicationName = "MSAA Rotating Triangle";
     Engine engine;
-    auto exampleLayer = engine.createEngineLayer<RotatingTriangleMSAA>();
+    auto exampleLayer = engine.createEngineLayer<HelloTriangleMSAA>();
     engine.running = true;
     return app.exec();
 }

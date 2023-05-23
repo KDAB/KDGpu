@@ -23,10 +23,10 @@
 
 using namespace KDGpuExample;
 
-class RotatingTriangleMSAA : public SimpleExampleEngineLayer
+class HelloTriangleMSAA : public SimpleExampleEngineLayer
 {
 public:
-    RotatingTriangleMSAA();
+    HelloTriangleMSAA();
 
 protected:
     void initializeScene() override;
