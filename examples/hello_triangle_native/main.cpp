@@ -226,10 +226,10 @@ int main()
     }
 
     // Create a vertex shader and fragment shader (spir-v only for now)
-    const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/02_hello_triangle/hello_triangle.vert.spv";
+    const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_triangle_native/hello_triangle.vert.spv";
     ShaderModule vertexShader = device.createShaderModule(KDGpu::readShaderFile(vertexShaderPath));
 
-    const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/02_hello_triangle/hello_triangle.frag.spv";
+    const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_triangle_native/hello_triangle.frag.spv";
     ShaderModule fragmentShader = device.createShaderModule(KDGpu::readShaderFile(fragmentShaderPath));
 
     BindGroupLayout bindGroupLayout = device.createBindGroupLayout(BindGroupLayoutOptions{

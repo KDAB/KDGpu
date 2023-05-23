@@ -6,7 +6,7 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
-add_subdirectory(02_hello_triangle)
+add_subdirectory(hello_triangle_native)
 add_subdirectory(rotating_triangle)
 add_subdirectory(compute_particles)
 add_subdirectory(render_to_texture)
