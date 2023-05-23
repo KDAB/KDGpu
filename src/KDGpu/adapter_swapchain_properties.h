@@ -17,6 +17,13 @@
 
 namespace KDGpu {
 
+/*! \addtogroup public
+ *  @{
+ */
+
+/**
+    @headerfile adapter_swapchain_properties.h <KDGpu/adapter_swapchain_properties.h>
+ */
 struct SurfaceCapabilities {
     uint32_t minImageCount;
     uint32_t maxImageCount;
@@ -30,6 +37,9 @@ struct SurfaceCapabilities {
     TextureUsageFlags supportedUsageFlags;
 };
 
+/**
+    @headerfile adapter_swapchain_properties.h <KDGpu/adapter_swapchain_properties.h>
+ */
 inline std::string surfaceCapabilitiesToString(const SurfaceCapabilities &capabilities)
 {
     const std::vector<std::string> surfaceCapabilitiesString = {
@@ -47,15 +57,23 @@ inline std::string surfaceCapabilitiesToString(const SurfaceCapabilities &capabi
     return fmt::format("SurfaceCapabilities:\n{}", fmt::join(surfaceCapabilitiesString, "\n"));
 }
 
+/**
+    @headerfile adapter_swapchain_properties.h <KDGpu/adapter_swapchain_properties.h>
+ */
 struct SurfaceFormat {
     Format format;
     ColorSpace colorSpace;
 };
 
+/**
+    @headerfile adapter_swapchain_properties.h <KDGpu/adapter_swapchain_properties.h>
+ */
 struct AdapterSwapchainProperties {
     SurfaceCapabilities capabilities;
     std::vector<SurfaceFormat> formats;
     std::vector<PresentMode> presentModes;
 };
+
+/*! @} */
 
 } // namespace KDGpu

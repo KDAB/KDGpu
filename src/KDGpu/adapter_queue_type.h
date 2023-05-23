@@ -14,6 +14,14 @@
 
 namespace KDGpu {
 
+/*! \addtogroup public
+ *  @{
+ */
+
+/**
+    @headerfile adapter_queue_type.h <KDGpu/adapter_queue_type.h>
+ */
+
 struct AdapterQueueType {
     bool supportsFeature(QueueFlags featureFlags) const noexcept { return (flags & featureFlags) == featureFlags; }
 
@@ -22,5 +30,7 @@ struct AdapterQueueType {
     uint32_t timestampValidBits;
     Extent3D minImageTransferGranularity;
 };
+
+/*! @} */
 
 } // namespace KDGpu

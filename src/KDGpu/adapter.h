@@ -32,15 +32,16 @@ struct Adapter_t;
 struct Instance_t;
 struct Surface_t;
 
+/**
+    @brief Holds option fields used for Adapter creation
+    @ingroup public
+    @headerfile adapter.h <KDGpu/adapter.h>
+ */
 struct AdapterOptions {
     std::vector<std::string> layers;
     std::vector<std::string> extensions;
 };
 
-/**
- * @brief Adapter
- * @ingroup public
- */
 class KDGPU_EXPORT Adapter
 {
 public:

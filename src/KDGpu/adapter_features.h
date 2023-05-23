@@ -12,6 +12,14 @@
 
 namespace KDGpu {
 
+/*! \addtogroup public
+ *  @{
+ */
+
+/**
+    @headerfile adapter_features.h <KDGpu/adapter_features.h>
+ */
+
 struct AdapterFeatures {
     bool robustBufferAccess;
     bool fullDrawIndexUint32;
@@ -73,5 +81,7 @@ struct AdapterFeatures {
     bool multiViewGeometryShader;
     bool multiViewTessellationShader;
 };
+
+/*! @} */
 
 } // namespace KDGpu

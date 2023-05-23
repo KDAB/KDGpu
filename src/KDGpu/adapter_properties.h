@@ -17,6 +17,13 @@
 
 namespace KDGpu {
 
+/*! \addtogroup public
+ *  @{
+ */
+
+/**
+    @headerfile adapter_properties.h <KDGpu/adapter_properties.h>
+ */
 struct AdapterLimits {
     uint32_t maxImageDimension1D;
     uint32_t maxImageDimension2D;
@@ -126,6 +133,9 @@ struct AdapterLimits {
     DeviceSize nonCoherentAtomSize;
 };
 
+/**
+    @headerfile adapter_properties.h <KDGpu/adapter_properties.h>
+ */
 struct AdapterSparseProperties {
     bool residencyStandard2DBlockShape;
     bool residencyStandard2DMultisampleBlockShape;
@@ -134,11 +144,17 @@ struct AdapterSparseProperties {
     bool residencyNonResidentStrict;
 };
 
+/**
+    @headerfile adapter_properties.h <KDGpu/adapter_properties.h>
+ */
 struct AdapterMultiViewProperties {
     uint32_t maxMultiViewCount;
     uint32_t maxMultiviewInstanceIndex;
 };
 
+/**
+    @headerfile adapter_properties.h <KDGpu/adapter_properties.h>
+ */
 struct AdapterProperties {
     uint32_t apiVersion;
     uint32_t driverVersion;
@@ -152,10 +168,15 @@ struct AdapterProperties {
     AdapterMultiViewProperties multiViewProperties;
 };
 
+/**
+    @headerfile adapter_properties.h <KDGpu/adapter_properties.h>
+ */
 struct FormatProperties {
     FormatFeatureFlags linearTilingFeatures;
     FormatFeatureFlags optimalTilingFeatures;
     FormatFeatureFlags bufferFeatures;
 };
+
+/*! @} */
 
 } // namespace KDGpu
