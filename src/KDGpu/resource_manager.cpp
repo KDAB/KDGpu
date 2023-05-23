@@ -12,6 +12,14 @@
 
 namespace KDGpu {
 
+/**
+    @class ResourceManager
+    @brief ResourceManager manages Graphic API resources
+    @ingroup api
+    @ingroup public
+    @headerfile resource_manager.h <KDGpu/resource_manager.h>
+*/
+
 ResourceManager::ResourceManager()
 {
 }

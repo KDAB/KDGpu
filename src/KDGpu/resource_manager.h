@@ -82,11 +82,6 @@ struct ShaderModule_t;
 // parent resource type structs? For example VulkanDevice could have a createTexture()
 // function and just use this class as the place to store the resulting data.
 
-/**
- * @brief ResourceManager
- * \ingroup api
- * \ingroup public
- */
 class KDGPU_EXPORT ResourceManager
 {
 public:
