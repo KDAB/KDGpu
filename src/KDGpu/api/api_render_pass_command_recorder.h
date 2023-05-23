@@ -28,6 +28,7 @@ struct PushConstantRange;
 
 /**
  * @brief ApiRenderPassCommandRecorder
+ * \ingroup api
  *
  */
 struct ApiRenderPassCommandRecorder {

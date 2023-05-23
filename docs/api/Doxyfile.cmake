@@ -884,7 +884,13 @@ moc* \
 #
 # Note that the wildcards are matched against the file with absolute path, so to
 # exclude all test directories use the pattern */test/*
-EXCLUDE_SYMBOLS= @* # Doxygen XML output otherwise lists anonymous namespaces as numbered, starting with @
+EXCLUDE_SYMBOLS= @* \
+KDBindings \
+KDBindings::* \
+KDFoundation \
+KDFoundation::* \
+KDGui \
+fmt \
 
 # The EXAMPLE_PATH tag can be used to specify one or more files or directories
 # that contain example code fragments that are included (see the \include

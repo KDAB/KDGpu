@@ -22,6 +22,11 @@ class VulkanResourceManager;
 struct ComputePipeline_t;
 struct Device_t;
 
+/**
+ * @brief VulkanComputePassCommandRecorder
+ * \ingroup vulkan
+ *
+ */
 struct KDGPU_EXPORT VulkanComputePassCommandRecorder : public ApiComputePassCommandRecorder {
 
     explicit VulkanComputePassCommandRecorder(VkCommandBuffer _commandBuffer,

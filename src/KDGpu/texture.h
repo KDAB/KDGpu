@@ -39,7 +39,7 @@ struct SubresourceLayout {
 
 /**
  * @brief Texture
- *
+ * @ingroup public
  */
 class KDGPU_EXPORT Texture
 {

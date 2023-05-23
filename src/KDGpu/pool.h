@@ -18,6 +18,11 @@ namespace KDGpu {
 
   Contact KDAB at <info@kdab.com> for commercial licensing options.
 */
+
+/**
+ * @brief Pool
+ * @internal
+ */
 template<typename T, typename H>
 class Pool
 {

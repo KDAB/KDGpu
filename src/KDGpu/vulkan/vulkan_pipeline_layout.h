@@ -24,6 +24,11 @@ class VulkanResourceManager;
 
 struct Device_t;
 
+/**
+ * @brief VulkanPipelineLayout
+ * \ingroup vulkan
+ *
+ */
 struct KDGPU_EXPORT VulkanPipelineLayout : public ApiPipelineLayout {
     explicit VulkanPipelineLayout(VkPipelineLayout _pipelineLayout,
                                   std::vector<VkDescriptorSetLayout> &&_descriptorSetLayouts,

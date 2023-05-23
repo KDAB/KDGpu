@@ -13,7 +13,8 @@
         "files",
         "pages",
         "namespaces",
-        "examples"
+        "examples",
+        "modules"
     ],
     "indexClassesName": "Classes",
     "indexFilesName": "Files",

@@ -23,7 +23,7 @@ struct ShaderModule_t;
 
 /**
  * @brief ShaderModule
- *
+ * @ingroup public
  */
 class KDGPU_EXPORT ShaderModule
 {

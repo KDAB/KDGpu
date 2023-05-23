@@ -24,6 +24,7 @@ class ResourceManager;
 
 /**
  * @brief ApiDevice
+ * \ingroup api
  *
  */
 struct ApiDevice {

@@ -23,6 +23,11 @@ class VulkanResourceManager;
 
 struct Device_t;
 
+/**
+ * @brief VulkanShaderModule
+ * \ingroup vulkan
+ *
+ */
 struct KDGPU_EXPORT VulkanShaderModule : public ApiShaderModule {
     explicit VulkanShaderModule(VkShaderModule _shaderModule,
                                 VulkanResourceManager *_vulkanResourceManager,

@@ -14,6 +14,7 @@ namespace KDGpu {
 
 /**
  * @brief ApiSampler
+ * \ingroup api
  *
  */
 struct ApiSampler {

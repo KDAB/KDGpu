@@ -23,6 +23,7 @@ struct PipelineLayout_t;
 
 /**
  * @brief ApiComputePassCommandRecorder
+ * \ingroup api
  *
  */
 struct ApiComputePassCommandRecorder {

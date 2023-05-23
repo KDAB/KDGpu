@@ -19,6 +19,10 @@ class GraphicsApi;
 
 struct TextureView_t;
 
+/**
+ * @brief TextureView
+ * @ingroup public
+ */
 class KDGPU_EXPORT TextureView
 {
 public:

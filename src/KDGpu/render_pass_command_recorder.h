@@ -60,6 +60,10 @@ struct DrawIndexedIndirectCommand {
     uint32_t stride{ 0 };
 };
 
+/**
+ * @brief RenderPassCommandRecorder
+ * @ingroup public
+ */
 class KDGPU_EXPORT RenderPassCommandRecorder
 {
 public:

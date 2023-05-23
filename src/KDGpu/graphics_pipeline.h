@@ -24,7 +24,7 @@ struct GraphicsPipelineOptions;
 
 /**
  * @brief GraphicsPipeline
- *
+ * @ingroup public
  */
 class KDGPU_EXPORT GraphicsPipeline
 {

@@ -22,6 +22,11 @@ class VulkanResourceManager;
 
 struct Device_t;
 
+/**
+ * @brief VulkanFence
+ * \ingroup vulkan
+ *
+ */
 struct KDGPU_EXPORT VulkanFence : public ApiFence {
     explicit VulkanFence(VkFence _fence,
                          VulkanResourceManager *_vulkanResourceManager,

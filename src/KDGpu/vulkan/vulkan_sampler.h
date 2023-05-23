@@ -20,6 +20,11 @@ namespace KDGpu {
 class VulkanResourceManager;
 struct Device_t;
 
+/**
+ * @brief VulkanSampler
+ * \ingroup vulkan
+ *
+ */
 struct KDGPU_EXPORT VulkanSampler : public ApiSampler {
 
     explicit VulkanSampler(VkSampler _sampler, const Handle<Device_t> &_deviceHandle);

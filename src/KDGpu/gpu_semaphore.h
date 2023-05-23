@@ -24,6 +24,10 @@ class GraphicsApi;
 struct GpuSemaphoreOptions {
 };
 
+/**
+ * @brief GpuSemaphore
+ * @ingroup public
+ */
 class KDGPU_EXPORT GpuSemaphore
 {
 public:

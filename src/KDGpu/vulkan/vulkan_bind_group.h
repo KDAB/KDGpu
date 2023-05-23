@@ -20,6 +20,11 @@ namespace KDGpu {
 class VulkanResourceManager;
 struct Device_t;
 
+/**
+ * @brief VulkanBindGroup
+ * \ingroup vulkan
+ *
+ */
 struct KDGPU_EXPORT VulkanBindGroup : public ApiBindGroup {
     explicit VulkanBindGroup(VkDescriptorSet _descriptorSet,
                              VkDescriptorPool _descriptorPool,

@@ -16,6 +16,7 @@ namespace KDGpu {
 
 /**
  * @brief ApiFence
+ * \ingroup api
  *
  */
 struct ApiFence {

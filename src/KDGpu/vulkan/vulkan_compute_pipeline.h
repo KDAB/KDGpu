@@ -23,6 +23,11 @@ class VulkanResourceManager;
 struct Device_t;
 struct PipelineLayout_t;
 
+/**
+ * @brief VulkanComputePipeline
+ * \ingroup vulkan
+ *
+ */
 struct KDGPU_EXPORT VulkanComputePipeline : public ApiComputePipeline {
     explicit VulkanComputePipeline(VkPipeline _pipeline,
                                    VulkanResourceManager *_vulkanResourceManager,

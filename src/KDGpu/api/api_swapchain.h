@@ -21,6 +21,7 @@ struct GpuSemaphore_t;
 struct Texture_t;
 /**
  * @brief ApiSwapchain
+ * \ingroup api
  *
  */
 struct ApiSwapchain {

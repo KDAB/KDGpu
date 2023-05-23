@@ -24,6 +24,11 @@ class VulkanResourceManager;
 
 struct Device_t;
 
+/**
+ * @brief VulkanSwapchain
+ * \ingroup vulkan
+ *
+ */
 struct KDGPU_EXPORT VulkanSwapchain : public ApiSwapchain {
     explicit VulkanSwapchain(VkSwapchainKHR _swapchain,
                              Format _format,

@@ -18,6 +18,11 @@ namespace KDGpu {
 
 class VulkanResourceManager;
 
+/**
+ * @brief VulkanInstance
+ * \ingroup vulkan
+ *
+ */
 struct KDGPU_EXPORT VulkanInstance : public ApiInstance {
     explicit VulkanInstance(VulkanResourceManager *_vulkanResourceManager, VkInstance _instance, bool _isOwned = true) noexcept;
 

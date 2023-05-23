@@ -14,6 +14,7 @@ namespace KDGpu {
 
 /**
  * @brief ApiRenderPass
+ * \ingroup api
  *
  */
 struct ApiRenderPass {

@@ -22,6 +22,12 @@ namespace KDGpu {
 class VulkanResourceManager;
 
 struct Device_t;
+
+/**
+ * @brief VulkanBuffer
+ * \ingroup vulkan
+ *
+ */
 struct KDGPU_EXPORT VulkanBuffer : public ApiBuffer {
     explicit VulkanBuffer(VkBuffer _buffer,
                           VmaAllocation _allocation,

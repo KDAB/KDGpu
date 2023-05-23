@@ -20,6 +20,7 @@ struct SubmitOptions;
 
 /**
  * @brief ApiQueue
+ * \ingroup api
  *
  */
 struct ApiQueue {

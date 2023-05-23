@@ -21,7 +21,7 @@ class GraphicsApi;
 
 /**
  * @brief CommandBuffer
- *
+ * @ingroup public
  */
 class KDGPU_EXPORT CommandBuffer
 {

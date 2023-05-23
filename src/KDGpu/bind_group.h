@@ -27,7 +27,7 @@ class GraphicsApi;
 
 /**
  * @brief BindGroup
- *
+ * @ingroup public
  */
 class KDGPU_EXPORT BindGroup
 {

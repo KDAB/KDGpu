@@ -37,6 +37,10 @@ struct AdapterOptions {
     std::vector<std::string> extensions;
 };
 
+/**
+ * @brief Adapter
+ * @ingroup public
+ */
 class KDGPU_EXPORT Adapter
 {
 public:

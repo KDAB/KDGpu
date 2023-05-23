@@ -23,6 +23,11 @@ class VulkanResourceManager;
 struct Device_t;
 struct Buffer_t;
 
+/**
+ * @brief VulkanCommandRecorder
+ * \ingroup vulkan
+ *
+ */
 struct KDGPU_EXPORT VulkanCommandRecorder : public ApiCommandRecorder {
     explicit VulkanCommandRecorder(VkCommandPool _commandPool,
                                    const Handle<CommandBuffer_t> _commandBufferHandle,

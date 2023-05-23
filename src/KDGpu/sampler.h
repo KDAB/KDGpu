@@ -20,6 +20,10 @@ struct Device_t;
 struct Sampler_t;
 struct SamplerOptions;
 
+/**
+ * @brief Sampler
+ * @ingroup public
+ */
 class KDGPU_EXPORT Sampler
 {
 public:

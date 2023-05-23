@@ -24,6 +24,11 @@ class VulkanResourceManager;
 
 struct Device_t;
 
+/**
+ * @brief VulkanGpuSemaphore
+ * \ingroup vulkan
+ *
+ */
 struct KDGPU_EXPORT VulkanGpuSemaphore : public ApiGpuSemaphore {
     explicit VulkanGpuSemaphore(VkSemaphore _semaphore,
                                 VulkanResourceManager *_vulkanResourceManager,

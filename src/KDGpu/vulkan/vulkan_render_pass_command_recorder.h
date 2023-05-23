@@ -22,6 +22,11 @@ class VulkanResourceManager;
 
 struct Device_t;
 
+/**
+ * @brief VulkanRenderPassCommandRecorder
+ * \ingroup vulkan
+ *
+ */
 struct KDGPU_EXPORT VulkanRenderPassCommandRecorder : public ApiRenderPassCommandRecorder {
     explicit VulkanRenderPassCommandRecorder(VkCommandBuffer _commandBuffer,
                                              VkRect2D _renderArea,

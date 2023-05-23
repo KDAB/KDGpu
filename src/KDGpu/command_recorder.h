@@ -78,6 +78,10 @@ struct TextureToTextureCopy {
     std::vector<TextureCopyRegion> regions;
 };
 
+/**
+ * @brief CommandRecorder
+ * @ingroup public
+ */
 class KDGPU_EXPORT CommandRecorder
 {
 public:

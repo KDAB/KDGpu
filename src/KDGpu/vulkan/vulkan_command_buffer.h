@@ -21,6 +21,11 @@ namespace KDGpu {
 struct Device_t;
 class VulkanResourceManager;
 
+/**
+ * @brief VulkanCommandBuffer
+ * \ingroup vulkan
+ *
+ */
 struct KDGPU_EXPORT VulkanCommandBuffer : public ApiCommandBuffer {
     explicit VulkanCommandBuffer(VkCommandBuffer _commandBuffer,
                                  VkCommandPool _commandPool,

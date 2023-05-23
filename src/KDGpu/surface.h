@@ -21,7 +21,7 @@ class GraphicsApi;
 
 /**
  * @brief Surface
- *
+ * @ingroup public
  */
 class KDGPU_EXPORT Surface
 {

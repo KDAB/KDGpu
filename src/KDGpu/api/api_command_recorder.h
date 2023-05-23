@@ -26,6 +26,7 @@ struct TextureToTextureCopy;
 
 /**
  * @brief ApiCommandRecorder
+ * \ingroup api
  *
  */
 struct ApiCommandRecorder {

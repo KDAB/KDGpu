@@ -53,6 +53,10 @@ nav:
   - Getting Started:
     - Installation: 'INSTALL.md'
     - Using KDGpu: 'using-kdgpu/index.md'
-  - Classes: 'Classes.md'
+  - Classes:
+    - Public API: 'group__public.md'
+    - Graphics Interface: 'group__api.md'
+    - Vulkan Implementation: 'group__vulkan.md'
+    - All: 'Classes.md'
   - Examples: 'Examples.md'
   - License: 'license.md'

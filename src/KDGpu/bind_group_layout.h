@@ -22,7 +22,7 @@ class GraphicsApi;
 
 /**
  * @brief BindGroupLayout
- *
+ * @ingroup public
  */
 class KDGPU_EXPORT BindGroupLayout
 {

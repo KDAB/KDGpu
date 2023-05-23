@@ -44,7 +44,7 @@ struct ComputePassCommandRecorderOptions {
 
 /**
  * @brief ComputePassCommandRecorder
- *
+ * @ingroup public
  */
 class KDGPU_EXPORT ComputePassCommandRecorder
 {

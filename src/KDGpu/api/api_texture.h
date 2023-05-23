@@ -16,6 +16,7 @@ namespace KDGpu {
 
 /**
  * @brief ApiTexture
+ * \ingroup api
  *
  */
 struct ApiTexture {

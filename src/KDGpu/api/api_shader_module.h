@@ -14,6 +14,7 @@ namespace KDGpu {
 
 /**
  * @brief ApiShaderModule
+ * \ingroup api
  *
  */
 struct ApiShaderModule {

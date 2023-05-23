@@ -14,6 +14,7 @@ namespace KDGpu {
 
 /**
  * @brief ApiSurface
+ * \ingroup api
  *
  */
 struct ApiSurface {

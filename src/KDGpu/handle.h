@@ -16,6 +16,10 @@
 
 namespace KDGpu {
 
+/**
+ * @brief Handle
+ * @ingroup public
+ */
 template<typename T>
 class Handle
 {

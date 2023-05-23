@@ -25,6 +25,10 @@ struct FenceOptions {
     bool createSignalled{ true };
 };
 
+/**
+ * @brief Fence
+ * @ingroup public
+ */
 class KDGPU_EXPORT Fence
 {
 public:

@@ -16,6 +16,7 @@ struct BindGroupEntry;
 
 /**
  * @brief ApiBindGroup
+ * \ingroup api
  *
  */
 struct ApiBindGroup {

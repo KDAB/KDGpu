@@ -25,6 +25,11 @@ class VulkanResourceManager;
 
 struct Device_t;
 
+/**
+ * @brief VulkanTexture
+ * \ingroup vulkan
+ *
+ */
 struct KDGPU_EXPORT VulkanTexture : public ApiTexture {
     explicit VulkanTexture(VkImage _image,
                            VmaAllocation _allocation,

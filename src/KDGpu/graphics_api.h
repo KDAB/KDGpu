@@ -16,6 +16,18 @@
 
 namespace KDGpu {
 
+/**
+ * @defgroup api API
+ *
+ * Holds the interfaces for the Rendering APIs
+ */
+
+/**
+ * @brief GraphicsApi
+ * \ingroup api
+ * \ingroup public
+ *
+ */
 class KDGPU_EXPORT GraphicsApi
 {
 public:

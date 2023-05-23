@@ -18,6 +18,23 @@
 
 namespace KDGpu {
 
+/**
+ * @defgroup vulkan Vulkan
+ *
+ * Holds the Vulkan implementation of the Rendering API Interfaces
+ */
+
+/**
+ * @page Vulkan
+ *
+ */
+
+/**
+ * @brief VulkanGraphicsApi
+ * \ingroup vulkan
+ * \ingroup public
+ *
+ */
 class KDGPU_EXPORT VulkanGraphicsApi final : public GraphicsApi
 {
 public:

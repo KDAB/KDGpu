@@ -27,7 +27,7 @@ struct SwapchainOptions;
 
 /**
  * @brief Swapchain
- *
+ * @ingroup public
  */
 class KDGPU_EXPORT Swapchain
 {

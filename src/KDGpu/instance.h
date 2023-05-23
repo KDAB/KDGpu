@@ -41,6 +41,10 @@ struct AdapterAndDevice {
     Device device;
 };
 
+/**
+ * @brief Instance
+ * @ingroup public
+ */
 class KDGPU_EXPORT Instance
 {
 public:

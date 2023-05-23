@@ -14,6 +14,7 @@ namespace KDGpu {
 
 /**
  * @brief ApiPipelineLayout
+ * \ingroup api
  *
  */
 struct ApiPipelineLayout {

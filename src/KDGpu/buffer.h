@@ -22,7 +22,7 @@ class GraphicsApi;
 
 /**
  * @brief Buffer
- *
+ * @ingroup public
  */
 class KDGPU_EXPORT Buffer
 {

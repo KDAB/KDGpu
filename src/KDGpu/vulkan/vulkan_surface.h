@@ -17,6 +17,11 @@
 
 namespace KDGpu {
 
+/**
+ * @brief VulkanSurface
+ * \ingroup vulkan
+ *
+ */
 struct KDGPU_EXPORT VulkanSurface : public ApiSurface {
     explicit VulkanSurface(VkSurfaceKHR _surface, VkInstance _instance, bool _isOwned = true);
 

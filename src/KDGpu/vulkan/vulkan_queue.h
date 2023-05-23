@@ -18,6 +18,11 @@ namespace KDGpu {
 
 class VulkanResourceManager;
 
+/**
+ * @brief VulkanQueue
+ * \ingroup vulkan
+ *
+ */
 struct KDGPU_EXPORT VulkanQueue : public ApiQueue {
     explicit VulkanQueue(VkQueue _queue,
                          VulkanResourceManager *_vulkanResourceManager);

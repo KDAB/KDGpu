@@ -96,7 +96,7 @@ struct UploadStagingBuffer {
 
 /**
  * @brief Queue
- *
+ * @ingroup public
  */
 class KDGPU_EXPORT Queue
 {

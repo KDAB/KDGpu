@@ -28,6 +28,11 @@ class VulkanResourceManager;
 
 struct Adapter_t;
 
+/**
+ * @brief VulkanDevice
+ * \ingroup vulkan
+ *
+ */
 struct KDGPU_EXPORT VulkanDevice : public ApiDevice {
     explicit VulkanDevice(VkDevice _device,
                           VulkanResourceManager *_vulkanResourceManager,

@@ -22,6 +22,10 @@ struct Device_t;
 struct PipelineLayout_t;
 struct PipelineLayoutOptions;
 
+/**
+ * @brief PipelineLayout
+ * @ingroup public
+ */
 class KDGPU_EXPORT PipelineLayout
 {
 public:

@@ -22,6 +22,16 @@
 
 namespace KDGpu {
 
+/**
+ * @defgroup public Public API
+ *
+ * Holds the Public API
+ */
+
+/*! \addtogroup public
+ *  @{
+ */
+
 constexpr uint32_t maxAdapterNameSize = 256U;
 constexpr uint32_t UuidSize = 16U;
 constexpr uint32_t remainingArrayLayers = (~0U);
@@ -1028,6 +1038,8 @@ enum class FenceStatus {
     Unsignalled = 1,
     Error = 2
 };
+
+/*! @} */
 
 } // namespace KDGpu
 

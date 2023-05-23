@@ -14,6 +14,7 @@ namespace KDGpu {
 
 /**
  * @brief ApiBindGroupLayout
+ * \ingroup api
  *
  */
 struct ApiBindGroupLayout {

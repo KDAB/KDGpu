@@ -81,6 +81,12 @@ struct ShaderModule_t;
 // TODO: Should this class have create/destroy functions or should we put those onto the
 // parent resource type structs? For example VulkanDevice could have a createTexture()
 // function and just use this class as the place to store the resulting data.
+
+/**
+ * @brief ResourceManager
+ * \ingroup api
+ * \ingroup public
+ */
 class KDGPU_EXPORT ResourceManager
 {
 public:

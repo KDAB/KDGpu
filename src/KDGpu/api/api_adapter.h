@@ -25,6 +25,7 @@ struct Surface_t;
 
 /**
  * @brief ApiAdapter
+ * \ingroup api
  *
  */
 struct ApiAdapter {

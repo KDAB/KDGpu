@@ -50,6 +50,10 @@ struct BindGroupLayoutOptions;
 struct BindGroupEntry;
 struct ComputePipelineOptions;
 
+/**
+ * @brief Device
+ * @ingroup public
+ */
 class KDGPU_EXPORT Device
 {
 public:

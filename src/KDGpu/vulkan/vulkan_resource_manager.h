@@ -45,6 +45,11 @@
 
 namespace KDGpu {
 
+/**
+ * @brief VulkanResourceManager
+ * \ingroup vulkan
+ *
+ */
 class KDGPU_EXPORT VulkanResourceManager final : public ResourceManager
 {
 public:

@@ -24,6 +24,7 @@ struct Surface_t;
 
 /**
  * @brief ApiInstance
+ * \ingroup api
  *
  */
 struct ApiInstance {

@@ -21,6 +21,10 @@ struct Device_t;
 struct ComputePipeline_t;
 struct ComputePipelineOptions;
 
+/**
+ * @brief ComputePipeline
+ * @ingroup public
+ */
 class KDGPU_EXPORT ComputePipeline
 {
 public:

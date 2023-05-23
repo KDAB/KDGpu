@@ -21,6 +21,11 @@ namespace KDGpu {
 struct Texture_t;
 struct Device_t;
 
+/**
+ * @brief VulkanTextureView
+ * \ingroup vulkan
+ *
+ */
 struct KDGPU_EXPORT VulkanTextureView : public ApiTextureView {
     explicit VulkanTextureView(VkImageView _imageView,
                                const Handle<Texture_t> &_textureHandle,
