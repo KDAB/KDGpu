@@ -21,7 +21,7 @@
 
 using namespace KDGpuExample;
 
-class RotatingTriangle : public SimpleExampleEngineLayer
+class HelloTriangle : public SimpleExampleEngineLayer
 {
 public:
 protected:

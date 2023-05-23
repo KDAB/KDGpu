@@ -6,4 +6,4 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
-CompileShaderSet(KDGpu_08HelloTriangle hello_triangle)
+CompileShaderSet(KDGpu_HelloTriangleOverlap hello_triangle)

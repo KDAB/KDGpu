@@ -8,7 +8,7 @@
   Contact KDAB at <info@kdab.com> for commercial licensing options.
 */
 
-#include "rotating_triangle.h"
+#include "hello_triangle.h"
 
 #include <KDGpuExample/engine.h>
 
@@ -36,7 +36,7 @@ inline std::string assetPath()
 
 } // namespace KDGpu
 
-void RotatingTriangle::initializeScene()
+void HelloTriangle::initializeScene()
 {
     struct Vertex {
         glm::vec3 position;
@@ -107,10 +107,10 @@ void RotatingTriangle::initializeScene()
     }
 
     // Create a vertex shader and fragment shader (spir-v only for now)
-    const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/rotating_triangle/rotating_triangle.vert.spv";
+    const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_triangle/hello_triangle.vert.spv";
     auto vertexShader = m_device.createShaderModule(KDGpu::readShaderFile(vertexShaderPath));
 
-    const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/rotating_triangle/rotating_triangle.frag.spv";
+    const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_triangle/hello_triangle.frag.spv";
     auto fragmentShader = m_device.createShaderModule(KDGpu::readShaderFile(fragmentShaderPath));
 
     // Create bind group layout consisting of a single binding holding a UBO
@@ -191,7 +191,7 @@ void RotatingTriangle::initializeScene()
     // clang-format on
 }
 
-void RotatingTriangle::cleanupScene()
+void HelloTriangle::cleanupScene()
 {
     m_pipeline = {};
     m_pipelineLayout = {};
@@ -202,7 +202,7 @@ void RotatingTriangle::cleanupScene()
     m_commandBuffer = {};
 }
 
-void RotatingTriangle::updateScene()
+void HelloTriangle::updateScene()
 {
     // Each frame we want to rotate the triangle a little
     static float angle = 0.0f;
@@ -220,13 +220,13 @@ void RotatingTriangle::updateScene()
     m_transformBuffer.unmap();
 }
 
-void RotatingTriangle::resize()
+void HelloTriangle::resize()
 {
     // Swapchain might have been resized and texture views recreated. Ensure we update the PassOptions accordingly
     m_opaquePassOptions.depthStencilAttachment.view = m_depthTextureView;
 }
 
-void RotatingTriangle::render()
+void HelloTriangle::render()
 {
     auto commandRecorder = m_device.createCommandRecorder();
 

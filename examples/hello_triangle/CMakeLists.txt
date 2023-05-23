@@ -7,7 +7,7 @@
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
 project(
-    kdgpu_rotating_triangle
+    kdgpu_hello_triangle
     VERSION 0.1
     LANGUAGES CXX
 )
@@ -19,7 +19,7 @@ add_kdgpu_example(
     ${PROJECT_NAME}
     SOURCES
     main.cpp
-    rotating_triangle.cpp
+    hello_triangle.cpp
     LIBS
     KDGpu::KDGpuExample
     glm::glm

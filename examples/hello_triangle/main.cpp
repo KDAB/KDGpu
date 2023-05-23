@@ -8,7 +8,7 @@
   Contact KDAB at <info@kdab.com> for commercial licensing options.
 */
 
-#include "rotating_triangle.h"
+#include "hello_triangle.h"
 
 #include <KDGpuExample/engine.h>
 
@@ -21,9 +21,9 @@ using namespace KDGpuExample;
 int main()
 {
     GuiApplication app;
-    app.applicationName = "Rotating Triangle";
+    app.applicationName = "Hello Triangle";
     Engine engine;
-    auto exampleLayer = engine.createEngineLayer<RotatingTriangle>();
+    auto exampleLayer = engine.createEngineLayer<HelloTriangle>();
     engine.running = true;
     return app.exec();
 }

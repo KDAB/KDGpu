@@ -59,10 +59,10 @@ void HelloTriangle::initializeScene()
     m_buffer.unmap();
 
     // Create a vertex shader and fragment shader (spir-v only for now)
-    const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/08_hello_triangle/hello_triangle.vert.spv";
+    const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_triangle_overlap/hello_triangle.vert.spv";
     auto vertexShader = m_device.createShaderModule(KDGpu::readShaderFile(vertexShaderPath));
 
-    const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/08_hello_triangle/hello_triangle.frag.spv";
+    const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_triangle_overlap/hello_triangle.frag.spv";
     auto fragmentShader = m_device.createShaderModule(KDGpu::readShaderFile(fragmentShaderPath));
 
     // Create a pipeline layout (array of bind group layouts)
