@@ -136,8 +136,8 @@ PresentResult VulkanQueue::present(const PresentOptions &options)
         }
     }
 
-    m_presentResults.resize(m_swapchains.size());
     m_presentResults.clear();
+    m_presentResults.resize(m_swapchains.size());
 
     VkPresentInfoKHR presentInfo = {};
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
