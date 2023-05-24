@@ -71,6 +71,7 @@ inline std::string assetPath()
 
 int main()
 {
+    //![0]
     GuiApplication app;
     std::unique_ptr<GraphicsApi> api = std::make_unique<VulkanGraphicsApi>();
 
@@ -90,6 +91,7 @@ int main()
         if (visible == false)
             app.quit();
     });
+    //![0]
 
 #if defined(KD_PLATFORM_WIN32)
     auto win32Window = dynamic_cast<Win32PlatformWindow *>(window.platformWindow());

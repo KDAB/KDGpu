@@ -14,6 +14,7 @@
 
 #include <KDGui/gui_application.h>
 
+//![0]
 using namespace KDGui;
 using namespace KDGpu;
 using namespace KDGpuExample;
@@ -27,3 +28,4 @@ int main()
     engine.running = true;
     return app.exec();
 }
+//![0]

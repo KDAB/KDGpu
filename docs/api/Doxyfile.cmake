@@ -804,7 +804,8 @@ WARN_LOGFILE= doxygen.log
 # directories like /usr/src/myproject. Separate the files or directories with
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
-INPUT= "@CMAKE_SOURCE_DIR@/src/"
+INPUT= "@CMAKE_SOURCE_DIR@/src/" \
+       "@CMAKE_SOURCE_DIR@/examples/"
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
@@ -912,7 +913,8 @@ EXAMPLE_RECURSIVE= YES
 # The IMAGE_PATH tag can be used to specify one or more files or directories
 # that contain images that are to be included in the documentation (see the
 # \image command).
-IMAGE_PATH= "@CMAKE_SOURCE_DIR@/docs/images"
+IMAGE_PATH= "@CMAKE_SOURCE_DIR@/docs/images" \
+            "@CMAKE_SOURCE_DIR@/examples/doc/images"
 
 # The INPUT_FILTER tag can be used to specify a program that doxygen should
 # invoke to filter for each input file. Doxygen will invoke the filter program
