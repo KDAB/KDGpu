@@ -134,6 +134,7 @@ set(HEADERS
     api/api_surface.h
     api/api_texture.h
     api/api_texture_view.h
+    utils/formatters.h
     utils/hash_utils.h
     utils/logging.h
     vulkan/vulkan_adapter.h
@@ -174,7 +175,7 @@ add_library(
     KDGpu::KDGpu ALIAS KDGpu
 )
 
-set(KDGPU_PUBLIC_LIBS KDUtils::KDUtils Vulkan::Vulkan KDGpu::vulkan_memory_allocator spdlog::spdlog)
+set(KDGPU_PUBLIC_LIBS KDUtils::KDUtils Vulkan::Vulkan KDGpu::vulkan_memory_allocator)
 
 set(KDGPU_EXPORT_TARGETS KDGpu vulkan_memory_allocator)
 

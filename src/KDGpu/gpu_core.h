@@ -492,6 +492,32 @@ enum class SurfaceTransformFlagBits {
 };
 using SurfaceTransformFlags = KDUtils::Flags<SurfaceTransformFlagBits>;
 
+inline std::string surfaceTransformFlagBitsToString(SurfaceTransformFlagBits transform)
+{
+    switch (transform) {
+    case SurfaceTransformFlagBits::IdentityBit:
+        return "Identity";
+    case SurfaceTransformFlagBits::Rotate90Bit:
+        return "Rotate 90";
+    case SurfaceTransformFlagBits::Rotate180Bit:
+        return "Rotate 180";
+    case SurfaceTransformFlagBits::Rotate270Bit:
+        return "Rotate 270";
+    case SurfaceTransformFlagBits::HorizontalMirrorBit:
+        return "Horizontal Mirror";
+    case SurfaceTransformFlagBits::HorizontalMirrorRotate90Bit:
+        return "Horizontal Mirror Rotate 90";
+    case SurfaceTransformFlagBits::HorizontalMirrorRotate180Bit:
+        return "Horizontal Mirror Rotate 180";
+    case SurfaceTransformFlagBits::HorizontalMirrorRotate270Bit:
+        return "Horizontal Mirror Rotate 270";
+    case SurfaceTransformFlagBits::InheritBit:
+        return "Inherit";
+    default:
+        return "Unknown";
+    }
+}
+
 enum class CompositeAlphaFlagBits {
     OpaqueBit = 0x00000001,
     PreMultipliedBit = 0x00000002,

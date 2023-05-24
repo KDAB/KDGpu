@@ -11,9 +11,9 @@
 #pragma once
 
 #include <KDGpu/gpu_core.h>
+#include <KDGpu/utils/logging.h>
 
 #include <vector>
-#include <KDGpu/utils/logging.h>
 
 namespace KDGpu {
 
@@ -50,7 +50,7 @@ inline std::string surfaceCapabilitiesToString(const SurfaceCapabilities &capabi
         fmt::format("- maxImageExtent: {} x {}", capabilities.maxImageExtent.width, capabilities.maxImageExtent.height),
         fmt::format("- maxImageArrayLayers: {}", capabilities.maxImageArrayLayers),
         fmt::format("- supportedTransforms: {:b}", capabilities.supportedTransforms.toInt()),
-        fmt::format("- currentTransform: {:b}", capabilities.currentTransform),
+        fmt::format("- currentTransform: {}", KDGpu::surfaceTransformFlagBitsToString(capabilities.currentTransform)),
         fmt::format("- supportedCompositeAlpha: {:b}", capabilities.supportedCompositeAlpha.toInt()),
         fmt::format("- supportedUsageFlags: {:b}", capabilities.supportedUsageFlags.toInt()),
     };

@@ -17,7 +17,6 @@
 #include <KDGpu/graphics_pipeline.h>
 #include <KDGpu/graphics_pipeline_options.h>
 #include <KDGpu/fence.h>
-#include <KDGpu/formatters.h>
 #include <KDGpu/gpu_core.h>
 #include <KDGpu/gpu_semaphore.h>
 #include <KDGpu/queue.h>
@@ -26,6 +25,7 @@
 #include <KDGpu/swapchain_options.h>
 #include <KDGpu/texture.h>
 #include <KDGpu/texture_options.h>
+#include <KDGpu/utils/formatters.h>
 #include <KDGpu/vulkan/vulkan_graphics_api.h>
 
 #include <KDGui/gui_application.h>
