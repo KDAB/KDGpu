@@ -11,6 +11,7 @@
 #include "shader_module.h"
 #include <fstream>
 
+#include <KDUtils/file.h>
 #include <KDGpu/graphics_api.h>
 #include <KDGpu/resource_manager.h>
 #include <KDGpu/api/api_shader_module.h>
@@ -64,17 +65,17 @@ ShaderModule &ShaderModule::operator=(ShaderModule &&other)
 
 std::vector<uint32_t> readShaderFile(const std::string &filename)
 {
-    std::ifstream file(filename, std::ios::ate | std::ios::binary);
-    if (!file.is_open()) {
+    KDUtils::File file(filename);
+
+    if (!file.open(std::ios::in | std::ios::binary)) {
         SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to open file {}", filename);
         throw std::runtime_error("Failed to open file");
     }
 
-    const size_t fileSize = static_cast<size_t>(file.tellg());
-    std::vector<uint32_t> buffer(fileSize / 4);
-    file.seekg(0);
-    file.read(reinterpret_cast<char *>(buffer.data()), static_cast<std::streamsize>(fileSize));
-    file.close();
+    const KDUtils::ByteArray fileContent = file.readAll();
+    std::vector<uint32_t> buffer(fileContent.size() / 4);
+    std::memcpy(buffer.data(), fileContent.data(), fileContent.size());
+
     return buffer;
 }
 
