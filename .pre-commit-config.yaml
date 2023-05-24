@@ -26,9 +26,9 @@ repos:
   rev: v0.6.13
   hooks:
   - id: cmake-lint
-    exclude: (.yml.cmake|Doxyfile.cmake)
+    exclude: (.yml.cmake|Doxyfile.cmake|CMakeRC.cmake)
   - id: cmake-format
-    exclude: (.yml.cmake|Doxyfile.cmake)
+    exclude: (.yml.cmake|Doxyfile.cmake|CMakeRC.cmake)
 - repo: https://github.com/markdownlint/markdownlint
   rev: v0.12.0
   hooks:

@@ -19,9 +19,14 @@
 #include <KDGpu/graphics_pipeline_options.h>
 #include <KDGpu/texture_options.h>
 
+#include <cmrc/cmrc.hpp>
+
 #include <imgui.h>
 
 #include <vector>
+
+CMRC_DECLARE(KDGpuExample::ShaderResources);
+CMRC_DECLARE(KDGpuExample::Resources);
 
 using namespace KDGpu;
 
@@ -60,6 +65,15 @@ struct VertexImGui {
     }
 };
 
+std::vector<uint32_t> readShaderFile(cmrc::embedded_filesystem &fs, const std::string &filename)
+{
+    auto file = fs.open(filename);
+    const std::size_t byteSize = file.size();
+    std::vector<uint32_t> buffer(byteSize / 4);
+    std::memcpy(buffer.data(), file.cbegin(), byteSize);
+    return buffer;
+}
+
 } // namespace
 
 namespace KDGpuExample {
@@ -95,10 +109,13 @@ ImGuiRenderer::~ImGuiRenderer()
 
 void ImGuiRenderer::initialize(KDGpu::SampleCountFlagBits samples, KDGpu::Format colorFormat, KDGpu::Format depthFormat)
 {
-    const auto vertShaderCode = KDGpu::readShaderFile(KDGpuExample::assetPath() + "/shaders/kdgpu_kdgui/imgui.vert.spv");
-    m_vertexShader = m_device->createShaderModule(vertShaderCode);
-    const auto fragShaderCode = KDGpu::readShaderFile(KDGpuExample::assetPath() + "/shaders/kdgpu_kdgui/imgui.frag.spv");
-    m_fragmentShader = m_device->createShaderModule(fragShaderCode);
+    {
+        auto fs = cmrc::KDGpuExample::ShaderResources::get_filesystem();
+        const auto vertShaderCode = readShaderFile(fs, "imgui.vert.spv");
+        m_vertexShader = m_device->createShaderModule(vertShaderCode);
+        const auto fragShaderCode = readShaderFile(fs, "imgui.frag.spv");
+        m_fragmentShader = m_device->createShaderModule(fragShaderCode);
+    }
 
     m_bindGroupLayout = m_device->createBindGroupLayout(
             BindGroupLayoutOptions{
@@ -126,7 +143,13 @@ void ImGuiRenderer::initialize(KDGpu::SampleCountFlagBits samples, KDGpu::Format
     ImGuiIO &io = ImGui::GetIO();
     unsigned char *fontData;
     int texWidth, texHeight;
-    io.Fonts->AddFontFromFileTTF((KDGpuExample::assetPath() + "/fonts/Roboto-Medium.ttf").data(), 18.0f);
+    auto fs = cmrc::KDGpuExample::Resources::get_filesystem();
+    auto ttfFile = fs.open("fonts/Roboto-Medium.ttf");
+    auto ttfData = const_cast<void *>(static_cast<const void *>(ttfFile.begin()));
+    ImFontConfig fontConfig{};
+    fontConfig.FontDataOwnedByAtlas = false;
+    const float fontPixelSize = 18.0f;
+    io.Fonts->AddFontFromMemoryTTF(ttfData, ttfFile.size(), fontPixelSize, &fontConfig);
     io.Fonts->GetTexDataAsRGBA32(&fontData, &texWidth, &texHeight);
     DeviceSize uploadSize = texWidth * texHeight * 4 * sizeof(char);
 

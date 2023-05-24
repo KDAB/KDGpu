@@ -14,12 +14,12 @@ Copyright: 2022-2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@k
 License: MIT
 
 #assets (shaders, textures)
-Files: assets/shaders assets/textures/*.png
+Files: assets/shaders assets/textures/\*.png src/KDGpuExample/imgui.vert src/KDGpuExample/imgui.frag
 Copyright: 2022-2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
 License: MIT
 
 #assets (contributed fonts)
-Files: assets/fonts/Roboto-Medium.ttf assets/fonts/Roboto-Medium-license.txt
+Files: assets/fonts/Roboto-Medium.ttf assets/fonts/Roboto-Medium-license.txt src/KDGpuExample/fonts/Roboto-Medium.ttf src/KDGpuExample/fonts/Roboto-Medium-license.txt
 Copyright: Christian Robertson
 License: Apache-2.0
 
@@ -29,14 +29,19 @@ Copyright: 2022-2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@k
 License: BSD-3-Clause
 
 #artwork
-Files: docs/api/mkdocs/docs/assets/*.svg docs/api/mkdocs/docs/stylesheets/header.jpg
+Files: docs/api/mkdocs/docs/assets/\*.svg docs/api/mkdocs/docs/stylesheets/header.jpg
 Copyright: 2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
 License: MIT
 
 #3rdparty
-Files: cmake/CodeCoverage.cmake
+Files: cmake/CodeCoverage.cmake cmake/CMakeRC.cmake
 Copyright: Copyright (c) 2012 - 2017, Lars Bilke
 License: BSD-3-Clause
+
+#3rdparty
+Files: cmake/CMakeRC.cmake
+Copyright: Copyright (c) 2022, Vector-of-Bool
+License: MIT
 
 Files: assets/textures/samuel-ferrara-1527pjeb6jg-unsplash.jpg assets/textures/License.txt
 Copyright: Samuel Ferrara

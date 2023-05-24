@@ -6,6 +6,40 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
+
+# Create a static library for the needed shader resources. The raw GLSL shaders get compiled at
+# build time and the resulting SPIR-V shaders are output to ${CMAKE_CURRENT_BINARY_DIR}. To handle
+# this we must pass the WHENCE argument to cmrc_add_resource_library.
+#
+# We also enable C++17 for the resource static libs to cope with the nested namespaces we use.
+include(CMakeRC)
+
+CompileShaderSet(KDGpuExample_ImGui imgui)
+cmrc_add_resource_library(
+    KDGpuExampleShaderResources
+    ALIAS
+    KDGpuExample::ShaderResources
+    WHENCE
+    ${CMAKE_CURRENT_BINARY_DIR}
+    NAMESPACE
+    KDGpuExample::ShaderResources
+    ${CMAKE_CURRENT_BINARY_DIR}/imgui.vert.spv
+    ${CMAKE_CURRENT_BINARY_DIR}/imgui.frag.spv
+)
+target_compile_features(KDGpuExampleShaderResources PUBLIC cxx_std_17)
+
+# As the other resources are just located in this directory and not the build dir, we must have
+# a separate resource lib for these.
+cmrc_add_resource_library(
+    KDGpuExampleResources
+    ALIAS
+    KDGpuExample::Resources
+    NAMESPACE
+    KDGpuExample::Resources
+    fonts/Roboto-Medium.ttf
+)
+target_compile_features(KDGpuExampleResources PUBLIC cxx_std_17)
+
 find_package(Vulkan REQUIRED)
 
 set(SOURCES
@@ -48,6 +82,7 @@ set(KDGPUEXAMPLE_EXPORT_TARGETS KDGpuExample)
 
 target_link_libraries(
     KDGpuExample
+    PRIVATE KDGpuExample::Resources KDGpuExample::ShaderResources
     PUBLIC ${KDGPUEXAMPLE_PUBLIC_LIBS}
 )
 
