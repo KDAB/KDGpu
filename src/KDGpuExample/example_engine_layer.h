@@ -25,6 +25,8 @@
 
 #include <KDGpuExample/kdgpuexample_export.h>
 
+#include <KDFoundation/logging.h>
+
 #include <array>
 #include <functional>
 #include <memory>
@@ -80,6 +82,7 @@ protected:
     void uploadTextureData(const TextureUploadOptions &options);
     void releaseStagingBuffers();
 
+    std::shared_ptr<spdlog::logger> m_logger;
     std::unique_ptr<GraphicsApi> m_api;
     std::unique_ptr<KDGpuKDGui::View> m_window;
 

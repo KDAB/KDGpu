@@ -1,0 +1,55 @@
+#
+# Copy this file to somewhere convenient e.g. $HOME/kdgpu-log-config.toml
+# and then set an environment variable KDFOUNDATION_LOG_CONFIG to point to it:
+#
+# export KDFOUNDATION_LOG_CONFIG=$HOME/kdgpu-log-config.toml
+#
+# KDFoundation::CoreApplication will look for the file pointed to by this env variable
+# and try to use it to configure the various loggers you specify. If the environment
+# variable is set but the file cannot be found or contains errors, the
+# Application constructor will print an error and quit.
+#
+# Note that you can control logging level on a per logger basis e.g. for
+# the various subsystems but also on a per-sink basis. So you can keep the
+# noise down in the console output but record all the gory details in the
+# log file if you wish. Just edit your own config file to taste.
+#
+# level is optional for both sinks and loggers
+# level for error logging is 'err', not 'error'
+# _st => single threaded, _mt => multi threaded
+# syslog_sink is automatically thread-safe by default, no need for _mt suffix
+
+# max_size supports suffix
+# - T (terabyte)
+# - G (gigabyte)
+# - M (megabyte)
+# - K (kilobyte)
+# - or simply no suffix (byte)
+
+# check out https: // github.com/gabime/spdlog/wiki/3.-Custom-formatting
+# global_pattern = "[%Y-%m-%dT%T%z] [%L] <%n>: %v"
+
+global_pattern = "[%Y-%m-%d %T%e] [+%5o ms] [%l] [%n] %v"
+
+[[sink]]
+name = "color_console_mt"
+type = "color_stdout_sink_mt"
+level = "trace"
+
+[[sink]]
+name = "file_out"
+type = "basic_file_sink_st"
+filename = "serenity.log"
+truncate = true
+create_parent_dir = true
+level = "debug"
+
+[[logger]]
+name = "engine"
+sinks = ["color_console_mt", "file_out"]
+level = "debug"
+
+[[logger]]
+name = "KDGpu"
+sinks = ["color_console_mt", "file_out"]
+level = "debug"

@@ -24,7 +24,7 @@ Copyright: Christian Robertson
 License: Apache-2.0
 
 #misc config files
-Files: .krazy .clang-format .clang-tidy .cmake-format.py .codespellrc .gitignore .gitreview .mdlrc .mdlrc.rb .pre-commit-config.yaml docs/api/Doxyfile.cmake docs/api/doxybook/config.json docs/api/mkdocs/docs/stylesheets/kdab.css docs/api/mkdocs/requirements.txt docs/api/mkdocs/docs/javascripts/config.js
+Files: .krazy .clang-format .clang-tidy .cmake-format.py .codespellrc .gitignore .gitreview .mdlrc .mdlrc.rb .pre-commit-config.yaml docs/api/Doxyfile.cmake docs/api/doxybook/config.json docs/api/mkdocs/docs/stylesheets/kdab.css docs/api/mkdocs/requirements.txt docs/api/mkdocs/docs/javascripts/config.js kdgpu-log-config-example.toml
 Copyright: 2022-2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
 License: BSD-3-Clause
 

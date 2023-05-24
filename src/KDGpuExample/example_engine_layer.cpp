@@ -31,6 +31,9 @@ ExampleEngineLayer::ExampleEngineLayer()
     : EngineLayer()
     , m_api(std::make_unique<VulkanGraphicsApi>())
 {
+    m_logger = spdlog::get("engine");
+    if (!m_logger)
+        m_logger = spdlog::stdout_color_mt("engine");
 }
 
 ExampleEngineLayer::ExampleEngineLayer(const SampleCountFlagBits samples)
@@ -102,7 +105,7 @@ void ExampleEngineLayer::releaseStagingBuffers()
         return stagingBuffer.fence.status() == FenceStatus::Signalled;
     });
     if (removedCount)
-        SPDLOG_INFO("Released {} staging buffers", removedCount);
+        SPDLOG_LOGGER_INFO(m_logger, "Released {} staging buffers", removedCount);
 }
 
 void ExampleEngineLayer::drawImGuiOverlay(ImGuiContext *ctx)
