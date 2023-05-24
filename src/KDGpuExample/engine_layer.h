@@ -18,6 +18,12 @@ namespace KDGpuExample {
 
 class Engine;
 
+/**
+    @class EngineLayer
+    @brief EngineLayer ...
+    @ingroup kdgpuexample
+    @headerfile engine_layer.h <KDGpuExample/engine_layer.h>
+ */
 class KDGPUEXAMPLE_EXPORT EngineLayer : public KDFoundation::Object
 {
 public:

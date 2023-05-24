@@ -17,6 +17,12 @@ using namespace KDGpu;
 
 namespace KDGpuExample {
 
+/**
+    @class SimpleExampleEngineLayer
+    @brief SimpleExampleEngineLayer ...
+    @ingroup kdgpuexample
+    @headerfile simple_example_engine_layer.h <KDGpuExample/simple_example_engine_layer.h>
+ */
 class KDGPUEXAMPLE_EXPORT SimpleExampleEngineLayer : public ExampleEngineLayer
 {
 public:

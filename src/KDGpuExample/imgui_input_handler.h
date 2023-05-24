@@ -21,6 +21,12 @@
 
 namespace KDGpuExample {
 
+/**
+    @class ImGuiInputHandler
+    @brief ImGuiInputHandler ...
+    @ingroup kdgpuexample
+    @headerfile imgui_input_handler.h <KDGpuExample/imgui_input_handler.h>
+ */
 class KDGPUEXAMPLE_EXPORT ImGuiInputHandler : public KDFoundation::Object
 {
 public:

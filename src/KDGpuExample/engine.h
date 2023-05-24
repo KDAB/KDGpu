@@ -27,6 +27,12 @@ using TimePoint = std::chrono::time_point<std::chrono::high_resolution_clock>;
 
 namespace KDGpuExample {
 
+/**
+    @class Engine
+    @brief Engine ...
+    @ingroup kdgpuexample
+    @headerfile engine.h <KDGpuExample/engine.h>
+ */
 class KDGPUEXAMPLE_EXPORT Engine : public KDFoundation::Object
 {
 public:

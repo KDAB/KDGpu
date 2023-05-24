@@ -16,6 +16,18 @@
 
 namespace KDGpuExample {
 
+/**
+ * @defgroup kdgpuexample KDGpuExample API
+ *
+ * Holds the KDGpuExample Helper API
+ */
+
+/*! \addtogroup kdgpuexample
+ *  @{
+ */
+
 KDGPUEXAMPLE_EXPORT std::string assetPath();
 
-}
+/*! @} */
+
+} // namespace KDGpuExample

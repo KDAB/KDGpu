@@ -57,5 +57,6 @@ nav:
     - Public API: 'group__public.md'
     - Graphics Interface: 'group__api.md'
     - Vulkan Implementation: 'group__vulkan.md'
+    - KDGpuExample Helper API: 'group__kdgpuexample.md'
   - Examples: 'kdgpu-examples.md'
   - License: 'license.md'

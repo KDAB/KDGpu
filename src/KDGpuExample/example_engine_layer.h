@@ -50,6 +50,12 @@ class ImGuiItem;
 // until the GPU signals it is done with frame N.
 constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;
 
+/**
+    @class ExampleEngineLayer
+    @brief ExampleEngineLayer ...
+    @ingroup kdgpuexample
+    @headerfile example_engine_layer.h <KDGpuExample/example_engine_layer.h>
+ */
 class KDGPUEXAMPLE_EXPORT ExampleEngineLayer : public EngineLayer
 {
 public:

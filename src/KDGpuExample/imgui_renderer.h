@@ -35,6 +35,12 @@ struct ImGuiContext;
 
 namespace KDGpuExample {
 
+/**
+    @class ImGuiRenderer
+    @brief ImGuiRenderer ...
+    @ingroup kdgpuexample
+    @headerfile imgui_renderer.h <KDGpuExample/imgui_renderer.h>
+ */
 class KDGPUEXAMPLE_EXPORT ImGuiRenderer
 {
 public:
