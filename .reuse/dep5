@@ -14,7 +14,7 @@ Copyright: 2022-2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@k
 License: MIT
 
 #assets (shaders, textures)
-Files: assets/shaders assets/textures/\*.png src/KDGpuExample/imgui.vert src/KDGpuExample/imgui.frag
+Files: assets/shaders assets/textures/\*.png src/KDGpuExample/imgui.vert src/KDGpuExample/imgui.frag assets/textures/point-simple-large.png assets/textures/point-textured-64x64.png docs/api/mkdocs/docs/assets/assets_logo_tree.svg docs/api/mkdocs/docs/assets/transparentWhiteKDAB.svg
 Copyright: 2022-2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
 License: MIT
 
