@@ -18,6 +18,9 @@
 
 #if defined(KDGPU_PLATFORM_LINUX)
 #include <xcb/xproto.h>
+
+struct wl_display;
+struct wl_surface;
 #endif
 
 #if defined(KDGPU_PLATFORM_MACOS)
@@ -35,9 +38,11 @@ struct SurfaceOptions {
     HWND hWnd;
 #endif
 #if defined(KDGPU_PLATFORM_LINUX)
-    // TODO: Add Wayland support
     xcb_connection_t *connection;
     xcb_window_t window;
+
+    wl_display *display = nullptr;
+    wl_surface *surface = nullptr;
 #endif
 #if defined(KDGPU_PLATFORM_MACOS)
     CAMetalLayer *layer;

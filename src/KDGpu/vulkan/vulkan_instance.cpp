@@ -21,6 +21,7 @@
 
 #if defined(KDGPU_PLATFORM_LINUX)
 #include <vulkan/vulkan_xcb.h>
+#include <vulkan/vulkan_wayland.h>
 #endif
 
 #if defined(KDGPU_PLATFORM_MACOS)
@@ -81,18 +82,33 @@ Handle<Surface_t> VulkanInstance::createSurface(const SurfaceOptions &options)
 #endif
 
 #if defined(KDGPU_PLATFORM_LINUX)
-    PFN_vkCreateXcbSurfaceKHR vkCreateXcbSurfaceKHR{ nullptr };
-    vkCreateXcbSurfaceKHR = (PFN_vkCreateXcbSurfaceKHR)vkGetInstanceProcAddr(instance, "vkCreateXcbSurfaceKHR");
-    if (!vkCreateXcbSurfaceKHR)
-        return {};
+    if (options.connection != nullptr) {
+        PFN_vkCreateXcbSurfaceKHR vkCreateXcbSurfaceKHR{ nullptr };
+        vkCreateXcbSurfaceKHR = (PFN_vkCreateXcbSurfaceKHR)vkGetInstanceProcAddr(instance, "vkCreateXcbSurfaceKHR");
+        if (!vkCreateXcbSurfaceKHR)
+            return {};
 
-    VkXcbSurfaceCreateInfoKHR createInfo = {};
-    createInfo.sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
-    createInfo.connection = options.connection;
-    createInfo.window = options.window;
+        VkXcbSurfaceCreateInfoKHR createInfo = {};
+        createInfo.sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
+        createInfo.connection = options.connection;
+        createInfo.window = options.window;
 
-    if (vkCreateXcbSurfaceKHR(instance, &createInfo, nullptr, &vkSurface) != VK_SUCCESS)
-        return {};
+        if (vkCreateXcbSurfaceKHR(instance, &createInfo, nullptr, &vkSurface) != VK_SUCCESS)
+            return {};
+    } else if (options.display != nullptr) {
+        PFN_vkCreateWaylandSurfaceKHR vkCreateWaylandSurfaceKHR{ nullptr };
+        vkCreateWaylandSurfaceKHR = (PFN_vkCreateWaylandSurfaceKHR)vkGetInstanceProcAddr(instance, "vkCreateWaylandSurfaceKHR");
+        if (!vkCreateWaylandSurfaceKHR)
+            return {};
+
+        VkWaylandSurfaceCreateInfoKHR createInfo = {};
+        createInfo.sType = VK_STRUCTURE_TYPE_WAYLAND_SURFACE_CREATE_INFO_KHR;
+        createInfo.display = options.display;
+        createInfo.surface = options.surface;
+
+        if (vkCreateWaylandSurfaceKHR(instance, &createInfo, nullptr, &vkSurface) != VK_SUCCESS)
+            return {};
+    }
 #endif
 
 #if defined(KDGPU_PLATFORM_MACOS)

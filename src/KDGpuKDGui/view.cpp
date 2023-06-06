@@ -14,12 +14,17 @@
 
 #include <KDFoundation/config.h> // for KD_PLATFORM
 #include <KDFoundation/core_application.h>
+#include <KDGui/config.h>
 
 #if defined(KD_PLATFORM_WIN32)
 #include <KDGui/platform/win32/win32_platform_window.h>
 #endif
 #if defined(KD_PLATFORM_LINUX)
 #include <KDGui/platform/linux/xcb/linux_xcb_platform_window.h>
+#endif
+#if defined(KDGUI_PLATFORM_WAYLAND)
+#include <KDGui/platform/linux/wayland/linux_wayland_platform_window.h>
+#include <KDGui/platform/linux/wayland/linux_wayland_platform_integration.h>
 #endif
 #if defined(KD_PLATFORM_MACOS)
 extern CAMetalLayer *createMetalLayer(KDGui::Window *window);
@@ -57,10 +62,20 @@ KDGpu::SurfaceOptions View::surfaceOptions(KDGui::Window *w)
 
 #if defined(KD_PLATFORM_LINUX)
     auto xcbWindow = dynamic_cast<KDGui::LinuxXcbPlatformWindow *>(w->platformWindow());
-    return KDGpu::SurfaceOptions{
-        .connection = xcbWindow->connection(),
-        .window = xcbWindow->handle()
-    };
+    if (xcbWindow != nullptr) {
+        return KDGpu::SurfaceOptions{
+            .connection = xcbWindow->connection(),
+            .window = xcbWindow->handle()
+        };
+    }
+
+    auto waylandWindow = dynamic_cast<KDGui::LinuxWaylandPlatformWindow *>(w->platformWindow());
+    if (waylandWindow != nullptr) {
+        return KDGpu::SurfaceOptions{
+            .display = waylandWindow->display(),
+            .surface = waylandWindow->surface()
+        };
+    }
 #endif
 
 #if defined(KD_PLATFORM_MACOS)

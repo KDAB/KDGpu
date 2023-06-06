@@ -47,9 +47,7 @@ std::vector<const char *> getDefaultRequestedInstanceExtensions()
     extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
 #if defined(PLATFORM_LINUX)
     extensions.push_back("VK_KHR_xcb_surface");
-#if defined(PLATFORM_WAYLAND)
     extensions.push_back("VK_KHR_wayland_surface");
-#endif
 #elif defined(PLATFORM_WIN32)
     extensions.push_back("VK_KHR_win32_surface");
 #elif defined(PLATFORM_MACOS)
