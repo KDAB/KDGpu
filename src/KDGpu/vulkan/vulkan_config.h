@@ -22,7 +22,11 @@ namespace KDGpu {
 
 #if defined(NDEBUG) || defined(__arm__)
 constexpr bool enableValidationLayers = false;
-const std::vector<const char *> requestedInstanceLayers = {};
+const std::vector<const char *> requestedInstanceLayers = {
+#if defined(PLATFORM_MACOS)
+    "VK_LAYER_KHRONOS_synchronization2"
+#endif
+};
 #else
 constexpr bool enableValidationLayers = true;
 const std::vector<const char *> requestedInstanceLayers = {
