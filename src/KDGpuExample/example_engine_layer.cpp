@@ -27,20 +27,14 @@
 
 namespace KDGpuExample {
 
-ExampleEngineLayer::ExampleEngineLayer()
-    : EngineLayer()
-    , m_api(std::make_unique<VulkanGraphicsApi>())
-{
-    m_logger = spdlog::get("engine");
-    if (!m_logger)
-        m_logger = spdlog::stdout_color_mt("engine");
-}
-
 ExampleEngineLayer::ExampleEngineLayer(const SampleCountFlagBits samples)
     : EngineLayer()
     , m_api(std::make_unique<VulkanGraphicsApi>())
     , m_samples(samples)
 {
+    m_logger = spdlog::get("engine");
+    if (!m_logger)
+        m_logger = spdlog::stdout_color_mt("engine");
 }
 
 ExampleEngineLayer::~ExampleEngineLayer()
