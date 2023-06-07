@@ -11,11 +11,19 @@
 /**
     @page kdgpu-examples KDGpu Examples
 
-    \section native_examples Examples using the Native API
-
-    - @subpage hello_triangle_native
-
     \section kdgpuexample_examples Examples using the KDGpuExample helper API
 
     - @subpage hello_triangle
+    - @subpage hello_triangle_msaa
+    - @subpage hello_triangle_overlap
+    - @subpage dynamic_ubo
+    - @subpage multiview
+    - @subpage textured_quad
+    - @subpage render_to_texture
+    - @subpage compute_particles
+
+    \section native_examples Examples using the Native API
+
+    - @subpage hello_triangle_native
+    - @subpage offscreen_rendering
 */

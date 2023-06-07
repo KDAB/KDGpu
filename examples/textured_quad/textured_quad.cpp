@@ -20,13 +20,16 @@
 
 #include <glm/gtx/transform.hpp>
 
+//![1]
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
+//![1]
 
 #include <cmath>
 #include <fstream>
 #include <string>
 
+//![2]
 struct ImageData {
     uint32_t width{ 0 };
     uint32_t height{ 0 };
@@ -34,6 +37,7 @@ struct ImageData {
     DeviceSize byteSize{ 0 };
     Format format{ Format::R8G8B8A8_UNORM };
 };
+//![2]
 
 namespace KDGpu {
 
@@ -46,6 +50,7 @@ inline std::string assetPath()
 #endif
 }
 
+//![3]
 ImageData loadImage(const std::string &path)
 {
     int texChannels;
@@ -70,6 +75,7 @@ ImageData loadImage(const std::string &path)
         .byteSize = 4 * static_cast<DeviceSize>(_width) * static_cast<DeviceSize>(_height)
     };
 }
+//![3]
 
 } // namespace KDGpu
 
@@ -116,6 +122,7 @@ void TexturedQuad::initializeScene()
     }
 
     // Create a texture to hold the image data
+    //![4]
     {
         // Load the image data and size
         ImageData image = loadImage(KDGpu::assetPath() + "/textures/samuel-ferrara-1527pjeb6jg-unsplash.jpg");
@@ -154,6 +161,7 @@ void TexturedQuad::initializeScene()
         m_textureView = m_texture.createView();
         m_sampler = m_device.createSampler();
     }
+    //![4]
 
     // Create a vertex shader and fragment shader (spir-v only for now)
     const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/textured_quad/textured_quad.vert.spv";
@@ -205,15 +213,18 @@ void TexturedQuad::initializeScene()
             .depthWritesEnabled = true,
             .depthCompareOperation = CompareOperation::Less
         },
+        //![5]
         .primitive = {
             .topology = PrimitiveTopology::TriangleStrip
         }
+        //![5]
     };
     // clang-format on
     m_pipeline = m_device.createGraphicsPipeline(pipelineOptions);
 
     // Create a bindGroup to hold the uniform containing the texture and sampler
     // clang-format off
+    //![6]
     BindGroupOptions bindGroupOptions = {
         .layout = bindGroupLayout,
         .resources = {{
@@ -223,6 +234,7 @@ void TexturedQuad::initializeScene()
     };
     // clang-format on
     m_textureBindGroup = m_device.createBindGroup(bindGroupOptions);
+    //![6]
 
     // Most of the render pass is the same between frames. The only thing that changes, is which image
     // of the swapchain we wish to render to. So set up what we can here, and in the render loop we will
@@ -265,6 +277,7 @@ void TexturedQuad::resize()
     m_opaquePassOptions.depthStencilAttachment.view = m_depthTextureView;
 }
 
+//![7]
 void TexturedQuad::render()
 {
     auto commandRecorder = m_device.createCommandRecorder();
@@ -286,3 +299,4 @@ void TexturedQuad::render()
     };
     m_queue.submit(submitOptions);
 }
+//![7]

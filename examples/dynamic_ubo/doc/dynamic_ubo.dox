@@ -1,0 +1,39 @@
+/*
+  This file is part of KDGpu.
+
+  SPDX-FileCopyrightText: 2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+
+  SPDX-License-Identifier: MIT
+
+  Contact KDAB at <info@kdab.com> for commercial licensing options.
+*/
+
+/**
+    @page dynamic_ubo Dynamic Uniform Buffer
+    @ingroup kdgpu-examples
+
+    @brief This example draws multiple triangles, storing their transforms in a single contiguous buffer
+
+    This example showcases how raw data can be written to uniform buffers and then be indexed with bind groups. In this case it is used to store the transformation matrices of four triangles and render each one using the same index and vertex buffers. The only input that's necessary is the index of the object's transform matrix in the buffer. Take a look at the following render code:
+
+    @snippet dynamic_ubo/dynamic_ubo_triangles.cpp 1
+
+    ``entityCount`` is 4, corresponding to the triangles. During this process of creating the draw commands for each triangle, only the offset of the bindgroup is changed.
+
+    This buffer of transforms is modified every frame in ``updateScene``:
+
+    @snippet dynamic_ubo/dynamic_ubo_triangles.cpp 2
+
+    In order to achieve this, all of the buffers must be mapped to CPU address space: the vertex buffer, index buffer, and transform uniform buffer. We do not use ``uploadBufferData`` like we did in the previous examples for most of these buffers. Instead, we use the map, memcpy, and unmap pattern. Uploading the index data looks like this:
+
+    @snippet dynamic_ubo/dynamic_ubo_triangles.cpp 3
+
+    Additionally, we must configure the bind group format to hold a dynamic uniform buffer by setting the resource type to KDGpu::ResourceBindingType::DynamicUniformBuffer
+
+    @snippet dynamic_ubo/dynamic_ubo_triangles.cpp 4
+
+    And the bind group itself needs to contain a KDGpu::DynamicUniformBufferBinding instead of a KDGpu::UniformBufferBinding.
+
+    @snippet dynamic_ubo/dynamic_ubo_triangles.cpp 5
+
+*/

@@ -1,0 +1,79 @@
+/*
+  This file is part of KDGpu.
+
+  SPDX-FileCopyrightText: 2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+
+  SPDX-License-Identifier: MIT
+
+  Contact KDAB at <info@kdab.com> for commercial licensing options.
+*/
+
+/**
+    @page render_to_texture Render to Texture
+    @ingroup kdgpu-examples
+
+    @brief This example renders a colorful triangle and then post-processes it.
+
+    This example demonstrates how to render a scene onto a texture, and then to sample from it in another pass.
+
+    \section render_to_texture_initialization Initialization
+
+    There are a couple function calls at the beginning of ``initializeScene``: ``initializeMainScene`` and ``initializePostProcess``. The former initializes a vertex, index, and transformation matrix buffers, as well as the pipeline, in a similar fashion to the previous examples. This pipeline will be used in the first pass to render the actual geometry to the texture. ``initializePostProcess`` initializes the second pipeline, which will be used to draw the texture onto a quad covering the whole screen. Because it's drawn onto a quad, this pipeline also has geometry buffers, except there is no index buffer and the vertices are for a quad instead of one triangle.
+
+    The post process pass also needs a sampler:
+
+    <blockquote>
+    TODO: this snippet is broken for no reason
+    </blockquote>
+
+    @snippet render_to_texture/render_to_texture.cpp 1
+
+    Which will be passed into a bind group on initialization and on resize:
+
+    @snippet render_to_texture/render_to_texture.cpp 8
+
+    We will also be using post processing shaders for this pass. The fragment shader also expects a push constant- a fraction. We will be passing in sine wave values into this, and the fragment shader will create an oscillating red line, on the right of which it will apply its post processing and on the left of which it render the original image.
+
+    @snippet render_to_texture/render_to_texture.cpp 3
+
+    Additionally, we lay out a bind group for this pipeline which contains a ``CombinedImageSampler``. That's the layout for the bind group shown previously.
+
+    @snippet render_to_texture/render_to_texture.cpp 4
+
+    The pipeline needs to also accept the push constant, which will be the position of the red line filter.
+
+    @snippet render_to_texture/render_to_texture.cpp 5
+
+    The final pipeline configuration should look very familiar, with the exception of the new ``primitive`` entry. This provides an easy default alternative to having an index buffer. ``TriangleStrip`` will cause the vertices to be interpreted as a series of triangles sharing one side, which is ideal for drawing a quad.
+
+    @snippet render_to_texture/render_to_texture.cpp 6
+
+    This post-process pass will be configured in a member variable called ``m_finalPassOptions``, with similar settings to pass options seen in previous examples. The configuration for the first pass, which does the actual rendering to the texture, is notable:
+
+    @snippet render_to_texture/render_to_texture.cpp 2
+
+    Note that the view is constant. It is always the view for the render target texture.
+
+    Lets take a look at where that texture and view were created:
+
+    @snippet render_to_texture/render_to_texture.cpp 7
+
+    <blockquote>
+    TODO: multiview is probably more advanced than render to texture, so they should be re-ordered and reference each other in the opposite direction
+    </blockquote>
+
+    This should look similar to depth texture creation in previous examples (such as [Hello Triangle Native](#hello_triangle_native) and particularly [Multiview](#multiview)). Just note that ``usage`` includes the ``ColorAttachmentBit`` and ``SampledBit``. This is identical to how we created the multiview texture.
+
+    \section render_to_texture_perframe Per-Frame Logic
+
+    We've got an update loop in this example, part of which populates a variable ``m_filterPosData`` with the sine wave value that determines the location of the red line:
+
+    @snippet render_to_texture/render_to_texture.cpp 9
+
+    And finally, lets look at the bulk of the ``render`` method:
+
+    @snippet render_to_texture/render_to_texture.cpp 10
+
+    Notice that only the fullscreen pass uses the swapchain view, because the first is rendering to the texture.
+
+*/

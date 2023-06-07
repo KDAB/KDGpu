@@ -1,0 +1,89 @@
+/*
+  This file is part of KDGpu.
+
+  SPDX-FileCopyrightText: 2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+
+  SPDX-License-Identifier: MIT
+
+  Contact KDAB at <info@kdab.com> for commercial licensing options.
+*/
+
+/**
+    @page compute_particles Compute Particles
+    @ingroup kdgpu-examples
+
+    @brief This example shows how to transform data in parallel on the GPU.
+
+    This example shows how to transform data in parallel by uploading a buffer of data to the GPU and running a shader on all the items in the buffer. We do this every frame and draw the results to the screen using instanced rendering.
+
+    If you look at the code for this example, you may notice that the ``updateScene`` function is empty. That's because *all* the per-frame logic is occurring on the GPU, per-particle, with the following shader:
+
+    @snippet compute_particles/doc/shadersnippet.comp 1
+
+    \section compute_particles_initialization Initialization
+
+    Our "particles" are a set of triangles with color and position information. They share their shape in common. The information that is unique to each triangle is the position, color, and velocity. We pack that data into a struct.
+
+    @snippet compute_particles/compute_particles.cpp 4
+
+    You may recognize this from a moment ago. An identical struct was created in the shader so that the GPU can receive this data properly.
+
+    Next, we create a buffer of ``ParticleData``. Notice that it has been declared a storage buffer with the ``StorageBufferBit``. A storage buffer is able to be much larger than a uniform buffer and is writable by the GPU.
+
+    @snippet compute_particles/compute_particles.cpp 1
+
+    We also create a small buffer with the common information between each triangle: the vertices.
+
+    @snippet compute_particles/compute_particles.cpp 2
+
+    Next, we begin creating the compute pipeline. The first step is to load in the ``.comp`` compute shader, shown in the introduction:
+
+    @snippet compute_particles/compute_particles.cpp 5
+
+    Then we create bind group options, a bind group, pipeline layout options, and finally the pipeline layout meant to hold the storage buffer we originally created.
+
+    @snippet compute_particles/compute_particles.cpp 6
+
+    Now we can instantiate the pipeline elements. First we create the bind group, using a ``StorageBufferBinding`` resource in the creation options. Then we create the compute pipeline with KDGpu::ComputePipelineOptions, which is far simpler than the usual graphics pipeline options.
+
+    @snippet compute_particles/compute_particles.cpp 7
+
+    The next step is the initialization of the graphics pipeline. This pipeline will be used in a second pass to draw a triangle at a position and color according to the data in the storage buffer. It is initialized in largely the same way as graphics pipelines in previous examples. Let's take a look at the pipeline options' ``vertex`` field, which is new.
+
+    @snippet compute_particles/compute_particles.cpp 8
+
+    There are two bindings: the common data (the vertices for every triangle) and the per-particle data. The first binding has one RGB attribute (a vec3) and the per-particle data has position and color. Notice that the offset of the particle color is two vec4s! We are skipping over the ``velocity`` field of ``ParticleData`` because only the compute shader needs that information.
+
+    Additionally, the input rate of the per-particle information is marked ``Instance``. That means that the GPU will only move to the next item in that buffer after it finishes drawing all the vertices in the vertex buffer. The default rate is ``Vertex``, which would tell the GPU that there was a different ``ParticleData`` for every vertex.
+
+    \section compute_particles_perframe Per-Frame Logic
+
+    Each frame we don't run any CPU instructions except to queue new jobs on the GPU. We can achieve this either by using a single command buffer with a memory barrier inserted between the compute and rendering commands, or we can use two command buffers with semaphores.
+
+    Here is what the first approach looks like:
+
+    @snippet compute_particles/compute_particles.cpp 9
+
+    The new command is ``dispatchCompute``. In its arguments we specify the work group size to be 256. It is also found in the shader code:
+
+    @snippet compute_particles/doc/shadersnippet.comp 2
+
+    <blockquote>
+        TODO: explain meaning of work groups and reasoning for 256 maybe
+    </blockquote>
+
+    The memory barrier inserted afterwards provides assurance that the compute shader will have completed before rendering begins. Within the memory barrier options, we describe the stages of the pipeline that come before and after the barrier using KDGpu::PipelineStageFlagBit. We also create the memory barrier object itself, which has two bitmasks describing the access that the previous commands had to the buffer and the access that the succeeding commands will have to the buffer. In this case, the compute shader was writing (`ShaderWriteBit`) and the graphics shader will read the buffer as vertex attributes (``VertexAttributeReadBit``).
+
+    The second available approach (not used by default for this example) is to use two separate command buffers.
+
+    @snippet compute_particles/compute_particles.cpp 10
+
+    Note the additional ``m_computeSemaphoreComplete``, which was initialized at program start with ``m_device.createGpuSemaphore();`` and will live until the end of the program.
+
+    This approach is entirely identical in terms of the executed commands, but uses a different synchronization method. For more information on semaphores, check out the [Hello Triangle Native](#hello_triangle_native) example.
+
+    <blockquote>
+        TODO: maybe benchmark these and talk about performance differences?
+    </blockquote>
+
+*/

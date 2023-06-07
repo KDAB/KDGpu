@@ -171,9 +171,11 @@ void HelloTriangleMSAA::initializeScene()
             .depthWritesEnabled = true,
             .depthCompareOperation = CompareOperation::Less
         },
+        //![3]
         .multisample = {
             .samples = m_samples
         }
+        //![3]
     };
     // clang-format on
     m_pipeline = m_device.createGraphicsPipeline(pipelineOptions);
@@ -194,11 +196,12 @@ void HelloTriangleMSAA::initializeScene()
     // of the swapchain we wish to render to. So set up what we can here, and in the render loop we will
     // just update the color texture view.
     // clang-format off
+    //![2]
     m_opaquePassOptions = {
         .colorAttachments = {
             {
-                .view = m_msaaTextureView,
-                .resolveView = {}, // Not setting the swapchain texture view just yet
+                .view = m_msaaTextureView, // The multisampled view which will change on resize.
+                .resolveView = {}, // Not setting the swapchain texture view just yet. That's handled at render.
                 .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
                 .finalLayout = TextureLayout::PresentSrc
             }
@@ -206,8 +209,10 @@ void HelloTriangleMSAA::initializeScene()
         .depthStencilAttachment = {
             .view = m_depthTextureView,
         },
+        // configure for multisampling
         .samples = m_samples
     };
+    //![2]
     // clang-format on
 }
 
@@ -251,7 +256,7 @@ void HelloTriangleMSAA::resize()
     m_opaquePassOptions.colorAttachments[0].view = m_msaaTextureView;
     m_opaquePassOptions.depthStencilAttachment.view = m_depthTextureView;
 }
-
+//![4]
 void HelloTriangleMSAA::createRenderTarget()
 {
     const TextureOptions options = {
@@ -267,13 +272,15 @@ void HelloTriangleMSAA::createRenderTarget()
     m_msaaTexture = m_device.createTexture(options);
     m_msaaTextureView = m_msaaTexture.createView();
 }
-
+//![4]
 void HelloTriangleMSAA::render()
 {
     auto commandRecorder = m_device.createCommandRecorder();
 
-    // We now update the resolveView instead
+    //![1]
+    // We now update the resolveView instead of the view
     m_opaquePassOptions.colorAttachments[0].resolveView = m_swapchainViews.at(m_currentSwapchainImageIndex);
+    //![1]
     auto opaquePass = commandRecorder.beginRenderPass(m_opaquePassOptions);
 
     opaquePass.setPipeline(m_pipeline);

@@ -1,0 +1,57 @@
+/*
+  This file is part of KDGpu.
+
+  SPDX-FileCopyrightText: 2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+
+  SPDX-License-Identifier: MIT
+
+  Contact KDAB at <info@kdab.com> for commercial licensing options.
+*/
+
+/**
+    @page textured_quad Textured Quad
+    @ingroup kdgpu-examples
+
+    @brief This example shows how to load a texture and sample from it.
+
+    This example demonstrates using KDGpu::Device::createTexture on a static image loaded from disk using the STB image header.
+
+    First, we include the STB image header, which will provide us with the necessary inputs to the KDGpu API:
+
+    @snippet textured_quad/textured_quad.cpp 1
+
+    We organize all of the STB-image-supplied values into one struct, using an RGBA KDGpu::Format.
+
+    @snippet textured_quad/textured_quad.cpp 2
+
+    And we have a function to populate the struct, with some per-platform implementation details. This function includes all of the STB image calls in this example.
+
+    @snippet textured_quad/textured_quad.cpp 3
+
+    \section textured_quad_initialization Initialization
+
+    At scene initialization, we load and upload the texture, and create and upload the vertex buffer for the quad. The quad vertex buffer creation is unsurprising, but texture upload is a set of new function calls. Some settings to note:
+    - We have no need to access the buffer after loading, so the memory usage is GPU-only.
+    - We perform the texture upload with only one copy region which covers the whole texture. This is just boilerplate for us but a larger texture could make use of multiple copy regions.
+    - The ``oldLayout`` and ``newLayout`` options offer a way to optimize the texture for different usecases. Check out KDGpu::TextureLayout to see the available layouts.
+
+    @snippet textured_quad/textured_quad.cpp 4
+
+    When initializing the graphics pipeline, we pass in a KDGpu::PrimitiveOptions to the ``primitive`` field, which in turn contains KDGpu::PrimitiveTopology field. The topology declares how the vertices will be interpreted as polygons. Another way to achieve this is with an index buffer. In our case, a quad is well described by an existing topology option, so we use that.
+
+    @snippet textured_quad/textured_quad.cpp 5
+
+    We also create a bindgroup with a ``TextureViewBinding`` resource for sampling this static texture:
+
+    @snippet textured_quad/textured_quad.cpp 6
+
+    \section textured_quad_perframe Per-Frame Rendering Logic
+
+    Now that we have initialized everything properly, the render function is one of the simplest so far. We set the pipeline and buffer as usual, and set the bindgroup we just created.
+
+    @snippet textured_quad/textured_quad.cpp 7
+
+    Also, be sure to actually sample from the texture in the shader:
+
+    @snippet textured_quad/doc/shadersnippet.frag 8
+*/

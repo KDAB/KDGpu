@@ -1,0 +1,45 @@
+/*
+  This file is part of KDGpu.
+
+  SPDX-FileCopyrightText: 2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+
+  SPDX-License-Identifier: MIT
+
+  Contact KDAB at <info@kdab.com> for commercial licensing options.
+*/
+
+/**
+    @page hello_triangle_overlap Hello Triangle with CPU/GPU overlap
+    @ingroup kdgpu-examples
+
+    @brief This example shows how to let GPU processes from previous frames continue to run while preparing the next one.
+
+    This example is visually identical to the [Hello Triangle](#hello_triangle), but with increased performance. Try building and running both and comparing the framerates.
+
+    What's happening? In this example, the CPU is able to continue processing the draw commands for the next frame while the GPU is still working on the previous frame. The KDGpuExample::AdvancedExampleEngineLayer is handling this in the background, for the most part (previous examples such as [Hello Triangle](#hello_triangle) were inheriting from KDGpuExample::SimpleExampleEngineLayer instead).
+
+    \section overlap_engine_types AdvancedExampleEngineLayer vs. SimpleExampleEngineLayer
+
+    This is a brief summary of the behind-the-scenes functionality added to the AdvancedExampleEngineLayer which allows for CPU/GPU overlap. In order to understand this summary, as well as the way the SimpleExampleEngineLayer was working in other examples, please read [Hello Triangle](#hello_triangle) and then [Hello Triangle Native](#hello_triangle_native).
+
+    The KDGpuExample::SimpleExampleEngineLayer makes the following call at the end of each frame: ``m_device.waitUntilIdle()``. This is effectively identical to ``wait``ing on a fence. Doing so throttles performance. The CPU is blocked, and once it's running again the GPU has nothing to do while the CPU prepares the next frame's resources.
+
+    So let's get rid of it. Unfortunately, this opens a can of worms. The CPU will speed ahead of the GPU, requesting more and more frames be rendered. As this continues, the number of frames until the current frame is rendered increases. This creates latency (and other issues) and is not desirable for interactive, real-time simulations such as games. The ideal solution is to create a small range of frames (often called a "flight") in which the CPU and GPU can operate simulaneously.
+
+    KDGpuExample::AdvancedExampleEngineLayer removes the ``waitUntilIdle`` call and uses a circular flight of fences to synchronize the CPU and GPU. Each entry in the flight represents a frame. Each frame is drawing to a different swapchain image, and each one only waits on its own fence. As a result, the CPU can move ahead until it comes back to the frame the GPU is rendering. AdvancedExampleEngineLayer uses two frames per flight.
+
+    \section overlap_code_changes Changes needed to migrate to AdvancedExampleEngineLayer
+
+    This snippet of the render loop contains all then necessary code changes/new code:
+
+       @snippet hello_triangle_overlap/hello_triangle.cpp 1
+
+    Note all the uses of ``m_inFlightIndex``. It needs to be passed to the helper ``renderImGuiOverlay`` so that the function can properly use the current frame's resources. In the submit options, we only submit the current frame's command buffers. We attach the current frame's ``m_renderCompleteSemaphores`` semaphore to be signalled when this frame's render is completed, and we only wait on the current frame's fence. The last element is the ``waitSemaphores``. We also wait on the current frame's ``m_presentCompleteSemaphores`` semaphore if the last instance of this frame was presented (determined by ``m_waitForPresentation``). The presentation semaphores have already been set as the signal semaphore for swapchain image acquisition by the AdvancedExampleEngineLayer.
+
+    And the last change is to clean up the command buffers on ``cleanupScene``.
+
+       @snippet hello_triangle_overlap/hello_triangle.cpp 2
+
+    Pretty minimal changes for such a large performance increase! If you skipped the previous section to get here, please look at [Hello Triangle](#hello_triangle) and then [Hello Triangle Native](#hello_triangle_native) in order to understand why the CPU/GPU overlap is possible.
+
+*/

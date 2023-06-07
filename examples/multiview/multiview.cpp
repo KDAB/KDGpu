@@ -84,6 +84,7 @@ void MultiView::resize()
     updateFinalPassBindGroup();
 }
 
+//![3]
 void MultiView::createMultiViewOffscreenTextures()
 {
     m_multiViewColorOutput = m_device.createTexture(TextureOptions{
@@ -114,6 +115,7 @@ void MultiView::createMultiViewOffscreenTextures()
             .viewType = ViewType::ViewType2DArray,
     });
 }
+//![3]
 
 void MultiView::initializeMultiViewPass()
 {
@@ -148,10 +150,12 @@ void MultiView::initializeMultiViewPass()
     const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/multiview/rotating_triangle.frag.spv";
     auto fragmentShader = m_device.createShaderModule(KDGpu::readShaderFile(fragmentShaderPath));
 
+    //![4]
     // Create a pipeline layout (array of bind group layouts)
     m_mvPipelineLayout = m_device.createPipelineLayout(PipelineLayoutOptions{
             .pushConstantRanges = { m_mvPushConstantRange },
     });
+    //![4]
 
     m_mvPipeline = m_device.createGraphicsPipeline(GraphicsPipelineOptions{
             .shaderStages = {
@@ -178,6 +182,7 @@ void MultiView::initializeMultiViewPass()
             .viewCount = 2,
     });
 
+    //![5]
     m_mvPassOptions = {
         .colorAttachments = {
                 { .view = m_multiViewColorOutputView,
@@ -187,6 +192,7 @@ void MultiView::initializeMultiViewPass()
         .depthStencilAttachment = { .view = m_multiViewDepthView },
         .viewCount = 2, // Enables multiview rendering
     };
+    //![5]
 }
 
 void MultiView::initializeFullScreenPass()
@@ -243,6 +249,7 @@ void MultiView::initializeFullScreenPass()
     m_multiViewColorOutputSampler = m_device.createSampler();
 }
 
+//![7]
 void MultiView::updateFinalPassBindGroup()
 {
     // Create a bindGroup to hold the Offscreen Color Texture
@@ -257,6 +264,7 @@ void MultiView::updateFinalPassBindGroup()
             },
     });
 }
+//![7]
 
 void MultiView::render()
 {
@@ -269,6 +277,7 @@ void MultiView::render()
     // Create a command encoder/recorder
     auto commandRecorder = m_device.createCommandRecorder();
 
+    //![6]
     // MultiView Pass
     auto mvPass = commandRecorder.beginRenderPass(m_mvPassOptions);
     mvPass.setPipeline(m_mvPipeline);
@@ -276,7 +285,9 @@ void MultiView::render()
     mvPass.pushConstant(m_mvPushConstantRange, &rotationAngleRad);
     mvPass.draw(DrawCommand{ .vertexCount = 3 });
     mvPass.end();
+    //![6]
 
+    //![8]
     // FullScreen Pass
     m_fsqPassOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex);
     auto fsqPass = commandRecorder.beginRenderPass(m_fsqPassOptions);
@@ -309,6 +320,7 @@ void MultiView::render()
     renderImGuiOverlay(&fsqPass);
 
     fsqPass.end();
+    //![8]
 
     // End recording
     m_commandBuffer = commandRecorder.finish();

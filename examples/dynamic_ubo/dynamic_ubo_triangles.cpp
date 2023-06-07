@@ -67,6 +67,7 @@ void DynamicUBOTriangles::initializeScene()
 
     // Create a buffer to hold the geometry index data
     {
+        //![3]
         BufferOptions bufferOptions = {
             .size = 3 * sizeof(uint32_t),
             .usage = BufferUsageFlagBits::IndexBufferBit,
@@ -77,6 +78,7 @@ void DynamicUBOTriangles::initializeScene()
         auto bufferData = m_indexBuffer.map();
         std::memcpy(bufferData, indexData.data(), indexData.size() * sizeof(uint32_t));
         m_indexBuffer.unmap();
+        //![3]
     }
 
     // Create a buffer to hold dynamic transformation matrix
@@ -100,6 +102,7 @@ void DynamicUBOTriangles::initializeScene()
     const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/dynamic_ubo/dynamic_ubo.frag.spv";
     auto fragmentShader = m_device.createShaderModule(KDGpu::readShaderFile(fragmentShaderPath));
 
+    //![4]
     // Create bind group layout consisting of a single binding holding a UBO
     // clang-format off
     const BindGroupLayoutOptions bindGroupLayoutOptions = {
@@ -109,6 +112,7 @@ void DynamicUBOTriangles::initializeScene()
             .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit)
         }}
     };
+    //![4]
     // clang-format on
     const BindGroupLayout bindGroupLayout = m_device.createBindGroupLayout(bindGroupLayoutOptions);
 
@@ -149,6 +153,7 @@ void DynamicUBOTriangles::initializeScene()
 
     // Create a bindGroup to hold the UBO with the transform
     // clang-format off
+    //![5]
     BindGroupOptions bindGroupOptions = {
         .layout = bindGroupLayout,
         .resources = {{
@@ -158,6 +163,7 @@ void DynamicUBOTriangles::initializeScene()
             .resource = DynamicUniformBufferBinding{ .buffer = m_transformDynamicUBOBuffer, .size = uint32_t(m_dynamicUBOByteStride) }
         }}
     };
+    //![5]
     // clang-format on
     m_transformBindGroup = m_device.createBindGroup(bindGroupOptions);
 
@@ -190,9 +196,9 @@ void DynamicUBOTriangles::cleanupScene()
     m_transformBindGroup = {};
     m_transformDynamicUBOBuffer = {};
 }
-
 void DynamicUBOTriangles::updateScene()
 {
+    //![2]
     // Each frame we want to rotate the triangle a little
     static float angle = 0.0f;
     angle += 0.1f;
@@ -214,6 +220,7 @@ void DynamicUBOTriangles::updateScene()
     auto bufferData = m_transformDynamicUBOBuffer.map();
     std::memcpy(bufferData, rawTransformData.data(), rawTransformData.size());
     m_transformDynamicUBOBuffer.unmap();
+    //![2]
 }
 
 void DynamicUBOTriangles::resize()
@@ -233,6 +240,7 @@ void DynamicUBOTriangles::render()
     opaquePass.setVertexBuffer(0, m_buffer);
     opaquePass.setIndexBuffer(m_indexBuffer);
 
+    //![1]
     for (size_t i = 0; i < entityCount; ++i) {
         // Bind Group and provide offset into the Dynamic UBO that holds all the transform matrices
         const uint32_t dynamicUBOOffset = i * m_dynamicUBOByteStride;
@@ -240,6 +248,7 @@ void DynamicUBOTriangles::render()
         const DrawIndexedCommand drawCmd = { .indexCount = 3 };
         opaquePass.drawIndexed(drawCmd);
     }
+    //![1]
 
     renderImGuiOverlay(&opaquePass);
     opaquePass.end();

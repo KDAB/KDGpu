@@ -38,6 +38,7 @@ inline std::string assetPath()
 
 void HelloTriangle::initializeScene()
 {
+    //![3]
     struct Vertex {
         glm::vec3 position;
         glm::vec3 color;
@@ -64,7 +65,9 @@ void HelloTriangle::initializeScene()
             .usage = BufferUsageFlagBits::VertexBufferBit | BufferUsageFlagBits::TransferDstBit,
             .memoryUsage = MemoryUsage::GpuOnly
         };
+        //![4]
         m_buffer = m_device.createBuffer(bufferOptions);
+        //![4]
         const BufferUploadOptions uploadOptions = {
             .destinationBuffer = m_buffer,
             .dstStages = PipelineStageFlagBit::VertexAttributeInputBit,
@@ -72,10 +75,14 @@ void HelloTriangle::initializeScene()
             .data = vertexData.data(),
             .byteSize = dataByteSize
         };
+        //![5]
         uploadBufferData(uploadOptions);
+        //![5]
     }
+    //![3]
 
     // Create a buffer to hold the geometry index data
+    //![6]
     {
         std::array<uint32_t, 3> indexData = { 0, 1, 2 };
         const DeviceSize dataByteSize = indexData.size() * sizeof(uint32_t);
@@ -94,8 +101,10 @@ void HelloTriangle::initializeScene()
         };
         uploadBufferData(uploadOptions);
     }
+    //![6]
 
     // Create a buffer to hold the transformation matrix
+    //![7]
     {
         BufferOptions bufferOptions = {
             .size = sizeof(glm::mat4),
@@ -110,14 +119,18 @@ void HelloTriangle::initializeScene()
         std::memcpy(bufferData, &m_transform, sizeof(glm::mat4));
         m_transformBuffer.unmap();
     }
+    //![7]
 
     // Create a vertex shader and fragment shader
+    //![8]
     const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_triangle/hello_triangle.vert.spv";
     auto vertexShader = m_device.createShaderModule(KDGpu::readShaderFile(vertexShaderPath));
 
     const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_triangle/hello_triangle.frag.spv";
     auto fragmentShader = m_device.createShaderModule(KDGpu::readShaderFile(fragmentShaderPath));
+    //![8]
 
+    //![9]
     // Create bind group layout consisting of a single binding holding a UBO
     // clang-format off
     const BindGroupLayoutOptions bindGroupLayoutOptions = {
@@ -135,9 +148,11 @@ void HelloTriangle::initializeScene()
         .bindGroupLayouts = { bindGroupLayout }
     };
     m_pipelineLayout = m_device.createPipelineLayout(pipelineLayoutOptions);
+    //![9]
 
     // Create a pipeline
     // clang-format off
+    //![10]
     GraphicsPipelineOptions pipelineOptions = {
         .shaderStages = {
             { .shaderModule = vertexShader, .stage = ShaderStageFlagBits::VertexBit },
@@ -164,9 +179,11 @@ void HelloTriangle::initializeScene()
     };
     // clang-format on
     m_pipeline = m_device.createGraphicsPipeline(pipelineOptions);
+    //![10]
 
     // Create a bindGroup to hold the UBO with the transform
     // clang-format off
+    //![11]
     BindGroupOptions bindGroupOptions = {
         .layout = bindGroupLayout,
         .resources = {{
@@ -176,11 +193,13 @@ void HelloTriangle::initializeScene()
     };
     // clang-format on
     m_transformBindGroup = m_device.createBindGroup(bindGroupOptions);
+    //![11]
 
     // Most of the render pass is the same between frames. The only thing that changes, is which image
     // of the swapchain we wish to render to. So set up what we can here, and in the render loop we will
     // just update the color texture view.
     // clang-format off
+    //![12]
     m_opaquePassOptions = {
         .colorAttachments = {
             {
@@ -193,6 +212,7 @@ void HelloTriangle::initializeScene()
             .view = m_depthTextureView,
         }
     };
+    //![12]
     // clang-format on
 }
 
@@ -207,6 +227,7 @@ void HelloTriangle::cleanupScene()
     m_commandBuffer = {};
 }
 
+//![1]
 void HelloTriangle::updateScene()
 {
     // Each frame we want to rotate the triangle a little
@@ -224,6 +245,7 @@ void HelloTriangle::updateScene()
     std::memcpy(bufferData, &m_transform, sizeof(glm::mat4));
     m_transformBuffer.unmap();
 }
+//![1]
 
 void HelloTriangle::resize()
 {
@@ -231,6 +253,7 @@ void HelloTriangle::resize()
     m_opaquePassOptions.depthStencilAttachment.view = m_depthTextureView;
 }
 
+//![2]
 void HelloTriangle::render()
 {
     auto commandRecorder = m_device.createCommandRecorder();
@@ -248,10 +271,13 @@ void HelloTriangle::render()
     opaquePass.end();
     m_commandBuffer = commandRecorder.finish();
 
+    //![13]
     SubmitOptions submitOptions = {
         .commandBuffers = { m_commandBuffer },
         .waitSemaphores = { m_presentCompleteSemaphores[m_inFlightIndex] },
         .signalSemaphores = { m_renderCompleteSemaphores[m_inFlightIndex] }
     };
     m_queue.submit(submitOptions);
+    //![13]
 }
+//![2]

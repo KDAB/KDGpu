@@ -29,10 +29,12 @@ using namespace KDGpu;
 class Offscreen
 {
 public:
+    //![1]
     struct Vertex {
         glm::vec2 pos;
         glm::vec4 color;
     };
+    //![1]
 
     Offscreen();
     ~Offscreen();

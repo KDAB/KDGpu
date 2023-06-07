@@ -1,0 +1,66 @@
+/*
+  This file is part of KDGpu.
+
+  SPDX-FileCopyrightText: 2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+
+  SPDX-License-Identifier: MIT
+
+  Contact KDAB at <info@kdab.com> for commercial licensing options.
+*/
+
+/**
+    @page multiview Multiview
+    @ingroup kdgpu-examples
+
+    @brief This example shows how to render in multiple passes.
+
+    This example uses the multiview extension to draw the same texture multiple times simultaneously. This is useful in VR applications where it is necessary to render the same scene twice from different cameras. When a multiview render pass happens, the different renderings will be sent to a 3D texture. In the shaders, you can differentiate between which pass you are rendering with ``gl_ViewIndex``. For example, the following code is what makes the triangles turn in opposite directions:
+
+    @snippet multiview/doc/shadersnippet.vert 1
+
+    In a 3D VR game or application, this could be a ternary/conditional which translates and slightly rotates the view matrix if it's on the second layer.
+
+    Once the 3D texture has been rendered to and contains the two views on each layer, we need to render each layer to the screen, one view on the left half and one view on the right. This process does not involve multiview, just sampling from each layer of the 3D texture and re-rendering them in a squashed half-screen views. In order to achieve this, we do two passes with the same pipeline, updating a push constant which says which layer to sample from.
+
+    Here is the shader code which receives the push constant:
+
+    @snippet multiview/doc/shadersnippet.vert 2
+
+    \section multiview_initialization Initialization
+
+    In order to set up splitscreen multiview rendering, we must do the following:
+    1. Create two separate pipelines:
+        - One with the multiview shader.
+        - One with the shader that samples from the multiview-ed 3D texture.
+    2. Configure each pipeline to have the correct push constant and bind group layouts.
+    3. Bind the texture from the first pipeline to the second pipeline for sampling.
+
+    Creating the multiview pipeline is almost identical to previous examples of creating pipelines in KDGpu, with the new addition of adding the push constant range to the bind group:
+
+    @snippet multiview/multiview.cpp 4
+
+    And setting up the multiview pass options so that multiview is enabled:
+
+    @snippet multiview/multiview.cpp 5
+
+    ``m_multiViewColorOutputView`` and ``m_multiViewDepthView`` are initialized when the scene is initialized and when the window is resized.
+
+    @snippet multiview/multiview.cpp 3
+
+    On resize/initialize we must also re-create the bindgroup that is correctly bound to the new textures we created in the previous step.
+
+    @snippet multiview/multiview.cpp 7
+
+    \section multiview_perframe Per-Frame Rendering Logic
+
+    Rendering to the off-screen multiview textures is the first thing we do on render, and very similar to rendering in previous examples. The only addition is the need to update the push constant.
+
+    @snippet multiview/multiview.cpp 6
+
+    The majority of the new logic occurs during the full screen pass, where we render each layer of off-screen texture in two separate passes. We use KDGpu::RenderPassCommandRecorder::setViewport to squash the different views onto either half of the screen.
+
+    @snippet multiview/multiview.cpp 8
+
+    Note that it is necessary to re-set the color attachment's view before beginning the second pass, and that we send a different value to the push constant for each pass (that's the index of the layer that the shader should sample from).
+
+*/

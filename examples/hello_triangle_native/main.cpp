@@ -93,6 +93,7 @@ int main()
     });
     //![0]
 
+    //![2]
 #if defined(KD_PLATFORM_WIN32)
     auto win32Window = dynamic_cast<Win32PlatformWindow *>(window.platformWindow());
     SurfaceOptions surfaceOptions = {
@@ -115,24 +116,32 @@ int main()
 #endif
 
     Surface surface = instance.createSurface(surfaceOptions);
+    //![2]
 
+    //![4]
     // Enumerate the adapters (physical devices) and select one to use. Here we look for
     // a discrete GPU. In a real app, we could fallback to an integrated one.
     Adapter *selectedAdapter = instance.selectAdapter(AdapterDeviceType::Default);
+    //![4]
 
     if (!selectedAdapter) {
         SPDLOG_WARN("Unable to find a discrete GPU. Aborting...");
         return -1;
     }
 
+    //![5]
     // We can easily query the adapter for various features, properties and limits.
     SPDLOG_WARN("maxBoundDescriptorSets = {}", selectedAdapter->properties().limits.maxBoundDescriptorSets);
     SPDLOG_WARN("multiDrawIndirect = {}", selectedAdapter->features().multiDrawIndirect);
+    //![5]
 
+    //![6]
     auto queueTypes = selectedAdapter->queueTypes();
     const bool hasGraphicsAndCompute = queueTypes[0].supportsFeature(QueueFlags(QueueFlagBits::GraphicsBit) | QueueFlags(QueueFlagBits::ComputeBit));
     SPDLOG_WARN("Queue family 0 graphics and compute support: {}", hasGraphicsAndCompute);
+    //![6]
 
+    //![7]
     // We are now able to query the adapter for swapchain properties and presentation support with the window surface
     const auto swapchainProperties = selectedAdapter->swapchainProperties(surface);
     const bool supportsPresentation = selectedAdapter->supportsPresentation(surface, 0); // Query about the 1st queue type
@@ -142,7 +151,9 @@ int main()
         SPDLOG_WARN("Selected adapter queue family 0 does not meet requirements. Aborting.");
         return -1;
     }
+    //![7]
 
+    //![8]
     // Now we can create a device from the selected adapter that we can then use to interact with the GPU.
     Device device = selectedAdapter->createDevice();
     Queue queue = device.queues()[0];
@@ -174,6 +185,7 @@ int main()
             swapchainViews.push_back(std::move(view));
         }
 
+        //![3]
         // Create a depth texture to use for rendering
         const TextureOptions depthTextureOptions = {
             .type = TextureType::TextureType2D,
@@ -183,6 +195,7 @@ int main()
             .usage = TextureUsageFlagBits::DepthStencilAttachmentBit,
             .memoryUsage = MemoryUsage::GpuOnly
         };
+        //![3]
         depthTexture = device.createTexture(depthTextureOptions);
         depthTextureView = depthTexture.createView();
 
@@ -191,6 +204,7 @@ int main()
     };
 
     createSwapchain();
+    //![8]
 
     // Create a buffer to hold triangle vertex data
     Buffer vertexBuffer = device.createBuffer(BufferOptions{
@@ -293,23 +307,35 @@ int main()
     // Update BindGroup for binding 0
     bindGroup.update(BindGroupEntry{ .binding = 0, .resource = UniformBufferBinding{ .buffer = cameraUBOBuffer } });
 
+    //![9]
     const GpuSemaphore imageAvailableSemaphore = device.createGpuSemaphore();
     const GpuSemaphore renderCompleteSemaphore = device.createGpuSemaphore();
+    //![15]
     Fence frameInFlightFence = device.createFence(FenceOptions{ .createSignalled = true });
+    //![15]
+    //![9]
 
+    //![10]
     while (window.visible()) {
+        //![10]
         // Reset fence
+        //![17]
         frameInFlightFence.reset();
+        //![17]
 
         // Acquire next swapchain image
+        //![11]
         uint32_t currentImageIndex = 0;
+        //![12]
         AcquireImageResult result = swapchain.getNextImageIndex(currentImageIndex, imageAvailableSemaphore);
+        //![12]
         if (result == AcquireImageResult::OutOfDate) {
             // This can happen when swapchain was resized
             // We need to recreate the swapchain and retry
             createSwapchain();
             result = swapchain.getNextImageIndex(currentImageIndex, imageAvailableSemaphore);
         }
+        //![11]
         if (result != AcquireImageResult::Success) {
             SPDLOG_LOGGER_ERROR(Logger::logger(), "Unable to acquire swapchain image");
         }
@@ -370,23 +396,31 @@ int main()
         // - wait for the imageAvailableSemaphore
         // - will signal the renderCompleteSemaphore when execution on the GPU is completed
         // - will signal the frameInFlightFence so that we can wait on the CPU for execution to have completed
+        //![13]
         queue.submit(SubmitOptions{
                 .commandBuffers = { commands },
                 .waitSemaphores = { imageAvailableSemaphore },
                 .signalSemaphores = { renderCompleteSemaphore },
+                //![16]
                 .signalFence = frameInFlightFence,
+                //![16]
         });
+        //![13]
 
         // Present and request next frame (need API for this)
         // - wait for the renderCompleteSemaphore to have been signalled as we only want to present once
         //   everything has been rendered
+        //![14]
         queue.present(PresentOptions{
                 .waitSemaphores = { renderCompleteSemaphore },
                 .swapchainInfos = { { .swapchain = swapchain, .imageIndex = currentImageIndex } },
         });
+        //![14]
 
         // Wait for frame to have completed its execution
+        //![18]
         frameInFlightFence.wait();
+        //![18]
 
         // Process application events
         app.processEvents();

@@ -160,7 +160,9 @@ void HelloTriangle::cleanupScene()
     m_pipelineLayout = {};
     m_indexBuffer = {};
     m_buffer = {};
+    //![2]
     m_commandBuffers = {};
+    //![2]
 }
 
 void HelloTriangle::updateScene()
@@ -196,6 +198,7 @@ void HelloTriangle::render()
     opaquePass.pushConstant(m_transformPushConstantRange, glm::value_ptr(m_transform));
     const DrawIndexedCommand drawCmd = { .indexCount = 3 };
     opaquePass.drawIndexed(drawCmd);
+    //![1]
     renderImGuiOverlay(&opaquePass, m_inFlightIndex);
     opaquePass.end();
     m_commandBuffers[m_inFlightIndex] = commandRecorder.finish();
@@ -211,5 +214,6 @@ void HelloTriangle::render()
         .signalSemaphores = { m_renderCompleteSemaphores[m_inFlightIndex] },
         .signalFence = m_frameFences[m_inFlightIndex] // Signal Fence once submission and execution is complete
     };
+    //![1]
     m_queue.submit(submitOptions);
 }

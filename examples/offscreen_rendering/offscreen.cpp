@@ -84,6 +84,7 @@ void writeImage(const std::string &path, const ImageData &image)
 
 } // namespace KDGpu
 
+//![7]
 Offscreen::Offscreen()
     : m_api(std::make_unique<VulkanGraphicsApi>())
 {
@@ -101,6 +102,7 @@ Offscreen::Offscreen()
 
     createRenderTargets();
 }
+//![7]
 
 Offscreen::~Offscreen()
 {
@@ -142,11 +144,15 @@ void Offscreen::initializeScene()
             .newLayout = TextureLayout::ShaderReadOnlyOptimal,
             .regions = regions
         };
+        //![7]
         m_stagingBuffers.emplace_back(m_queue.uploadTextureData(uploadOptions));
+        //![7]
 
         // Create a view and sampler
         m_pointTextureView = m_pointTexture.createView();
+        //![1]
         m_pointSampler = m_device.createSampler(SamplerOptions{ .magFilter = FilterMode::Linear, .minFilter = FilterMode::Linear });
+        //![1]
     }
 
     // Create a vertex shader and fragment shader (spir-v only for now)
@@ -221,6 +227,7 @@ void Offscreen::initializeScene()
 
     // Create a pipeline
     // clang-format off
+    //![5]
     GraphicsPipelineOptions pipelineOptions = {
         .shaderStages = {
             { .shaderModule = vertexShader, .stage = ShaderStageFlagBits::VertexBit },
@@ -263,6 +270,7 @@ void Offscreen::initializeScene()
             .samples = m_samples
         }
     };
+    //![5]
     // clang-format on
     m_pipeline = m_device.createGraphicsPipeline(pipelineOptions);
 }
@@ -298,6 +306,7 @@ void Offscreen::resize(uint32_t width, uint32_t height)
     createRenderTargets();
 }
 
+//![6]
 void Offscreen::setData(const std::vector<Offscreen::Vertex> &data)
 {
     m_pointCount = data.size();
@@ -322,7 +331,9 @@ void Offscreen::setData(const std::vector<Offscreen::Vertex> &data)
     // at the end of each render function.
     m_stagingBuffers.emplace_back(m_queue.uploadBufferData(uploadOptions));
 }
+//![6]
 
+//![4]
 void Offscreen::setProjection(float left, float right, float bottom, float top)
 {
     // NB: We flip bottom and top since Vulkan (and KDGpu) invert the y vs OpenGL
@@ -331,6 +342,7 @@ void Offscreen::setProjection(float left, float right, float bottom, float top)
     std::memcpy(bufferData, &m_proj, sizeof(glm::mat4));
     m_projBuffer.unmap();
 }
+//![4]
 
 void Offscreen::releaseStagingBuffers()
 {
@@ -363,11 +375,13 @@ void Offscreen::render(const std::string &baseFilename)
     // that we correctly serialize the operations performed on the GPU and also act to transition
     // the textures into the correct layout for each step. See the explanations in the
     // createRenderTargets() function for more information.
+    //![11]
     commandRecorder.textureMemoryBarrier(m_barriers[uint8_t(TextureBarriers::CopySrcPre)]);
     commandRecorder.textureMemoryBarrier(m_barriers[uint8_t(TextureBarriers::CopyDstPre)]);
     commandRecorder.copyTextureToTexture(m_copyOptions);
     commandRecorder.textureMemoryBarrier(m_barriers[uint8_t(TextureBarriers::CopyDstPost)]);
     commandRecorder.textureMemoryBarrier(m_barriers[uint8_t(TextureBarriers::CopySrcPost)]);
+    //![11]
 
     // Finish recording and submit
     m_commandBuffer = commandRecorder.finish();
@@ -429,6 +443,7 @@ void Offscreen::render(const std::string &baseFilename)
 
 void Offscreen::createRenderTargets()
 {
+    //![8]
     // Create a color texture to use as our color render target
     TextureOptions msaaColorTextureOptions = {
         .type = TextureType::TextureType2D,
@@ -454,6 +469,7 @@ void Offscreen::createRenderTargets()
     };
     m_colorTexture = m_device.createTexture(colorTextureOptions);
     m_colorTextureView = m_colorTexture.createView();
+    //![8]
 
     // Create a depth texture to use for depth-correct rendering
     TextureOptions depthTextureOptions = {
@@ -469,6 +485,7 @@ void Offscreen::createRenderTargets()
     m_depthTextureView = m_depthTexture.createView();
 
     // clang-format off
+    //![9]
     m_renderPassOptions = {
         .colorAttachments = {
             {
@@ -482,8 +499,10 @@ void Offscreen::createRenderTargets()
         },
         .samples = m_samples
     };
+    //![9]
     // clang-format on
 
+    //![10]
     // Create a color texture that is host visible and in linear layout. We will copy into this.
     TextureOptions cpuColorTextureOptions = {
         .type = TextureType::TextureType2D,
@@ -496,12 +515,14 @@ void Offscreen::createRenderTargets()
         .memoryUsage = MemoryUsage::CpuOnly
     };
     m_cpuColorTexture = m_device.createTexture(cpuColorTextureOptions);
+    //![10]
 
     // Setup the options for the memory barriers that will be used to serialize the
     // memory accesses and transition the textures into the correct layouts for each step.
     // These will be the same for every call to render() unless we have to resize and
     // hence recreate the textures we are rendering to and copying between.
 
+    //![12]
     // Insert a texture memory barrier to ensure the rendering to the color render target
     // is completed and to transition it into a layout suitable for copying from
     m_barriers[uint8_t(TextureBarriers::CopySrcPre)] = {
@@ -553,10 +574,12 @@ void Offscreen::createRenderTargets()
         .texture = m_colorTexture,
         .range = { .aspectMask = TextureAspectFlagBits::ColorBit }
     };
+    //![12]
 
     // Likewise, we can specify the copy operation parameters once here and reuse them many
     // times in calls to render().
     // clang-format off
+    //![13]
     m_copyOptions = {
         .srcTexture = m_colorTexture,
         .srcLayout = TextureLayout::TransferSrcOptimal,
@@ -566,5 +589,6 @@ void Offscreen::createRenderTargets()
             .extent = { .width = m_width, .height = m_height, .depth = 1 }
         }}
     };
+    //![13]
     // clang-format on
 }
