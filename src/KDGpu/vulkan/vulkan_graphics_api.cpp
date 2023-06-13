@@ -46,11 +46,11 @@ Adapter VulkanGraphicsApi::createAdapterFromExistingVkPhysicalDevice(const Handl
                            VulkanAdapter(vkPhysicalDevice, m_vulkanResourceManager.get(), instanceH)));
 }
 
-Queue VulkanGraphicsApi::createQueueFromExistingVkQueue(const Handle<Device_t> &deviceH, VkQueue vkQueue, const QueueFlags queueFlags)
+Queue VulkanGraphicsApi::createQueueFromExistingVkQueue(VkQueue vkQueue, const QueueFlags queueFlags)
 {
     const Handle<Queue_t> queueHandle = m_vulkanResourceManager->insertQueue(VulkanQueue(vkQueue, m_vulkanResourceManager.get()));
     return Queue(this,
-                 deviceH,
+                 {},
                  QueueDescription{
                          .queue = queueHandle,
                          .flags = queueFlags,
@@ -78,7 +78,9 @@ Device VulkanGraphicsApi::createDeviceFromExistingVkDevice(Adapter *adapter,
     assert(vulkanDevice);
     std::vector<QueueDescription> descriptions;
     descriptions.reserve(device.m_queues.size());
-    for (const Queue &queue : device.m_queues)
+    for (Queue &queue : device.m_queues) {
+        if (!queue.m_device.isValid())
+            queue.m_device = device.m_device; // Set device on queue since we couldn't do it when creating the queue with createQueueFromExistingVkQueue
         descriptions.push_back(QueueDescription{
                 .queue = queue.handle(),
                 .flags = queue.flags(),
@@ -86,6 +88,7 @@ Device VulkanGraphicsApi::createDeviceFromExistingVkDevice(Adapter *adapter,
                 .minImageTransferGranularity = queue.minImageTransferGranularity(),
                 .queueTypeIndex = queue.queueTypeIndex(),
         });
+    }
     vulkanDevice->queueDescriptions = std::move(descriptions);
 
     return device;
