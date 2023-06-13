@@ -19,9 +19,10 @@ namespace KDGpu {
 
 struct Device_t;
 struct Texture_t;
-
-class GraphicsApi;
 struct TextureOptions;
+class Device;
+class Queue;
+class GraphicsApi;
 
 struct TextureSubresource {
     TextureAspectFlags aspectMask{ TextureAspectFlagBits::ColorBit };
@@ -64,6 +65,8 @@ public:
     void unmap();
 
     SubresourceLayout getSubresourceLayout(const TextureSubresource &subresource = TextureSubresource()) const;
+
+    bool generateMipMaps(Device &device, Queue &transferQueue, const TextureOptions &options, TextureLayout oldLayout);
 
 private:
     explicit Texture(GraphicsApi *api, const Handle<Device_t> &device, const TextureOptions &options);

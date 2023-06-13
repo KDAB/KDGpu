@@ -142,4 +142,30 @@ TEST_SUITE("Texture")
             CHECK(a != b);
         }
     }
+
+    TEST_CASE("MipMap Creation")
+    {
+        // GIVEN
+        const TextureOptions textureOptions = {
+            .type = TextureType::TextureType2D,
+            .format = Format::R8G8B8A8_SNORM,
+            .extent = { 512, 512, 1 },
+            .mipLevels = 8,
+            .usage = TextureUsageFlagBits::SampledBit | TextureUsageFlagBits::TransferSrcBit | TextureUsageFlagBits::TransferDstBit,
+            .memoryUsage = MemoryUsage::GpuOnly
+        };
+
+        // WHEN
+        Texture t = device.createTexture(textureOptions);
+
+        // THEN
+        CHECK(t.isValid());
+
+        // WHEN
+        Queue &transferQueue = device.queues().front();
+        const bool success = t.generateMipMaps(device, transferQueue, textureOptions, TextureLayout::Undefined);
+
+        // THEN
+        CHECK(success);
+    }
 }
