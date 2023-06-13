@@ -68,6 +68,8 @@ public:
     bool supportsPresentation(const Handle<Surface_t> &surface, uint32_t queueTypeIndex) const noexcept;
 
     FormatProperties formatProperties(Format format) const;
+    bool supportsBlitting(Format srcFormat, TextureTiling srcTiling, Format dstFormat, TextureTiling dstTiling) const;
+    bool supportsBlitting(Format format, TextureTiling tiling) const;
 
     Device createDevice(const DeviceOptions &options = DeviceOptions());
 

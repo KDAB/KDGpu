@@ -181,4 +181,30 @@ Device Adapter::createDevice(const DeviceOptions &options)
     return Device(this, m_api, options);
 }
 
+bool Adapter::supportsBlitting(Format srcFormat, TextureTiling srcTiling,
+                               Format dstFormat, TextureTiling dstTiling) const
+{
+    auto featureFlags = [this](Format f, TextureTiling t) {
+        const FormatProperties &props = formatProperties(f);
+        if (t == TextureTiling::Linear)
+            return props.linearTilingFeatures;
+        return props.optimalTilingFeatures;
+    };
+
+    const FormatFeatureFlags srcFormatFeatureFlags = featureFlags(srcFormat, srcTiling);
+    if (!srcFormatFeatureFlags.testFlag(FormatFeatureFlagBit::BlitSrcBit))
+        return false;
+
+    const FormatFeatureFlags dstFormatFeatureFlags = featureFlags(dstFormat, dstTiling);
+    return dstFormatFeatureFlags.testFlag(FormatFeatureFlagBit::BlitDstBit);
+}
+
+bool Adapter::supportsBlitting(Format format, TextureTiling tiling) const
+{
+    const FormatProperties &props = formatProperties(format);
+    const FormatFeatureFlags &formatFeatureFlags = (tiling == TextureTiling::Linear) ? props.linearTilingFeatures : props.optimalTilingFeatures;
+
+    return bool(formatFeatureFlags & (FormatFeatureFlagBit::BlitSrcBit | FormatFeatureFlagBit::BlitDstBit));
+}
+
 } // namespace KDGpu
