@@ -23,6 +23,7 @@ struct BufferCopy;
 struct BufferToTextureCopy;
 struct TextureToBufferCopy;
 struct TextureToTextureCopy;
+struct TextureBlitOptions;
 
 /**
  * @brief ApiCommandRecorder
@@ -31,6 +32,7 @@ struct TextureToTextureCopy;
  */
 struct ApiCommandRecorder {
     virtual void begin() = 0;
+    virtual void blitTexture(const TextureBlitOptions &options) = 0;
     virtual void copyBuffer(const BufferCopy &copy) = 0;
     virtual void copyBufferToTexture(const BufferToTextureCopy &copy) = 0;
     virtual void copyTextureToBuffer(const TextureToBufferCopy &copy) = 0;

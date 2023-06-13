@@ -74,6 +74,56 @@ std::vector<VkImageCopy> buildRegions(const std::vector<KDGpu::TextureCopyRegion
     return vkRegions;
 }
 
+std::vector<VkImageBlit> buildRegions(const std::vector<KDGpu::TextureBlitRegion> &regions)
+{
+    const uint32_t regionCount = regions.size();
+    std::vector<VkImageBlit> vkRegions;
+    vkRegions.reserve(regionCount);
+    for (uint32_t i = 0; i < regionCount; ++i) {
+        const auto &region = regions.at(i);
+        const VkImageBlit vkRegion = {
+            .srcSubresource = {
+                    .aspectMask = region.srcSubresource.aspectMask.toInt(),
+                    .mipLevel = region.srcSubresource.mipLevel,
+                    .baseArrayLayer = region.srcSubresource.baseArrayLayer,
+                    .layerCount = region.srcSubresource.layerCount,
+            },
+            .srcOffsets = {
+                    {
+                            .x = region.srcOffset.x,
+                            .y = region.srcOffset.y,
+                            .z = region.srcOffset.z,
+                    },
+                    {
+                            .x = static_cast<int32_t>(region.srcExtent.width),
+                            .y = static_cast<int32_t>(region.srcExtent.height),
+                            .z = static_cast<int32_t>(region.srcExtent.depth),
+                    },
+            },
+            .dstSubresource = {
+                    .aspectMask = region.dstSubresource.aspectMask.toInt(),
+                    .mipLevel = region.dstSubresource.mipLevel,
+                    .baseArrayLayer = region.srcSubresource.baseArrayLayer,
+                    .layerCount = region.dstSubresource.layerCount,
+            },
+            .dstOffsets = {
+                    {
+                            .x = region.dstOffset.x,
+                            .y = region.dstOffset.y,
+                            .z = region.dstOffset.z,
+                    },
+                    {
+                            .x = static_cast<int32_t>(region.dstExtent.width),
+                            .y = static_cast<int32_t>(region.dstExtent.height),
+                            .z = static_cast<int32_t>(region.dstExtent.depth),
+                    },
+            },
+        };
+        vkRegions.emplace_back(std::move(vkRegion));
+    }
+    return vkRegions;
+}
+
 } // namespace
 
 namespace KDGpu {
@@ -96,6 +146,22 @@ void VulkanCommandRecorder::begin()
 {
     VulkanCommandBuffer *commandBuffer = vulkanResourceManager->getCommandBuffer(commandBufferHandle);
     commandBuffer->begin();
+}
+
+void VulkanCommandRecorder::blitTexture(const TextureBlitOptions &options)
+{
+    VulkanTexture *srcVulkanTexture = vulkanResourceManager->getTexture(options.srcTexture);
+    VulkanTexture *dstVulkanTexture = vulkanResourceManager->getTexture(options.dstTexture);
+    const std::vector<VkImageBlit> vkRegions = buildRegions(options.regions);
+
+    vkCmdBlitImage(commandBuffer,
+                   srcVulkanTexture->image,
+                   textureLayoutToVkImageLayout(options.srcLayout),
+                   dstVulkanTexture->image,
+                   textureLayoutToVkImageLayout(options.dstLayout),
+                   static_cast<uint32_t>(vkRegions.size()),
+                   vkRegions.data(),
+                   filterModeToVkFilterMode(options.scalingFilter));
 }
 
 void VulkanCommandRecorder::copyBuffer(const BufferCopy &copy)

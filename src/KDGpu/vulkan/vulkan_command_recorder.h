@@ -35,6 +35,7 @@ struct KDGPU_EXPORT VulkanCommandRecorder : public ApiCommandRecorder {
                                    const Handle<Device_t> &_deviceHandle);
 
     void begin() final;
+    void blitTexture(const TextureBlitOptions &options) final;
     void copyBuffer(const BufferCopy &copy) final;
     void copyBufferToTexture(const BufferToTextureCopy &copy) final;
     void copyTextureToBuffer(const TextureToBufferCopy &copy) final;

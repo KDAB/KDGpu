@@ -78,6 +78,24 @@ struct TextureToTextureCopy {
     std::vector<TextureCopyRegion> regions;
 };
 
+struct TextureBlitRegion {
+    TextureSubresourceLayers srcSubresource{ .aspectMask = TextureAspectFlagBits::ColorBit };
+    Offset3D srcOffset{};
+    Extent3D srcExtent{};
+    TextureSubresourceLayers dstSubresource{ .aspectMask = TextureAspectFlagBits::ColorBit };
+    Offset3D dstOffset{};
+    Extent3D dstExtent{};
+};
+
+struct TextureBlitOptions {
+    Handle<Texture_t> srcTexture;
+    TextureLayout srcLayout;
+    Handle<Texture_t> dstTexture;
+    TextureLayout dstLayout;
+    std::vector<TextureBlitRegion> regions;
+    FilterMode scalingFilter;
+};
+
 /**
  * @brief CommandRecorder
  * @ingroup public
@@ -100,6 +118,7 @@ public:
 
     RenderPassCommandRecorder beginRenderPass(const RenderPassCommandRecorderOptions &options);
     ComputePassCommandRecorder beginComputePass(const ComputePassCommandRecorderOptions &options = {});
+    void blitTexture(const TextureBlitOptions &options);
     void copyBuffer(const BufferCopy &copy);
     void copyBufferToTexture(const BufferToTextureCopy &copy);
     void copyTextureToBuffer(const TextureToBufferCopy &copy);

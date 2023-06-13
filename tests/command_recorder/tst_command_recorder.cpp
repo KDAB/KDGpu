@@ -13,6 +13,8 @@
 #include <KDGpu/instance.h>
 #include <KDGpu/buffer_options.h>
 #include <KDGpu/buffer.h>
+#include <KDGpu/texture_options.h>
+#include <KDGpu/texture.h>
 #include <KDGpu/vulkan/vulkan_graphics_api.h>
 
 #include <type_traits>
@@ -372,6 +374,105 @@ TEST_CASE("CommandRecorder")
         CHECK(m[3] == initialData[3]);
 
         gpuToCpu.unmap();
+    }
+
+    SUBCASE("Blit Texture")
+    {
+        // GIVEN
+        const TextureOptions textureOptions = {
+            .type = TextureType::TextureType2D,
+            .format = Format::R8G8B8A8_SNORM,
+            .extent = { 512, 512, 1 },
+            .mipLevels = 2,
+            .usage = TextureUsageFlagBits::TransferSrcBit | TextureUsageFlagBits::TransferDstBit,
+            .memoryUsage = MemoryUsage::GpuOnly,
+            .initialLayout = TextureLayout::Undefined,
+        };
+        Texture t = device.createTexture(textureOptions);
+
+        // WEN
+        CommandRecorder primaryCommandRecorder = device.createCommandRecorder();
+
+        // Transition base miplevel to TransferSrcOptimal
+        primaryCommandRecorder.textureMemoryBarrier(TextureMemoryBarrierOptions{
+                .srcStages = PipelineStageFlagBit::TransferBit,
+                .srcMask = AccessFlagBit::None,
+                .dstStages = PipelineStageFlagBit::TransferBit,
+                .dstMask = AccessFlagBit::TransferReadBit,
+                .oldLayout = TextureLayout::Undefined,
+                .newLayout = TextureLayout::TransferSrcOptimal,
+                .texture = t,
+                .range = {
+                        .aspectMask = TextureAspectFlagBits::ColorBit,
+                        .baseMipLevel = 0,
+                        .levelCount = 1,
+                },
+        });
+
+        // Transition first miplevel to TransforDstOptimal
+        primaryCommandRecorder.textureMemoryBarrier(TextureMemoryBarrierOptions{
+                .srcStages = PipelineStageFlagBit::TransferBit,
+                .srcMask = AccessFlagBit::None,
+                .dstStages = PipelineStageFlagBit::TransferBit,
+                .dstMask = AccessFlagBit::TransferWriteBit,
+                .oldLayout = TextureLayout::Undefined,
+                .newLayout = TextureLayout::TransferDstOptimal,
+                .texture = t,
+                .range = {
+                        .aspectMask = TextureAspectFlagBits::ColorBit,
+                        .baseMipLevel = 1,
+                        .levelCount = 1,
+                },
+        });
+
+        primaryCommandRecorder.blitTexture(TextureBlitOptions{
+                .srcTexture = t,
+                .srcLayout = TextureLayout::TransferSrcOptimal,
+                .dstTexture = t,
+                .dstLayout = TextureLayout::TransferDstOptimal,
+                .regions = {
+                        {
+                                .srcSubresource = {
+                                        .aspectMask = TextureAspectFlagBits::ColorBit,
+                                        .mipLevel = 0,
+                                },
+                                .srcOffset = {
+                                        .x = 0,
+                                        .y = 0,
+                                        .z = 0,
+                                },
+                                .srcExtent = {
+                                        .width = 512,
+                                        .height = 512,
+                                        .depth = 1,
+                                },
+                                .dstSubresource = {
+                                        .aspectMask = TextureAspectFlagBits::ColorBit,
+                                        .mipLevel = 1,
+                                },
+                                .dstOffset = {
+                                        .x = 0,
+                                        .y = 0,
+                                        .z = 0,
+                                },
+                                .dstExtent = {
+                                        .width = 256,
+                                        .height = 256,
+                                        .depth = 1,
+                                },
+                        },
+                },
+                .scalingFilter = FilterMode::Nearest,
+        });
+
+        auto commandBuffer = primaryCommandRecorder.finish();
+
+        transferQueue.submit(SubmitOptions{
+                .commandBuffers = { commandBuffer } });
+
+        device.waitUntilIdle();
+
+        // THEN -> Shouldn't log validation errors
     }
 
     SUBCASE("Destruction - Going Out of Scope")

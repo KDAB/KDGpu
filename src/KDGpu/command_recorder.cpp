@@ -73,6 +73,12 @@ ComputePassCommandRecorder CommandRecorder::beginComputePass(const ComputePassCo
     return ComputePassCommandRecorder(m_api, m_device, m_api->resourceManager()->createComputePassCommandRecorder(m_device, m_commandRecorder, options));
 }
 
+void CommandRecorder::blitTexture(const TextureBlitOptions &options)
+{
+    auto apiCommandRecorder = m_api->resourceManager()->getCommandRecorder(m_commandRecorder);
+    apiCommandRecorder->blitTexture(options);
+}
+
 void CommandRecorder::copyBuffer(const BufferCopy &copy)
 {
     auto apiCommandRecorder = m_api->resourceManager()->getCommandRecorder(m_commandRecorder);
