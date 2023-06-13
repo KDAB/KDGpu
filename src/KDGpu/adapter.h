@@ -45,7 +45,7 @@ struct AdapterOptions {
 class KDGPU_EXPORT Adapter
 {
 public:
-    Adapter() = delete;
+    Adapter() = default;
     ~Adapter();
 
     Adapter(Adapter &&);
