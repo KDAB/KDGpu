@@ -113,11 +113,8 @@ protected:
     std::vector<UploadStagingBuffer> m_stagingBuffers;
 
     const Format m_swapchainFormat{ Format::B8G8R8A8_UNORM };
-#if defined(KDGPU_PLATFORM_MACOS)
-    const Format m_depthFormat{ Format::D32_SFLOAT_S8_UINT };
-#else
-    const Format m_depthFormat{ Format::D24_UNORM_S8_UINT };
-#endif
+    Format m_depthFormat;
+
     bool m_showSurfaceCapabilities{ false };
     std::string m_capabilitiesString;
 };

@@ -185,6 +185,22 @@ void ExampleEngineLayer::onAttached()
         }
     }
 
+    // Choose a depth format from the ones supported
+    constexpr std::array<Format, 5> preferredDepthFormat = {
+        Format::D24_UNORM_S8_UINT,
+        Format::D16_UNORM_S8_UINT,
+        Format::D32_SFLOAT_S8_UINT,
+        Format::D16_UNORM,
+        Format::D32_SFLOAT,
+    };
+    for (const auto &depthFormat : preferredDepthFormat) {
+        const FormatProperties formatProperties = defaultDevice.adapter->formatProperties(depthFormat);
+        if (formatProperties.optimalTilingFeatures & FormatFeatureFlagBit::DepthStencilAttachmentBit) {
+            m_depthFormat = depthFormat;
+            break;
+        }
+    }
+
     // TODO: Move swapchain handling to View?
     recreateSwapChain();
 
