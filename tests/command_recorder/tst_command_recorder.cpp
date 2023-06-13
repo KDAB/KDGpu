@@ -475,6 +475,109 @@ TEST_CASE("CommandRecorder")
         // THEN -> Shouldn't log validation errors
     }
 
+    SUBCASE("Resolve Texture")
+    {
+        // GIVEN
+        Texture tMSAA = device.createTexture(TextureOptions{
+                .type = TextureType::TextureType2D,
+                .format = Format::R8G8B8A8_SNORM,
+                .extent = { 512, 512, 1 },
+                .mipLevels = 1,
+                .samples = SampleCountFlagBits::Samples4Bit,
+                .usage = TextureUsageFlagBits::TransferSrcBit | TextureUsageFlagBits::TransferDstBit,
+                .memoryUsage = MemoryUsage::GpuOnly,
+                .initialLayout = TextureLayout::Undefined,
+        });
+        Texture tResolve = device.createTexture(TextureOptions{
+                .type = TextureType::TextureType2D,
+                .format = Format::R8G8B8A8_SNORM,
+                .extent = { 512, 512, 1 },
+                .mipLevels = 1,
+                .samples = SampleCountFlagBits::Samples1Bit,
+                .usage = TextureUsageFlagBits::TransferSrcBit | TextureUsageFlagBits::TransferDstBit,
+                .memoryUsage = MemoryUsage::GpuOnly,
+                .initialLayout = TextureLayout::Undefined,
+        });
+
+        // WEN
+        CommandRecorder primaryCommandRecorder = device.createCommandRecorder();
+
+        // Transition tMSAA to TransferSrcOptimal
+        primaryCommandRecorder.textureMemoryBarrier(TextureMemoryBarrierOptions{
+                .srcStages = PipelineStageFlagBit::TransferBit,
+                .srcMask = AccessFlagBit::None,
+                .dstStages = PipelineStageFlagBit::TransferBit,
+                .dstMask = AccessFlagBit::TransferReadBit,
+                .oldLayout = TextureLayout::Undefined,
+                .newLayout = TextureLayout::TransferSrcOptimal,
+                .texture = tMSAA,
+                .range = {
+                        .aspectMask = TextureAspectFlagBits::ColorBit,
+                        .baseMipLevel = 0,
+                        .levelCount = 1,
+                },
+        });
+
+        // Transition tResolve TransforDstOptimal
+        primaryCommandRecorder.textureMemoryBarrier(TextureMemoryBarrierOptions{
+                .srcStages = PipelineStageFlagBit::TransferBit,
+                .srcMask = AccessFlagBit::None,
+                .dstStages = PipelineStageFlagBit::TransferBit,
+                .dstMask = AccessFlagBit::TransferWriteBit,
+                .oldLayout = TextureLayout::Undefined,
+                .newLayout = TextureLayout::TransferDstOptimal,
+                .texture = tResolve,
+                .range = {
+                        .aspectMask = TextureAspectFlagBits::ColorBit,
+                        .baseMipLevel = 0,
+                        .levelCount = 1,
+                },
+        });
+
+        primaryCommandRecorder.resolveTexture(TextureResolveOptions{
+                .srcTexture = tMSAA,
+                .srcLayout = TextureLayout::TransferSrcOptimal,
+                .dstTexture = tResolve,
+                .dstLayout = TextureLayout::TransferDstOptimal,
+                .regions = {
+                        {
+                                .srcSubresource = {
+                                        .aspectMask = TextureAspectFlagBits::ColorBit,
+                                        .mipLevel = 0,
+                                },
+                                .srcOffset = {
+                                        .x = 0,
+                                        .y = 0,
+                                        .z = 0,
+                                },
+                                .dstSubresource = {
+                                        .aspectMask = TextureAspectFlagBits::ColorBit,
+                                        .mipLevel = 0,
+                                },
+                                .dstOffset = {
+                                        .x = 0,
+                                        .y = 0,
+                                        .z = 0,
+                                },
+                                .extent = {
+                                        .width = 512,
+                                        .height = 512,
+                                        .depth = 1,
+                                },
+                        },
+                },
+        });
+
+        auto commandBuffer = primaryCommandRecorder.finish();
+
+        transferQueue.submit(SubmitOptions{
+                .commandBuffers = { commandBuffer } });
+
+        device.waitUntilIdle();
+
+        // THEN -> Shouldn't log validation errors
+    }
+
     SUBCASE("Destruction - Going Out of Scope")
     {
         Handle<CommandRecorder_t> recorderHandle;

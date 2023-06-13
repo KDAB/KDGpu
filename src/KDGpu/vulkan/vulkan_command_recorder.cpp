@@ -124,6 +124,47 @@ std::vector<VkImageBlit> buildRegions(const std::vector<KDGpu::TextureBlitRegion
     return vkRegions;
 }
 
+std::vector<VkImageResolve> buildResolveRegions(const std::vector<KDGpu::TextureResolveRegion> &regions)
+{
+    const uint32_t regionCount = regions.size();
+    std::vector<VkImageResolve> vkRegions;
+    vkRegions.reserve(regionCount);
+    for (uint32_t i = 0; i < regionCount; ++i) {
+        const auto &region = regions.at(i);
+        const VkImageResolve vkRegion = {
+            .srcSubresource = {
+                    .aspectMask = region.srcSubresource.aspectMask.toInt(),
+                    .mipLevel = region.srcSubresource.mipLevel,
+                    .baseArrayLayer = region.srcSubresource.baseArrayLayer,
+                    .layerCount = region.srcSubresource.layerCount,
+            },
+            .srcOffset = {
+                    .x = region.srcOffset.x,
+                    .y = region.srcOffset.y,
+                    .z = region.srcOffset.z,
+            },
+            .dstSubresource = {
+                    .aspectMask = region.dstSubresource.aspectMask.toInt(),
+                    .mipLevel = region.dstSubresource.mipLevel,
+                    .baseArrayLayer = region.srcSubresource.baseArrayLayer,
+                    .layerCount = region.dstSubresource.layerCount,
+            },
+            .dstOffset = {
+                    .x = region.dstOffset.x,
+                    .y = region.dstOffset.y,
+                    .z = region.dstOffset.z,
+            },
+            .extent = {
+                    .width = region.extent.width,
+                    .height = region.extent.height,
+                    .depth = region.extent.depth,
+            }
+        };
+        vkRegions.emplace_back(std::move(vkRegion));
+    }
+    return vkRegions;
+}
+
 } // namespace
 
 namespace KDGpu {
@@ -358,6 +399,21 @@ void VulkanCommandRecorder::executeSecondaryCommandBuffer(const Handle<CommandBu
 {
     VulkanCommandBuffer *vulkanSecondaryCommandBuffer = vulkanResourceManager->getCommandBuffer(secondaryCommandBuffer);
     vkCmdExecuteCommands(commandBuffer, 1, &vulkanSecondaryCommandBuffer->commandBuffer);
+}
+
+void VulkanCommandRecorder::resolveTexture(const TextureResolveOptions &options)
+{
+    VulkanTexture *srcVulkanTexture = vulkanResourceManager->getTexture(options.srcTexture);
+    VulkanTexture *dstVulkanTexture = vulkanResourceManager->getTexture(options.dstTexture);
+    const std::vector<VkImageResolve> vkRegions = buildResolveRegions(options.regions);
+
+    vkCmdResolveImage(commandBuffer,
+                      srcVulkanTexture->image,
+                      textureLayoutToVkImageLayout(options.srcLayout),
+                      dstVulkanTexture->image,
+                      textureLayoutToVkImageLayout(options.dstLayout),
+                      static_cast<uint32_t>(vkRegions.size()),
+                      vkRegions.data());
 }
 
 Handle<CommandBuffer_t> VulkanCommandRecorder::finish()

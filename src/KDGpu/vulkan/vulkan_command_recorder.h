@@ -44,6 +44,7 @@ struct KDGPU_EXPORT VulkanCommandRecorder : public ApiCommandRecorder {
     void bufferMemoryBarrier(const BufferMemoryBarrierOptions &options) final;
     void textureMemoryBarrier(const TextureMemoryBarrierOptions &options) final;
     void executeSecondaryCommandBuffer(const Handle<CommandBuffer_t> &secondaryCommandBuffer) final;
+    void resolveTexture(const TextureResolveOptions &options) final;
     Handle<CommandBuffer_t> finish() final;
 
     VkCommandPool commandPool{ VK_NULL_HANDLE };

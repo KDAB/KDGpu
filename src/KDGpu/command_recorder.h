@@ -96,6 +96,16 @@ struct TextureBlitOptions {
     FilterMode scalingFilter;
 };
 
+using TextureResolveRegion = TextureCopyRegion;
+
+struct TextureResolveOptions {
+    Handle<Texture_t> srcTexture;
+    TextureLayout srcLayout;
+    Handle<Texture_t> dstTexture;
+    TextureLayout dstLayout;
+    std::vector<TextureResolveRegion> regions;
+};
+
 /**
  * @brief CommandRecorder
  * @ingroup public
@@ -127,6 +137,7 @@ public:
     void bufferMemoryBarrier(const BufferMemoryBarrierOptions &options);
     void textureMemoryBarrier(const TextureMemoryBarrierOptions &options);
     void executeSecondaryCommandBuffer(const Handle<CommandBuffer_t> &secondaryCommandBuffer);
+    void resolveTexture(const TextureResolveOptions &options);
 
     CommandBuffer finish();
 

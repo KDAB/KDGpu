@@ -134,4 +134,10 @@ void CommandRecorder::executeSecondaryCommandBuffer(const Handle<CommandBuffer_t
     apiCommandRecorder->executeSecondaryCommandBuffer(secondaryCommandBuffer);
 }
 
+void CommandRecorder::resolveTexture(const TextureResolveOptions &options)
+{
+    auto apiCommandRecorder = m_api->resourceManager()->getCommandRecorder(m_commandRecorder);
+    apiCommandRecorder->resolveTexture(options);
+}
+
 } // namespace KDGpu
