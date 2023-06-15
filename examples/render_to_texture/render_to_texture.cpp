@@ -329,7 +329,7 @@ void RenderToTexture::updateColorBindGroup()
         .layout = m_colorBindGroupLayout,
         .resources = {{
             .binding = 0,
-            .resource = TextureViewBinding{ .textureView = m_colorOutputView, .sampler = m_colorOutputSampler }
+            .resource = TextureViewSamplerBinding{ .textureView = m_colorOutputView, .sampler = m_colorOutputSampler }
         }}
     };
     // clang-format on

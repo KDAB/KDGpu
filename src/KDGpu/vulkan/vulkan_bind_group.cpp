@@ -48,7 +48,7 @@ void VulkanBindGroup::update(const BindGroupEntry &entry)
 
     switch (entry.resource.type()) {
     case ResourceBindingType::CombinedImageSampler: {
-        const TextureViewBinding &textureViewBinding = entry.resource.textureViewBinding();
+        const TextureViewSamplerBinding &textureViewBinding = entry.resource.textureViewSamplerBinding();
         VulkanTextureView *textView = vulkanResourceManager->getTextureView(textureViewBinding.textureView);
         VulkanSampler *sampler = vulkanResourceManager->getSampler(textureViewBinding.sampler);
         imageInfo.imageView = textView->imageView;
@@ -57,6 +57,37 @@ void VulkanBindGroup::update(const BindGroupEntry &entry)
         descriptorWrite.descriptorCount = 1;
         descriptorWrite.pImageInfo = &imageInfo;
         descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        break;
+    }
+    case ResourceBindingType::SampledImage: {
+        const TextureViewBinding &textureViewBinding = entry.resource.textureViewBinding();
+        VulkanTextureView *textView = vulkanResourceManager->getTextureView(textureViewBinding.textureView);
+        imageInfo.imageView = textView->imageView;
+
+        descriptorWrite.descriptorCount = 1;
+        descriptorWrite.pImageInfo = &imageInfo;
+        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+        break;
+    }
+    case ResourceBindingType::Sampler: {
+        const SamplerBinding &samplerBinding = entry.resource.samplerBinding();
+        VulkanSampler *sampler = vulkanResourceManager->getSampler(samplerBinding.sampler);
+        imageInfo.sampler = sampler->sampler;
+
+        descriptorWrite.descriptorCount = 1;
+        descriptorWrite.pImageInfo = &imageInfo;
+        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+        break;
+    }
+    case ResourceBindingType::StorageImage: {
+        const ImageBinding &imageBinding = entry.resource.imageBinding();
+        VulkanTextureView *textView = vulkanResourceManager->getTextureView(imageBinding.textureView);
+        imageInfo.imageView = textView->imageView;
+        imageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL; // Since we can read or write to these types of resources
+
+        descriptorWrite.descriptorCount = 1;
+        descriptorWrite.pImageInfo = &imageInfo;
+        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
         break;
     }
     case ResourceBindingType::UniformBuffer: {

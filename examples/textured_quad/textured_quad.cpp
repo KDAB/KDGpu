@@ -218,7 +218,7 @@ void TexturedQuad::initializeScene()
         .layout = bindGroupLayout,
         .resources = {{
             .binding = 0,
-            .resource = TextureViewBinding{ .textureView = m_textureView, .sampler = m_sampler }
+            .resource = TextureViewSamplerBinding{ .textureView = m_textureView, .sampler = m_sampler }
         }}
     };
     // clang-format on

@@ -23,13 +23,21 @@ struct Buffer_t;
 struct TextureView_t;
 struct Sampler_t;
 
-struct TextureViewBinding {
+struct TextureViewSamplerBinding {
     Handle<TextureView_t> textureView{};
     Handle<Sampler_t> sampler{};
 };
 
+struct TextureViewBinding {
+    Handle<TextureView_t> textureView{};
+};
+
+struct SamplerBinding {
+    Handle<Sampler_t> sampler{};
+};
+
 struct ImageBinding {
-    // TODO: Complete
+    Handle<TextureView_t> textureView{};
 };
 
 struct UniformBufferBinding {
@@ -58,8 +66,14 @@ struct DynamicUniformBufferBinding {
 class BindingResource
 {
 public:
-    BindingResource(const TextureViewBinding &textureView)
+    BindingResource(const TextureViewSamplerBinding &textureView)
         : m_type(ResourceBindingType::CombinedImageSampler)
+    {
+        m_resource.combineTextureViewSampler = textureView;
+    }
+
+    BindingResource(const TextureViewBinding &textureView)
+        : m_type(ResourceBindingType::SampledImage)
     {
         m_resource.textureView = textureView;
     }
@@ -68,6 +82,12 @@ public:
         : m_type(ResourceBindingType::StorageImage)
     {
         m_resource.image = image;
+    }
+
+    BindingResource(const SamplerBinding &sampler)
+        : m_type(ResourceBindingType::Sampler)
+    {
+        m_resource.sampler = sampler;
     }
 
     BindingResource(const UniformBufferBinding &buffer)
@@ -92,15 +112,19 @@ public:
     const UniformBufferBinding &uniformBufferBinding() const { return m_resource.uniformBuffer; }
     const StorageBufferBinding &storageBufferBinding() const { return m_resource.storageBuffer; }
     const ImageBinding &imageBinding() const { return m_resource.image; }
+    const SamplerBinding &samplerBinding() const { return m_resource.sampler; }
     const TextureViewBinding &textureViewBinding() const { return m_resource.textureView; }
+    const TextureViewSamplerBinding &textureViewSamplerBinding() const { return m_resource.combineTextureViewSampler; }
     const DynamicUniformBufferBinding &dynamicUniformBufferBinding() const { return m_resource.dynamicUniformBuffer; }
 
 private:
     union Resource {
         Resource() { std::memset(this, 0, sizeof(Resource)); }
 
+        TextureViewSamplerBinding combineTextureViewSampler;
         TextureViewBinding textureView;
         ImageBinding image;
+        SamplerBinding sampler;
         UniformBufferBinding uniformBuffer;
         StorageBufferBinding storageBuffer;
         DynamicUniformBufferBinding dynamicUniformBuffer;

@@ -251,8 +251,8 @@ void MultiView::updateFinalPassBindGroup()
             .resources = {
                     {
                             .binding = 0,
-                            .resource = TextureViewBinding{ .textureView = m_multiViewColorOutputView,
-                                                            .sampler = m_multiViewColorOutputSampler },
+                            .resource = TextureViewSamplerBinding{ .textureView = m_multiViewColorOutputView,
+                                                                   .sampler = m_multiViewColorOutputSampler },
                     },
             },
     });

@@ -123,7 +123,7 @@ TEST_SUITE("BindGroup")
             t.update(BindGroupEntry{ .binding = 0, .resource = UniformBufferBinding{ .buffer = ubo } });
         }
 
-        SUBCASE("TextureView")
+        SUBCASE("TextureViewSampler")
         {
             // GIVEN
             const TextureOptions textureOptions = {
@@ -165,7 +165,7 @@ TEST_SUITE("BindGroup")
                 .layout = bindGroupLayout,
                 .resources = {
                         { .binding = 0,
-                          .resource = TextureViewBinding{ .textureView = tv, .sampler = s } },
+                          .resource = TextureViewSamplerBinding{ .textureView = tv, .sampler = s } },
                 }
             };
 
@@ -176,7 +176,149 @@ TEST_SUITE("BindGroup")
             CHECK(b.isValid());
 
             // WHEN
-            b.update(BindGroupEntry{ .binding = 0, .resource = TextureViewBinding{ .textureView = tv, .sampler = s } });
+            b.update(BindGroupEntry{ .binding = 0, .resource = TextureViewSamplerBinding{ .textureView = tv, .sampler = s } });
+        }
+
+        SUBCASE("TextureView")
+        {
+            // GIVEN
+            const TextureOptions textureOptions = {
+                .type = TextureType::TextureType2D,
+                .format = Format::R8G8B8A8_SNORM,
+                .extent = { 512, 512, 1 },
+                .mipLevels = 1,
+                .usage = TextureUsageFlagBits::SampledBit | TextureUsageFlagBits::ColorAttachmentBit,
+                .memoryUsage = MemoryUsage::GpuOnly
+            };
+
+            const TextureViewOptions tvOptions = {
+                .viewType = ViewType::ViewType2D,
+                .format = Format::R8G8B8A8_SNORM
+            };
+
+            // WHEN
+            Texture t = device.createTexture(textureOptions);
+            TextureView tv = t.createView(tvOptions);
+
+            // THEN
+            CHECK(t.isValid());
+            CHECK(tv.isValid());
+
+            const BindGroupLayoutOptions bindGroupLayoutOptions = {
+                .bindings = { { .binding = 0,
+                                .count = 1,
+                                .resourceType = ResourceBindingType::SampledImage,
+                                .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit) } }
+            };
+
+            const BindGroupLayout bindGroupLayout = device.createBindGroupLayout(bindGroupLayoutOptions);
+
+            const BindGroupOptions bindGroupOptions = {
+                .layout = bindGroupLayout,
+                .resources = {
+                        { .binding = 0,
+                          .resource = TextureViewBinding{ .textureView = tv } },
+                }
+            };
+
+            // WHEN
+            BindGroup b = device.createBindGroup(bindGroupOptions);
+
+            // THEN
+            CHECK(b.isValid());
+
+            // WHEN
+            b.update(BindGroupEntry{ .binding = 0, .resource = TextureViewBinding{ .textureView = tv } });
+        }
+
+        SUBCASE("Sampler")
+        {
+            // GIVEN
+            const SamplerOptions samplerOptions = {};
+
+            // WHEN
+            Sampler s = device.createSampler(samplerOptions);
+
+            // THEN
+            CHECK(s.isValid());
+
+            const BindGroupLayoutOptions bindGroupLayoutOptions = {
+                .bindings = { { .binding = 0,
+                                .count = 1,
+                                .resourceType = ResourceBindingType::Sampler,
+                                .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit) } }
+            };
+
+            const BindGroupLayout bindGroupLayout = device.createBindGroupLayout(bindGroupLayoutOptions);
+
+            const BindGroupOptions bindGroupOptions = {
+                .layout = bindGroupLayout,
+                .resources = {
+                        { .binding = 0,
+                          .resource = SamplerBinding{ .sampler = s } },
+                }
+            };
+
+            // WHEN
+            BindGroup b = device.createBindGroup(bindGroupOptions);
+
+            // THEN
+            CHECK(b.isValid());
+
+            // WHEN
+            b.update(BindGroupEntry{ .binding = 0, .resource = SamplerBinding{ .sampler = s } });
+        }
+
+        SUBCASE("Image")
+        {
+            // GIVEN
+            const TextureOptions textureOptions = {
+                .type = TextureType::TextureType2D,
+                .format = Format::R8G8B8A8_SNORM,
+                .extent = { 512, 512, 1 },
+                .mipLevels = 1,
+                .usage = TextureUsageFlagBits::StorageBit,
+                .memoryUsage = MemoryUsage::GpuOnly
+            };
+
+            const TextureViewOptions tvOptions = {
+                .viewType = ViewType::ViewType2D,
+                .format = Format::R8G8B8A8_SNORM
+            };
+
+            // WHEN
+            Texture t = device.createTexture(textureOptions);
+            TextureView tv = t.createView(tvOptions);
+
+            // THEN
+            CHECK(t.isValid());
+            CHECK(tv.isValid());
+
+            const BindGroupLayoutOptions bindGroupLayoutOptions = {
+                .bindings = { { .binding = 0,
+                                .count = 1,
+                                .resourceType = ResourceBindingType::StorageImage,
+                                .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit) } }
+            };
+
+            const BindGroupLayout bindGroupLayout = device.createBindGroupLayout(bindGroupLayoutOptions);
+
+            const BindGroupOptions bindGroupOptions = {
+                .layout = bindGroupLayout,
+                .resources = {
+                        { .binding = 0,
+                          .resource = ImageBinding{ .textureView = tv } },
+                }
+            };
+
+            // WHEN
+            BindGroup b = device.createBindGroup(bindGroupOptions);
+
+            // THEN
+            CHECK(b.isValid());
+
+            // WHEN
+            b.update(BindGroupEntry{ .binding = 0, .resource = ImageBinding{ .textureView = tv } });
         }
 
         SUBCASE("Dynamic UBO")

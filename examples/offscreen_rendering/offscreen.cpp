@@ -174,7 +174,7 @@ void Offscreen::initializeScene()
         .layout = pointTextureBindGroupLayout,
         .resources = {{
             .binding = 0,
-            .resource = TextureViewBinding{ .textureView = m_pointTextureView, .sampler = m_pointSampler }
+            .resource = TextureViewSamplerBinding{ .textureView = m_pointTextureView, .sampler = m_pointSampler }
         }}
     };
     // clang-format on
