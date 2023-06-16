@@ -15,7 +15,7 @@ elseif(NOT TARGET KDUtils)
     if(NOT KDUtils_FOUND)
         FetchContent_Declare(
             KDUtils
-            GIT_REPOSITORY ssh://codereview.kdab.com:29418/kdab/kdutils
+            GIT_REPOSITORY https://github.com/KDAB/KDUtils.git
             GIT_TAG master
             USES_TERMINAL_DOWNLOAD YES USES_TERMINAL_UPDATE YES
         )
