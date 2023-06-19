@@ -33,6 +33,7 @@ struct KDGPU_EXPORT VulkanInstance : public ApiInstance {
 
     VulkanResourceManager *vulkanResourceManager{ nullptr };
     VkInstance instance{ VK_NULL_HANDLE };
+    VkDebugUtilsMessengerEXT debugMessenger{ nullptr };
     bool isOwned{ true };
 };
 

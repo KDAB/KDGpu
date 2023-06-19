@@ -21,6 +21,7 @@
 #include <KDGpu/texture_options.h>
 #include <KDGpu/vulkan/vulkan_config.h>
 #include <KDGpu/vulkan/vulkan_enums.h>
+#include <KDGpu/utils/logging.h>
 
 #include <cassert>
 #include <stdexcept>
@@ -61,6 +62,43 @@ void setupMultiViewInfo(VkRenderPassMultiviewCreateInfo &multiViewCreateInfo, ui
     multiViewCreateInfo.pCorrelationMasks = viewMask;
     // pViewMask is a bitfield of view indices describing which views rendering is broadcast to in each subpass
     multiViewCreateInfo.pViewMasks = viewMask;
+}
+
+static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
+        VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+        VkDebugUtilsMessageTypeFlagsEXT messageType,
+        const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
+        void *pUserData)
+{
+    // The validation layers do not cache the queried swapchain extent range and so
+    // can race on X11 when resizing rapidly. See
+    //
+    // https://github.com/KhronosGroup/Vulkan-ValidationLayers/issues/1340
+    //
+    // Ignore this false positive.
+    const char *ignore = "VUID-VkSwapchainCreateInfoKHR-imageExtent-01274";
+    if (strcmp(ignore, pCallbackData->pMessageIdName) == 0)
+        return false;
+
+    switch (messageSeverity) {
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
+        SPDLOG_LOGGER_DEBUG(KDGpu::Logger::logger(), "validation layer: {}", pCallbackData->pMessage);
+        break;
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
+        SPDLOG_LOGGER_INFO(KDGpu::Logger::logger(), "validation layer: {}", pCallbackData->pMessage);
+        break;
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
+        SPDLOG_LOGGER_WARN(KDGpu::Logger::logger(), "validation layer: {}", pCallbackData->pMessage);
+        break;
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
+        SPDLOG_LOGGER_ERROR(KDGpu::Logger::logger(), "validation layer: {}", pCallbackData->pMessage);
+        break;
+    default:
+        SPDLOG_LOGGER_TRACE(KDGpu::Logger::logger(), "validation layer: {}", pCallbackData->pMessage);
+        break;
+    }
+
+    return VK_FALSE;
 }
 
 } // namespace
@@ -126,6 +164,23 @@ Handle<Instance_t> VulkanResourceManager::createInstance(const InstanceOptions &
     }
 
     VulkanInstance vulkanInstance(this, instance);
+
+    // Validation Debug Logger
+    {
+        VkDebugUtilsMessengerCreateInfoEXT createInfo{};
+        createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+        createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+        createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+        createInfo.pfnUserCallback = debugCallback;
+        createInfo.pUserData = nullptr; // Optional
+
+        auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(vulkanInstance.instance, "vkCreateDebugUtilsMessengerEXT");
+        if (func != nullptr) {
+            if (func(vulkanInstance.instance, &createInfo, nullptr, &vulkanInstance.debugMessenger) != VK_SUCCESS)
+                vulkanInstance.debugMessenger = nullptr;
+        }
+    }
+
     auto h = m_instances.emplace(vulkanInstance);
     return h;
 }
@@ -142,8 +197,17 @@ void VulkanResourceManager::deleteInstance(const Handle<Instance_t> &handle)
     VulkanInstance *instance = m_instances.get(handle);
 
     // Only destroy instances that we have allocated
-    if (instance->isOwned)
+    if (instance->isOwned) {
+
+        // Destroy debug logger if we have one
+        if (instance->debugMessenger) {
+            auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance->instance, "vkDestroyDebugUtilsMessengerEXT");
+            if (func != nullptr)
+                func(instance->instance, instance->debugMessenger, nullptr);
+        }
+
         vkDestroyInstance(instance->instance, nullptr);
+    }
 
     m_instances.remove(handle);
 }
