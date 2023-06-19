@@ -633,9 +633,8 @@ Handle<TextureView_t> VulkanResourceManager::createTextureView(const Handle<Devi
     if (options.range.aspectMask == TextureAspectFlagBits::None) {
         if (vulkanTexture->usage.testFlag(TextureUsageFlagBits::DepthStencilAttachmentBit))
             createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-
-        if (vulkanTexture->usage.testFlag(TextureUsageFlagBits::ColorAttachmentBit) || //
-            vulkanTexture->usage.testFlag(TextureUsageFlagBits::SampledBit)) {
+        else if (vulkanTexture->usage.testFlag(TextureUsageFlagBits::ColorAttachmentBit) ||
+                 vulkanTexture->usage.testFlag(TextureUsageFlagBits::SampledBit)) {
             createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         }
     }
