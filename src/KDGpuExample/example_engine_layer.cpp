@@ -72,7 +72,7 @@ void ExampleEngineLayer::recreateSwapChain()
         .extent = { m_window->width(), m_window->height(), 1 },
         .mipLevels = 1,
         .samples = m_samples,
-        .usage = TextureUsageFlagBits::DepthStencilAttachmentBit,
+        .usage = TextureUsageFlagBits::DepthStencilAttachmentBit | m_depthTextureUsgageFlags,
         .memoryUsage = MemoryUsage::GpuOnly
     };
     m_depthTexture = m_device.createTexture(depthTextureOptions);
