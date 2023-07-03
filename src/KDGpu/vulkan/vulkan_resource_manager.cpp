@@ -146,9 +146,32 @@ Handle<Instance_t> VulkanResourceManager::createInstance(const InstanceOptions &
         createInfo.ppEnabledLayerNames = layers.data();
     }
 
-    std::vector<const char *> requestedInstanceExtensions = getDefaultRequestedInstanceExtensions();
-    for (const std::string &userExtension : options.extensions)
-        requestedInstanceExtensions.push_back(userExtension.c_str());
+    std::vector<const char *> requestedInstanceExtensions;
+
+    // Query the available instance extensions
+    const auto availableExtensions = getInstanceExtensions();
+
+    const auto findExtension = [&extensions = availableExtensions](const std::string_view &name) {
+        const auto it = std::find_if(begin(extensions), end(extensions), [name](const Extension &ext) { return ext.name == name; });
+        return it != std::end(extensions);
+    };
+
+    const auto defaultRequestedExtensions = getDefaultRequestedInstanceExtensions();
+    for (const char *requestedExtension : defaultRequestedExtensions) {
+        if (findExtension(requestedExtension)) {
+            requestedInstanceExtensions.push_back(requestedExtension);
+        } else {
+            SPDLOG_LOGGER_WARN(Logger::logger(), "Unable to find default requested extension {}", requestedExtension);
+        }
+    }
+
+    for (const std::string &userExtension : options.extensions) {
+        if (findExtension(userExtension)) {
+            requestedInstanceExtensions.push_back(userExtension.c_str());
+        } else {
+            SPDLOG_LOGGER_WARN(Logger::logger(), "Unable to find user requested extensions {}", userExtension);
+        }
+    }
 
     if (!requestedInstanceExtensions.empty()) {
         createInfo.enabledExtensionCount = static_cast<uint32_t>(requestedInstanceExtensions.size());
