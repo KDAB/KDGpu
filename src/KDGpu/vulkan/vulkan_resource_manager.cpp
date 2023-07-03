@@ -217,6 +217,31 @@ VulkanInstance *VulkanResourceManager::getInstance(const Handle<Instance_t> &han
     return m_instances.get(handle);
 }
 
+std::vector<Extension> VulkanResourceManager::getInstanceExtensions() const
+{
+    uint32_t extensionCount{ 0 };
+    if (vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr) != VK_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Unable to enumerate instance extensions");
+        return {};
+    }
+
+    std::vector<VkExtensionProperties> vkExtensions(extensionCount);
+    if (vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, vkExtensions.data()) != VK_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Unable to query instance extensions");
+        return {};
+    }
+
+    std::vector<Extension> extensions;
+    extensions.reserve(extensionCount);
+    for (const auto &vkExtension : vkExtensions) {
+        extensions.emplace_back(Extension{
+                .name = vkExtension.extensionName,
+                .version = vkExtension.specVersion });
+    }
+
+    return extensions;
+}
+
 Handle<Adapter_t> VulkanResourceManager::insertAdapter(const VulkanAdapter &physicalDevice)
 {
     return m_adapters.emplace(physicalDevice);

@@ -60,6 +60,7 @@ public:
     Handle<Instance_t> createInstanceFromExistingVkInstance(VkInstance vkInstance);
     void deleteInstance(const Handle<Instance_t> &handle) final;
     VulkanInstance *getInstance(const Handle<Instance_t> &handle) const final;
+    std::vector<Extension> getInstanceExtensions() const;
 
     Handle<Adapter_t> insertAdapter(const VulkanAdapter &vulkanAdapter);
     void removeAdapter(const Handle<Adapter_t> &handle) final;

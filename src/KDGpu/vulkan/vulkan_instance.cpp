@@ -39,27 +39,7 @@ VulkanInstance::VulkanInstance(VulkanResourceManager *_vulkanResourceManager, Vk
 
 std::vector<Extension> VulkanInstance::extensions() const
 {
-    uint32_t extensionCount{ 0 };
-    if (vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr) != VK_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Unable to enumerate instance extensions");
-        return {};
-    }
-
-    std::vector<VkExtensionProperties> vkExtensions(extensionCount);
-    if (vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, vkExtensions.data()) != VK_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Unable to query instance extensions");
-        return {};
-    }
-
-    std::vector<Extension> extensions;
-    extensions.reserve(extensionCount);
-    for (const auto &vkExtension : vkExtensions) {
-        extensions.emplace_back(Extension{
-                .name = vkExtension.extensionName,
-                .version = vkExtension.specVersion });
-    }
-
-    return extensions;
+    return vulkanResourceManager->getInstanceExtensions();
 }
 
 std::vector<Handle<Adapter_t>> VulkanInstance::queryAdapters(const Handle<Instance_t> &instanceHandle)
