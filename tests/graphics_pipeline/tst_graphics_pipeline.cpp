@@ -14,6 +14,8 @@
 #include <KDGpu/instance.h>
 #include <KDGpu/vulkan/vulkan_graphics_api.h>
 
+#include <array>
+
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest.h>
 
@@ -28,6 +30,28 @@ inline std::string assetPath()
     return "";
 #endif
 }
+
+Format selectDepthFormat(Adapter *adapter)
+{
+    // Choose a depth format from the ones supported
+    constexpr std::array<Format, 5> preferredDepthFormat = {
+        Format::D24_UNORM_S8_UINT,
+        Format::D16_UNORM_S8_UINT,
+        Format::D32_SFLOAT_S8_UINT,
+        Format::D16_UNORM,
+        Format::D32_SFLOAT
+    };
+
+    for (const auto &depthFormat : preferredDepthFormat) {
+        const FormatProperties formatProperties = adapter->formatProperties(depthFormat);
+        if (formatProperties.optimalTilingFeatures & FormatFeatureFlagBit::DepthStencilAttachmentBit) {
+            return depthFormat;
+        }
+    }
+
+    return Format::UNDEFINED;
+}
+
 } // namespace
 
 TEST_SUITE("GraphicsPipeline")
@@ -36,8 +60,8 @@ TEST_SUITE("GraphicsPipeline")
     Instance instance = api->createInstance(InstanceOptions{
             .applicationName = "GraphicsPipeline",
             .applicationVersion = SERENITY_MAKE_API_VERSION(0, 1, 0, 0) });
-    Adapter *discreteGPUAdapter = instance.selectAdapter(AdapterDeviceType::Default);
-    Device device = discreteGPUAdapter->createDevice();
+    Adapter *adapter = instance.selectAdapter(AdapterDeviceType::Default);
+    Device device = adapter->createDevice();
 
     const auto vertexShaderPath = assetPath() + "/shaders/tests/graphics_pipeline/triangle.vert.spv";
     auto vertexShader = device.createShaderModule(KDGpu::readShaderFile(vertexShaderPath));
@@ -64,6 +88,8 @@ TEST_SUITE("GraphicsPipeline")
             // GIVEN
             PipelineLayoutOptions pipelineLayoutOptions{};
             PipelineLayout pipelineLayout = device.createPipelineLayout(pipelineLayoutOptions);
+            const Format depthFormat = selectDepthFormat(adapter);
+            REQUIRE(depthFormat != Format::UNDEFINED);
 
             // clang-format off
             GraphicsPipelineOptions pipelineOptions = {
@@ -85,7 +111,7 @@ TEST_SUITE("GraphicsPipeline")
                     { .format = Format::R8G8B8A8_UNORM }
                 },
                 .depthStencil = {
-                    .format = Format::D24_UNORM_S8_UINT,
+                    .format = depthFormat,
                     .depthWritesEnabled = true,
                     .depthCompareOperation = CompareOperation::Less
                 }
@@ -105,6 +131,8 @@ TEST_SUITE("GraphicsPipeline")
         // GIVEN
         PipelineLayoutOptions pipelineLayoutOptions{};
         PipelineLayout pipelineLayout = device.createPipelineLayout(pipelineLayoutOptions);
+        const Format depthFormat = selectDepthFormat(adapter);
+        REQUIRE(depthFormat != Format::UNDEFINED);
 
         // clang-format off
             GraphicsPipelineOptions pipelineOptions = {
@@ -126,7 +154,7 @@ TEST_SUITE("GraphicsPipeline")
                     { .format = Format::R8G8B8A8_UNORM }
                 },
                 .depthStencil = {
-                    .format = Format::D24_UNORM_S8_UINT,
+                    .format = depthFormat,
                     .depthWritesEnabled = true,
                     .depthCompareOperation = CompareOperation::Less
                 }
@@ -189,6 +217,8 @@ TEST_SUITE("GraphicsPipeline")
             // GIVEN
             PipelineLayoutOptions pipelineLayoutOptions{};
             PipelineLayout pipelineLayout = device.createPipelineLayout(pipelineLayoutOptions);
+            const Format depthFormat = selectDepthFormat(adapter);
+            REQUIRE(depthFormat != Format::UNDEFINED);
 
             // clang-format off
             GraphicsPipelineOptions pipelineOptions = {
@@ -210,7 +240,7 @@ TEST_SUITE("GraphicsPipeline")
                     { .format = Format::R8G8B8A8_UNORM }
                 },
                 .depthStencil = {
-                    .format = Format::D24_UNORM_S8_UINT,
+                    .format = depthFormat,
                     .depthWritesEnabled = true,
                     .depthCompareOperation = CompareOperation::Less
                 }
