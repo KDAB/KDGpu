@@ -243,14 +243,14 @@ VulkanInstance *VulkanResourceManager::getInstance(const Handle<Instance_t> &han
 std::vector<Extension> VulkanResourceManager::getInstanceExtensions() const
 {
     uint32_t extensionCount{ 0 };
-    if (vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr) != VK_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Unable to enumerate instance extensions");
+    if (auto result = vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr); result != VK_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Unable to enumerate instance extensions: {}", getResultAsString(result));
         return {};
     }
 
     std::vector<VkExtensionProperties> vkExtensions(extensionCount);
-    if (vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, vkExtensions.data()) != VK_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Unable to query instance extensions");
+    if (auto result = vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, vkExtensions.data()); result != VK_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Unable to query instance extensions: {}", getResultAsString(result));
         return {};
     }
 
@@ -522,7 +522,7 @@ Handle<Swapchain_t> VulkanResourceManager::createSwapchain(const Handle<Device_t
     VkSwapchainKHR vkSwapchain{ VK_NULL_HANDLE };
     const VkResult result = vkCreateSwapchainKHR(vulkanDevice->device, &createInfo, nullptr, &vkSwapchain);
     if (result != VK_SUCCESS) {
-        SPDLOG_LOGGER_WARN(Logger::logger(), "Error creating swapchain {}", static_cast<uint32_t>(result));
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating swapchain: {}", getResultAsString(result));
         return {};
     }
 
@@ -615,8 +615,10 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
     VkImage vkImage;
     VmaAllocation vmaAllocation;
 
-    if (vmaCreateImage(vulkanDevice->allocator, &createInfo, &allocInfo, &vkImage, &vmaAllocation, nullptr) != VK_SUCCESS)
+    if (auto result = vmaCreateImage(vulkanDevice->allocator, &createInfo, &allocInfo, &vkImage, &vmaAllocation, nullptr); result != VK_SUCCESS) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating image: {}", getResultAsString(result));
         return {};
+    }
 
     const auto vulkanTextureHandle = m_textures.emplace(VulkanTexture(
             vkImage,
@@ -688,8 +690,10 @@ Handle<TextureView_t> VulkanResourceManager::createTextureView(const Handle<Devi
     }
 
     VkImageView imageView;
-    if (vkCreateImageView(vulkanDevice->device, &createInfo, nullptr, &imageView) != VK_SUCCESS)
+    if (auto result = vkCreateImageView(vulkanDevice->device, &createInfo, nullptr, &imageView); result != VK_SUCCESS) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating image view: {}", getResultAsString(result));
         return {};
+    }
 
     const auto vulkanTextureViewHandle = m_textureViews.emplace(VulkanTextureView(imageView, textureHandle, deviceHandle));
     return vulkanTextureViewHandle;
@@ -728,8 +732,10 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
 
     VkBuffer vkBuffer;
     VmaAllocation vmaAllocation;
-    if (vmaCreateBuffer(vulkanDevice->allocator, &createInfo, &allocInfo, &vkBuffer, &vmaAllocation, nullptr) != VK_SUCCESS)
+    if (auto result = vmaCreateBuffer(vulkanDevice->allocator, &createInfo, &allocInfo, &vkBuffer, &vmaAllocation, nullptr); result != VK_SUCCESS) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating buffer: {}", getResultAsString(result));
         return {};
+    }
 
     const auto vulkanBufferHandle = m_buffers.emplace(VulkanBuffer(vkBuffer, vmaAllocation, this, deviceHandle));
 
@@ -768,8 +774,10 @@ Handle<ShaderModule_t> VulkanResourceManager::createShaderModule(const Handle<De
     createInfo.pCode = code.data();
 
     VkShaderModule vkShaderModule;
-    if (vkCreateShaderModule(vulkanDevice->device, &createInfo, nullptr, &vkShaderModule) != VK_SUCCESS)
+    if (auto result = vkCreateShaderModule(vulkanDevice->device, &createInfo, nullptr, &vkShaderModule); result != VK_SUCCESS) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating shader module: {}", getResultAsString(result));
         return {};
+    }
 
     const auto vulkanShaderModuleHandle = m_shaderModules.emplace(vkShaderModule, this, deviceHandle);
     return vulkanShaderModuleHandle;
@@ -832,8 +840,8 @@ Handle<PipelineLayout_t> VulkanResourceManager::createPipelineLayout(const Handl
     createInfo.pPushConstantRanges = vkPushConstantRanges.data();
 
     VkPipelineLayout vkPipelineLayout{ VK_NULL_HANDLE };
-    if (vkCreatePipelineLayout(vulkanDevice->device, &createInfo, nullptr, &vkPipelineLayout) != VK_SUCCESS) {
-        // TODO: Log problem
+    if (auto result = vkCreatePipelineLayout(vulkanDevice->device, &createInfo, nullptr, &vkPipelineLayout); result != VK_SUCCESS) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating pipeline layout: {}", getResultAsString(result));
         return {};
     }
 
@@ -1173,8 +1181,8 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
             renderPassInfo.pNext = &multiViewCreateInfo;
         }
 
-        if (vkCreateRenderPass(vulkanDevice->device, &renderPassInfo, nullptr, &vkRenderPass) != VK_SUCCESS) {
-            // TODO: Log failure to create a render pass
+        if (auto result = vkCreateRenderPass(vulkanDevice->device, &renderPassInfo, nullptr, &vkRenderPass); result != VK_SUCCESS) {
+            SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating render pass: {}", getResultAsString(result));
             return {};
         }
     }
@@ -1200,8 +1208,8 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     pipelineInfo.subpass = 0;
 
     VkPipeline vkPipeline{ VK_NULL_HANDLE };
-    if (vkCreateGraphicsPipelines(vulkanDevice->device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &vkPipeline) != VK_SUCCESS) {
-        // TODO: Log failure to create a pipeline
+    if (auto result = vkCreateGraphicsPipelines(vulkanDevice->device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &vkPipeline); result != VK_SUCCESS) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating graphics pipeline: {}", getResultAsString(result));
         return {};
     }
 
@@ -1262,7 +1270,8 @@ Handle<ComputePipeline_t> VulkanResourceManager::createComputePipeline(const Han
 
     VkPipeline vkPipeline{ VK_NULL_HANDLE };
 
-    if (vkCreateComputePipelines(vulkanDevice->device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &vkPipeline) != VK_SUCCESS) {
+    if (auto result = vkCreateComputePipelines(vulkanDevice->device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &vkPipeline); result != VK_SUCCESS) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating compute pipeline: {}", getResultAsString(result));
         return {};
     }
 
@@ -1298,8 +1307,8 @@ Handle<GpuSemaphore_t> VulkanResourceManager::createGpuSemaphore(const Handle<De
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
     VkSemaphore vkSemaphore{ VK_NULL_HANDLE };
-    if (vkCreateSemaphore(vulkanDevice->device, &semaphoreInfo, nullptr, &vkSemaphore) != VK_SUCCESS) {
-        // TODO: Log failure to create a pipeline
+    if (auto result = vkCreateSemaphore(vulkanDevice->device, &semaphoreInfo, nullptr, &vkSemaphore); result != VK_SUCCESS) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating semaphore: {}", getResultAsString(result));
         return {};
     }
 
@@ -1367,8 +1376,8 @@ Handle<CommandRecorder_t> VulkanResourceManager::createCommandRecorder(const Han
         poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
         VkCommandPool vkCommandPool = VK_NULL_HANDLE;
-        if (vkCreateCommandPool(vulkanDevice->device, &poolInfo, nullptr, &vkCommandPool) != VK_SUCCESS) {
-            // TODO: Log that we failed to create a command pool for this queue family
+        if (auto result = vkCreateCommandPool(vulkanDevice->device, &poolInfo, nullptr, &vkCommandPool); result != VK_SUCCESS) {
+            SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating command pool for queue family {}: {}", queueTypeIndex, getResultAsString(result));
             return {};
         }
         vulkanDevice->commandPools[queueTypeIndex] = vkCommandPool;
@@ -1418,8 +1427,8 @@ Handle<CommandBuffer_t> VulkanResourceManager::createCommandBuffer(const Handle<
     allocInfo.commandBufferCount = 1U;
 
     VkCommandBuffer vkCommandBuffer{ VK_NULL_HANDLE };
-    if (vkAllocateCommandBuffers(vulkanDevice->device, &allocInfo, &vkCommandBuffer) != VK_SUCCESS) {
-        // TODO: Log failure to allocate a command buffer
+    if (auto result = vkAllocateCommandBuffers(vulkanDevice->device, &allocInfo, &vkCommandBuffer); result != VK_SUCCESS) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating allocating command buffers: {}", getResultAsString(result));
         return {};
     }
 
@@ -1773,8 +1782,8 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
     }
 
     VkRenderPass vkRenderPass{ VK_NULL_HANDLE };
-    if (vkCreateRenderPass(vulkanDevice->device, &renderPassInfo, nullptr, &vkRenderPass) != VK_SUCCESS) {
-        // TODO: Log failure to create a render pass
+    if (auto result = vkCreateRenderPass(vulkanDevice->device, &renderPassInfo, nullptr, &vkRenderPass); result != VK_SUCCESS) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating render pass: {}", getResultAsString(result));
         return {};
     }
 
@@ -1819,8 +1828,8 @@ Handle<Framebuffer_t> VulkanResourceManager::createFramebuffer(const Handle<Devi
     framebufferInfo.layers = frameBufferKey.layers;
 
     VkFramebuffer vkFramebuffer{ VK_NULL_HANDLE };
-    if (vkCreateFramebuffer(vulkanDevice->device, &framebufferInfo, nullptr, &vkFramebuffer) != VK_SUCCESS) {
-        // TODO: Log failure to create a framebuffer
+    if (auto result = vkCreateFramebuffer(vulkanDevice->device, &framebufferInfo, nullptr, &vkFramebuffer); result != VK_SUCCESS) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating framebuffer: {}", getResultAsString(result));
         return {};
     }
 
@@ -1852,9 +1861,11 @@ Handle<BindGroup_t> VulkanResourceManager::createBindGroup(const Handle<Device_t
         poolInfo.maxSets = 1024;
         poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 
-        const VkResult result = vkCreateDescriptorPool(device, &poolInfo, nullptr, &pool);
-        if (result != VK_SUCCESS)
+        if (auto result = vkCreateDescriptorPool(device, &poolInfo, nullptr, &pool); result != VK_SUCCESS) {
+            SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating descriptor pool: {}", getResultAsString(result));
             return static_cast<VkDescriptorPool>(VK_NULL_HANDLE);
+        }
+
         return pool;
     };
 
@@ -1887,8 +1898,10 @@ Handle<BindGroup_t> VulkanResourceManager::createBindGroup(const Handle<Device_t
         result = allocateDescriptorSet(vulkanDevice->device, vulkanDevice->descriptorSetPools.back(),
                                        bindGroupLayout, descriptorSet);
     }
-    if (result != VK_SUCCESS)
+    if (result != VK_SUCCESS) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when allocating descriptor set: {}", getResultAsString(result));
         return {};
+    }
 
     const auto vulkanBindGroupHandle = m_bindGroups.emplace(VulkanBindGroup(descriptorSet, vulkanDevice->descriptorSetPools.back(), this, deviceHandle));
     auto vulkanBindGroup = m_bindGroups.get(vulkanBindGroupHandle);
@@ -1944,9 +1957,8 @@ Handle<BindGroupLayout_t> VulkanResourceManager::createBindGroupLayout(const Han
     createInfo.pBindings = vkBindingLayouts.data();
 
     VkDescriptorSetLayout vkDescriptorSetLayout{ VK_NULL_HANDLE };
-    if (vkCreateDescriptorSetLayout(vulkanDevice->device, &createInfo, nullptr, &vkDescriptorSetLayout) != VK_SUCCESS) {
-        // TODO: Log problem
-        // SPDLOG_LOGGER_WARN(Logger::logger(), "Failed to create DescriptorSetLayout");
+    if (auto result = vkCreateDescriptorSetLayout(vulkanDevice->device, &createInfo, nullptr, &vkDescriptorSetLayout); result != VK_SUCCESS) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating pipeline layout: {}", getResultAsString(result));
     }
 
     const auto vulkanBindGroupLayoutHandle = m_bindGroupLayouts.emplace(VulkanBindGroupLayout(vkDescriptorSetLayout, deviceHandle));
@@ -1998,8 +2010,10 @@ Handle<Sampler_t> VulkanResourceManager::createSampler(const Handle<Device_t> &d
     samplerInfo.unnormalizedCoordinates = !options.normalizedCoordinates;
 
     VkSampler sampler{ VK_NULL_HANDLE };
-    if (vkCreateSampler(vulkanDevice->device, &samplerInfo, nullptr, &sampler) != VK_SUCCESS)
+    if (auto result = vkCreateSampler(vulkanDevice->device, &samplerInfo, nullptr, &sampler); result != VK_SUCCESS) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating sampler: {}", getResultAsString(result));
         return {};
+    }
 
     auto samplerHandle = m_samplers.emplace(VulkanSampler(sampler, deviceHandle));
     return samplerHandle;
@@ -2030,8 +2044,10 @@ Handle<Fence_t> VulkanResourceManager::createFence(const Handle<Device_t> &devic
         fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
     VkFence fence{ VK_NULL_HANDLE };
-    if (vkCreateFence(vulkanDevice->device, &fenceInfo, nullptr, &fence) != VK_SUCCESS)
+    if (auto result = vkCreateFence(vulkanDevice->device, &fenceInfo, nullptr, &fence); result != VK_SUCCESS) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating fence: {}", getResultAsString(result));
         return {};
+    }
 
     auto fenceHandle = m_fences.emplace(VulkanFence(fence, this, deviceHandle));
     return fenceHandle;
