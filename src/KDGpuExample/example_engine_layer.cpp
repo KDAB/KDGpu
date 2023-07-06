@@ -43,10 +43,13 @@ ExampleEngineLayer::~ExampleEngineLayer()
 
 void ExampleEngineLayer::recreateSwapChain()
 {
+    const AdapterSwapchainProperties swapchainProperties = m_device.adapter()->swapchainProperties(m_surface);
+
     // Create a swapchain of images that we will render to.
     SwapchainOptions swapchainOptions = {
         .surface = m_surface,
         .format = m_swapchainFormat,
+        .minImageCount = getSuitableImageCount(swapchainProperties.capabilities),
         .imageExtent = { .width = m_window->width(), .height = m_window->height() },
         .presentMode = m_presentMode,
         .oldSwapchain = m_swapchain,

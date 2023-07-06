@@ -167,9 +167,12 @@ int main()
     Format depthTextureFormat;
 
     auto createSwapchain = [&] {
+        const AdapterSwapchainProperties swapchainProperties = device.adapter()->swapchainProperties(surface);
+
         // Create a swapchain of images that we will render to.
         const SwapchainOptions swapchainOptions = {
             .surface = surface.handle(),
+            .minImageCount = getSuitableImageCount(swapchainProperties.capabilities),
             .imageExtent = { .width = window.width(), .height = window.height() },
             .oldSwapchain = swapchain,
         };

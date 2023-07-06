@@ -38,6 +38,18 @@ struct SurfaceCapabilities {
 };
 
 /**
+    @brief Returns a suitable image count for a given surface, which can be used for minImageCount in SwapchainOptions.
+ */
+inline uint32_t getSuitableImageCount(const SurfaceCapabilities &capabilities)
+{
+    if (capabilities.maxImageCount != 0) {
+        return std::min(capabilities.minImageCount + 1, capabilities.maxImageCount);
+    } else {
+        return capabilities.minImageCount + 1;
+    }
+}
+
+/**
     @headerfile adapter_swapchain_properties.h <KDGpu/adapter_swapchain_properties.h>
  */
 inline std::string surfaceCapabilitiesToString(const SurfaceCapabilities &capabilities)
