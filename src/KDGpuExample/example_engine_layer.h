@@ -59,7 +59,7 @@ constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;
 class KDGPUEXAMPLE_EXPORT ExampleEngineLayer : public EngineLayer
 {
 public:
-    ExampleEngineLayer(const SampleCountFlagBits samples = SampleCountFlagBits::Samples1Bit);
+    ExampleEngineLayer();
     ~ExampleEngineLayer() override;
 
     KDGpuKDGui::View *window() { return m_window.get(); }
@@ -75,6 +75,7 @@ protected:
     virtual void renderImGuiOverlay(RenderPassCommandRecorder *recorder, uint32_t inFlightIndex = 0);
     void registerImGuiOverlayDrawFunction(const std::function<void(ImGuiContext *)> &func);
     void clearImGuiOverlayDrawFunctions();
+    void recreateImGuiOverlay();
 
     void onAttached() override;
     void onDetached() override;
@@ -82,6 +83,8 @@ protected:
     void event(KDFoundation::EventReceiver *target, KDFoundation::Event *ev) override;
 
     virtual void recreateSwapChain();
+    void recreateDepthTexture();
+    void recreateSampleDependentResources();
 
     void uploadBufferData(const BufferUploadOptions &options);
     void uploadTextureData(const TextureUploadOptions &options);
@@ -91,7 +94,8 @@ protected:
     std::unique_ptr<GraphicsApi> m_api;
     std::unique_ptr<KDGpuKDGui::View> m_window;
 
-    const SampleCountFlagBits m_samples{ SampleCountFlagBits::Samples1Bit };
+    KDBindings::Property<SampleCountFlagBits> m_samples{ SampleCountFlagBits::Samples1Bit };
+    std::vector<SampleCountFlagBits> m_supportedSampleCounts;
     Instance m_instance;
     Surface m_surface;
     Device m_device;

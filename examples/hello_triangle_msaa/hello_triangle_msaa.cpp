@@ -9,6 +9,7 @@
 */
 
 #include "hello_triangle_msaa.h"
+#include <imgui.h>
 
 #include <KDGpuExample/engine.h>
 #include <KDGpuExample/kdgpuexample.h>
@@ -39,7 +40,7 @@ inline std::string assetPath()
 } // namespace KDGpu
 
 HelloTriangleMSAA::HelloTriangleMSAA()
-    : SimpleExampleEngineLayer(SampleCountFlagBits::Samples8Bit)
+    : SimpleExampleEngineLayer()
 {
 }
 
@@ -118,9 +119,9 @@ void HelloTriangleMSAA::initializeScene()
         m_transformBuffer.unmap();
     }
 
-    // Create a multisample texture into which we will render. The pipeline will then resolve the
-    // multi-sampled texture into the current swapchain image.
-    createRenderTarget();
+    registerImGuiOverlayDrawFunction([this](ImGuiContext *ctx) {
+        drawMsaaSettings(ctx);
+    });
 
     // Create a vertex shader and fragment shader
     const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_triangle_msaa/hello_triangle.vert.spv";
@@ -149,7 +150,8 @@ void HelloTriangleMSAA::initializeScene()
 
     // Create a pipeline
     // clang-format off
-    const GraphicsPipelineOptions pipelineOptions = {
+    auto mkPipelineOptions = [&](SampleCountFlagBits samples) -> GraphicsPipelineOptions {
+        return {
         .shaderStages = {
             { .shaderModule = vertexShader, .stage = ShaderStageFlagBits::VertexBit },
             { .shaderModule = fragmentShader, .stage = ShaderStageFlagBits::FragmentBit }
@@ -174,12 +176,18 @@ void HelloTriangleMSAA::initializeScene()
         },
         //![3]
         .multisample = {
-            .samples = m_samples
+            .samples = samples
         }
         //![3]
+        };
     };
     // clang-format on
-    m_pipeline = m_device.createGraphicsPipeline(pipelineOptions);
+
+    // create pipelines for all supported sample counts. m_supportedSampleCounts
+    // is populated by KDGpu::ExampleEngineLayer.
+    for (auto sampleCount : m_supportedSampleCounts) {
+        m_pipelines.push_back(m_device.createGraphicsPipeline(mkPipelineOptions(sampleCount)));
+    }
 
     // Create a bindGroup to hold the UBO with the transform
     // clang-format off
@@ -193,12 +201,17 @@ void HelloTriangleMSAA::initializeScene()
     // clang-format on
     m_transformBindGroup = m_device.createBindGroup(bindGroupOptions);
 
+    // initialize pipeline, UI variable, and samples to all be the maximum supported MSAA level
+    m_samples = m_supportedSampleCounts.back();
+    m_requestedSampleCountIndex = m_supportedSampleCounts.size() - 1;
+    m_currentPipelineIndex = m_requestedSampleCountIndex;
+
     // Most of the render pass is the same between frames. The only thing that changes, is which image
     // of the swapchain we wish to render to. So set up what we can here, and in the render loop we will
     // just update the color texture view.
     // clang-format off
     //![2]
-    m_opaquePassOptions = {
+    m_commandRecorderOptions = {
         .colorAttachments = {
             {
                 .view = m_msaaTextureView, // The multisampled view which will change on resize.
@@ -211,15 +224,18 @@ void HelloTriangleMSAA::initializeScene()
             .view = m_depthTextureView,
         },
         // configure for multisampling
-        .samples = m_samples
+        .samples = m_samples.get()
     };
     //![2]
     // clang-format on
+
+    // Create a multisample texture into which we will render. The pipeline will then resolve the
+    // multi-sampled texture into the current swapchain image.
+    createRenderTarget();
 }
 
 void HelloTriangleMSAA::cleanupScene()
 {
-    m_pipeline = {};
     m_pipelineLayout = {};
     m_msaaTextureView = {};
     m_msaaTexture = {};
@@ -228,6 +244,7 @@ void HelloTriangleMSAA::cleanupScene()
     m_transformBindGroup = {};
     m_transformBuffer = {};
     m_commandBuffer = {};
+    m_pipelines.clear();
 }
 
 void HelloTriangleMSAA::updateScene()
@@ -246,45 +263,131 @@ void HelloTriangleMSAA::updateScene()
     auto bufferData = m_transformBuffer.map();
     std::memcpy(bufferData, &m_transform, sizeof(glm::mat4));
     m_transformBuffer.unmap();
+
+    auto requested = m_supportedSampleCounts[m_requestedSampleCountIndex];
+    if (requested != m_samples.get())
+        setMsaaSampleCount(requested);
 }
 
 void HelloTriangleMSAA::resize()
 {
     // Recreate the msaa render target texture
     createRenderTarget();
-
-    // Swapchain might have been resized and texture views recreated. Ensure we update the PassOptions accordingly
-    m_opaquePassOptions.colorAttachments[0].view = m_msaaTextureView;
-    m_opaquePassOptions.depthStencilAttachment.view = m_depthTextureView;
 }
 //![4]
 void HelloTriangleMSAA::createRenderTarget()
 {
+    // Reset depthTextureView as depthStencilAttachment view as it might
+    // have been recreated following a resize
+    m_commandRecorderOptions.depthStencilAttachment.view = m_depthTextureView;
+
     const TextureOptions options = {
         .type = TextureType::TextureType2D,
         .format = m_swapchainFormat,
         .extent = { .width = m_window->width(), .height = m_window->height(), .depth = 1 },
         .mipLevels = 1,
-        .samples = m_samples,
+        .samples = m_samples.get(),
         .usage = TextureUsageFlagBits::ColorAttachmentBit,
         .memoryUsage = MemoryUsage::GpuOnly,
         .initialLayout = TextureLayout::Undefined
     };
     m_msaaTexture = m_device.createTexture(options);
     m_msaaTextureView = m_msaaTexture.createView();
+
+    if (isMsaaEnabled())
+        m_commandRecorderOptions.colorAttachments[0].view = m_msaaTextureView;
 }
+
+bool HelloTriangleMSAA::isMsaaEnabled() const
+{
+    return m_samples.get() != SampleCountFlagBits::Samples1Bit;
+}
+
+void HelloTriangleMSAA::setMsaaSampleCount(SampleCountFlagBits samples)
+{
+    if (samples == m_samples.get())
+        return;
+
+    // get new pipeline
+    for (size_t i = 0; i < m_supportedSampleCounts.size(); ++i) {
+        if (m_supportedSampleCounts[i] == samples) {
+            m_currentPipelineIndex = i;
+            break;
+        }
+    }
+
+    // the ExampleEngineLayer will recreate the depth view when we do this
+    m_samples = samples;
+
+    // we must also refresh the view(s) we handle, and reattach them
+    createRenderTarget();
+
+    // update the samples option that will configure the render pass
+    m_commandRecorderOptions.samples = samples;
+}
+
+void HelloTriangleMSAA::drawMsaaSettings(ImGuiContext *ctx)
+{
+    constexpr ImVec2 winOffset(200, 150);
+    constexpr ImVec2 buttonSize(120, 40);
+    constexpr size_t maxMessageLen = 40;
+
+    ImGui::SetCurrentContext(ctx);
+    ImGui::SetNextWindowPos(ImVec2((float)m_window->width() - winOffset.x, winOffset.y));
+    ImGui::SetNextWindowSize(ImVec2(0, 0), ImGuiCond_FirstUseEver);
+    ImGui::Begin(
+            "Controls",
+            nullptr,
+            ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize);
+
+    auto getButtonLabel = [](SampleCountFlagBits samples) -> const char * {
+        switch (samples) {
+        case SampleCountFlagBits::Samples1Bit:
+            return "No MSAA";
+        case SampleCountFlagBits::Samples2Bit:
+            return "2x MSAA";
+        case SampleCountFlagBits::Samples4Bit:
+            return "4x MSAA";
+        case SampleCountFlagBits::Samples8Bit:
+            return "8x MSAA";
+        case SampleCountFlagBits::Samples16Bit:
+            return "16x MSAA";
+        case SampleCountFlagBits::Samples32Bit:
+            return "32x MSAA";
+        case SampleCountFlagBits::Samples64Bit:
+            return "64x MSAA";
+        default:
+            return "Unknown";
+        }
+    };
+
+    int selectedIndex = m_requestedSampleCountIndex;
+    for (int i = 0; i < m_supportedSampleCounts.size(); ++i) {
+        ImGui::RadioButton(getButtonLabel(m_supportedSampleCounts[i]), &selectedIndex, i);
+    }
+
+    // so we can deal with it in updateScene
+    m_requestedSampleCountIndex = selectedIndex;
+
+    ImGui::End();
+}
+
 //![4]
 void HelloTriangleMSAA::render()
 {
+    if (isMsaaEnabled()) {
+        //![1]
+        // When using MSAA, we update the resolveView instead of the view
+        m_commandRecorderOptions.colorAttachments[0].resolveView = m_swapchainViews.at(m_currentSwapchainImageIndex);
+        //![1]
+    } else {
+        m_commandRecorderOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex);
+    }
+
     auto commandRecorder = m_device.createCommandRecorder();
+    auto opaquePass = commandRecorder.beginRenderPass(m_commandRecorderOptions);
 
-    //![1]
-    // We now update the resolveView instead of the view
-    m_opaquePassOptions.colorAttachments[0].resolveView = m_swapchainViews.at(m_currentSwapchainImageIndex);
-    //![1]
-    auto opaquePass = commandRecorder.beginRenderPass(m_opaquePassOptions);
-
-    opaquePass.setPipeline(m_pipeline);
+    opaquePass.setPipeline(m_pipelines[m_currentPipelineIndex]);
     opaquePass.setVertexBuffer(0, m_buffer);
     opaquePass.setIndexBuffer(m_indexBuffer);
     opaquePass.setBindGroup(0, m_transformBindGroup);

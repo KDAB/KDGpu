@@ -27,14 +27,15 @@
 
 namespace KDGpuExample {
 
-ExampleEngineLayer::ExampleEngineLayer(const SampleCountFlagBits samples)
+ExampleEngineLayer::ExampleEngineLayer()
     : EngineLayer()
     , m_api(std::make_unique<VulkanGraphicsApi>())
-    , m_samples(samples)
 {
     m_logger = spdlog::get("engine");
     if (!m_logger)
         m_logger = spdlog::stdout_color_mt("engine");
+
+    m_samples.valueChanged().connect([this]() { recreateSampleDependentResources(); });
 }
 
 ExampleEngineLayer::~ExampleEngineLayer()
@@ -68,20 +69,36 @@ void ExampleEngineLayer::recreateSwapChain()
         m_swapchainViews.push_back(std::move(view));
     }
 
+    recreateDepthTexture();
+
+    m_capabilitiesString = surfaceCapabilitiesToString(m_device.adapter()->swapchainProperties(m_surface).capabilities);
+}
+
+void ExampleEngineLayer::recreateDepthTexture()
+{
     // Create a depth texture to use for depth-correct rendering
     TextureOptions depthTextureOptions = {
         .type = TextureType::TextureType2D,
         .format = m_depthFormat,
         .extent = { m_window->width(), m_window->height(), 1 },
         .mipLevels = 1,
-        .samples = m_samples,
+        .samples = m_samples.get(),
         .usage = TextureUsageFlagBits::DepthStencilAttachmentBit | m_depthTextureUsageFlags,
         .memoryUsage = MemoryUsage::GpuOnly
     };
     m_depthTexture = m_device.createTexture(depthTextureOptions);
     m_depthTextureView = m_depthTexture.createView();
+}
 
-    m_capabilitiesString = surfaceCapabilitiesToString(m_device.adapter()->swapchainProperties(m_surface).capabilities);
+void ExampleEngineLayer::recreateSampleDependentResources()
+{
+    // create the resources only if they exist already
+    if (m_imguiOverlay != nullptr) {
+        recreateImGuiOverlay();
+    }
+    if (m_depthTexture.isValid()) {
+        recreateDepthTexture();
+    }
 }
 
 void ExampleEngineLayer::uploadBufferData(const BufferUploadOptions &options)
@@ -103,6 +120,12 @@ void ExampleEngineLayer::releaseStagingBuffers()
     });
     if (removedCount)
         SPDLOG_LOGGER_INFO(m_logger, "Released {} staging buffers", removedCount);
+}
+
+void ExampleEngineLayer::recreateImGuiOverlay()
+{
+    m_imguiOverlay = std::make_unique<ImGuiItem>(&m_device, &m_queue);
+    m_imguiOverlay->initialize(m_samples.get(), m_swapchainFormat, m_depthFormat);
 }
 
 void ExampleEngineLayer::drawImGuiOverlay(ImGuiContext *ctx)
@@ -213,9 +236,28 @@ void ExampleEngineLayer::onAttached()
         m_renderCompleteSemaphores[i] = m_device.createGpuSemaphore();
     }
 
-    // Create the ImGui overlay item
-    m_imguiOverlay = std::make_unique<ImGuiItem>(&m_device, &m_queue);
-    m_imguiOverlay->initialize(m_samples, m_swapchainFormat, m_depthFormat);
+    constexpr std::array availableSampleCounts{
+        SampleCountFlagBits::Samples1Bit,
+        SampleCountFlagBits::Samples2Bit,
+        SampleCountFlagBits::Samples4Bit,
+        SampleCountFlagBits::Samples8Bit,
+        SampleCountFlagBits::Samples16Bit,
+        SampleCountFlagBits::Samples32Bit,
+        SampleCountFlagBits::Samples64Bit,
+    };
+
+    // get all of the supported sample counts for the hardware
+    {
+        auto supported = m_device.adapter()->properties().limits.framebufferColorSampleCounts.toInt();
+        assert(supported);
+
+        for (auto sample : availableSampleCounts) {
+            if (static_cast<int>(sample) & supported)
+                m_supportedSampleCounts.push_back(sample);
+        }
+    }
+
+    recreateImGuiOverlay();
 
     initializeScene();
 }

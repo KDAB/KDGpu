@@ -28,9 +28,8 @@ namespace KDGpuExample {
 class KDGPUEXAMPLE_EXPORT AdvancedExampleEngineLayer : public ExampleEngineLayer
 {
 public:
-    AdvancedExampleEngineLayer();
-    explicit AdvancedExampleEngineLayer(const SampleCountFlagBits samples);
-    ~AdvancedExampleEngineLayer() override;
+    AdvancedExampleEngineLayer() = default;
+    ~AdvancedExampleEngineLayer() override = default;
 
 protected:
     void onAttached() override;

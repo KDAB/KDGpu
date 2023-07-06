@@ -26,8 +26,7 @@ namespace KDGpuExample {
 class KDGPUEXAMPLE_EXPORT SimpleExampleEngineLayer : public ExampleEngineLayer
 {
 public:
-    SimpleExampleEngineLayer();
-    explicit SimpleExampleEngineLayer(SampleCountFlagBits samples);
+    SimpleExampleEngineLayer() = default;
     ~SimpleExampleEngineLayer() override;
 
 protected:

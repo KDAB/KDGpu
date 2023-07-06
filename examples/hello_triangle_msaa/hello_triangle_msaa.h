@@ -37,15 +37,22 @@ protected:
 
 private:
     void createRenderTarget();
+    bool isMsaaEnabled() const;
+    void drawMsaaSettings(ImGuiContext *);
+    void setMsaaSampleCount(SampleCountFlagBits samples);
 
     Buffer m_buffer;
     Buffer m_indexBuffer;
     Texture m_msaaTexture;
     TextureView m_msaaTextureView;
     PipelineLayout m_pipelineLayout;
-    GraphicsPipeline m_pipeline;
-    RenderPassCommandRecorderOptions m_opaquePassOptions;
+    RenderPassCommandRecorderOptions m_commandRecorderOptions;
     CommandBuffer m_commandBuffer;
+
+    std::vector<GraphicsPipeline> m_pipelines;
+
+    uint8_t m_requestedSampleCountIndex = 0;
+    uint8_t m_currentPipelineIndex = 0;
 
     glm::mat4 m_transform;
     Buffer m_transformBuffer;

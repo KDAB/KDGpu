@@ -20,16 +20,6 @@
 
 namespace KDGpuExample {
 
-SimpleExampleEngineLayer::SimpleExampleEngineLayer()
-    : ExampleEngineLayer()
-{
-}
-
-SimpleExampleEngineLayer::SimpleExampleEngineLayer(const SampleCountFlagBits samples)
-    : ExampleEngineLayer(samples)
-{
-}
-
 SimpleExampleEngineLayer::~SimpleExampleEngineLayer()
 {
 }

@@ -14,20 +14,6 @@
 
 namespace KDGpuExample {
 
-AdvancedExampleEngineLayer::AdvancedExampleEngineLayer()
-    : ExampleEngineLayer()
-{
-}
-
-AdvancedExampleEngineLayer::AdvancedExampleEngineLayer(const SampleCountFlagBits samples)
-    : ExampleEngineLayer(samples)
-{
-}
-
-AdvancedExampleEngineLayer::~AdvancedExampleEngineLayer()
-{
-}
-
 void AdvancedExampleEngineLayer::onAttached()
 {
     ExampleEngineLayer::onAttached();

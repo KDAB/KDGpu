@@ -178,7 +178,7 @@ void MultiViewStereo::recreateSwapChain()
         .extent = { m_window->width(), m_window->height(), 1 },
         .mipLevels = 1,
         .arrayLayers = 2,
-        .samples = m_samples,
+        .samples = m_samples.get(),
         .usage = TextureUsageFlagBits::DepthStencilAttachmentBit | m_depthTextureUsageFlags,
         .memoryUsage = MemoryUsage::GpuOnly
     };
