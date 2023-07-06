@@ -77,7 +77,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
     //
     // Ignore this false positive.
     const char *ignore = "VUID-VkSwapchainCreateInfoKHR-imageExtent-01274";
-    if (strcmp(ignore, pCallbackData->pMessageIdName) == 0)
+    if (pCallbackData->pMessageIdName != nullptr && strcmp(ignore, pCallbackData->pMessageIdName) == 0)
         return false;
 
     switch (messageSeverity) {
