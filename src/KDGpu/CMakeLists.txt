@@ -149,6 +149,7 @@ set(HEADERS
     vulkan/vulkan_device.h
     vulkan/vulkan_enums.h
     vulkan/vulkan_fence.h
+    vulkan/vulkan_formatters.h
     vulkan/vulkan_framebuffer.h
     vulkan/vulkan_gpu_semaphore.h
     vulkan/vulkan_graphics_api.h
