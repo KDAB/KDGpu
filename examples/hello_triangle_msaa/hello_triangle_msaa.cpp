@@ -65,7 +65,7 @@ void HelloTriangleMSAA::initializeScene()
         };
 
         const DeviceSize dataByteSize = vertexData.size() * sizeof(Vertex);
-        BufferOptions bufferOptions = {
+        const BufferOptions bufferOptions = {
             .size = dataByteSize,
             .usage = BufferUsageFlagBits::VertexBufferBit | BufferUsageFlagBits::TransferDstBit,
             .memoryUsage = MemoryUsage::GpuOnly
@@ -83,9 +83,9 @@ void HelloTriangleMSAA::initializeScene()
 
     // Create a buffer to hold the geometry index data
     {
-        std::array<uint32_t, 3> indexData = { 0, 1, 2 };
+        const std::array<uint32_t, 3> indexData = { 0, 1, 2 };
         const DeviceSize dataByteSize = indexData.size() * sizeof(uint32_t);
-        BufferOptions bufferOptions = {
+        const BufferOptions bufferOptions = {
             .size = dataByteSize,
             .usage = BufferUsageFlagBits::IndexBufferBit | BufferUsageFlagBits::TransferDstBit,
             .memoryUsage = MemoryUsage::GpuOnly
@@ -103,7 +103,7 @@ void HelloTriangleMSAA::initializeScene()
 
     // Create a buffer to hold the transformation matrix
     {
-        BufferOptions bufferOptions = {
+        const BufferOptions bufferOptions = {
             .size = sizeof(glm::mat4),
             .usage = BufferUsageFlagBits::UniformBufferBit,
             .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
@@ -134,7 +134,7 @@ void HelloTriangleMSAA::initializeScene()
         .bindings = {{
             .binding = 0,
             .resourceType = ResourceBindingType::UniformBuffer,
-            .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit)
+            .shaderStages = ShaderStageFlagBits::VertexBit
         }}
     };
     // clang-format on
@@ -148,7 +148,7 @@ void HelloTriangleMSAA::initializeScene()
 
     // Create a pipeline
     // clang-format off
-    GraphicsPipelineOptions pipelineOptions = {
+    const GraphicsPipelineOptions pipelineOptions = {
         .shaderStages = {
             { .shaderModule = vertexShader, .stage = ShaderStageFlagBits::VertexBit },
             { .shaderModule = fragmentShader, .stage = ShaderStageFlagBits::FragmentBit }
@@ -182,7 +182,7 @@ void HelloTriangleMSAA::initializeScene()
 
     // Create a bindGroup to hold the UBO with the transform
     // clang-format off
-    BindGroupOptions bindGroupOptions = {
+    const BindGroupOptions bindGroupOptions = {
         .layout = bindGroupLayout,
         .resources = {{
             .binding = 0,
