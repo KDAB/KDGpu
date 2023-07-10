@@ -32,6 +32,9 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/stb.cmake)
 # imgui (for 2D UI)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/imgui.cmake)
 
+# dxc (for shader compilation)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/dxc.cmake)
+
 if(TOYRENDERER_BUILD_TESTS)
     # doctest
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/doctest.cmake)

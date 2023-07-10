@@ -1,0 +1,26 @@
+/*
+  This file is part of KDGpu.
+
+  SPDX-FileCopyrightText: 2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+
+  SPDX-License-Identifier: MIT
+
+  Contact KDAB at <info@kdab.com> for commercial licensing options.
+*/
+
+/**
+    @page hello_triangle_hlsl Hello Triangle HLSL
+    @ingroup kdgpu-examples
+
+    @brief This example shows how to use HLSL shader that will be compiled with DXC.
+
+    This example showcases the minimal changes needed to use HLSL shaders instead of the usual GLSL. Read the [Hello Triangle](#hello_triangle) example to see the differences.
+
+    The main difference is to set the path in the hello_triangle_hlsl.cpp to the proper shader.
+
+       @snippet hello_triangle_hlsl/hello_triangle_hlsl.cpp 8
+
+    To compile the shaders, the shaders need to be added to the assets directory where, within the CMakeLists.txt file the shaders will automatically be compiled into Spir-V with the use of DXC when the code is compiled.
+
+      @snippet ../../cmake/CompileShader.cmake 1
+*/

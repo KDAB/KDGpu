@@ -50,3 +50,39 @@ function(CompileShaderSet target name)
         COMMENT "Target to compile a shader set"
     )
 endfunction()
+
+# Compile a shader using dxc
+function(CompileHLSLShader
+    target
+    shader
+    output
+    type
+)
+    add_custom_command(
+        OUTPUT ${output}
+        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${shader}
+        COMMAND ${DXC_EXECUTABLE} -Emain -T${type}_6_1 -Zi $<IF:$<CONFIG:DEBUG>,-Od,-O3> -spirv -Fo${output}
+                ${CMAKE_CURRENT_SOURCE_DIR}/${shader}
+        COMMENT "Compile shader using dxc"
+    )
+
+    add_custom_target(
+        ${target}
+        DEPENDS ${output}
+        COMMENT "Target to compile a shader"
+    )
+endfunction()
+
+# Compiles shader set using dxc
+function(CompileHLSLShaderSet target name)
+    # TODO: in future we probably want to check which shaders we have instead of assuming vert/frag
+    CompileHLSLShader(${target}VertexShader ${name}.ps.hlsl ${name}.ps.spv ps)
+    CompileHLSLShader(${target}FragmentShader ${name}.vs.hlsl ${name}.vs.spv vs)
+
+    # TODO: for now generate ALL, in future would be better to build on case by case
+    add_custom_target(
+        ${target}Shaders ALL
+        DEPENDS ${target}VertexShader ${target}FragmentShader
+        COMMENT "Target to compile a shader set using dxc"
+    )
+endfunction()
