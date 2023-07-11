@@ -117,6 +117,7 @@ struct PrimitiveOptions {
     PolygonMode polygonMode{ PolygonMode::Fill };
     uint32_t patchControlPoints{ 0 };
     DepthBiasOptions depthBias{};
+    float lineWidth{ 1.0f };
 
     friend bool operator==(const PrimitiveOptions &, const PrimitiveOptions &) = default;
 };

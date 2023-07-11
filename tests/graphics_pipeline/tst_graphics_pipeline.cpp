@@ -61,7 +61,7 @@ TEST_SUITE("GraphicsPipeline")
             .applicationName = "GraphicsPipeline",
             .applicationVersion = SERENITY_MAKE_API_VERSION(0, 1, 0, 0) });
     Adapter *adapter = instance.selectAdapter(AdapterDeviceType::Default);
-    Device device = adapter->createDevice();
+    Device device = adapter->createDevice(DeviceOptions{ .requestedFeatures = adapter->features() });
 
     const auto vertexShaderPath = assetPath() + "/shaders/tests/graphics_pipeline/triangle.vert.spv";
     auto vertexShader = device.createShaderModule(KDGpu::readShaderFile(vertexShaderPath));
@@ -114,6 +114,9 @@ TEST_SUITE("GraphicsPipeline")
                     .format = depthFormat,
                     .depthWritesEnabled = true,
                     .depthCompareOperation = CompareOperation::Less
+                },
+                .primitive = {
+                    .lineWidth = adapter->features().wideLines ? 20.0f : 1.0f,
                 }
             };
             // clang-format on

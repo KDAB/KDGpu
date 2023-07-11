@@ -924,7 +924,7 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     rasterizer.depthClampEnable = VK_FALSE;
     rasterizer.rasterizerDiscardEnable = VK_FALSE;
     rasterizer.polygonMode = polygonModeToVkPolygonMode(options.primitive.polygonMode);
-    rasterizer.lineWidth = 1.0f;
+    rasterizer.lineWidth = options.primitive.lineWidth;
     rasterizer.cullMode = options.primitive.cullMode.toInt();
     rasterizer.frontFace = frontFaceToVkFrontFace(options.primitive.frontFace);
     rasterizer.depthBiasEnable = options.primitive.depthBias.enabled;
