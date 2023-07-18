@@ -326,7 +326,7 @@ void MultiView::render()
     m_commandBuffer = commandRecorder.finish();
 
     // Submit command buffer to queue
-    SubmitOptions submitOptions = {
+    const SubmitOptions submitOptions = {
         .commandBuffers = { m_commandBuffer },
         .waitSemaphores = { m_presentCompleteSemaphores[m_inFlightIndex] },
         .signalSemaphores = { m_renderCompleteSemaphores[m_inFlightIndex] }

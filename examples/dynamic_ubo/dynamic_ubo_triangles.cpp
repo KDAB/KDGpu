@@ -43,7 +43,7 @@ void DynamicUBOTriangles::initializeScene()
 {
     // Create a buffer to hold triangle vertex data
     {
-        BufferOptions bufferOptions = {
+        const BufferOptions bufferOptions = {
             .size = 3 * 2 * 4 * sizeof(float), // 3 vertices * 2 attributes * 4 float components
             .usage = BufferUsageFlagBits::VertexBufferBit,
             .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
@@ -51,7 +51,7 @@ void DynamicUBOTriangles::initializeScene()
         m_buffer = m_device.createBuffer(bufferOptions);
 
         // clang-format off
-        std::vector<float> vertexData = {
+        const std::vector<float> vertexData = {
             1.0f, -1.0f, 0.0f, 1.0f, // position
             1.0f,  0.0f, 0.0f, 1.0f, // color
             -1.0f, -1.0f, 0.0f, 1.0f, // position
@@ -68,7 +68,7 @@ void DynamicUBOTriangles::initializeScene()
     // Create a buffer to hold the geometry index data
     {
         //![3]
-        BufferOptions bufferOptions = {
+        const BufferOptions bufferOptions = {
             .size = 3 * sizeof(uint32_t),
             .usage = BufferUsageFlagBits::IndexBufferBit,
             .memoryUsage = MemoryUsage::CpuToGpu
@@ -87,7 +87,7 @@ void DynamicUBOTriangles::initializeScene()
         const size_t minDynamicUBOOffsetAlignment = m_device.adapter()->properties().limits.minUniformBufferOffsetAlignment;
         m_dynamicUBOByteStride = std::max(minDynamicUBOOffsetAlignment, sizeof(glm::mat4));
 
-        BufferOptions bufferOptions = {
+        const BufferOptions bufferOptions = {
             .size = entityCount * m_dynamicUBOByteStride,
             .usage = BufferUsageFlagBits::UniformBufferBit,
             .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
@@ -124,7 +124,7 @@ void DynamicUBOTriangles::initializeScene()
 
     // Create a pipeline
     // clang-format off
-    GraphicsPipelineOptions pipelineOptions = {
+    const GraphicsPipelineOptions pipelineOptions = {
         .shaderStages = {
             { .shaderModule = vertexShader, .stage = ShaderStageFlagBits::VertexBit },
             { .shaderModule = fragmentShader, .stage = ShaderStageFlagBits::FragmentBit }
@@ -154,7 +154,7 @@ void DynamicUBOTriangles::initializeScene()
     // Create a bindGroup to hold the UBO with the transform
     // clang-format off
     //![5]
-    BindGroupOptions bindGroupOptions = {
+    const BindGroupOptions bindGroupOptions = {
         .layout = bindGroupLayout,
         .resources = {{
             .binding = 0,
@@ -254,7 +254,7 @@ void DynamicUBOTriangles::render()
     opaquePass.end();
     m_commandBuffer = commandRecorder.finish();
 
-    SubmitOptions submitOptions = {
+    const SubmitOptions submitOptions = {
         .commandBuffers = { m_commandBuffer },
         .waitSemaphores = { m_presentCompleteSemaphores[m_inFlightIndex] },
         .signalSemaphores = { m_renderCompleteSemaphores[m_inFlightIndex] }

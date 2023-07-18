@@ -100,7 +100,7 @@ void RenderToTexture::initializeMainScene()
 
     // Create a buffer to hold triangle vertex data
     {
-        BufferOptions bufferOptions = {
+        const BufferOptions bufferOptions = {
             .size = 3 * sizeof(Vertex), // 3 vertices * 2 attributes * 3 float components
             .usage = BufferUsageFlagBits::VertexBufferBit,
             .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
@@ -120,7 +120,7 @@ void RenderToTexture::initializeMainScene()
 
     // Create a buffer to hold the geometry index data
     {
-        BufferOptions bufferOptions = {
+        const BufferOptions bufferOptions = {
             .size = 3 * sizeof(uint32_t),
             .usage = BufferUsageFlagBits::IndexBufferBit,
             .memoryUsage = MemoryUsage::CpuToGpu
@@ -134,7 +134,7 @@ void RenderToTexture::initializeMainScene()
 
     // Create a buffer to hold the transformation matrix
     {
-        BufferOptions bufferOptions = {
+        const BufferOptions bufferOptions = {
             .size = sizeof(glm::mat4),
             .usage = BufferUsageFlagBits::UniformBufferBit,
             .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
@@ -176,7 +176,7 @@ void RenderToTexture::initializeMainScene()
 
     // Create a pipeline
     // clang-format off
-    GraphicsPipelineOptions pipelineOptions = {
+    const GraphicsPipelineOptions pipelineOptions = {
         .shaderStages = {
             { .shaderModule = vertexShader, .stage = ShaderStageFlagBits::VertexBit },
             { .shaderModule = fragmentShader, .stage = ShaderStageFlagBits::FragmentBit }
@@ -205,7 +205,7 @@ void RenderToTexture::initializeMainScene()
 
     // Create a bindGroup to hold the UBO with the transform
     // clang-format off
-    BindGroupOptions bindGroupOptions = {
+    const BindGroupOptions bindGroupOptions = {
         .layout = bindGroupLayout,
         .resources = {{
             .binding = 0,
@@ -283,7 +283,7 @@ void RenderToTexture::initializePostProcess()
 
     // Create a pipeline
     // clang-format off
-    GraphicsPipelineOptions pipelineOptions = {
+    const GraphicsPipelineOptions pipelineOptions = {
         .shaderStages = {
             { .shaderModule = vertexShader, .stage = ShaderStageFlagBits::VertexBit },
             { .shaderModule = fragmentShader, .stage = ShaderStageFlagBits::FragmentBit }
@@ -451,7 +451,7 @@ void RenderToTexture::render()
     // Finalize the command recording
     m_commandBuffer = commandRecorder.finish();
 
-    SubmitOptions submitOptions = {
+    const SubmitOptions submitOptions = {
         .commandBuffers = { m_commandBuffer },
         .waitSemaphores = { m_presentCompleteSemaphores[m_inFlightIndex] },
         .signalSemaphores = { m_renderCompleteSemaphores[m_inFlightIndex] }

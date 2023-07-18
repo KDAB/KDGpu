@@ -322,7 +322,7 @@ void ComputeParticles::renderSingleCommandBuffer()
     m_graphicsAndComputeCommands = commandRecorder.finish();
 
     // Submit Commands
-    SubmitOptions submitOptions = {
+    const SubmitOptions submitOptions = {
         .commandBuffers = { m_graphicsAndComputeCommands },
         .waitSemaphores = { m_presentCompleteSemaphores[m_inFlightIndex] },
         .signalSemaphores = { m_renderCompleteSemaphores[m_inFlightIndex] }
@@ -365,7 +365,7 @@ void ComputeParticles::renderMultipleCommandBuffers()
     // Submit Commands
 
     // We first submit compute commands
-    SubmitOptions computeSubmitOptions = {
+    const SubmitOptions computeSubmitOptions = {
         .commandBuffers = { m_computeCommands },
         .waitSemaphores = { m_presentCompleteSemaphores[m_inFlightIndex] },
         .signalSemaphores = { m_computeSemaphoreComplete }
@@ -374,7 +374,7 @@ void ComputeParticles::renderMultipleCommandBuffers()
 
     // Then we submit the graphics command, we rely on a semaphore to ensure
     // graphics commands don't start prior to the compute commands being completed
-    SubmitOptions graphicsSubmitOptions = {
+    const SubmitOptions graphicsSubmitOptions = {
         .commandBuffers = { m_graphicsCommands },
         .waitSemaphores = { m_computeSemaphoreComplete },
         .signalSemaphores = { m_renderCompleteSemaphores[m_inFlightIndex] }

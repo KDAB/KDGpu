@@ -60,7 +60,7 @@ void HelloTriangle::initializeScene()
         };
 
         const DeviceSize dataByteSize = vertexData.size() * sizeof(Vertex);
-        BufferOptions bufferOptions = {
+        const BufferOptions bufferOptions = {
             .size = dataByteSize,
             .usage = BufferUsageFlagBits::VertexBufferBit | BufferUsageFlagBits::TransferDstBit,
             .memoryUsage = MemoryUsage::GpuOnly
@@ -86,7 +86,7 @@ void HelloTriangle::initializeScene()
     {
         std::array<uint32_t, 3> indexData = { 0, 1, 2 };
         const DeviceSize dataByteSize = indexData.size() * sizeof(uint32_t);
-        BufferOptions bufferOptions = {
+        const BufferOptions bufferOptions = {
             .size = dataByteSize,
             .usage = BufferUsageFlagBits::IndexBufferBit | BufferUsageFlagBits::TransferDstBit,
             .memoryUsage = MemoryUsage::GpuOnly
@@ -106,7 +106,7 @@ void HelloTriangle::initializeScene()
     // Create a buffer to hold the transformation matrix
     //![7]
     {
-        BufferOptions bufferOptions = {
+        const BufferOptions bufferOptions = {
             .size = sizeof(glm::mat4),
             .usage = BufferUsageFlagBits::UniformBufferBit,
             .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
@@ -153,7 +153,7 @@ void HelloTriangle::initializeScene()
     // Create a pipeline
     // clang-format off
     //![10]
-    GraphicsPipelineOptions pipelineOptions = {
+    const GraphicsPipelineOptions pipelineOptions = {
         .shaderStages = {
             { .shaderModule = vertexShader, .stage = ShaderStageFlagBits::VertexBit },
             { .shaderModule = fragmentShader, .stage = ShaderStageFlagBits::FragmentBit }
@@ -184,7 +184,7 @@ void HelloTriangle::initializeScene()
     // Create a bindGroup to hold the UBO with the transform
     // clang-format off
     //![11]
-    BindGroupOptions bindGroupOptions = {
+    const BindGroupOptions bindGroupOptions = {
         .layout = bindGroupLayout,
         .resources = {{
             .binding = 0,
@@ -272,7 +272,7 @@ void HelloTriangle::render()
     m_commandBuffer = commandRecorder.finish();
 
     //![13]
-    SubmitOptions submitOptions = {
+    const SubmitOptions submitOptions = {
         .commandBuffers = { m_commandBuffer },
         .waitSemaphores = { m_presentCompleteSemaphores[m_inFlightIndex] },
         .signalSemaphores = { m_renderCompleteSemaphores[m_inFlightIndex] }

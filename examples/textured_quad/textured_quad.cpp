@@ -105,7 +105,7 @@ void TexturedQuad::initializeScene()
         };
 
         const DeviceSize dataByteSize = vertexData.size() * sizeof(Vertex);
-        BufferOptions bufferOptions = {
+        const BufferOptions bufferOptions = {
             .size = dataByteSize,
             .usage = BufferUsageFlagBits::VertexBufferBit | BufferUsageFlagBits::TransferDstBit,
             .memoryUsage = MemoryUsage::GpuOnly
@@ -190,7 +190,7 @@ void TexturedQuad::initializeScene()
 
     // Create a pipeline
     // clang-format off
-    GraphicsPipelineOptions pipelineOptions = {
+    const GraphicsPipelineOptions pipelineOptions = {
         .shaderStages = {
             { .shaderModule = vertexShader, .stage = ShaderStageFlagBits::VertexBit },
             { .shaderModule = fragmentShader, .stage = ShaderStageFlagBits::FragmentBit }
@@ -225,7 +225,7 @@ void TexturedQuad::initializeScene()
     // Create a bindGroup to hold the uniform containing the texture and sampler
     // clang-format off
     //![6]
-    BindGroupOptions bindGroupOptions = {
+    const BindGroupOptions bindGroupOptions = {
         .layout = bindGroupLayout,
         .resources = {{
             .binding = 0,
@@ -292,7 +292,7 @@ void TexturedQuad::render()
     opaquePass.end();
     m_commandBuffer = commandRecorder.finish();
 
-    SubmitOptions submitOptions = {
+    const SubmitOptions submitOptions = {
         .commandBuffers = { m_commandBuffer },
         .waitSemaphores = { m_presentCompleteSemaphores[m_inFlightIndex] },
         .signalSemaphores = { m_renderCompleteSemaphores[m_inFlightIndex] }

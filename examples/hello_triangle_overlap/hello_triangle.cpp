@@ -108,7 +108,7 @@ void HelloTriangle::initializeScene()
 
     // Create a pipeline
     // clang-format off
-    GraphicsPipelineOptions pipelineOptions = {
+    const GraphicsPipelineOptions pipelineOptions = {
         .shaderStages = {
             { .shaderModule = vertexShader, .stage = ShaderStageFlagBits::VertexBit },
             { .shaderModule = fragmentShader, .stage = ShaderStageFlagBits::FragmentBit }
@@ -208,7 +208,7 @@ void HelloTriangle::render()
     if (m_waitForPresentation)
         waitSemaphores.emplace_back(m_presentCompleteSemaphores[m_inFlightIndex]);
 
-    SubmitOptions submitOptions = {
+    const SubmitOptions submitOptions = {
         .commandBuffers = { m_commandBuffers[m_inFlightIndex] },
         .waitSemaphores = waitSemaphores,
         .signalSemaphores = { m_renderCompleteSemaphores[m_inFlightIndex] },

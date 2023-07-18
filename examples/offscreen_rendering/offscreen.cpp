@@ -228,7 +228,7 @@ void Offscreen::initializeScene()
     // Create a pipeline
     // clang-format off
     //![5]
-    GraphicsPipelineOptions pipelineOptions = {
+    const GraphicsPipelineOptions pipelineOptions = {
         .shaderStages = {
             { .shaderModule = vertexShader, .stage = ShaderStageFlagBits::VertexBit },
             { .shaderModule = fragmentShader, .stage = ShaderStageFlagBits::FragmentBit }
@@ -385,7 +385,7 @@ void Offscreen::render(const std::string &baseFilename)
 
     // Finish recording and submit
     m_commandBuffer = commandRecorder.finish();
-    SubmitOptions submitOptions = {
+    const SubmitOptions submitOptions = {
         .commandBuffers = { m_commandBuffer }
     };
     m_queue.submit(submitOptions);
@@ -445,7 +445,7 @@ void Offscreen::createRenderTargets()
 {
     //![8]
     // Create a color texture to use as our color render target
-    TextureOptions msaaColorTextureOptions = {
+    const TextureOptions msaaColorTextureOptions = {
         .type = TextureType::TextureType2D,
         .format = m_colorFormat,
         .extent = { m_width, m_height, 1 },
@@ -458,7 +458,7 @@ void Offscreen::createRenderTargets()
     m_msaaColorTextureView = m_msaaColorTexture.createView();
 
     // Create a color texture to use as our resolve render target
-    TextureOptions colorTextureOptions = {
+    const TextureOptions colorTextureOptions = {
         .type = TextureType::TextureType2D,
         .format = m_colorFormat,
         .extent = { m_width, m_height, 1 },
@@ -472,7 +472,7 @@ void Offscreen::createRenderTargets()
     //![8]
 
     // Create a depth texture to use for depth-correct rendering
-    TextureOptions depthTextureOptions = {
+    const TextureOptions depthTextureOptions = {
         .type = TextureType::TextureType2D,
         .format = m_depthFormat,
         .extent = { m_width, m_height, 1 },
@@ -504,7 +504,7 @@ void Offscreen::createRenderTargets()
 
     //![10]
     // Create a color texture that is host visible and in linear layout. We will copy into this.
-    TextureOptions cpuColorTextureOptions = {
+    const TextureOptions cpuColorTextureOptions = {
         .type = TextureType::TextureType2D,
         .format = m_colorFormat,
         .extent = { m_width, m_height, 1 },

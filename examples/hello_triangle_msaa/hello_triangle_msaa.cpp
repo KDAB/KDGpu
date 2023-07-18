@@ -293,7 +293,7 @@ void HelloTriangleMSAA::render()
     opaquePass.end();
     m_commandBuffer = commandRecorder.finish();
 
-    SubmitOptions submitOptions = {
+    const SubmitOptions submitOptions = {
         .commandBuffers = { m_commandBuffer },
         .waitSemaphores = { m_presentCompleteSemaphores[m_inFlightIndex] },
         .signalSemaphores = { m_renderCompleteSemaphores[m_inFlightIndex] }
