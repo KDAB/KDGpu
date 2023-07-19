@@ -340,6 +340,7 @@ void VulkanCommandRecorder::bufferMemoryBarrier(const BufferMemoryBarrierOptions
 void VulkanCommandRecorder::textureMemoryBarrier(const TextureMemoryBarrierOptions &options)
 {
     auto vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
+#if defined(VK_KHR_synchronization2)
     if (vulkanDevice->vkCmdPipelineBarrier2 != nullptr) {
         VkImageMemoryBarrier2KHR vkImageBarrier = {};
         vkImageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2_KHR;
@@ -369,6 +370,7 @@ void VulkanCommandRecorder::textureMemoryBarrier(const TextureMemoryBarrierOptio
 
         vulkanDevice->vkCmdPipelineBarrier2(commandBuffer, &vkDependencyInfo);
     } else {
+#endif
         // Fallback to the Vulkan 1.0 approach
         VkImageMemoryBarrier vkImageBarrier = {};
         vkImageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -396,7 +398,9 @@ void VulkanCommandRecorder::textureMemoryBarrier(const TextureMemoryBarrierOptio
                              0, nullptr,
                              0, nullptr,
                              1, &vkImageBarrier);
+#if defined(VK_KHR_synchronization2)
     }
+#endif
 }
 
 void VulkanCommandRecorder::executeSecondaryCommandBuffer(const Handle<CommandBuffer_t> &secondaryCommandBuffer)
