@@ -48,6 +48,7 @@ VulkanDevice::VulkanDevice(VkDevice _device,
     for (uint32_t i = 0; i < queueTypeCount; ++i)
         commandPools[i] = VK_NULL_HANDLE;
 
+#if defined(VK_KHR_synchronization2)
     // Check to see if we have the VK_KHR_synchronization2 extension or not
     const auto adapterExtensions = vulkanAdapter->extensions();
     for (const auto &extension : adapterExtensions) {
@@ -58,6 +59,7 @@ VulkanDevice::VulkanDevice(VkDevice _device,
             break;
         }
     }
+#endif
 }
 
 std::vector<QueueDescription> VulkanDevice::getQueues(ResourceManager *resourceManager,

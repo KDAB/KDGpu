@@ -288,6 +288,7 @@ void VulkanCommandRecorder::memoryBarrier(const MemoryBarrierOptions &options)
 void VulkanCommandRecorder::bufferMemoryBarrier(const BufferMemoryBarrierOptions &options)
 {
     auto vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
+#if defined(VK_KHR_synchronization2)
     if (vulkanDevice->vkCmdPipelineBarrier2 != nullptr) {
         VkBufferMemoryBarrier2KHR vkBufferBarrier = {};
         vkBufferBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2_KHR;
@@ -310,6 +311,7 @@ void VulkanCommandRecorder::bufferMemoryBarrier(const BufferMemoryBarrierOptions
 
         vulkanDevice->vkCmdPipelineBarrier2(commandBuffer, &vkDependencyInfo);
     } else {
+#endif
         // Fallback to the Vulkan 1.0 approach
         VkBufferMemoryBarrier vkBufferBarrier = {};
         vkBufferBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
@@ -328,7 +330,9 @@ void VulkanCommandRecorder::bufferMemoryBarrier(const BufferMemoryBarrierOptions
                              0, nullptr,
                              1, &vkBufferBarrier,
                              0, nullptr);
+#if defined(VK_KHR_synchronization2)
     }
+#endif
 }
 
 // TODO: Implement an array version. Perhaps also a way to refer to the set of arguments via a

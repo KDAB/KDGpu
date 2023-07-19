@@ -354,17 +354,11 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     physicalDeviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
     physicalDeviceFeatures2.features = deviceFeatures;
 
-    // Enable the VK_KHR_Synchronization2 extension features by chaining this into the createInfo chain.
-    VkPhysicalDeviceSynchronization2FeaturesKHR sync2Features = {};
-    sync2Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES_KHR;
-    sync2Features.synchronization2 = true;
-    physicalDeviceFeatures2.pNext = &sync2Features;
-
     // Allows to use std430 for uniform buffers which gives much nicer packing of data
     VkPhysicalDeviceUniformBufferStandardLayoutFeatures stdLayoutFeatures = {};
     stdLayoutFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_UNIFORM_BUFFER_STANDARD_LAYOUT_FEATURES;
     stdLayoutFeatures.uniformBufferStandardLayout = options.requestedFeatures.uniformBufferStandardLayout;
-    sync2Features.pNext = &stdLayoutFeatures;
+    physicalDeviceFeatures2.pNext = &stdLayoutFeatures;
 
     // Enable multiview rendering if requested
     VkPhysicalDeviceMultiviewFeatures multiViewFeatures{};
@@ -373,6 +367,14 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     multiViewFeatures.multiviewGeometryShader = options.requestedFeatures.multiViewGeometryShader;
     multiViewFeatures.multiviewTessellationShader = options.requestedFeatures.multiViewTessellationShader;
     stdLayoutFeatures.pNext = &multiViewFeatures;
+
+#if defined(VK_KHR_synchronization2)
+    // Enable the VK_KHR_Synchronization2 extension features by chaining this into the createInfo chain.
+    VkPhysicalDeviceSynchronization2FeaturesKHR sync2Features = {};
+    sync2Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES_KHR;
+    sync2Features.synchronization2 = true;
+    stdLayoutFeatures.pNext = &sync2Features;
+#endif
 
     VkDeviceCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;

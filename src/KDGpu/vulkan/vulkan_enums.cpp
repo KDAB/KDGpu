@@ -313,10 +313,12 @@ VkAccessFlagBits accessFlagsToVkAccessFlagBits(AccessFlags accessFlags)
     return static_cast<VkAccessFlagBits>(static_cast<uint32_t>(accessFlags.toInt()));
 }
 
+#if defined(VK_KHR_synchronization2)
 VkAccessFlagBits2KHR accessFlagsToVkAccessFlagBits2(AccessFlags accessFlags)
 {
     return static_cast<VkAccessFlagBits2KHR>(accessFlags.toInt());
 }
+#endif
 
 VkPipelineStageFlagBits pipelineStageFlagsToVkPipelineStageFlagBits(PipelineStageFlags pipelineFlags)
 {
@@ -326,10 +328,12 @@ VkPipelineStageFlagBits pipelineStageFlagsToVkPipelineStageFlagBits(PipelineStag
     return static_cast<VkPipelineStageFlagBits>(static_cast<uint32_t>(pipelineFlags.toInt()));
 }
 
+#if defined(VK_KHR_synchronization2)
 VkPipelineStageFlagBits2KHR pipelineStageFlagsToVkPipelineStageFlagBits2(PipelineStageFlags pipelineFlags)
 {
     return static_cast<VkPipelineStageFlagBits2KHR>(pipelineFlags.toInt());
 }
+#endif
 
 VkCommandBufferLevel commandBufferLevelToVkCommandBufferLevel(CommandBufferLevel level)
 {
