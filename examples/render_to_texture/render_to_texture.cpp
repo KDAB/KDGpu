@@ -355,7 +355,7 @@ void RenderToTexture::updateColorBindGroup()
 void RenderToTexture::drawControls(ImGuiContext *ctx)
 {
     ImGui::SetCurrentContext(ctx);
-    ImGui::SetNextWindowPos(ImVec2(10, 150));
+    ImGui::SetNextWindowPos(ImVec2(10, 170), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(0, 0), ImGuiCond_FirstUseEver);
     ImGui::Begin(
             "About",
