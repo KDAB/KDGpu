@@ -68,7 +68,9 @@ KDGpu::SurfaceOptions View::surfaceOptions(KDGui::Window *w)
             .window = xcbWindow->handle()
         };
     }
+#endif
 
+#if defined(KDGUI_PLATFORM_WAYLAND)
     auto waylandWindow = dynamic_cast<KDGui::LinuxWaylandPlatformWindow *>(w->platformWindow());
     if (waylandWindow != nullptr) {
         return KDGpu::SurfaceOptions{
