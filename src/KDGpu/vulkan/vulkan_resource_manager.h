@@ -67,7 +67,7 @@ public:
     VulkanAdapter *getAdapter(const Handle<Adapter_t> &handle) const final;
 
     Handle<Device_t> createDevice(const Handle<Adapter_t> &adapterHandle, const DeviceOptions &options, std::vector<QueueRequest> &queueRequests) final;
-    Handle<Device_t> createDeviceFromExisitingVkDevice(const Handle<Adapter_t> &adapterHandle, VkDevice vkDevice);
+    Handle<Device_t> createDeviceFromExistingVkDevice(const Handle<Adapter_t> &adapterHandle, VkDevice vkDevice);
     void deleteDevice(const Handle<Device_t> &handle) final;
     VulkanDevice *getDevice(const Handle<Device_t> &handle) const final;
 

@@ -407,7 +407,7 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     return deviceHandle;
 }
 
-Handle<Device_t> VulkanResourceManager::createDeviceFromExisitingVkDevice(const Handle<Adapter_t> &adapterHandle, VkDevice vkDevice)
+Handle<Device_t> VulkanResourceManager::createDeviceFromExistingVkDevice(const Handle<Adapter_t> &adapterHandle, VkDevice vkDevice)
 {
     const auto deviceHandle = m_devices.emplace(vkDevice, this, adapterHandle, false);
 

@@ -66,7 +66,7 @@ Device VulkanGraphicsApi::createDeviceFromExistingVkDevice(Adapter *adapter,
     Device device;
     device.m_api = this;
     device.m_adapter = adapter;
-    device.m_device = m_vulkanResourceManager->createDeviceFromExisitingVkDevice(adapter->handle(), vkDevice);
+    device.m_device = m_vulkanResourceManager->createDeviceFromExistingVkDevice(adapter->handle(), vkDevice);
     device.m_queues = std::move(queues);
 
     // Note: we can't know what queues the VkDevice was create with, we assume createQueueFromExistingVkQueue
