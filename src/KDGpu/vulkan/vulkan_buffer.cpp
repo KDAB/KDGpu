@@ -40,4 +40,20 @@ void VulkanBuffer::unmap()
     mapped = nullptr;
 }
 
+// Note: invalidating before mapping is only needed on non host coherent memory
+// (AMD, Intel, NVIDIA) driver currently provide HOST_COHERENT flag on all memory types that are HOST_VISIBLE
+void VulkanBuffer::invalidate()
+{
+    auto vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
+    vmaInvalidateAllocation(vulkanDevice->allocator, allocation, 0, VK_WHOLE_SIZE);
+}
+
+// Note: flushing after mapping is only needed on non host coherent memory
+// (AMD, Intel, NVIDIA) driver currently provide HOST_COHERENT flag on all memory types that are HOST_VISIBLE
+void VulkanBuffer::flush()
+{
+    auto vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
+    vmaFlushAllocation(vulkanDevice->allocator, allocation, 0, VK_WHOLE_SIZE);
+}
+
 } // namespace KDGpu

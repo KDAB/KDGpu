@@ -36,6 +36,8 @@ struct KDGPU_EXPORT VulkanBuffer : public ApiBuffer {
 
     void *map() final;
     void unmap() final;
+    void invalidate() final;
+    void flush() final;
 
     VkBuffer buffer{ VK_NULL_HANDLE };
     VmaAllocation allocation{ VK_NULL_HANDLE };

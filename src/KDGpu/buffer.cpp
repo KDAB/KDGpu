@@ -78,6 +78,18 @@ void Buffer::unmap()
     m_mapped = nullptr;
 }
 
+void Buffer::invalidate()
+{
+    auto apiBuffer = m_api->resourceManager()->getBuffer(m_buffer);
+    apiBuffer->invalidate();
+}
+
+void Buffer::flush()
+{
+    auto apiBuffer = m_api->resourceManager()->getBuffer(m_buffer);
+    apiBuffer->flush();
+}
+
 bool operator==(const Buffer &a, const Buffer &b)
 {
     return a.m_api == b.m_api && a.m_device == b.m_device && a.m_buffer == b.m_buffer && a.m_mapped == b.m_mapped;

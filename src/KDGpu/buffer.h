@@ -44,6 +44,9 @@ public:
     void *map();
     void unmap();
 
+    void invalidate();
+    void flush();
+
 private:
     explicit Buffer(GraphicsApi *api, const Handle<Device_t> &device, const BufferOptions &options, const void *initialData);
 

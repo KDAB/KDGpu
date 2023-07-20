@@ -183,6 +183,66 @@ TEST_SUITE("Buffer")
 
             // THEN -> It's all good
         }
+
+        SUBCASE("Flush")
+        {
+            // GIVEN
+            const BufferOptions bufferOptions = {
+                .size = 4 * sizeof(float),
+                .usage = BufferUsageFlagBits::VertexBufferBit,
+                .memoryUsage = MemoryUsage::CpuToGpu
+            };
+
+            // WHEN
+            Buffer b = device.createBuffer(bufferOptions);
+
+            // THEN
+            CHECK(b.isValid());
+
+            // WHEN
+            const std::vector<float> vertexData = {
+                1.0f, -1.0f, 0.0f, 1.0f
+            };
+            float *rawData = reinterpret_cast<float *>(b.map());
+            std::memcpy(rawData, vertexData.data(), vertexData.size() * sizeof(float));
+            b.unmap();
+            b.flush();
+
+            // THEN
+            const float *rawData2 = reinterpret_cast<const float *>(b.map());
+
+            CHECK(std::memcmp(rawData2, vertexData.data(), vertexData.size() * sizeof(float)) == 0);
+
+            b.unmap();
+        }
+
+        SUBCASE("Invalidate")
+        {
+            // GIVEN
+            const BufferOptions bufferOptions = {
+                .size = 4 * sizeof(float),
+                .usage = BufferUsageFlagBits::VertexBufferBit,
+                .memoryUsage = MemoryUsage::CpuToGpu
+            };
+
+            // WHEN
+            const std::vector<float> vertexData = {
+                1.0f, -1.0f, 0.0f, 1.0f
+            };
+            Buffer b = device.createBuffer(bufferOptions, vertexData.data());
+
+            // THEN
+            CHECK(b.isValid());
+
+            // WHEN
+            b.invalidate();
+            const float *rawData = reinterpret_cast<const float *>(b.map());
+
+            // THEN
+            CHECK(std::memcmp(rawData, vertexData.data(), vertexData.size() * sizeof(float)) == 0);
+
+            b.unmap();
+        }
     }
 
     TEST_CASE("Comparison")
