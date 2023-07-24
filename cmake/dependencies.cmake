@@ -23,17 +23,19 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/kdutils.cmake)
 # VMA
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/vulkan_memory_allocator.cmake)
 
-# glm
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/glm.cmake)
+if(KDGPU_BUILD_EXAMPLES)
+    # glm
+    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/glm.cmake)
 
-# stb (for stb image)
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/stb.cmake)
+    # stb (for stb image)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/stb.cmake)
 
-# imgui (for 2D UI)
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/imgui.cmake)
+    # imgui (for 2D UI)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/imgui.cmake)
 
-# dxc (for shader compilation)
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/dxc.cmake)
+    # dxc (for shader compilation)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/dxc.cmake)
+endif()
 
 if(KDGPU_BUILD_TESTS)
     # doctest

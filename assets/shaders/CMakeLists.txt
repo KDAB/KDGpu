@@ -8,8 +8,13 @@
 #
 project(shaders)
 
-add_subdirectory(examples)
-add_subdirectory(tests)
+if(KDGPU_BUILD_EXAMPLES)
+    add_subdirectory(examples)
+endif()
+
+if(KDGPU_BUILD_TESTS)
+    add_subdirectory(tests)
+endif()
 
 add_custom_target(kdgpu_assets ALL COMMENT "Target to copy the shader assets into the current source directory")
 

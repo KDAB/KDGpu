@@ -60,11 +60,13 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
+option(KDGPU_CODE_COVERAGE "Code Coverage" OFF)
+option(KDGPU_BUILD_TESTS "Build tests" ON)
+option(KDGPU_BUILD_EXAMPLES "Build examples" ON)
+
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies.cmake)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
-option(KDGPU_CODE_COVERAGE "Code Coverage" OFF)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     if(KDGPU_CODE_COVERAGE)
@@ -75,15 +77,11 @@ endif()
 add_subdirectory(src)
 add_subdirectory(assets)
 
-option(KDGPU_BUILD_TESTS "Build tests" ON)
-
 if(KDGPU_BUILD_TESTS)
     add_feature_info(KDGpu-Tests ON "Build Tests")
     enable_testing()
     add_subdirectory(tests)
 endif()
-
-option(KDGPU_BUILD_EXAMPLES "Build examples" ON)
 
 if(KDGPU_BUILD_EXAMPLES)
     add_feature_info(KDGpu-Examples ON "Build Examples")

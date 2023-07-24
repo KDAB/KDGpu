@@ -6,6 +6,10 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
-add_subdirectory(fonts)
+
+if(KDGPU_BUILD_EXAMPLES)
+    add_subdirectory(fonts)
+    add_subdirectory(textures)
+endif()
+
 add_subdirectory(shaders)
-add_subdirectory(textures)

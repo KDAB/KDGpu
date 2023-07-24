@@ -26,26 +26,29 @@ function(add_kdgpu_test NAME SOURCES)
     endif()
 endfunction()
 
-# Build an example test program
-function(add_kdgpuexample_test NAME SOURCES)
-    set(TARGET_NAME test_kdgpuexample_${NAME})
-    add_executable(${TARGET_NAME} ${SOURCES})
+if(KDGPU_BUILD_EXAMPLES)
+    # Build an example test program
+    function(add_kdgpuexample_test NAME SOURCES)
+        set(TARGET_NAME test_kdgpuexample_${NAME})
+        add_executable(${TARGET_NAME} ${SOURCES})
 
-    target_link_libraries(${TARGET_NAME} KDGpu::KDGpu KDGpu::KDGpuExample)
+        target_link_libraries(${TARGET_NAME} KDGpu::KDGpu KDGpu::KDGpuExample)
 
-    add_test(NAME ${TARGET_NAME} COMMAND $<TARGET_FILE:${TARGET_NAME}>)
-    set_tests_properties(${TARGET_NAME} PROPERTIES LABELS "KDGpuExample")
+        add_test(NAME ${TARGET_NAME} COMMAND $<TARGET_FILE:${TARGET_NAME}>)
+        set_tests_properties(${TARGET_NAME} PROPERTIES LABELS "KDGpuExample")
 
-    if(APPLE)
-        target_compile_options(${TARGET_NAME} PRIVATE -Wno-deprecated-declarations)
-    endif()
-endfunction()
+        if(APPLE)
+            target_compile_options(${TARGET_NAME} PRIVATE -Wno-deprecated-declarations)
+        endif()
+    endfunction()
+
+    add_subdirectory(instance)
+endif()
 
 add_subdirectory(pool)
 add_subdirectory(buffer)
 add_subdirectory(texture)
 add_subdirectory(textureview)
-add_subdirectory(instance)
 add_subdirectory(bindgroup)
 add_subdirectory(bindgrouplayout)
 add_subdirectory(sampler)
