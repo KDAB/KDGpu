@@ -26,8 +26,8 @@ function(CompileShader target shader output)
     add_custom_command(
         OUTPUT ${output}
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${shader}
-        COMMAND ${Vulkan_GLSLANG_VALIDATOR_EXECUTABLE} -V ${CMAKE_CURRENT_SOURCE_DIR}/${shader} -o ${output}
-        COMMENT "Compile shader using glslangValidator"
+        COMMAND ${Vulkan_GLSLANG_VALIDATOR_EXECUTABLE} --quiet -V ${CMAKE_CURRENT_SOURCE_DIR}/${shader} -o ${output}
+        COMMENT "Compile shader ${shader} using glslangValidator"
     )
 
     add_custom_target(
@@ -52,7 +52,8 @@ function(CompileShaderSet target name)
 endfunction()
 
 # Compile a shader using dxc
-function(CompileHLSLShader
+function(
+    CompileHLSLShader
     target
     shader
     output
@@ -63,7 +64,7 @@ function(CompileHLSLShader
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${shader}
         COMMAND ${DXC_EXECUTABLE} -Emain -T${type}_6_1 -Zi $<IF:$<CONFIG:DEBUG>,-Od,-O3> -spirv -Fo${output}
                 ${CMAKE_CURRENT_SOURCE_DIR}/${shader}
-        COMMENT "Compile shader using dxc"
+        COMMENT "Compile shader ${shader} using dxc"
     )
 
     add_custom_target(
@@ -76,8 +77,8 @@ endfunction()
 # Compiles shader set using dxc
 function(CompileHLSLShaderSet target name)
     # TODO: in future we probably want to check which shaders we have instead of assuming vert/frag
-    CompileHLSLShader(${target}VertexShader ${name}.ps.hlsl ${name}.ps.spv ps)
-    CompileHLSLShader(${target}FragmentShader ${name}.vs.hlsl ${name}.vs.spv vs)
+    compilehlslshader(${target}VertexShader ${name}.ps.hlsl ${name}.ps.spv ps)
+    compilehlslshader(${target}FragmentShader ${name}.vs.hlsl ${name}.vs.spv vs)
 
     # TODO: for now generate ALL, in future would be better to build on case by case
     add_custom_target(
