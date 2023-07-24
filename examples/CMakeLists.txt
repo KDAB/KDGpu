@@ -57,7 +57,4 @@ add_subdirectory(multiview)
 add_subdirectory(offscreen_rendering)
 add_subdirectory(render_to_texture)
 add_subdirectory(textured_quad)
-
-if(NOT APPLE)
-    add_subdirectory(hello_triangle_hlsl)
-endif()
+add_subdirectory(hello_triangle_hlsl)
