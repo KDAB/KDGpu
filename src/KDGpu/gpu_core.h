@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include <KDUtils/flags.h>
+#include <KDGpu/utils/flags.h>
 
 #include <stdint.h>
 #include <string>
@@ -40,8 +40,6 @@ constexpr uint32_t IgnoreQueueType = (~0U);
 constexpr uint64_t WholeSize = (~0ULL);
 
 using DeviceSize = uint64_t;
-using Flags = uint32_t;
-using Flags64 = uint64_t;
 using SampleMask = uint32_t;
 
 struct Extension {
@@ -125,7 +123,7 @@ enum class SampleCountFlagBits {
     Samples64Bit = 0x00000040,
     MaxEnum = 0x7FFFFFFF
 };
-using SampleCountFlags = KDUtils::Flags<SampleCountFlagBits>;
+using SampleCountFlags = KDGpu::Flags<SampleCountFlagBits>;
 
 enum class AdapterDeviceType {
     Other = 0,
@@ -173,7 +171,7 @@ enum class QueueFlagBits {
     VideoEncodeBit = 0x00000040,
     MaxEnum = 0x7FFFFFFF
 };
-using QueueFlags = KDUtils::Flags<QueueFlagBits>;
+using QueueFlags = KDGpu::Flags<QueueFlagBits>;
 
 enum class PresentMode {
     Immediate = 0,
@@ -490,7 +488,7 @@ enum class SurfaceTransformFlagBits {
     InheritBit = 0x00000100,
     MaxEnum = 0x7fffffff
 };
-using SurfaceTransformFlags = KDUtils::Flags<SurfaceTransformFlagBits>;
+using SurfaceTransformFlags = KDGpu::Flags<SurfaceTransformFlagBits>;
 
 inline std::string surfaceTransformFlagBitsToString(SurfaceTransformFlagBits transform)
 {
@@ -525,7 +523,7 @@ enum class CompositeAlphaFlagBits {
     InheritBit = 0x00000008,
     MaxEnum = 0x7FFFFFFF
 };
-using CompositeAlphaFlags = KDUtils::Flags<CompositeAlphaFlagBits>;
+using CompositeAlphaFlags = KDGpu::Flags<CompositeAlphaFlagBits>;
 
 enum class TextureUsageFlagBits {
     TransferSrcBit = 0x00000001,
@@ -547,7 +545,7 @@ enum class TextureUsageFlagBits {
     InvocationMaskBit = 0x00040000,
     MaxEnum = 0x7fffffff
 };
-using TextureUsageFlags = KDUtils::Flags<TextureUsageFlagBits>;
+using TextureUsageFlags = KDGpu::Flags<TextureUsageFlagBits>;
 
 enum class TextureTiling {
     Optimal = 0,
@@ -627,7 +625,7 @@ enum class TextureAspectFlagBits : uint32_t {
     MemoryPlane3Bit = 0x00000400,
     MaxEnum = 0x7fffffff
 };
-using TextureAspectFlags = KDUtils::Flags<TextureAspectFlagBits>;
+using TextureAspectFlags = KDGpu::Flags<TextureAspectFlagBits>;
 
 struct TextureSubresourceRange {
     TextureAspectFlags aspectMask{ TextureAspectFlagBits::None };
@@ -672,7 +670,7 @@ enum class BufferUsageFlagBits {
     MicromapStorageBit = 0x01000000,
     MaxEnum = 0x7fffffff
 };
-using BufferUsageFlags = KDUtils::Flags<BufferUsageFlagBits>;
+using BufferUsageFlags = KDGpu::Flags<BufferUsageFlagBits>;
 
 enum class VertexRate {
     Vertex = 0,
@@ -716,7 +714,7 @@ enum class ShaderStageFlagBits : uint32_t {
     MeshBit = 0x00000080,
     MaxEnum = 0x7fffffff
 };
-using ShaderStageFlags = KDUtils::Flags<ShaderStageFlagBits>;
+using ShaderStageFlags = KDGpu::Flags<ShaderStageFlagBits>;
 
 enum class ResourceBindingType {
     Sampler = 0,
@@ -755,7 +753,7 @@ enum class CullModeFlagBits {
     FrontAndBack = 0x00000003,
     MaxEnum = 0x7fffffff
 };
-using CullModeFlags = KDUtils::Flags<CullModeFlagBits>;
+using CullModeFlags = KDGpu::Flags<CullModeFlagBits>;
 
 enum class FrontFace {
     CounterClockwise = 0,
@@ -802,7 +800,7 @@ enum ColorComponentFlagBits {
     AllComponents = RedBit | GreenBit | BlueBit | AlphaBit,
     MaxEnum = 0x7fffffff
 };
-using ColorComponentFlags = KDUtils::Flags<ColorComponentFlagBits>;
+using ColorComponentFlags = KDGpu::Flags<ColorComponentFlagBits>;
 
 enum class BlendOperation {
     Add = 0,
@@ -965,7 +963,7 @@ enum class AccessFlagBit : uint64_t {
     OpticalFlowReadBit = 0x40000000000ULL,
     OpticalFlowWriteBit = 0x80000000000ULL
 };
-using AccessFlags = KDUtils::Flags<AccessFlagBit>;
+using AccessFlags = KDGpu::Flags<AccessFlagBit>;
 
 enum class PipelineStageFlagBit : uint64_t {
     None = 0,
@@ -1009,7 +1007,7 @@ enum class PipelineStageFlagBit : uint64_t {
     MicromapBuildBit = 0x40000000ULL,
     OpticalFlowBit = 0x20000000ULL
 };
-using PipelineStageFlags = KDUtils::Flags<PipelineStageFlagBit>;
+using PipelineStageFlags = KDGpu::Flags<PipelineStageFlagBit>;
 
 enum class CommandBufferLevel {
     Primary = 0,
@@ -1044,7 +1042,7 @@ enum class FormatFeatureFlagBit : uint32_t {
     SampledImageFilterCubicBit = 0x00002000,
     MaxEnum = 0x7FFFFFFF
 };
-using FormatFeatureFlags = KDUtils::Flags<FormatFeatureFlagBit>;
+using FormatFeatureFlags = KDGpu::Flags<FormatFeatureFlagBit>;
 
 enum class PresentResult {
     // Error nothing submitted

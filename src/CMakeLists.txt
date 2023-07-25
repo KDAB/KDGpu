@@ -7,8 +7,8 @@
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
 add_subdirectory(KDGpu)
-add_subdirectory(KDGpuKDGui)
 
 if(KDGPU_BUILD_EXAMPLES)
+    add_subdirectory(KDGpuKDGui)
     add_subdirectory(KDGpuExample)
 endif()

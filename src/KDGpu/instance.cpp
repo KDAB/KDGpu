@@ -14,8 +14,6 @@
 #include <KDGpu/resource_manager.h>
 #include <KDGpu/api/api_instance.h>
 
-#include <KDFoundation/config.h>
-
 #include <KDGpu/utils/logging.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 
