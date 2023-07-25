@@ -13,6 +13,7 @@
 #include <KDGpuExample/kdgpuexample_export.h>
 
 #include <string>
+#include <vector>
 
 namespace KDGpuExample {
 
@@ -27,6 +28,8 @@ namespace KDGpuExample {
  */
 
 KDGPUEXAMPLE_EXPORT std::string assetPath();
+
+KDGPUEXAMPLE_EXPORT std::vector<uint32_t> readShaderFile(const std::string &filename);
 
 /*! @} */
 

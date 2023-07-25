@@ -9,7 +9,11 @@
 */
 
 #include "kdgpuexample.h"
+
+#include <KDGpu/utils/logging.h>
+
 #include <KDUtils/dir.h>
+#include <KDUtils/file.h>
 
 #include <cstdlib>
 
@@ -30,6 +34,24 @@ std::string assetPath()
 #else
     return "";
 #endif
+}
+
+std::vector<uint32_t> readShaderFile(const std::string &filename)
+{
+    using namespace KDUtils;
+
+    File file(File::exists(filename) ? filename : Dir::applicationDir().absoluteFilePath(filename));
+
+    if (!file.open(std::ios::in | std::ios::binary)) {
+        SPDLOG_LOGGER_CRITICAL(KDGpu::Logger::logger(), "Failed to open file {}", filename);
+        throw std::runtime_error("Failed to open file");
+    }
+
+    const ByteArray fileContent = file.readAll();
+    std::vector<uint32_t> buffer(fileContent.size() / 4);
+    std::memcpy(buffer.data(), fileContent.data(), fileContent.size());
+
+    return buffer;
 }
 
 } // namespace KDGpuExample

@@ -14,6 +14,9 @@
 #include <KDGpu/instance.h>
 #include <KDGpu/vulkan/vulkan_graphics_api.h>
 
+#include <KDUtils/file.h>
+#include <KDUtils/dir.h>
+
 #include <array>
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
@@ -29,6 +32,24 @@ inline std::string assetPath()
 #else
     return "";
 #endif
+}
+
+std::vector<uint32_t> readShaderFile(const std::string &filename)
+{
+    using namespace KDUtils;
+
+    File file(File::exists(filename) ? filename : Dir::applicationDir().absoluteFilePath(filename));
+
+    if (!file.open(std::ios::in | std::ios::binary)) {
+        SPDLOG_CRITICAL("Failed to open file {}", filename);
+        throw std::runtime_error("Failed to open file");
+    }
+
+    const ByteArray fileContent = file.readAll();
+    std::vector<uint32_t> buffer(fileContent.size() / 4);
+    std::memcpy(buffer.data(), fileContent.data(), fileContent.size());
+
+    return buffer;
 }
 
 Format selectDepthFormat(Adapter *adapter)
@@ -64,10 +85,10 @@ TEST_SUITE("GraphicsPipeline")
     Device device = adapter->createDevice(DeviceOptions{ .requestedFeatures = adapter->features() });
 
     const auto vertexShaderPath = assetPath() + "/shaders/tests/graphics_pipeline/triangle.vert.spv";
-    auto vertexShader = device.createShaderModule(KDGpu::readShaderFile(vertexShaderPath));
+    auto vertexShader = device.createShaderModule(readShaderFile(vertexShaderPath));
 
     const auto fragmentShaderPath = assetPath() + "/shaders/tests/graphics_pipeline/triangle.frag.spv";
-    auto fragmentShader = device.createShaderModule(KDGpu::readShaderFile(fragmentShaderPath));
+    auto fragmentShader = device.createShaderModule(readShaderFile(fragmentShaderPath));
 
     TEST_CASE("Construction")
     {

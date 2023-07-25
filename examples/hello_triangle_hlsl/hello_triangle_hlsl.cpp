@@ -11,6 +11,7 @@
 #include "hello_triangle_hlsl.h"
 
 #include <KDGpuExample/engine.h>
+#include <KDGpuExample/kdgpuexample.h>
 
 #include <KDGpu/bind_group_layout_options.h>
 #include <KDGpu/bind_group_options.h>
@@ -124,10 +125,10 @@ void HelloTriangle::initializeScene()
     // Create a vertex shader and fragment shader
     //![8]
     const auto vsShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_triangle_hlsl/hello_triangle.vs.spv";
-    auto vsShader = m_device.createShaderModule(KDGpu::readShaderFile(vsShaderPath));
+    auto vsShader = m_device.createShaderModule(KDGpuExample::readShaderFile(vsShaderPath));
 
     const auto psShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_triangle_hlsl/hello_triangle.ps.spv";
-    auto psShader = m_device.createShaderModule(KDGpu::readShaderFile(psShaderPath));
+    auto psShader = m_device.createShaderModule(KDGpuExample::readShaderFile(psShaderPath));
     //![8]
 
     //![9]

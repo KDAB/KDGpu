@@ -16,7 +16,7 @@ function(add_kdgpu_test NAME SOURCES)
     set(TARGET_NAME test_kdgpu_${NAME})
     add_executable(${TARGET_NAME} ${SOURCES})
 
-    target_link_libraries(${TARGET_NAME} KDGpu)
+    target_link_libraries(${TARGET_NAME} KDGpu KDUtils::KDUtils)
 
     add_test(NAME ${TARGET_NAME} COMMAND $<TARGET_FILE:${TARGET_NAME}>)
     set_tests_properties(${TARGET_NAME} PROPERTIES LABELS "KDGpu")

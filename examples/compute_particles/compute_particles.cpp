@@ -11,6 +11,7 @@
 #include "compute_particles.h"
 
 #include <KDGpuExample/engine.h>
+#include <KDGpuExample/kdgpuexample.h>
 
 #include <KDGpu/bind_group_layout_options.h>
 #include <KDGpu/bind_group_options.h>
@@ -126,7 +127,7 @@ void ComputeParticles::initializeScene()
         // Create a compute shader (spir-v only for now)
         //![5]
         const auto computeShaderPath = KDGpu::assetPath() + "/shaders/examples/compute_particles/particles.comp.spv";
-        auto computeShader = m_device.createShaderModule(KDGpu::readShaderFile(computeShaderPath));
+        auto computeShader = m_device.createShaderModule(KDGpuExample::readShaderFile(computeShaderPath));
         //![5]
 
         // Create bind group layout consisting of a single binding holding a SSBO
@@ -175,10 +176,10 @@ void ComputeParticles::initializeScene()
     auto initializeGraphicsPipeline = [this]() {
         // Create a vertex shader and fragment shader (spir-v only for now)
         const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/compute_particles/triangle.vert.spv";
-        auto vertexShader = m_device.createShaderModule(KDGpu::readShaderFile(vertexShaderPath));
+        auto vertexShader = m_device.createShaderModule(KDGpuExample::readShaderFile(vertexShaderPath));
 
         const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/compute_particles/triangle.frag.spv";
-        auto fragmentShader = m_device.createShaderModule(KDGpu::readShaderFile(fragmentShaderPath));
+        auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
 
         // Create a pipeline layout (array of bind group layouts)
         const PipelineLayoutOptions pipelineLayoutOptions = {};

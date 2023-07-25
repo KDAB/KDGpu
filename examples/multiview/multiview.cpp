@@ -11,6 +11,7 @@
 #include "multiview.h"
 
 #include <KDGpuExample/engine.h>
+#include <KDGpuExample/kdgpuexample.h>
 
 #include <KDGpu/buffer_options.h>
 #include <KDGpu/texture_options.h>
@@ -145,10 +146,10 @@ void MultiView::initializeMultiViewPass()
 
     // Create a vertex shader and fragment shader (spir-v only for now)
     const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/multiview/rotating_triangle.vert.spv";
-    auto vertexShader = m_device.createShaderModule(KDGpu::readShaderFile(vertexShaderPath));
+    auto vertexShader = m_device.createShaderModule(KDGpuExample::readShaderFile(vertexShaderPath));
 
     const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/multiview/rotating_triangle.frag.spv";
-    auto fragmentShader = m_device.createShaderModule(KDGpu::readShaderFile(fragmentShaderPath));
+    auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
 
     //![4]
     // Create a pipeline layout (array of bind group layouts)
@@ -216,10 +217,10 @@ void MultiView::initializeFullScreenPass()
 
     // Create a vertex shader and fragment shader for fullscreen quad
     const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/multiview/fullscreenquad.vert.spv";
-    auto vertexShader = m_device.createShaderModule(KDGpu::readShaderFile(vertexShaderPath));
+    auto vertexShader = m_device.createShaderModule(KDGpuExample::readShaderFile(vertexShaderPath));
 
     const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/multiview/fullscreenquad.frag.spv";
-    auto fragmentShader = m_device.createShaderModule(KDGpu::readShaderFile(fragmentShaderPath));
+    auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
 
     // Create a pipeline
     m_fsqPipeline = m_device.createGraphicsPipeline(GraphicsPipelineOptions{

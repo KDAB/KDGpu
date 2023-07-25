@@ -17,6 +17,9 @@
 #include <KDGpu/instance.h>
 #include <KDGpu/vulkan/vulkan_graphics_api.h>
 
+#include <KDUtils/file.h>
+#include <KDUtils/dir.h>
+
 #include <type_traits>
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
@@ -32,6 +35,24 @@ inline std::string assetPath()
 #else
     return "";
 #endif
+}
+
+std::vector<uint32_t> readShaderFile(const std::string &filename)
+{
+    using namespace KDUtils;
+
+    File file(File::exists(filename) ? filename : Dir::applicationDir().absoluteFilePath(filename));
+
+    if (!file.open(std::ios::in | std::ios::binary)) {
+        SPDLOG_CRITICAL("Failed to open file {}", filename);
+        throw std::runtime_error("Failed to open file");
+    }
+
+    const ByteArray fileContent = file.readAll();
+    std::vector<uint32_t> buffer(fileContent.size() / 4);
+    std::memcpy(buffer.data(), fileContent.data(), fileContent.size());
+
+    return buffer;
 }
 } // namespace
 
@@ -70,7 +91,7 @@ TEST_CASE("ComputePassCommandRecorder")
     }
 
     const auto computeShaderPath = assetPath() + "/shaders/tests/compute_pipeline/empty_compute.comp.spv";
-    auto computeShader = device.createShaderModule(KDGpu::readShaderFile(computeShaderPath));
+    auto computeShader = device.createShaderModule(readShaderFile(computeShaderPath));
 
     // THEN
     REQUIRE(device.isValid());

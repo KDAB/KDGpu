@@ -31,6 +31,9 @@
 #include <KDGui/gui_application.h>
 #include <KDGui/window.h>
 
+#include <KDUtils/file.h>
+#include <KDUtils/dir.h>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -68,6 +71,28 @@ inline std::string assetPath()
 }
 
 } // namespace KDGpu
+
+namespace {
+
+std::vector<uint32_t> readShaderFile(const std::string &filename)
+{
+    using namespace KDUtils;
+
+    File file(File::exists(filename) ? filename : Dir::applicationDir().absoluteFilePath(filename));
+
+    if (!file.open(std::ios::in | std::ios::binary)) {
+        SPDLOG_CRITICAL("Failed to open file {}", filename);
+        throw std::runtime_error("Failed to open file");
+    }
+
+    const ByteArray fileContent = file.readAll();
+    std::vector<uint32_t> buffer(fileContent.size() / 4);
+    std::memcpy(buffer.data(), fileContent.data(), fileContent.size());
+
+    return buffer;
+}
+
+} // namespace
 
 int main()
 {
@@ -246,10 +271,10 @@ int main()
 
     // Create a vertex shader and fragment shader (spir-v only for now)
     const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_triangle_native/hello_triangle.vert.spv";
-    ShaderModule vertexShader = device.createShaderModule(KDGpu::readShaderFile(vertexShaderPath));
+    ShaderModule vertexShader = device.createShaderModule(readShaderFile(vertexShaderPath));
 
     const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_triangle_native/hello_triangle.frag.spv";
-    ShaderModule fragmentShader = device.createShaderModule(KDGpu::readShaderFile(fragmentShaderPath));
+    ShaderModule fragmentShader = device.createShaderModule(readShaderFile(fragmentShaderPath));
 
     BindGroupLayout bindGroupLayout = device.createBindGroupLayout(BindGroupLayoutOptions{
             .bindings = {

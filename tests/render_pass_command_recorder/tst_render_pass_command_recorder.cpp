@@ -21,6 +21,9 @@
 #include <KDGpu/device_options.h>
 #include <KDGpu/vulkan/vulkan_graphics_api.h>
 
+#include <KDUtils/file.h>
+#include <KDUtils/dir.h>
+
 #include <type_traits>
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
@@ -36,6 +39,24 @@ inline std::string assetPath()
 #else
     return "";
 #endif
+}
+
+std::vector<uint32_t> readShaderFile(const std::string &filename)
+{
+    using namespace KDUtils;
+
+    File file(File::exists(filename) ? filename : Dir::applicationDir().absoluteFilePath(filename));
+
+    if (!file.open(std::ios::in | std::ios::binary)) {
+        SPDLOG_CRITICAL("Failed to open file {}", filename);
+        throw std::runtime_error("Failed to open file");
+    }
+
+    const ByteArray fileContent = file.readAll();
+    std::vector<uint32_t> buffer(fileContent.size() / 4);
+    std::memcpy(buffer.data(), fileContent.data(), fileContent.size());
+
+    return buffer;
 }
 } // namespace
 
@@ -54,10 +75,10 @@ TEST_SUITE("RenderPassCommandRecorder")
         Device device = discreteGPUAdapter->createDevice();
 
         const auto vertexShaderPath = assetPath() + "/shaders/tests/render_pass_command_recorder/triangle.vert.spv";
-        auto vertexShader = device.createShaderModule(KDGpu::readShaderFile(vertexShaderPath));
+        auto vertexShader = device.createShaderModule(readShaderFile(vertexShaderPath));
 
         const auto fragmentShaderPath = assetPath() + "/shaders/tests/render_pass_command_recorder/triangle.frag.spv";
-        auto fragmentShader = device.createShaderModule(KDGpu::readShaderFile(fragmentShaderPath));
+        auto fragmentShader = device.createShaderModule(readShaderFile(fragmentShaderPath));
 
         const Texture colorTexture = device.createTexture(TextureOptions{
                 .type = TextureType::TextureType2D,
@@ -191,10 +212,10 @@ TEST_SUITE("RenderPassCommandRecorder")
         });
 
         const auto vertexShaderPath = assetPath() + "/shaders/tests/render_pass_command_recorder/triangle-multi-view.vert.spv";
-        auto vertexShader = device.createShaderModule(KDGpu::readShaderFile(vertexShaderPath));
+        auto vertexShader = device.createShaderModule(readShaderFile(vertexShaderPath));
 
         const auto fragmentShaderPath = assetPath() + "/shaders/tests/render_pass_command_recorder/triangle-multi-view.frag.spv";
-        auto fragmentShader = device.createShaderModule(KDGpu::readShaderFile(fragmentShaderPath));
+        auto fragmentShader = device.createShaderModule(readShaderFile(fragmentShaderPath));
 
         const Texture colorTexture = device.createTexture(TextureOptions{
                 .type = TextureType::TextureType2D,

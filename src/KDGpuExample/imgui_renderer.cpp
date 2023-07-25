@@ -65,7 +65,7 @@ struct VertexImGui {
     }
 };
 
-std::vector<uint32_t> readShaderFile(cmrc::embedded_filesystem &fs, const std::string &filename)
+std::vector<uint32_t> readShaderFileFromCmrc(cmrc::embedded_filesystem &fs, const std::string &filename)
 {
     auto file = fs.open(filename);
     const std::size_t byteSize = file.size();
@@ -111,9 +111,9 @@ void ImGuiRenderer::initialize(KDGpu::SampleCountFlagBits samples, KDGpu::Format
 {
     {
         auto fs = cmrc::KDGpuExample::ShaderResources::get_filesystem();
-        const auto vertShaderCode = readShaderFile(fs, "imgui.vert.spv");
+        const auto vertShaderCode = readShaderFileFromCmrc(fs, "imgui.vert.spv");
         m_vertexShader = m_device->createShaderModule(vertShaderCode);
-        const auto fragShaderCode = readShaderFile(fs, "imgui.frag.spv");
+        const auto fragShaderCode = readShaderFileFromCmrc(fs, "imgui.frag.spv");
         m_fragmentShader = m_device->createShaderModule(fragShaderCode);
     }
 

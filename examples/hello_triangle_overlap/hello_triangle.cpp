@@ -11,6 +11,7 @@
 #include "hello_triangle.h"
 
 #include <KDGpuExample/engine.h>
+#include <KDGpuExample/kdgpuexample.h>
 
 #include <KDGpu/buffer_options.h>
 #include <KDGpu/graphics_pipeline_options.h>
@@ -95,10 +96,10 @@ void HelloTriangle::initializeScene()
 
     // Create a vertex shader and fragment shader
     const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_triangle_overlap/hello_triangle.vert.spv";
-    auto vertexShader = m_device.createShaderModule(KDGpu::readShaderFile(vertexShaderPath));
+    auto vertexShader = m_device.createShaderModule(KDGpuExample::readShaderFile(vertexShaderPath));
 
     const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_triangle_overlap/hello_triangle.frag.spv";
-    auto fragmentShader = m_device.createShaderModule(KDGpu::readShaderFile(fragmentShaderPath));
+    auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
 
     // Create a pipeline layout (array of bind group layouts)
     const PipelineLayoutOptions pipelineLayoutOptions = {

@@ -52,6 +52,4 @@ private:
     friend class Device;
 };
 
-KDGPU_EXPORT std::vector<uint32_t> readShaderFile(const std::string &filename);
-
 } // namespace KDGpu

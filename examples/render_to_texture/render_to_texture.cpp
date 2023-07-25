@@ -11,6 +11,7 @@
 #include "render_to_texture.h"
 
 #include <KDGpuExample/engine.h>
+#include <KDGpuExample/kdgpuexample.h>
 #include <KDGpuExample/imgui_item.h>
 
 #include <KDGpu/bind_group_layout_options.h>
@@ -151,10 +152,10 @@ void RenderToTexture::initializeMainScene()
 
     // Create a vertex shader and fragment shader (spir-v only for now)
     const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/render_to_texture/rotating_triangle.vert.spv";
-    auto vertexShader = m_device.createShaderModule(KDGpu::readShaderFile(vertexShaderPath));
+    auto vertexShader = m_device.createShaderModule(KDGpuExample::readShaderFile(vertexShaderPath));
 
     const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/render_to_texture/rotating_triangle.frag.spv";
-    auto fragmentShader = m_device.createShaderModule(KDGpu::readShaderFile(fragmentShaderPath));
+    auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
 
     // Create bind group layout consisting of a single binding holding a UBO
     // clang-format off
@@ -250,10 +251,10 @@ void RenderToTexture::initializePostProcess()
     // Create a vertex shader and fragment shader (spir-v only for now)
     //![3]
     const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/render_to_texture/desaturate.vert.spv";
-    auto vertexShader = m_device.createShaderModule(KDGpu::readShaderFile(vertexShaderPath));
+    auto vertexShader = m_device.createShaderModule(KDGpuExample::readShaderFile(vertexShaderPath));
 
     const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/render_to_texture/desaturate.frag.spv";
-    auto fragmentShader = m_device.createShaderModule(KDGpu::readShaderFile(fragmentShaderPath));
+    auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
     //![3]
 
     // Create bind group layout consisting of a single binding holding the texture the 1st pass rendered to

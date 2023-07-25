@@ -11,6 +11,7 @@
 #include "dynamic_ubo_triangles.h"
 
 #include <KDGpuExample/engine.h>
+#include <KDGpuExample/kdgpuexample.h>
 
 #include <KDGpu/bind_group_layout_options.h>
 #include <KDGpu/bind_group_options.h>
@@ -97,10 +98,10 @@ void DynamicUBOTriangles::initializeScene()
 
     // Create a vertex shader and fragment shader (spir-v only for now)
     const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/dynamic_ubo/dynamic_ubo.vert.spv";
-    auto vertexShader = m_device.createShaderModule(KDGpu::readShaderFile(vertexShaderPath));
+    auto vertexShader = m_device.createShaderModule(KDGpuExample::readShaderFile(vertexShaderPath));
 
     const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/dynamic_ubo/dynamic_ubo.frag.spv";
-    auto fragmentShader = m_device.createShaderModule(KDGpu::readShaderFile(fragmentShaderPath));
+    auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
 
     //![4]
     // Create bind group layout consisting of a single binding holding a UBO

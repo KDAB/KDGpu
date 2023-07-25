@@ -74,7 +74,13 @@ add_library(
     KDGpu::KDGpuExample ALIAS KDGpuExample
 )
 
-set(KDGPUEXAMPLE_PUBLIC_LIBS KDGpu::KDGpu KDUtils::KDGui KDGpu::imgui KDGpu::KDGpuKDGui)
+set(KDGPUEXAMPLE_PUBLIC_LIBS
+    KDGpu::KDGpu
+    KDUtils::KDGui
+    KDUtils::KDUtils
+    KDGpu::imgui
+    KDGpu::KDGpuKDGui
+)
 
 target_compile_definitions(KDGpuExample PRIVATE KDGPUEXAMPLE_ASSET_PATH="${CMAKE_INSTALL_FULL_DATADIR}/assets")
 
