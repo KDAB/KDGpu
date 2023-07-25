@@ -109,7 +109,7 @@ protected:
     uint32_t m_inFlightIndex{ 0 };
     std::array<GpuSemaphore, MAX_FRAMES_IN_FLIGHT> m_presentCompleteSemaphores;
     std::array<GpuSemaphore, MAX_FRAMES_IN_FLIGHT> m_renderCompleteSemaphores;
-    TextureUsageFlags m_depthTextureUsgageFlags;
+    TextureUsageFlags m_depthTextureUsageFlags;
 
     std::vector<UploadStagingBuffer> m_stagingBuffers;
 
