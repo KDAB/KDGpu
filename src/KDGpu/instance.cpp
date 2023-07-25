@@ -146,6 +146,9 @@ AdapterAndDevice Instance::createDefaultDevice(const Surface &surface,
         return {};
     }
 
+    const bool supportsMultiView = selectedAdapter->features().multiView;
+    SPDLOG_LOGGER_INFO(Logger::logger(), "Supports multiview: {}", supportsMultiView);
+
     // Now we can create a device from the selected adapter that we can then use to interact with the GPU.
     auto device = selectedAdapter->createDevice(DeviceOptions{
             .requestedFeatures = selectedAdapter->features() });

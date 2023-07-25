@@ -373,7 +373,7 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     VkPhysicalDeviceSynchronization2FeaturesKHR sync2Features = {};
     sync2Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES_KHR;
     sync2Features.synchronization2 = true;
-    stdLayoutFeatures.pNext = &sync2Features;
+    multiViewFeatures.pNext = &sync2Features;
 #endif
 
     VkDeviceCreateInfo createInfo = {};
