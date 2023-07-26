@@ -46,7 +46,7 @@ ImGuiInputHandler::ImGuiInputHandler()
     io.KeyMap[ImGuiKey_Insert] = mapSpecialKey(Key_Insert);
     io.KeyMap[ImGuiKey_Delete] = mapSpecialKey(Key_Delete);
     io.KeyMap[ImGuiKey_Backspace] = mapSpecialKey(Key_Backspace);
-    io.KeyMap[ImGuiKey_Space] = Key_Space; // This is in the ASCII range of Serenity::key. No need to map.
+    io.KeyMap[ImGuiKey_Space] = Key_Space; // This is in the ASCII range of KDGui::key. No need to map.
     io.KeyMap[ImGuiKey_Enter] = mapSpecialKey(Key_Enter);
     io.KeyMap[ImGuiKey_Escape] = mapSpecialKey(Key_Escape);
     io.KeyMap[ImGuiKey_KeyPadEnter] = mapSpecialKey(Key_NumPad_Enter);

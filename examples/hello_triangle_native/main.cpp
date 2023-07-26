@@ -103,7 +103,7 @@ int main()
     // Request an instance of the api with whatever layers and extensions we wish to request.
     Instance instance = api->createInstance(InstanceOptions{
             .applicationName = "hello_triangle_native",
-            .applicationVersion = SERENITY_MAKE_API_VERSION(0, 1, 0, 0),
+            .applicationVersion = KDGPU_MAKE_API_VERSION(0, 1, 0, 0),
     });
 
     // Create a window and platform surface from it suitable for use with our chosen graphics API.

@@ -24,7 +24,7 @@ TEST_SUITE("Sampler")
     std::unique_ptr<GraphicsApi> api = std::make_unique<VulkanGraphicsApi>();
     Instance instance = api->createInstance(InstanceOptions{
             .applicationName = "sampler",
-            .applicationVersion = SERENITY_MAKE_API_VERSION(0, 1, 0, 0) });
+            .applicationVersion = KDGPU_MAKE_API_VERSION(0, 1, 0, 0) });
     Adapter *discreteGPUAdapter = instance.selectAdapter(AdapterDeviceType::Default);
     Device device = discreteGPUAdapter->createDevice();
 

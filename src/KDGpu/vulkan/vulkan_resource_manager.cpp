@@ -289,7 +289,7 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
         queueCreateInfos.push_back(queueCreateInfo);
     }
 
-    // Request the physical device features that Serenity typically wants
+    // Request the physical device features requested by options
     VkPhysicalDeviceFeatures deviceFeatures = {};
     {
         deviceFeatures.robustBufferAccess = options.requestedFeatures.robustBufferAccess;

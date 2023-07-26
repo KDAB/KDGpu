@@ -161,7 +161,7 @@ void ExampleEngineLayer::onAttached()
     // Request an instance of the api with whatever layers and extensions we wish to request.
     InstanceOptions instanceOptions = {
         .applicationName = KDGui::GuiApplication::instance()->applicationName(),
-        .applicationVersion = SERENITY_MAKE_API_VERSION(0, 1, 0, 0)
+        .applicationVersion = KDGPU_MAKE_API_VERSION(0, 1, 0, 0)
     };
     m_instance = m_api->createInstance(instanceOptions);
 

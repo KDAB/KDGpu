@@ -35,7 +35,7 @@ TEST_SUITE("Instance")
         // WHEN
         Instance instance = api->createInstance(InstanceOptions{
                 .applicationName = "instance",
-                .applicationVersion = SERENITY_MAKE_API_VERSION(0, 1, 0, 0) });
+                .applicationVersion = KDGPU_MAKE_API_VERSION(0, 1, 0, 0) });
 
         // THEN
         CHECK(instance.isValid());
@@ -162,7 +162,7 @@ TEST_SUITE("Instance")
 
         const InstanceOptions options{
             .applicationName = "instance",
-            .applicationVersion = SERENITY_MAKE_API_VERSION(0, 1, 0, 0)
+            .applicationVersion = KDGPU_MAKE_API_VERSION(0, 1, 0, 0)
         };
 
         Handle<Instance_t> handle;

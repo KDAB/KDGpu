@@ -35,8 +35,8 @@ struct Instance_t;
     @headerfile instance.h <KDGpu/instance.h>
  */
 struct InstanceOptions {
-    std::string applicationName{ "Serenity Application" };
-    uint32_t applicationVersion{ SERENITY_MAKE_API_VERSION(0, 1, 0, 0) };
+    std::string applicationName{ "KDGpu Application" };
+    uint32_t applicationVersion{ KDGPU_MAKE_API_VERSION(0, 1, 0, 0) };
     std::vector<std::string> layers;
     std::vector<std::string> extensions;
 };

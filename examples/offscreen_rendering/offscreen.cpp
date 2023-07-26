@@ -92,7 +92,7 @@ Offscreen::Offscreen()
 {
     m_instance = m_api->createInstance(InstanceOptions{
             .applicationName = "offscreen_rendering",
-            .applicationVersion = SERENITY_MAKE_API_VERSION(0, 1, 0, 0) });
+            .applicationVersion = KDGPU_MAKE_API_VERSION(0, 1, 0, 0) });
 
     auto adapter = m_instance.selectAdapter(AdapterDeviceType::Default);
     const auto adapterProperties = adapter->properties();

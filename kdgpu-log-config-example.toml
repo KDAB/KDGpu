@@ -39,7 +39,7 @@ level = "trace"
 [[sink]]
 name = "file_out"
 type = "basic_file_sink_st"
-filename = "serenity.log"
+filename = "kdgpu.log"
 truncate = true
 create_parent_dir = true
 level = "debug"
