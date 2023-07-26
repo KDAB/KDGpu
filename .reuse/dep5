@@ -9,7 +9,7 @@ Copyright: 2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.c
 License: MIT
 
 #misc documentation
-Files: README.md INSTALL.md docs/api/mkdocs/docs/using-kdgpu/index.md
+Files: README.md INSTALL.md ChangeLog docs/api/mkdocs/docs/using-kdgpu/index.md
 Copyright: 2022-2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
 License: MIT
 
