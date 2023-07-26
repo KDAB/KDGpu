@@ -263,24 +263,50 @@ void VulkanCommandRecorder::copyTextureToTexture(const TextureToTextureCopy &cop
 
 void VulkanCommandRecorder::memoryBarrier(const MemoryBarrierOptions &options)
 {
-    std::vector<VkMemoryBarrier> memoryBarriers;
+    auto vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
 
-    memoryBarriers.reserve(options.memoryBarriers.size());
-    for (const MemoryBarrier &b : options.memoryBarriers) {
-        VkMemoryBarrier barrier{};
-        barrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
-        barrier.srcAccessMask = accessFlagsToVkAccessFlagBits(b.srcMask);
-        barrier.dstAccessMask = accessFlagsToVkAccessFlagBits(b.dstMask);
-        memoryBarriers.push_back(barrier);
+#if defined(VK_KHR_synchronization2)
+    if (vulkanDevice->vkCmdPipelineBarrier2 != nullptr) {
+        std::vector<VkMemoryBarrier2KHR> memoryBarriers;
+        memoryBarriers.reserve(options.memoryBarriers.size());
+        for (const MemoryBarrier &b : options.memoryBarriers) {
+            VkMemoryBarrier2KHR barrier{};
+            barrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER_2_KHR;
+            barrier.srcStageMask = pipelineStageFlagsToVkPipelineStageFlagBits2(options.srcStages);
+            barrier.srcAccessMask = accessFlagsToVkAccessFlagBits2(b.srcMask);
+            barrier.dstStageMask = pipelineStageFlagsToVkPipelineStageFlagBits2(options.dstStages);
+            barrier.dstAccessMask = accessFlagsToVkAccessFlagBits2(b.dstMask);
+            memoryBarriers.push_back(barrier);
+        }
+
+        VkDependencyInfoKHR vkDependencyInfo = {};
+        vkDependencyInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO_KHR;
+        vkDependencyInfo.memoryBarrierCount = memoryBarriers.size();
+        vkDependencyInfo.pMemoryBarriers = memoryBarriers.data();
+
+        vulkanDevice->vkCmdPipelineBarrier2(commandBuffer, &vkDependencyInfo);
+    } else {
+#endif
+        std::vector<VkMemoryBarrier> memoryBarriers;
+        memoryBarriers.reserve(options.memoryBarriers.size());
+        for (const MemoryBarrier &b : options.memoryBarriers) {
+            VkMemoryBarrier barrier{};
+            barrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+            barrier.srcAccessMask = accessFlagsToVkAccessFlagBits(b.srcMask);
+            barrier.dstAccessMask = accessFlagsToVkAccessFlagBits(b.dstMask);
+            memoryBarriers.push_back(barrier);
+        }
+
+        vkCmdPipelineBarrier(commandBuffer,
+                             pipelineStageFlagsToVkPipelineStageFlagBits(options.srcStages),
+                             pipelineStageFlagsToVkPipelineStageFlagBits(options.dstStages),
+                             0, // None
+                             memoryBarriers.size(), memoryBarriers.data(),
+                             0, nullptr,
+                             0, nullptr);
+#if defined(VK_KHR_synchronization2)
     }
-
-    vkCmdPipelineBarrier(commandBuffer,
-                         pipelineStageFlagsToVkPipelineStageFlagBits(options.srcStages),
-                         pipelineStageFlagsToVkPipelineStageFlagBits(options.dstStages),
-                         0, // None
-                         memoryBarriers.size(), memoryBarriers.data(),
-                         0, nullptr,
-                         0, nullptr);
+#endif
 }
 
 // TODO: Implement an array version. Perhaps also a way to refer to the set of arguments via a
