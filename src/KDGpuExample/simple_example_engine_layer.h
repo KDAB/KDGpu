@@ -27,7 +27,7 @@ class KDGPUEXAMPLE_EXPORT SimpleExampleEngineLayer : public ExampleEngineLayer
 {
 public:
     SimpleExampleEngineLayer();
-    explicit SimpleExampleEngineLayer(const SampleCountFlagBits samples);
+    explicit SimpleExampleEngineLayer(SampleCountFlagBits samples, TextureUsageFlags depthTextureUsageFlags);
     ~SimpleExampleEngineLayer() override;
 
 protected:

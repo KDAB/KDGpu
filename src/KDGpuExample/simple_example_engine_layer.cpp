@@ -25,8 +25,8 @@ SimpleExampleEngineLayer::SimpleExampleEngineLayer()
 {
 }
 
-SimpleExampleEngineLayer::SimpleExampleEngineLayer(const SampleCountFlagBits samples)
-    : ExampleEngineLayer(samples)
+SimpleExampleEngineLayer::SimpleExampleEngineLayer(const SampleCountFlagBits samples, const TextureUsageFlags depthTextureUsageFlags)
+    : ExampleEngineLayer(samples, depthTextureUsageFlags)
 {
 }
 

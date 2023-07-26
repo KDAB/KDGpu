@@ -27,10 +27,11 @@
 
 namespace KDGpuExample {
 
-ExampleEngineLayer::ExampleEngineLayer(const SampleCountFlagBits samples)
+ExampleEngineLayer::ExampleEngineLayer(const SampleCountFlagBits samples, const TextureUsageFlags depthTextureUsageFlags)
     : EngineLayer()
     , m_api(std::make_unique<VulkanGraphicsApi>())
     , m_samples(samples)
+    , m_depthTextureUsageFlags(depthTextureUsageFlags)
 {
     m_logger = spdlog::get("engine");
     if (!m_logger)

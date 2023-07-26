@@ -59,7 +59,7 @@ constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;
 class KDGPUEXAMPLE_EXPORT ExampleEngineLayer : public EngineLayer
 {
 public:
-    ExampleEngineLayer(const SampleCountFlagBits samples = SampleCountFlagBits::Samples1Bit);
+    ExampleEngineLayer(const SampleCountFlagBits samples = SampleCountFlagBits::Samples1Bit, const TextureUsageFlags depthTextureUsageFlags = {});
     ~ExampleEngineLayer() override;
 
     KDGpuKDGui::View *window() { return m_window.get(); }
