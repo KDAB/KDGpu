@@ -12,6 +12,7 @@
 
 #include <KDGpuExample/kdgpuexample_export.h>
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
