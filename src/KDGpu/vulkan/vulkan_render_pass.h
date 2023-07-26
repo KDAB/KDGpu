@@ -77,6 +77,8 @@ struct VulkanRenderPassKey {
 
         const VulkanRenderPassKeyDepthStencilAttachment depthAttachmentKey(options.depthStencilAttachment);
         KDGpu::hash_combine(hash, depthAttachmentKey.hash);
+        KDGpu::hash_combine(hash, options.samples);
+        KDGpu::hash_combine(hash, options.viewCount);
     }
 
     bool operator==(const VulkanRenderPassKey &other) const noexcept
