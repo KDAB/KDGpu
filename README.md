@@ -22,6 +22,8 @@ native APIs or you can checkout the included KDGpuExample library which makes it
 use KDGpu with KDGui::Window. Check out the handy [KDBindings](https://github.com/KDAB/KDBindings)
 repository too for some more syntactic sugar.
 
+More information can be found in the [documentation](https://docs.kdab.com/toy-renderer/unstable/index.html).
+
 ### What does KDGpu provide?
 
 - The KDGpu library
