@@ -31,6 +31,7 @@ repository too for some more syntactic sugar.
 
 ### How do I get up and running with KDGpu?
 
+- Install the [Vulkan SDK](https://vulkan.lunarg.com/)
 - Clone this repository
 - Open up the directory in VS Code with the CMakeTools extension loaded
 - Configure and Build - all of the dependencies will be pulled down via CMake's FetchContent feature
