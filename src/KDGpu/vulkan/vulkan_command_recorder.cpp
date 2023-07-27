@@ -261,6 +261,17 @@ void VulkanCommandRecorder::copyTextureToTexture(const TextureToTextureCopy &cop
                    vkRegions.data());
 }
 
+void VulkanCommandRecorder::updateBuffer(const BufferUpdate &update)
+{
+    VulkanBuffer *dstVulkanBuffer = vulkanResourceManager->getBuffer(update.dstBuffer);
+    // Note: to be used for update size smaller than 65536, we won't warn but Validation Layer should
+    vkCmdUpdateBuffer(commandBuffer,
+                      dstVulkanBuffer->buffer,
+                      update.dstOffset,
+                      update.byteSize,
+                      update.data);
+}
+
 void VulkanCommandRecorder::memoryBarrier(const MemoryBarrierOptions &options)
 {
     auto vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);

@@ -106,6 +106,13 @@ struct TextureResolveOptions {
     std::vector<TextureResolveRegion> regions;
 };
 
+struct BufferUpdate {
+    Handle<Buffer_t> dstBuffer;
+    DeviceSize dstOffset{ 0 };
+    const void *data{ nullptr };
+    DeviceSize byteSize{ 0 };
+};
+
 /**
  * @brief CommandRecorder
  * @ingroup public
@@ -133,6 +140,7 @@ public:
     void copyBufferToTexture(const BufferToTextureCopy &copy);
     void copyTextureToBuffer(const TextureToBufferCopy &copy);
     void copyTextureToTexture(const TextureToTextureCopy &copy);
+    void updateBuffer(const BufferUpdate &update);
     void memoryBarrier(const MemoryBarrierOptions &options);
     void bufferMemoryBarrier(const BufferMemoryBarrierOptions &options);
     void textureMemoryBarrier(const TextureMemoryBarrierOptions &options);
