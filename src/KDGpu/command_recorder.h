@@ -120,6 +120,21 @@ struct BufferClear {
     uint32_t clearValue{ 0 };
 };
 
+struct ClearColorTexture {
+    Handle<Texture_t> texture;
+    TextureLayout layout{ TextureLayout::ColorAttachmentOptimal };
+    ColorClearValue clearValue;
+    std::vector<TextureSubresourceRange> ranges;
+};
+
+struct ClearDepthStencilTexture {
+    Handle<Texture_t> texture;
+    TextureLayout layout{ TextureLayout::DepthStencilAttachmentOptimal };
+    float depthClearValue{ 1.0f };
+    uint32_t stencilClearValue{ 0 };
+    std::vector<TextureSubresourceRange> ranges;
+};
+
 /**
  * @brief CommandRecorder
  * @ingroup public
@@ -144,6 +159,8 @@ public:
     ComputePassCommandRecorder beginComputePass(const ComputePassCommandRecorderOptions &options = {});
     void blitTexture(const TextureBlitOptions &options);
     void clearBuffer(const BufferClear &clear);
+    void clearColorTexture(const ClearColorTexture &clear);
+    void clearDepthStencilTexture(const ClearDepthStencilTexture &clear);
     void copyBuffer(const BufferCopy &copy);
     void copyBufferToTexture(const BufferToTextureCopy &copy);
     void copyTextureToBuffer(const TextureToBufferCopy &copy);

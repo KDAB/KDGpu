@@ -165,6 +165,27 @@ std::vector<VkImageResolve> buildResolveRegions(const std::vector<KDGpu::Texture
     return vkRegions;
 }
 
+std::vector<VkImageSubresourceRange> buildImageSubresourceRanges(const std::vector<KDGpu::TextureSubresourceRange> &ranges)
+{
+    const uint32_t rangesCount = ranges.size();
+    std::vector<VkImageSubresourceRange> vkRanges;
+    vkRanges.reserve(rangesCount);
+
+    for (const KDGpu::TextureSubresourceRange &range : ranges) {
+        VkImageSubresourceRange vkRange{
+            .aspectMask = range.aspectMask.toInt(),
+            .baseMipLevel = range.baseMipLevel,
+            .levelCount = range.levelCount,
+            .baseArrayLayer = range.baseArrayLayer,
+            .layerCount = range.layerCount
+        };
+
+        vkRanges.emplace_back(std::move(vkRange));
+    }
+
+    return vkRanges;
+}
+
 } // namespace
 
 namespace KDGpu {
@@ -213,6 +234,38 @@ void VulkanCommandRecorder::clearBuffer(const BufferClear &clear)
                     dstBuf->buffer,
                     clear.dstOffset,
                     clear.byteSize, clear.clearValue);
+}
+
+void VulkanCommandRecorder::clearColorTexture(const ClearColorTexture &clear)
+{
+    VulkanTexture *texture = vulkanResourceManager->getTexture(clear.texture);
+    VkClearColorValue clearValue{};
+    std::memcpy(&clearValue.uint32[0], &clear.clearValue.uint32[0], 4 * sizeof(uint32_t));
+    const std::vector<VkImageSubresourceRange> vkRanges = buildImageSubresourceRanges(clear.ranges);
+
+    vkCmdClearColorImage(commandBuffer,
+                         texture->image,
+                         textureLayoutToVkImageLayout(clear.layout),
+                         &clearValue,
+                         vkRanges.size(),
+                         vkRanges.data());
+}
+
+void VulkanCommandRecorder::clearDepthStencilTexture(const ClearDepthStencilTexture &clear)
+{
+    VulkanTexture *texture = vulkanResourceManager->getTexture(clear.texture);
+    const VkClearDepthStencilValue clearValue{
+        .depth = clear.depthClearValue,
+        .stencil = clear.stencilClearValue,
+    };
+    const std::vector<VkImageSubresourceRange> vkRanges = buildImageSubresourceRanges(clear.ranges);
+
+    vkCmdClearDepthStencilImage(commandBuffer,
+                                texture->image,
+                                textureLayoutToVkImageLayout(clear.layout),
+                                &clearValue,
+                                vkRanges.size(),
+                                vkRanges.data());
 }
 
 void VulkanCommandRecorder::copyBuffer(const BufferCopy &copy)

@@ -23,6 +23,8 @@ struct BufferClear;
 struct BufferCopy;
 struct BufferUpdate;
 struct BufferToTextureCopy;
+struct ClearColorTexture;
+struct ClearDepthStencilTexture;
 struct TextureToBufferCopy;
 struct TextureToTextureCopy;
 struct TextureBlitOptions;
@@ -37,6 +39,8 @@ struct ApiCommandRecorder {
     virtual void begin() = 0;
     virtual void blitTexture(const TextureBlitOptions &options) = 0;
     virtual void clearBuffer(const BufferClear &clear) = 0;
+    virtual void clearColorTexture(const ClearColorTexture &clear) = 0;
+    virtual void clearDepthStencilTexture(const ClearDepthStencilTexture &clear) = 0;
     virtual void copyBuffer(const BufferCopy &copy) = 0;
     virtual void copyBufferToTexture(const BufferToTextureCopy &copy) = 0;
     virtual void copyTextureToBuffer(const TextureToBufferCopy &copy) = 0;

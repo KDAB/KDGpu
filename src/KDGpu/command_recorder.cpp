@@ -85,6 +85,18 @@ void CommandRecorder::clearBuffer(const BufferClear &clear)
     apiCommandRecorder->clearBuffer(clear);
 }
 
+void CommandRecorder::clearColorTexture(const ClearColorTexture &clear)
+{
+    auto apiCommandRecorder = m_api->resourceManager()->getCommandRecorder(m_commandRecorder);
+    apiCommandRecorder->clearColorTexture(clear);
+}
+
+void CommandRecorder::clearDepthStencilTexture(const ClearDepthStencilTexture &clear)
+{
+    auto apiCommandRecorder = m_api->resourceManager()->getCommandRecorder(m_commandRecorder);
+    apiCommandRecorder->clearDepthStencilTexture(clear);
+}
+
 void CommandRecorder::copyBuffer(const BufferCopy &copy)
 {
     auto apiCommandRecorder = m_api->resourceManager()->getCommandRecorder(m_commandRecorder);

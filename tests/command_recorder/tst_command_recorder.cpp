@@ -60,16 +60,20 @@ TEST_CASE("CommandRecorder")
     Device device = transferAdapter->createDevice();
 
     Queue transferQueue;
+    Queue graphicsQueue;
     const auto &queues = device.queues();
     for (const auto &q : queues) {
-        if (q.flags() | QueueFlags(QueueFlagBits::TransferBit)) {
+        if (q.flags() | QueueFlags(QueueFlagBits::TransferBit))
             transferQueue = q;
+        if (q.flags() | QueueFlags(QueueFlagBits::GraphicsBit))
+            graphicsQueue = q;
+        if (transferQueue.isValid() && graphicsQueue.isValid())
             break;
-        }
     }
 
     REQUIRE(device.isValid());
     REQUIRE(transferQueue.isValid());
+    REQUIRE(graphicsQueue.isValid());
 
     SUBCASE("A default constructed CommandRecorder is invalid")
     {
@@ -850,5 +854,120 @@ TEST_CASE("CommandRecorder")
 
         // THEN
         CHECK(api->resourceManager()->getCommandRecorder(recorderHandle) == nullptr);
+    }
+
+    SUBCASE("Clear Color Texture")
+    {
+        // GIVEN
+        const Texture colorTexture = device.createTexture(TextureOptions{
+                .type = TextureType::TextureType2D,
+                .format = Format::R8G8B8A8_UNORM,
+                .extent = { 256, 256, 1 },
+                .mipLevels = 1,
+                .samples = SampleCountFlagBits::Samples1Bit,
+                .usage = TextureUsageFlagBits::ColorAttachmentBit | TextureUsageFlagBits::TransferDstBit,
+                .memoryUsage = MemoryUsage::GpuOnly,
+        });
+
+        // THEN
+        CHECK(colorTexture.isValid());
+
+        // WHEN
+        CommandRecorder c = device.createCommandRecorder();
+
+        c.textureMemoryBarrier(TextureMemoryBarrierOptions{
+                .srcStages = PipelineStageFlagBit::TransferBit,
+                .srcMask = AccessFlagBit::None,
+                .dstStages = PipelineStageFlagBit::TransferBit,
+                .dstMask = AccessFlagBit::TransferWriteBit,
+                .oldLayout = TextureLayout::Undefined,
+                .newLayout = TextureLayout::General,
+                .texture = colorTexture,
+                .range = {
+                        .aspectMask = TextureAspectFlagBits::ColorBit,
+                        .baseMipLevel = 0,
+                        .levelCount = 1,
+                },
+        });
+
+        c.clearColorTexture(ClearColorTexture{
+                .texture = colorTexture,
+                .layout = TextureLayout::General,
+                .clearValue = ColorClearValue{ .float32 = { 1.0f, 0.0f, 0.0f, 1.0f } },
+                .ranges = {
+                        TextureSubresourceRange{
+                                .aspectMask = TextureAspectFlagBits::ColorBit,
+                                .baseMipLevel = 0,
+                                .levelCount = 1,
+                        },
+                },
+        });
+
+        auto commandBuffer = c.finish();
+
+        graphicsQueue.submit(SubmitOptions{
+                .commandBuffers = { commandBuffer } });
+
+        device.waitUntilIdle();
+
+        // THEN -> No Validation Error and Doesn't crash
+    }
+
+    SUBCASE("Clear Depth Stencil Texture")
+    {
+        // GIVEN
+        const Texture depthTexture = device.createTexture(TextureOptions{
+                .type = TextureType::TextureType2D,
+                .format = Format::D24_UNORM_S8_UINT,
+                .extent = { 256, 256, 1 },
+                .mipLevels = 1,
+                .samples = SampleCountFlagBits::Samples1Bit,
+                .usage = TextureUsageFlagBits::DepthStencilAttachmentBit | TextureUsageFlagBits::TransferDstBit,
+                .memoryUsage = MemoryUsage::GpuOnly,
+        });
+
+        // THEN
+        CHECK(depthTexture.isValid());
+
+        // WHEN
+        CommandRecorder c = device.createCommandRecorder();
+
+        c.textureMemoryBarrier(TextureMemoryBarrierOptions{
+                .srcStages = PipelineStageFlagBit::TransferBit,
+                .srcMask = AccessFlagBit::None,
+                .dstStages = PipelineStageFlagBit::TransferBit,
+                .dstMask = AccessFlagBit::TransferWriteBit,
+                .oldLayout = TextureLayout::Undefined,
+                .newLayout = TextureLayout::General,
+                .texture = depthTexture,
+                .range = {
+                        .aspectMask = TextureAspectFlagBits::DepthBit | TextureAspectFlagBits::StencilBit,
+                        .baseMipLevel = 0,
+                        .levelCount = 1,
+                },
+        });
+
+        c.clearDepthStencilTexture(ClearDepthStencilTexture{
+                .texture = depthTexture,
+                .layout = TextureLayout::General,
+                .depthClearValue = 1.0,
+                .stencilClearValue = 0,
+                .ranges = {
+                        TextureSubresourceRange{
+                                .aspectMask = TextureAspectFlagBits::DepthBit | TextureAspectFlagBits::StencilBit,
+                                .baseMipLevel = 0,
+                                .levelCount = 1,
+                        },
+                },
+        });
+
+        auto commandBuffer = c.finish();
+
+        graphicsQueue.submit(SubmitOptions{
+                .commandBuffers = { commandBuffer } });
+
+        device.waitUntilIdle();
+
+        // THEN -> No Validation Error and Doesn't crash
     }
 }
