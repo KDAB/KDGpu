@@ -205,6 +205,16 @@ void VulkanCommandRecorder::blitTexture(const TextureBlitOptions &options)
                    filterModeToVkFilterMode(options.scalingFilter));
 }
 
+void VulkanCommandRecorder::clearBuffer(const BufferClear &clear)
+{
+    VulkanBuffer *dstBuf = vulkanResourceManager->getBuffer(clear.dstBuffer);
+
+    vkCmdFillBuffer(commandBuffer,
+                    dstBuf->buffer,
+                    clear.dstOffset,
+                    clear.byteSize, clear.clearValue);
+}
+
 void VulkanCommandRecorder::copyBuffer(const BufferCopy &copy)
 {
     VulkanBuffer *srcBuf = vulkanResourceManager->getBuffer(copy.src);

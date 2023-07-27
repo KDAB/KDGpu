@@ -19,6 +19,7 @@ namespace KDGpu {
 struct CommandBuffer_t;
 struct RenderPassCommandRecorder_t;
 struct MemoryBarrierOptions;
+struct BufferClear;
 struct BufferCopy;
 struct BufferUpdate;
 struct BufferToTextureCopy;
@@ -35,6 +36,7 @@ struct TextureResolveOptions;
 struct ApiCommandRecorder {
     virtual void begin() = 0;
     virtual void blitTexture(const TextureBlitOptions &options) = 0;
+    virtual void clearBuffer(const BufferClear &clear) = 0;
     virtual void copyBuffer(const BufferCopy &copy) = 0;
     virtual void copyBufferToTexture(const BufferToTextureCopy &copy) = 0;
     virtual void copyTextureToBuffer(const TextureToBufferCopy &copy) = 0;

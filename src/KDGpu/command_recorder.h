@@ -113,6 +113,13 @@ struct BufferUpdate {
     DeviceSize byteSize{ 0 };
 };
 
+struct BufferClear {
+    Handle<Buffer_t> dstBuffer;
+    DeviceSize dstOffset{ 0 };
+    DeviceSize byteSize{ 0 };
+    uint32_t clearValue{ 0 };
+};
+
 /**
  * @brief CommandRecorder
  * @ingroup public
@@ -136,6 +143,7 @@ public:
     RenderPassCommandRecorder beginRenderPass(const RenderPassCommandRecorderOptions &options);
     ComputePassCommandRecorder beginComputePass(const ComputePassCommandRecorderOptions &options = {});
     void blitTexture(const TextureBlitOptions &options);
+    void clearBuffer(const BufferClear &clear);
     void copyBuffer(const BufferCopy &copy);
     void copyBufferToTexture(const BufferToTextureCopy &copy);
     void copyTextureToBuffer(const TextureToBufferCopy &copy);

@@ -79,6 +79,12 @@ void CommandRecorder::blitTexture(const TextureBlitOptions &options)
     apiCommandRecorder->blitTexture(options);
 }
 
+void CommandRecorder::clearBuffer(const BufferClear &clear)
+{
+    auto apiCommandRecorder = m_api->resourceManager()->getCommandRecorder(m_commandRecorder);
+    apiCommandRecorder->clearBuffer(clear);
+}
+
 void CommandRecorder::copyBuffer(const BufferCopy &copy)
 {
     auto apiCommandRecorder = m_api->resourceManager()->getCommandRecorder(m_commandRecorder);

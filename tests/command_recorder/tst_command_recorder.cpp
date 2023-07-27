@@ -698,6 +698,121 @@ TEST_CASE("CommandRecorder")
         }
     }
 
+    SUBCASE("Clear Buffer")
+    {
+        // GIVEN
+        const BufferOptions gpuGpuBufferOptions = {
+            .size = 4 * sizeof(int),
+            .usage = BufferUsageFlagBits::TransferSrcBit | BufferUsageFlagBits::TransferDstBit,
+            .memoryUsage = MemoryUsage::GpuOnly
+        };
+        const BufferOptions gpuCpuBufferOptions = {
+            .size = 4 * sizeof(int),
+            .usage = BufferUsageFlagBits::TransferSrcBit | BufferUsageFlagBits::TransferDstBit,
+            .memoryUsage = MemoryUsage::GpuToCpu
+        };
+
+        // WHEN
+        Buffer gpuToGpu = device.createBuffer(gpuGpuBufferOptions);
+        Buffer gpuToCpu = device.createBuffer(gpuCpuBufferOptions);
+
+        // THEN
+        CHECK(gpuToGpu.isValid());
+        CHECK(gpuToCpu.isValid());
+
+        {
+            // WHEN
+            CommandRecorder c = device.createCommandRecorder();
+
+            c.clearBuffer(BufferClear{
+                    .dstBuffer = gpuToGpu,
+                    .dstOffset = 0,
+                    .byteSize = 4 * sizeof(int),
+                    .clearValue = 883,
+            });
+
+            // Barrier to ensure gpuToGpu memory operations are completed before commands that follow
+            c.memoryBarrier(MemoryBarrierOptions{
+                    .srcStages = PipelineStageFlags(PipelineStageFlagBit::TransferBit),
+                    .dstStages = PipelineStageFlags(PipelineStageFlagBit::TransferBit),
+                    .memoryBarriers = {
+                            { .srcMask = AccessFlags(AccessFlagBit::TransferReadBit) | AccessFlags(AccessFlagBit::TransferWriteBit),
+                              .dstMask = AccessFlags(AccessFlagBit::TransferReadBit) | AccessFlags(AccessFlagBit::TransferWriteBit) } } });
+
+            // Copy gpuGpu to gpuCpu
+            c.copyBuffer(BufferCopy{
+                    .src = gpuToGpu,
+                    .srcOffset = 0,
+                    .dst = gpuToCpu,
+                    .dstOffset = 0,
+                    .byteSize = 4 * sizeof(int) });
+
+            auto commandBuffer = c.finish();
+
+            transferQueue.submit(SubmitOptions{
+                    .commandBuffers = { commandBuffer } });
+
+            device.waitUntilIdle();
+
+            // THEN
+            const int *m = reinterpret_cast<const int *>(gpuToCpu.map());
+
+            CHECK(m != nullptr);
+            CHECK(m[0] == 883);
+            CHECK(m[1] == 883);
+            CHECK(m[2] == 883);
+            CHECK(m[3] == 883);
+
+            gpuToCpu.unmap();
+        }
+
+        {
+            // WHEN
+            CommandRecorder c = device.createCommandRecorder();
+
+            c.clearBuffer(BufferClear{
+                    .dstBuffer = gpuToGpu,
+                    .dstOffset = 2 * sizeof(int),
+                    .byteSize = 2 * sizeof(int),
+                    .clearValue = 1584,
+            });
+
+            // Barrier to ensure gpuToGpu memory operations are completed before commands that follow
+            c.memoryBarrier(MemoryBarrierOptions{
+                    .srcStages = PipelineStageFlags(PipelineStageFlagBit::TransferBit),
+                    .dstStages = PipelineStageFlags(PipelineStageFlagBit::TransferBit),
+                    .memoryBarriers = {
+                            { .srcMask = AccessFlags(AccessFlagBit::TransferReadBit) | AccessFlags(AccessFlagBit::TransferWriteBit),
+                              .dstMask = AccessFlags(AccessFlagBit::TransferReadBit) | AccessFlags(AccessFlagBit::TransferWriteBit) } } });
+
+            // Copy gpuGpu to gpuCpu
+            c.copyBuffer(BufferCopy{
+                    .src = gpuToGpu,
+                    .srcOffset = 0,
+                    .dst = gpuToCpu,
+                    .dstOffset = 0,
+                    .byteSize = 4 * sizeof(int) });
+
+            auto commandBuffer = c.finish();
+
+            transferQueue.submit(SubmitOptions{
+                    .commandBuffers = { commandBuffer } });
+
+            device.waitUntilIdle();
+
+            // THEN
+            const int *m = reinterpret_cast<const int *>(gpuToCpu.map());
+
+            CHECK(m != nullptr);
+            CHECK(m[0] == 883);
+            CHECK(m[1] == 883);
+            CHECK(m[2] == 1584);
+            CHECK(m[3] == 1584);
+
+            gpuToCpu.unmap();
+        }
+    }
+
     SUBCASE("Destruction - Going Out of Scope")
     {
         Handle<CommandRecorder_t> recorderHandle;
