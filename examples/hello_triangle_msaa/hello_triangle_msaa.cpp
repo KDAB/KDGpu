@@ -39,7 +39,7 @@ inline std::string assetPath()
 } // namespace KDGpu
 
 HelloTriangleMSAA::HelloTriangleMSAA()
-    : SimpleExampleEngineLayer(SampleCountFlagBits::Samples8Bit, {})
+    : SimpleExampleEngineLayer(SampleCountFlagBits::Samples8Bit)
 {
 }
 
