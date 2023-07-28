@@ -75,8 +75,10 @@ struct VulkanRenderPassKey {
             KDGpu::hash_combine(hash, colorAttachmentKey.hash);
         }
 
-        const VulkanRenderPassKeyDepthStencilAttachment depthAttachmentKey(options.depthStencilAttachment);
-        KDGpu::hash_combine(hash, depthAttachmentKey.hash);
+        if (options.depthStencilAttachment.view.isValid()) {
+            const VulkanRenderPassKeyDepthStencilAttachment depthAttachmentKey(options.depthStencilAttachment);
+            KDGpu::hash_combine(hash, depthAttachmentKey.hash);
+        }
         KDGpu::hash_combine(hash, options.samples);
         KDGpu::hash_combine(hash, options.viewCount);
     }

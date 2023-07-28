@@ -164,6 +164,84 @@ TEST_SUITE("RenderPassCommandRecorder")
             CHECK(renderPassRecorder.isValid());
         }
 
+        SUBCASE("Uses different RenderPasses if depth attachment is not used")
+        {
+            // GIVEN
+            CommandRecorder commandRecorder = device.createCommandRecorder();
+            const RenderPassCommandRecorderOptions renderPassOptionsWithDepth{
+                .colorAttachments = {
+                        { .view = colorTextureView,
+                          .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
+                          .finalLayout = TextureLayout::PresentSrc } },
+                .depthStencilAttachment = {
+                        .view = depthTextureView,
+                }
+            };
+            const RenderPassCommandRecorderOptions renderPassOptionsWithoutDepth{
+                .colorAttachments = {
+                        { .view = colorTextureView,
+                          .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
+                          .finalLayout = TextureLayout::PresentSrc } },
+            };
+
+            const GraphicsPipeline depthPipeline = device.createGraphicsPipeline(GraphicsPipelineOptions{
+                    .shaderStages = {
+                            { .shaderModule = vertexShader.handle(), .stage = ShaderStageFlagBits::VertexBit },
+                            { .shaderModule = fragmentShader.handle(), .stage = ShaderStageFlagBits::FragmentBit },
+                    },
+                    .layout = pipelineLayout.handle(),
+                    .vertex = {
+                            .buffers = {
+                                    { .binding = 0, .stride = 2 * 4 * sizeof(float) },
+                            },
+                            .attributes = {
+                                    { .location = 0, .binding = 0, .format = Format::R32G32B32A32_SFLOAT }, // Position
+                                    { .location = 1, .binding = 0, .format = Format::R32G32B32A32_SFLOAT, .offset = 4 * sizeof(float) }, // Color
+                            },
+                    },
+                    .renderTargets = {
+                            { .format = Format::R8G8B8A8_UNORM },
+                    },
+                    .depthStencil = { .format = Format::D24_UNORM_S8_UINT, .depthWritesEnabled = true, .depthCompareOperation = CompareOperation::Less },
+            });
+
+            const GraphicsPipeline noDepthPipeline = device.createGraphicsPipeline(GraphicsPipelineOptions{
+                    .shaderStages = {
+                            { .shaderModule = vertexShader.handle(), .stage = ShaderStageFlagBits::VertexBit },
+                            { .shaderModule = fragmentShader.handle(), .stage = ShaderStageFlagBits::FragmentBit },
+                    },
+                    .layout = pipelineLayout.handle(),
+                    .vertex = {
+                            .buffers = {
+                                    { .binding = 0, .stride = 2 * 4 * sizeof(float) },
+                            },
+                            .attributes = {
+                                    { .location = 0, .binding = 0, .format = Format::R32G32B32A32_SFLOAT }, // Position
+                                    { .location = 1, .binding = 0, .format = Format::R32G32B32A32_SFLOAT, .offset = 4 * sizeof(float) }, // Color
+                            },
+                    },
+                    .renderTargets = {
+                            { .format = Format::R8G8B8A8_UNORM },
+                    },
+            });
+
+            // WHEN
+            RenderPassCommandRecorder renderPassRecorderDepth = commandRecorder.beginRenderPass(renderPassOptionsWithDepth);
+            renderPassRecorderDepth.setPipeline(depthPipeline);
+            renderPassRecorderDepth.end();
+
+            RenderPassCommandRecorder renderPassRecorderNoDepth = commandRecorder.beginRenderPass(renderPassOptionsWithoutDepth);
+            renderPassRecorderNoDepth.setPipeline(noDepthPipeline);
+            renderPassRecorderNoDepth.end();
+
+            CommandBuffer commandBuffer = commandRecorder.finish();
+
+            // THEN
+            CHECK(commandRecorder.isValid());
+            CHECK(renderPassRecorderDepth.isValid());
+            CHECK(renderPassRecorderNoDepth.isValid());
+        }
+
         SUBCASE("Destruction")
         {
             // GIVEN
