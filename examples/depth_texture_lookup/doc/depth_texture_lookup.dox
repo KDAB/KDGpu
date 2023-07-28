@@ -1,0 +1,59 @@
+/*
+  This file is part of KDGpu.
+
+  SPDX-FileCopyrightText: 2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+
+  SPDX-License-Identifier: MIT
+
+  Contact KDAB at <info@kdab.com> for commercial licensing options.
+*/
+
+/**
+    @page depth_texture_lookup Depth Texture Lookup
+    @ingroup kdgpu-examples
+
+    @brief This example shows how to use multiple render passes to fill the depth buffer and subsequently sample from it.
+
+    First, we start by preparing resources for 3 render passes.
+
+    The first render pass will render a cube to the swapchain color attachment and a depth attachment.
+    We request attachments to be cleared when we begin this render pass.
+
+    @snippet depth_texture_lookup/depth_texture_lookup.cpp 1
+
+    The second render pass will clear the color attachment and sample from the previously filled depth buffer.
+    Note that this render pass has no depth attachment.
+    A BindGroup that can hold a CombinedImageSampler is allocated in order to feed the depth texture to the shader.
+
+    @snippet depth_texture_lookup/depth_texture_lookup.cpp 2
+
+    Next we prepare our last render pass which will use the color and depth attachments but won't clear any of these attachments.
+    This pass will only be used to render the ImGui overlay.
+
+    @snippet depth_texture_lookup/depth_texture_lookup.cpp 3
+
+    \section depth_texture_lookup_rendering Rendering
+
+    The rendering follows the same order as that of the render passes resources creation detailed above.
+
+    First we begin by updating the TextureView for the color attachment of each RenderPass options.
+
+    @snippet depth_texture_lookup/depth_texture_lookup.cpp 4
+
+    Then we start recording commands for the first RenderPass which draws a cube and fills up the depth attachment.
+
+    @snippet depth_texture_lookup/depth_texture_lookup.cpp 5
+
+    Next, we record commands for the depth lookup render pass which will draw a full screen quad and sample from the depth attachment.
+
+    Note that in order to be able to sample from the depth attachment we first have to transition the depth attachment texture from the DepthStencilAttachmentOptimal layout to the ShaderReadOnlyOptimal layout.
+
+    We don't update the bind group for this pass every frame but rather only when we know the depth texture has changed, which is every time the swapchain has been resized.
+
+    Subsequently, after having recorded the draw commands, we will transition back to the appropriate layout for the render pass that follows.
+
+    @snippet depth_texture_lookup/depth_texture_lookup.cpp 6
+
+    Lastly, we begin the overlay render pass and record the commands that draw up the overlay.
+
+*/

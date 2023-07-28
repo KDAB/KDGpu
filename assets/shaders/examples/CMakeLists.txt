@@ -7,6 +7,7 @@
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
 add_subdirectory(compute_particles)
+add_subdirectory(depth_texture_lookup)
 add_subdirectory(dynamic_ubo)
 add_subdirectory(hello_triangle_msaa)
 add_subdirectory(hello_triangle_native)

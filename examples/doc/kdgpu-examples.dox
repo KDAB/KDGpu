@@ -21,6 +21,7 @@
     - @subpage textured_quad
     - @subpage render_to_texture
     - @subpage compute_particles
+    - @subpage depth_texture_lookup
 
     \section native_examples Examples using the Native API
 
