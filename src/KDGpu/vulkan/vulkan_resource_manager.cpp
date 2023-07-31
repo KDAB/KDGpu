@@ -965,7 +965,7 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     depthStencil.depthBoundsTestEnable = VK_FALSE;
     depthStencil.minDepthBounds = 0.0f;
     depthStencil.maxDepthBounds = 1.0f;
-    depthStencil.stencilTestEnable = VK_FALSE;
+    depthStencil.stencilTestEnable = options.depthStencil.stencilTestEnabled;
     depthStencil.front = vkStencilOpStateFromStencilOperationOptions(options.depthStencil.stencilFront);
     depthStencil.back = vkStencilOpStateFromStencilOperationOptions(options.depthStencil.stencilBack);
 
