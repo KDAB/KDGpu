@@ -1102,6 +1102,18 @@ enum ResolveModeFlagBits : uint32_t {
 };
 using ResolveModeFlags = KDGpu::Flags<ResolveModeFlagBits>;
 
+enum class StencilFaceFlagBits {
+    FrontBit = 0x00000001,
+    BackBit = 0x00000002,
+    FrontAndBack = 0x00000003,
+    MaxEnum = 0x7fffffff
+};
+using StencilFaceFlags = KDGpu::Flags<StencilFaceFlagBits>;
+
+enum class DynamicState {
+    StencilReference = 8,
+};
+
 /*! @} */
 
 } // namespace KDGpu
@@ -1119,3 +1131,4 @@ OPERATORS_FOR_FLAGS(KDGpu::FormatFeatureFlags)
 OPERATORS_FOR_FLAGS(KDGpu::ExternalSemaphoreHandleTypeFlags)
 OPERATORS_FOR_FLAGS(KDGpu::ExternalMemoryHandleTypeFlags)
 OPERATORS_FOR_FLAGS(KDGpu::ResolveModeFlags)
+OPERATORS_FOR_FLAGS(KDGpu::StencilFaceFlags)

@@ -33,10 +33,13 @@ struct KDGPU_EXPORT VulkanGraphicsPipeline : public ApiGraphicsPipeline {
     explicit VulkanGraphicsPipeline(VkPipeline _pipeline,
                                     VulkanResourceManager *_vulkanResourceManager,
                                     const Handle<RenderPass_t> &_renderPassHandle,
+                                    const std::vector<VkDynamicState> &_enabledDynamicState,
                                     const Handle<Device_t> &_deviceHandle,
                                     const Handle<PipelineLayout_t> &_pipelineLayoutHandle);
 
     VkPipeline pipeline{ VK_NULL_HANDLE };
+    VkRenderPass renderPass{ VK_NULL_HANDLE };
+    std::vector<VkDynamicState> enabledDynamicState;
 
     VulkanResourceManager *vulkanResourceManager;
     Handle<RenderPass_t> renderPassHandle;

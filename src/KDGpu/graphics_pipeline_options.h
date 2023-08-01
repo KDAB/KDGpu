@@ -131,6 +131,11 @@ struct MultisampleOptions {
     friend bool operator==(const MultisampleOptions &, const MultisampleOptions &) = default;
 };
 
+struct DynamicStateOptions {
+    std::vector<DynamicState> enabledDynamicStates;
+    friend bool operator==(const DynamicStateOptions &, const DynamicStateOptions &) = default;
+};
+
 struct GraphicsPipelineOptions {
     std::vector<ShaderStage> shaderStages;
     Handle<PipelineLayout_t> layout;
@@ -140,6 +145,7 @@ struct GraphicsPipelineOptions {
     PrimitiveOptions primitive;
     MultisampleOptions multisample;
     uint32_t viewCount{ 1 };
+    DynamicStateOptions dynamicState;
 };
 
 } // namespace KDGpu

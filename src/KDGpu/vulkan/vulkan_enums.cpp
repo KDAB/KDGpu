@@ -380,4 +380,14 @@ VkResolveModeFlags resolveModesToVkResolveModes(ResolveModeFlags resolveFlags)
     return static_cast<VkResolveModeFlagBits>(static_cast<uint32_t>(resolveFlags.toInt()));
 }
 
+VkStencilFaceFlagBits stencilFaceToVkStencilFace(StencilFaceFlags flags)
+{
+    return static_cast<VkStencilFaceFlagBits>(flags.toInt());
+}
+
+VkDynamicState dynamicStateToVkDynamicState(DynamicState state)
+{
+    return static_cast<VkDynamicState>(state);
+}
+
 } // namespace KDGpu

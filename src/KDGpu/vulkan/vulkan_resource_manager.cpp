@@ -1002,6 +1002,10 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
         VK_DYNAMIC_STATE_SCISSOR
     };
 
+    for (auto dynamicState : options.dynamicState.enabledDynamicStates) {
+        dynamicStates.push_back(dynamicStateToVkDynamicState(dynamicState));
+    }
+
     VkPipelineDynamicStateCreateInfo dynamicStateInfo{};
     dynamicStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
     dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
@@ -1088,6 +1092,7 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
             vkPipeline,
             this,
             vulkanRenderPassHandle,
+            dynamicStates,
             deviceHandle,
             options.layout));
 

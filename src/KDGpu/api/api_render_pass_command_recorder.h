@@ -39,6 +39,7 @@ struct ApiRenderPassCommandRecorder {
                               const Handle<PipelineLayout_t> &pipelineLayout, const std::vector<uint32_t> &dynamicBufferOffsets) = 0;
     virtual void setViewport(const Viewport &viewport) = 0;
     virtual void setScissor(const Rect2D &scissor) = 0;
+    virtual void setStencilReference(StencilFaceFlags faceMask, int reference) = 0;
     virtual void draw(const DrawCommand &drawCommand) = 0;
     virtual void draw(const std::vector<DrawCommand> &drawCommands) = 0;
     virtual void drawIndexed(const DrawIndexedCommand &drawCommand) = 0;

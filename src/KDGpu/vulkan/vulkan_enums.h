@@ -121,4 +121,8 @@ VkResolveModeFlagBits resolveModeToVkResolveMode(ResolveModeFlagBits resolveFlag
 ResolveModeFlags vkResolveModesToResolveModes(VkResolveModeFlags resolveFlags);
 VkResolveModeFlags resolveModesToVkResolveModes(ResolveModeFlags resolveFlags);
 
+VkStencilFaceFlagBits stencilFaceToVkStencilFace(StencilFaceFlags flags);
+
+VkDynamicState dynamicStateToVkDynamicState(DynamicState state);
+
 } // namespace KDGpu

@@ -40,6 +40,7 @@ struct KDGPU_EXPORT VulkanRenderPassCommandRecorder : public ApiRenderPassComman
                       const Handle<PipelineLayout_t> &pipelineLayout, const std::vector<uint32_t> &dynamicBufferOffsets) final;
     void setViewport(const Viewport &viewport) final;
     void setScissor(const Rect2D &scissor) final;
+    void setStencilReference(StencilFaceFlags faceMask, int reference) final;
     void draw(const DrawCommand &drawCommand) final;
     void draw(const std::vector<DrawCommand> &drawCommands) final;
     void drawIndexed(const DrawIndexedCommand &drawCommand) final;

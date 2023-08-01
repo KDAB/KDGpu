@@ -93,6 +93,7 @@ public:
 
     void setViewport(const Viewport &viewport);
     void setScissor(const Rect2D &scissor);
+    void setStencilReference(StencilFaceFlags faceMask, int reference);
 
     void draw(const DrawCommand &drawCommand);
     void draw(const std::vector<DrawCommand> &drawCommands);

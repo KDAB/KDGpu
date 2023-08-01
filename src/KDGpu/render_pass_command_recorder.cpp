@@ -97,6 +97,12 @@ void RenderPassCommandRecorder::setScissor(const Rect2D &scissor)
     apiRenderPassCommandRecorder->setScissor(scissor);
 }
 
+void RenderPassCommandRecorder::setStencilReference(const StencilFaceFlags faceMask, const int reference)
+{
+    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    apiRenderPassCommandRecorder->setStencilReference(faceMask, reference);
+}
+
 void RenderPassCommandRecorder::end()
 {
     auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);

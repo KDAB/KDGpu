@@ -15,12 +15,14 @@ namespace KDGpu {
 VulkanGraphicsPipeline::VulkanGraphicsPipeline(VkPipeline _pipeline,
                                                VulkanResourceManager *_vulkanResourceManager,
                                                const Handle<RenderPass_t> &_renderPassHandle,
+                                               const std::vector<VkDynamicState> &_enabledDynamicState,
                                                const Handle<Device_t> &_deviceHandle,
                                                const Handle<PipelineLayout_t> &_pipelineLayoutHandle)
     : ApiGraphicsPipeline()
     , pipeline(_pipeline)
     , vulkanResourceManager(_vulkanResourceManager)
     , renderPassHandle(_renderPassHandle)
+    , enabledDynamicState(_enabledDynamicState)
     , deviceHandle(_deviceHandle)
     , pipelineLayoutHandle(_pipelineLayoutHandle)
 {

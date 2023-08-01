@@ -117,6 +117,11 @@ void VulkanRenderPassCommandRecorder::setScissor(const Rect2D &scissor)
     vkCmdSetScissor(commandBuffer, 0, 1, &vkScissor);
 }
 
+void VulkanRenderPassCommandRecorder::setStencilReference(const StencilFaceFlags faceMask, const int reference)
+{
+    vkCmdSetStencilReference(commandBuffer, stencilFaceToVkStencilFace(faceMask), reference);
+}
+
 void VulkanRenderPassCommandRecorder::draw(const DrawCommand &drawCommand)
 {
     vkCmdDraw(commandBuffer,
