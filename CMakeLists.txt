@@ -65,6 +65,16 @@ option(KDGPU_BUILD_TESTS "Build tests" ON)
 option(KDGPU_BUILD_EXAMPLES "Build examples" ON)
 option(KDGPU_HLSL_SUPPORT "Try to find and use the dxc HLSL to SPIR-V compiler" OFF)
 
+find_package(CUDAToolkit QUIET)
+
+cmake_dependent_option(
+    KDGPU_CUDA
+    "Enable CUDA Vulkan interops"
+    ON
+    "CUDAToolkit_FOUND"
+    OFF
+)
+
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies.cmake)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)

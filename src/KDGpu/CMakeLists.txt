@@ -206,6 +206,10 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     target_sources(KDGpu PRIVATE vulkan/vulkan_utils.mm)
 endif()
 
+if(KDGPU_CUDA)
+    target_compile_definitions(KDGpu PUBLIC KDGPU_CUDA)
+endif()
+
 # Require >=C++20 for us and downstream projects
 target_compile_features(KDGpu PUBLIC cxx_std_20)
 

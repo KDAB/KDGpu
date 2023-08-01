@@ -67,6 +67,12 @@ std::vector<const char *> getDefaultRequestedDeviceExtensions()
 {
     std::vector<const char *> extensions;
     extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+#if defined(KDGPU_CUDA)
+    extensions.push_back(VK_KHR_EXTERNAL_MEMORY_EXTENSION_NAME);
+    extensions.push_back(VK_KHR_EXTERNAL_SEMAPHORE_EXTENSION_NAME);
+    extensions.push_back(VK_KHR_EXTERNAL_MEMORY_FD_EXTENSION_NAME);
+    extensions.push_back(VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME);
+#endif
 #if defined(VK_KHR_synchronization2)
     extensions.push_back(VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME);
 #endif
