@@ -12,6 +12,7 @@
 
 #include <KDGpu/handle.h>
 #include <KDGpu/kdgpu_export.h>
+#include <KDGpu/gpu_core.h>
 
 namespace KDGpu {
 
@@ -20,8 +21,8 @@ struct GpuSemaphore_t;
 
 class GraphicsApi;
 
-// Reserved for later use
 struct GpuSemaphoreOptions {
+    ExternalSemaphoreHandleTypeFlags externalSemaphoreHandleType{ ExternalSemaphoreHandleTypeFlagBits::None };
 };
 
 /**

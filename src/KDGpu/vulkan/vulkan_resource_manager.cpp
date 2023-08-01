@@ -1292,13 +1292,13 @@ Handle<GpuSemaphore_t> VulkanResourceManager::createGpuSemaphore(const Handle<De
 
     VkSemaphoreCreateInfo semaphoreInfo = {};
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-#if defined(KDGPU_CUDA)
     VkExportSemaphoreCreateInfoKHR exportSemaphoreCreateInfo = {};
-    exportSemaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO_KHR;
-    exportSemaphoreCreateInfo.pNext = nullptr;
-    exportSemaphoreCreateInfo.handleTypes = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT;
-    semaphoreInfo.pNext = &exportSemaphoreCreateInfo;
-#endif
+    if (options.externalSemaphoreHandleType != ExternalSemaphoreHandleTypeFlagBits::None) {
+        exportSemaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO_KHR;
+        exportSemaphoreCreateInfo.pNext = nullptr;
+        exportSemaphoreCreateInfo.handleTypes = externalSemaphoreHandleTypeToVkExternalSemaphoreHandleType(options.externalSemaphoreHandleType);
+        semaphoreInfo.pNext = &exportSemaphoreCreateInfo;
+    }
 
     VkSemaphore vkSemaphore{ VK_NULL_HANDLE };
     if (auto result = vkCreateSemaphore(vulkanDevice->device, &semaphoreInfo, nullptr, &vkSemaphore); result != VK_SUCCESS) {
