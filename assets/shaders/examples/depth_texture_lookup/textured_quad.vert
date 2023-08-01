@@ -20,5 +20,5 @@ void main()
     vec3 pos = corners[indices[gl_VertexIndex]];
 
     texCoord = (1.0 + pos.xy) * 0.5;
-    gl_Position = vec4(pos, 1.0);
+    gl_Position = vec4(pos * 0.25 - vec3(0.75, 0.75, 0.0), 1.0);
 }

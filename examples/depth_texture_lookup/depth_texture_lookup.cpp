@@ -155,7 +155,9 @@ void DepthTextureLookup::initializeScene()
             .colorAttachments = {
                     {
                             .view = {}, // Not setting the swapchain texture view just yet
-                            .clearValue = { 1.0f, 1.0f, 1.0f, 1.0f },
+                            .loadOperation = AttachmentLoadOperation::Load, // Don't clear color
+                            .initialLayout = TextureLayout::ColorAttachmentOptimal,
+
                     },
             },
         };
@@ -168,7 +170,8 @@ void DepthTextureLookup::initializeScene()
         m_overlayPassOptions = {
             .colorAttachments = {
                     { .view = {}, // Not setting the swapchain texture view just yet
-                      .loadOperation = AttachmentLoadOperation::DontCare, // Don't clear color
+                      .loadOperation = AttachmentLoadOperation::Load, // Don't clear color
+                      .initialLayout = TextureLayout::ColorAttachmentOptimal,
                       .finalLayout = TextureLayout::PresentSrc },
             },
             .depthStencilAttachment = {
