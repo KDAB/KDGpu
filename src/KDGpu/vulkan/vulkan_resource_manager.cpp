@@ -589,13 +589,12 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
     if (options.type == TextureType::TextureTypeCube)
         createInfo.flags |= VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
 
-#if defined(KDGPU_CUDA)
-    VkExternalMemoryImageCreateInfo vkExternalMemImageCreateInfo = {
-        .sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO,
-        .handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT_KHR
-    };
-    createInfo.pNext = &vkExternalMemImageCreateInfo;
-#endif
+    VkExternalMemoryImageCreateInfo vkExternalMemImageCreateInfo = {};
+    if (options.externalMemoryHandleType != ExternalMemoryHandleTypeFlagBits::None) {
+        vkExternalMemImageCreateInfo.sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO,
+        vkExternalMemImageCreateInfo.handleTypes = externalMemoryHandleTypeToVkExternalMemoryHandleType(options.externalMemoryHandleType);
+        createInfo.pNext = &vkExternalMemImageCreateInfo;
+    }
 
     VmaAllocationCreateInfo allocInfo = {};
     allocInfo.usage = memoryUsageToVmaMemoryUsage(options.memoryUsage);
