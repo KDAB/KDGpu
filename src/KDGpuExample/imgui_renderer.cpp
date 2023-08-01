@@ -237,6 +237,10 @@ void ImGuiRenderer::createPipeline(KDGpu::SampleCountFlagBits samples, KDGpu::Fo
                 .color = {
                     .srcFactor = BlendFactor::SrcAlpha,
                     .dstFactor = BlendFactor::OneMinusSrcAlpha,
+                },
+                .alpha = {
+                    .srcFactor = BlendFactor::One,
+                    .dstFactor = BlendFactor::OneMinusSrcAlpha,
                 }
             },
         }},
