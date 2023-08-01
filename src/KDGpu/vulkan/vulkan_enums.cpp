@@ -340,4 +340,24 @@ VkCommandBufferLevel commandBufferLevelToVkCommandBufferLevel(CommandBufferLevel
     return static_cast<VkCommandBufferLevel>(static_cast<uint32_t>(level));
 }
 
+ExternalSemaphoreHandleTypeFlags vkExternalSemaphoreHandleTypeToExternalSemaphoreHandleType(VkExternalSemaphoreHandleTypeFlagBits handleFlags)
+{
+    return ExternalSemaphoreHandleTypeFlags::fromInt(static_cast<uint32_t>(handleFlags));
+}
+
+VkExternalSemaphoreHandleTypeFlagBits externalSemaphoreHandleTypeToVkExternalSemaphoreHandleType(ExternalSemaphoreHandleTypeFlags handleFlags)
+{
+    return static_cast<VkExternalSemaphoreHandleTypeFlagBits>(static_cast<uint32_t>(handleFlags.toInt()));
+}
+
+ExternalMemoryHandleTypeFlags VkExternalMemoryHandleTypeToExternalMemoryHandleType(VkExternalMemoryHandleTypeFlagBits handleFlags)
+{
+    return ExternalMemoryHandleTypeFlags::fromInt(static_cast<uint32_t>(handleFlags));
+}
+
+VkExternalMemoryHandleTypeFlagBits externalMemoryHandleTypeToVkExternalMemoryHandleType(ExternalMemoryHandleTypeFlags handleFlags)
+{
+    return static_cast<VkExternalMemoryHandleTypeFlagBits>(static_cast<uint32_t>(handleFlags.toInt()));
+}
+
 } // namespace KDGpu

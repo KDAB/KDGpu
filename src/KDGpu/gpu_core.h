@@ -1063,6 +1063,36 @@ enum class FenceStatus {
     Error = 2
 };
 
+enum class ExternalSemaphoreHandleTypeFlagBits : uint32_t {
+    None = 0,
+    OpaqueFD = 0x00000001,
+    OpaqueWin32 = 0x00000002,
+    OpaqueWin32Kmt = 0x00000004,
+    D3D12Fence = 0x00000008,
+    SyncFD = 0x00000010,
+    ZirconEventFuchsia = 0x00000080,
+};
+using ExternalSemaphoreHandleTypeFlags = KDGpu::Flags<ExternalSemaphoreHandleTypeFlagBits>;
+
+enum class ExternalMemoryHandleTypeFlagBits : uint32_t {
+    None = 0,
+    OpaqueFD = 0x00000001,
+    OpaqueWin32 = 0x00000002,
+    OpaqueWin32Kmt = 0x00000004,
+    D3D11Texture = 0x00000008,
+    D3D11TextureKmt = 0x00000010,
+    D3D12Heap = 0x00000020,
+    D3D12Resource = 0x00000040,
+    DmaBuf = 0x00000200,
+    AndroidHardwareBuffer = 0x00000400,
+    HostAllocation = 0x00000080,
+    HostMappedForeignMemor = 0x00000100,
+    ZirconVmoFuschia = 0x00000800,
+    RmdaAddressNV = 0x00001000,
+    ScreenBufferQnx = 0x00004000,
+};
+using ExternalMemoryHandleTypeFlags = KDGpu::Flags<ExternalMemoryHandleTypeFlagBits>;
+
 /*! @} */
 
 } // namespace KDGpu
@@ -1077,3 +1107,5 @@ OPERATORS_FOR_FLAGS(KDGpu::ColorComponentFlags)
 OPERATORS_FOR_FLAGS(KDGpu::AccessFlags)
 OPERATORS_FOR_FLAGS(KDGpu::PipelineStageFlags)
 OPERATORS_FOR_FLAGS(KDGpu::FormatFeatureFlags)
+OPERATORS_FOR_FLAGS(KDGpu::ExternalSemaphoreHandleTypeFlags)
+OPERATORS_FOR_FLAGS(KDGpu::ExternalMemoryHandleTypeFlags)
