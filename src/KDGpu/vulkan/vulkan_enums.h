@@ -84,13 +84,13 @@ VkBlendFactor blendFactorToVkBlendFactor(BlendFactor factor);
 BlendFactor vkBlendFactorToBlendFactor(VkBlendFactor factor);
 
 VkBlendOp blendOperationToVkBlendOp(BlendOperation op);
-BlendOperation vkBlendOpToBlendOperation(BlendOperation op);
+BlendOperation vkBlendOpToBlendOperation(VkBlendOp op);
 
 VkAttachmentLoadOp attachmentLoadOperationToVkAttachmentLoadOp(AttachmentLoadOperation op);
-AttachmentLoadOperation vkAttachmentLoadOperationToAttachmentLoadOperation(AttachmentLoadOperation op);
+AttachmentLoadOperation vkAttachmentLoadOperationToAttachmentLoadOperation(VkAttachmentLoadOp op);
 
 VkAttachmentStoreOp attachmentStoreOperationToVkAttachmentStoreOp(AttachmentStoreOperation op);
-AttachmentStoreOperation vkAttachmentStoreOperationToAttachmentStoreOperation(AttachmentStoreOperation op);
+AttachmentStoreOperation vkAttachmentStoreOperationToAttachmentStoreOperation(VkAttachmentStoreOp op);
 
 VkFilter filterModeToVkFilterMode(FilterMode mode);
 VkSamplerMipmapMode mipMapFilterModeToVkSamplerMipmapMode(MipmapFilterMode mode);

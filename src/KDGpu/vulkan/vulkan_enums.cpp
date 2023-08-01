@@ -255,7 +255,7 @@ VkBlendOp blendOperationToVkBlendOp(BlendOperation op)
     return static_cast<VkBlendOp>(static_cast<uint32_t>(op));
 }
 
-BlendOperation vkBlendOpToBlendOperation(BlendOperation op)
+BlendOperation vkBlendOpToBlendOperation(VkBlendOp op)
 {
     return static_cast<BlendOperation>(static_cast<uint32_t>(op));
 }
@@ -265,7 +265,7 @@ VkAttachmentLoadOp attachmentLoadOperationToVkAttachmentLoadOp(AttachmentLoadOpe
     return static_cast<VkAttachmentLoadOp>(static_cast<uint32_t>(op));
 }
 
-AttachmentLoadOperation vkAttachmentLoadOperationToAttachmentLoadOperation(AttachmentLoadOperation op)
+AttachmentLoadOperation vkAttachmentLoadOperationToAttachmentLoadOperation(VkAttachmentLoadOp op)
 {
     return static_cast<AttachmentLoadOperation>(static_cast<uint32_t>(op));
 }
@@ -275,7 +275,7 @@ VkAttachmentStoreOp attachmentStoreOperationToVkAttachmentStoreOp(AttachmentStor
     return static_cast<VkAttachmentStoreOp>(static_cast<uint32_t>(op));
 }
 
-AttachmentStoreOperation vkAttachmentStoreOperationToAttachmentStoreOperation(AttachmentStoreOperation op)
+AttachmentStoreOperation vkAttachmentStoreOperationToAttachmentStoreOperation(VkAttachmentStoreOp op)
 {
     return static_cast<AttachmentStoreOperation>(static_cast<uint32_t>(op));
 }
