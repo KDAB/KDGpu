@@ -350,7 +350,7 @@ VkExternalSemaphoreHandleTypeFlagBits externalSemaphoreHandleTypeToVkExternalSem
     return static_cast<VkExternalSemaphoreHandleTypeFlagBits>(static_cast<uint32_t>(handleFlags.toInt()));
 }
 
-ExternalMemoryHandleTypeFlags VkExternalMemoryHandleTypeToExternalMemoryHandleType(VkExternalMemoryHandleTypeFlagBits handleFlags)
+ExternalMemoryHandleTypeFlags vkExternalMemoryHandleTypeToExternalMemoryHandleType(VkExternalMemoryHandleTypeFlagBits handleFlags)
 {
     return ExternalMemoryHandleTypeFlags::fromInt(static_cast<uint32_t>(handleFlags));
 }
