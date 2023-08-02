@@ -28,20 +28,6 @@
 
 namespace {
 
-void setupMultiViewInfo(VkRenderPassMultiviewCreateInfo &multiViewCreateInfo, uint32_t viewCount, const uint32_t *viewMask)
-{
-    multiViewCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_MULTIVIEW_CREATE_INFO;
-    multiViewCreateInfo.subpassCount = 1; // Must be > 0 to enable multiview
-    multiViewCreateInfo.dependencyCount = 0;
-    // CorrelationMasks sets the number of views to be rendered concurrently from a mask
-    // For now, we expect all of them to be rendered concurrently as we don't want to
-    // mess with subpass and view dependencies.
-    multiViewCreateInfo.correlationMaskCount = 1;
-    multiViewCreateInfo.pCorrelationMasks = viewMask;
-    // pViewMask is a bitfield of view indices describing which views rendering is broadcast to in each subpass
-    multiViewCreateInfo.pViewMasks = viewMask;
-}
-
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
         VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
         VkDebugUtilsMessageTypeFlagsEXT messageType,
@@ -1065,14 +1051,15 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
         //
         // We do not concern ourselves with subpass dependencies here as they do not
         // impact upon render pass compatibility (I think/hope).
-        std::vector<VkAttachmentDescription> allAttachments;
+        std::vector<VkAttachmentDescription2> allAttachments;
 
         // The subpass description will then index into the above vector of attachment
         // descriptions to specify which subpasses use which of the available attachments.
         uint32_t attachmentIndex = 0;
-        std::vector<VkAttachmentReference> colorAttachmentRefs;
-        std::vector<VkAttachmentReference> resolveAttachmentRefs;
-        VkAttachmentReference depthStencilAttachmentRef = {};
+        std::vector<VkAttachmentReference2> colorAttachmentRefs;
+        std::vector<VkAttachmentReference2> resolveAttachmentRefs;
+        VkAttachmentReference2 depthStencilAttachmentRef = {};
+        depthStencilAttachmentRef.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
 
         const bool usingMultisampling = options.multisample.samples > SampleCountFlagBits::Samples1Bit;
         const VkSampleCountFlagBits sampleCount = sampleCountFlagBitsToVkSampleFlagBits(options.multisample.samples);
@@ -1088,7 +1075,8 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
 
                 // NB: We don't care about load/store operations and initial/final layouts here
                 // so we just set some random values;
-                VkAttachmentDescription colorAttachment = {};
+                VkAttachmentDescription2 colorAttachment = {};
+                colorAttachment.sType = VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_2;
                 colorAttachment.format = formatToVkFormat(renderTarget.format);
                 colorAttachment.samples = sampleCount;
                 colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -1099,14 +1087,16 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
                 colorAttachment.finalLayout = usingMultisampling ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
                 allAttachments.emplace_back(colorAttachment);
 
-                VkAttachmentReference colorAttachmentRef = {};
+                VkAttachmentReference2 colorAttachmentRef = {};
+                colorAttachmentRef.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
                 colorAttachmentRef.attachment = attachmentIndex++;
                 colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
                 colorAttachmentRefs.emplace_back(colorAttachmentRef);
 
                 // If using multisampling, then for each color attachment we need a resolve attachment
                 if (usingMultisampling) {
-                    VkAttachmentDescription resolveAttachment = {};
+                    VkAttachmentDescription2 resolveAttachment = {};
+                    resolveAttachment.sType = VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_2;
                     resolveAttachment.format = formatToVkFormat(renderTarget.format);
                     resolveAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
                     resolveAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -1117,7 +1107,8 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
                     resolveAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
                     allAttachments.emplace_back(resolveAttachment);
 
-                    VkAttachmentReference resolveAttachmentRef = {};
+                    VkAttachmentReference2 resolveAttachmentRef = {};
+                    resolveAttachmentRef.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
                     resolveAttachmentRef.attachment = attachmentIndex++;
                     resolveAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
                     resolveAttachmentRefs.emplace_back(resolveAttachmentRef);
@@ -1127,7 +1118,8 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
 
         // Depth-stencil attachment
         if (options.depthStencil.format != Format::UNDEFINED) {
-            VkAttachmentDescription depthStencilAttachment = {};
+            VkAttachmentDescription2 depthStencilAttachment = {};
+            depthStencilAttachment.sType = VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_2;
             depthStencilAttachment.format = formatToVkFormat(options.depthStencil.format);
             depthStencilAttachment.samples = sampleCount;
             depthStencilAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -1142,17 +1134,20 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
             depthStencilAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
         }
 
+        const uint32_t multiViewMaskMask = uint32_t(1 << options.viewCount) - 1;
+
         // Just create a single subpass. We do not support multiple subpasses at this
         // stage as other graphics APIs do not have an equivalent to subpasses.
-        VkSubpassDescription subpass = {};
+        VkSubpassDescription2 subpass = {};
+        subpass.sType = VK_STRUCTURE_TYPE_SUBPASS_DESCRIPTION_2;
         subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
         subpass.colorAttachmentCount = static_cast<uint32_t>(colorAttachmentRefs.size());
         subpass.pColorAttachments = colorAttachmentRefs.data();
         subpass.pResolveAttachments = usingMultisampling ? resolveAttachmentRefs.data() : nullptr;
         subpass.pDepthStencilAttachment = options.depthStencil.format != Format::UNDEFINED ? &depthStencilAttachmentRef : nullptr;
 
-        VkRenderPassCreateInfo renderPassInfo = {};
-        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+        VkRenderPassCreateInfo2 renderPassInfo = {};
+        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO_2;
         renderPassInfo.attachmentCount = static_cast<uint32_t>(allAttachments.size());
         renderPassInfo.pAttachments = allAttachments.data();
         renderPassInfo.subpassCount = 1;
@@ -1160,15 +1155,17 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
         renderPassInfo.dependencyCount = 0;
         renderPassInfo.pDependencies = nullptr;
 
-        VkRenderPassMultiviewCreateInfo multiViewCreateInfo = {};
-        const uint32_t multiViewMaskMask = uint32_t(1 << options.viewCount) - 1;
-
         if (options.viewCount > 1) {
-            setupMultiViewInfo(multiViewCreateInfo, options.viewCount, &multiViewMaskMask);
-            renderPassInfo.pNext = &multiViewCreateInfo;
+            // pViewMask is a bitfield of view indices describing which views rendering is broadcast to in this subpass
+            subpass.viewMask = multiViewMaskMask;
+            // CorrelationMasks sets the number of views to be rendered concurrently from a mask
+            // For now, we expect all of them to be rendered concurrently as we don't want to
+            // mess with subpass and view dependencies.
+            renderPassInfo.correlatedViewMaskCount = 1;
+            renderPassInfo.pCorrelatedViewMasks = &multiViewMaskMask;
         }
 
-        if (auto result = vkCreateRenderPass(vulkanDevice->device, &renderPassInfo, nullptr, &vkRenderPass); result != VK_SUCCESS) {
+        if (auto result = vkCreateRenderPass2(vulkanDevice->device, &renderPassInfo, nullptr, &vkRenderPass); result != VK_SUCCESS) {
             SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating render pass: {}", result);
             return {};
         }
@@ -1643,10 +1640,11 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
     // descriptions to specify which subpasses use which of the available attachments.
     uint32_t attachmentIndex = 0;
     constexpr size_t MaxAttachmentCount = 8;
-    std::array<VkAttachmentReference, MaxAttachmentCount> colorAttachmentRefs;
-    std::array<VkAttachmentReference, MaxAttachmentCount> resolveAttachmentRefs;
-    std::array<VkAttachmentDescription, MaxAttachmentCount * 2> allAttachments;
-    VkAttachmentReference depthStencilAttachmentRef = {};
+    std::array<VkAttachmentReference2, MaxAttachmentCount> colorAttachmentRefs{};
+    std::array<VkAttachmentReference2, MaxAttachmentCount> resolveAttachmentRefs{};
+    std::array<VkAttachmentDescription2, MaxAttachmentCount * 2> allAttachments{};
+    VkAttachmentReference2 depthStencilAttachmentRef = {};
+    depthStencilAttachmentRef.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
 
     // TODO: Handle multisampling
     const bool usingMultisampling = options.samples > SampleCountFlagBits::Samples1Bit;
@@ -1672,7 +1670,8 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
 
             // NB: We don't care about load/store operations and initial/final layouts here
             // so we just set some random values;
-            VkAttachmentDescription colorAttachment = {};
+            VkAttachmentDescription2 colorAttachment = {};
+            colorAttachment.sType = VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_2;
             colorAttachment.format = formatToVkFormat(texture->format);
             colorAttachment.samples = sampleCount;
             colorAttachment.loadOp = attachmentLoadOperationToVkAttachmentLoadOp(renderTarget.loadOperation);
@@ -1683,7 +1682,8 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
             colorAttachment.finalLayout = textureLayoutToVkImageLayout(renderTarget.finalLayout);
             allAttachments[attachmentIndex] = colorAttachment;
 
-            VkAttachmentReference &colorAttachmentRef = colorAttachmentRefs[i];
+            VkAttachmentReference2 &colorAttachmentRef = colorAttachmentRefs[i];
+            colorAttachmentRef.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
             colorAttachmentRef.attachment = attachmentIndex++;
             colorAttachmentRef.layout = textureLayoutToVkImageLayout(renderTarget.layout);
 
@@ -1700,7 +1700,8 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
                     return {};
                 }
 
-                VkAttachmentDescription resolveAttachment = {};
+                VkAttachmentDescription2 resolveAttachment = {};
+                resolveAttachment.sType = VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_2;
                 resolveAttachment.format = formatToVkFormat(texture->format);
                 resolveAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
                 resolveAttachment.loadOp = attachmentLoadOperationToVkAttachmentLoadOp(renderTarget.loadOperation);
@@ -1711,7 +1712,8 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
                 resolveAttachment.finalLayout = textureLayoutToVkImageLayout(renderTarget.finalLayout);
                 allAttachments[attachmentIndex] = resolveAttachment;
 
-                VkAttachmentReference &resolveAttachmentRef = resolveAttachmentRefs[i];
+                VkAttachmentReference2 &resolveAttachmentRef = resolveAttachmentRefs[i];
+                resolveAttachmentRef.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
                 resolveAttachmentRef.attachment = attachmentIndex++;
                 resolveAttachmentRef.layout = textureLayoutToVkImageLayout(renderTarget.layout);
             }
@@ -1733,7 +1735,15 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
             return {};
         }
 
-        VkAttachmentDescription depthStencilAttachment = {};
+        // If using multisampling, then we might need to resolve the depth attachment
+        if (usingMultisampling) {
+            // TODO:
+            // set a ptr to a VkSubpassDescriptionDepthStencilResolve on the VkSubpassDescription2::pNext
+            // to allow resolving of a msaaDepthBuffer
+        }
+
+        VkAttachmentDescription2 depthStencilAttachment = {};
+        depthStencilAttachment.sType = VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_2;
         depthStencilAttachment.format = formatToVkFormat(texture->format);
         depthStencilAttachment.samples = sampleCount;
         depthStencilAttachment.loadOp = attachmentLoadOperationToVkAttachmentLoadOp(renderTarget.depthLoadOperation);
@@ -1748,17 +1758,21 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
         depthStencilAttachmentRef.layout = textureLayoutToVkImageLayout(renderTarget.layout);
     }
 
+    assert(options.viewCount > 0);
+    const uint32_t multiViewMaskMask = uint32_t(1 << options.viewCount) - 1;
+
     // Just create a single subpass. We do not support multiple subpasses at this
     // stage as other graphics APIs do not have an equivalent to subpasses.
-    VkSubpassDescription subpass = {};
+    VkSubpassDescription2 subpass = {};
+    subpass.sType = VK_STRUCTURE_TYPE_SUBPASS_DESCRIPTION_2;
     subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
     subpass.colorAttachmentCount = colorTargetsCount;
     subpass.pColorAttachments = colorAttachmentRefs.data();
     subpass.pResolveAttachments = usingMultisampling ? resolveAttachmentRefs.data() : nullptr;
     subpass.pDepthStencilAttachment = options.depthStencilAttachment.view.isValid() ? &depthStencilAttachmentRef : nullptr;
 
-    VkRenderPassCreateInfo renderPassInfo = {};
-    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+    VkRenderPassCreateInfo2 renderPassInfo = {};
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO_2;
     renderPassInfo.attachmentCount = attachmentIndex;
     renderPassInfo.pAttachments = allAttachments.data();
     renderPassInfo.subpassCount = 1;
@@ -1766,17 +1780,18 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
     renderPassInfo.dependencyCount = 0;
     renderPassInfo.pDependencies = nullptr;
 
-    assert(options.viewCount > 0);
-    VkRenderPassMultiviewCreateInfo multiViewCreateInfo = {};
-    const uint32_t multiViewMaskMask = uint32_t(1 << options.viewCount) - 1;
-
     if (options.viewCount > 1) {
-        setupMultiViewInfo(multiViewCreateInfo, options.viewCount, &multiViewMaskMask);
-        renderPassInfo.pNext = &multiViewCreateInfo;
+        // pViewMask is a bitfield of view indices describing which views rendering is broadcast to in this subpass
+        subpass.viewMask = multiViewMaskMask;
+        // CorrelationMasks sets the number of views to be rendered concurrently from a mask
+        // For now, we expect all of them to be rendered concurrently as we don't want to
+        // mess with subpass and view dependencies.
+        renderPassInfo.correlatedViewMaskCount = 1;
+        renderPassInfo.pCorrelatedViewMasks = &multiViewMaskMask;
     }
 
     VkRenderPass vkRenderPass{ VK_NULL_HANDLE };
-    if (auto result = vkCreateRenderPass(vulkanDevice->device, &renderPassInfo, nullptr, &vkRenderPass); result != VK_SUCCESS) {
+    if (auto result = vkCreateRenderPass2(vulkanDevice->device, &renderPassInfo, nullptr, &vkRenderPass); result != VK_SUCCESS) {
         SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating render pass: {}", result);
         return {};
     }
