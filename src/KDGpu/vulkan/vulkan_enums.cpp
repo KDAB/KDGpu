@@ -360,4 +360,24 @@ VkExternalMemoryHandleTypeFlagBits externalMemoryHandleTypeToVkExternalMemoryHan
     return static_cast<VkExternalMemoryHandleTypeFlagBits>(static_cast<uint32_t>(handleFlags.toInt()));
 }
 
+ResolveModeFlagBits vkResolveModeToResolveMode(VkResolveModeFlagBits resolveFlag)
+{
+    return static_cast<ResolveModeFlagBits>(static_cast<uint32_t>(resolveFlag));
+}
+
+VkResolveModeFlagBits resolveModeToVkResolveMode(ResolveModeFlagBits resolveFlag)
+{
+    return static_cast<VkResolveModeFlagBits>(static_cast<uint32_t>(resolveFlag));
+}
+
+ResolveModeFlags vkResolveModesToResolveModes(VkResolveModeFlags resolveFlags)
+{
+    return ResolveModeFlags::fromInt(static_cast<uint32_t>(resolveFlags));
+}
+
+VkResolveModeFlags resolveModesToVkResolveModes(ResolveModeFlags resolveFlags)
+{
+    return static_cast<VkResolveModeFlagBits>(static_cast<uint32_t>(resolveFlags.toInt()));
+}
+
 } // namespace KDGpu

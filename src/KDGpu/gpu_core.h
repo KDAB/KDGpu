@@ -1093,6 +1093,15 @@ enum class ExternalMemoryHandleTypeFlagBits : uint32_t {
 };
 using ExternalMemoryHandleTypeFlags = KDGpu::Flags<ExternalMemoryHandleTypeFlagBits>;
 
+enum ResolveModeFlagBits : uint32_t {
+    None = 0,
+    SampleZero = 0x00000001,
+    Average = 0x00000002,
+    Min = 0x00000004,
+    Max = 0x00000008,
+};
+using ResolveModeFlags = KDGpu::Flags<ResolveModeFlagBits>;
+
 /*! @} */
 
 } // namespace KDGpu
@@ -1109,3 +1118,4 @@ OPERATORS_FOR_FLAGS(KDGpu::PipelineStageFlags)
 OPERATORS_FOR_FLAGS(KDGpu::FormatFeatureFlags)
 OPERATORS_FOR_FLAGS(KDGpu::ExternalSemaphoreHandleTypeFlags)
 OPERATORS_FOR_FLAGS(KDGpu::ExternalMemoryHandleTypeFlags)
+OPERATORS_FOR_FLAGS(KDGpu::ResolveModeFlags)
