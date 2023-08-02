@@ -155,6 +155,16 @@ struct AdapterMultiViewProperties {
 /**
     @headerfile adapter_properties.h <KDGpu/adapter_properties.h>
  */
+struct AdapterDepthStencilResolveProperties {
+    ResolveModeFlags supportedDepthResolveModes;
+    ResolveModeFlags supportedStencilResolveModes;
+    bool independentResolveNone;
+    bool independentResolve;
+};
+
+/**
+    @headerfile adapter_properties.h <KDGpu/adapter_properties.h>
+ */
 struct AdapterProperties {
     uint32_t apiVersion;
     uint32_t driverVersion;
@@ -166,6 +176,7 @@ struct AdapterProperties {
     AdapterLimits limits;
     AdapterSparseProperties sparseProperties;
     AdapterMultiViewProperties multiViewProperties;
+    AdapterDepthStencilResolveProperties depthResolveProperties;
 };
 
 /**

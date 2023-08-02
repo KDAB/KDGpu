@@ -59,6 +59,10 @@ AdapterProperties VulkanAdapter::queryAdapterProperties()
     VkPhysicalDeviceMultiviewProperties multiViewProperties{};
     multiViewProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTIVIEW_PROPERTIES;
 
+    VkPhysicalDeviceDepthStencilResolveProperties depthResolveProps{};
+    depthResolveProps.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEPTH_STENCIL_RESOLVE_PROPERTIES;
+    multiViewProperties.pNext = &depthResolveProps;
+
     deviceProperties2.pNext = &multiViewProperties;
 
     vkGetPhysicalDeviceProperties2(physicalDevice, &deviceProperties2);
@@ -232,6 +236,12 @@ AdapterProperties VulkanAdapter::queryAdapterProperties()
         .multiViewProperties = {
             .maxMultiViewCount = multiViewProperties.maxMultiviewViewCount,
             .maxMultiviewInstanceIndex = multiViewProperties.maxMultiviewInstanceIndex,
+        },
+        .depthResolveProperties = {
+            .supportedDepthResolveModes = vkResolveModesToResolveModes(depthResolveProps.supportedDepthResolveModes),
+            .supportedStencilResolveModes = vkResolveModesToResolveModes(depthResolveProps.supportedStencilResolveModes),
+            .independentResolveNone = static_cast<bool>(depthResolveProps.independentResolveNone),
+            .independentResolve = static_cast<bool>(depthResolveProps.independentResolve),
         },
     };
     // clang-format-on
