@@ -96,6 +96,7 @@ struct DepthStencilOptions {
     bool stencilTestEnabled{ false };
     StencilOperationOptions stencilFront;
     StencilOperationOptions stencilBack;
+    bool resolveDepthStencil{ false };
 
     friend bool operator==(const DepthStencilOptions &, const DepthStencilOptions &) = default;
 };

@@ -148,6 +148,55 @@ TEST_SUITE("GraphicsPipeline")
             // THEN
             CHECK(g.isValid());
         }
+
+        SUBCASE("A GraphicsPipeline from a Vulkan API that does MSAA color and depth resolves")
+        {
+            // GIVEN
+            PipelineLayoutOptions pipelineLayoutOptions{};
+            PipelineLayout pipelineLayout = device.createPipelineLayout(pipelineLayoutOptions);
+            const Format depthFormat = selectDepthFormat(adapter);
+            REQUIRE(depthFormat != Format::UNDEFINED);
+
+            // clang-format off
+            GraphicsPipelineOptions pipelineOptions = {
+                .shaderStages = {
+                    { .shaderModule = vertexShader.handle(), .stage = ShaderStageFlagBits::VertexBit },
+                    { .shaderModule = fragmentShader.handle(), .stage = ShaderStageFlagBits::FragmentBit }
+                },
+                .layout = pipelineLayout.handle(),
+                .vertex = {
+                    .buffers = {
+                        { .binding = 0, .stride = 2 * 4 * sizeof(float) }
+                    },
+                    .attributes = {
+                        { .location = 0, .binding = 0, .format = Format::R32G32B32A32_SFLOAT }, // Position
+                        { .location = 1, .binding = 0, .format = Format::R32G32B32A32_SFLOAT, .offset = 4 * sizeof(float) } // Color
+                    }
+                },
+                .renderTargets = {
+                    { .format = Format::R8G8B8A8_UNORM }
+                },
+                .depthStencil = {
+                    .format = depthFormat,
+                    .depthWritesEnabled = true,
+                    .depthCompareOperation = CompareOperation::Less,
+                    .resolveDepthStencil = true,
+                },
+                .primitive = {
+                    .lineWidth = adapter->features().wideLines ? 20.0f : 1.0f,
+                },
+                .multisample = {
+                    .samples = SampleCountFlagBits::Samples4Bit,
+                }
+            };
+            // clang-format on
+
+            // WHEN
+            GraphicsPipeline g = device.createGraphicsPipeline(pipelineOptions);
+
+            // THEN
+            CHECK(g.isValid());
+        }
     }
 
     TEST_CASE("Destruction")

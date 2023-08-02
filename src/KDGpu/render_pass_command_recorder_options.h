@@ -49,12 +49,15 @@ struct ColorAttachment {
 
 struct DepthStencilAttachment {
     Handle<TextureView_t> view;
+    Handle<TextureView_t> resolveView;
     AttachmentLoadOperation depthLoadOperation{ AttachmentLoadOperation::Clear };
     AttachmentStoreOperation depthStoreOperation{ AttachmentStoreOperation::Store };
     float depthClearValue{ 1.0f };
+    ResolveModeFlagBits depthResolveMode{ ResolveModeFlagBits::Average };
     AttachmentLoadOperation stencilLoadOperation{ AttachmentLoadOperation::Clear };
     AttachmentStoreOperation stencilStoreOperation{ AttachmentStoreOperation::Store };
     uint32_t stencilClearValue{ 0 };
+    ResolveModeFlagBits stencilResolveMode{ ResolveModeFlagBits::None };
     TextureLayout initialLayout{ TextureLayout::Undefined };
     TextureLayout layout{ TextureLayout::DepthStencilAttachmentOptimal };
     TextureLayout finalLayout{ TextureLayout::DepthStencilAttachmentOptimal };

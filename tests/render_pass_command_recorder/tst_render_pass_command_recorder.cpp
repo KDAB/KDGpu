@@ -89,14 +89,18 @@ TEST_SUITE("RenderPassCommandRecorder")
                 .usage = TextureUsageFlagBits::ColorAttachmentBit,
                 .memoryUsage = MemoryUsage::GpuOnly,
         });
-        const Texture depthTexture = device.createTexture(TextureOptions{
-                .type = TextureType::TextureType2D,
-                .format = Format::D24_UNORM_S8_UINT,
-                .extent = { 256, 256, 1 },
-                .mipLevels = 1,
-                .samples = SampleCountFlagBits::Samples1Bit,
-                .usage = TextureUsageFlagBits::DepthStencilAttachmentBit,
-                .memoryUsage = MemoryUsage::GpuOnly,
+        const Texture depthTexture = device.createTexture(TextureOptions {
+            .type = TextureType::TextureType2D,
+#if defined(KD_PLATFORM_MACOS)
+            .format = Format::D32_SFLOAT_S8_UINT,
+#else
+                    .format = Format::D24_UNORM_S8_UINT,
+#endif
+            .extent = { 256, 256, 1 },
+            .mipLevels = 1,
+            .samples = SampleCountFlagBits::Samples1Bit,
+            .usage = TextureUsageFlagBits::DepthStencilAttachmentBit,
+            .memoryUsage = MemoryUsage::GpuOnly,
         });
 
         const TextureView colorTextureView = colorTexture.createView();
@@ -305,15 +309,19 @@ TEST_SUITE("RenderPassCommandRecorder")
                 .usage = TextureUsageFlagBits::ColorAttachmentBit,
                 .memoryUsage = MemoryUsage::GpuOnly,
         });
-        const Texture depthTexture = device.createTexture(TextureOptions{
-                .type = TextureType::TextureType2D,
-                .format = Format::D24_UNORM_S8_UINT,
-                .extent = { 256, 256, 1 },
-                .mipLevels = 1,
-                .arrayLayers = 2,
-                .samples = SampleCountFlagBits::Samples1Bit,
-                .usage = TextureUsageFlagBits::DepthStencilAttachmentBit,
-                .memoryUsage = MemoryUsage::GpuOnly,
+        const Texture depthTexture = device.createTexture(TextureOptions {
+            .type = TextureType::TextureType2D,
+#if defined(KD_PLATFORM_MACOS)
+            .format = Format::D32_SFLOAT_S8_UINT,
+#else
+                    .format = Format::D24_UNORM_S8_UINT,
+#endif
+            .extent = { 256, 256, 1 },
+            .mipLevels = 1,
+            .arrayLayers = 2,
+            .samples = SampleCountFlagBits::Samples1Bit,
+            .usage = TextureUsageFlagBits::DepthStencilAttachmentBit,
+            .memoryUsage = MemoryUsage::GpuOnly,
         });
 
         const TextureView colorTextureView = colorTexture.createView(TextureViewOptions{
@@ -374,6 +382,177 @@ TEST_SUITE("RenderPassCommandRecorder")
                         .view = depthTextureView,
                 },
                 .viewCount = 2,
+            };
+
+            // WHEN
+            RenderPassCommandRecorder renderPassRecorder = commandRecorder.beginRenderPass(renderPassOptions);
+            renderPassRecorder.setPipeline(pipeline);
+            renderPassRecorder.end();
+
+            CommandBuffer commandBuffer = commandRecorder.finish();
+
+            // THEN
+            CHECK(commandRecorder.isValid());
+            CHECK(renderPassRecorder.isValid());
+        }
+    }
+
+    TEST_CASE("RenderPassCommandRecorder - Resolve MSAA Color & Depth")
+    {
+        const bool supportsAverageDepthResolveMode = discreteGPUAdapter->properties().depthResolveProperties.supportedDepthResolveModes.testFlag(ResolveModeFlagBits::Average);
+        if (!supportsAverageDepthResolveMode)
+            return;
+
+        const SampleCountFlagBits samples = SampleCountFlagBits::Samples4Bit;
+        const bool colorFrameBufferSupportsSamples = discreteGPUAdapter->properties().limits.framebufferColorSampleCounts.testFlag(samples);
+        const bool depthFrameBufferSupportsSamples = discreteGPUAdapter->properties().limits.framebufferDepthSampleCounts.testFlag(samples);
+
+        REQUIRE(discreteGPUAdapter->features().sampleRateShading);
+        REQUIRE(supportsAverageDepthResolveMode);
+        REQUIRE(colorFrameBufferSupportsSamples);
+        REQUIRE(depthFrameBufferSupportsSamples);
+
+        // GIVEN
+        Device device = discreteGPUAdapter->createDevice(DeviceOptions{
+                .requestedFeatures = {
+                        .sampleRateShading = true,
+                },
+        });
+
+        const auto vertexShaderPath = assetPath() + "/shaders/tests/render_pass_command_recorder/triangle.vert.spv";
+        auto vertexShader = device.createShaderModule(readShaderFile(vertexShaderPath));
+
+        const auto fragmentShaderPath = assetPath() + "/shaders/tests/render_pass_command_recorder/triangle.frag.spv";
+        auto fragmentShader = device.createShaderModule(readShaderFile(fragmentShaderPath));
+
+        const Texture colorMSAATexture = device.createTexture(TextureOptions{
+                .type = TextureType::TextureType2D,
+                .format = Format::R8G8B8A8_UNORM,
+                .extent = { 256, 256, 1 },
+                .mipLevels = 1,
+                .samples = samples,
+                .usage = TextureUsageFlagBits::ColorAttachmentBit,
+                .memoryUsage = MemoryUsage::GpuOnly,
+        });
+        const Texture depthMSAATexture = device.createTexture(TextureOptions {
+            .type = TextureType::TextureType2D,
+#if defined(KD_PLATFORM_MACOS)
+            .format = Format::D32_SFLOAT_S8_UINT,
+#else
+                    .format = Format::D24_UNORM_S8_UINT,
+#endif
+            .extent = { 256, 256, 1 },
+            .mipLevels = 1,
+            .samples = samples,
+            .usage = TextureUsageFlagBits::DepthStencilAttachmentBit,
+            .memoryUsage = MemoryUsage::GpuOnly,
+        });
+
+        const Texture colorResolveTexture = device.createTexture(TextureOptions{
+                .type = TextureType::TextureType2D,
+                .format = Format::R8G8B8A8_UNORM,
+                .extent = { 256, 256, 1 },
+                .mipLevels = 1,
+                .samples = SampleCountFlagBits::Samples1Bit,
+                .usage = TextureUsageFlagBits::ColorAttachmentBit,
+                .memoryUsage = MemoryUsage::GpuOnly,
+        });
+        const Texture depthResolveTexture = device.createTexture(TextureOptions {
+            .type = TextureType::TextureType2D,
+#if defined(KD_PLATFORM_MACOS)
+            .format = Format::D32_SFLOAT_S8_UINT,
+#else
+                    .format = Format::D24_UNORM_S8_UINT,
+#endif
+            .extent = { 256, 256, 1 },
+            .mipLevels = 1,
+            .samples = SampleCountFlagBits::Samples1Bit,
+            .usage = TextureUsageFlagBits::DepthStencilAttachmentBit,
+            .memoryUsage = MemoryUsage::GpuOnly,
+        });
+
+        const TextureView colorMSAATextureView = colorMSAATexture.createView(TextureViewOptions{
+                .viewType = ViewType::ViewType2DArray,
+                .range = {
+                        .aspectMask = TextureAspectFlagBits::ColorBit,
+                },
+        });
+        const TextureView depthMSAATextureView = depthMSAATexture.createView(TextureViewOptions{
+                .viewType = ViewType::ViewType2DArray,
+                .range = {
+                        .aspectMask = (TextureAspectFlagBits::DepthBit | TextureAspectFlagBits::StencilBit),
+                },
+        });
+
+        const TextureView colorResolveTextureView = colorResolveTexture.createView(TextureViewOptions{
+                .viewType = ViewType::ViewType2DArray,
+                .range = {
+                        .aspectMask = TextureAspectFlagBits::ColorBit,
+                },
+        });
+        const TextureView depthResolveTextureView = depthResolveTexture.createView(TextureViewOptions{
+                .viewType = ViewType::ViewType2DArray,
+                .range = {
+                        .aspectMask = (TextureAspectFlagBits::DepthBit | TextureAspectFlagBits::StencilBit),
+                },
+        });
+
+        const PipelineLayout pipelineLayout = device.createPipelineLayout();
+        const GraphicsPipeline pipeline = device.createGraphicsPipeline(GraphicsPipelineOptions{
+                .shaderStages = {
+                        { .shaderModule = vertexShader.handle(), .stage = ShaderStageFlagBits::VertexBit },
+                        { .shaderModule = fragmentShader.handle(), .stage = ShaderStageFlagBits::FragmentBit },
+                },
+                .layout = pipelineLayout.handle(),
+                .vertex = {
+                        .buffers = {
+                                { .binding = 0, .stride = 2 * 4 * sizeof(float) },
+                        },
+                        .attributes = {
+                                { .location = 0, .binding = 0, .format = Format::R32G32B32A32_SFLOAT }, // Position
+                                { .location = 1, .binding = 0, .format = Format::R32G32B32A32_SFLOAT, .offset = 4 * sizeof(float) }, // Color
+                        },
+                },
+                .renderTargets = {
+                        { .format = Format::R8G8B8A8_UNORM },
+                },
+                .depthStencil = {
+                        .format = Format::D24_UNORM_S8_UINT,
+                        .depthWritesEnabled = true,
+                        .depthCompareOperation = CompareOperation::Less,
+                        .resolveDepthStencil = true,
+                },
+                .multisample = {
+                        .samples = samples,
+                },
+        });
+
+        // THEN
+        REQUIRE(pipelineLayout.isValid());
+        REQUIRE(pipeline.isValid());
+        REQUIRE(colorMSAATextureView.isValid());
+        REQUIRE(depthMSAATextureView.isValid());
+        REQUIRE(colorResolveTextureView.isValid());
+        REQUIRE(depthResolveTextureView.isValid());
+        REQUIRE(device.isValid());
+
+        SUBCASE("A constructed RenderPassCommandRecorder that Resolve MSAA Color & Depth with Vulkan API")
+        {
+            // GIVEN
+            CommandRecorder commandRecorder = device.createCommandRecorder();
+            const RenderPassCommandRecorderOptions renderPassOptions{
+                .colorAttachments = {
+                        { .view = colorMSAATextureView,
+                          .resolveView = colorResolveTextureView,
+                          .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
+                          .finalLayout = TextureLayout::PresentSrc } },
+                .depthStencilAttachment = {
+                        .view = depthMSAATextureView,
+                        .resolveView = depthResolveTextureView,
+                        .depthResolveMode = ResolveModeFlagBits::Average,
+                        .stencilResolveMode = ResolveModeFlagBits::None,
+                },
+                .samples = samples,
             };
 
             // WHEN
