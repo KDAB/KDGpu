@@ -50,6 +50,10 @@ namespace KDGpu {
  * \ingroup vulkan
  *
  */
+
+struct RenderTargetOptions;
+struct DepthStencilOptions;
+
 class KDGPU_EXPORT VulkanResourceManager final : public ResourceManager
 {
 public:
@@ -136,11 +140,6 @@ public:
     void deleteComputePassCommandRecorder(const Handle<ComputePassCommandRecorder_t> &handle) final;
     VulkanComputePassCommandRecorder *getComputePassCommandRecorder(const Handle<ComputePassCommandRecorder_t> &handle) const final;
 
-    // TODO: Should we make this part of the ResourceManager api? Or combine it with the public RenderPass api?
-    // TODO: Should we pass in specific options types here for render passes and framebuffers?
-    Handle<RenderPass_t> createRenderPass(const Handle<Device_t> &deviceHandle, const RenderPassCommandRecorderOptions &options);
-    Handle<Framebuffer_t> createFramebuffer(const Handle<Device_t> &deviceHandle, const RenderPassCommandRecorderOptions &options, const VulkanFramebufferKey &frameBufferKey);
-
     // Command buffers are not created by the api. It is up to the concrete subclasses to insert the command buffers
     // by whatever mechanism they wish. They also do not need to be destroyed as they are cleaned up by the owning
     // command pool (command recorder).
@@ -168,6 +167,40 @@ public:
     VulkanFence *getFence(const Handle<Fence_t> &handle) const final;
 
 private:
+    void fillColorAttachmnents(std::vector<VkAttachmentReference2> &colorAttachmentRefs,
+                               std::vector<VkAttachmentReference2> &colorResolveAttachmentRefs,
+                               std::vector<VkAttachmentDescription2> &attachments,
+                               const std::vector<ColorAttachment> &colorAttachments,
+                               SampleCountFlagBits samples);
+
+    void fillColorAttachmnents(std::vector<VkAttachmentReference2> &colorAttachmentRefs,
+                               std::vector<VkAttachmentReference2> &colorResolveAttachmentRefs,
+                               std::vector<VkAttachmentDescription2> &attachments,
+                               const std::vector<RenderTargetOptions> &colorAttachments,
+                               SampleCountFlagBits samples);
+
+    std::pair<bool, bool> fillDepthAttachments(VkAttachmentReference2 &depthStencilAttachmentRef,
+                                               VkAttachmentReference2 &depthStencilResolveAttachmentRef,
+                                               std::vector<VkAttachmentDescription2> &attachments,
+                                               VkSubpassDescriptionDepthStencilResolve &depthResolve,
+                                               const DepthStencilAttachment &depthStencilAttachment,
+                                               SampleCountFlagBits samples);
+
+    std::pair<bool, bool> fillDepthAttachments(VkAttachmentReference2 &depthStencilAttachmentRef,
+                                               VkAttachmentReference2 &depthStencilResolveAttachmentRef,
+                                               std::vector<VkAttachmentDescription2> &attachments,
+                                               VkSubpassDescriptionDepthStencilResolve &depthResolve,
+                                               const DepthStencilOptions &depthStencilAttachment,
+                                               SampleCountFlagBits samples);
+
+    template<typename ColorAtt, typename DepthAtt>
+    Handle<RenderPass_t> createRenderPass(const Handle<Device_t> &deviceHandle,
+                                          const std::vector<ColorAtt> &colorAttachments,
+                                          const DepthAtt &depthAttachment,
+                                          SampleCountFlagBits samples,
+                                          uint32_t viewCount);
+    Handle<Framebuffer_t> createFramebuffer(const Handle<Device_t> &deviceHandle, const RenderPassCommandRecorderOptions &options, const VulkanFramebufferKey &frameBufferKey);
+
     Pool<VulkanInstance, Instance_t> m_instances{ 1 };
     Pool<VulkanAdapter, Adapter_t> m_adapters{ 1 };
     Pool<VulkanDevice, Device_t> m_devices{ 1 };

@@ -1033,6 +1033,7 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     // pipeline at command record time. We only do this if the pipeline outputs to
     // render targets.
     VkRenderPass vkRenderPass = VK_NULL_HANDLE;
+    Handle<RenderPass_t> vulkanRenderPassHandle;
     if (!options.renderTargets.empty()) {
         // Specify attachment refs for all color and resolve render targets and any
         // depth-stencil target. Concrete render passes that want to use this pipeline
@@ -1044,162 +1045,16 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
         // But in short, the concrete render pass must match attachment counts of each
         // type and match the formats and sample counts in each case.
 
-        // The render pass create info needs to know about all of the attachments that
-        // could be used in all of the subpasses (just 1 here). We will populate this
-        // with all of the color attachments, resolve attachments (if using MSAA), and
-        // finally a depth-stencil attachment, if specified.
-        //
-        // We do not concern ourselves with subpass dependencies here as they do not
-        // impact upon render pass compatibility (I think/hope).
-        std::vector<VkAttachmentDescription2> allAttachments;
+        vulkanRenderPassHandle = createRenderPass(deviceHandle,
+                                                  options.renderTargets,
+                                                  options.depthStencil,
+                                                  options.multisample.samples,
+                                                  options.viewCount);
 
-        // The subpass description will then index into the above vector of attachment
-        // descriptions to specify which subpasses use which of the available attachments.
-        uint32_t attachmentIndex = 0;
-        std::vector<VkAttachmentReference2> colorAttachmentRefs;
-        std::vector<VkAttachmentReference2> colorResolveAttachmentRefs;
-        VkAttachmentReference2 depthStencilAttachmentRef = {};
-        VkAttachmentReference2 depthStencilResolveAttachmentRef = {};
-
-        const bool usingMultisampling = options.multisample.samples > SampleCountFlagBits::Samples1Bit;
-        const VkSampleCountFlagBits sampleCount = sampleCountFlagBitsToVkSampleFlagBits(options.multisample.samples);
-
-        // Color and resolve attachments
-        {
-            const uint32_t colorTargetsCount = options.renderTargets.size();
-            colorAttachmentRefs.reserve(colorTargetsCount);
-            colorResolveAttachmentRefs.reserve(colorTargetsCount);
-
-            for (uint32_t i = 0; i < colorTargetsCount; ++i) {
-                const auto &renderTarget = options.renderTargets.at(i);
-
-                // NB: We don't care about load/store operations and initial/final layouts here
-                // so we just set some random values;
-                VkAttachmentDescription2 colorAttachment = {};
-                colorAttachment.sType = VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_2;
-                colorAttachment.format = formatToVkFormat(renderTarget.format);
-                colorAttachment.samples = sampleCount;
-                colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-                colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-                colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-                colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-                colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-                colorAttachment.finalLayout = usingMultisampling ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-                allAttachments.emplace_back(colorAttachment);
-
-                VkAttachmentReference2 colorAttachmentRef = {};
-                colorAttachmentRef.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
-                colorAttachmentRef.attachment = attachmentIndex++;
-                colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-                colorAttachmentRefs.emplace_back(colorAttachmentRef);
-
-                // If using multisampling, then for each color attachment we need a resolve attachment
-                if (usingMultisampling) {
-                    VkAttachmentDescription2 resolveAttachment = {};
-                    resolveAttachment.sType = VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_2;
-                    resolveAttachment.format = formatToVkFormat(renderTarget.format);
-                    resolveAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-                    resolveAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-                    resolveAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-                    resolveAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-                    resolveAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-                    resolveAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-                    resolveAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-                    allAttachments.emplace_back(resolveAttachment);
-
-                    VkAttachmentReference2 resolveAttachmentRef = {};
-                    resolveAttachmentRef.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
-                    resolveAttachmentRef.attachment = attachmentIndex++;
-                    resolveAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-                    colorResolveAttachmentRefs.emplace_back(resolveAttachmentRef);
-                }
-            }
-        }
-
-        // Depth-stencil attachment
-        const bool hasDepthAttachment = options.depthStencil.format != Format::UNDEFINED;
-        const bool hasDepthResolveAttachment = hasDepthAttachment && usingMultisampling && options.depthStencil.resolveDepthStencil;
-        VkSubpassDescriptionDepthStencilResolve depthResolve{};
-
-        if (hasDepthAttachment) {
-            VkAttachmentDescription2 depthStencilAttachment = {};
-            depthStencilAttachment.sType = VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_2;
-            depthStencilAttachment.format = formatToVkFormat(options.depthStencil.format);
-            depthStencilAttachment.samples = sampleCount;
-            depthStencilAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-            depthStencilAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-            depthStencilAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-            depthStencilAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-            depthStencilAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-            depthStencilAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-            allAttachments.emplace_back(depthStencilAttachment);
-
-            depthStencilAttachmentRef.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
-            depthStencilAttachmentRef.attachment = attachmentIndex++;
-            depthStencilAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-            if (usingMultisampling && options.depthStencil.resolveDepthStencil) {
-                VkAttachmentDescription2 resolveAttachment = {};
-                resolveAttachment.sType = VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_2;
-                resolveAttachment.format = formatToVkFormat(options.depthStencil.format);
-                resolveAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-                resolveAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-                resolveAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-                resolveAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-                resolveAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-                resolveAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-                resolveAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-                allAttachments.emplace_back(resolveAttachment);
-
-                depthStencilResolveAttachmentRef.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
-                depthStencilResolveAttachmentRef.attachment = attachmentIndex++;
-                depthStencilResolveAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-                depthResolve.sType = VK_STRUCTURE_TYPE_SUBPASS_DESCRIPTION_DEPTH_STENCIL_RESOLVE;
-                depthResolve.depthResolveMode = VK_RESOLVE_MODE_AVERAGE_BIT;
-                depthResolve.stencilResolveMode = VK_RESOLVE_MODE_NONE;
-                depthResolve.pDepthStencilResolveAttachment = &depthStencilResolveAttachmentRef;
-            }
-        }
-
-        const uint32_t multiViewMaskMask = uint32_t(1 << options.viewCount) - 1;
-
-        // Just create a single subpass. We do not support multiple subpasses at this
-        // stage as other graphics APIs do not have an equivalent to subpasses.
-        VkSubpassDescription2 subpass = {};
-        subpass.sType = VK_STRUCTURE_TYPE_SUBPASS_DESCRIPTION_2;
-        subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-        subpass.colorAttachmentCount = static_cast<uint32_t>(colorAttachmentRefs.size());
-        subpass.pColorAttachments = colorAttachmentRefs.data();
-        subpass.pResolveAttachments = usingMultisampling ? colorResolveAttachmentRefs.data() : nullptr;
-        subpass.pDepthStencilAttachment = hasDepthAttachment ? &depthStencilAttachmentRef : nullptr;
-        // Depth MSAA Resolve
-        if (hasDepthResolveAttachment)
-            subpass.pNext = &depthResolve;
-
-        VkRenderPassCreateInfo2 renderPassInfo = {};
-        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO_2;
-        renderPassInfo.attachmentCount = static_cast<uint32_t>(allAttachments.size());
-        renderPassInfo.pAttachments = allAttachments.data();
-        renderPassInfo.subpassCount = 1;
-        renderPassInfo.pSubpasses = &subpass;
-        renderPassInfo.dependencyCount = 0;
-        renderPassInfo.pDependencies = nullptr;
-
-        if (options.viewCount > 1) {
-            // pViewMask is a bitfield of view indices describing which views rendering is broadcast to in this subpass
-            subpass.viewMask = multiViewMaskMask;
-            // CorrelationMasks sets the number of views to be rendered concurrently from a mask
-            // For now, we expect all of them to be rendered concurrently as we don't want to
-            // mess with subpass and view dependencies.
-            renderPassInfo.correlatedViewMaskCount = 1;
-            renderPassInfo.pCorrelatedViewMasks = &multiViewMaskMask;
-        }
-
-        if (auto result = vkCreateRenderPass2(vulkanDevice->device, &renderPassInfo, nullptr, &vkRenderPass); result != VK_SUCCESS) {
-            SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating render pass: {}", result);
-            return {};
-        }
+        // Note: at the moment this render pass isn't shared. It might make sense to do so at some point,
+        // in which case, the renderPass handle will have to be added to vulkanDevice->renderPasses
+        VulkanRenderPass *vulkanRenderPass = m_renderPasses.get(vulkanRenderPassHandle);
+        vkRenderPass = vulkanRenderPass->renderPass;
     }
 
     // Bring it all together in the all-knowing pipeline create info
@@ -1231,8 +1086,8 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     // Create VulkanPipeline object and return handle
     const auto vulkanGraphicsPipelineHandle = m_graphicsPipelines.emplace(VulkanGraphicsPipeline(
             vkPipeline,
-            vkRenderPass,
             this,
+            vulkanRenderPassHandle,
             deviceHandle,
             options.layout));
 
@@ -1245,7 +1100,14 @@ void VulkanResourceManager::deleteGraphicsPipeline(const Handle<GraphicsPipeline
     VulkanDevice *vulkanDevice = m_devices.get(vulkanPipeline->deviceHandle);
 
     vkDestroyPipeline(vulkanDevice->device, vulkanPipeline->pipeline, nullptr);
-    vkDestroyRenderPass(vulkanDevice->device, vulkanPipeline->renderPass, nullptr);
+
+    // Note this renderPass isn't shared since we haven't added it to vulkanDevice->renderPasses
+    // so we're in charge of releasing it
+    VulkanRenderPass *vulkanRenderPass = m_renderPasses.get(vulkanPipeline->renderPassHandle);
+    if (vulkanRenderPass) {
+        vkDestroyRenderPass(vulkanDevice->device, vulkanRenderPass->renderPass, nullptr);
+        m_renderPasses.remove(vulkanPipeline->renderPassHandle);
+    }
 
     m_graphicsPipelines.remove(handle);
 }
@@ -1497,7 +1359,11 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
     Handle<RenderPass_t> vulkanRenderPassHandle;
     if (itRenderPass == vulkanDevice->renderPasses.end()) {
         // TODO: Create the render pass and cache the handle for it
-        vulkanRenderPassHandle = createRenderPass(deviceHandle, options);
+        vulkanRenderPassHandle = createRenderPass(deviceHandle,
+                                                  options.colorAttachments,
+                                                  options.depthStencilAttachment,
+                                                  options.samples,
+                                                  options.viewCount);
         vulkanDevice->renderPasses.insert({ renderPassKey, vulkanRenderPassHandle });
     } else {
         vulkanRenderPassHandle = itRenderPass->second;
@@ -1671,41 +1537,28 @@ VulkanComputePassCommandRecorder *VulkanResourceManager::getComputePassCommandRe
     return m_computePassCommandRecorders.get(handle);
 }
 
-Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device_t> &deviceHandle,
-                                                             const RenderPassCommandRecorderOptions &options)
+void VulkanResourceManager::fillColorAttachmnents(std::vector<VkAttachmentReference2> &colorAttachmentRefs,
+                                                  std::vector<VkAttachmentReference2> &colorResolveAttachmentRefs,
+                                                  std::vector<VkAttachmentDescription2> &attachments,
+                                                  const std::vector<ColorAttachment> &colorAttachments,
+                                                  SampleCountFlagBits samples)
 {
-    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
-
-    // The subpass description will then index into the above vector of attachment
-    // descriptions to specify which subpasses use which of the available attachments.
-    uint32_t attachmentIndex = 0;
-    constexpr size_t MaxAttachmentCount = 8;
-    std::array<VkAttachmentReference2, MaxAttachmentCount> colorAttachmentRefs{};
-    std::array<VkAttachmentReference2, MaxAttachmentCount> colorResolveAttachmentRefs{};
-    std::array<VkAttachmentDescription2, MaxAttachmentCount * 2> allAttachments{};
-    VkAttachmentReference2 depthStencilAttachmentRef = {};
-    VkAttachmentReference2 depthStencilResolveAttachmentRef = {};
-
-    // TODO: Handle multisampling
-    const bool usingMultisampling = options.samples > SampleCountFlagBits::Samples1Bit;
-    const VkSampleCountFlagBits sampleCount = sampleCountFlagBitsToVkSampleFlagBits(options.samples);
-
     // Color and resolve attachments
-    const uint32_t colorTargetsCount = options.colorAttachments.size();
-    assert(colorTargetsCount <= MaxAttachmentCount);
+    const bool usingMultisampling = samples > SampleCountFlagBits::Samples1Bit;
+    const uint32_t colorTargetsCount = colorAttachments.size();
     {
         for (uint32_t i = 0; i < colorTargetsCount; ++i) {
-            const auto &renderTarget = options.colorAttachments.at(i);
+            const ColorAttachment &renderTarget = colorAttachments.at(i);
 
             VulkanTextureView *view = getTextureView(renderTarget.view);
             if (!view) {
                 // Log invalid view requested
-                return {};
+                return;
             }
             VulkanTexture *texture = getTexture(view->textureHandle);
             if (!texture) {
                 // Log invalid texture requested
-                return {};
+                return;
             }
 
             // NB: We don't care about load/store operations and initial/final layouts here
@@ -1713,31 +1566,33 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
             VkAttachmentDescription2 colorAttachment = {};
             colorAttachment.sType = VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_2;
             colorAttachment.format = formatToVkFormat(texture->format);
-            colorAttachment.samples = sampleCount;
+            colorAttachment.samples = sampleCountFlagBitsToVkSampleFlagBits(samples);
             colorAttachment.loadOp = attachmentLoadOperationToVkAttachmentLoadOp(renderTarget.loadOperation);
             colorAttachment.storeOp = attachmentStoreOperationToVkAttachmentStoreOp(renderTarget.storeOperation);
             colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
             colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
             colorAttachment.initialLayout = textureLayoutToVkImageLayout(renderTarget.initialLayout);
             colorAttachment.finalLayout = textureLayoutToVkImageLayout(renderTarget.finalLayout);
-            allAttachments[attachmentIndex] = colorAttachment;
 
-            VkAttachmentReference2 &colorAttachmentRef = colorAttachmentRefs[i];
+            VkAttachmentReference2 colorAttachmentRef = {};
             colorAttachmentRef.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
-            colorAttachmentRef.attachment = attachmentIndex++;
+            colorAttachmentRef.attachment = attachments.size();
             colorAttachmentRef.layout = textureLayoutToVkImageLayout(renderTarget.layout);
+
+            colorAttachmentRefs.emplace_back(colorAttachmentRef);
+            attachments.emplace_back(colorAttachment);
 
             // If using multisampling, then for each color attachment we need a resolve attachment
             if (usingMultisampling) {
                 VulkanTextureView *view = getTextureView(renderTarget.resolveView);
                 if (!view) {
                     // Log invalid view requested
-                    return {};
+                    return;
                 }
                 VulkanTexture *texture = getTexture(view->textureHandle);
                 if (!texture) {
                     // Log invalid texture requested
-                    return {};
+                    return;
                 }
 
                 VkAttachmentDescription2 resolveAttachment = {};
@@ -1750,50 +1605,116 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
                 resolveAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
                 resolveAttachment.initialLayout = textureLayoutToVkImageLayout(renderTarget.initialLayout);
                 resolveAttachment.finalLayout = textureLayoutToVkImageLayout(renderTarget.finalLayout);
-                allAttachments[attachmentIndex] = resolveAttachment;
 
-                VkAttachmentReference2 &resolveAttachmentRef = colorResolveAttachmentRefs[i];
+                VkAttachmentReference2 resolveAttachmentRef = {};
                 resolveAttachmentRef.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
-                resolveAttachmentRef.attachment = attachmentIndex++;
+                resolveAttachmentRef.attachment = attachments.size();
                 resolveAttachmentRef.layout = textureLayoutToVkImageLayout(renderTarget.layout);
+
+                colorResolveAttachmentRefs.emplace_back(resolveAttachmentRef);
+                attachments.emplace_back(resolveAttachment);
             }
         }
     }
+}
 
-    // Depth-stencil attachment
-    const bool hasDepthAttachment = options.depthStencilAttachment.view.isValid();
-    const bool hasDepthResolveAttachment = hasDepthAttachment && usingMultisampling && options.depthStencilAttachment.resolveView.isValid();
-    VkSubpassDescriptionDepthStencilResolve depthResolve{};
+void VulkanResourceManager::fillColorAttachmnents(std::vector<VkAttachmentReference2> &colorAttachmentRefs,
+                                                  std::vector<VkAttachmentReference2> &colorResolveAttachmentRefs,
+                                                  std::vector<VkAttachmentDescription2> &attachments,
+                                                  const std::vector<RenderTargetOptions> &colorAttachments,
+                                                  SampleCountFlagBits samples)
+{
+    const bool usingMultisampling = samples > SampleCountFlagBits::Samples1Bit;
+    const uint32_t colorTargetsCount = colorAttachments.size();
+    for (uint32_t i = 0; i < colorTargetsCount; ++i) {
+        const auto &renderTarget = colorAttachments.at(i);
+
+        // NB: We don't care about load/store operations and initial/final layouts here
+        // so we just set some random values;
+        VkAttachmentDescription2 colorAttachment = {};
+        colorAttachment.sType = VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_2;
+        colorAttachment.format = formatToVkFormat(renderTarget.format);
+        colorAttachment.samples = sampleCountFlagBitsToVkSampleFlagBits(samples);
+        colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        colorAttachment.finalLayout = usingMultisampling ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+        VkAttachmentReference2 colorAttachmentRef = {};
+        colorAttachmentRef.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
+        colorAttachmentRef.attachment = attachments.size();
+        colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+        colorAttachmentRefs.emplace_back(colorAttachmentRef);
+        attachments.emplace_back(colorAttachment);
+
+        // If using multisampling, then for each color attachment we need a resolve attachment
+        if (usingMultisampling) {
+            VkAttachmentDescription2 resolveAttachment = {};
+            resolveAttachment.sType = VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_2;
+            resolveAttachment.format = formatToVkFormat(renderTarget.format);
+            resolveAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+            resolveAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+            resolveAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+            resolveAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+            resolveAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+            resolveAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+            resolveAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+            VkAttachmentReference2 resolveAttachmentRef = {};
+            resolveAttachmentRef.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
+            resolveAttachmentRef.attachment = attachments.size();
+            resolveAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+            colorResolveAttachmentRefs.emplace_back(resolveAttachmentRef);
+            attachments.emplace_back(resolveAttachment);
+        }
+    }
+}
+
+std::pair<bool, bool> VulkanResourceManager::fillDepthAttachments(VkAttachmentReference2 &depthStencilAttachmentRef,
+                                                                  VkAttachmentReference2 &depthStencilResolveAttachmentRef,
+                                                                  std::vector<VkAttachmentDescription2> &attachments,
+                                                                  VkSubpassDescriptionDepthStencilResolve &depthResolve,
+                                                                  const DepthStencilAttachment &depthStencilAttachment,
+                                                                  SampleCountFlagBits samples)
+{
+    const bool hasDepthAttachment = depthStencilAttachment.view.isValid();
+    const bool usingMultisampling = samples > SampleCountFlagBits::Samples1Bit;
+    const bool hasDepthResolveAttachment = hasDepthAttachment && usingMultisampling && depthStencilAttachment.resolveView.isValid();
 
     if (hasDepthAttachment) {
-        const auto &renderTarget = options.depthStencilAttachment;
+        const DepthStencilAttachment &renderTarget = depthStencilAttachment;
 
         VulkanTextureView *view = getTextureView(renderTarget.view);
         if (!view) {
-            return {};
+            return { false, false };
             // Log invalid view requested
         }
         VulkanTexture *texture = getTexture(view->textureHandle);
         if (!texture) {
             // Log invalid texture requested
-            return {};
+            return { false, false };
         }
 
         VkAttachmentDescription2 depthStencilAttachment = {};
         depthStencilAttachment.sType = VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_2;
         depthStencilAttachment.format = formatToVkFormat(texture->format);
-        depthStencilAttachment.samples = sampleCount;
+        depthStencilAttachment.samples = sampleCountFlagBitsToVkSampleFlagBits(samples);
         depthStencilAttachment.loadOp = attachmentLoadOperationToVkAttachmentLoadOp(renderTarget.depthLoadOperation);
         depthStencilAttachment.storeOp = attachmentStoreOperationToVkAttachmentStoreOp(renderTarget.depthStoreOperation);
         depthStencilAttachment.stencilLoadOp = attachmentLoadOperationToVkAttachmentLoadOp(renderTarget.stencilLoadOperation);
         depthStencilAttachment.stencilStoreOp = attachmentStoreOperationToVkAttachmentStoreOp(renderTarget.stencilStoreOperation);
         depthStencilAttachment.initialLayout = textureLayoutToVkImageLayout(renderTarget.initialLayout);
         depthStencilAttachment.finalLayout = textureLayoutToVkImageLayout(renderTarget.finalLayout);
-        allAttachments[attachmentIndex] = depthStencilAttachment;
 
         depthStencilAttachmentRef.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
-        depthStencilAttachmentRef.attachment = attachmentIndex++;
+        depthStencilAttachmentRef.attachment = attachments.size();
         depthStencilAttachmentRef.layout = textureLayoutToVkImageLayout(renderTarget.layout);
+
+        attachments.emplace_back(depthStencilAttachment);
 
         // If using multisampling, then we might need to resolve the depth attachment
         if (hasDepthResolveAttachment) {
@@ -1811,11 +1732,12 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
                     resolveAttachment.stencilStoreOp = attachmentStoreOperationToVkAttachmentStoreOp(renderTarget.stencilStoreOperation);
                     resolveAttachment.initialLayout = textureLayoutToVkImageLayout(renderTarget.initialLayout);
                     resolveAttachment.finalLayout = textureLayoutToVkImageLayout(renderTarget.finalLayout);
-                    allAttachments[attachmentIndex] = resolveAttachment;
 
                     depthStencilResolveAttachmentRef.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
-                    depthStencilResolveAttachmentRef.attachment = attachmentIndex++;
+                    depthStencilResolveAttachmentRef.attachment = attachments.size();
                     depthStencilResolveAttachmentRef.layout = textureLayoutToVkImageLayout(renderTarget.layout);
+
+                    attachments.emplace_back(resolveAttachment);
 
                     depthResolve.sType = VK_STRUCTURE_TYPE_SUBPASS_DESCRIPTION_DEPTH_STENCIL_RESOLVE;
                     depthResolve.depthResolveMode = resolveModeToVkResolveMode(renderTarget.depthResolveMode);
@@ -1829,17 +1751,116 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
         }
     }
 
-    assert(options.viewCount > 0);
-    const uint32_t multiViewMaskMask = uint32_t(1 << options.viewCount) - 1;
+    return { hasDepthAttachment, hasDepthResolveAttachment };
+}
+
+std::pair<bool, bool> VulkanResourceManager::fillDepthAttachments(VkAttachmentReference2 &depthStencilAttachmentRef,
+                                                                  VkAttachmentReference2 &depthStencilResolveAttachmentRef,
+                                                                  std::vector<VkAttachmentDescription2> &attachments,
+                                                                  VkSubpassDescriptionDepthStencilResolve &depthResolve,
+                                                                  const DepthStencilOptions &depthStencil,
+                                                                  SampleCountFlagBits samples)
+{
+    const bool hasDepthAttachment = depthStencil.format != Format::UNDEFINED;
+    const bool usingMultisampling = samples > SampleCountFlagBits::Samples1Bit;
+    const bool hasDepthResolveAttachment = hasDepthAttachment && usingMultisampling && depthStencil.resolveDepthStencil;
+
+    if (hasDepthAttachment) {
+        VkAttachmentDescription2 depthStencilAttachment = {};
+        depthStencilAttachment.sType = VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_2;
+        depthStencilAttachment.format = formatToVkFormat(depthStencil.format);
+        depthStencilAttachment.samples = sampleCountFlagBitsToVkSampleFlagBits(samples);
+        depthStencilAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        depthStencilAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        depthStencilAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        depthStencilAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        depthStencilAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        depthStencilAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+        depthStencilAttachmentRef.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
+        depthStencilAttachmentRef.attachment = attachments.size();
+        depthStencilAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+        attachments.emplace_back(depthStencilAttachment);
+
+        if (usingMultisampling && depthStencil.resolveDepthStencil) {
+            VkAttachmentDescription2 resolveAttachment = {};
+            resolveAttachment.sType = VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_2;
+            resolveAttachment.format = formatToVkFormat(depthStencil.format);
+            resolveAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+            resolveAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+            resolveAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+            resolveAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+            resolveAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+            resolveAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+            resolveAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+            depthStencilResolveAttachmentRef.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
+            depthStencilResolveAttachmentRef.attachment = attachments.size();
+            depthStencilResolveAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+            attachments.emplace_back(resolveAttachment);
+
+            depthResolve.sType = VK_STRUCTURE_TYPE_SUBPASS_DESCRIPTION_DEPTH_STENCIL_RESOLVE;
+            depthResolve.depthResolveMode = VK_RESOLVE_MODE_AVERAGE_BIT;
+            depthResolve.stencilResolveMode = VK_RESOLVE_MODE_NONE;
+            depthResolve.pDepthStencilResolveAttachment = &depthStencilResolveAttachmentRef;
+        }
+    }
+
+    return { hasDepthAttachment, hasDepthResolveAttachment };
+}
+
+template<typename ColorAtt, typename DepthAtt>
+Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device_t> &deviceHandle,
+                                                             const std::vector<ColorAtt> &colorAttachments,
+                                                             const DepthAtt &depthAttachment,
+                                                             SampleCountFlagBits samples,
+                                                             uint32_t viewCount)
+{
+    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
+
+    // The subpass description will then index into the above vector of attachment
+    // descriptions to specify which subpasses use which of the available attachments.
+    constexpr size_t MaxAttachmentCount = 8;
+    std::vector<VkAttachmentReference2> colorAttachmentRefs{};
+    std::vector<VkAttachmentReference2> colorResolveAttachmentRefs{};
+    std::vector<VkAttachmentDescription2> allAttachments{};
+    VkAttachmentReference2 depthStencilAttachmentRef = {};
+    VkAttachmentReference2 depthStencilResolveAttachmentRef = {};
+
+    colorAttachmentRefs.reserve(MaxAttachmentCount);
+    colorResolveAttachmentRefs.reserve(MaxAttachmentCount);
+    allAttachments.reserve(MaxAttachmentCount * 2);
+
+    // Color and resolve attachments
+    fillColorAttachmnents(colorAttachmentRefs,
+                          colorResolveAttachmentRefs,
+                          allAttachments,
+                          colorAttachments,
+                          samples);
+
+    // Depth-stencil attachment
+    VkSubpassDescriptionDepthStencilResolve depthResolve{};
+    bool hasDepthAttachment, hasDepthResolveAttachment;
+    std::tie(hasDepthAttachment, hasDepthResolveAttachment) = fillDepthAttachments(depthStencilAttachmentRef,
+                                                                                   depthStencilResolveAttachmentRef,
+                                                                                   allAttachments,
+                                                                                   depthResolve,
+                                                                                   depthAttachment,
+                                                                                   samples);
+
+    assert(viewCount > 0);
+    const uint32_t multiViewMaskMask = uint32_t(1 << viewCount) - 1;
 
     // Just create a single subpass. We do not support multiple subpasses at this
     // stage as other graphics APIs do not have an equivalent to subpasses.
     VkSubpassDescription2 subpass = {};
     subpass.sType = VK_STRUCTURE_TYPE_SUBPASS_DESCRIPTION_2;
     subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-    subpass.colorAttachmentCount = colorTargetsCount;
+    subpass.colorAttachmentCount = colorAttachmentRefs.size();
     subpass.pColorAttachments = colorAttachmentRefs.data();
-    subpass.pResolveAttachments = usingMultisampling ? colorResolveAttachmentRefs.data() : nullptr;
+    subpass.pResolveAttachments = colorResolveAttachmentRefs.size() > 0 ? colorResolveAttachmentRefs.data() : nullptr;
     subpass.pDepthStencilAttachment = hasDepthAttachment ? &depthStencilAttachmentRef : nullptr;
     // Depth MSAA Resolve
     if (hasDepthResolveAttachment)
@@ -1847,14 +1868,14 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
 
     VkRenderPassCreateInfo2 renderPassInfo = {};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO_2;
-    renderPassInfo.attachmentCount = attachmentIndex;
+    renderPassInfo.attachmentCount = allAttachments.size();
     renderPassInfo.pAttachments = allAttachments.data();
     renderPassInfo.subpassCount = 1;
     renderPassInfo.pSubpasses = &subpass;
     renderPassInfo.dependencyCount = 0;
     renderPassInfo.pDependencies = nullptr;
 
-    if (options.viewCount > 1) {
+    if (viewCount > 1) {
         // pViewMask is a bitfield of view indices describing which views rendering is broadcast to in this subpass
         subpass.viewMask = multiViewMaskMask;
         // CorrelationMasks sets the number of views to be rendered concurrently from a mask
@@ -1873,6 +1894,18 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
     const auto vulkanRenderPassHandle = m_renderPasses.emplace(VulkanRenderPass(vkRenderPass, this, deviceHandle));
     return vulkanRenderPassHandle;
 }
+
+// explicitly instantiate the template specializations so that their definitions are known at compile time (since we haven't implemented it in the header)
+template Handle<RenderPass_t> VulkanResourceManager::createRenderPass<RenderTargetOptions, DepthStencilOptions>(const Handle<Device_t> &,
+                                                                                                                const std::vector<RenderTargetOptions> &,
+                                                                                                                const DepthStencilOptions &,
+                                                                                                                SampleCountFlagBits,
+                                                                                                                uint32_t);
+template Handle<RenderPass_t> VulkanResourceManager::createRenderPass<ColorAttachment, DepthStencilAttachment>(const Handle<Device_t> &,
+                                                                                                               const std::vector<ColorAttachment> &,
+                                                                                                               const DepthStencilAttachment &,
+                                                                                                               SampleCountFlagBits,
+                                                                                                               uint32_t);
 
 Handle<Framebuffer_t> VulkanResourceManager::createFramebuffer(const Handle<Device_t> &deviceHandle,
                                                                const RenderPassCommandRecorderOptions &options,

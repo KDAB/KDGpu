@@ -22,6 +22,7 @@ class VulkanResourceManager;
 
 struct Device_t;
 struct PipelineLayout_t;
+struct RenderPass_t;
 
 /**
  * @brief VulkanGraphicsPipeline
@@ -30,15 +31,15 @@ struct PipelineLayout_t;
  */
 struct KDGPU_EXPORT VulkanGraphicsPipeline : public ApiGraphicsPipeline {
     explicit VulkanGraphicsPipeline(VkPipeline _pipeline,
-                                    VkRenderPass _renderPass,
                                     VulkanResourceManager *_vulkanResourceManager,
+                                    const Handle<RenderPass_t> &_renderPassHandle,
                                     const Handle<Device_t> &_deviceHandle,
                                     const Handle<PipelineLayout_t> &_pipelineLayoutHandle);
 
     VkPipeline pipeline{ VK_NULL_HANDLE };
-    VkRenderPass renderPass{ VK_NULL_HANDLE };
 
     VulkanResourceManager *vulkanResourceManager;
+    Handle<RenderPass_t> renderPassHandle;
     Handle<Device_t> deviceHandle;
     Handle<PipelineLayout_t> pipelineLayoutHandle;
 };
