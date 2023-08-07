@@ -134,9 +134,9 @@ AdapterAndDevice Instance::createDefaultDevice(const Surface &surface,
     SPDLOG_LOGGER_INFO(Logger::logger(), "Queue family 0 supports presentation: {}", supportsPresentation);
 
     const auto adapterExtensions = selectedAdapter->extensions();
-    SPDLOG_LOGGER_DEBUG(Logger::logger(), "Supported adapter extensions:");
+    SPDLOG_LOGGER_INFO(Logger::logger(), "Supported adapter extensions:");
     for (const auto &extension : adapterExtensions) {
-        SPDLOG_LOGGER_DEBUG(Logger::logger(), "  - {} Version {}", extension.name, extension.version);
+        SPDLOG_LOGGER_INFO(Logger::logger(), "  - {} Version {}", extension.name, extension.version);
     }
 
     if (!supportsPresentation || !hasGraphicsAndCompute) {
