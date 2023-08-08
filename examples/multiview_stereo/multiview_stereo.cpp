@@ -146,7 +146,7 @@ void MultiViewStereo::recreateSwapChain()
         .minImageCount = getSuitableImageCount(swapchainProperties.capabilities),
         .imageExtent = { .width = m_window->width(), .height = m_window->height() },
         .imageLayers = 2,
-        .presentMode = m_presentMode,
+        .presentMode = PresentMode::FifoRelaxed,
         .oldSwapchain = m_swapchain,
     };
 
