@@ -81,7 +81,7 @@ protected:
     void update() override;
     void event(KDFoundation::EventReceiver *target, KDFoundation::Event *ev) override;
 
-    void recreateSwapChain();
+    virtual void recreateSwapChain();
 
     void uploadBufferData(const BufferUploadOptions &options);
     void uploadTextureData(const TextureUploadOptions &options);
