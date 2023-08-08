@@ -146,7 +146,7 @@ void MultiViewStereo::recreateSwapChain()
         .minImageCount = getSuitableImageCount(swapchainProperties.capabilities),
         .imageExtent = { .width = m_window->width(), .height = m_window->height() },
         .imageLayers = 2,
-        .presentMode = PresentMode::FifoRelaxed,
+        .presentMode = PresentMode::FifoRelaxed, // NVidia doesn't support MailBox with Stereo
         .oldSwapchain = m_swapchain,
     };
 
