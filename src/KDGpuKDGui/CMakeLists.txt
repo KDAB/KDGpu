@@ -11,7 +11,7 @@ set(SOURCES view.cpp)
 set(HEADERS view.h)
 
 add_library(
-    KDGpuKDGui SHARED
+    KDGpuKDGui
     ${SOURCES} ${PUBLIC_HEADERS} ${PRIVATE_HEADERS}
 )
 add_library(

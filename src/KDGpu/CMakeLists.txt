@@ -170,7 +170,7 @@ set(HEADERS
 )
 
 add_library(
-    KDGpu SHARED
+    KDGpu
     ${SOURCES} ${PUBLIC_HEADERS} ${PRIVATE_HEADERS}
 )
 add_library(

@@ -14,7 +14,6 @@ cmake_policy(SET CMP0117 NEW) # Do not add /GR to CMAKE_CXX_FLAGS
 
 project(KDGpu VERSION 0.1.0)
 
-set(BUILD_SHARED_LIBS ON)
 add_definitions(-DKDGPU_ASSET_PATH="${CMAKE_CURRENT_BINARY_DIR}/assets")
 
 if(KDGPU_LARGE_ASSETS)
@@ -62,7 +61,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
 option(KDGPU_CODE_COVERAGE "Code Coverage" OFF)
 option(KDGPU_BUILD_TESTS "Build tests" ON)
-option(KDGPU_BUILD_EXAMPLES "Build examples" ON)
+option(KDGPU_BUILD_EXAMPLES "Build examples" ${BUILD_SHARED_LIBS})
 option(KDGPU_HLSL_SUPPORT "Try to find and use the dxc HLSL to SPIR-V compiler" OFF)
 
 find_package(CUDAToolkit QUIET)
