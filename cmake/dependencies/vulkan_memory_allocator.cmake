@@ -6,7 +6,9 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
-if(NOT TARGET KDGpu::vulkan_memory_allocator)
+
+find_package(vulkan-memory-allocator QUIET)
+if(NOT TARGET vulkan-memory-allocator::vulkan-memory-allocator)
     FetchContent_Declare(
         vulkan_memory_allocator
         GIT_REPOSITORY https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
@@ -22,17 +24,17 @@ if(NOT TARGET KDGpu::vulkan_memory_allocator)
 
     find_package(Vulkan REQUIRED)
 
-    add_library(vulkan_memory_allocator STATIC ${VULKAN_MEMORY_ALLOCATOR_LIBRARY_SOURCE_FILES})
-    set_target_properties(vulkan_memory_allocator PROPERTIES POSITION_INDEPENDENT_CODE ON)
-    target_link_libraries(vulkan_memory_allocator PUBLIC Vulkan::Vulkan)
-    set_property(TARGET vulkan_memory_allocator PROPERTY CXX_STANDARD 17)
+    add_library(vulkan-memory-allocator STATIC ${VULKAN_MEMORY_ALLOCATOR_LIBRARY_SOURCE_FILES})
+    set_target_properties(vulkan-memory-allocator PROPERTIES POSITION_INDEPENDENT_CODE ON)
+    target_link_libraries(vulkan-memory-allocator PUBLIC Vulkan::Vulkan)
+    set_property(TARGET vulkan-memory-allocator PROPERTY CXX_STANDARD 17)
 
     target_include_directories(
-        vulkan_memory_allocator PRIVATE $<BUILD_INTERFACE:${vulkan_memory_allocator_SOURCE_DIR}/src>
+        vulkan-memory-allocator PRIVATE $<BUILD_INTERFACE:${vulkan_memory_allocator_SOURCE_DIR}/src>
     )
 
     target_include_directories(
-        vulkan_memory_allocator PUBLIC $<BUILD_INTERFACE:${vulkan_memory_allocator_SOURCE_DIR}/include>
+        vulkan-memory-allocator PUBLIC $<BUILD_INTERFACE:${vulkan_memory_allocator_SOURCE_DIR}/include>
                                        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/KDGpu/vulkan_memory_allocator>
     )
 
@@ -51,7 +53,7 @@ if(NOT TARGET KDGpu::vulkan_memory_allocator)
 
     # cmake-lint: disable=C0301
     target_compile_definitions(
-        vulkan_memory_allocator
+        vulkan-memory-allocator
         PUBLIC
             VMA_USE_STL_CONTAINERS=$<BOOL:${VMA_USE_STL_CONTAINERS}>
             VMA_DYNAMIC_VULKAN_FUNCTIONS=$<BOOL:${VMA_DYNAMIC_VULKAN_FUNCTIONS}>
@@ -62,9 +64,12 @@ if(NOT TARGET KDGpu::vulkan_memory_allocator)
             VMA_RECORDING_ENABLED=$<BOOL:${VMA_RECORDING_ENABLED}>
     )
 
-    add_library(KDGpu::vulkan_memory_allocator ALIAS vulkan_memory_allocator)
+    add_library(vulkan-memory-allocator::vulkan-memory-allocator ALIAS vulkan-memory-allocator)
 
     install(FILES ${vulkan_memory_allocator_SOURCE_DIR}/include/vk_mem_alloc.h
             DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/KDGpu/vulkan_memory_allocator/
     )
+    set(export-vulkan-memory-allocator ON)
+else()
+    set(export-vulkan-memory-allocator OFF)
 endif()

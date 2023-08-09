@@ -6,7 +6,9 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
-if(NOT TARGET KDGpu::imgui)
+
+find_package(imgui QUIET)
+if(NOT TARGET imgui::imgui)
     FetchContent_Declare(
         imgui
         GIT_REPOSITORY https://github.com/ocornut/imgui.git
@@ -29,7 +31,7 @@ if(NOT TARGET KDGpu::imgui)
         imgui PUBLIC $<BUILD_INTERFACE:${imgui_SOURCE_DIR}> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/imgui>
     )
     set_target_properties(imgui PROPERTIES POSITION_INDEPENDENT_CODE ON CXX_STANDARD 11)
-    add_library(KDGpu::imgui ALIAS imgui)
+    add_library(imgui::imgui ALIAS imgui)
 
     install(DIRECTORY ${imgui_SOURCE_DIR}/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/imgui)
 
@@ -48,6 +50,6 @@ if(NOT TARGET KDGpu::imgui)
         EXPORT imguiConfig
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/imgui
         EXPORT_LINK_INTERFACE_LIBRARIES
-        NAMESPACE KDGpu::
+        NAMESPACE imgui::
     )
 endif()

@@ -6,6 +6,8 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
+
+find_package(glm QUIET)
 if(NOT TARGET glm::glm)
     FetchContent_Declare(
         glm
