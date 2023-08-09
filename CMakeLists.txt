@@ -64,6 +64,7 @@ set(BUILD_SHARED_LIBS ${KDGPU_BUILD_SHARED_LIBS})
 
 option(KDGPU_CODE_COVERAGE "Code Coverage" OFF)
 option(KDGPU_BUILD_TESTS "Build tests" ON)
+option(KDGPU_BUILD_EXTRAS "Build KDGpuKDGui and KDGpuExample" ON)
 option(KDGPU_BUILD_EXAMPLES "Build examples" ON)
 option(KDGPU_HLSL_SUPPORT "Try to find and use the dxc HLSL to SPIR-V compiler" OFF)
 
@@ -96,7 +97,7 @@ if(KDGPU_BUILD_TESTS)
     add_subdirectory(tests)
 endif()
 
-if(KDGPU_BUILD_EXAMPLES)
+if(KDGPU_BUILD_EXAMPLES AND KDGPU_BUILD_EXTRAS)
     add_feature_info(KDGpu-Examples ON "Build Examples")
     add_subdirectory(examples)
 endif()
