@@ -6,6 +6,8 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
+
+find_package(trompeloeil QUIET)
 if(NOT TARGET trompeloeil::trompeloeil)
     FetchContent_Declare(
         trompeloeil

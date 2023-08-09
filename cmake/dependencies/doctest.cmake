@@ -6,6 +6,8 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
+
+find_package(doctest QUIET)
 if(NOT TARGET doctest::doctest)
     FetchContent_Declare(
         doctest

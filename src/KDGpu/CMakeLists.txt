@@ -177,9 +177,12 @@ add_library(
     KDGpu::KDGpu ALIAS KDGpu
 )
 
-set(KDGPU_PUBLIC_LIBS spdlog::spdlog Vulkan::Vulkan KDGpu::vulkan_memory_allocator)
+set(KDGPU_PUBLIC_LIBS spdlog::spdlog Vulkan::Vulkan vulkan-memory-allocator::vulkan-memory-allocator)
 
-set(KDGPU_EXPORT_TARGETS KDGpu vulkan_memory_allocator)
+set(KDGPU_EXPORT_TARGETS KDGpu)
+if(${export-vulkan-memory-allocator})
+    set(KDGPU_EXPORT_TARGETS ${KDGPU_EXPORT_TARGETS} vulkan-memory-allocator)
+endif()
 
 target_link_libraries(
     KDGpu

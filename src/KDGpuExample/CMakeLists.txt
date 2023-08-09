@@ -78,7 +78,7 @@ set(KDGPUEXAMPLE_PUBLIC_LIBS
     KDGpu::KDGpu
     KDUtils::KDGui
     KDUtils::KDUtils
-    KDGpu::imgui
+    imgui::imgui
     KDGpu::KDGpuKDGui
 )
 

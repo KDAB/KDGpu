@@ -6,6 +6,8 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
+
+find_package(stb QUIET)
 if(NOT TARGET stb::stb)
     FetchContent_Declare(
         stb
