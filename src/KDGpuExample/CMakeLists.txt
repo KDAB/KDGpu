@@ -67,7 +67,7 @@ set(HEADERS
 )
 
 add_library(
-    KDGpuExample SHARED
+    KDGpuExample
     ${SOURCES} ${PUBLIC_HEADERS} ${PRIVATE_HEADERS}
 )
 add_library(
