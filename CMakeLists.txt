@@ -59,9 +59,12 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
+option(KDGPU_BUILD_SHARED_LIBS "Build shared libraries" ON)
+set(BUILD_SHARED_LIBS ${KDGPU_BUILD_SHARED_LIBS})
+
 option(KDGPU_CODE_COVERAGE "Code Coverage" OFF)
 option(KDGPU_BUILD_TESTS "Build tests" ON)
-option(KDGPU_BUILD_EXAMPLES "Build examples" ${BUILD_SHARED_LIBS})
+option(KDGPU_BUILD_EXAMPLES "Build examples" ON)
 option(KDGPU_HLSL_SUPPORT "Try to find and use the dxc HLSL to SPIR-V compiler" OFF)
 
 find_package(CUDAToolkit QUIET)

@@ -84,7 +84,7 @@ set(KDGPUEXAMPLE_PUBLIC_LIBS
 
 target_compile_definitions(KDGpuExample PRIVATE KDGPUEXAMPLE_ASSET_PATH="${CMAKE_INSTALL_FULL_DATADIR}/assets")
 
-set(KDGPUEXAMPLE_EXPORT_TARGETS KDGpuExample)
+set(KDGPUEXAMPLE_EXPORT_TARGETS KDGpuExample KDGpuExampleResources KDGpuExampleShaderResources cmrc-base)
 
 target_link_libraries(
     KDGpuExample
