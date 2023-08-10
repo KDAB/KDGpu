@@ -1,2 +1,14 @@
+- v0.2.0
+  - Allow static builds
+  - Use vkCreateRenderPass2
+  - Optionally allow CUDA interop
+  - Add support for external semaphore and memory types
+  - Add example showing how to sample from depth texture
+  - Add example showing how to use stereo multiview (if supported)
+  - Add commands to CommandRecorder for:
+    - clearing color/depthstencil
+    - clearing a buffer
+    - updating a buffer
+  - [Bugfix] VulkanRenderPassKey now uses samples and view count
 - v0.1.0
   - Initial public pre-release
