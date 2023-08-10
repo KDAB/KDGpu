@@ -9,14 +9,12 @@
 cmake_minimum_required(VERSION 3.12)
 project(KDGpu-Tests)
 
-include_directories(./doctest)
-
 # Build a test program
 function(add_kdgpu_test NAME SOURCES)
     set(TARGET_NAME test_kdgpu_${NAME})
     add_executable(${TARGET_NAME} ${SOURCES})
 
-    target_link_libraries(${TARGET_NAME} KDGpu KDUtils::KDUtils)
+    target_link_libraries(${TARGET_NAME} KDGpu KDUtils::KDUtils doctest::doctest)
 
     add_test(NAME ${TARGET_NAME} COMMAND $<TARGET_FILE:${TARGET_NAME}>)
     set_tests_properties(${TARGET_NAME} PROPERTIES LABELS "KDGpu")
@@ -32,7 +30,7 @@ if(KDGPU_BUILD_EXAMPLES)
         set(TARGET_NAME test_kdgpuexample_${NAME})
         add_executable(${TARGET_NAME} ${SOURCES})
 
-        target_link_libraries(${TARGET_NAME} KDGpu::KDGpu KDGpu::KDGpuExample)
+        target_link_libraries(${TARGET_NAME} KDGpu::KDGpu KDGpu::KDGpuExample doctest::doctest)
 
         add_test(NAME ${TARGET_NAME} COMMAND $<TARGET_FILE:${TARGET_NAME}>)
         set_tests_properties(${TARGET_NAME} PROPERTIES LABELS "KDGpuExample")
