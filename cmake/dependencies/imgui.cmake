@@ -36,7 +36,7 @@ if(NOT TARGET imgui::imgui)
     install(DIRECTORY ${imgui_SOURCE_DIR}/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/imgui)
 
     # Create CMake Package File for imgui so that it can be found with find_package(imgui)
-    # and exports target KDGpu::imgui to link against
+    # and exports target imgui::imgui to link against
     install(
         TARGETS imgui
         EXPORT imguiConfig
