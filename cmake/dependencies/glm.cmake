@@ -52,7 +52,7 @@ if(NOT TARGET glm::glm)
     export(
         TARGETS glm
         NAMESPACE glm::
-        FILE "${CMAKE_CURRENT_BINARY_DIR}/glmConfig.cmake"
+        FILE "${glm_BINARY_DIR}/glmConfig.cmake"
     )
 
     install(

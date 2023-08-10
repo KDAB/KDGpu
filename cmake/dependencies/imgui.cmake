@@ -47,7 +47,7 @@ if(NOT TARGET imgui::imgui)
     export(
         TARGETS imgui
         NAMESPACE imgui::
-        FILE "${CMAKE_CURRENT_BINARY_DIR}/imguiConfig.cmake"
+        FILE "${imgui_BINARY_DIR}/imguiConfig.cmake"
     )
 
     install(
