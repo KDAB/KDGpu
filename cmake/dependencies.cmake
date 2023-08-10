@@ -47,7 +47,4 @@ endif()
 if(KDGPU_BUILD_TESTS)
     # doctest
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/doctest.cmake)
-
-    # trompeloeil
-    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/trompeloeil.cmake)
 endif()
