@@ -49,7 +49,11 @@ if(NOT TARGET glm::glm)
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     )
-    export(TARGETS glm FILE "${CMAKE_CURRENT_BINARY_DIR}/glmConfig.cmake")
+    export(
+        TARGETS glm
+        NAMESPACE glm::
+        FILE "${CMAKE_CURRENT_BINARY_DIR}/glmConfig.cmake"
+    )
 
     install(
         EXPORT glmConfig

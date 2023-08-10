@@ -44,7 +44,11 @@ if(NOT TARGET imgui::imgui)
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     )
-    export(TARGETS imgui FILE "${CMAKE_CURRENT_BINARY_DIR}/imguiConfig.cmake")
+    export(
+        TARGETS imgui
+        NAMESPACE imgui::
+        FILE "${CMAKE_CURRENT_BINARY_DIR}/imguiConfig.cmake"
+    )
 
     install(
         EXPORT imguiConfig
