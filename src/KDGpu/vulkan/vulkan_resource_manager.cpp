@@ -1683,15 +1683,15 @@ std::pair<bool, bool> VulkanResourceManager::fillDepthAttachments(VkAttachmentRe
                                                                   VkAttachmentReference2 &depthStencilResolveAttachmentRef,
                                                                   std::vector<VkAttachmentDescription2> &attachments,
                                                                   VkSubpassDescriptionDepthStencilResolve &depthResolve,
-                                                                  const DepthStencilAttachment &depthStencilAttachment,
+                                                                  const DepthStencilAttachment &depthStencil,
                                                                   SampleCountFlagBits samples)
 {
-    const bool hasDepthAttachment = depthStencilAttachment.view.isValid();
+    const bool hasDepthAttachment = depthStencil.view.isValid();
     const bool usingMultisampling = samples > SampleCountFlagBits::Samples1Bit;
-    const bool hasDepthResolveAttachment = hasDepthAttachment && usingMultisampling && depthStencilAttachment.resolveView.isValid();
+    const bool hasDepthResolveAttachment = hasDepthAttachment && usingMultisampling && depthStencil.resolveView.isValid();
 
     if (hasDepthAttachment) {
-        const DepthStencilAttachment &renderTarget = depthStencilAttachment;
+        const DepthStencilAttachment &renderTarget = depthStencil;
 
         VulkanTextureView *view = getTextureView(renderTarget.view);
         if (!view) {
