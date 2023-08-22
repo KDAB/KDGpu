@@ -1187,9 +1187,9 @@ Handle<GpuSemaphore_t> VulkanResourceManager::createGpuSemaphore(const Handle<De
 
     VkSemaphoreCreateInfo semaphoreInfo = {};
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-    VkExportSemaphoreCreateInfoKHR exportSemaphoreCreateInfo = {};
+    VkExportSemaphoreCreateInfo exportSemaphoreCreateInfo = {};
     if (options.externalSemaphoreHandleType != ExternalSemaphoreHandleTypeFlagBits::None) {
-        exportSemaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO_KHR;
+        exportSemaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO;
         exportSemaphoreCreateInfo.pNext = nullptr;
         exportSemaphoreCreateInfo.handleTypes = externalSemaphoreHandleTypeToVkExternalSemaphoreHandleType(options.externalSemaphoreHandleType);
         semaphoreInfo.pNext = &exportSemaphoreCreateInfo;
