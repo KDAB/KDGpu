@@ -10,6 +10,8 @@
 
 #include "vulkan_command_buffer.h"
 
+#include "KDGpu/utils/logging.h"
+
 namespace KDGpu {
 
 VulkanCommandBuffer::VulkanCommandBuffer(VkCommandBuffer _commandBuffer,
@@ -43,15 +45,17 @@ void VulkanCommandBuffer::begin()
         beginInfo.pInheritanceInfo = &inheritanceInfo;
     }
 
-    if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS) {
-        // TODO: Log failure to begin recording
+    VkResult result = vkBeginCommandBuffer(commandBuffer, &beginInfo);
+    if (result != VK_SUCCESS) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Unable to begin command buffer recording: {}", result);
     }
 }
 
 void VulkanCommandBuffer::finish()
 {
-    if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
-        // TODO: Log failure to end recording
+    VkResult result = vkEndCommandBuffer(commandBuffer);
+    if (result != VK_SUCCESS) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Unable to end command buffer recording: {}", result);
     }
 }
 

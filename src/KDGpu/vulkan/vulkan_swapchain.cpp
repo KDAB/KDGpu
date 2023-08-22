@@ -38,7 +38,7 @@ std::vector<Handle<Texture_t>> VulkanSwapchain::getTextures()
 {
     VulkanDevice *vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
     if (!vulkanDevice) {
-        // TODO: Log could not find device
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Could not find a valid device");
         return {};
     }
     VkDevice device = vulkanDevice->device;
@@ -72,7 +72,7 @@ AcquireImageResult VulkanSwapchain::getNextImageIndex(uint32_t &imageIndex, cons
 {
     VulkanDevice *vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
     if (!vulkanDevice) {
-        // TODO: Log could not find device
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Could not find a valid device");
         return AcquireImageResult::DeviceLost;
     }
     VkDevice device = vulkanDevice->device;

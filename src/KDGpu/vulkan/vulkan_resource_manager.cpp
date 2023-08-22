@@ -1023,7 +1023,7 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     // Fetch the specified pipeline layout
     VulkanPipelineLayout *vulkanPipelineLayout = getPipelineLayout(options.layout);
     if (!vulkanPipelineLayout) {
-        // TODO: Log invalid pipeline layout requested
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Invalid pipeline layout requested");
         return {};
     }
 
@@ -1129,7 +1129,7 @@ Handle<ComputePipeline_t> VulkanResourceManager::createComputePipeline(const Han
     // Fetch the specified pipeline layout
     VulkanPipelineLayout *vulkanPipelineLayout = getPipelineLayout(options.layout);
     if (!vulkanPipelineLayout) {
-        // TODO: Log invalid pipeline layout requested
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Invalid pipeline layout requested");
         return {};
     }
 
@@ -1234,7 +1234,7 @@ Handle<CommandRecorder_t> VulkanResourceManager::createCommandRecorder(const Han
 
     if (!options.queue.isValid()) {
         if (vulkanDevice->queueDescriptions.empty()) {
-            // TODO: Log that we have no queue descriptions on the device
+            SPDLOG_LOGGER_ERROR(Logger::logger(), "No more queue descriptors available for device");
             return {};
         }
         queueDescription = &vulkanDevice->queueDescriptions[0];
@@ -1245,7 +1245,7 @@ Handle<CommandRecorder_t> VulkanResourceManager::createCommandRecorder(const Han
                 vulkanDevice->queueDescriptions.end(),
                 [options](const QueueDescription &queueDescription) { return queueDescription.queue == options.queue; });
         if (it == vulkanDevice->queueDescriptions.end()) {
-            // TODO: Log that we can't find the requested queue on this device
+            SPDLOG_LOGGER_ERROR(Logger::logger(), "Cannot find requested queue for device");
             return {};
         }
         queueDescription = &(*it);
@@ -1376,7 +1376,7 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
 
     VulkanRenderPass *vulkanRenderPass = m_renderPasses.get(vulkanRenderPassHandle);
     if (!vulkanRenderPass) {
-        // TODO: Log about not finding/creating a render pass
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Unable to find or create a render pass");
         return {};
     }
     VkRenderPass vkRenderPass = vulkanRenderPass->renderPass;
@@ -1402,12 +1402,12 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
     assert(!options.colorAttachments.empty());
     VulkanTextureView *firstView = getTextureView(options.colorAttachments.at(0).view);
     if (!firstView) {
-        // TODO: Log invalid attachment
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Invalid texture view when creating render pass");
         return {};
     }
     VulkanTexture *firstTexture = getTexture(firstView->textureHandle);
     if (!firstTexture) {
-        // TODO: Log invalid attachment
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Invalid texture when creating render pass");
         return {};
     }
 
@@ -1437,7 +1437,7 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
 
     VulkanFramebuffer *vulkanFramebuffer = m_framebuffers.get(vulkanFramebufferHandle);
     if (!vulkanFramebuffer) {
-        // TODO: Log about not finding/creating a framebuffer
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Could not create or find a framebuffer");
         return {};
     }
     VkFramebuffer vkFramebuffer = vulkanFramebuffer->framebuffer;
@@ -1488,7 +1488,7 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
 
     VulkanCommandRecorder *vulkanCommandRecorder = m_commandRecorders.get(commandRecorderHandle);
     if (!vulkanCommandRecorder) {
-        // TODO: Log about not having a valid command recorder
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Could not find a valid command recorder");
         return {};
     }
     VkCommandBuffer vkCommandBuffer = vulkanCommandRecorder->commandBuffer;
@@ -1520,7 +1520,7 @@ Handle<ComputePassCommandRecorder_t> VulkanResourceManager::createComputePassCom
 
     VulkanCommandRecorder *vulkanCommandRecorder = m_commandRecorders.get(commandRecorderHandle);
     if (!vulkanCommandRecorder) {
-        // TODO: Log about not having a valid command recorder
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Could not find a valid command recorder");
         return {};
     }
     VkCommandBuffer vkCommandBuffer = vulkanCommandRecorder->commandBuffer;
