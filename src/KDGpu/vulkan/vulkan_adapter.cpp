@@ -425,13 +425,14 @@ bool VulkanAdapter::supportsPresentation(const Handle<Surface_t> surfaceHandle, 
 
 FormatProperties VulkanAdapter::formatProperties(Format format) const
 {
-    VkFormatProperties props;
-    vkGetPhysicalDeviceFormatProperties(physicalDevice, static_cast<VkFormat>(format), &props);
+    VkFormatProperties2 props{};
+    props.sType = VK_STRUCTURE_TYPE_FORMAT_PROPERTIES_2;
+    vkGetPhysicalDeviceFormatProperties2(physicalDevice, static_cast<VkFormat>(format), &props);
 
     return FormatProperties {
-        .linearTilingFeatures = FormatFeatureFlags::fromInt(props.linearTilingFeatures),
-        .optimalTilingFeatures = FormatFeatureFlags::fromInt(props.optimalTilingFeatures),
-        .bufferFeatures = FormatFeatureFlags::fromInt(props.bufferFeatures)
+        .linearTilingFeatures = FormatFeatureFlags::fromInt(props.formatProperties.linearTilingFeatures),
+        .optimalTilingFeatures = FormatFeatureFlags::fromInt(props.formatProperties.optimalTilingFeatures),
+        .bufferFeatures = FormatFeatureFlags::fromInt(props.formatProperties.bufferFeatures)
     };
 }
 
