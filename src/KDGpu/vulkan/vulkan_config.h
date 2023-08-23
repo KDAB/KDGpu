@@ -45,12 +45,12 @@ std::vector<const char *> getDefaultRequestedInstanceExtensions()
 {
     std::vector<const char *> extensions;
     extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
-#if defined(PLATFORM_LINUX)
+#if defined(KDGPU_PLATFORM_LINUX)
     extensions.push_back("VK_KHR_xcb_surface");
     extensions.push_back("VK_KHR_wayland_surface");
-#elif defined(PLATFORM_WIN32)
+#elif defined(KDGPU_PLATFORM_WIN32)
     extensions.push_back("VK_KHR_win32_surface");
-#elif defined(PLATFORM_MACOS)
+#elif defined(KDGPU_PLATFORM_MACOS)
     extensions.push_back("VK_EXT_metal_surface");
     extensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
     extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
@@ -69,10 +69,10 @@ std::vector<const char *> getDefaultRequestedDeviceExtensions()
     extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
 // clang-format off
 #if defined(KDGPU_CUDA)
-    #if defined(PLATFORM_LINUX)
+    #if defined(KDGPU_PLATFORM_LINUX)
         extensions.push_back(VK_KHR_EXTERNAL_MEMORY_FD_EXTENSION_NAME);
         extensions.push_back(VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME);
-    #elif defined(PLATFORM_WIN32)
+    #elif defined(KDGPU_PLATFORM_WIN32)
         extensions.push_back(VK_KHR_EXTERNAL_MEMORY_WIN32_EXTENSION_NAME);
         extensions.push_back(VK_KHR_EXTERNAL_SEMAPHORE_WIN32_EXTENSION_NAME);
     #endif
@@ -81,7 +81,7 @@ std::vector<const char *> getDefaultRequestedDeviceExtensions()
 #if defined(VK_KHR_synchronization2)
     extensions.push_back(VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME);
 #endif
-#if defined(PLATFORM_MACOS)
+#if defined(KDGPU_PLATFORM_MACOS)
     extensions.push_back("VK_KHR_portability_subset");
 #endif
     return extensions;
