@@ -8,6 +8,11 @@
 #
 
 find_package(glm QUIET)
+
+if(NOT TARGET glm::glm AND TARGET glm)
+    add_library(glm::glm ALIAS glm)
+endif()
+
 if(NOT TARGET glm::glm)
     FetchContent_Declare(
         glm
