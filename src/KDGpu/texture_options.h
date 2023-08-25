@@ -17,6 +17,7 @@
 namespace KDGpu {
 
 struct TextureOptions {
+    std::string_view label;
     TextureType type;
     Format format;
     Extent3D extent;

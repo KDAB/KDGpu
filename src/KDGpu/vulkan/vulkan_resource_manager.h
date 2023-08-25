@@ -208,6 +208,8 @@ private:
                                           uint32_t viewCount);
     Handle<Framebuffer_t> createFramebuffer(const Handle<Device_t> &deviceHandle, const RenderPassCommandRecorderOptions &options, const VulkanFramebufferKey &frameBufferKey);
 
+    void setObjectName(VulkanDevice *device, const VkObjectType type, const uint64_t handle, const std::string_view name);
+
     Pool<VulkanInstance, Instance_t> m_instances{ 1 };
     Pool<VulkanAdapter, Adapter_t> m_adapters{ 1 };
     Pool<VulkanDevice, Device_t> m_devices{ 1 };

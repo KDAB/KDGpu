@@ -24,6 +24,7 @@ struct ComputeShaderStage {
 };
 
 struct ComputePipelineOptions {
+    std::string_view label;
     Handle<PipelineLayout_t> layout;
     ComputeShaderStage shaderStage;
 };

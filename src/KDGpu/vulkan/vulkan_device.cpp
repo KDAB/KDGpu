@@ -53,6 +53,14 @@ VulkanDevice::VulkanDevice(VkDevice _device,
     for (uint32_t i = 0; i < queueTypeCount; ++i)
         commandPools[i] = VK_NULL_HANDLE;
 
+    const auto instanceExtensions = vulkanInstance->extensions();
+    for (const auto &extension : instanceExtensions) {
+        if (extension.name == "VK_EXT_debug_utils") {
+            this->vkSetDebugUtilsObjectNameEXT = PFN_vkSetDebugUtilsObjectNameEXT(vkGetDeviceProcAddr(device, "vkSetDebugUtilsObjectNameEXT"));
+            break;
+        }
+    }
+
 #if defined(VK_KHR_synchronization2)
     // Check to see if we have the VK_KHR_synchronization2 extension or not
     if (vulkanAdapter->supportsSynchronization2) {

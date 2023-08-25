@@ -137,6 +137,7 @@ struct DynamicStateOptions {
 };
 
 struct GraphicsPipelineOptions {
+    std::string_view label;
     std::vector<ShaderStage> shaderStages;
     Handle<PipelineLayout_t> layout;
     VertexOptions vertex;

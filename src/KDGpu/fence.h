@@ -22,6 +22,7 @@ struct Fence_t;
 class GraphicsApi;
 
 struct FenceOptions {
+    std::string_view label;
     bool createSignalled{ true };
     ExternalFenceHandleTypeFlags externalFenceHandleType{ ExternalFenceHandleTypeFlagBits::None };
 };

@@ -25,6 +25,7 @@ struct QueueRequest {
 };
 
 struct DeviceOptions {
+    std::string_view label;
     std::vector<std::string> layers;
     std::vector<std::string> extensions;
     std::vector<QueueRequest> queues;

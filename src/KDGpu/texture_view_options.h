@@ -17,6 +17,7 @@ namespace KDGpu {
 struct Texture_t;
 
 struct TextureViewOptions {
+    std::string_view label;
     ViewType viewType{ ViewType::ViewType2D };
     Format format{ Format::UNDEFINED };
     TextureSubresourceRange range{};

@@ -22,6 +22,7 @@ struct GpuSemaphore_t;
 class GraphicsApi;
 
 struct GpuSemaphoreOptions {
+    std::string_view label;
     ExternalSemaphoreHandleTypeFlags externalSemaphoreHandleType{ ExternalSemaphoreHandleTypeFlagBits::None };
 };
 

@@ -15,6 +15,7 @@
 namespace KDGpu {
 
 struct SamplerOptions {
+    std::string_view label;
     FilterMode magFilter{ FilterMode::Nearest };
     FilterMode minFilter{ FilterMode::Nearest };
 

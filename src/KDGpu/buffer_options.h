@@ -17,6 +17,7 @@
 namespace KDGpu {
 
 struct BufferOptions {
+    std::string_view label;
     DeviceSize size;
     BufferUsageFlags usage;
     MemoryUsage memoryUsage;

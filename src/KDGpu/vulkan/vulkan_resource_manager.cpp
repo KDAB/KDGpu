@@ -517,6 +517,8 @@ Handle<Swapchain_t> VulkanResourceManager::createSwapchain(const Handle<Device_t
         return {};
     }
 
+    setObjectName(vulkanDevice, VK_OBJECT_TYPE_SWAPCHAIN_KHR, reinterpret_cast<uint64_t>(vkSwapchain), options.label);
+
     const auto swapchainHandle = m_swapchains.emplace(VulkanSwapchain{
             vkSwapchain,
             options.format,
@@ -656,6 +658,8 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
 #endif
     }
 
+    setObjectName(vulkanDevice, VK_OBJECT_TYPE_IMAGE, reinterpret_cast<uint64_t>(vkImage), options.label);
+
     const auto vulkanTextureHandle = m_textures.emplace(VulkanTexture(
             vkImage,
             vmaAllocation,
@@ -731,6 +735,8 @@ Handle<TextureView_t> VulkanResourceManager::createTextureView(const Handle<Devi
         SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating image view: {}", result);
         return {};
     }
+
+    setObjectName(vulkanDevice, VK_OBJECT_TYPE_IMAGE_VIEW, reinterpret_cast<uint64_t>(imageView), options.label);
 
     const auto vulkanTextureViewHandle = m_textureViews.emplace(VulkanTextureView(imageView, textureHandle, deviceHandle));
     return vulkanTextureViewHandle;
@@ -819,6 +825,8 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
         }
 #endif
     }
+
+    setObjectName(vulkanDevice, VK_OBJECT_TYPE_BUFFER, reinterpret_cast<uint64_t>(vkBuffer), options.label);
 
     const auto vulkanBufferHandle = m_buffers.emplace(VulkanBuffer(vkBuffer, vmaAllocation, this, deviceHandle, memoryHandle));
 
@@ -927,6 +935,8 @@ Handle<PipelineLayout_t> VulkanResourceManager::createPipelineLayout(const Handl
         SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating pipeline layout: {}", result);
         return {};
     }
+
+    setObjectName(vulkanDevice, VK_OBJECT_TYPE_PIPELINE_LAYOUT, reinterpret_cast<uint64_t>(vkPipelineLayout), options.label);
 
     // Store the results
     const auto vulkanPipelineLayoutHandle = m_pipelineLayouts.emplace(VulkanPipelineLayout(
@@ -1197,6 +1207,8 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
         return {};
     }
 
+    setObjectName(vulkanDevice, VK_OBJECT_TYPE_PIPELINE, reinterpret_cast<uint64_t>(vkPipeline), options.label);
+
     // Create VulkanPipeline object and return handle
     const auto vulkanGraphicsPipelineHandle = m_graphicsPipelines.emplace(VulkanGraphicsPipeline(
             vkPipeline,
@@ -1266,6 +1278,8 @@ Handle<ComputePipeline_t> VulkanResourceManager::createComputePipeline(const Han
         SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating compute pipeline: {}", result);
         return {};
     }
+
+    setObjectName(vulkanDevice, VK_OBJECT_TYPE_PIPELINE, reinterpret_cast<uint64_t>(vkPipeline), options.label);
 
     // Create VulkanPipeline object and return handle
     const auto vulkanComputePipelineHandle = m_computePipelines.emplace(VulkanComputePipeline(
@@ -1341,6 +1355,8 @@ Handle<GpuSemaphore_t> VulkanResourceManager::createGpuSemaphore(const Handle<De
         }
 #endif
     }
+
+    setObjectName(vulkanDevice, VK_OBJECT_TYPE_SEMAPHORE, reinterpret_cast<uint64_t>(vkSemaphore), options.label);
 
     const auto vulkanGpuSemaphoreHandle = m_gpuSemaphores.emplace(VulkanGpuSemaphore(
             vkSemaphore,
@@ -2222,6 +2238,8 @@ Handle<BindGroup_t> VulkanResourceManager::createBindGroup(const Handle<Device_t
         return {};
     }
 
+    setObjectName(vulkanDevice, VK_OBJECT_TYPE_DESCRIPTOR_SET, reinterpret_cast<uint64_t>(descriptorSet), options.label);
+
     const auto vulkanBindGroupHandle = m_bindGroups.emplace(VulkanBindGroup(descriptorSet, vulkanDevice->descriptorSetPools.back(), this, deviceHandle));
     auto vulkanBindGroup = m_bindGroups.get(vulkanBindGroupHandle);
 
@@ -2280,6 +2298,8 @@ Handle<BindGroupLayout_t> VulkanResourceManager::createBindGroupLayout(const Han
         SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating pipeline layout: {}", result);
     }
 
+    setObjectName(vulkanDevice, VK_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT, reinterpret_cast<uint64_t>(vkDescriptorSetLayout), options.label);
+
     const auto vulkanBindGroupLayoutHandle = m_bindGroupLayouts.emplace(VulkanBindGroupLayout(vkDescriptorSetLayout, deviceHandle));
     return vulkanBindGroupLayoutHandle;
 }
@@ -2333,6 +2353,8 @@ Handle<Sampler_t> VulkanResourceManager::createSampler(const Handle<Device_t> &d
         SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating sampler: {}", result);
         return {};
     }
+
+    setObjectName(vulkanDevice, VK_OBJECT_TYPE_SAMPLER, reinterpret_cast<uint64_t>(sampler), options.label);
 
     auto samplerHandle = m_samplers.emplace(VulkanSampler(sampler, deviceHandle));
     return samplerHandle;
@@ -2406,6 +2428,8 @@ Handle<Fence_t> VulkanResourceManager::createFence(const Handle<Device_t> &devic
 #endif
     }
 
+    setObjectName(vulkanDevice, VK_OBJECT_TYPE_FENCE, reinterpret_cast<uint64_t>(vkFence), options.label);
+
     auto fenceHandle = m_fences.emplace(VulkanFence(vkFence, this, deviceHandle, externalFenceHandle));
     return fenceHandle;
 }
@@ -2425,4 +2449,17 @@ VulkanFence *VulkanResourceManager::getFence(const Handle<Fence_t> &handle) cons
     return m_fences.get(handle);
 }
 
+void VulkanResourceManager::setObjectName(VulkanDevice *device, const VkObjectType type, const uint64_t handle, const std::string_view name)
+{
+    if (device == nullptr || device->vkSetDebugUtilsObjectNameEXT == nullptr) {
+        return;
+    }
+    const VkDebugUtilsObjectNameInfoEXT nameInfo{
+        .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
+        .objectType = type,
+        .objectHandle = handle,
+        .pObjectName = name.data()
+    };
+    device->vkSetDebugUtilsObjectNameEXT(device->device, &nameInfo);
+}
 } // namespace KDGpu

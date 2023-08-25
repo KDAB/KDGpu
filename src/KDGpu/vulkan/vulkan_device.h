@@ -70,6 +70,7 @@ struct KDGPU_EXPORT VulkanDevice : public ApiDevice {
     std::unordered_map<VulkanFramebufferKey, Handle<Framebuffer_t>> framebuffers;
     VkQueryPool timestampQueryPool{ VK_NULL_HANDLE };
 
+    PFN_vkSetDebugUtilsObjectNameEXT vkSetDebugUtilsObjectNameEXT{ nullptr };
 #if defined(VK_KHR_synchronization2)
     PFN_vkCmdPipelineBarrier2KHR vkCmdPipelineBarrier2{ nullptr };
 #endif
