@@ -62,6 +62,7 @@ void HelloTriangle::initializeScene()
 
         const DeviceSize dataByteSize = vertexData.size() * sizeof(Vertex);
         const BufferOptions bufferOptions = {
+            .label = "Vertex Buffer",
             .size = dataByteSize,
             .usage = BufferUsageFlagBits::VertexBufferBit | BufferUsageFlagBits::TransferDstBit,
             .memoryUsage = MemoryUsage::GpuOnly
@@ -88,6 +89,7 @@ void HelloTriangle::initializeScene()
         std::array<uint32_t, 3> indexData = { 0, 1, 2 };
         const DeviceSize dataByteSize = indexData.size() * sizeof(uint32_t);
         const BufferOptions bufferOptions = {
+            .label = "Index Buffer",
             .size = dataByteSize,
             .usage = BufferUsageFlagBits::IndexBufferBit | BufferUsageFlagBits::TransferDstBit,
             .memoryUsage = MemoryUsage::GpuOnly
@@ -108,6 +110,7 @@ void HelloTriangle::initializeScene()
     //![7]
     {
         const BufferOptions bufferOptions = {
+            .label = "Transformation Buffer",
             .size = sizeof(glm::mat4),
             .usage = BufferUsageFlagBits::UniformBufferBit,
             .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
@@ -135,6 +138,7 @@ void HelloTriangle::initializeScene()
     // Create bind group layout consisting of a single binding holding a UBO
     // clang-format off
     const BindGroupLayoutOptions bindGroupLayoutOptions = {
+        .label = "Transform Bind Group",
         .bindings = {{
             .binding = 0,
             .resourceType = ResourceBindingType::UniformBuffer,
@@ -146,6 +150,7 @@ void HelloTriangle::initializeScene()
 
     // Create a pipeline layout (array of bind group layouts)
     const PipelineLayoutOptions pipelineLayoutOptions = {
+        .label = "Triangle",
         .bindGroupLayouts = { bindGroupLayout }
     };
     m_pipelineLayout = m_device.createPipelineLayout(pipelineLayoutOptions);
@@ -155,6 +160,7 @@ void HelloTriangle::initializeScene()
     // clang-format off
     //![10]
     const GraphicsPipelineOptions pipelineOptions = {
+        .label = "Triangle",
         .shaderStages = {
             { .shaderModule = vertexShader, .stage = ShaderStageFlagBits::VertexBit },
             { .shaderModule = fragmentShader, .stage = ShaderStageFlagBits::FragmentBit }
@@ -186,6 +192,7 @@ void HelloTriangle::initializeScene()
     // clang-format off
     //![11]
     const BindGroupOptions bindGroupOptions = {
+        .label = "Transform Bind Group",
         .layout = bindGroupLayout,
         .resources = {{
             .binding = 0,
