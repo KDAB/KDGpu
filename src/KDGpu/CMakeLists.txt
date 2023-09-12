@@ -41,6 +41,7 @@ set(SOURCES
     vulkan/vulkan_command_recorder.cpp
     vulkan/vulkan_compute_pass_command_recorder.cpp
     vulkan/vulkan_compute_pipeline.cpp
+    vulkan/vulkan_config.cpp
     vulkan/vulkan_device.cpp
     vulkan/vulkan_enums.cpp
     vulkan/vulkan_fence.cpp
