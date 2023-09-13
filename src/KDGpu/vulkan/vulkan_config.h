@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include <KDGpu/kdgpu_export.h>
+
 #include <vulkan/vulkan.h>
 
 #include <array>
@@ -42,11 +44,11 @@ constexpr std::array<const char *, 1> requestedInstanceExtensions = {
     VK_EXT_DEBUG_UTILS_EXTENSION_NAME
 };
 
-std::vector<const char *> getDefaultRequestedInstanceExtensions();
+std::vector<const char *> KDGPU_EXPORT getDefaultRequestedInstanceExtensions();
 
 //
 // Device Config
 //
-std::vector<const char *> getDefaultRequestedDeviceExtensions();
+std::vector<const char *> KDGPU_EXPORT getDefaultRequestedDeviceExtensions();
 
 } // namespace KDGpu
