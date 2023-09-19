@@ -14,6 +14,8 @@
 #include <KDGpu/handle.h>
 #include <KDGpu/compute_pass_command_recorder.h>
 #include <KDGpu/render_pass_command_recorder.h>
+#include <KDGpu/timestamp_query_recorder.h>
+#include <KDGpu/timestamp_query_recorder_options.h>
 #include <KDGpu/render_pass_command_recorder_options.h>
 #include <KDGpu/kdgpu_export.h>
 #include <KDGpu/memory_barrier.h>
@@ -157,6 +159,7 @@ public:
 
     RenderPassCommandRecorder beginRenderPass(const RenderPassCommandRecorderOptions &options);
     ComputePassCommandRecorder beginComputePass(const ComputePassCommandRecorderOptions &options = {});
+    TimestampQueryRecorder beginTimestampRecording(const TimestampQueryRecorderOptions &options = {});
     void blitTexture(const TextureBlitOptions &options);
     void clearBuffer(const BufferClear &clear);
     void clearColorTexture(const ClearColorTexture &clear);

@@ -52,6 +52,7 @@ struct ApiSwapchain;
 struct ApiSurface;
 struct ApiTexture;
 struct ApiTextureView;
+struct ApiTimestampQueryRecorder;
 
 struct BindGroupOptions;
 struct BufferOptions;
@@ -67,6 +68,7 @@ struct RenderPassCommandRecorderOptions;
 struct SamplerOptions;
 struct TextureOptions;
 struct TextureViewOptions;
+struct TimestampQueryRecorderOptions;
 
 struct BindGroup_t;
 struct CommandRecorder_t;
@@ -167,6 +169,12 @@ public:
                                                                                   const ComputePassCommandRecorderOptions &options) = 0;
     virtual void deleteComputePassCommandRecorder(const Handle<ComputePassCommandRecorder_t> &handle) = 0;
     virtual ApiComputePassCommandRecorder *getComputePassCommandRecorder(const Handle<ComputePassCommandRecorder_t> &handle) const = 0;
+
+    virtual Handle<TimestampQueryRecorder_t> createTimestampQueryRecorder(const Handle<Device_t> &deviceHandle,
+                                                                          const Handle<CommandRecorder_t> &commandRecorderHandle,
+                                                                          const TimestampQueryRecorderOptions &options) = 0;
+    virtual void deleteTimestampQueryRecorder(const Handle<TimestampQueryRecorder_t> &handle) = 0;
+    virtual ApiTimestampQueryRecorder *getTimestampQueryRecorder(const Handle<TimestampQueryRecorder_t> &handle) const = 0;
 
     virtual Handle<CommandBuffer_t> createCommandBuffer(const Handle<Device_t> &deviceHandle,
                                                         const QueueDescription &queueDescription,

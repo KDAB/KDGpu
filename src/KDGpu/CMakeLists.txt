@@ -33,6 +33,7 @@ set(SOURCES
     surface.cpp
     texture.cpp
     texture_view.cpp
+    timestamp_query_recorder.cpp
     vulkan/vulkan_adapter.cpp
     vulkan/vulkan_bind_group.cpp
     vulkan/vulkan_bind_group_layout.cpp
@@ -61,6 +62,7 @@ set(SOURCES
     vulkan/vulkan_surface.cpp
     vulkan/vulkan_texture.cpp
     vulkan/vulkan_texture_view.cpp
+    vulkan/vulkan_timestamp_query_recorder.cpp
 )
 
 set(HEADERS
@@ -111,6 +113,8 @@ set(HEADERS
     texture_options.h
     texture_view.h
     texture_view_options.h
+    timestamp_query_recorder.h
+    timestamp_query_recorder_options.h
     api/api_adapter.h
     api/api_bind_group.h
     api/api_bind_group_layout.h
@@ -135,6 +139,7 @@ set(HEADERS
     api/api_surface.h
     api/api_texture.h
     api/api_texture_view.h
+    api/api_timestamp_query_recorder.h
     utils/flags.h
     utils/formatters.h
     utils/hash_utils.h
@@ -168,6 +173,7 @@ set(HEADERS
     vulkan/vulkan_surface.h
     vulkan/vulkan_texture.h
     vulkan/vulkan_texture_view.h
+    vulkan/vulkan_timestamp_query_recorder.h
 )
 
 add_library(

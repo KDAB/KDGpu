@@ -73,6 +73,11 @@ ComputePassCommandRecorder CommandRecorder::beginComputePass(const ComputePassCo
     return ComputePassCommandRecorder(m_api, m_device, m_api->resourceManager()->createComputePassCommandRecorder(m_device, m_commandRecorder, options));
 }
 
+TimestampQueryRecorder CommandRecorder::beginTimestampRecording(const TimestampQueryRecorderOptions &options)
+{
+    return TimestampQueryRecorder(m_api, m_device, m_api->resourceManager()->createTimestampQueryRecorder(m_device, m_commandRecorder, options));
+}
+
 void CommandRecorder::blitTexture(const TextureBlitOptions &options)
 {
     auto apiCommandRecorder = m_api->resourceManager()->getCommandRecorder(m_commandRecorder);

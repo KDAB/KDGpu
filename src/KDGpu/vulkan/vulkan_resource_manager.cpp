@@ -433,6 +433,10 @@ void VulkanResourceManager::deleteDevice(const Handle<Device_t> &handle)
     for (VkCommandPool commandPool : vulkanDevice->commandPools)
         vkDestroyCommandPool(vulkanDevice->device, commandPool, nullptr);
 
+    // Destroy Timestamp Query Pool
+    if (vulkanDevice->timestampQueryPool != VK_NULL_HANDLE)
+        vkDestroyQueryPool(vulkanDevice->device, vulkanDevice->timestampQueryPool, nullptr);
+
     // Destroy Memory Allocator
     vmaDestroyAllocator(vulkanDevice->allocator);
 
@@ -1744,6 +1748,60 @@ void VulkanResourceManager::fillColorAttachmnents(std::vector<VkAttachmentRefere
             }
         }
     }
+}
+
+Handle<TimestampQueryRecorder_t> VulkanResourceManager::createTimestampQueryRecorder(const Handle<Device_t> &deviceHandle,
+                                                                                     const Handle<CommandRecorder_t> &commandRecorderHandle,
+                                                                                     const TimestampQueryRecorderOptions &options)
+{
+    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
+
+    VulkanCommandRecorder *vulkanCommandRecorder = m_commandRecorders.get(commandRecorderHandle);
+    if (!vulkanCommandRecorder) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Could not find a valid command recorder");
+        return {};
+    }
+    VkCommandBuffer vkCommandBuffer = vulkanCommandRecorder->commandBuffer;
+
+    if (vulkanDevice->timestampQueryPool == VK_NULL_HANDLE) {
+        VkQueryPoolCreateInfo poolCreateInfo = {};
+        poolCreateInfo.sType = VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO;
+        poolCreateInfo.queryCount = 1024;
+        poolCreateInfo.queryType = VK_QUERY_TYPE_TIMESTAMP;
+        vkCreateQueryPool(vulkanDevice->device, &poolCreateInfo, nullptr, &vulkanDevice->timestampQueryPool);
+    }
+
+    // Find suitable starting index to accommodate requested number of queries
+    uint32_t startQueryIndex = 0;
+    for (const TimestampQueryBucket &b : m_timestampQueryBuckets) {
+        startQueryIndex = std::max(startQueryIndex, b.start + b.count);
+    };
+
+    const auto vulkanTimestampQueryRecorderHandle = m_timestampQueryRecorders.emplace(
+            VulkanTimestampQueryRecorder(vkCommandBuffer, this, deviceHandle, startQueryIndex, options.queryCount));
+
+    m_timestampQueryBuckets.push_back({ startQueryIndex, options.queryCount });
+
+    return vulkanTimestampQueryRecorderHandle;
+}
+
+void VulkanResourceManager::deleteTimestampQueryRecorder(const Handle<TimestampQueryRecorder_t> &handle)
+{
+    VulkanTimestampQueryRecorder *vulkanTimestampQueryRecorder = m_timestampQueryRecorders.get(handle);
+
+    auto it = std::find_if(m_timestampQueryBuckets.begin(), m_timestampQueryBuckets.end(),
+                           [vulkanTimestampQueryRecorder](const TimestampQueryBucket &b) {
+                               return b.start == vulkanTimestampQueryRecorder->startQuery && b.count == vulkanTimestampQueryRecorder->maxQueryCount;
+                           });
+    assert(it != m_timestampQueryBuckets.end());
+    m_timestampQueryBuckets.erase(it);
+
+    m_timestampQueryRecorders.remove(handle);
+}
+
+VulkanTimestampQueryRecorder *VulkanResourceManager::getTimestampQueryRecorder(const Handle<TimestampQueryRecorder_t> &handle) const
+{
+    return m_timestampQueryRecorders.get(handle);
 }
 
 void VulkanResourceManager::fillColorAttachmnents(std::vector<VkAttachmentReference2> &colorAttachmentRefs,

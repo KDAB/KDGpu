@@ -38,6 +38,7 @@
 #include <KDGpu/vulkan/vulkan_surface.h>
 #include <KDGpu/vulkan/vulkan_texture.h>
 #include <KDGpu/vulkan/vulkan_texture_view.h>
+#include <KDGpu/vulkan/vulkan_timestamp_query_recorder.h>
 
 #include <KDGpu/kdgpu_export.h>
 
@@ -140,6 +141,12 @@ public:
     void deleteComputePassCommandRecorder(const Handle<ComputePassCommandRecorder_t> &handle) final;
     VulkanComputePassCommandRecorder *getComputePassCommandRecorder(const Handle<ComputePassCommandRecorder_t> &handle) const final;
 
+    Handle<TimestampQueryRecorder_t> createTimestampQueryRecorder(const Handle<Device_t> &deviceHandle,
+                                                                  const Handle<CommandRecorder_t> &commandRecorderHandle,
+                                                                  const TimestampQueryRecorderOptions &options) final;
+    void deleteTimestampQueryRecorder(const Handle<TimestampQueryRecorder_t> &handle) final;
+    VulkanTimestampQueryRecorder *getTimestampQueryRecorder(const Handle<TimestampQueryRecorder_t> &handle) const final;
+
     // Command buffers are not created by the api. It is up to the concrete subclasses to insert the command buffers
     // by whatever mechanism they wish. They also do not need to be destroyed as they are cleaned up by the owning
     // command pool (command recorder).
@@ -225,6 +232,13 @@ private:
     Pool<VulkanFramebuffer, Framebuffer_t> m_framebuffers{ 16 };
     Pool<VulkanSampler, Sampler_t> m_samplers{ 16 };
     Pool<VulkanFence, Fence_t> m_fences{ 16 };
+    Pool<VulkanTimestampQueryRecorder, TimestampQueryRecorder_t> m_timestampQueryRecorders{ 4 };
+
+    struct TimestampQueryBucket {
+        uint32_t start;
+        uint32_t count;
+    };
+    std::vector<TimestampQueryBucket> m_timestampQueryBuckets;
 };
 
 } // namespace KDGpu

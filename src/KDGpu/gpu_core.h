@@ -42,6 +42,7 @@ constexpr uint64_t WholeSize = (~0ULL);
 
 using DeviceSize = uint64_t;
 using SampleMask = uint32_t;
+using TimestampIndex = uint32_t;
 
 using HandleOrFD = std::variant<std::monostate, int, HANDLE>;
 
