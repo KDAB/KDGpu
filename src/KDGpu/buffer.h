@@ -12,6 +12,7 @@
 
 #include <KDGpu/handle.h>
 #include <KDGpu/kdgpu_export.h>
+#include <KDGpu/gpu_core.h>
 
 namespace KDGpu {
 
@@ -46,6 +47,8 @@ public:
 
     void invalidate();
     void flush();
+
+    HandleOrFD externalMemoryHandle() const;
 
 private:
     explicit Buffer(GraphicsApi *api, const Handle<Device_t> &device, const BufferOptions &options, const void *initialData);

@@ -745,6 +745,15 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
         createInfo.pQueueFamilyIndices = options.queueTypeIndices.data();
     }
 
+    VkExternalMemoryBufferCreateInfo vkExternalMemBufferCreateInfo = {};
+    HandleOrFD memoryHandle{};
+
+    if (options.externalMemoryHandleType != ExternalMemoryHandleTypeFlagBits::None) {
+        vkExternalMemBufferCreateInfo.sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_BUFFER_CREATE_INFO;
+        vkExternalMemBufferCreateInfo.handleTypes = externalMemoryHandleTypeToVkExternalMemoryHandleType(options.externalMemoryHandleType);
+        createInfo.pNext = &vkExternalMemBufferCreateInfo;
+    }
+
     VmaAllocationCreateInfo allocInfo = {};
     allocInfo.usage = memoryUsageToVmaMemoryUsage(options.memoryUsage);
 
@@ -755,7 +764,44 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
         return {};
     }
 
-    const auto vulkanBufferHandle = m_buffers.emplace(VulkanBuffer(vkBuffer, vmaAllocation, this, deviceHandle));
+    // Retrieve Shared Memory FD/Handle
+    if (options.externalMemoryHandleType != ExternalMemoryHandleTypeFlagBits::None) {
+        VulkanAdapter *adapter = getAdapter(vulkanDevice->adapterHandle);
+        VulkanInstance *instance = getInstance(adapter->instanceHandle);
+
+        VmaAllocationInfo allocationInfo;
+        vmaGetAllocationInfo(vulkanDevice->allocator, vmaAllocation, &allocationInfo);
+
+#if defined(KDGPU_PLATFORM_LINUX)
+        if (instance->vkGetMemoryFdKHR) {
+            VkMemoryGetFdInfoKHR vkMemoryGetFdInfoKHR = {
+                .sType = VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR,
+                .pNext = nullptr,
+                .memory = allocationInfo.deviceMemory,
+                .handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT_KHR
+            };
+            int fd{};
+            instance->vkGetMemoryFdKHR(vulkanDevice->device, &vkMemoryGetFdInfoKHR, &fd);
+            memoryHandle = fd;
+        }
+#endif
+
+#if defined(KDGPU_PLATFORM_WIN32)
+        if (instance->vkGetMemoryWin32HandleKHR) {
+            VkMemoryGetWin32HandleInfoKHR vkGetWin32HandleInfoKHR = {
+                .sType = VK_STRUCTURE_TYPE_MEMORY_GET_WIN32_HANDLE_INFO_KHR,
+                .pNext = nullptr,
+                .memory = allocationInfo.deviceMemory,
+                .handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT
+            };
+            HANDLE winHandle{};
+            instance->vkGetMemoryWin32HandleKHR(vulkanDevice->device, &vkGetWin32HandleInfoKHR, &winHandle);
+            memoryHandle = winHandle;
+        }
+#endif
+    }
+
+    const auto vulkanBufferHandle = m_buffers.emplace(VulkanBuffer(vkBuffer, vmaAllocation, this, deviceHandle, memoryHandle));
 
     if (initialData) {
         VulkanBuffer *vulkanBuffer = m_buffers.get(vulkanBufferHandle);
