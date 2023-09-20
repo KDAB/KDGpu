@@ -39,22 +39,14 @@ struct KDGPU_EXPORT VulkanTexture : public ApiTexture {
                            uint32_t _arrayLayers,
                            TextureUsageFlags _usage,
                            VulkanResourceManager *_vulkanResourceManager,
-                           const Handle<Device_t> &_deviceHandle);
-
-    explicit VulkanTexture(VkImage _image,
-                           VmaAllocation _allocation,
-                           Format _format,
-                           Extent3D _extent,
-                           uint32_t _mipLevels,
-                           uint32_t _arrayLayers,
-                           TextureUsageFlags _usage,
-                           bool _ownedBySwapchain,
-                           VulkanResourceManager *_vulkanResourceManager,
-                           const Handle<Device_t> &_deviceHandle);
+                           const Handle<Device_t> &_deviceHandle,
+                           const HandleOrFD &_externalMemoryHandle,
+                           bool _ownedBySwapchain = false);
 
     void *map() final;
     void unmap() final;
     SubresourceLayout getSubresourceLayout(const TextureSubresource &subresource) const final;
+    HandleOrFD externalMemoryHandle() const final;
 
     VkImage image{ VK_NULL_HANDLE };
     VmaAllocation allocation{ VK_NULL_HANDLE };
@@ -67,6 +59,7 @@ struct KDGPU_EXPORT VulkanTexture : public ApiTexture {
     bool ownedBySwapchain{ false };
     VulkanResourceManager *vulkanResourceManager{ nullptr };
     Handle<Device_t> deviceHandle;
+    HandleOrFD m_externalMemoryHandle{};
 };
 
 } // namespace KDGpu

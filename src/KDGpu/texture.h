@@ -68,6 +68,8 @@ public:
 
     bool generateMipMaps(Device &device, Queue &transferQueue, const TextureOptions &options, TextureLayout oldLayout);
 
+    HandleOrFD externalMemoryHandle() const;
+
 private:
     explicit Texture(GraphicsApi *api, const Handle<Device_t> &device, const TextureOptions &options);
     explicit Texture(GraphicsApi *api, const Handle<Device_t> &device, const Handle<Texture_t> &handle); // From Swapchain

@@ -196,6 +196,12 @@ bool Texture::generateMipMaps(Device &device, Queue &transferQueue, const Textur
     return true;
 }
 
+HandleOrFD Texture::externalMemoryHandle() const
+{
+    auto apiTexture = m_api->resourceManager()->getTexture(m_texture);
+    return apiTexture->externalMemoryHandle();
+}
+
 bool operator==(const Texture &a, const Texture &b)
 {
     return a.m_api == b.m_api && a.m_device == b.m_device && a.m_texture == b.m_texture;

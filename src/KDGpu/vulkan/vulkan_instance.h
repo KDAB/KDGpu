@@ -14,6 +14,10 @@
 #include <KDGpu/kdgpu_export.h>
 #include <vulkan/vulkan.h>
 
+#if defined(KDGPU_PLATFORM_WIN32)
+struct VkMemoryGetWin32HandleInfoKHR;
+#endif
+
 namespace KDGpu {
 
 class VulkanResourceManager;
@@ -35,6 +39,15 @@ struct KDGPU_EXPORT VulkanInstance : public ApiInstance {
     VkInstance instance{ VK_NULL_HANDLE };
     VkDebugUtilsMessengerEXT debugMessenger{ nullptr };
     bool isOwned{ true };
+
+#if defined(KDGPU_PLATFORM_WIN32)
+    using PFN_vkGetMemoryWin32HandleKHR = VkResult(VKAPI_PTR *)(VkDevice, const VkMemoryGetWin32HandleInfoKHR *, HANDLE *);
+    PFN_vkGetMemoryWin32HandleKHR vkGetMemoryWin32HandleKHR{ nullptr };
+#endif
+
+#if defined(KDGPU_PLATFORM_LINUX)
+    PFN_vkGetMemoryFdKHR vkGetMemoryFdKHR{ nullptr };
+#endif
 };
 
 } // namespace KDGpu

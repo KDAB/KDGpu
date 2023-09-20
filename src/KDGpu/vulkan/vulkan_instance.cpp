@@ -16,6 +16,7 @@
 #include <KDGpu/utils/logging.h>
 
 #if defined(KDGPU_PLATFORM_WIN32)
+// Avoid having to define VK_USE_PLATFORM_WIN32_KHR which would result in windows.h being included when vulkan.h is included
 #include <vulkan/vulkan_win32.h>
 #endif
 
@@ -36,6 +37,13 @@ VulkanInstance::VulkanInstance(VulkanResourceManager *_vulkanResourceManager, Vk
     , instance(_instance)
     , isOwned(_isOwned)
 {
+#if defined(KDGPU_PLATFORM_LINUX)
+    vkGetMemoryFdKHR = (PFN_vkGetMemoryFdKHR)vkGetInstanceProcAddr(instance, "vkGetMemoryFdKHR");
+#endif
+
+#if defined(KDGPU_PLATFORM_WIN32)
+    vkGetMemoryWin32HandleKHR = (PFN_vkGetMemoryWin32HandleKHR)vkGetInstanceProcAddr(instance, "vkGetMemoryWin32HandleKHR");
+#endif
 }
 
 std::vector<Extension> VulkanInstance::extensions() const

@@ -582,6 +582,7 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
         createInfo.flags |= VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
 
     VkExternalMemoryImageCreateInfo vkExternalMemImageCreateInfo = {};
+    HandleOrFD memoryHandle{};
     if (options.externalMemoryHandleType != ExternalMemoryHandleTypeFlagBits::None) {
         vkExternalMemImageCreateInfo.sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO,
         vkExternalMemImageCreateInfo.handleTypes = externalMemoryHandleTypeToVkExternalMemoryHandleType(options.externalMemoryHandleType);
@@ -599,6 +600,43 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
         return {};
     }
 
+    // Retrieve Shared Memory FD/Handle
+    if (options.externalMemoryHandleType != ExternalMemoryHandleTypeFlagBits::None) {
+        VulkanAdapter *adapter = getAdapter(vulkanDevice->adapterHandle);
+        VulkanInstance *instance = getInstance(adapter->instanceHandle);
+
+        VmaAllocationInfo allocationInfo;
+        vmaGetAllocationInfo(vulkanDevice->allocator, vmaAllocation, &allocationInfo);
+
+#if defined(KDGPU_PLATFORM_LINUX)
+        if (instance->vkGetMemoryFdKHR) {
+            VkMemoryGetFdInfoKHR vkMemoryGetFdInfoKHR = {
+                .sType = VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR,
+                .pNext = nullptr,
+                .memory = allocationInfo.deviceMemory,
+                .handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT_KHR
+            };
+            int fd{};
+            instance->vkGetMemoryFdKHR(vulkanDevice->device, &vkMemoryGetFdInfoKHR, &fd);
+            memoryHandle = fd;
+        }
+#endif
+
+#if defined(KDGPU_PLATFORM_WIN32)
+        if (instance->vkGetMemoryWin32HandleKHR) {
+            VkMemoryGetWin32HandleInfoKHR vkGetWin32HandleInfoKHR = {
+                .sType = VK_STRUCTURE_TYPE_MEMORY_GET_WIN32_HANDLE_INFO_KHR,
+                .pNext = nullptr,
+                .memory = allocationInfo.deviceMemory,
+                .handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT
+            };
+            HANDLE winHandle{};
+            instance->vkGetMemoryWin32HandleKHR(vulkanDevice->device, &vkGetWin32HandleInfoKHR, &winHandle);
+            memoryHandle = winHandle;
+        }
+#endif
+    }
+
     const auto vulkanTextureHandle = m_textures.emplace(VulkanTexture(
             vkImage,
             vmaAllocation,
@@ -608,7 +646,8 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
             options.arrayLayers,
             options.usage,
             this,
-            deviceHandle));
+            deviceHandle,
+            memoryHandle));
     return vulkanTextureHandle;
 }
 
