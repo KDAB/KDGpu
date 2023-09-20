@@ -250,6 +250,8 @@ VulkanAdapter *VulkanResourceManager::getAdapter(const Handle<Adapter_t> &handle
  */
 Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &adapterHandle, const DeviceOptions &options, std::vector<QueueRequest> &queueRequests)
 {
+    VulkanAdapter *vulkanAdapter = getAdapter(adapterHandle);
+
     queueRequests = options.queues;
     if (queueRequests.empty()) {
         QueueRequest queueRequest = {
@@ -358,7 +360,7 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     // Enable the VK_KHR_Synchronization2 extension features by chaining this into the createInfo chain.
     VkPhysicalDeviceSynchronization2FeaturesKHR sync2Features = {};
     sync2Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES_KHR;
-    sync2Features.synchronization2 = true;
+    sync2Features.synchronization2 = vulkanAdapter->supportsSynchronization2;
     multiViewFeatures.pNext = &sync2Features;
 #endif
 
@@ -383,8 +385,7 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     }
 
     VkDevice vkDevice{ VK_NULL_HANDLE };
-    VulkanAdapter vulkanAdapter = *getAdapter(adapterHandle);
-    VkResult result = vkCreateDevice(vulkanAdapter.physicalDevice, &createInfo, nullptr, &vkDevice);
+    VkResult result = vkCreateDevice(vulkanAdapter->physicalDevice, &createInfo, nullptr, &vkDevice);
     if (result != VK_SUCCESS)
         throw std::runtime_error(std::string{ "Failed to create a logical device: " } + getResultAsString(result));
 

@@ -45,6 +45,7 @@ struct KDGPU_EXPORT VulkanAdapter : public ApiAdapter {
     VulkanResourceManager *vulkanResourceManager{ nullptr };
     Handle<Instance_t> instanceHandle;
     std::vector<AdapterQueueType> queueTypes;
+    bool supportsSynchronization2{ false };
 };
 
 } // namespace KDGpu

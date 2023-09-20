@@ -261,6 +261,12 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
     stdLayoutFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_UNIFORM_BUFFER_STANDARD_LAYOUT_FEATURES;
     multiViewFeatures.pNext = &stdLayoutFeatures; // So that it gets filled by the vkGetPhysicalDeviceFeatures2 call
 
+#if defined(VK_KHR_synchronization2)
+    VkPhysicalDeviceSynchronization2Features synchronization2Features{};
+    synchronization2Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES;
+    stdLayoutFeatures.pNext = &synchronization2Features;
+#endif
+
     vkGetPhysicalDeviceFeatures2(physicalDevice, &deviceFeatures2);
     const VkPhysicalDeviceFeatures &deviceFeatures = deviceFeatures2.features;
 
@@ -325,6 +331,10 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
         .multiViewGeometryShader = static_cast<bool>(multiViewFeatures.multiviewGeometryShader),
         .multiViewTessellationShader = static_cast<bool>(multiViewFeatures.multiviewTessellationShader),
     };
+
+#if defined(VK_KHR_synchronization2)
+    supportsSynchronization2 = synchronization2Features.synchronization2;
+#endif
 
     return features;
 }
