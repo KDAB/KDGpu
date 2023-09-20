@@ -63,6 +63,10 @@ Adapter::Adapter(GraphicsApi *api, const Handle<Adapter_t> &adapter)
     : m_api(api)
     , m_adapter(adapter)
 {
+    auto apiAdapter = m_api->resourceManager()->getAdapter(m_adapter);
+    m_features = apiAdapter->queryAdapterFeatures();
+    m_properties = apiAdapter->queryAdapterProperties();
+    m_queueTypes = apiAdapter->queryQueueTypes();
 }
 
 Adapter::~Adapter()
@@ -75,9 +79,15 @@ Adapter::Adapter(Adapter &&other)
 {
     m_api = other.m_api;
     m_adapter = other.m_adapter;
+    m_features = other.m_features;
+    m_properties = other.m_properties;
+    m_queueTypes = other.m_queueTypes;
 
     other.m_api = nullptr;
     other.m_adapter = {};
+    other.m_features = {};
+    other.m_properties = {};
+    other.m_queueTypes = {};
 }
 
 Adapter &Adapter::operator=(Adapter &&other)
@@ -88,9 +98,15 @@ Adapter &Adapter::operator=(Adapter &&other)
 
         m_api = other.m_api;
         m_adapter = other.m_adapter;
+        m_features = other.m_features;
+        m_properties = other.m_properties;
+        m_queueTypes = other.m_queueTypes;
 
         other.m_api = nullptr;
         other.m_adapter = {};
+        other.m_features = {};
+        other.m_properties = {};
+        other.m_queueTypes = {};
     }
     return *this;
 }
@@ -106,12 +122,6 @@ std::vector<Extension> Adapter::extensions() const
  */
 const AdapterProperties &Adapter::properties() const noexcept
 {
-    if (!m_propertiesQueried) {
-        auto apiAdapter = m_api->resourceManager()->getAdapter(m_adapter);
-        m_properties = apiAdapter->queryAdapterProperties();
-        m_propertiesQueried = true;
-    }
-
     return m_properties;
 }
 
@@ -120,12 +130,6 @@ const AdapterProperties &Adapter::properties() const noexcept
  */
 const AdapterFeatures &Adapter::features() const noexcept
 {
-    if (!m_featuresQueried) {
-        auto apiAdapter = m_api->resourceManager()->getAdapter(m_adapter);
-        m_features = apiAdapter->queryAdapterFeatures();
-        m_featuresQueried = true;
-    }
-
     return m_features;
 }
 
@@ -134,12 +138,6 @@ const AdapterFeatures &Adapter::features() const noexcept
  */
 std::span<AdapterQueueType> Adapter::queueTypes() const
 {
-    if (m_queueTypes.empty()) {
-        // TODO: query queue type information
-        auto apiAdapter = m_api->resourceManager()->getAdapter(m_adapter);
-        m_queueTypes = apiAdapter->queryQueueTypes();
-    }
-
     return m_queueTypes;
 }
 

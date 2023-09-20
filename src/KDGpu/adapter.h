@@ -79,12 +79,8 @@ private:
     GraphicsApi *m_api{ nullptr };
     Handle<Adapter_t> m_adapter;
 
-    mutable AdapterProperties m_properties;
-    mutable bool m_propertiesQueried{ false };
-
-    mutable AdapterFeatures m_features;
-    mutable bool m_featuresQueried{ false };
-
+    AdapterProperties m_properties;
+    AdapterFeatures m_features;
     mutable std::vector<AdapterQueueType> m_queueTypes;
 
     friend class Instance;
