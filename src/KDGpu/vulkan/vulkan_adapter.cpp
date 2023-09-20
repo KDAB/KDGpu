@@ -257,12 +257,12 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
     multiViewFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTIVIEW_FEATURES;
     deviceFeatures2.pNext = &multiViewFeatures; // So that it gets filled by the vkGetPhysicalDeviceFeatures2 call
 
+    VkPhysicalDeviceUniformBufferStandardLayoutFeatures stdLayoutFeatures {};
+    stdLayoutFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_UNIFORM_BUFFER_STANDARD_LAYOUT_FEATURES;
+    multiViewFeatures.pNext = &stdLayoutFeatures; // So that it gets filled by the vkGetPhysicalDeviceFeatures2 call
+
     vkGetPhysicalDeviceFeatures2(physicalDevice, &deviceFeatures2);
     const VkPhysicalDeviceFeatures &deviceFeatures = deviceFeatures2.features;
-
-    const VkPhysicalDeviceUniformBufferStandardLayoutFeatures *stdLayoutFeatures {nullptr};
-    if (deviceFeatures2.pNext)
-        stdLayoutFeatures = reinterpret_cast<const VkPhysicalDeviceUniformBufferStandardLayoutFeatures *>(deviceFeatures2.pNext);
 
     AdapterFeatures features = {
         .robustBufferAccess = static_cast<bool>(deviceFeatures.robustBufferAccess),
@@ -320,11 +320,12 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
         .sparseResidencyAliased = static_cast<bool>(deviceFeatures.sparseResidencyAliased),
         .variableMultisampleRate = static_cast<bool>(deviceFeatures.variableMultisampleRate),
         .inheritedQueries = static_cast<bool>(deviceFeatures.inheritedQueries),
-        .uniformBufferStandardLayout = stdLayoutFeatures ? static_cast<bool>(stdLayoutFeatures->uniformBufferStandardLayout) : false,
+        .uniformBufferStandardLayout = static_cast<bool>(stdLayoutFeatures.uniformBufferStandardLayout),
         .multiView = static_cast<bool>(multiViewFeatures.multiview),
         .multiViewGeometryShader = static_cast<bool>(multiViewFeatures.multiviewGeometryShader),
         .multiViewTessellationShader = static_cast<bool>(multiViewFeatures.multiviewTessellationShader),
     };
+
     return features;
 }
 
