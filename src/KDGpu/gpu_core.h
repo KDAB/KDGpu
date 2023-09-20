@@ -14,8 +14,9 @@
 
 #include <stdint.h>
 #include <string>
+#include <variant>
 
-#pragma once
+using HANDLE = void *;
 
 #define KDGPU_MAKE_API_VERSION(variant, major, minor, patch) \
     ((((uint32_t)(variant)) << 29) | (((uint32_t)(major)) << 22) | (((uint32_t)(minor)) << 12) | ((uint32_t)(patch)))
@@ -41,6 +42,8 @@ constexpr uint64_t WholeSize = (~0ULL);
 
 using DeviceSize = uint64_t;
 using SampleMask = uint32_t;
+
+using HandleOrFD = std::variant<std::monostate, int, HANDLE>;
 
 struct Extension {
     std::string name;

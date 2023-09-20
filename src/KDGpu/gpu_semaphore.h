@@ -46,6 +46,8 @@ public:
 
     operator Handle<GpuSemaphore_t>() const noexcept { return m_gpuSemaphore; }
 
+    HandleOrFD externalSemaphoreHandle() const;
+
 private:
     explicit GpuSemaphore(GraphicsApi *api, const Handle<Device_t> &device, const GpuSemaphoreOptions &options);
 

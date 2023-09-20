@@ -32,11 +32,15 @@ struct Device_t;
 struct KDGPU_EXPORT VulkanGpuSemaphore : public ApiGpuSemaphore {
     explicit VulkanGpuSemaphore(VkSemaphore _semaphore,
                                 VulkanResourceManager *_vulkanResourceManager,
-                                const Handle<Device_t> &_deviceHandle);
+                                const Handle<Device_t> &_deviceHandle,
+                                const HandleOrFD &_externalSemaphoreHandle);
+
+    HandleOrFD externalSemaphoreHandle() const final;
 
     VkSemaphore semaphore{ VK_NULL_HANDLE };
     VulkanResourceManager *vulkanResourceManager{ nullptr };
     Handle<Device_t> deviceHandle;
+    HandleOrFD m_externalSemaphoreHandle{};
 };
 
 } // namespace KDGpu

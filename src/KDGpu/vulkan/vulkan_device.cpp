@@ -16,6 +16,11 @@
 
 #include <stdexcept>
 
+#if defined(KDGPU_PLATFORM_WIN32)
+// Avoid having to define VK_USE_PLATFORM_WIN32_KHR which would result in windows.h being included when vulkan.h is included
+#include <vulkan/vulkan_win32.h>
+#endif
+
 namespace KDGpu {
 
 VulkanDevice::VulkanDevice(VkDevice _device,
@@ -61,6 +66,14 @@ VulkanDevice::VulkanDevice(VkDevice _device,
             }
         }
     }
+#endif
+
+#if defined(KDGPU_PLATFORM_LINUX)
+    vkGetSemaphoreFdKHR = (PFN_vkGetSemaphoreFdKHR)vkGetDeviceProcAddr(device, "vkGetSemaphoreFdKHR");
+#endif
+
+#if defined(KDGPU_PLATFORM_WIN32)
+    vkGetSemaphoreWin32HandleKHR = (PFN_vkGetSemaphoreWin32HandleKHR)vkGetDeviceProcAddr(device, "vkGetSemaphoreWin32HandleKHR");
 #endif
 }
 

@@ -10,6 +10,11 @@
 
 #include "vulkan_resource_manager.h"
 
+#if defined(KDGPU_PLATFORM_WIN32)
+// Avoid having to define VK_USE_PLATFORM_WIN32_KHR which would result in windows.h being included when vulkan.h is included
+#include <vulkan/vulkan_win32.h>
+#endif
+
 #include <KDGpu/bind_group_options.h>
 #include <KDGpu/bind_group_layout_options.h>
 #include <KDGpu/buffer_options.h>
@@ -1202,10 +1207,42 @@ Handle<GpuSemaphore_t> VulkanResourceManager::createGpuSemaphore(const Handle<De
         return {};
     }
 
+    HandleOrFD externalSemaphoreHandle{};
+    if (options.externalSemaphoreHandleType != ExternalSemaphoreHandleTypeFlagBits::None) {
+#if defined(KDGPU_PLATFORM_LINUX)
+        if (vulkanDevice->vkGetSemaphoreFdKHR) {
+            VkSemaphoreGetFdInfoKHR vulkanSemaphoreGetFdInfoKHR = {
+                .sType = VK_STRUCTURE_TYPE_SEMAPHORE_GET_FD_INFO_KHR,
+                .pNext = nullptr,
+                .semaphore = vkSemaphore,
+                .handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT_KHR
+            };
+            int fd{};
+            vulkanDevice->vkGetSemaphoreFdKHR(vulkanDevice->device, &vulkanSemaphoreGetFdInfoKHR, &fd);
+            externalSemaphoreHandle = fd;
+        }
+#endif
+
+#if defined(KDGPU_PLATFORM_WIN32)
+        if (vulkanDevice->vkGetSemaphoreWin32HandleKHR) {
+            VkSemaphoreGetWin32HandleInfoKHR vulkanSemaphoreGetHandleInfoKHR = {
+                .sType = VK_STRUCTURE_TYPE_SEMAPHORE_GET_WIN32_HANDLE_INFO_KHR,
+                .pNext = nullptr,
+                .semaphore = vkSemaphore,
+                .handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT
+            };
+            HANDLE winHandle{};
+            vulkanDevice->vkGetSemaphoreWin32HandleKHR(vulkanDevice->device, &vulkanSemaphoreGetHandleInfoKHR, &winHandle);
+            externalSemaphoreHandle = winHandle;
+        }
+#endif
+    }
+
     const auto vulkanGpuSemaphoreHandle = m_gpuSemaphores.emplace(VulkanGpuSemaphore(
             vkSemaphore,
             this,
-            deviceHandle));
+            deviceHandle,
+            externalSemaphoreHandle));
 
     return vulkanGpuSemaphoreHandle;
 }

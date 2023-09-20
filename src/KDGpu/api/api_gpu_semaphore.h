@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include <KDGpu/gpu_core.h>
+
 namespace KDGpu {
 
 /**
@@ -18,6 +20,8 @@ namespace KDGpu {
  *
  */
 struct ApiGpuSemaphore {
+
+    virtual HandleOrFD externalSemaphoreHandle() const = 0;
 };
 
 } // namespace KDGpu

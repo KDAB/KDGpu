@@ -22,6 +22,10 @@
 
 #include <unordered_map>
 
+#if defined(KDGPU_PLATFORM_WIN32)
+struct VkSemaphoreGetWin32HandleInfoKHR;
+#endif
+
 namespace KDGpu {
 
 class VulkanResourceManager;
@@ -67,6 +71,16 @@ struct KDGPU_EXPORT VulkanDevice : public ApiDevice {
 #if defined(VK_KHR_synchronization2)
     PFN_vkCmdPipelineBarrier2KHR vkCmdPipelineBarrier2{ nullptr };
 #endif
+
+#if defined(KDGPU_PLATFORM_WIN32)
+    using PFN_vkGetSemaphoreWin32HandleKHR = VkResult(VKAPI_PTR *)(VkDevice, const VkSemaphoreGetWin32HandleInfoKHR *, HANDLE *);
+    PFN_vkGetSemaphoreWin32HandleKHR vkGetSemaphoreWin32HandleKHR{ nullptr };
+#endif
+
+#if defined(KDGPU_PLATFORM_LINUX)
+    PFN_vkGetSemaphoreFdKHR vkGetSemaphoreFdKHR{ nullptr };
+#endif
+
     bool isOwned{ true };
 };
 

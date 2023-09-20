@@ -14,12 +14,19 @@ namespace KDGpu {
 
 VulkanGpuSemaphore::VulkanGpuSemaphore(VkSemaphore _semaphore,
                                        VulkanResourceManager *_vulkanResourceManager,
-                                       const Handle<Device_t> &_deviceHandle)
+                                       const Handle<Device_t> &_deviceHandle,
+                                       const HandleOrFD &_externalSemaphoreHandle)
     : ApiGpuSemaphore()
     , semaphore(_semaphore)
     , vulkanResourceManager(_vulkanResourceManager)
     , deviceHandle(_deviceHandle)
+    , m_externalSemaphoreHandle(_externalSemaphoreHandle)
 {
+}
+
+HandleOrFD VulkanGpuSemaphore::externalSemaphoreHandle() const
+{
+    return m_externalSemaphoreHandle;
 }
 
 } // namespace KDGpu

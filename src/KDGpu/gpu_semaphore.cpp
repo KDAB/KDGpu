@@ -61,4 +61,10 @@ GpuSemaphore &GpuSemaphore::operator=(GpuSemaphore &&other)
     return *this;
 }
 
+HandleOrFD GpuSemaphore::externalSemaphoreHandle() const
+{
+    auto apiSemaphore = m_api->resourceManager()->getGpuSemaphore(m_gpuSemaphore);
+    return apiSemaphore->externalSemaphoreHandle();
+}
+
 } // namespace KDGpu
