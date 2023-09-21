@@ -129,7 +129,7 @@ void Queue::waitForUploadBufferData(const WaitForBufferUploadOptions &options)
     BufferOptions bufferOptions = {
         .size = options.byteSize,
         .usage = BufferUsageFlagBits::TransferSrcBit,
-        .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
+        .memoryUsage = MemoryUsage::CpuOnly // Use a CPU heap for the staging buffer
     };
     Buffer stagingBuffer(m_api, m_device, bufferOptions, options.data);
 
@@ -159,7 +159,7 @@ UploadStagingBuffer Queue::uploadBufferData(const BufferUploadOptions &options)
     BufferOptions bufferOptions = {
         .size = options.byteSize,
         .usage = BufferUsageFlagBits::TransferSrcBit,
-        .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
+        .memoryUsage = MemoryUsage::CpuOnly // Use a CPU heap for the staging buffer
     };
     Buffer stagingBuffer(m_api, m_device, bufferOptions, options.data);
 
@@ -210,7 +210,7 @@ void Queue::waitForUploadTextureData(const WaitForTextureUploadOptions &options)
     BufferOptions bufferOptions = {
         .size = options.byteSize,
         .usage = BufferUsageFlagBits::TransferSrcBit,
-        .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
+        .memoryUsage = MemoryUsage::CpuOnly // Use a CPU heap for the staging buffer
     };
     Buffer stagingBuffer{ m_api, m_device, bufferOptions, options.data };
 
@@ -274,7 +274,7 @@ UploadStagingBuffer Queue::uploadTextureData(const TextureUploadOptions &options
     BufferOptions bufferOptions = {
         .size = options.byteSize,
         .usage = BufferUsageFlagBits::TransferSrcBit,
-        .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
+        .memoryUsage = MemoryUsage::CpuOnly // Use a CPU heap for the staging buffer
     };
     Buffer stagingBuffer{ m_api, m_device, bufferOptions, options.data };
 
