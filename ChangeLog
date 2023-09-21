@@ -1,3 +1,8 @@
+- v0.3.0
+  - Fixes to static builds
+  - More work on external memory and semaphore support
+  - Add support for timestamp queries for GPU performance tracking
+  - Don't just assume support for VK_KHR_synchronization2
 - v0.2.0
   - Allow static builds
   - Use vkCreateRenderPass2
