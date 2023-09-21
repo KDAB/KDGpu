@@ -10,6 +10,13 @@
 
 #include "vulkan_config.h"
 
+#if defined(KDGPU_PLATFORM_WIN32)
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <vulkan/vulkan_win32.h>
+#endif
+
 namespace KDGpu {
 
 std::vector<const char *> getDefaultRequestedInstanceExtensions()
