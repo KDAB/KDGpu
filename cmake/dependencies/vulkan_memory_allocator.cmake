@@ -20,22 +20,20 @@ if(NOT TARGET vulkan-memory-allocator::vulkan-memory-allocator)
         add_compile_options(-Wno-implicit-fallthrough)
     endif()
 
-    set(VULKAN_MEMORY_ALLOCATOR_LIBRARY_SOURCE_FILES ${vulkan_memory_allocator_SOURCE_DIR}/src/VmaUsage.cpp)
-
     find_package(Vulkan REQUIRED)
 
-    add_library(vulkan-memory-allocator STATIC ${VULKAN_MEMORY_ALLOCATOR_LIBRARY_SOURCE_FILES})
-    set_target_properties(vulkan-memory-allocator PROPERTIES POSITION_INDEPENDENT_CODE ON)
-    target_link_libraries(vulkan-memory-allocator PUBLIC Vulkan::Vulkan)
+    add_library(vulkan-memory-allocator INTERFACE)
+    target_link_libraries(vulkan-memory-allocator INTERFACE Vulkan::Vulkan)
     set_property(TARGET vulkan-memory-allocator PROPERTY CXX_STANDARD 17)
 
     target_include_directories(
-        vulkan-memory-allocator PRIVATE $<BUILD_INTERFACE:${vulkan_memory_allocator_SOURCE_DIR}/src>
+        vulkan-memory-allocator INTERFACE $<BUILD_INTERFACE:${vulkan_memory_allocator_SOURCE_DIR}/src>
     )
 
     target_include_directories(
-        vulkan-memory-allocator PUBLIC $<BUILD_INTERFACE:${vulkan_memory_allocator_SOURCE_DIR}/include>
-                                       $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/KDGpu/vulkan_memory_allocator>
+        vulkan-memory-allocator
+        INTERFACE $<BUILD_INTERFACE:${vulkan_memory_allocator_SOURCE_DIR}/include>
+                  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/KDGpu/vulkan_memory_allocator>
     )
 
     option(VMA_RECORDING_ENABLED "Enable VMA memory recording for debugging" OFF)
@@ -54,7 +52,7 @@ if(NOT TARGET vulkan-memory-allocator::vulkan-memory-allocator)
     # cmake-lint: disable=C0301
     target_compile_definitions(
         vulkan-memory-allocator
-        PUBLIC
+        INTERFACE
             VMA_USE_STL_CONTAINERS=$<BOOL:${VMA_USE_STL_CONTAINERS}>
             VMA_DYNAMIC_VULKAN_FUNCTIONS=$<BOOL:${VMA_DYNAMIC_VULKAN_FUNCTIONS}>
             VMA_DEBUG_ALWAYS_DEDICATED_MEMORY=$<BOOL:${VMA_DEBUG_ALWAYS_DEDICATED_MEMORY}>

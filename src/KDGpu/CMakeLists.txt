@@ -63,6 +63,7 @@ set(SOURCES
     vulkan/vulkan_texture.cpp
     vulkan/vulkan_texture_view.cpp
     vulkan/vulkan_timestamp_query_recorder.cpp
+    vulkan/vk_mem_alloc.cpp
 )
 
 set(HEADERS
