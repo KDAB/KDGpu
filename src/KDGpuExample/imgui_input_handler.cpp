@@ -80,7 +80,7 @@ void ImGuiInputHandler::event(EventReceiver *target, Event *ev)
     }
 
     case Event::Type::MouseRelease: {
-        auto e = static_cast<MousePressEvent *>(ev);
+        auto e = static_cast<MouseReleaseEvent *>(ev);
         m_mouseButtons &= ~e->button();
 
         ImGuiIO &io = ImGui::GetIO();
