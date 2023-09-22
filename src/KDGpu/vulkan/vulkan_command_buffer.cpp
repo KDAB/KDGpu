@@ -10,7 +10,8 @@
 
 #include "vulkan_command_buffer.h"
 
-#include "KDGpu/utils/logging.h"
+#include <KDGpu/utils/logging.h>
+#include <KDGpu/vulkan/vulkan_formatters.h>
 
 namespace KDGpu {
 
