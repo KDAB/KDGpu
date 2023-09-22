@@ -72,14 +72,21 @@ void VulkanQueue::submit(const SubmitOptions &options)
     VkSubmitInfo submitInfo = {};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     submitInfo.waitSemaphoreCount = m_vkWaitSemaphores.size();
-    submitInfo.pWaitSemaphores = m_vkWaitSemaphores.data();
+    if (!m_vkWaitSemaphores.empty()) {
+        submitInfo.pWaitSemaphores = m_vkWaitSemaphores.data();
+    }
+
     submitInfo.pWaitDstStageMask = m_vkWaitStageFlags.data();
 
     submitInfo.signalSemaphoreCount = m_vkSignalSemaphores.size();
-    submitInfo.pSignalSemaphores = m_vkSignalSemaphores.data();
+    if (!m_vkSignalSemaphores.empty()) {
+        submitInfo.pSignalSemaphores = m_vkSignalSemaphores.data();
+    }
 
     submitInfo.commandBufferCount = m_vkCommandBuffers.size();
-    submitInfo.pCommandBuffers = m_vkCommandBuffers.data();
+    if (!m_vkCommandBuffers.empty()) {
+        submitInfo.pCommandBuffers = m_vkCommandBuffers.data();
+    }
 
     // TODO: Support fences
     // Make sure the fence is ready for use and submit
