@@ -13,6 +13,7 @@
 #include <KDGpu/vulkan/vulkan_resource_manager.h>
 #include <KDGpu/vulkan/vulkan_enums.h>
 #include <KDGpu/vulkan/vulkan_device.h>
+#include <KDGpu/vulkan/vulkan_formatters.h>
 
 namespace KDGpu {
 
