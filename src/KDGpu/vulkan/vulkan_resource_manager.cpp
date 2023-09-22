@@ -70,6 +70,12 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
     return VK_FALSE;
 }
 
+bool findExtension(const std::vector<KDGpu::Extension> &extensions, const std::string_view &name)
+{
+    const auto it = std::find_if(begin(extensions), end(extensions), [name](const KDGpu::Extension &ext) { return ext.name == name; });
+    return it != std::end(extensions);
+};
+
 } // namespace
 namespace KDGpu {
 
@@ -120,14 +126,9 @@ Handle<Instance_t> VulkanResourceManager::createInstance(const InstanceOptions &
     // Query the available instance extensions
     const auto availableExtensions = getInstanceExtensions();
 
-    const auto findExtension = [&extensions = availableExtensions](const std::string_view &name) {
-        const auto it = std::find_if(begin(extensions), end(extensions), [name](const Extension &ext) { return ext.name == name; });
-        return it != std::end(extensions);
-    };
-
     const auto defaultRequestedExtensions = getDefaultRequestedInstanceExtensions();
     for (const char *requestedExtension : defaultRequestedExtensions) {
-        if (findExtension(requestedExtension)) {
+        if (findExtension(availableExtensions, requestedExtension)) {
             requestedInstanceExtensions.push_back(requestedExtension);
         } else {
             SPDLOG_LOGGER_WARN(Logger::logger(), "Unable to find default requested extension {}", requestedExtension);
@@ -135,7 +136,7 @@ Handle<Instance_t> VulkanResourceManager::createInstance(const InstanceOptions &
     }
 
     for (const std::string &userExtension : options.extensions) {
-        if (findExtension(userExtension)) {
+        if (findExtension(availableExtensions, userExtension)) {
             requestedInstanceExtensions.push_back(userExtension.c_str());
         } else {
             SPDLOG_LOGGER_WARN(Logger::logger(), "Unable to find user requested extensions {}", userExtension);
@@ -382,7 +383,17 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
 
     // TODO: Obey requested adapter features (e.g. geometry shaders)
     // TODO: Merge requested device extensions and layers with our defaults
-    const auto requestedDeviceExtensions = getDefaultRequestedDeviceExtensions();
+    const auto availableDeviceExtensions = vulkanAdapter->extensions();
+    std::vector<const char *> requestedDeviceExtensions;
+    const auto defaultRequestedDeviceExtensions = getDefaultRequestedDeviceExtensions();
+    for (const char *requestedDeviceExtension : defaultRequestedDeviceExtensions) {
+        if (findExtension(availableDeviceExtensions, requestedDeviceExtension)) {
+            requestedDeviceExtensions.push_back(requestedDeviceExtension);
+        } else {
+            SPDLOG_LOGGER_WARN(Logger::logger(), "Unable to find default requested device extension {}", requestedDeviceExtension);
+        }
+    }
+
     if (!requestedDeviceExtensions.empty()) {
         createInfo.enabledExtensionCount = static_cast<uint32_t>(requestedDeviceExtensions.size());
         assert(requestedDeviceExtensions.size() <= std::numeric_limits<uint32_t>::max());
