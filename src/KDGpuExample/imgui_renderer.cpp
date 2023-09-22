@@ -402,6 +402,7 @@ void ImGuiRenderer::initializeFontData(const float scaleFactor)
     // clang-format on
     const WaitForTextureUploadOptions uploadOptions = {
         .destinationTexture = m_texture,
+        .dstStages = PipelineStageFlagBit::FragmentShaderBit,
         .data = fontData,
         .byteSize = uploadSize,
         .oldLayout = TextureLayout::Undefined,

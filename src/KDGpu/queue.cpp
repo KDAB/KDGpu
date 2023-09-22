@@ -252,8 +252,8 @@ void Queue::waitForUploadTextureData(const WaitForTextureUploadOptions &options)
     const TextureMemoryBarrierOptions toFinalLayout = {
         .srcStages = PipelineStageFlags(PipelineStageFlagBit::TransferBit),
         .srcMask = AccessFlags(AccessFlagBit::TransferWriteBit),
-        .dstStages = PipelineStageFlags(PipelineStageFlagBit::AllGraphicsBit), // Could be used anywhere in pipeline
-        .dstMask = AccessFlags(AccessFlagBit::MemoryReadBit),
+        .dstStages = options.dstStages,
+        .dstMask = AccessFlags(AccessFlagBit::InputAttachmentReadBit | AccessFlagBit::ShaderReadBit),
         .oldLayout = TextureLayout::TransferDstOptimal,
         .newLayout = options.newLayout,
         .texture = options.destinationTexture,

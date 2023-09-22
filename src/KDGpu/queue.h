@@ -90,6 +90,7 @@ struct BufferUploadOptions {
 */
 struct WaitForTextureUploadOptions {
     Handle<Texture_t> destinationTexture;
+    PipelineStageFlags dstStages = PipelineStageFlagBit::AllGraphicsBit;
     const void *data{ nullptr };
     DeviceSize byteSize{ 0 };
     TextureLayout oldLayout{ TextureLayout::Undefined };
