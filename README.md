@@ -1,4 +1,6 @@
-# README
+# KDGpu
+
+KDGpu is a thin wrapper around Vulkan to make modern graphics easier to learn and use.
 
 ## Introduction
 
@@ -45,44 +47,44 @@ More information can be found in the [documentation](https://docs.kdab.com/toy-r
 A typical render function for KDGPu looks something like this:
 
 ```cpp
-    auto opaquePass = commandRecorder.beginRenderPass(m_opaquePassOptions);
-    opaquePass.setPipeline(m_pipeline);
-    opaquePass.setVertexBuffer(0, m_buffer);
-    opaquePass.setBindGroup(0, m_textureBindGroup);
-    opaquePass.draw(DrawCommand{ .vertexCount = 4 });
-    renderImGuiOverlay(&opaquePass);
-    opaquePass.end();
-    m_commandBuffer = commandRecorder.finish();
+auto opaquePass = commandRecorder.beginRenderPass(m_opaquePassOptions);
+opaquePass.setPipeline(m_pipeline);
+opaquePass.setVertexBuffer(0, m_buffer);
+opaquePass.setBindGroup(0, m_textureBindGroup);
+opaquePass.draw(DrawCommand{ .vertexCount = 4 });
+renderImGuiOverlay(&opaquePass);
+opaquePass.end();
+m_commandBuffer = commandRecorder.finish();
 ```
 
 Creating GPU resources is just as easy and intuitive. Creating a Buffer that resides on the GPU
 and can be uploaded to and used as a vertex buffer is as simple as:
 
 ```cpp
-    const DeviceSize dataByteSize = vertexData.size() * sizeof(Vertex);
-    BufferOptions bufferOptions = {
-        .size = dataByteSize,
-        .usage = BufferUsageFlagBits::VertexBufferBit | BufferUsageFlagBits::TransferDstBit,
-        .memoryUsage = MemoryUsage::GpuOnly
-    };
-    m_buffer = m_device.createBuffer(bufferOptions);
+const DeviceSize dataByteSize = vertexData.size() * sizeof(Vertex);
+BufferOptions bufferOptions = {
+    .size = dataByteSize,
+    .usage = BufferUsageFlagBits::VertexBufferBit | BufferUsageFlagBits::TransferDstBit,
+    .memoryUsage = MemoryUsage::GpuOnly
+};
+m_buffer = m_device.createBuffer(bufferOptions);
 ```
 
-This pattern of usings options structs and initializing them with C++20 designated initializers
+This pattern of using options structs and initializing them with C++20 designated initializers
 permeates through the API. It makes it easily discoverable, extensible and trivial to queue up
 for deferred invocations.
 
 Uploading data to the above buffer is just as easy:
 
 ```cpp
-    const BufferUploadOptions uploadOptions = {
-        .destinationBuffer = m_buffer,
-        .dstStages = PipelineStageFlagBit::VertexAttributeInputBit,
-        .dstMask = AccessFlagBit::VertexAttributeReadBit,
-        .data = vertexData.data(),
-        .byteSize = dataByteSize
-    };
-    m_queue.uploadBufferData(uploadOptions);
+const BufferUploadOptions uploadOptions = {
+    .destinationBuffer = m_buffer,
+    .dstStages = PipelineStageFlagBit::VertexAttributeInputBit,
+    .dstMask = AccessFlagBit::VertexAttributeReadBit,
+    .data = vertexData.data(),
+    .byteSize = dataByteSize
+};
+m_queue.uploadBufferData(uploadOptions);
 ```
 
 ## Contact
