@@ -7,8 +7,8 @@
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
 
-find_package(vulkan-memory-allocator QUIET)
-if(NOT TARGET vulkan-memory-allocator::vulkan-memory-allocator)
+find_package(VulkanMemoryAllocator QUIET)
+if(NOT TARGET GPUOpen::VulkanMemoryAllocator)
     FetchContent_Declare(
         vulkan_memory_allocator
         GIT_REPOSITORY https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
@@ -69,5 +69,7 @@ if(NOT TARGET vulkan-memory-allocator::vulkan-memory-allocator)
     )
     set(export-vulkan-memory-allocator ON)
 else()
+    add_library(vulkan-memory-allocator::vulkan-memory-allocator ALIAS GPUOpen::VulkanMemoryAllocator)
+
     set(export-vulkan-memory-allocator OFF)
 endif()
