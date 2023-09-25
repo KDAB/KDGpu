@@ -55,7 +55,6 @@ public:
     void initialize(KDGpu::SampleCountFlagBits samples, KDGpu::Format colorFormat, KDGpu::Format depthFormat);
     void cleanup();
 
-    void updateInputState();
     void event(KDFoundation::EventReceiver *target, KDFoundation::Event *ev);
 
     void render(KDGpu::RenderPassCommandRecorder *recorder, const KDGpu::Extent2D &extent, uint32_t inFlightIndex = 0);

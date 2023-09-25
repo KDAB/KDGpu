@@ -41,11 +41,6 @@ void ImGuiItem::cleanup()
     m_renderer->cleanup();
 }
 
-void ImGuiItem::updateInputState()
-{
-    m_input->updateInputState();
-}
-
 void ImGuiItem::event(KDFoundation::EventReceiver *target, KDFoundation::Event *ev)
 {
     m_input->event(target, ev);

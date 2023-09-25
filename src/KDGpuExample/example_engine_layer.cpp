@@ -292,9 +292,6 @@ void ExampleEngineLayer::update()
     io.DeltaTime = engine()->deltaTimeSeconds();
     io.DisplaySize = ImVec2(static_cast<float>(m_window->width()), static_cast<float>(m_window->height()));
 
-    // Process the input events for ImGui
-    m_imguiOverlay->updateInputState();
-
     // Call our imgui drawing function
     ImGui::NewFrame();
     drawImGuiOverlay(context);
