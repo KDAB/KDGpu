@@ -18,7 +18,7 @@ message(STATUS "Checking/updating dependencies. This may take a little while...
 )
 
 # KDUtils
-if(KDGPU_BUILD_TESTS OR KDGPU_BUILD_EXAMPLES OR KDGPU_BUILD_EXTRAS)
+if(KDGPU_BUILD_TESTS OR KDGPU_BUILD_KDGPUKDGUI)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/kdutils.cmake)
 else()
     # If not pulling in KDUtils, which itself pulls in spdlog, we must do it ourselves.
@@ -28,7 +28,7 @@ endif()
 # VMA
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/vulkan_memory_allocator.cmake)
 
-if(KDGPU_BUILD_EXAMPLES OR KDGPU_BUILD_EXTRAS)
+if(KDGPU_BUILD_EXAMPLES)
     # glm
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/glm.cmake)
 

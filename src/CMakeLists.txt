@@ -8,7 +8,10 @@
 #
 add_subdirectory(KDGpu)
 
-if(KDGPU_BUILD_EXTRAS)
+if(KDGPU_BUILD_KDGPUKDGUI)
     add_subdirectory(KDGpuKDGui)
+endif()
+
+if(KDGPU_BUILD_KDGPUEXAMPLE)
     add_subdirectory(KDGpuExample)
 endif()
