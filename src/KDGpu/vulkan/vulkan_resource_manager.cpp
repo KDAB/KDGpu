@@ -381,11 +381,15 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     createInfo.enabledExtensionCount = 0;
     createInfo.ppEnabledExtensionNames = nullptr;
 
-    // TODO: Obey requested adapter features (e.g. geometry shaders)
     // TODO: Merge requested device extensions and layers with our defaults
     const auto availableDeviceExtensions = vulkanAdapter->extensions();
     std::vector<const char *> requestedDeviceExtensions;
-    const auto defaultRequestedDeviceExtensions = getDefaultRequestedDeviceExtensions();
+    auto defaultRequestedDeviceExtensions = getDefaultRequestedDeviceExtensions();
+
+    // Add requested device extensions set by user in the options
+    for (const std::string &userRequestedExtension : options.extensions)
+        defaultRequestedDeviceExtensions.push_back(userRequestedExtension.c_str());
+
     for (const char *requestedDeviceExtension : defaultRequestedDeviceExtensions) {
         if (findExtension(availableDeviceExtensions, requestedDeviceExtension)) {
             requestedDeviceExtensions.push_back(requestedDeviceExtension);

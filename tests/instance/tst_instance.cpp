@@ -75,6 +75,28 @@ TEST_SUITE("Instance")
             CHECK(device.isValid());
         }
 
+        SUBCASE("Can create Device with user extension")
+        {
+            // WHEN
+            Adapter *discreteGPUAdapter = instance.selectAdapter(AdapterDeviceType::Default);
+
+            // THEN
+            CHECK(discreteGPUAdapter);
+            CHECK(discreteGPUAdapter->isValid());
+
+            // WHEN
+            using namespace std::string_literals;
+
+            DeviceOptions options{
+                .extensions = { "VK_KHR_shader_non_semantic_info"s },
+                .requestedFeatures = discreteGPUAdapter->features(),
+            };
+            Device device = discreteGPUAdapter->createDevice(options);
+
+            // THEN
+            CHECK(device.isValid());
+        }
+
         SUBCASE("Can create Surface")
         {
             // GIVEN
