@@ -15,6 +15,7 @@
 #include <KDGpu/buffer_options.h>
 #include <KDGpu/swapchain_options.h>
 #include <KDGpu/texture_options.h>
+#include <KDGui/gui_events.h>
 
 #include <algorithm>
 
@@ -34,6 +35,14 @@ void SimpleExampleEngineLayer::update()
 
     // Call updateScene() function to update scene state.
     updateScene();
+
+    if (m_swapchainDirty) {
+        // We need to recreate swapchain
+        recreateSwapChain();
+        // Handle any changes that would be needed when a swapchain resize occurs
+        resize();
+        m_swapchainDirty = false;
+    }
 
     // Obtain swapchain image view
     m_inFlightIndex = engine()->frameNumber() % MAX_FRAMES_IN_FLIGHT;
@@ -68,6 +77,14 @@ void SimpleExampleEngineLayer::update()
 
     // Just wait until the GPU is done with all work
     m_device.waitUntilIdle();
+}
+
+void SimpleExampleEngineLayer::event(KDFoundation::EventReceiver *target, KDFoundation::Event *ev)
+{
+    if (ev->type() == KDFoundation::Event::Type::Resize && m_device.isValid())
+        m_swapchainDirty = true;
+
+    ExampleEngineLayer::event(target, ev);
 }
 
 } // namespace KDGpuExample

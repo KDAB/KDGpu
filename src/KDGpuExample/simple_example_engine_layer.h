@@ -31,6 +31,10 @@ public:
 
 protected:
     void update() override;
+    void event(KDFoundation::EventReceiver *target, KDFoundation::Event *ev) override;
+
+private:
+    bool m_swapchainDirty{ false };
 };
 
 } // namespace KDGpuExample
