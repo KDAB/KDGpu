@@ -48,6 +48,42 @@ TEST_SUITE("GPU_Semaphore")
             // THEN
             CHECK(s.isValid());
         }
+
+#if defined(KDGPU_CUDA)
+#if defined(KDGPU_PLATFORM_LINUX)
+        SUBCASE("A constructed GpuSemaphore from a Vulkan API with external FD")
+        {
+            // GIVEN
+            const GpuSemaphoreOptions gpuSemaphoreOptions{
+                .externalSemaphoreHandleType = ExternalSemaphoreHandleTypeFlagBits::OpaqueFD,
+            };
+
+            // WHEN
+            GpuSemaphore s = device.createGpuSemaphore(gpuSemaphoreOptions);
+
+            // THEN
+            CHECK(s.isValid());
+            const HandleOrFD externalHandleOrFD = s.externalSemaphoreHandle();
+            CHECK(std::get<int>(externalHandleOrFD) > -1);
+        }
+#elif defined(KDGPU_PLATFORM_WIN32)
+        SUBCASE("A constructed GpuSemaphore from a Vulkan API with external Handle")
+        {
+            // GIVEN
+            const GpuSemaphoreOptions gpuSemaphoreOptions{
+                .externalSemaphoreHandleType = ExternalSemaphoreHandleTypeFlagBits::OpaqueWin32,
+            };
+
+            // WHEN
+            GpuSemaphore s = device.createGpuSemaphore(gpuSemaphoreOptions);
+
+            // THEN
+            CHECK(s.isValid());
+            const HandleOrFD externalHandleOrFD = s.externalSemaphoreHandle();
+            CHECK(std::get<HANDLE>(externalHandleOrFD) != nullptr);
+        }
+#endif
+#endif
     }
 
     TEST_CASE("Destruction")
