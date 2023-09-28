@@ -58,6 +58,54 @@ TEST_SUITE("Texture")
             // THEN
             CHECK(t.isValid());
         }
+
+#if defined(KDGPU_CUDA)
+#if defined(KDGPU_PLATFORM_LINUX)
+        SUBCASE("A constructed Texture from a Vulkan API with external FD")
+        {
+            // GIVEN
+            const TextureOptions textureOptions = {
+                .type = TextureType::TextureType2D,
+                .format = Format::R8G8B8A8_SNORM,
+                .extent = { 512, 512, 1 },
+                .mipLevels = 1,
+                .usage = TextureUsageFlagBits::SampledBit,
+                .memoryUsage = MemoryUsage::GpuOnly,
+                .externalMemoryHandleType = ExternalMemoryHandleTypeFlagBits::OpaqueFD,
+            };
+
+            // WHEN
+            Texture t = device.createTexture(textureOptions);
+
+            // THEN
+            CHECK(t.isValid());
+            const HandleOrFD externalHandleOrFD = t.externalMemoryHandle();
+            CHECK(std::get<int>(externalHandleOrFD) > -1);
+        }
+#elif defined(KDGPU_PLATFORM_WIN32)
+        SUBCASE("A constructed Texture from a Vulkan API with external Handle")
+        {
+            // GIVEN
+            const TextureOptions textureOptions = {
+                .type = TextureType::TextureType2D,
+                .format = Format::R8G8B8A8_SNORM,
+                .extent = { 512, 512, 1 },
+                .mipLevels = 1,
+                .usage = TextureUsageFlagBits::SampledBit,
+                .memoryUsage = MemoryUsage::GpuOnly,
+                .externalMemoryHandleType = ExternalMemoryHandleTypeFlagBits::OpaqueWin32,
+            };
+
+            // WHEN
+            Texture t = device.createTexture(textureOptions);
+
+            // THEN
+            CHECK(t.isValid());
+            const HandleOrFD externalHandleOrFD = t.externalMemoryHandle();
+            CHECK(std::get<HANDLE>(externalHandleOrFD) != nullptr);
+        }
+#endif
+#endif
     }
 
     TEST_CASE("Destruction")
