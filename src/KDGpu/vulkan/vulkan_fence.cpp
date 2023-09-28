@@ -16,11 +16,13 @@ namespace KDGpu {
 
 VulkanFence::VulkanFence(VkFence _fence,
                          VulkanResourceManager *_vulkanResourceManager,
-                         const Handle<Device_t> &_deviceHandle)
+                         const Handle<Device_t> &_deviceHandle,
+                         const HandleOrFD &_externalFenceHandle)
     : ApiFence()
     , fence(_fence)
     , vulkanResourceManager(_vulkanResourceManager)
     , deviceHandle(_deviceHandle)
+    , m_externalFenceHandle(_externalFenceHandle)
 {
 }
 
@@ -48,6 +50,11 @@ FenceStatus VulkanFence::status()
     default:
         return FenceStatus::Error;
     }
+}
+
+HandleOrFD VulkanFence::externalFenceHandle() const
+{
+    return m_externalFenceHandle;
 }
 
 } // namespace KDGpu

@@ -30,15 +30,18 @@ struct Device_t;
 struct KDGPU_EXPORT VulkanFence : public ApiFence {
     explicit VulkanFence(VkFence _fence,
                          VulkanResourceManager *_vulkanResourceManager,
-                         const Handle<Device_t> &_deviceHandle);
+                         const Handle<Device_t> &_deviceHandle,
+                         const HandleOrFD &_externalFenceHandle);
 
     VkFence fence{ VK_NULL_HANDLE };
     VulkanResourceManager *vulkanResourceManager{ nullptr };
     Handle<Device_t> deviceHandle;
+    HandleOrFD m_externalFenceHandle{};
 
     void wait() final;
     void reset() final;
     FenceStatus status() final;
+    HandleOrFD externalFenceHandle() const final;
 };
 
 } // namespace KDGpu

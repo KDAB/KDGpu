@@ -77,6 +77,12 @@ FenceStatus Fence::status() const
     return m_api->resourceManager()->getFence(handle())->status();
 }
 
+HandleOrFD Fence::externalFenceHandle() const
+{
+    auto apiFence = m_api->resourceManager()->getFence(m_fence);
+    return apiFence->externalFenceHandle();
+}
+
 bool operator==(const Fence &a, const Fence &b)
 {
     return a.m_api == b.m_api && a.m_device == b.m_device && a.m_fence == b.m_fence;

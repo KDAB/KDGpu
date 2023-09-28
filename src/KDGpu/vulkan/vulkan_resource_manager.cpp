@@ -2361,14 +2361,52 @@ Handle<Fence_t> VulkanResourceManager::createFence(const Handle<Device_t> &devic
     fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     if (options.createSignalled)
         fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+    VkExportFenceCreateInfo exportFenceCreateInfo = {};
+    if (options.externalFenceHandleType != ExternalFenceHandleTypeFlagBits::None) {
+        exportFenceCreateInfo.sType = VK_STRUCTURE_TYPE_EXPORT_FENCE_CREATE_INFO;
+        exportFenceCreateInfo.pNext = nullptr;
+        exportFenceCreateInfo.handleTypes = externalFenceHandleTypeToVkExternalFenceHandleType(options.externalFenceHandleType);
+        fenceInfo.pNext = &exportFenceCreateInfo;
+    }
 
-    VkFence fence{ VK_NULL_HANDLE };
-    if (auto result = vkCreateFence(vulkanDevice->device, &fenceInfo, nullptr, &fence); result != VK_SUCCESS) {
+    VkFence vkFence{ VK_NULL_HANDLE };
+    if (auto result = vkCreateFence(vulkanDevice->device, &fenceInfo, nullptr, &vkFence); result != VK_SUCCESS) {
         SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating fence: {}", result);
         return {};
     }
 
-    auto fenceHandle = m_fences.emplace(VulkanFence(fence, this, deviceHandle));
+    HandleOrFD externalFenceHandle{};
+    if (options.externalFenceHandleType != ExternalFenceHandleTypeFlagBits::None) {
+#if defined(KDGPU_PLATFORM_LINUX)
+        if (vulkanDevice->vkGetFenceFdKHR) {
+            VkFenceGetFdInfoKHR vulkanFenceGetFdInfoKHR = {
+                .sType = VK_STRUCTURE_TYPE_FENCE_GET_FD_INFO_KHR,
+                .pNext = nullptr,
+                .fence = vkFence,
+                .handleType = VK_EXTERNAL_FENCE_HANDLE_TYPE_OPAQUE_FD_BIT
+            };
+            int fd{};
+            vulkanDevice->vkGetFenceFdKHR(vulkanDevice->device, &vulkanFenceGetFdInfoKHR, &fd);
+            externalFenceHandle = fd;
+        }
+#endif
+
+#if defined(KDGPU_PLATFORM_WIN32)
+        if (vulkanDevice->vkGetFenceWin32HandleKHR) {
+            VkFenceGetWin32HandleInfoKHR vulkanFenceGetHandleInfoKHR = {
+                .sType = VK_STRUCTURE_TYPE_FENCE_GET_WIN32_HANDLE_INFO_KHR,
+                .pNext = nullptr,
+                .fence = vkFence,
+                .handleType = VK_EXTERNAL_FENCE_HANDLE_TYPE_OPAQUE_WIN32_BIT
+            };
+            HANDLE winHandle{};
+            vulkanDevice->vkGetFenceWin32HandleKHR(vulkanDevice->device, &vulkanFenceGetHandleInfoKHR, &winHandle);
+            externalFenceHandle = winHandle;
+        }
+#endif
+    }
+
+    auto fenceHandle = m_fences.emplace(VulkanFence(vkFence, this, deviceHandle, externalFenceHandle));
     return fenceHandle;
 }
 

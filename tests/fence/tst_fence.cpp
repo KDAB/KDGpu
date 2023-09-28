@@ -48,6 +48,41 @@ TEST_SUITE("Fence")
             // THEN
             CHECK(s.isValid());
         }
+#if defined(KDGPU_CUDA)
+#if defined(KDGPU_PLATFORM_LINUX)
+        SUBCASE("A constructed Fence from a Vulkan API with external FD")
+        {
+            // GIVEN
+            const FenceOptions fenceOptions{
+                .externalFenceHandleType = ExternalFenceHandleTypeFlagBits::OpaqueFD,
+            };
+
+            // WHEN
+            Fence s = device.createFence(fenceOptions);
+
+            // THEN
+            CHECK(s.isValid());
+            const HandleOrFD externalHandleOrFD = s.externalFenceHandle();
+            CHECK(std::get<int>(externalHandleOrFD) > -1);
+        }
+#elif defined(KDGPU_PLATFORM_WIN32)
+        SUBCASE("A constructed Fence from a Vulkan API with external Handle")
+        {
+            // GIVEN
+            const FenceOptions fenceOptions{
+                .externalFenceHandleType = ExternalFenceHandleTypeFlagBits::OpaqueWin32,
+            };
+
+            // WHEN
+            Fence s = device.createFence(fenceOptions);
+
+            // THEN
+            CHECK(s.isValid());
+            const HandleOrFD externalHandleOrFD = s.externalFenceHandle();
+            CHECK(std::get<HANDLE>(externalHandleOrFD) != nullptr);
+        }
+#endif
+#endif
     }
 
     TEST_CASE("Destruction")

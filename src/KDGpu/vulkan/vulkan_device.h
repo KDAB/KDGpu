@@ -24,6 +24,7 @@
 
 #if defined(KDGPU_PLATFORM_WIN32)
 struct VkSemaphoreGetWin32HandleInfoKHR;
+struct VkFenceGetWin32HandleInfoKHR;
 #endif
 
 namespace KDGpu {
@@ -76,10 +77,14 @@ struct KDGPU_EXPORT VulkanDevice : public ApiDevice {
 #if defined(KDGPU_PLATFORM_WIN32)
     using PFN_vkGetSemaphoreWin32HandleKHR = VkResult(VKAPI_PTR *)(VkDevice, const VkSemaphoreGetWin32HandleInfoKHR *, HANDLE *);
     PFN_vkGetSemaphoreWin32HandleKHR vkGetSemaphoreWin32HandleKHR{ nullptr };
+
+    using PFN_vkGetFenceWin32HandleKHR = VkResult(VKAPI_PTR *)(VkDevice, const VkFenceGetWin32HandleInfoKHR *, HANDLE *);
+    PFN_vkGetFenceWin32HandleKHR vkGetFenceWin32HandleKHR{ nullptr };
 #endif
 
 #if defined(KDGPU_PLATFORM_LINUX)
     PFN_vkGetSemaphoreFdKHR vkGetSemaphoreFdKHR{ nullptr };
+    PFN_vkGetFenceFdKHR vkGetFenceFdKHR{ nullptr };
 #endif
 
     bool isOwned{ true };

@@ -23,6 +23,7 @@ struct ApiFence {
     virtual void wait() = 0;
     virtual void reset() = 0;
     virtual FenceStatus status() = 0;
+    virtual HandleOrFD externalFenceHandle() const = 0;
 };
 
 } // namespace KDGpu

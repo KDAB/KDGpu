@@ -23,6 +23,7 @@ class GraphicsApi;
 
 struct FenceOptions {
     bool createSignalled{ true };
+    ExternalFenceHandleTypeFlags externalFenceHandleType{ ExternalFenceHandleTypeFlagBits::None };
 };
 
 /**
@@ -49,6 +50,8 @@ public:
     void reset();
     void wait();
     FenceStatus status() const;
+
+    HandleOrFD externalFenceHandle() const;
 
 private:
     explicit Fence(GraphicsApi *api, const Handle<Device_t> &device, const FenceOptions &options);

@@ -1078,6 +1078,15 @@ enum class ExternalSemaphoreHandleTypeFlagBits : uint32_t {
 };
 using ExternalSemaphoreHandleTypeFlags = KDGpu::Flags<ExternalSemaphoreHandleTypeFlagBits>;
 
+enum class ExternalFenceHandleTypeFlagBits : uint32_t {
+    None = 0,
+    OpaqueFD = 0x00000001,
+    OpaqueWin32 = 0x00000002,
+    OpaqueWin32Kmt = 0x00000004,
+    SyncFD = 0x00000008,
+};
+using ExternalFenceHandleTypeFlags = KDGpu::Flags<ExternalFenceHandleTypeFlagBits>;
+
 enum class ExternalMemoryHandleTypeFlagBits : uint32_t {
     None = 0,
     OpaqueFD = 0x00000001,

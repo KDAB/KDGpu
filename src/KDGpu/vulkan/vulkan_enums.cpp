@@ -360,6 +360,16 @@ VkExternalMemoryHandleTypeFlagBits externalMemoryHandleTypeToVkExternalMemoryHan
     return static_cast<VkExternalMemoryHandleTypeFlagBits>(static_cast<uint32_t>(handleFlags.toInt()));
 }
 
+ExternalFenceHandleTypeFlags vkExternalFenceHandleTypeToExternalFenceHandleType(VkExternalFenceHandleTypeFlagBits handleFlags)
+{
+    return ExternalFenceHandleTypeFlags::fromInt(static_cast<uint32_t>(handleFlags));
+}
+
+VkExternalFenceHandleTypeFlagBits externalFenceHandleTypeToVkExternalFenceHandleType(ExternalFenceHandleTypeFlags handleFlags)
+{
+    return static_cast<VkExternalFenceHandleTypeFlagBits>(static_cast<uint32_t>(handleFlags.toInt()));
+}
+
 ResolveModeFlagBits vkResolveModeToResolveMode(VkResolveModeFlagBits resolveFlag)
 {
     return static_cast<ResolveModeFlagBits>(static_cast<uint32_t>(resolveFlag));

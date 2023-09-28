@@ -50,9 +50,11 @@ std::vector<const char *> getDefaultRequestedDeviceExtensions()
     #if defined(KDGPU_PLATFORM_LINUX)
         extensions.push_back(VK_KHR_EXTERNAL_MEMORY_FD_EXTENSION_NAME);
         extensions.push_back(VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME);
+        extensions.push_back(VK_KHR_EXTERNAL_FENCE_FD_EXTENSION_NAME);
     #elif defined(KDGPU_PLATFORM_WIN32)
         extensions.push_back(VK_KHR_EXTERNAL_MEMORY_WIN32_EXTENSION_NAME);
         extensions.push_back(VK_KHR_EXTERNAL_SEMAPHORE_WIN32_EXTENSION_NAME);
+        extensions.push_back(VK_KHR_EXTERNAL_FENCE_WIN32_EXTENSION_NAME);
     #endif
 #endif
 // clang-format on
