@@ -77,6 +77,48 @@ TEST_SUITE("Buffer")
             // THEN
             CHECK(b.isValid());
         }
+
+#if defined(KDGPU_CUDA)
+#if defined(KDGPU_PLATFORM_LINUX)
+        SUBCASE("A constructed Buffer from a Vulkan API with external FD")
+        {
+            // GIVEN
+            const BufferOptions bufferOptions = {
+                .size = 4 * sizeof(float),
+                .usage = BufferUsageFlagBits::VertexBufferBit,
+                .memoryUsage = MemoryUsage::CpuToGpu,
+                .externalMemoryHandleType = ExternalMemoryHandleTypeFlagBits::OpaqueFD,
+            };
+
+            // WHEN
+            Buffer b = device.createBuffer(bufferOptions);
+
+            // THEN
+            CHECK(b.isValid());
+            const HandleOrFD externalHandleOrFD = b.externalMemoryHandle();
+            CHECK(std::get<int>(externalHandleOrFD) > -1);
+        }
+#elif defined(KDGPU_PLATFORM_WIN32)
+        SUBCASE("A constructed Buffer from a Vulkan API with external Handle")
+        {
+            // GIVEN
+            const BufferOptions bufferOptions = {
+                .size = 4 * sizeof(float),
+                .usage = BufferUsageFlagBits::VertexBufferBit,
+                .memoryUsage = MemoryUsage::CpuToGpu,
+                .externalMemoryHandleType = ExternalMemoryHandleTypeFlagBits::OpaqueWin32,
+            };
+
+            // WHEN
+            Buffer b = device.createBuffer(bufferOptions);
+
+            // THEN
+            CHECK(b.isValid());
+            const HandleOrFD externalHandleOrFD = b.externalMemoryHandle();
+            CHECK(std::get<HANDLE>(externalHandleOrFD) != nullptr);
+        }
+#endif
+#endif
     }
 
     TEST_CASE("Destruction")
