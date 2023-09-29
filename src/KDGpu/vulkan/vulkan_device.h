@@ -63,6 +63,7 @@ struct KDGPU_EXPORT VulkanDevice : public ApiDevice {
     VulkanResourceManager *vulkanResourceManager{ nullptr };
     Handle<Adapter_t> adapterHandle;
     VmaAllocator allocator{ VK_NULL_HANDLE };
+    VmaAllocator externalAllocator{ VK_NULL_HANDLE };
     std::vector<QueueDescription> queueDescriptions;
     std::vector<VkCommandPool> commandPools; // Indexed by queue type (family)
     std::vector<VkDescriptorPool> descriptorSetPools;

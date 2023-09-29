@@ -46,6 +46,25 @@ VulkanDevice::VulkanDevice(VkDevice _device,
     if (vmaCreateAllocator(&allocatorInfo, &allocator) != VK_SUCCESS)
         SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to create Vulkan memory allocator!");
 
+        // clang-format off
+#if defined(KDGPU_CUDA)
+    VkPhysicalDeviceMemoryProperties memoryProperties{};
+    vkGetPhysicalDeviceMemoryProperties(vulkanAdapter->physicalDevice, &memoryProperties);
+
+    std::vector<VkExternalMemoryHandleTypeFlags> externalMemoryHandleTypes;
+    #if defined(KDGPU_PLATFORM_LINUX)
+        externalMemoryHandleTypes.resize(memoryProperties.memoryTypeCount, VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT);
+        allocatorInfo.pTypeExternalMemoryHandleTypes = externalMemoryHandleTypes.data();
+    #elif defined(KDGPU_PLATFORM_WIN32)
+        externalMemoryHandleTypes.resize(memoryProperties.memoryTypeCount, VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT);
+        allocatorInfo.pTypeExternalMemoryHandleTypes = externalMemoryHandleTypes.data();
+    #endif
+
+     if (vmaCreateAllocator(&allocatorInfo, &externalAllocator) != VK_SUCCESS)
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to create Vulkan external memory allocator!");
+#endif
+    // clang-format on
+
     // Resize the vector of command pools to have one for each queue family
     const auto queueTypes = vulkanAdapter->queryQueueTypes();
     const auto queueTypeCount = queueTypes.size();

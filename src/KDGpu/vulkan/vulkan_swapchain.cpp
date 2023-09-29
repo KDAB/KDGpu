@@ -56,6 +56,7 @@ std::vector<Handle<Texture_t>> VulkanSwapchain::getTextures()
                 vulkanResourceManager->insertTexture(VulkanTexture(
                         vkImages[i],
                         VK_NULL_HANDLE, // No allocation for swapchain images
+                        VK_NULL_HANDLE, // No allocator for swapchain images
                         format,
                         extent,
                         1,

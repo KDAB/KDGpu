@@ -452,8 +452,10 @@ void VulkanResourceManager::deleteDevice(const Handle<Device_t> &handle)
     if (vulkanDevice->timestampQueryPool != VK_NULL_HANDLE)
         vkDestroyQueryPool(vulkanDevice->device, vulkanDevice->timestampQueryPool, nullptr);
 
-    // Destroy Memory Allocator
+    // Destroy Memory Allocators
     vmaDestroyAllocator(vulkanDevice->allocator);
+    if (vulkanDevice->externalAllocator != VK_NULL_HANDLE)
+        vmaDestroyAllocator(vulkanDevice->externalAllocator);
 
     // At last, destroy device if we allocated it
     if (vulkanDevice->isOwned)
@@ -602,12 +604,16 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
     if (options.type == TextureType::TextureTypeCube)
         createInfo.flags |= VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
 
+    VmaAllocator allocator = vulkanDevice->allocator;
     VkExternalMemoryImageCreateInfo vkExternalMemImageCreateInfo = {};
     HandleOrFD memoryHandle{};
     if (options.externalMemoryHandleType != ExternalMemoryHandleTypeFlagBits::None) {
         vkExternalMemImageCreateInfo.sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO,
         vkExternalMemImageCreateInfo.handleTypes = externalMemoryHandleTypeToVkExternalMemoryHandleType(options.externalMemoryHandleType);
         createInfo.pNext = &vkExternalMemImageCreateInfo;
+
+        // We have to use a dedicated allocator for external handles that has been created with VkExportMemoryAllocateInfo
+        allocator = vulkanDevice->externalAllocator;
     }
 
     VmaAllocationCreateInfo allocInfo = {};
@@ -616,7 +622,7 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
     VkImage vkImage;
     VmaAllocation vmaAllocation;
 
-    if (auto result = vmaCreateImage(vulkanDevice->allocator, &createInfo, &allocInfo, &vkImage, &vmaAllocation, nullptr); result != VK_SUCCESS) {
+    if (auto result = vmaCreateImage(allocator, &createInfo, &allocInfo, &vkImage, &vmaAllocation, nullptr); result != VK_SUCCESS) {
         SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating image: {}", result);
         return {};
     }
@@ -627,7 +633,7 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
         VulkanInstance *instance = getInstance(adapter->instanceHandle);
 
         VmaAllocationInfo allocationInfo;
-        vmaGetAllocationInfo(vulkanDevice->allocator, vmaAllocation, &allocationInfo);
+        vmaGetAllocationInfo(allocator, vmaAllocation, &allocationInfo);
 
 #if defined(KDGPU_PLATFORM_LINUX)
         if (instance->vkGetMemoryFdKHR) {
@@ -663,6 +669,7 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
     const auto vulkanTextureHandle = m_textures.emplace(VulkanTexture(
             vkImage,
             vmaAllocation,
+            allocator,
             options.format,
             options.extent,
             options.mipLevels,
@@ -680,9 +687,7 @@ void VulkanResourceManager::deleteTexture(const Handle<Texture_t> &handle)
     if (vulkanTexture->ownedBySwapchain)
         return;
 
-    VulkanDevice *vulkanDevice = m_devices.get(vulkanTexture->deviceHandle);
-
-    vmaDestroyImage(vulkanDevice->allocator, vulkanTexture->image, vulkanTexture->allocation);
+    vmaDestroyImage(vulkanTexture->allocator, vulkanTexture->image, vulkanTexture->allocation);
 
     m_textures.remove(handle);
 }
@@ -770,6 +775,7 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
         createInfo.pQueueFamilyIndices = options.queueTypeIndices.data();
     }
 
+    VmaAllocator allocator = vulkanDevice->allocator;
     VkExternalMemoryBufferCreateInfo vkExternalMemBufferCreateInfo = {};
     HandleOrFD memoryHandle{};
 
@@ -777,6 +783,9 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
         vkExternalMemBufferCreateInfo.sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_BUFFER_CREATE_INFO;
         vkExternalMemBufferCreateInfo.handleTypes = externalMemoryHandleTypeToVkExternalMemoryHandleType(options.externalMemoryHandleType);
         createInfo.pNext = &vkExternalMemBufferCreateInfo;
+
+        // We have to use a dedicated allocator for external handles that has been created with VkExportMemoryAllocateInfo
+        allocator = vulkanDevice->externalAllocator;
     }
 
     VmaAllocationCreateInfo allocInfo = {};
@@ -784,7 +793,8 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
 
     VkBuffer vkBuffer;
     VmaAllocation vmaAllocation;
-    if (auto result = vmaCreateBuffer(vulkanDevice->allocator, &createInfo, &allocInfo, &vkBuffer, &vmaAllocation, nullptr); result != VK_SUCCESS) {
+
+    if (auto result = vmaCreateBuffer(allocator, &createInfo, &allocInfo, &vkBuffer, &vmaAllocation, nullptr); result != VK_SUCCESS) {
         SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating buffer: {}", result);
         return {};
     }
@@ -795,7 +805,7 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
         VulkanInstance *instance = getInstance(adapter->instanceHandle);
 
         VmaAllocationInfo allocationInfo;
-        vmaGetAllocationInfo(vulkanDevice->allocator, vmaAllocation, &allocationInfo);
+        vmaGetAllocationInfo(allocator, vmaAllocation, &allocationInfo);
 
 #if defined(KDGPU_PLATFORM_LINUX)
         if (instance->vkGetMemoryFdKHR) {
@@ -817,10 +827,10 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
                 .sType = VK_STRUCTURE_TYPE_MEMORY_GET_WIN32_HANDLE_INFO_KHR,
                 .pNext = nullptr,
                 .memory = allocationInfo.deviceMemory,
-                .handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT
+                .handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT_KHR
             };
             HANDLE winHandle{};
-            instance->vkGetMemoryWin32HandleKHR(vulkanDevice->device, &vkGetWin32HandleInfoKHR, &winHandle);
+            VkResult res = instance->vkGetMemoryWin32HandleKHR(vulkanDevice->device, &vkGetWin32HandleInfoKHR, &winHandle);
             memoryHandle = winHandle;
         }
 #endif
@@ -828,7 +838,7 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
 
     setObjectName(vulkanDevice, VK_OBJECT_TYPE_BUFFER, reinterpret_cast<uint64_t>(vkBuffer), options.label);
 
-    const auto vulkanBufferHandle = m_buffers.emplace(VulkanBuffer(vkBuffer, vmaAllocation, this, deviceHandle, memoryHandle));
+    const auto vulkanBufferHandle = m_buffers.emplace(VulkanBuffer(vkBuffer, vmaAllocation, allocator, this, deviceHandle, memoryHandle));
 
     if (initialData) {
         VulkanBuffer *vulkanBuffer = m_buffers.get(vulkanBufferHandle);
@@ -843,9 +853,8 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
 void VulkanResourceManager::deleteBuffer(const Handle<Buffer_t> &handle)
 {
     VulkanBuffer *vulkanBuffer = m_buffers.get(handle);
-    VulkanDevice *vulkanDevice = m_devices.get(vulkanBuffer->deviceHandle);
 
-    vmaDestroyBuffer(vulkanDevice->allocator, vulkanBuffer->buffer, vulkanBuffer->allocation);
+    vmaDestroyBuffer(vulkanBuffer->allocator, vulkanBuffer->buffer, vulkanBuffer->allocation);
 
     m_buffers.remove(handle);
 }

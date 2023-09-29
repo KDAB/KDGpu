@@ -33,6 +33,7 @@ struct Device_t;
 struct KDGPU_EXPORT VulkanTexture : public ApiTexture {
     explicit VulkanTexture(VkImage _image,
                            VmaAllocation _allocation,
+                           VmaAllocator _allocator,
                            Format _format,
                            Extent3D _extent,
                            uint32_t _mipLevels,
@@ -50,6 +51,7 @@ struct KDGPU_EXPORT VulkanTexture : public ApiTexture {
 
     VkImage image{ VK_NULL_HANDLE };
     VmaAllocation allocation{ VK_NULL_HANDLE };
+    VmaAllocator allocator{ VK_NULL_HANDLE };
     void *mapped{ nullptr };
     Format format;
     Extent3D extent;

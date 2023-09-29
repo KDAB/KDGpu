@@ -17,6 +17,7 @@ namespace KDGpu {
 
 VulkanTexture::VulkanTexture(VkImage _image,
                              VmaAllocation _allocation,
+                             VmaAllocator _allocator,
                              Format _format,
                              Extent3D _extent,
                              uint32_t _mipLevels,
@@ -29,6 +30,7 @@ VulkanTexture::VulkanTexture(VkImage _image,
     : ApiTexture()
     , image(_image)
     , allocation(_allocation)
+    , allocator(_allocator)
     , format(_format)
     , extent(_extent)
     , mipLevels(_mipLevels)
