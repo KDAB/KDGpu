@@ -31,9 +31,14 @@ ImGuiItem::~ImGuiItem()
     ImGui::DestroyContext(m_context);
 }
 
-void ImGuiItem::initialize(KDGpu::SampleCountFlagBits samples, KDGpu::Format colorFormat, KDGpu::Format depthFormat)
+void ImGuiItem::initialize(float scaleFactor, KDGpu::SampleCountFlagBits samples, KDGpu::Format colorFormat, KDGpu::Format depthFormat)
 {
-    m_renderer->initialize(samples, colorFormat, depthFormat);
+    m_renderer->initialize(scaleFactor, samples, colorFormat, depthFormat);
+}
+
+void ImGuiItem::updateScale(const float scaleFactor)
+{
+    m_renderer->updateScale(scaleFactor);
 }
 
 void ImGuiItem::cleanup()

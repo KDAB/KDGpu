@@ -107,7 +107,7 @@ ImGuiRenderer::~ImGuiRenderer()
 {
 }
 
-void ImGuiRenderer::initialize(KDGpu::SampleCountFlagBits samples, KDGpu::Format colorFormat, KDGpu::Format depthFormat)
+void ImGuiRenderer::initialize(float scaleFactor, KDGpu::SampleCountFlagBits samples, KDGpu::Format colorFormat, KDGpu::Format depthFormat)
 {
     {
         auto fs = cmrc::KDGpuExample::ShaderResources::get_filesystem();
@@ -139,67 +139,25 @@ void ImGuiRenderer::initialize(KDGpu::SampleCountFlagBits samples, KDGpu::Format
                     },
             });
 
-    // Create font texture, view and sampler
-    ImGuiIO &io = ImGui::GetIO();
-    unsigned char *fontData;
-    int texWidth, texHeight;
-    auto fs = cmrc::KDGpuExample::Resources::get_filesystem();
-    auto ttfFile = fs.open("fonts/Roboto-Medium.ttf");
-    auto ttfData = const_cast<void *>(static_cast<const void *>(ttfFile.begin()));
-    ImFontConfig fontConfig{};
-    fontConfig.FontDataOwnedByAtlas = false;
-    const float fontPixelSize = 18.0f;
-    io.Fonts->AddFontFromMemoryTTF(ttfData, ttfFile.size(), fontPixelSize, &fontConfig);
-    io.Fonts->GetTexDataAsRGBA32(&fontData, &texWidth, &texHeight);
-    DeviceSize uploadSize = texWidth * texHeight * 4 * sizeof(char);
-
-    const auto textureOptions = TextureOptions{
-        .type = TextureType::TextureType2D,
-        .format = Format::R8G8B8A8_UNORM,
-        .extent = { .width = static_cast<uint32_t>(texWidth), .height = static_cast<uint32_t>(texHeight), .depth = 1 },
-        .mipLevels = 1,
-        .usage = TextureUsageFlagBits::SampledBit | TextureUsageFlagBits::TransferDstBit
-    };
-    m_texture = m_device->createTexture(textureOptions);
-
-    // Upload the font texture data
-    // clang-format off
-    const std::vector<BufferTextureCopyRegion> regions = {{
-        .textureSubResource = { .aspectMask = TextureAspectFlagBits::ColorBit },
-        .textureExtent = { .width = static_cast<uint32_t>(texWidth), .height = static_cast<uint32_t>(texHeight), .depth = 1 }
-    }};
-    // clang-format on
-    const WaitForTextureUploadOptions uploadOptions = {
-        .destinationTexture = m_texture,
-        .data = fontData,
-        .byteSize = uploadSize,
-        .oldLayout = TextureLayout::Undefined,
-        .newLayout = TextureLayout::ShaderReadOnlyOptimal,
-        .regions = regions
-    };
-    m_queue->waitForUploadTextureData(uploadOptions);
-
-    m_textureView = m_texture.createView();
-
     const auto samplerOptions = SamplerOptions{
         .magFilter = FilterMode::Linear,
         .minFilter = FilterMode::Linear
     };
     m_sampler = m_device->createSampler(samplerOptions);
 
-    // Create a bind group for the font texture
-    // clang-format off
-    const BindGroupOptions bindGroupOptions = {
-        .layout = m_bindGroupLayout,
-        .resources = {{
-            .binding = 0,
-            .resource = TextureViewSamplerBinding{ .textureView = m_textureView, .sampler = m_sampler }
-        }}
-    };
-    // clang-format on
-    m_bindGroup = m_device->createBindGroup(bindGroupOptions);
+    updateScale(scaleFactor);
 
     createPipeline(samples, colorFormat, depthFormat);
+}
+
+void ImGuiRenderer::updateScale(const float scaleFactor)
+{
+    ImGuiStyle &style = ImGui::GetStyle();
+    style.ScaleAllSizes(scaleFactor / m_oldScaleFactor);
+
+    initializeFontData(scaleFactor);
+
+    m_oldScaleFactor = scaleFactor;
 }
 
 void ImGuiRenderer::cleanup()
@@ -331,9 +289,6 @@ void ImGuiRenderer::recordCommands(KDGpu::RenderPassCommandRecorder *recorder, K
     int32_t vertexOffset = 0;
     uint32_t indexOffset = 0;
 
-    // TODO: Add support for this to ExampleApplicationLayer using KDGui::Window?
-    // io.FontGlobalScale = m_renderer->scaleFactor();
-
     // Bind the pipeline
     recorder->setPipeline(m_pipeline);
 
@@ -403,6 +358,79 @@ void ImGuiRenderer::recordCommands(KDGpu::RenderPassCommandRecorder *recorder, K
             indexOffset += pcmd->ElemCount;
         }
         vertexOffset += cmd_list->VtxBuffer.Size;
+    }
+}
+
+void ImGuiRenderer::initializeFontData(const float scaleFactor)
+{
+    ImGuiIO &io = ImGui::GetIO();
+    io.Fonts->Clear();
+
+    // Clear previous font texture, view
+    m_texture = {};
+    m_textureView = {};
+
+    // Create font texture, view
+    unsigned char *fontData;
+    int texWidth, texHeight;
+    auto fs = cmrc::KDGpuExample::Resources::get_filesystem();
+    auto ttfFile = fs.open("fonts/Roboto-Medium.ttf");
+    auto ttfData = const_cast<void *>(static_cast<const void *>(ttfFile.begin()));
+    ImFontConfig fontConfig{};
+    fontConfig.FontDataOwnedByAtlas = false;
+    const float fontPixelSize = 18.0f * scaleFactor;
+    io.Fonts->AddFontFromMemoryTTF(ttfData, ttfFile.size(), fontPixelSize, &fontConfig);
+    io.Fonts->GetTexDataAsRGBA32(&fontData, &texWidth, &texHeight);
+    DeviceSize uploadSize = texWidth * texHeight * 4 * sizeof(char);
+
+    const auto textureOptions = TextureOptions{
+        .type = TextureType::TextureType2D,
+        .format = Format::R8G8B8A8_UNORM,
+        .extent = { .width = static_cast<uint32_t>(texWidth), .height = static_cast<uint32_t>(texHeight), .depth = 1 },
+        .mipLevels = 1,
+        .usage = TextureUsageFlagBits::SampledBit | TextureUsageFlagBits::TransferDstBit
+    };
+    m_texture = m_device->createTexture(textureOptions);
+
+    // Upload the font texture data
+    // clang-format off
+    const std::vector<BufferTextureCopyRegion> regions = {{
+        .textureSubResource = { .aspectMask = TextureAspectFlagBits::ColorBit },
+        .textureExtent = { .width = static_cast<uint32_t>(texWidth), .height = static_cast<uint32_t>(texHeight), .depth = 1 }
+    }};
+    // clang-format on
+    const WaitForTextureUploadOptions uploadOptions = {
+        .destinationTexture = m_texture,
+        .data = fontData,
+        .byteSize = uploadSize,
+        .oldLayout = TextureLayout::Undefined,
+        .newLayout = TextureLayout::ShaderReadOnlyOptimal,
+        .regions = regions
+    };
+    m_queue->waitForUploadTextureData(uploadOptions);
+
+    m_textureView = m_texture.createView();
+
+    // Update previous bind group if it exists
+    if (m_bindGroup.isValid()) {
+        const BindGroupEntry entry{
+            .binding = 0,
+            .resource = TextureViewSamplerBinding{ .textureView = m_textureView, .sampler = m_sampler }
+        };
+
+        m_bindGroup.update(entry);
+    } else {
+        // Create a bind group for the font texture
+        // clang-format off
+        const BindGroupOptions bindGroupOptions = {
+            .layout = m_bindGroupLayout,
+            .resources = {{
+                .binding = 0,
+                .resource = TextureViewSamplerBinding{ .textureView = m_textureView, .sampler = m_sampler }
+            }}
+        };
+        // clang-format on
+        m_bindGroup = m_device->createBindGroup(bindGroupOptions);
     }
 }
 

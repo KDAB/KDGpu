@@ -125,7 +125,11 @@ void ExampleEngineLayer::releaseStagingBuffers()
 void ExampleEngineLayer::recreateImGuiOverlay()
 {
     m_imguiOverlay = std::make_unique<ImGuiItem>(&m_device, &m_queue);
-    m_imguiOverlay->initialize(m_samples.get(), m_swapchainFormat, m_depthFormat);
+    m_window->scaleFactor.valueChanged().connect([this](const float scale_factor) {
+        m_imguiOverlay->updateScale(scale_factor);
+    });
+
+    m_imguiOverlay->initialize(m_window->scaleFactor.get(), m_samples.get(), m_swapchainFormat, m_depthFormat);
 }
 
 void ExampleEngineLayer::drawImGuiOverlay(ImGuiContext *ctx)

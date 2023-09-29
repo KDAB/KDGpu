@@ -53,7 +53,8 @@ public:
     ImGuiRenderer(ImGuiRenderer &&other) noexcept = default;
     ImGuiRenderer &operator=(ImGuiRenderer &&other) noexcept = default;
 
-    void initialize(KDGpu::SampleCountFlagBits samples, KDGpu::Format colorFormat, KDGpu::Format depthFormat);
+    void initialize(float scaleFactor, KDGpu::SampleCountFlagBits samples, KDGpu::Format colorFormat, KDGpu::Format depthFormat);
+    void updateScale(float scaleFactor);
     void cleanup();
 
     void createPipeline(KDGpu::SampleCountFlagBits samples, KDGpu::Format colorFormat, KDGpu::Format depthFormat);
@@ -62,6 +63,8 @@ public:
     void recordCommands(KDGpu::RenderPassCommandRecorder *recorder, KDGpu::Extent2D extent, uint32_t inFlightIndex);
 
 private:
+    void initializeFontData(float scaleFactor);
+
     struct MeshData {
         KDGpu::Buffer vertices;
         KDGpu::Buffer indexBuffer;
@@ -95,6 +98,8 @@ private:
     KDGpu::ShaderModule m_fragmentShader;
     KDGpu::GraphicsPipeline m_pipeline;
     KDGpu::PipelineLayout m_pipelineLayout;
+
+    float m_oldScaleFactor = 1.0f;
 };
 
 } // namespace KDGpuExample

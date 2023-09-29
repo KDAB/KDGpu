@@ -52,7 +52,8 @@ public:
 
     ImGuiContext *context() noexcept { return m_context; }
 
-    void initialize(KDGpu::SampleCountFlagBits samples, KDGpu::Format colorFormat, KDGpu::Format depthFormat);
+    void initialize(float scaleFactor, KDGpu::SampleCountFlagBits samples, KDGpu::Format colorFormat, KDGpu::Format depthFormat);
+    void updateScale(float scaleFactor);
     void cleanup();
 
     void event(KDFoundation::EventReceiver *target, KDFoundation::Event *ev);
