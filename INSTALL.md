@@ -88,7 +88,7 @@ KDGpu builds with CMake. Unpack or clone the KDGpu sources in the directory of y
 
 #### Notes
 
-CMake will looks for a file named KDGpuConfig.cmake. This file is located in <kdgpu_install_dir>/lib/cmake/Kuesa.
+CMake will looks for a file named KDGpuConfig.cmake. This file is located in <kdgpu_install_dir>/lib/cmake/KDGpu.
 If KDGpu was installed into a user defined location, you might have to set the
 CMAKE_PREFIX_PATH variable to contain the KDGpu install path:
 
