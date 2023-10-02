@@ -34,7 +34,7 @@
 
 ### Hardware
 
-Anything that supports Vulkan 1.1 or later
+Anything that supports Vulkan 1.2 or later
 
 ## Dependencies
 
