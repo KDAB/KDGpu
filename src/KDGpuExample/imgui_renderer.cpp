@@ -18,6 +18,7 @@
 #include <KDGpu/device.h>
 #include <KDGpu/graphics_pipeline_options.h>
 #include <KDGpu/texture_options.h>
+#include <KDUtils/color.h>
 
 #include <cmrc/cmrc.hpp>
 
@@ -95,12 +96,12 @@ ImGuiRenderer::ImGuiRenderer(KDGpu::Device *device, KDGpu::Queue *queue, ImGuiCo
     style.AntiAliasedLines = true;
     style.ItemSpacing = ImVec2(8.0f, 8.0f);
     style.ItemInnerSpacing = ImVec2(6.0f, 6.0f);
-    // TODO: Create a constexpr hex -> rgb/rgba helper that works with templated vector types e.g. imgui and glm.
-    style.Colors[ImGuiCol_Text] = ImVec4(226.0f / 255.0f, 232.0f / 255.0f, 240.0f / 255.0f, 1.0f);
-    style.Colors[ImGuiCol_WindowBg] = ImVec4(15.0f / 255.0f, 23.0f / 255.0f, 42.0f / 255.0f, 0.85f);
-    style.Colors[ImGuiCol_TitleBg] = ImVec4(30.0f / 255.0f, 41.0f / 255.0f, 59.0f / 255.0f, 1.0f);
-    style.Colors[ImGuiCol_TitleBgActive] = ImVec4(51.0f / 255.0f, 65.0f / 255.0f, 85.0f / 255.0f, 1.0f);
-    style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(30.0f / 255.0f, 41.0f / 255.0f, 59.0f / 255.0f, 1.0f);
+
+    style.Colors[ImGuiCol_Text] = KDUtils::hexToRgba<ImVec4>("#e2e8f0", 1.0f);
+    style.Colors[ImGuiCol_WindowBg] = KDUtils::hexToRgba<ImVec4>("#2a2726", 0.85f);
+    style.Colors[ImGuiCol_TitleBg] = KDUtils::hexToRgba<ImVec4>("#1e293b", 1.0f);
+    style.Colors[ImGuiCol_TitleBgActive] = KDUtils::hexToRgba<ImVec4>("#334155", 1.0f);
+    style.Colors[ImGuiCol_TitleBgCollapsed] = KDUtils::hexToRgba<ImVec4>("#1e293b", 1.0f);
 }
 
 ImGuiRenderer::~ImGuiRenderer()
