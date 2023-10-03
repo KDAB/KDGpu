@@ -49,7 +49,6 @@ TEST_SUITE("GPU_Semaphore")
             CHECK(s.isValid());
         }
 
-#if defined(KDGPU_CUDA)
 #if defined(KDGPU_PLATFORM_LINUX)
         SUBCASE("A constructed GpuSemaphore from a Vulkan API with external FD")
         {
@@ -82,7 +81,6 @@ TEST_SUITE("GPU_Semaphore")
             const HandleOrFD externalHandleOrFD = s.externalSemaphoreHandle();
             CHECK(std::get<HANDLE>(externalHandleOrFD) != nullptr);
         }
-#endif
 #endif
     }
 

@@ -59,7 +59,6 @@ TEST_SUITE("Texture")
             CHECK(t.isValid());
         }
 
-#if defined(KDGPU_CUDA)
 #if defined(KDGPU_PLATFORM_LINUX)
         SUBCASE("A constructed Texture from a Vulkan API with external FD")
         {
@@ -104,7 +103,6 @@ TEST_SUITE("Texture")
             const HandleOrFD externalHandleOrFD = t.externalMemoryHandle();
             CHECK(std::get<HANDLE>(externalHandleOrFD) != nullptr);
         }
-#endif
 #endif
     }
 

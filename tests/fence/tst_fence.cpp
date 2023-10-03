@@ -48,7 +48,6 @@ TEST_SUITE("Fence")
             // THEN
             CHECK(s.isValid());
         }
-#if defined(KDGPU_CUDA)
 #if defined(KDGPU_PLATFORM_LINUX)
         SUBCASE("A constructed Fence from a Vulkan API with external FD")
         {
@@ -81,7 +80,6 @@ TEST_SUITE("Fence")
             const HandleOrFD externalHandleOrFD = s.externalFenceHandle();
             CHECK(std::get<HANDLE>(externalHandleOrFD) != nullptr);
         }
-#endif
 #endif
     }
 

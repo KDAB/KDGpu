@@ -1,3 +1,6 @@
+- v0.3.3
+  - Don't tie external semaphore/fence/memory handle support to CUDA
+  - Remove KDGPU_CUDA define
 - v0.3.2
   - Allow to specify user extensions when creating device
   - Use dedicated options to enable builds of KDGpuExample and KDGpuKDGui

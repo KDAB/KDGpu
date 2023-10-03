@@ -45,19 +45,15 @@ std::vector<const char *> getDefaultRequestedDeviceExtensions()
 {
     std::vector<const char *> extensions;
     extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
-// clang-format off
-#if defined(KDGPU_CUDA)
-    #if defined(KDGPU_PLATFORM_LINUX)
-        extensions.push_back(VK_KHR_EXTERNAL_MEMORY_FD_EXTENSION_NAME);
-        extensions.push_back(VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME);
-        extensions.push_back(VK_KHR_EXTERNAL_FENCE_FD_EXTENSION_NAME);
-    #elif defined(KDGPU_PLATFORM_WIN32)
-        extensions.push_back(VK_KHR_EXTERNAL_MEMORY_WIN32_EXTENSION_NAME);
-        extensions.push_back(VK_KHR_EXTERNAL_SEMAPHORE_WIN32_EXTENSION_NAME);
-        extensions.push_back(VK_KHR_EXTERNAL_FENCE_WIN32_EXTENSION_NAME);
-    #endif
+#if defined(KDGPU_PLATFORM_LINUX)
+    extensions.push_back(VK_KHR_EXTERNAL_MEMORY_FD_EXTENSION_NAME);
+    extensions.push_back(VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME);
+    extensions.push_back(VK_KHR_EXTERNAL_FENCE_FD_EXTENSION_NAME);
+#elif defined(KDGPU_PLATFORM_WIN32)
+    extensions.push_back(VK_KHR_EXTERNAL_MEMORY_WIN32_EXTENSION_NAME);
+    extensions.push_back(VK_KHR_EXTERNAL_SEMAPHORE_WIN32_EXTENSION_NAME);
+    extensions.push_back(VK_KHR_EXTERNAL_FENCE_WIN32_EXTENSION_NAME);
 #endif
-// clang-format on
 #if defined(VK_KHR_synchronization2)
     extensions.push_back(VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME);
 #endif

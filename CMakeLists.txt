@@ -89,16 +89,6 @@ if(KDGPU_BUILD_KDGPUEXAMPLE)
     add_feature_info(KDGpuExample ON "Build KDGpuExample")
 endif()
 
-find_package(CUDAToolkit QUIET)
-
-cmake_dependent_option(
-    KDGPU_CUDA
-    "Enable CUDA Vulkan interops"
-    ON
-    "CUDAToolkit_FOUND"
-    OFF
-)
-
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies.cmake)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)

@@ -78,7 +78,6 @@ TEST_SUITE("Buffer")
             CHECK(b.isValid());
         }
 
-#if defined(KDGPU_CUDA)
 #if defined(KDGPU_PLATFORM_LINUX)
         SUBCASE("A constructed Buffer from a Vulkan API with external FD")
         {
@@ -117,7 +116,6 @@ TEST_SUITE("Buffer")
             const HandleOrFD externalHandleOrFD = b.externalMemoryHandle();
             CHECK(std::get<HANDLE>(externalHandleOrFD) != nullptr);
         }
-#endif
 #endif
     }
 
