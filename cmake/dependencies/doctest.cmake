@@ -8,7 +8,15 @@
 #
 
 find_package(doctest QUIET)
-if(NOT TARGET doctest::doctest)
+if(TARGET doctest::doctest)
+    # Apply https://github.com/doctest/doctest/pull/812
+    # to be able to #include <doctest.h> instead of #include <doctest/doctest.h>
+    get_target_property(DOCTEST_INTERFACE_INCLUDE_DIRECTORIES doctest::doctest INTERFACE_INCLUDE_DIRECTORIES)
+    target_include_directories(
+        doctest::doctest SYSTEM
+        INTERFACE "${DOCTEST_INTERFACE_INCLUDE_DIRECTORIES};${DOCTEST_INTERFACE_INCLUDE_DIRECTORIES}/doctest"
+    )
+else()
     FetchContent_Declare(
         doctest
         GIT_REPOSITORY https://github.com/doctest/doctest.git
