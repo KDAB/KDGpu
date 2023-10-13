@@ -165,6 +165,35 @@ struct AdapterDepthStencilResolveProperties {
 /**
     @headerfile adapter_properties.h <KDGpu/adapter_properties.h>
  */
+struct BindGroupIndexingProperties {
+    uint32_t maxUpdateAfterBindBindGroups;
+    bool shaderUniformBufferArrayNonUniformIndexingNative;
+    bool shaderSampledImageArrayNonUniformIndexingNative;
+    bool shaderStorageBufferArrayNonUniformIndexingNative;
+    bool shaderStorageImageArrayNonUniformIndexingNative;
+    bool shaderInputAttachmentArrayNonUniformIndexingNative;
+    bool robustBufferAccessUpdateAfterBind;
+    bool quadDivergentImplicitLod;
+    uint32_t maxPerStageBindGroupEntriesUpdateAfterBindSamplers;
+    uint32_t maxPerStageBindGroupEntriesUpdateAfterBindUniformBuffers;
+    uint32_t maxPerStageBindGroupEntriesUpdateAfterBindStorageBuffers;
+    uint32_t maxPerStageBindGroupEntriesUpdateAfterBindSampledImages;
+    uint32_t maxPerStageBindGroupEntriesUpdateAfterBindStorageImages;
+    uint32_t maxPerStageBindGroupEntriesUpdateAfterBindInputAttachments;
+    uint32_t maxPerStageUpdateAfterBindResources;
+    uint32_t maxBindGroupUpdateAfterBindSamplers;
+    uint32_t maxBindGroupUpdateAfterBindUniformBuffers;
+    uint32_t maxBindGroupUpdateAfterBindUniformBuffersDynamic;
+    uint32_t maxBindGroupUpdateAfterBindStorageBuffers;
+    uint32_t maxBindGroupUpdateAfterBindStorageBuffersDynamic;
+    uint32_t maxBindGroupUpdateAfterBindSampledImages;
+    uint32_t maxBindGroupUpdateAfterBindStorageImages;
+    uint32_t maxBindGroupUpdateAfterBindInputAttachments;
+};
+
+/**
+    @headerfile adapter_properties.h <KDGpu/adapter_properties.h>
+ */
 struct AdapterProperties {
     uint32_t apiVersion;
     uint32_t driverVersion;
@@ -177,6 +206,7 @@ struct AdapterProperties {
     AdapterSparseProperties sparseProperties;
     AdapterMultiViewProperties multiViewProperties;
     AdapterDepthStencilResolveProperties depthResolveProperties;
+    BindGroupIndexingProperties bindGroupIndexingProperties;
 };
 
 /**

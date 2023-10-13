@@ -63,6 +63,10 @@ AdapterProperties VulkanAdapter::queryAdapterProperties()
     depthResolveProps.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEPTH_STENCIL_RESOLVE_PROPERTIES;
     multiViewProperties.pNext = &depthResolveProps;
 
+    VkPhysicalDeviceDescriptorIndexingProperties descriptorIndexingProperties{};
+    descriptorIndexingProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_PROPERTIES;
+    depthResolveProps.pNext = &descriptorIndexingProperties;
+
     deviceProperties2.pNext = &multiViewProperties;
 
     vkGetPhysicalDeviceProperties2(physicalDevice, &deviceProperties2);
@@ -243,6 +247,31 @@ AdapterProperties VulkanAdapter::queryAdapterProperties()
             .independentResolveNone = static_cast<bool>(depthResolveProps.independentResolveNone),
             .independentResolve = static_cast<bool>(depthResolveProps.independentResolve),
         },
+        .bindGroupIndexingProperties = {
+            .maxUpdateAfterBindBindGroups = descriptorIndexingProperties.maxUpdateAfterBindDescriptorsInAllPools,
+            .shaderUniformBufferArrayNonUniformIndexingNative  = static_cast<bool>(descriptorIndexingProperties.shaderUniformBufferArrayNonUniformIndexingNative),
+            .shaderSampledImageArrayNonUniformIndexingNative = static_cast<bool>(descriptorIndexingProperties.shaderSampledImageArrayNonUniformIndexingNative),
+            .shaderStorageBufferArrayNonUniformIndexingNative = static_cast<bool>(descriptorIndexingProperties.shaderStorageBufferArrayNonUniformIndexingNative),
+            .shaderStorageImageArrayNonUniformIndexingNative = static_cast<bool>(descriptorIndexingProperties.shaderStorageImageArrayNonUniformIndexingNative),
+            .shaderInputAttachmentArrayNonUniformIndexingNative = static_cast<bool>(descriptorIndexingProperties.shaderInputAttachmentArrayNonUniformIndexingNative),
+            .robustBufferAccessUpdateAfterBind = static_cast<bool>(descriptorIndexingProperties.robustBufferAccessUpdateAfterBind),
+            .quadDivergentImplicitLod = static_cast<bool>(descriptorIndexingProperties.quadDivergentImplicitLod),
+            .maxPerStageBindGroupEntriesUpdateAfterBindSamplers  = descriptorIndexingProperties.maxPerStageDescriptorUpdateAfterBindSamplers,
+            .maxPerStageBindGroupEntriesUpdateAfterBindUniformBuffers  = descriptorIndexingProperties.maxPerStageDescriptorUpdateAfterBindUniformBuffers,
+            .maxPerStageBindGroupEntriesUpdateAfterBindStorageBuffers  = descriptorIndexingProperties.maxPerStageDescriptorUpdateAfterBindStorageBuffers,
+            .maxPerStageBindGroupEntriesUpdateAfterBindSampledImages  = descriptorIndexingProperties.maxPerStageDescriptorUpdateAfterBindSampledImages,
+            .maxPerStageBindGroupEntriesUpdateAfterBindStorageImages = descriptorIndexingProperties.maxPerStageDescriptorUpdateAfterBindStorageImages,
+            .maxPerStageBindGroupEntriesUpdateAfterBindInputAttachments = descriptorIndexingProperties.maxPerStageDescriptorUpdateAfterBindInputAttachments,
+            .maxPerStageUpdateAfterBindResources = descriptorIndexingProperties.maxPerStageUpdateAfterBindResources,
+            .maxBindGroupUpdateAfterBindSamplers = descriptorIndexingProperties.maxDescriptorSetUpdateAfterBindSamplers,
+            .maxBindGroupUpdateAfterBindUniformBuffers = descriptorIndexingProperties.maxDescriptorSetUpdateAfterBindUniformBuffers,
+            .maxBindGroupUpdateAfterBindUniformBuffersDynamic = descriptorIndexingProperties.maxDescriptorSetUpdateAfterBindUniformBuffersDynamic,
+            .maxBindGroupUpdateAfterBindStorageBuffers = descriptorIndexingProperties.maxDescriptorSetUpdateAfterBindStorageBuffers,
+            .maxBindGroupUpdateAfterBindStorageBuffersDynamic = descriptorIndexingProperties.maxDescriptorSetUpdateAfterBindStorageBuffersDynamic,
+            .maxBindGroupUpdateAfterBindSampledImages = descriptorIndexingProperties.maxDescriptorSetUpdateAfterBindSampledImages,
+            .maxBindGroupUpdateAfterBindStorageImages = descriptorIndexingProperties.maxDescriptorSetUpdateAfterBindStorageImages,
+            .maxBindGroupUpdateAfterBindInputAttachments = descriptorIndexingProperties.maxDescriptorSetUpdateAfterBindInputAttachments,
+        }
     };
     // clang-format-on
     return properties;
