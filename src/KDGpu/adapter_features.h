@@ -80,6 +80,26 @@ struct AdapterFeatures {
     bool multiView;
     bool multiViewGeometryShader;
     bool multiViewTessellationShader;
+    bool shaderInputAttachmentArrayDynamicIndexing;
+    bool shaderUniformTexelBufferArrayDynamicIndexing;
+    bool shaderStorageTexelBufferArrayDynamicIndexing;
+    bool shaderUniformBufferArrayNonUniformIndexing;
+    bool shaderSampledImageArrayNonUniformIndexing;
+    bool shaderStorageBufferArrayNonUniformIndexing;
+    bool shaderStorageImageArrayNonUniformIndexing;
+    bool shaderInputAttachmentArrayNonUniformIndexing;
+    bool shaderUniformTexelBufferArrayNonUniformIndexing;
+    bool shaderStorageTexelBufferArrayNonUniformIndexing;
+    bool bindGroupBindingUniformBufferUpdateAfterBind;
+    bool bindGroupBindingSampledImageUpdateAfterBind;
+    bool bindGroupBindingStorageImageUpdateAfterBind;
+    bool bindGroupBindingStorageBufferUpdateAfterBind;
+    bool bindGroupBindingUniformTexelBufferUpdateAfterBind;
+    bool bindGroupBindingStorageTexelBufferUpdateAfterBind;
+    bool bindGroupBindingUpdateUnusedWhilePending;
+    bool bindGroupBindingPartiallyBound;
+    bool bindGroupBindingVariableDescriptorCount;
+    bool runtimeBindGroupArray;
 };
 
 /*! @} */
