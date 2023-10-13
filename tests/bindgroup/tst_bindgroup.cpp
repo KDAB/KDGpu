@@ -141,7 +141,10 @@ TEST_SUITE("BindGroup")
 
             const TextureViewOptions tvOptions = {
                 .viewType = ViewType::ViewType2D,
-                .format = Format::R8G8B8A8_SNORM
+                .format = Format::R8G8B8A8_SNORM,
+                .range = {
+                        .aspectMask = TextureAspectFlagBits::ColorBit,
+                },
             };
 
             // WHEN
@@ -195,7 +198,10 @@ TEST_SUITE("BindGroup")
 
             const TextureViewOptions tvOptions = {
                 .viewType = ViewType::ViewType2D,
-                .format = Format::R8G8B8A8_SNORM
+                .format = Format::R8G8B8A8_SNORM,
+                .range = {
+                        .aspectMask = TextureAspectFlagBits::ColorBit,
+                },
             };
 
             // WHEN
@@ -285,7 +291,10 @@ TEST_SUITE("BindGroup")
 
             const TextureViewOptions tvOptions = {
                 .viewType = ViewType::ViewType2D,
-                .format = Format::R8G8B8A8_SNORM
+                .format = Format::R8G8B8A8_SNORM,
+                .range = {
+                        .aspectMask = TextureAspectFlagBits::ColorBit,
+                },
             };
 
             // WHEN
