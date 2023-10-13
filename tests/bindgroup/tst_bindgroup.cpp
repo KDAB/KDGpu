@@ -36,7 +36,9 @@ TEST_SUITE("BindGroup")
             .applicationName = "BindGroup",
             .applicationVersion = KDGPU_MAKE_API_VERSION(0, 1, 0, 0) });
     Adapter *discreteGPUAdapter = instance.selectAdapter(AdapterDeviceType::Default);
-    Device device = discreteGPUAdapter->createDevice();
+    Device device = discreteGPUAdapter->createDevice(DeviceOptions{
+            .requestedFeatures = discreteGPUAdapter->features(),
+    });
 
     TEST_CASE("Construction")
     {
@@ -423,6 +425,43 @@ TEST_SUITE("BindGroup")
 
             // THEN
             CHECK(api->resourceManager()->getBindGroup(bindGroupHandle) == nullptr);
+        }
+    }
+
+    TEST_CASE("Dynamic BindGroup Indexing")
+    {
+        SUBCASE("VariableBindGroupEntriesCount")
+        {
+            if (!discreteGPUAdapter->features().shaderUniformBufferArrayNonUniformIndexing ||
+                !discreteGPUAdapter->features().runtimeBindGroupArray)
+                return;
+
+            // GIVEN
+            const BindGroupLayout bindGroupLayout = device.createBindGroupLayout(BindGroupLayoutOptions{
+                    .bindings = {
+                            {
+                                    // Array of 4 UBOs on Binding 0
+                                    .binding = 0,
+                                    .count = 4,
+                                    .resourceType = ResourceBindingType::UniformBuffer,
+                                    .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit),
+                                    // Means that as far as the shader is concerned, it has no idea how many UBOs are in the array
+                                    .flags = { ResourceBindingFlagBits::VariableBindGroupEntriesCountBit },
+                            },
+                    },
+            });
+
+            // THEN
+            CHECK(bindGroupLayout.isValid());
+
+            // WHEN
+            const BindGroup bindGroup = device.createBindGroup(BindGroupOptions{
+                    .layout = bindGroupLayout,
+                    .maxVariableArrayLength = 4,
+            });
+
+            // THEN
+            CHECK(bindGroup.isValid());
         }
     }
 

@@ -31,7 +31,9 @@ TEST_SUITE("BindGroupLayout")
             .applicationName = "BindGroupLayout",
             .applicationVersion = KDGPU_MAKE_API_VERSION(0, 1, 0, 0) });
     Adapter *discreteGPUAdapter = instance.selectAdapter(AdapterDeviceType::Default);
-    Device device = discreteGPUAdapter->createDevice();
+    Device device = discreteGPUAdapter->createDevice(DeviceOptions{
+            .requestedFeatures = discreteGPUAdapter->features(),
+    });
 
     TEST_CASE("Construction")
     {
@@ -107,6 +109,33 @@ TEST_SUITE("BindGroupLayout")
 
             // THEN
             CHECK(api->resourceManager()->getBindGroupLayout(bindGroupLayoutHandle) == nullptr);
+        }
+    }
+
+    TEST_CASE("Dynamic Indexing")
+    {
+        SUBCASE("VariableBindGroupEntriesCount")
+        {
+            if (!discreteGPUAdapter->features().shaderUniformBufferArrayNonUniformIndexing ||
+                !discreteGPUAdapter->features().bindGroupBindingVariableDescriptorCount ||
+                !discreteGPUAdapter->features().runtimeBindGroupArray)
+                return;
+
+            // GIVEN
+            const BindGroupLayout bindGroupLayout = device.createBindGroupLayout(BindGroupLayoutOptions{
+                    .bindings = {
+                            {
+                                    .binding = 0,
+                                    .count = 4,
+                                    .resourceType = ResourceBindingType::UniformBuffer,
+                                    .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit),
+                                    .flags = { ResourceBindingFlagBits::VariableBindGroupEntriesCountBit },
+                            },
+                    },
+            });
+
+            // THEN
+            CHECK(bindGroupLayout.isValid());
         }
     }
 

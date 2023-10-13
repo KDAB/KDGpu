@@ -24,6 +24,7 @@ struct BindGroupOptions {
     std::string_view label;
     Handle<BindGroupLayout_t> layout;
     std::vector<BindGroupEntry> resources;
+    uint32_t maxVariableArrayLength{ 0 };
 };
 
 } // namespace KDGpu
