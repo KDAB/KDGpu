@@ -37,14 +37,17 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <KDFoundation/config.h> // For KD_PLATFORM
-#if defined(KD_PLATFORM_WIN32)
+#include <KDGui/config.h> // For KDGUI_PLATFORM
+#if defined(KDGUI_PLATFORM_WIN32)
 #include <KDGui/platform/win32/win32_platform_window.h>
 #endif
-#if defined(KD_PLATFORM_LINUX)
+#if defined(KDGUI_PLATFORM_XCB)
 #include <KDGui/platform/linux/xcb/linux_xcb_platform_window.h>
 #endif
-#if defined(KD_PLATFORM_MACOS)
+#if defined(KDGUI_PLATFORM_WAYLAND)
+#include <KDGui/platform/linux/wayland/linux_wayland_platform_window.h>
+#endif
+#if defined(KDGUI_PLATFORM_COCOA)
 extern CAMetalLayer *createMetalLayer(KDGui::Window *window);
 #endif
 
@@ -118,26 +121,34 @@ int main()
     });
     //![0]
 
+    SurfaceOptions surfaceOptions{};
+
     //![2]
-#if defined(KD_PLATFORM_WIN32)
+#if defined(KDGUI_PLATFORM_WIN32)
     auto win32Window = dynamic_cast<Win32PlatformWindow *>(window.platformWindow());
-    SurfaceOptions surfaceOptions = {
-        .hWnd = win32Window->handle()
-    };
+    if (win32Window != nullptr) {
+        surfaceOptions.hWnd = win32Window->handle();
+    }
 #endif
 
-#if defined(KD_PLATFORM_LINUX)
+#if defined(KDGUI_PLATFORM_XCB)
     auto xcbWindow = dynamic_cast<LinuxXcbPlatformWindow *>(window.platformWindow());
-    SurfaceOptions surfaceOptions = {
-        .connection = xcbWindow->connection(),
-        .window = xcbWindow->handle()
-    };
+    if (xcbWindow != nullptr) {
+        surfaceOptions.connection = xcbWindow->connection();
+        surfaceOptions.window = xcbWindow->handle();
+    }
 #endif
 
-#if defined(KD_PLATFORM_MACOS)
-    SurfaceOptions surfaceOptions = {
-        .layer = createMetalLayer(&window)
-    };
+#if defined(KDGUI_PLATFORM_WAYLAND)
+    auto waylandWindow = dynamic_cast<LinuxWaylandPlatformWindow *>(window.platformWindow());
+    if (waylandWindow != nullptr) {
+        surfaceOptions.display = waylandWindow->display();
+        surfaceOptions.surface = waylandWindow->surface();
+    }
+#endif
+
+#if defined(KDGUI_PLATFORM_COCOA)
+    surfaceOptions.layer = createMetalLayer(&window);
 #endif
 
     Surface surface = instance.createSurface(surfaceOptions);
