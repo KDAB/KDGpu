@@ -464,13 +464,36 @@ TEST_SUITE("BindGroup")
             CHECK(bindGroupLayout.isValid());
 
             // WHEN
-            const BindGroup bindGroup = device.createBindGroup(BindGroupOptions{
+            BindGroup bindGroup = device.createBindGroup(BindGroupOptions{
                     .layout = bindGroupLayout,
                     .maxVariableArrayLength = 4,
             });
 
             // THEN
             CHECK(bindGroup.isValid());
+
+            // WHEN
+            const BufferOptions uboOptions = {
+                .size = 16 * sizeof(float),
+                .usage = BufferUsageFlagBits::UniformBufferBit,
+                .memoryUsage = MemoryUsage::CpuToGpu
+            };
+            const Buffer ubo1 = device.createBuffer(uboOptions);
+            const Buffer ubo2 = device.createBuffer(uboOptions);
+            const Buffer ubo3 = device.createBuffer(uboOptions);
+            const Buffer ubo4 = device.createBuffer(uboOptions);
+
+            CHECK(ubo1.isValid());
+            CHECK(ubo2.isValid());
+            CHECK(ubo3.isValid());
+            CHECK(ubo4.isValid());
+
+            bindGroup.update(BindGroupEntry{ .binding = 0, .resource = UniformBufferBinding{ .buffer = ubo1 }, .arrayElement = 0 });
+            bindGroup.update(BindGroupEntry{ .binding = 0, .resource = UniformBufferBinding{ .buffer = ubo2 }, .arrayElement = 1 });
+            bindGroup.update(BindGroupEntry{ .binding = 0, .resource = UniformBufferBinding{ .buffer = ubo3 }, .arrayElement = 2 });
+            bindGroup.update(BindGroupEntry{ .binding = 0, .resource = UniformBufferBinding{ .buffer = ubo4 }, .arrayElement = 3 });
+
+            // THEN -> No validation error
         }
     }
 

@@ -18,6 +18,7 @@ namespace KDGpu {
 struct BindGroupEntry { // An entry into a BindGroup ( == a descriptor in a descriptor set)
     uint32_t binding;
     BindingResource resource;
+    uint32_t arrayElement{ 0 };
 };
 
 struct BindGroupOptions {

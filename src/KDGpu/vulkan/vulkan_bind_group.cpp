@@ -39,7 +39,7 @@ void VulkanBindGroup::update(const BindGroupEntry &entry)
     descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
     descriptorWrite.dstSet = descriptorSet;
     descriptorWrite.dstBinding = entry.binding;
-    descriptorWrite.dstArrayElement = 0;
+    descriptorWrite.dstArrayElement = entry.arrayElement;
     descriptorWrite.descriptorCount = 0;
     descriptorWrite.pImageInfo = nullptr;
     descriptorWrite.pTexelBufferView = nullptr;
