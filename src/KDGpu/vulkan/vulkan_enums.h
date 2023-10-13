@@ -128,4 +128,6 @@ VkStencilFaceFlagBits stencilFaceToVkStencilFace(StencilFaceFlags flags);
 
 VkDynamicState dynamicStateToVkDynamicState(DynamicState state);
 
+VkDescriptorBindingFlags resourceBindingFlagsToVkDescriptorBindingFlags(ResourceBindingFlags flags);
+
 } // namespace KDGpu

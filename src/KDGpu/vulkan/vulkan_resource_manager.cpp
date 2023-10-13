@@ -2307,7 +2307,9 @@ Handle<BindGroupLayout_t> VulkanResourceManager::createBindGroupLayout(const Han
     assert(options.bindings.size() <= std::numeric_limits<uint32_t>::max());
     const uint32_t bindingLayoutCount = static_cast<uint32_t>(options.bindings.size());
     std::vector<VkDescriptorSetLayoutBinding> vkBindingLayouts;
+    std::vector<VkDescriptorBindingFlags> vkBindingFlags;
     vkBindingLayouts.reserve(bindingLayoutCount);
+    vkBindingFlags.reserve(bindingLayoutCount);
 
     for (uint32_t j = 0; j < bindingLayoutCount; ++j) {
         const auto &bindingLayout = options.bindings.at(j);
@@ -2320,13 +2322,22 @@ Handle<BindGroupLayout_t> VulkanResourceManager::createBindGroupLayout(const Han
         vkBindingLayout.pImmutableSamplers = nullptr; // TODO: Expose immutable samplers?
 
         vkBindingLayouts.emplace_back(std::move(vkBindingLayout));
+
+        VkDescriptorBindingFlags vkBindingFlag = resourceBindingFlagsToVkDescriptorBindingFlags(bindingLayout.flags);
+        vkBindingFlags.emplace_back(std::move(vkBindingFlag));
     }
+
+    VkDescriptorSetLayoutBindingFlagsCreateInfo setLayoutBindingFlags{};
+    setLayoutBindingFlags.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
+    setLayoutBindingFlags.bindingCount = static_cast<uint32_t>(vkBindingFlags.size());
+    setLayoutBindingFlags.pBindingFlags = vkBindingFlags.data();
 
     // Associate the bindings into a descriptor set layout
     VkDescriptorSetLayoutCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
     createInfo.bindingCount = static_cast<uint32_t>(vkBindingLayouts.size());
     createInfo.pBindings = vkBindingLayouts.data();
+    createInfo.pNext = &setLayoutBindingFlags;
 
     VkDescriptorSetLayout vkDescriptorSetLayout{ VK_NULL_HANDLE };
     if (auto result = vkCreateDescriptorSetLayout(vulkanDevice->device, &createInfo, nullptr, &vkDescriptorSetLayout); result != VK_SUCCESS) {

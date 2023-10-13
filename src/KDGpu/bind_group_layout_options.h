@@ -20,12 +20,14 @@ struct ResourceBindingLayout {
     uint32_t count{ 1 };
     ResourceBindingType resourceType;
     ShaderStageFlags shaderStages;
+    ResourceBindingFlags flags{ ResourceBindingFlagBits::None };
 
     bool isCompatible(const ResourceBindingLayout &other) const noexcept
     {
         return binding == other.binding &&
                 count == other.count &&
-                resourceType == other.resourceType;
+                resourceType == other.resourceType &&
+                flags == other.flags;
     }
 };
 

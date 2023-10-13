@@ -400,4 +400,9 @@ VkDynamicState dynamicStateToVkDynamicState(DynamicState state)
     return static_cast<VkDynamicState>(state);
 }
 
+VkDescriptorBindingFlags resourceBindingFlagsToVkDescriptorBindingFlags(ResourceBindingFlags flags)
+{
+    return static_cast<VkDescriptorBindingFlags>(flags.toInt());
+}
+
 } // namespace KDGpu

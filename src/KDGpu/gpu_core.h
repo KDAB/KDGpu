@@ -735,6 +735,15 @@ enum class ResourceBindingType {
     MaxEnum = 0x7fffffff
 };
 
+enum class ResourceBindingFlagBits : uint32_t {
+    None = 0,
+    UpdateAfterBindBit = 0x00000001,
+    UpdateUnusedWhilePendingBit = 0x00000002,
+    PartiallyBoundBit = 0x00000004,
+    VariableBindGroupEntriesCountBit = 0x00000008,
+};
+using ResourceBindingFlags = KDGpu::Flags<ResourceBindingFlagBits>;
+
 enum class PrimitiveTopology {
     PointList = 0,
     LineList = 1,
