@@ -1,6 +1,10 @@
-- v0.3.3
+- v0.4.0
   - Don't tie external semaphore/fence/memory handle support to CUDA
   - Remove KDGPU_CUDA define
+  - Add functions to set object names to help with error validation
+  - Fix wayland surface creation
+  - Fix external memory creation
+  - Add support for BindGroup indexing
 - v0.3.2
   - Allow to specify user extensions when creating device
   - Use dedicated options to enable builds of KDGpuExample and KDGpuKDGui
