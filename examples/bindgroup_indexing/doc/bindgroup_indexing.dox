@@ -1,0 +1,89 @@
+/*
+  This file is part of KDGpu.
+
+  SPDX-FileCopyrightText: 2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+
+  SPDX-License-Identifier: MIT
+
+  Contact KDAB at <info@kdab.com> for commercial licensing options.
+*/
+
+/**
+    @page bindgroup_indexing BindGroup Indexing
+    @ingroup kdgpu-examples
+
+    @brief This example shows how to enable bindgroup indexing. Bind group indexing is actually a set of features that encompasses:
+    - The ability to define for a given BindGroup binding an array of resources
+    - The ability to have that array be of variable length (at least as seen from the shader)
+    - The ability to have the shader index into this array using non constant or non uniform backed indices.
+
+    This example tries to demonstrate those features by:
+    - Defining a BindGroup compose of an array of N UBOs. Each UBO holds a rotation matrix around the Z axis
+    - Using the shader to count frame and index into the right rotation UBO based on an angle computed
+
+    To do so, after the usual vertex data initialization, we initialize our shader resources.
+
+    We start by allocating an array of UBOs.
+    @snippet bindgroup_indexing/bindgroup_indexing.cpp 1
+
+    Next, we allocate a SSBO. It will be used as a way for the vertex shader to compute a frame count value.
+
+    @snippet bindgroup_indexing/bindgroup_indexing.cpp 2
+
+    We need to create a graphics pipeline suitable to work with those resources.
+    To create an array of resources for a given binding, we specify a count. Additionally we specify the flag VariableBindGroupEntriesCountBit
+    to indicate that our shader will not expect a fixed size array of resources.
+
+    @snippet bindgroup_indexing/bindgroup_indexing.cpp 3
+
+    Next we can proceed with the actual BindGroup generator. We start with the variable length array BindGroup where we indicate the maximum length our array will ever have.
+
+    @snippet bindgroup_indexing/bindgroup_indexing.cpp 4
+
+    Then we continue with a second BindGroup to hold our frame count Storage buffer.
+
+    @snippet bindgroup_indexing/bindgroup_indexing.cpp 5
+
+    As for the actual rendering, we simply bind the pipeline, buffers and bind groups.
+
+    @snippet bindgroup_indexing/bindgroup_indexing.cpp 6
+
+    When it comes to our shader, we do a few things. We start by defining the extension:
+
+    @code
+    #extension GL_EXT_nonuniform_qualifier : enable
+    @endcode
+
+    Then we declare our bind groups and push constant blocks.
+
+    @code
+    layout(set = 0, binding = 0) uniform Transform
+    {
+        mat4 modelMatrix;
+    } transforms[];
+
+    layout(set = 1, binding = 0) coherent buffer FrameCounter
+    {
+        uint primitiveProcessingCount;
+    } frameCounter;
+
+    layout(push_constant) uniform PushConstants {
+        uint transformsCount;
+    } pushConstants;
+    @endcode
+
+    And we can finally perform a non uniform indexing into the Transform bind group.
+
+    @code
+    uint frameIdx = (frameCounter.primitiveProcessingCount / 3);
+
+    float angle =  mod(float(frameIdx), 360.0); // value between 0 and 359
+    const float angleStep = 360.0 / float(pushConstants.transformsCount);
+
+    // Select the right index based on current angle and steps between transforms
+    // angle [0, 359] and angleStep (e.g 45)
+    const uint transformIdx = uint(angle / angleStep);
+
+    gl_Position = transforms[transformIdx].modelMatrix * vec4(vertexPosition, 1.0);
+    @endcode
+*/
