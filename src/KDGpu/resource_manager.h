@@ -10,22 +10,14 @@
 
 #pragma once
 
-// TODO: Can we make these forward declarations?
-#include <KDGpu/adapter.h>
-#include <KDGpu/bind_group.h>
-#include <KDGpu/bind_group_description.h>
-#include <KDGpu/device.h>
-#include <KDGpu/gpu_semaphore.h>
-#include <KDGpu/handle.h>
-#include <KDGpu/pool.h>
-#include <KDGpu/queue.h>
-#include <KDGpu/swapchain.h>
-#include <KDGpu/surface.h>
-#include <KDGpu/texture.h>
-#include <KDGpu/texture_view.h>
-#include <KDGpu/fence.h>
-
 #include <KDGpu/kdgpu_export.h>
+#include <KDGpu/handle.h>
+#include <KDGpu/device_options.h>
+#include <KDGpu/swapchain_options.h>
+#include <KDGpu/compute_pass_command_recorder.h>
+#include <KDGpu/queue_description.h>
+#include <KDGpu/bind_group_options.h>
+#include <KDGpu/command_recorder.h>
 
 namespace KDGpu {
 
@@ -79,6 +71,21 @@ struct PipelineLayout_t;
 struct RenderPass_t;
 struct Sampler_t;
 struct ShaderModule_t;
+struct Adapter_t;
+struct Instance_t;
+struct Surface_t;
+struct Device_t;
+struct Queue_t;
+struct Swapchain_t;
+struct Texture_t;
+struct TextureView_t;
+struct Buffer_t;
+struct GpuSemaphore_t;
+struct RenderPassCommandRecorder_t;
+struct ComputePassCommandRecorder_t;
+struct TimestampQueryRecorder_t;
+struct CommandBuffer_t;
+struct BindGroupLayout_t;
 
 // TODO: Should this class have create/destroy functions or should we put those onto the
 // parent resource type structs? For example VulkanDevice could have a createTexture()

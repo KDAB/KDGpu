@@ -17,6 +17,7 @@
 namespace KDGpu {
 
 struct Swapchain_t;
+struct Surface_t;
 
 struct SwapchainOptions {
     std::string_view label;
