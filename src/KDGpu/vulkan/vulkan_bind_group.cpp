@@ -51,6 +51,8 @@ void VulkanBindGroup::update(const BindGroupEntry &entry)
         const TextureViewSamplerBinding &textureViewBinding = entry.resource.textureViewSamplerBinding();
         VulkanTextureView *textView = vulkanResourceManager->getTextureView(textureViewBinding.textureView);
         VulkanSampler *sampler = vulkanResourceManager->getSampler(textureViewBinding.sampler);
+        assert(textView != nullptr);
+        assert(sampler != nullptr);
         imageInfo.imageView = textView->imageView;
         imageInfo.sampler = sampler->sampler;
 
@@ -62,6 +64,7 @@ void VulkanBindGroup::update(const BindGroupEntry &entry)
     case ResourceBindingType::SampledImage: {
         const TextureViewBinding &textureViewBinding = entry.resource.textureViewBinding();
         VulkanTextureView *textView = vulkanResourceManager->getTextureView(textureViewBinding.textureView);
+        assert(textView != nullptr);
         imageInfo.imageView = textView->imageView;
 
         descriptorWrite.descriptorCount = 1;
@@ -72,6 +75,7 @@ void VulkanBindGroup::update(const BindGroupEntry &entry)
     case ResourceBindingType::Sampler: {
         const SamplerBinding &samplerBinding = entry.resource.samplerBinding();
         VulkanSampler *sampler = vulkanResourceManager->getSampler(samplerBinding.sampler);
+        assert(sampler != nullptr);
         imageInfo.sampler = sampler->sampler;
 
         descriptorWrite.descriptorCount = 1;
@@ -82,6 +86,7 @@ void VulkanBindGroup::update(const BindGroupEntry &entry)
     case ResourceBindingType::StorageImage: {
         const ImageBinding &imageBinding = entry.resource.imageBinding();
         VulkanTextureView *textView = vulkanResourceManager->getTextureView(imageBinding.textureView);
+        assert(textView != nullptr);
         imageInfo.imageView = textView->imageView;
         imageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL; // Since we can read or write to these types of resources
 
@@ -93,6 +98,7 @@ void VulkanBindGroup::update(const BindGroupEntry &entry)
     case ResourceBindingType::UniformBuffer: {
         const UniformBufferBinding &bufferBinding = entry.resource.uniformBufferBinding();
         VulkanBuffer *buffer = vulkanResourceManager->getBuffer(bufferBinding.buffer);
+        assert(buffer != nullptr);
         bufferInfo.buffer = buffer->buffer; // VkBuffer
         bufferInfo.offset = bufferBinding.offset;
         bufferInfo.range = (bufferBinding.size == UniformBufferBinding::WholeSize) ? VK_WHOLE_SIZE : bufferBinding.size;
@@ -105,6 +111,7 @@ void VulkanBindGroup::update(const BindGroupEntry &entry)
     case ResourceBindingType::StorageBuffer: {
         const StorageBufferBinding &bufferBinding = entry.resource.storageBufferBinding();
         VulkanBuffer *buffer = vulkanResourceManager->getBuffer(bufferBinding.buffer);
+        assert(buffer != nullptr);
         bufferInfo.buffer = buffer->buffer; // VkBuffer
         bufferInfo.offset = bufferBinding.offset;
         bufferInfo.range = (bufferBinding.size == StorageBufferBinding::WholeSize) ? VK_WHOLE_SIZE : bufferBinding.size;
@@ -117,6 +124,7 @@ void VulkanBindGroup::update(const BindGroupEntry &entry)
     case ResourceBindingType::DynamicUniformBuffer: {
         const DynamicUniformBufferBinding &bufferBinding = entry.resource.dynamicUniformBufferBinding();
         VulkanBuffer *buffer = vulkanResourceManager->getBuffer(bufferBinding.buffer);
+        assert(buffer != nullptr);
         bufferInfo.buffer = buffer->buffer; // VkBuffer
         bufferInfo.offset = bufferBinding.offset;
         bufferInfo.range = (bufferBinding.size == StorageBufferBinding::WholeSize) ? VK_WHOLE_SIZE : bufferBinding.size;
