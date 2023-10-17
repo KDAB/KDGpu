@@ -125,14 +125,14 @@ int main()
 
     //![2]
 #if defined(KDGUI_PLATFORM_WIN32)
-    auto win32Window = dynamic_cast<Win32PlatformWindow *>(window.platformWindow());
+    auto win32Window = static_cast<Win32PlatformWindow *>(window.platformWindow());
     if (win32Window != nullptr) {
         surfaceOptions.hWnd = win32Window->handle();
     }
 #endif
 
 #if defined(KDGUI_PLATFORM_XCB)
-    auto xcbWindow = dynamic_cast<LinuxXcbPlatformWindow *>(window.platformWindow());
+    auto xcbWindow = static_cast<LinuxXcbPlatformWindow *>(window.platformWindow());
     if (xcbWindow != nullptr) {
         surfaceOptions.connection = xcbWindow->connection();
         surfaceOptions.window = xcbWindow->handle();
@@ -140,7 +140,7 @@ int main()
 #endif
 
 #if defined(KDGUI_PLATFORM_WAYLAND)
-    auto waylandWindow = dynamic_cast<LinuxWaylandPlatformWindow *>(window.platformWindow());
+    auto waylandWindow = static_cast<LinuxWaylandPlatformWindow *>(window.platformWindow());
     if (waylandWindow != nullptr) {
         surfaceOptions.display = waylandWindow->display();
         surfaceOptions.surface = waylandWindow->surface();

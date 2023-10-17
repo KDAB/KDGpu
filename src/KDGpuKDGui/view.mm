@@ -22,7 +22,7 @@ CAMetalLayer *createMetalLayer(KDGui::Window *window)
         SPDLOG_WARN("Failed to create Metal layer");
         return nullptr;
     }
-    auto cocoaWindow = dynamic_cast<KDGui::CocoaPlatformWindow *>(window->platformWindow());
+    auto cocoaWindow = static_cast<KDGui::CocoaPlatformWindow *>(window->platformWindow());
     NSView *view = ((NSWindow *)cocoaWindow->nativeWindow()).contentView;
     [view setWantsLayer:YES];
     [view setLayer:layer];

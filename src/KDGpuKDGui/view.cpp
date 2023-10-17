@@ -54,14 +54,14 @@ View::~View()
 KDGpu::SurfaceOptions View::surfaceOptions(KDGui::Window *w)
 {
 #if defined(KD_PLATFORM_WIN32)
-    auto win32Window = dynamic_cast<KDGui::Win32PlatformWindow *>(w->platformWindow());
+    auto win32Window = static_cast<KDGui::Win32PlatformWindow *>(w->platformWindow());
     return KDGpu::SurfaceOptions{
         .hWnd = win32Window->handle()
     };
 #endif
 
 #if defined(KD_PLATFORM_LINUX)
-    auto xcbWindow = dynamic_cast<KDGui::LinuxXcbPlatformWindow *>(w->platformWindow());
+    auto xcbWindow = static_cast<KDGui::LinuxXcbPlatformWindow *>(w->platformWindow());
     if (xcbWindow != nullptr) {
         return KDGpu::SurfaceOptions{
             .connection = xcbWindow->connection(),
@@ -71,7 +71,7 @@ KDGpu::SurfaceOptions View::surfaceOptions(KDGui::Window *w)
 #endif
 
 #if defined(KDGUI_PLATFORM_WAYLAND)
-    auto waylandWindow = dynamic_cast<KDGui::LinuxWaylandPlatformWindow *>(w->platformWindow());
+    auto waylandWindow = static_cast<KDGui::LinuxWaylandPlatformWindow *>(w->platformWindow());
     if (waylandWindow != nullptr) {
         return KDGpu::SurfaceOptions{
             .display = waylandWindow->display(),
