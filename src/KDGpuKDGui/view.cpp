@@ -27,6 +27,7 @@
 #include <KDGui/platform/linux/wayland/linux_wayland_platform_integration.h>
 #endif
 #if defined(KDGUI_PLATFORM_COCOA)
+#include <KDGui/platform/cocoa/cocoa_platform_window.h>
 extern CAMetalLayer *createMetalLayer(KDGui::Window *window);
 #endif
 
@@ -53,38 +54,56 @@ View::~View()
 
 KDGpu::SurfaceOptions View::surfaceOptions(KDGui::Window *w)
 {
-#if defined(KDGUI_PLATFORM_WIN32)
-    auto win32Window = static_cast<KDGui::Win32PlatformWindow *>(w->platformWindow());
-    return KDGpu::SurfaceOptions{
-        .hWnd = win32Window->handle()
-    };
-#endif
+    KDGui::AbstractPlatformWindow *platformWindow = w->platformWindow();
+    if (platformWindow == nullptr)
+        return {};
 
+    switch (platformWindow->type()) {
+    case KDGui::AbstractPlatformWindow::Type::Win32: {
+#if defined(KDGUI_PLATFORM_WIN32)
+        auto win32Window = static_cast<KDGui::Win32PlatformWindow *>(w->platformWindow());
+        return KDGpu::SurfaceOptions{
+            .hWnd = win32Window->handle()
+        };
+#else
+        break;
+#endif
+    }
+
+    case KDGui::AbstractPlatformWindow::Type::XCB: {
 #if defined(KDGUI_PLATFORM_XCB)
-    auto xcbWindow = static_cast<KDGui::LinuxXcbPlatformWindow *>(w->platformWindow());
-    if (xcbWindow != nullptr) {
+        auto xcbWindow = static_cast<KDGui::LinuxXcbPlatformWindow *>(w->platformWindow());
         return KDGpu::SurfaceOptions{
             .connection = xcbWindow->connection(),
             .window = xcbWindow->handle()
         };
-    }
+#else
+        break;
 #endif
+    }
 
+    case KDGui::AbstractPlatformWindow::Type::Wayland: {
 #if defined(KDGUI_PLATFORM_WAYLAND)
-    auto waylandWindow = static_cast<KDGui::LinuxWaylandPlatformWindow *>(w->platformWindow());
-    if (waylandWindow != nullptr) {
+        auto waylandWindow = static_cast<KDGui::LinuxWaylandPlatformWindow *>(w->platformWindow());
         return KDGpu::SurfaceOptions{
             .display = waylandWindow->display(),
             .surface = waylandWindow->surface()
         };
+#else
+        break;
+#endif
     }
-#endif
 
+    case KDGui::AbstractPlatformWindow::Type::Cocoa: {
 #if defined(KDGUI_PLATFORM_COCOA)
-    return KDGpu::SurfaceOptions{
-        .layer = createMetalLayer(w)
-    };
+        return KDGpu::SurfaceOptions{
+            .layer = createMetalLayer(w)
+        };
+#else
+        break;
 #endif
+    }
+    }
 
     return {};
 }
