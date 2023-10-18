@@ -16,6 +16,7 @@
 
 #include <KDGpu/handle.h>
 #include <KDGpu/kdgpu_export.h>
+#include <KDGpu/config.h>
 
 #include <vk_mem_alloc.h>
 #include <vulkan/vulkan.h>

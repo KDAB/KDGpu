@@ -9,6 +9,7 @@
 */
 
 #include "vulkan_resource_manager.h"
+#include <KDGpu/config.h>
 
 #if defined(KDGPU_PLATFORM_WIN32)
 // Avoid having to define VK_USE_PLATFORM_WIN32_KHR which would result in windows.h being included when vulkan.h is included

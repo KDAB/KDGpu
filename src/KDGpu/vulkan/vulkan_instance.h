@@ -12,6 +12,7 @@
 
 #include <KDGpu/api/api_instance.h>
 #include <KDGpu/kdgpu_export.h>
+#include <KDGpu/config.h>
 #include <vulkan/vulkan.h>
 
 #if defined(KDGPU_PLATFORM_WIN32)

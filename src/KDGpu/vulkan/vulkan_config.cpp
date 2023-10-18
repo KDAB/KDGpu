@@ -9,6 +9,7 @@
 */
 
 #include "vulkan_config.h"
+#include <KDGpu/config.h>
 
 #if defined(KDGPU_PLATFORM_WIN32)
 #define NOMINMAX

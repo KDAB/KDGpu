@@ -8,6 +8,7 @@
   Contact KDAB at <info@kdab.com> for commercial licensing options.
 */
 
+#include <KDGpu/config.h>
 #include <KDGpu/buffer.h>
 #include <KDGpu/buffer_options.h>
 #include <KDGpu/device.h>

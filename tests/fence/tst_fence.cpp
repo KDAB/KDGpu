@@ -8,6 +8,7 @@
   Contact KDAB at <info@kdab.com> for commercial licensing options.
 */
 
+#include <KDGpu/config.h>
 #include <KDGpu/fence.h>
 #include <KDGpu/device.h>
 #include <KDGpu/instance.h>

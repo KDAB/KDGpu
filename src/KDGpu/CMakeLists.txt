@@ -198,12 +198,12 @@ target_link_libraries(
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    target_compile_definitions(KDGpu PUBLIC KDGPU_PLATFORM_LINUX)
+    set(KDGPU_PLATFORM_LINUX ON)
     target_compile_definitions(KDGpu PRIVATE PLATFORM_LINUX)
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    target_compile_definitions(KDGpu PUBLIC KDGPU_PLATFORM_WIN32)
+    set(KDGPU_PLATFORM_WIN32 ON)
     target_compile_definitions(KDGpu PRIVATE PLATFORM_WIN32)
     target_compile_definitions(KDGpu PRIVATE UNICODE)
     target_compile_definitions(KDGpu PRIVATE "VMA_CALL_PRE=__declspec(dllexport)")
@@ -212,7 +212,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    target_compile_definitions(KDGpu PUBLIC KDGPU_PLATFORM_MACOS)
+    set(KDGPU_PLATFORM_MACOS ON)
     target_compile_definitions(KDGpu PRIVATE PLATFORM_MACOS)
     target_sources(KDGpu PRIVATE vulkan/vulkan_utils.mm)
 endif()
@@ -222,7 +222,7 @@ target_compile_features(KDGpu PUBLIC cxx_std_20)
 
 target_include_directories(
     KDGpu
-    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..> $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include> $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
            $<INSTALL_INTERFACE:include>
 )
 
@@ -240,6 +240,11 @@ generate_export_header(KDGpu BASE_NAME kdgpu)
 configure_file(${CMAKE_CURRENT_BINARY_DIR}/kdgpu_export.h ${CMAKE_BINARY_DIR}/include/KDGpu/kdgpu_export.h)
 install(
     FILES ${CMAKE_CURRENT_BINARY_DIR}/kdgpu_export.h
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/KDGpu
+)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h ${CMAKE_BINARY_DIR}/include/KDGpu/config.h)
+install(
+    FILES ${CMAKE_BINARY_DIR}/include/KDGpu/config.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/KDGpu
 )
 
