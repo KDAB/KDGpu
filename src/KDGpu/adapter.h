@@ -15,6 +15,7 @@
 #include <KDGpu/adapter_queue_type.h>
 #include <KDGpu/adapter_swapchain_properties.h>
 #include <KDGpu/device.h>
+#include <KDGpu/device_options.h>
 #include <KDGpu/handle.h>
 
 #include <KDGpu/kdgpu_export.h>
@@ -40,11 +41,6 @@ struct Surface_t;
 struct AdapterOptions {
     std::vector<std::string> layers;
     std::vector<std::string> extensions;
-};
-
-struct AdapterGroup {
-    std::vector<Handle<Adapter_t>> adapters;
-    bool supportsSubsetAllocations{ false };
 };
 
 class KDGPU_EXPORT Adapter

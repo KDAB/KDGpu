@@ -11,6 +11,7 @@
 #pragma once
 
 #include <KDGpu/adapter_features.h>
+#include <KDGpu/adapter_group.h>
 
 #include <stdint.h>
 #include <string>
@@ -30,6 +31,7 @@ struct DeviceOptions {
     std::vector<std::string> extensions;
     std::vector<QueueRequest> queues;
     AdapterFeatures requestedFeatures;
+    AdapterGroup adapterGroup;
 };
 
 } // namespace KDGpu

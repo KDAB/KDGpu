@@ -15,7 +15,6 @@
 #include <KDGpu/buffer.h>
 #include <KDGpu/command_recorder.h>
 #include <KDGpu/compute_pipeline.h>
-#include <KDGpu/device_options.h>
 #include <KDGpu/fence.h>
 #include <KDGpu/gpu_semaphore.h>
 #include <KDGpu/graphics_pipeline.h>
@@ -42,6 +41,7 @@ class Adapter;
 struct Device_t;
 
 struct BufferOptions;
+struct DeviceOptions;
 struct GraphicsPipelineOptions;
 struct SwapchainOptions;
 struct TextureOptions;

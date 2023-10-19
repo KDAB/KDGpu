@@ -389,12 +389,36 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
 
     multiViewFeatures.pNext = &descriptorIndexingFeatures;
 
+    // Create a Device that targets several physical devices if a group was specified
+    VkDeviceGroupDeviceCreateInfo deviceGroupInfo = {};
+    deviceGroupInfo.sType = VK_STRUCTURE_TYPE_DEVICE_GROUP_DEVICE_CREATE_INFO_KHR;
+    deviceGroupInfo.physicalDeviceCount = 0;
+    descriptorIndexingFeatures.pNext = &deviceGroupInfo;
+
+    std::vector<VkPhysicalDevice> devicesInGroup;
+    const size_t adapterCount = options.adapterGroup.adapters.size();
+    const bool useDeviceGroup = adapterCount > 1;
+
+    if (useDeviceGroup) {
+        // Fetch VkPhysicalDevice from Handle<Adapter_t>
+        devicesInGroup.reserve(adapterCount);
+        for (const Handle<Adapter_t> &h : options.adapterGroup.adapters) {
+            VulkanAdapter *adapter = getAdapter(h);
+            assert(adapter);
+            devicesInGroup.emplace_back(adapter->physicalDevice);
+        }
+
+        deviceGroupInfo.physicalDeviceCount = options.adapterGroup.adapters.size();
+        deviceGroupInfo.pPhysicalDevices = devicesInGroup.data();
+    }
+
 #if defined(VK_KHR_synchronization2)
     // Enable the VK_KHR_Synchronization2 extension features by chaining this into the createInfo chain.
     VkPhysicalDeviceSynchronization2FeaturesKHR sync2Features = {};
     sync2Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES_KHR;
     sync2Features.synchronization2 = vulkanAdapter->supportsSynchronization2;
-    descriptorIndexingFeatures.pNext = &sync2Features;
+
+    deviceGroupInfo.pNext = &sync2Features;
 #endif
 
     VkDeviceCreateInfo createInfo = {};

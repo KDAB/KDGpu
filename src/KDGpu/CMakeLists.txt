@@ -68,6 +68,7 @@ set(SOURCES
 
 set(HEADERS
     adapter_features.h
+    adapter_group.h
     adapter_properties.h
     adapter_queue_type.h
     adapter_swapchain_properties.h

@@ -11,6 +11,7 @@
 #include "device.h"
 
 #include <KDGpu/adapter.h>
+#include <KDGpu/device_options.h>
 #include <KDGpu/graphics_api.h>
 #include <KDGpu/swapchain_options.h>
 #include <KDGpu/api/api_device.h>
