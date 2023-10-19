@@ -42,6 +42,11 @@ struct AdapterOptions {
     std::vector<std::string> extensions;
 };
 
+struct AdapterGroup {
+    std::vector<Handle<Adapter_t>> adapters;
+    bool supportsSubsetAllocations{ false };
+};
+
 class KDGPU_EXPORT Adapter
 {
 public:

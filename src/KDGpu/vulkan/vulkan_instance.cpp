@@ -66,9 +66,40 @@ std::vector<Handle<Adapter_t>> VulkanInstance::queryAdapters(const Handle<Instan
     for (uint32_t adapterIndex = 0; adapterIndex < adapterCount; ++adapterIndex) {
         VulkanAdapter vulkanAdapter{ physicalDevices[adapterIndex], vulkanResourceManager, instanceHandle };
         adapterHandles.emplace_back(vulkanResourceManager->insertAdapter(vulkanAdapter));
+        m_physicalDeviceToHandle.emplace(physicalDevices[adapterIndex], adapterHandles.back());
     }
 
     return adapterHandles;
+}
+
+std::vector<AdapterGroup> VulkanInstance::queryAdapterGroups()
+{
+    uint32_t adapterGroupCount = 0;
+    vkEnumeratePhysicalDeviceGroups(instance, &adapterGroupCount, nullptr);
+    std::vector<VkPhysicalDeviceGroupProperties> physicalDeviceGroups(adapterGroupCount);
+    vkEnumeratePhysicalDeviceGroups(instance, &adapterGroupCount, physicalDeviceGroups.data());
+
+    std::vector<AdapterGroup> adapterGroups;
+    adapterGroups.reserve(adapterGroupCount);
+    for (uint32_t adapterGroupIndex = 0; adapterGroupIndex < adapterGroupCount; ++adapterGroupIndex) {
+        const VkPhysicalDeviceGroupProperties &deviceGroupProps = physicalDeviceGroups[adapterGroupIndex];
+        AdapterGroup adapterGroup{
+            .supportsSubsetAllocations = static_cast<bool>(deviceGroupProps.subsetAllocation),
+        };
+
+        std::vector<Handle<Adapter_t>> adpterHandles;
+        adapterGroup.adapters.reserve(deviceGroupProps.physicalDeviceCount);
+        for (size_t i = 0; i < deviceGroupProps.physicalDeviceCount; ++i) {
+            const VkPhysicalDevice device = deviceGroupProps.physicalDevices[i];
+            const auto it = m_physicalDeviceToHandle.find(device);
+            assert(it != m_physicalDeviceToHandle.end());
+            adapterGroup.adapters.push_back(it->second);
+        }
+
+        adapterGroups.emplace_back(adapterGroup);
+    }
+
+    return adapterGroups;
 }
 
 Handle<Surface_t> VulkanInstance::createSurface(const SurfaceOptions &options)

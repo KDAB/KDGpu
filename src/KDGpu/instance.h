@@ -69,6 +69,7 @@ public:
                                          AdapterDeviceType deviceType = AdapterDeviceType::Default) const;
 
     std::vector<Adapter *> adapters() const;
+    std::vector<AdapterGroup> adapterGroups() const;
 
     Adapter *selectAdapter(AdapterDeviceType deviceType) const;
 
@@ -80,6 +81,7 @@ private:
     GraphicsApi *m_api{ nullptr };
     Handle<Instance_t> m_instance;
     mutable std::vector<Adapter> m_adapters;
+    mutable std::vector<AdapterGroup> m_adapterGroups;
 
     friend class GraphicsApi;
     friend class VulkanGraphicsApi;

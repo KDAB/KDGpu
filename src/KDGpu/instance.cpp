@@ -172,6 +172,8 @@ std::vector<Adapter *> Instance::adapters() const
         m_adapters.reserve(adapterCount);
         for (uint32_t adapterIndex = 0; adapterIndex < adapterCount; ++adapterIndex)
             m_adapters.emplace_back(Adapter{ m_api, adapterHandles[adapterIndex] });
+
+        m_adapterGroups = apiInstance->queryAdapterGroups();
     }
 
     std::vector<Adapter *> adapterPtrs;
@@ -180,6 +182,17 @@ std::vector<Adapter *> Instance::adapters() const
         adapterPtrs[i] = m_adapters.data() + i;
 
     return adapterPtrs;
+}
+
+/**
+ * @brief Returns a vector of the AdapterGroups available for the instance.
+ * AdapterGroup allow to spread operations across multiple adapters;
+ */
+std::vector<AdapterGroup> Instance::adapterGroups() const
+{
+    if (m_adapters.empty())
+        adapters();
+    return m_adapterGroups;
 }
 
 /**

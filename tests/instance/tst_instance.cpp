@@ -49,6 +49,15 @@ TEST_SUITE("Instance")
             CHECK(!adapters.empty());
         }
 
+        SUBCASE("Has AdapterGroups")
+        {
+            // WHEN
+            const auto adapterGroups = instance.adapterGroups();
+
+            // THEN
+            CHECK(!adapterGroups.empty());
+        }
+
         SUBCASE("Can query instance extensions")
         {
             // WHEN
