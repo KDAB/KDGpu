@@ -2510,7 +2510,7 @@ VulkanFence *VulkanResourceManager::getFence(const Handle<Fence_t> &handle) cons
 
 void VulkanResourceManager::setObjectName(VulkanDevice *device, const VkObjectType type, const uint64_t handle, const std::string_view name)
 {
-    if (device == nullptr || device->vkSetDebugUtilsObjectNameEXT == nullptr) {
+    if (device == nullptr || device->vkSetDebugUtilsObjectNameEXT == nullptr || name.empty()) {
         return;
     }
     const VkDebugUtilsObjectNameInfoEXT nameInfo{
