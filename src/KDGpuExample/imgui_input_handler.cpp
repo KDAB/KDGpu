@@ -41,7 +41,7 @@ void ImGuiInputHandler::event(EventReceiver *target, Event *ev)
         auto e = static_cast<MousePressEvent *>(ev);
         e->setAccepted(io.WantCaptureMouse);
         if (io.WantCaptureMouse) {
-            io.AddMouseButtonEvent(mapMouseButton(e->button()), true);
+            io.AddMouseButtonEvent(mapMouseButton(e->buttons()), true);
         }
 
         break;
@@ -51,7 +51,7 @@ void ImGuiInputHandler::event(EventReceiver *target, Event *ev)
         auto e = static_cast<MouseReleaseEvent *>(ev);
         e->setAccepted(io.WantCaptureMouse);
         if (io.WantCaptureMouse) {
-            io.AddMouseButtonEvent(mapMouseButton(e->button()), false);
+            io.AddMouseButtonEvent(mapMouseButton(e->buttons()), false);
         }
 
         break;
@@ -115,7 +115,7 @@ void ImGuiInputHandler::event(EventReceiver *target, Event *ev)
     Object::event(target, ev);
 }
 
-ImGuiMouseButton ImGuiInputHandler::mapMouseButton(const KDGui::MouseButton button) const
+ImGuiMouseButton ImGuiInputHandler::mapMouseButton(const KDGui::MouseButtons button) const
 {
     switch (button) {
     case NoButton:

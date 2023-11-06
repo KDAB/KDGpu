@@ -39,7 +39,7 @@ public:
     void event(KDFoundation::EventReceiver *target, KDFoundation::Event *ev) override;
 
 private:
-    ImGuiMouseButton mapMouseButton(KDGui::MouseButton button) const;
+    ImGuiMouseButton mapMouseButton(KDGui::MouseButtons button) const;
     ImGuiKey mapKeyCode(KDGui::Key key) const;
 };
 
