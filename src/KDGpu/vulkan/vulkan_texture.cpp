@@ -25,7 +25,7 @@ VulkanTexture::VulkanTexture(VkImage _image,
                              TextureUsageFlags _usage,
                              VulkanResourceManager *_vulkanResourceManager,
                              const Handle<Device_t> &_deviceHandle,
-                             const HandleOrFD &_externalMemoryHandle,
+                             const MemoryHandle &_externalMemoryHandle,
                              bool _ownedBySwapchain)
     : ApiTexture()
     , image(_image)
@@ -79,7 +79,7 @@ SubresourceLayout VulkanTexture::getSubresourceLayout(const TextureSubresource &
     return layout;
 }
 
-HandleOrFD VulkanTexture::externalMemoryHandle() const
+MemoryHandle VulkanTexture::externalMemoryHandle() const
 {
     return m_externalMemoryHandle;
 }

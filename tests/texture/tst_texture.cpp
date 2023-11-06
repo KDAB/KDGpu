@@ -58,6 +58,8 @@ TEST_SUITE("Texture")
 
             // THEN
             CHECK(t.isValid());
+            const MemoryHandle memoryHandle = t.externalMemoryHandle();
+            CHECK(memoryHandle.allocationSize > 0);
         }
 
 #if defined(KDGPU_PLATFORM_LINUX)
@@ -79,8 +81,9 @@ TEST_SUITE("Texture")
 
             // THEN
             CHECK(t.isValid());
-            const HandleOrFD externalHandleOrFD = t.externalMemoryHandle();
-            CHECK(std::get<int>(externalHandleOrFD) > -1);
+            const MemoryHandle externalHandleOrFD = t.externalMemoryHandle();
+            CHECK(std::get<int>(externalHandleOrFD.handle) > -1);
+            CHECK(externalHandleOrFD.allocationSize > 0);
         }
 #elif defined(KDGPU_PLATFORM_WIN32)
         SUBCASE("A constructed Texture from a Vulkan API with external Handle")
@@ -101,8 +104,9 @@ TEST_SUITE("Texture")
 
             // THEN
             CHECK(t.isValid());
-            const HandleOrFD externalHandleOrFD = t.externalMemoryHandle();
-            CHECK(std::get<HANDLE>(externalHandleOrFD) != nullptr);
+            const MemoryHandle externalHandleOrFD = t.externalMemoryHandle();
+            CHECK(std::get<HANDLE>(externalHandleOrFD.handle) != nullptr);
+            CHECK(externalHandleOrFD.allocationSize > 0);
         }
 #endif
     }

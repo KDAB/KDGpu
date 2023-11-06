@@ -64,7 +64,7 @@ std::vector<Handle<Texture_t>> VulkanSwapchain::getTextures()
                         imageUsageFlags,
                         vulkanResourceManager,
                         deviceHandle,
-                        HandleOrFD{},
+                        MemoryHandle{},
                         true // owned by swapchain
                         )));
     }

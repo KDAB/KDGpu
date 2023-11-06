@@ -46,6 +46,14 @@ using TimestampIndex = uint32_t;
 
 using HandleOrFD = std::variant<std::monostate, int, HANDLE>;
 
+struct MemoryHandle {
+    HandleOrFD handle;
+    size_t allocationSize{ 0 };
+    size_t allocationOffset{ 0 };
+
+    friend bool operator==(const MemoryHandle &, const MemoryHandle &) = default;
+};
+
 struct Extension {
     std::string name;
     uint32_t version{ 0 };

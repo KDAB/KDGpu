@@ -48,7 +48,7 @@ public:
     void invalidate();
     void flush();
 
-    HandleOrFD externalMemoryHandle() const;
+    MemoryHandle externalMemoryHandle() const;
 
 private:
     explicit Buffer(GraphicsApi *api, const Handle<Device_t> &device, const BufferOptions &options, const void *initialData);

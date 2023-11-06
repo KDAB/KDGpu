@@ -77,6 +77,8 @@ TEST_SUITE("Buffer")
 
             // THEN
             CHECK(b.isValid());
+            const MemoryHandle memoryHandle = b.externalMemoryHandle();
+            CHECK(memoryHandle.allocationSize > 0);
         }
 
 #if defined(KDGPU_PLATFORM_LINUX)
@@ -95,8 +97,9 @@ TEST_SUITE("Buffer")
 
             // THEN
             CHECK(b.isValid());
-            const HandleOrFD externalHandleOrFD = b.externalMemoryHandle();
-            CHECK(std::get<int>(externalHandleOrFD) > -1);
+            const MemoryHandle externalHandleOrFD = b.externalMemoryHandle();
+            CHECK(std::get<int>(externalHandleOrFD.handle) > -1);
+            CHECK(externalHandleOrFD.allocationSize > 0);
         }
 #elif defined(KDGPU_PLATFORM_WIN32)
         SUBCASE("A constructed Buffer from a Vulkan API with external Handle")
@@ -114,8 +117,9 @@ TEST_SUITE("Buffer")
 
             // THEN
             CHECK(b.isValid());
-            const HandleOrFD externalHandleOrFD = b.externalMemoryHandle();
-            CHECK(std::get<HANDLE>(externalHandleOrFD) != nullptr);
+            const MemoryHandle externalHandleOrFD = b.externalMemoryHandle();
+            CHECK(std::get<HANDLE>(externalHandleOrFD.handle) != nullptr);
+            CHECK(externalHandleOrFD.allocationSize > 0);
         }
 #endif
     }

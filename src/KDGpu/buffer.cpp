@@ -90,7 +90,7 @@ void Buffer::flush()
     apiBuffer->flush();
 }
 
-HandleOrFD Buffer::externalMemoryHandle() const
+MemoryHandle Buffer::externalMemoryHandle() const
 {
     auto apiBuffer = m_api->resourceManager()->getBuffer(m_buffer);
     return apiBuffer->externalMemoryHandle();

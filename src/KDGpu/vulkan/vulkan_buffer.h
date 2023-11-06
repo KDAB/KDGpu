@@ -34,13 +34,13 @@ struct KDGPU_EXPORT VulkanBuffer : public ApiBuffer {
                           VmaAllocator _allocator,
                           VulkanResourceManager *_vulkanResourceManager,
                           const Handle<Device_t> &_deviceHandle,
-                          const HandleOrFD &_externalMemoryHandle);
+                          const MemoryHandle &_externalMemoryHandle);
 
     void *map() final;
     void unmap() final;
     void invalidate() final;
     void flush() final;
-    HandleOrFD externalMemoryHandle() const final;
+    MemoryHandle externalMemoryHandle() const final;
 
     VkBuffer buffer{ VK_NULL_HANDLE };
     VmaAllocation allocation{ VK_NULL_HANDLE };
@@ -49,7 +49,7 @@ struct KDGPU_EXPORT VulkanBuffer : public ApiBuffer {
 
     VulkanResourceManager *vulkanResourceManager;
     Handle<Device_t> deviceHandle;
-    HandleOrFD m_externalMemoryHandle{};
+    MemoryHandle m_externalMemoryHandle{};
 };
 
 } // namespace KDGpu

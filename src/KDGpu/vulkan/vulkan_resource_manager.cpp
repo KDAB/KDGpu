@@ -657,7 +657,7 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
 
     VmaAllocator allocator = vulkanDevice->allocator;
     VkExternalMemoryImageCreateInfo vkExternalMemImageCreateInfo = {};
-    HandleOrFD memoryHandle{};
+    MemoryHandle memoryHandle{};
     if (options.externalMemoryHandleType != ExternalMemoryHandleTypeFlagBits::None) {
         vkExternalMemImageCreateInfo.sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO,
         vkExternalMemImageCreateInfo.handleTypes = externalMemoryHandleTypeToVkExternalMemoryHandleType(options.externalMemoryHandleType);
@@ -678,13 +678,17 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
         return {};
     }
 
+    VulkanAdapter *adapter = getAdapter(vulkanDevice->adapterHandle);
+    VulkanInstance *instance = getInstance(adapter->instanceHandle);
+
+    VmaAllocationInfo allocationInfo;
+    vmaGetAllocationInfo(allocator, vmaAllocation, &allocationInfo);
+
+    memoryHandle.allocationOffset = allocationInfo.offset;
+    memoryHandle.allocationSize = allocationInfo.size;
+
     // Retrieve Shared Memory FD/Handle
     if (options.externalMemoryHandleType != ExternalMemoryHandleTypeFlagBits::None) {
-        VulkanAdapter *adapter = getAdapter(vulkanDevice->adapterHandle);
-        VulkanInstance *instance = getInstance(adapter->instanceHandle);
-
-        VmaAllocationInfo allocationInfo;
-        vmaGetAllocationInfo(allocator, vmaAllocation, &allocationInfo);
 
 #if defined(KDGPU_PLATFORM_LINUX)
         if (instance->vkGetMemoryFdKHR) {
@@ -696,7 +700,7 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
             };
             int fd{};
             instance->vkGetMemoryFdKHR(vulkanDevice->device, &vkMemoryGetFdInfoKHR, &fd);
-            memoryHandle = fd;
+            memoryHandle.handle = fd;
         }
 #endif
 
@@ -710,7 +714,7 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
             };
             HANDLE winHandle{};
             instance->vkGetMemoryWin32HandleKHR(vulkanDevice->device, &vkGetWin32HandleInfoKHR, &winHandle);
-            memoryHandle = winHandle;
+            memoryHandle.handle = winHandle;
         }
 #endif
     }
@@ -828,7 +832,7 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
 
     VmaAllocator allocator = vulkanDevice->allocator;
     VkExternalMemoryBufferCreateInfo vkExternalMemBufferCreateInfo = {};
-    HandleOrFD memoryHandle{};
+    MemoryHandle memoryHandle{};
 
     if (options.externalMemoryHandleType != ExternalMemoryHandleTypeFlagBits::None) {
         vkExternalMemBufferCreateInfo.sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_BUFFER_CREATE_INFO;
@@ -850,13 +854,17 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
         return {};
     }
 
+    VulkanAdapter *adapter = getAdapter(vulkanDevice->adapterHandle);
+    VulkanInstance *instance = getInstance(adapter->instanceHandle);
+
+    VmaAllocationInfo allocationInfo;
+    vmaGetAllocationInfo(allocator, vmaAllocation, &allocationInfo);
+
+    memoryHandle.allocationOffset = allocationInfo.offset;
+    memoryHandle.allocationSize = allocationInfo.size;
+
     // Retrieve Shared Memory FD/Handle
     if (options.externalMemoryHandleType != ExternalMemoryHandleTypeFlagBits::None) {
-        VulkanAdapter *adapter = getAdapter(vulkanDevice->adapterHandle);
-        VulkanInstance *instance = getInstance(adapter->instanceHandle);
-
-        VmaAllocationInfo allocationInfo;
-        vmaGetAllocationInfo(allocator, vmaAllocation, &allocationInfo);
 
 #if defined(KDGPU_PLATFORM_LINUX)
         if (instance->vkGetMemoryFdKHR) {
@@ -868,7 +876,7 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
             };
             int fd{};
             instance->vkGetMemoryFdKHR(vulkanDevice->device, &vkMemoryGetFdInfoKHR, &fd);
-            memoryHandle = fd;
+            memoryHandle.handle = fd;
         }
 #endif
 
@@ -882,7 +890,7 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
             };
             HANDLE winHandle{};
             VkResult res = instance->vkGetMemoryWin32HandleKHR(vulkanDevice->device, &vkGetWin32HandleInfoKHR, &winHandle);
-            memoryHandle = winHandle;
+            memoryHandle.handle = winHandle;
         }
 #endif
     }

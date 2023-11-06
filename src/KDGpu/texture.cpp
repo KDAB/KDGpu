@@ -196,7 +196,7 @@ bool Texture::generateMipMaps(Device &device, Queue &transferQueue, const Textur
     return true;
 }
 
-HandleOrFD Texture::externalMemoryHandle() const
+MemoryHandle Texture::externalMemoryHandle() const
 {
     auto apiTexture = m_api->resourceManager()->getTexture(m_texture);
     return apiTexture->externalMemoryHandle();

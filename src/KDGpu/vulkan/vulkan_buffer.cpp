@@ -20,7 +20,7 @@ VulkanBuffer::VulkanBuffer(VkBuffer _buffer,
                            VmaAllocator _allocator,
                            VulkanResourceManager *_vulkanResourceManager,
                            const Handle<Device_t> &_deviceHandle,
-                           const HandleOrFD &_externalMemoryHandle)
+                           const MemoryHandle &_externalMemoryHandle)
     : buffer(_buffer)
     , allocation(_allocation)
     , allocator(_allocator)
@@ -60,7 +60,7 @@ void VulkanBuffer::flush()
     vmaFlushAllocation(vulkanDevice->allocator, allocation, 0, VK_WHOLE_SIZE);
 }
 
-HandleOrFD VulkanBuffer::externalMemoryHandle() const
+MemoryHandle VulkanBuffer::externalMemoryHandle() const
 {
     return m_externalMemoryHandle;
 }

@@ -41,13 +41,13 @@ struct KDGPU_EXPORT VulkanTexture : public ApiTexture {
                            TextureUsageFlags _usage,
                            VulkanResourceManager *_vulkanResourceManager,
                            const Handle<Device_t> &_deviceHandle,
-                           const HandleOrFD &_externalMemoryHandle,
+                           const MemoryHandle &_externalMemoryHandle,
                            bool _ownedBySwapchain = false);
 
     void *map() final;
     void unmap() final;
     SubresourceLayout getSubresourceLayout(const TextureSubresource &subresource) const final;
-    HandleOrFD externalMemoryHandle() const final;
+    MemoryHandle externalMemoryHandle() const final;
 
     VkImage image{ VK_NULL_HANDLE };
     VmaAllocation allocation{ VK_NULL_HANDLE };
@@ -61,7 +61,7 @@ struct KDGPU_EXPORT VulkanTexture : public ApiTexture {
     bool ownedBySwapchain{ false };
     VulkanResourceManager *vulkanResourceManager{ nullptr };
     Handle<Device_t> deviceHandle;
-    HandleOrFD m_externalMemoryHandle{};
+    MemoryHandle m_externalMemoryHandle{};
 };
 
 } // namespace KDGpu
