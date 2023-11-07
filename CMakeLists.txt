@@ -12,7 +12,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 cmake_policy(SET CMP0090 NEW) # Stop export(PACKAGE) from modifying the system-wide cmake package system
 cmake_policy(SET CMP0117 NEW) # Do not add /GR to CMAKE_CXX_FLAGS
 
-project(KDGpu VERSION 0.4.1)
+project(KDGpu VERSION 0.4.2)
 
 add_definitions(-DKDGPU_ASSET_PATH="${CMAKE_CURRENT_BINARY_DIR}/assets")
 
