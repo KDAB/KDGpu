@@ -655,6 +655,9 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
     if (options.type == TextureType::TextureTypeCube)
         createInfo.flags |= VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
 
+    VmaAllocationCreateInfo allocInfo = {};
+    allocInfo.usage = memoryUsageToVmaMemoryUsage(options.memoryUsage);
+
     VmaAllocator allocator = vulkanDevice->allocator;
     VkExternalMemoryImageCreateInfo vkExternalMemImageCreateInfo = {};
     MemoryHandle memoryHandle{};
@@ -665,10 +668,9 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
 
         // We have to use a dedicated allocator for external handles that has been created with VkExportMemoryAllocateInfo
         allocator = vulkanDevice->externalAllocator;
-    }
 
-    VmaAllocationCreateInfo allocInfo = {};
-    allocInfo.usage = memoryUsageToVmaMemoryUsage(options.memoryUsage);
+        allocInfo.flags = VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
+    }
 
     VkImage vkImage;
     VmaAllocation vmaAllocation;
@@ -830,6 +832,9 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
         createInfo.pQueueFamilyIndices = options.queueTypeIndices.data();
     }
 
+    VmaAllocationCreateInfo allocInfo = {};
+    allocInfo.usage = memoryUsageToVmaMemoryUsage(options.memoryUsage);
+
     VmaAllocator allocator = vulkanDevice->allocator;
     VkExternalMemoryBufferCreateInfo vkExternalMemBufferCreateInfo = {};
     MemoryHandle memoryHandle{};
@@ -841,10 +846,9 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
 
         // We have to use a dedicated allocator for external handles that has been created with VkExportMemoryAllocateInfo
         allocator = vulkanDevice->externalAllocator;
-    }
 
-    VmaAllocationCreateInfo allocInfo = {};
-    allocInfo.usage = memoryUsageToVmaMemoryUsage(options.memoryUsage);
+        allocInfo.flags = VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
+    }
 
     VkBuffer vkBuffer;
     VmaAllocation vmaAllocation;
