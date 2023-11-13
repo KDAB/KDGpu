@@ -10,6 +10,9 @@
 
 #include "imgui_input_handler.h"
 
+#include <KDGui/gui_application.h>
+#include <KDGui/abstract_clipboard.h>
+
 namespace KDGpuExample {
 
 using namespace KDFoundation;
@@ -30,6 +33,15 @@ ImGuiInputHandler::ImGuiInputHandler()
     auto imguiContext = ImGui::GetCurrentContext();
     if (!imguiContext)
         ImGui::CreateContext();
+
+    ImGui::GetIO().GetClipboardTextFn = [](void *) -> const char * {
+        // We need to keep the clipboard buffer in memory, ImGui uses a reference to it
+        static std::string currentClipboardString;
+        if (AbstractClipboard *clipboard = KDGui::GuiApplication::instance()->guiPlatformIntegration()->clipboard()) {
+            currentClipboardString = clipboard->text();
+        }
+        return currentClipboardString.c_str();
+    };
 }
 
 void ImGuiInputHandler::event(EventReceiver *target, Event *ev)
@@ -177,6 +189,10 @@ ImGuiKey ImGuiInputHandler::mapKeyCode(const KDGui::Key key) const
         return ImGuiKey_Y;
     case KDGui::Key_Z:
         return ImGuiKey_Z;
+    case KDGui::Key_LeftControl:
+        return ImGuiMod_Ctrl;
+    case KDGui::Key_LeftShift:
+        return ImGuiMod_Shift;
     }
 
     return ImGuiKey_None;
