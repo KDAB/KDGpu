@@ -29,3 +29,48 @@ struct KDGPU_EXPORT fmt::formatter<KDGpu::AdapterDeviceType> {
         return fmt::format_to(ctx.out(), KDGpu::adapterDeviceTypeToString(deviceType));
     }
 };
+
+template<>
+struct KDGPU_EXPORT fmt::formatter<KDGpu::SurfaceCapabilities> {
+    template<typename ParseContext>
+    constexpr auto parse(ParseContext &ctx)
+    {
+        return ctx.begin();
+    }
+
+    template<typename FormatContext>
+    auto format(KDGpu::SurfaceCapabilities const &capabilities, FormatContext &ctx)
+    {
+        return fmt::format_to(ctx.out(), KDGpu::surfaceCapabilitiesToString(capabilities));
+    }
+};
+
+template<>
+struct KDGPU_EXPORT fmt::formatter<KDGpu::PresentMode> {
+    template<typename ParseContext>
+    constexpr auto parse(ParseContext &ctx)
+    {
+        return ctx.begin();
+    }
+
+    template<typename FormatContext>
+    auto format(KDGpu::PresentMode const &mode, FormatContext &ctx)
+    {
+        return fmt::format_to(ctx.out(), KDGpu::presentModeToString(mode));
+    }
+};
+
+template<>
+struct KDGPU_EXPORT fmt::formatter<KDGpu::SurfaceTransformFlagBits> {
+    template<typename ParseContext>
+    constexpr auto parse(ParseContext &ctx)
+    {
+        return ctx.begin();
+    }
+
+    template<typename FormatContext>
+    auto format(KDGpu::SurfaceTransformFlagBits const &bits, FormatContext &ctx)
+    {
+        return fmt::format_to(ctx.out(), KDGpu::surfaceTransformFlagBitsToString(bits));
+    }
+};
