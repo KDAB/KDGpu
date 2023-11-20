@@ -76,7 +76,10 @@ std::vector<AdapterGroup> VulkanInstance::queryAdapterGroups()
 {
     uint32_t adapterGroupCount = 0;
     vkEnumeratePhysicalDeviceGroups(instance, &adapterGroupCount, nullptr);
+
     std::vector<VkPhysicalDeviceGroupProperties> physicalDeviceGroups(adapterGroupCount);
+    for (VkPhysicalDeviceGroupProperties &groupProps : physicalDeviceGroups)
+        groupProps.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_GROUP_PROPERTIES;
     vkEnumeratePhysicalDeviceGroups(instance, &adapterGroupCount, physicalDeviceGroups.data());
 
     std::vector<AdapterGroup> adapterGroups;
