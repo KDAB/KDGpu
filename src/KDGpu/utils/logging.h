@@ -10,23 +10,35 @@
 
 #pragma once
 
+#include <KDGpu/kdgpu_export.h>
+
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 
+#include <functional>
+
 namespace KDGpu {
 
-namespace Logger {
-
-inline std::shared_ptr<spdlog::logger> logger()
+class KDGPU_EXPORT Logger
 {
-    static std::shared_ptr<spdlog::logger> l = spdlog::get("KDGpu");
-    if (!l) {
-        l = spdlog::stdout_color_mt("KDGpu");
-        SPDLOG_LOGGER_INFO(l, "Hello from the KDGpu Logger");
+public:
+    static std::shared_ptr<spdlog::logger> logger()
+    {
+        if (!ms_logger)
+            ms_logger = createLogger();
+        return ms_logger;
     }
-    return l;
-}
 
-} // namespace Logger
+    using LoggerFactoryFunction = std::function<std::shared_ptr<spdlog::logger>(const std::string &)>;
+
+    static void setLoggerFactory(LoggerFactoryFunction factory);
+    static LoggerFactoryFunction loggerFactory();
+
+private:
+    static std::shared_ptr<spdlog::logger> createLogger();
+
+    static std::shared_ptr<spdlog::logger> ms_logger;
+    static LoggerFactoryFunction ms_loggerFactory;
+};
 
 } // namespace KDGpu

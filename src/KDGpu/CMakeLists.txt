@@ -34,6 +34,7 @@ set(SOURCES
     texture.cpp
     texture_view.cpp
     timestamp_query_recorder.cpp
+    utils/logging.cpp
     vulkan/vulkan_adapter.cpp
     vulkan/vulkan_bind_group.cpp
     vulkan/vulkan_bind_group_layout.cpp

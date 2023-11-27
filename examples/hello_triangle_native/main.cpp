@@ -26,6 +26,7 @@
 #include <KDGpu/texture.h>
 #include <KDGpu/texture_options.h>
 #include <KDGpu/utils/formatters.h>
+#include <KDGpu/utils/logging.h>
 #include <KDGpu/vulkan/vulkan_graphics_api.h>
 
 #include <KDGui/gui_application.h>
@@ -97,9 +98,19 @@ std::vector<uint32_t> readShaderFile(const std::string &filename)
 
 } // namespace
 
+std::shared_ptr<spdlog::logger> createLogger(const std::string &name)
+{
+    auto logger = spdlog::get(name);
+    if (logger)
+        return logger;
+    logger = spdlog::stdout_color_mt(name);
+    return logger;
+}
+
 int main()
 {
     //![0]
+    KDGpu::Logger::setLoggerFactory(createLogger);
     GuiApplication app;
     std::unique_ptr<GraphicsApi> api = std::make_unique<VulkanGraphicsApi>();
 
