@@ -102,4 +102,9 @@ VkImage VulkanGraphicsApi::vkImageFromTexture(const Handle<Texture_t> textureH) 
     return VK_NULL_HANDLE;
 }
 
+std::string VulkanGraphicsApi::getMemoryStats(const Handle<Device_t> &device) const
+{
+    return m_vulkanResourceManager->getMemoryStats(device);
+}
+
 } // namespace KDGpu

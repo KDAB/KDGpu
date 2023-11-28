@@ -50,6 +50,8 @@ public:
                                             std::vector<Queue> &&queues);
     VkImage vkImageFromTexture(const Handle<Texture_t> textureH) const;
 
+    std::string getMemoryStats(const Handle<Device_t> &device) const;
+
 private:
     std::unique_ptr<VulkanResourceManager> m_vulkanResourceManager;
 };

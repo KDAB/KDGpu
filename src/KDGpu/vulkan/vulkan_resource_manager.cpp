@@ -2557,4 +2557,23 @@ void VulkanResourceManager::setObjectName(VulkanDevice *device, const VkObjectTy
     };
     device->vkSetDebugUtilsObjectNameEXT(device->device, &nameInfo);
 }
+
+std::string VulkanResourceManager::getMemoryStats(const Handle<Device_t> &device) const
+{
+    VulkanDevice *vulkanDevice = m_devices.get(device);
+
+    char *statsAllocator = nullptr;
+    char *statsExternalAllocator = nullptr;
+
+    if (vulkanDevice->allocator)
+        vmaBuildStatsString(vulkanDevice->allocator, &statsAllocator, true);
+    if (vulkanDevice->externalAllocator)
+        vmaBuildStatsString(vulkanDevice->allocator, &statsExternalAllocator, true);
+
+    std::string stats;
+    stats.append(statsAllocator);
+    stats.append(statsExternalAllocator);
+    return stats;
+}
+
 } // namespace KDGpu
