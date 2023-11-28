@@ -1,3 +1,6 @@
+- v0.4.2
+  - Fix Validation Error about DeviceGroups
+  - Introduce VulkanGraphicsApi::getMemoryStats()
 - v0.4.1
   - Introduce MemoryHandle type to hold memory handles for Textures/Buffers
   - Use dedicated memory allocations for externally referenceable Textures/Buffers
