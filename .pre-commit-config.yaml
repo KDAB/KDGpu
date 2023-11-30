@@ -37,6 +37,6 @@ repos:
     language: ruby
     files: \.(md|mdown|markdown)$
 - repo: https://github.com/fsfe/reuse-tool
-  rev: v1.0.0
+  rev: v2.1.0
   hooks:
   - id: reuse
