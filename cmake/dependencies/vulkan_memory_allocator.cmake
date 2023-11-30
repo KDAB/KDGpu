@@ -20,6 +20,10 @@ if(NOT TARGET GPUOpen::VulkanMemoryAllocator)
         add_compile_options(-Wno-implicit-fallthrough)
     endif()
 
+    if(CMAKE_CXX_COMPILER_ID MATCHES "AppleClang")
+        add_compile_options(-Wno-nullability-completeness)
+    endif()
+
     find_package(Vulkan REQUIRED)
 
     add_library(vulkan-memory-allocator INTERFACE)
