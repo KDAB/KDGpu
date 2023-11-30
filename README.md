@@ -35,7 +35,8 @@ More information can be found in the [documentation](https://docs.kdab.com/toy-r
 
 ### How do I get up and running with KDGpu?
 
-- Install the [Vulkan SDK](https://vulkan.lunarg.com/)
+- Install the [Vulkan SDK](https://vulkan.lunarg.com/), setup the runtime environment and verify the
+  SDK as described in the [Vulkan documentation](https://vulkan.lunarg.com/doc/sdk)
 - Clone this repository
 - Open up the directory in VS Code with the CMakeTools extension loaded
 - Configure and Build - all of the dependencies will be pulled down via CMake's FetchContent feature
