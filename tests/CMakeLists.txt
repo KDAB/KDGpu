@@ -62,3 +62,8 @@ add_subdirectory(gpu_semaphore)
 add_subdirectory(shader_module)
 add_subdirectory(timestamp_query_recorder)
 add_subdirectory(memory_stats)
+
+find_package(CUDAToolkit QUIET)
+if(${CUDAToolkit_FOUND})
+    add_subdirectory(fragmentation)
+endif()
