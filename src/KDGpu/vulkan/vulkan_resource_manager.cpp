@@ -744,7 +744,10 @@ void VulkanResourceManager::deleteTexture(const Handle<Texture_t> &handle)
     if (vulkanTexture->ownedBySwapchain)
         return;
 
-    vmaDestroyImage(vulkanTexture->allocator, vulkanTexture->image, vulkanTexture->allocation);
+    // Only destroy images we have allocated ourselves
+    if (vulkanTexture->allocator && vulkanTexture->allocation) {
+        vmaDestroyImage(vulkanTexture->allocator, vulkanTexture->image, vulkanTexture->allocation);
+    }
 
     m_textures.remove(handle);
 }

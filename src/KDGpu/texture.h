@@ -82,6 +82,7 @@ private:
 
     friend class Swapchain;
     friend class Device;
+    friend class VulkanGraphicsApi;
     friend KDGPU_EXPORT bool operator==(const Texture &, const Texture &);
 };
 

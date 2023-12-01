@@ -49,6 +49,7 @@ public:
                                             VkDevice vkDevice,
                                             std::vector<Queue> &&queues);
     VkImage vkImageFromTexture(const Handle<Texture_t> textureH) const;
+    Texture createTextureFromExistingVkImage(const Handle<Device_t> &deviceHandle, const TextureOptions &options, VkImage vkImage);
 
     std::string getMemoryStats(const Handle<Device_t> &device) const;
 

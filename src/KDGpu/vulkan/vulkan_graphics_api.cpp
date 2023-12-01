@@ -11,6 +11,7 @@
 #include "vulkan_graphics_api.h"
 
 #include <KDGpu/vulkan/vulkan_enums.h>
+#include <KDGpu/texture_options.h>
 
 namespace KDGpu {
 
@@ -100,6 +101,11 @@ VkImage VulkanGraphicsApi::vkImageFromTexture(const Handle<Texture_t> textureH) 
     if (vulkanTexture)
         return vulkanTexture->image;
     return VK_NULL_HANDLE;
+}
+
+Texture VulkanGraphicsApi::createTextureFromExistingVkImage(const Handle<Device_t> &deviceHandle, const TextureOptions &options, VkImage vkImage)
+{
+    return Texture(this, deviceHandle, m_vulkanResourceManager->insertTexture(VulkanTexture(vkImage, VK_NULL_HANDLE, VK_NULL_HANDLE, options.format, options.extent, options.mipLevels, options.arrayLayers, options.usage, m_vulkanResourceManager.get(), deviceHandle, {})));
 }
 
 std::string VulkanGraphicsApi::getMemoryStats(const Handle<Device_t> &device) const
