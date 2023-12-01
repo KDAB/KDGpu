@@ -74,3 +74,20 @@ struct KDGPU_EXPORT fmt::formatter<KDGpu::SurfaceTransformFlagBits> {
         return fmt::format_to(ctx.out(), KDGpu::surfaceTransformFlagBitsToString(bits));
     }
 };
+
+template<class T>
+struct KDGPU_EXPORT fmt::formatter<KDGpu::Handle<T>> {
+    using HandleType = KDGpu::Handle<T>;
+
+    template<typename ParseContext>
+    constexpr auto parse(ParseContext &ctx)
+    {
+        return ctx.begin();
+    }
+
+    template<typename FormatContext>
+    auto format(HandleType const &handle, FormatContext &ctx)
+    {
+        return fmt::format_to(ctx.out(), "Handle(generation={}, index={})", handle.generation(), handle.index());
+    }
+};
