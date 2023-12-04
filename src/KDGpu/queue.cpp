@@ -17,6 +17,9 @@
 #include <KDGpu/api/api_queue.h>
 #include <KDGpu/api/api_device.h>
 
+#include <numeric>
+#include <algorithm>
+
 namespace KDGpu {
 
 /**
@@ -283,11 +286,26 @@ UploadStagingBuffer Queue::uploadTextureData(const TextureUploadOptions &options
     };
     CommandRecorder commandRecorder(m_api, m_device, commandRecorderOptions);
 
-    // Specify which subresource we will be copying and transitioning
-    const TextureSubresourceRange range = {
-        .aspectMask = TextureAspectFlags(TextureAspectFlagBits::ColorBit),
-        .levelCount = 1
+    auto findOrCreateRange = [&options]() {
+        if (options.range.aspectMask != TextureAspectFlagBits::None) {
+            return options.range;
+        }
+        const auto maxMipLayerPair = std::accumulate(
+                options.regions.begin(), options.regions.end(), std::make_pair(0U, 0U),
+                [](std::pair<uint32_t, uint32_t> acc, const BufferTextureCopyRegion &region) {
+                    return std::make_pair(std::max(acc.first, region.textureSubResource.mipLevel),
+                                          std::max(acc.second, region.textureSubResource.baseArrayLayer));
+                });
+
+        return TextureSubresourceRange{
+            .aspectMask = TextureAspectFlags(options.regions.empty() ? TextureAspectFlagBits::ColorBit : options.regions.front().textureSubResource.aspectMask),
+            .levelCount = maxMipLayerPair.first + 1,
+            .layerCount = maxMipLayerPair.second + 1
+        };
     };
+
+    // Find a suitable subresource we will be copying and transitioning
+    const TextureSubresourceRange range = findOrCreateRange();
 
     // We first need to transition the texture into the TextureLayout::TransferDstOptimal layout
     const TextureMemoryBarrierOptions toTransferDstOptimal = {

@@ -111,6 +111,7 @@ struct TextureUploadOptions {
     TextureLayout oldLayout{ TextureLayout::Undefined };
     TextureLayout newLayout{ TextureLayout::Undefined };
     std::vector<BufferTextureCopyRegion> regions;
+    TextureSubresourceRange range;
 };
 
 /**
