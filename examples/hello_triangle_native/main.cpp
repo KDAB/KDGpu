@@ -111,6 +111,9 @@ int main()
 {
     //![0]
     KDGpu::Logger::setLoggerFactory(createLogger);
+    auto appLogger = createLogger("app");
+    appLogger->set_level(spdlog::level::info);
+
     GuiApplication app;
     std::unique_ptr<GraphicsApi> api = std::make_unique<VulkanGraphicsApi>();
 
@@ -172,30 +175,30 @@ int main()
     //![4]
 
     if (!selectedAdapter) {
-        SPDLOG_WARN("Unable to find a discrete GPU. Aborting...");
+        SPDLOG_LOGGER_CRITICAL(appLogger, "Unable to find a discrete GPU. Aborting...");
         return -1;
     }
 
     //![5]
     // We can easily query the adapter for various features, properties and limits.
-    SPDLOG_WARN("maxBoundDescriptorSets = {}", selectedAdapter->properties().limits.maxBoundDescriptorSets);
-    SPDLOG_WARN("multiDrawIndirect = {}", selectedAdapter->features().multiDrawIndirect);
+    SPDLOG_LOGGER_DEBUG(appLogger, "maxBoundDescriptorSets = {}", selectedAdapter->properties().limits.maxBoundDescriptorSets);
+    SPDLOG_LOGGER_DEBUG(appLogger, "multiDrawIndirect = {}", selectedAdapter->features().multiDrawIndirect);
     //![5]
 
     //![6]
     auto queueTypes = selectedAdapter->queueTypes();
     const bool hasGraphicsAndCompute = queueTypes[0].supportsFeature(QueueFlags(QueueFlagBits::GraphicsBit) | QueueFlags(QueueFlagBits::ComputeBit));
-    SPDLOG_WARN("Queue family 0 graphics and compute support: {}", hasGraphicsAndCompute);
+    SPDLOG_LOGGER_DEBUG(appLogger, "Queue family 0 graphics and compute support: {}", hasGraphicsAndCompute);
     //![6]
 
     //![7]
     // We are now able to query the adapter for swapchain properties and presentation support with the window surface
     const auto swapchainProperties = selectedAdapter->swapchainProperties(surface);
     const bool supportsPresentation = selectedAdapter->supportsPresentation(surface, 0); // Query about the 1st queue type
-    SPDLOG_WARN("Queue family 0 supports presentation: {}", supportsPresentation);
+    SPDLOG_LOGGER_DEBUG(appLogger, "Queue family 0 supports presentation: {}", supportsPresentation);
 
     if (!supportsPresentation || !hasGraphicsAndCompute) {
-        SPDLOG_WARN("Selected adapter queue family 0 does not meet requirements. Aborting.");
+        SPDLOG_LOGGER_CRITICAL(appLogger, "Selected adapter queue family 0 does not meet requirements. Aborting.");
         return -1;
     }
     //![7]
@@ -204,6 +207,7 @@ int main()
     // Now we can create a device from the selected adapter that we can then use to interact with the GPU.
     Device device = selectedAdapter->createDevice();
     Queue queue = device.queues()[0];
+    SPDLOG_LOGGER_INFO(appLogger, "Created device with {} queues", device.queues().size());
 
     Swapchain swapchain;
     std::vector<TextureView> swapchainViews;
@@ -225,6 +229,7 @@ int main()
         };
 
         swapchain = device.createSwapchain(swapchainOptions);
+        SPDLOG_LOGGER_INFO(appLogger, "Created swapchain with {} images", swapchain.textures().size());
         const auto &swapchainTextures = swapchain.textures();
         const auto swapchainTextureCount = swapchainTextures.size();
 
@@ -248,6 +253,7 @@ int main()
         //![3]
         depthTexture = device.createTexture(depthTextureOptions);
         depthTextureView = depthTexture.createView();
+        SPDLOG_LOGGER_INFO(appLogger, "Created depth texture");
 
         swapchainFormat = swapchainOptions.format;
         depthTextureFormat = depthTextureOptions.format;
@@ -278,6 +284,7 @@ int main()
         std::memcpy(bufferData, vertexData.data(), vertexData.size() * sizeof(float));
         vertexBuffer.unmap();
     }
+    SPDLOG_LOGGER_INFO(appLogger, "Created vertex buffer");
 
     Buffer cameraUBOBuffer = device.createBuffer(BufferOptions{
             .size = 16 * sizeof(float), // 1 * mat4x4
@@ -290,13 +297,16 @@ int main()
         std::memcpy(bufferData, &m, 16 * sizeof(float));
         cameraUBOBuffer.unmap();
     }
+    SPDLOG_LOGGER_INFO(appLogger, "Created camera UBO buffer");
 
     // Create a vertex shader and fragment shader (spir-v only for now)
     const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_triangle_native/hello_triangle.vert.spv";
     ShaderModule vertexShader = device.createShaderModule(readShaderFile(vertexShaderPath));
+    SPDLOG_LOGGER_INFO(appLogger, "Created vertex shader");
 
     const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_triangle_native/hello_triangle.frag.spv";
     ShaderModule fragmentShader = device.createShaderModule(readShaderFile(fragmentShaderPath));
+    SPDLOG_LOGGER_INFO(appLogger, "Created fragment shader");
 
     BindGroupLayout bindGroupLayout = device.createBindGroupLayout(BindGroupLayoutOptions{
             .bindings = {
@@ -307,11 +317,13 @@ int main()
                       .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit) },
             },
     });
+    SPDLOG_LOGGER_INFO(appLogger, "Created bind group layout");
 
     // Create a pipeline layout (array of bind group layouts)
     PipelineLayout pipelineLayout = device.createPipelineLayout(PipelineLayoutOptions{
             .bindGroupLayouts = { bindGroupLayout },
     });
+    SPDLOG_LOGGER_INFO(appLogger, "Created pipeline layout");
 
     // Create a pipeline
     GraphicsPipeline pipeline = device.createGraphicsPipeline(GraphicsPipelineOptions{
@@ -338,6 +350,7 @@ int main()
                     .depthCompareOperation = CompareOperation::Less,
             },
     });
+    SPDLOG_LOGGER_INFO(appLogger, "Created graphics pipeline");
 
     // Implement the render loop
     // Most of the render pass is the same between frames. The only thing that changes, is which image
@@ -353,6 +366,7 @@ int main()
                     },
             },
     });
+    SPDLOG_LOGGER_INFO(appLogger, "Created bind group");
 
     // Update BindGroup for binding 0
     bindGroup.update(BindGroupEntry{ .binding = 0, .resource = UniformBufferBinding{ .buffer = cameraUBOBuffer } });
@@ -387,7 +401,7 @@ int main()
         }
         //![11]
         if (result != AcquireImageResult::Success) {
-            SPDLOG_LOGGER_ERROR(Logger::logger(), "Unable to acquire swapchain image");
+            SPDLOG_LOGGER_ERROR(appLogger, "Unable to acquire swapchain image");
         }
 
         // Create a command encoder/recorder
