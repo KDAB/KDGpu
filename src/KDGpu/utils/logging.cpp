@@ -29,11 +29,19 @@ std::shared_ptr<spdlog::logger> Logger::createLogger()
 {
     std::shared_ptr<spdlog::logger> logger;
     if (ms_loggerFactory) {
+        // Use the factory set by the application which should check
+        // its own spdlog registry first before creating a new logger.
         logger = ms_loggerFactory("KDGpu");
-        SPDLOG_LOGGER_INFO(logger, "Hello from the custom KDGpu Logger");
     } else {
-        logger = spdlog::stdout_color_mt("KDGpu");
-        SPDLOG_LOGGER_INFO(logger, "Hello from the default KDGpu Logger");
+        // No factory set, use the spdlog registry from KDGpu
+        logger = spdlog::get("KDGpu");
+        if (!logger) {
+#if defined(ANDROID)
+            logger = spdlog::android_logger_mt("KDGpu", "KDGpu");
+#else
+            logger = spdlog::stdout_color_mt("KDGpu");
+#endif
+        }
     }
     return logger;
 }
