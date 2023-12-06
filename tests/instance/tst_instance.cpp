@@ -97,7 +97,7 @@ TEST_SUITE("Instance")
             using namespace std::string_literals;
 
             DeviceOptions options{
-                .extensions = { "VK_KHR_shader_non_semantic_info"s },
+                .extensions = { "VK_KHR_dynamic_rendering"s },
                 .requestedFeatures = discreteGPUAdapter->features(),
             };
             Device device = discreteGPUAdapter->createDevice(options);
