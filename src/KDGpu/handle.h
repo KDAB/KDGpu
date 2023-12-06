@@ -61,6 +61,12 @@ bool operator!=(const KDGpu::Handle<T> &lhs, const KDGpu::Handle<T> &rhs)
     return !(lhs == rhs);
 }
 
+template<typename T>
+bool operator<(const KDGpu::Handle<T> &lhs, const KDGpu::Handle<T> &rhs)
+{
+    return lhs.index() < rhs.index();
+}
+
 } // namespace KDGpu
 
 namespace std {
