@@ -112,9 +112,23 @@ Handle<Instance_t> VulkanResourceManager::createInstance(const InstanceOptions &
     createInfo.flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
 #endif
 
-    std::vector<const char *> layers = requestedInstanceLayers;
-    for (const std::string &userLayer : options.layers)
-        layers.push_back(userLayer.c_str());
+    std::vector<const char *> requestedLayers = requestedInstanceLayers;
+    for (const std::string &userLayer : options.layers) {
+        requestedLayers.push_back(userLayer.c_str());
+    }
+
+    std::vector<const char *> layers;
+
+    // Query the available instance layers
+    const auto availableLayers = getAvailableLayers();
+
+    for (const char *userLayer : requestedLayers) {
+        if (std::find(availableLayers.begin(), availableLayers.end(), userLayer) != availableLayers.end()) {
+            layers.push_back(userLayer);
+        } else {
+            SPDLOG_LOGGER_WARN(Logger::logger(), "Unable to find requested layer {}", userLayer);
+        }
+    }
 
     if (!layers.empty()) {
         createInfo.enabledLayerCount = static_cast<uint32_t>(layers.size());
@@ -2577,6 +2591,29 @@ std::string VulkanResourceManager::getMemoryStats(const Handle<Device_t> &device
     stats.append(statsAllocator);
     stats.append(statsExternalAllocator);
     return stats;
+}
+
+std::vector<std::string> VulkanResourceManager::getAvailableLayers() const
+{
+    uint32_t layerCount{ 0 };
+    if (auto result = vkEnumerateInstanceLayerProperties(&layerCount, nullptr); result != VK_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Unable to enumerate instance layers: {}", result);
+        return {};
+    }
+
+    std::vector<VkLayerProperties> vkLayers(layerCount);
+    if (auto result = vkEnumerateInstanceLayerProperties(&layerCount, vkLayers.data()); result != VK_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Unable to query instance layers: {}", result);
+        return {};
+    }
+
+    std::vector<std::string> layers;
+    layers.reserve(layerCount);
+    for (const auto &vkExtension : vkLayers) {
+        layers.push_back(vkExtension.layerName);
+    }
+
+    return layers;
 }
 
 } // namespace KDGpu
