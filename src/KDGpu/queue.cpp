@@ -243,7 +243,7 @@ void Queue::waitForUploadTextureData(const WaitForTextureUploadOptions &options)
     CommandRecorder commandRecorder(m_api, m_device, commandRecorderOptions);
 
     // Find a suitable subresource we will be copying and transitioning
-    const TextureSubresourceRange range = options.range.aspectMask != TextureAspectFlagBits::None ? createRangeFromRegions(options.regions) : options.range;
+    const TextureSubresourceRange range = options.range.aspectMask == TextureAspectFlagBits::None ? createRangeFromRegions(options.regions) : options.range;
 
     // We first need to transition the texture into the TextureLayout::TransferDstOptimal layout
     const TextureMemoryBarrierOptions toTransferDstOptimal = {
@@ -304,7 +304,7 @@ UploadStagingBuffer Queue::uploadTextureData(const TextureUploadOptions &options
     CommandRecorder commandRecorder(m_api, m_device, commandRecorderOptions);
 
     // Find a suitable subresource we will be copying and transitioning
-    const TextureSubresourceRange range = options.range.aspectMask != TextureAspectFlagBits::None ? createRangeFromRegions(options.regions) : options.range;
+    const TextureSubresourceRange range = options.range.aspectMask == TextureAspectFlagBits::None ? createRangeFromRegions(options.regions) : options.range;
 
     // We first need to transition the texture into the TextureLayout::TransferDstOptimal layout
     const TextureMemoryBarrierOptions toTransferDstOptimal = {
