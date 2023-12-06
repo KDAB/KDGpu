@@ -207,6 +207,26 @@ UploadStagingBuffer Queue::uploadBufferData(const BufferUploadOptions &options)
     return uploadStagingBuffer;
 }
 
+namespace {
+
+TextureSubresourceRange createRangeFromRegions(const std::vector<BufferTextureCopyRegion> regions)
+{
+    const auto maxMipLayerPair = std::accumulate(
+            regions.begin(), regions.end(), std::make_pair(0U, 0U),
+            [](std::pair<uint32_t, uint32_t> acc, const BufferTextureCopyRegion &region) {
+                return std::make_pair(std::max(acc.first, region.textureSubResource.mipLevel),
+                                      std::max(acc.second, region.textureSubResource.baseArrayLayer));
+            });
+
+    return TextureSubresourceRange{
+        .aspectMask = TextureAspectFlags(regions.empty() ? TextureAspectFlagBits::ColorBit : regions.front().textureSubResource.aspectMask),
+        .levelCount = maxMipLayerPair.first + 1,
+        .layerCount = maxMipLayerPair.second + 1
+    };
+};
+
+} // namespace
+
 void Queue::waitForUploadTextureData(const WaitForTextureUploadOptions &options)
 {
     // Create a staging buffer and upload initial data to it by map(), memcpy(), unmap().
@@ -222,11 +242,8 @@ void Queue::waitForUploadTextureData(const WaitForTextureUploadOptions &options)
     };
     CommandRecorder commandRecorder(m_api, m_device, commandRecorderOptions);
 
-    // Specify which subresource we will be copying and transitioning
-    const TextureSubresourceRange range = {
-        .aspectMask = TextureAspectFlags(TextureAspectFlagBits::ColorBit),
-        .levelCount = 1
-    };
+    // Find a suitable subresource we will be copying and transitioning
+    const TextureSubresourceRange range = options.range.aspectMask != TextureAspectFlagBits::None ? createRangeFromRegions(options.regions) : options.range;
 
     // We first need to transition the texture into the TextureLayout::TransferDstOptimal layout
     const TextureMemoryBarrierOptions toTransferDstOptimal = {
@@ -286,26 +303,8 @@ UploadStagingBuffer Queue::uploadTextureData(const TextureUploadOptions &options
     };
     CommandRecorder commandRecorder(m_api, m_device, commandRecorderOptions);
 
-    auto findOrCreateRange = [&options]() {
-        if (options.range.aspectMask != TextureAspectFlagBits::None) {
-            return options.range;
-        }
-        const auto maxMipLayerPair = std::accumulate(
-                options.regions.begin(), options.regions.end(), std::make_pair(0U, 0U),
-                [](std::pair<uint32_t, uint32_t> acc, const BufferTextureCopyRegion &region) {
-                    return std::make_pair(std::max(acc.first, region.textureSubResource.mipLevel),
-                                          std::max(acc.second, region.textureSubResource.baseArrayLayer));
-                });
-
-        return TextureSubresourceRange{
-            .aspectMask = TextureAspectFlags(options.regions.empty() ? TextureAspectFlagBits::ColorBit : options.regions.front().textureSubResource.aspectMask),
-            .levelCount = maxMipLayerPair.first + 1,
-            .layerCount = maxMipLayerPair.second + 1
-        };
-    };
-
     // Find a suitable subresource we will be copying and transitioning
-    const TextureSubresourceRange range = findOrCreateRange();
+    const TextureSubresourceRange range = options.range.aspectMask != TextureAspectFlagBits::None ? createRangeFromRegions(options.regions) : options.range;
 
     // We first need to transition the texture into the TextureLayout::TransferDstOptimal layout
     const TextureMemoryBarrierOptions toTransferDstOptimal = {
