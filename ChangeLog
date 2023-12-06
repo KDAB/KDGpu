@@ -1,3 +1,8 @@
+- v0.4.3
+  - Fix logging registry to check for existing logger before creation
+  - Add createTextureFromExistingVkImage
+  - Add range member to TextureOploadOptions and WaitForTextureOploadOptions
+  - Add spdlog formatters for Handle types
 - v0.4.2
   - Fix Validation Error about DeviceGroups
   - Introduce VulkanGraphicsApi::getMemoryStats()
