@@ -8,6 +8,7 @@
 #
 # KDUtils library
 if(EXISTS "${CMAKE_SOURCE_DIR}/src/dependencies/kdutils")
+    set(KDUTILS_BUILD_TESTS OFF)
     add_subdirectory(${CMAKE_SOURCE_DIR}/src/dependencies/kdutils/)
 elseif(NOT TARGET KDUtils)
     find_package(KDUtils CONFIG)
