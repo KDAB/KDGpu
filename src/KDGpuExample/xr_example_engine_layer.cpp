@@ -144,6 +144,10 @@ void XrExampleEngineLayer::createXrInstance()
 
 void XrExampleEngineLayer::destroyXrInstance()
 {
+    if (xrDestroyInstance(m_xrInstance) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to destroy OpenXR Instance.");
+        return;
+    }
 }
 
 void XrExampleEngineLayer::recreateSwapChain()
