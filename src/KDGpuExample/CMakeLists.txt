@@ -82,6 +82,11 @@ set(KDGPUEXAMPLE_PUBLIC_LIBS
     KDGpu::KDGpuKDGui
 )
 
+if(KDGPU_OPENXR_SUPPORT)
+    set(KDGPU_OPENXR ON)
+    list(APPEND KDGPUEXAMPLE_PUBLIC_LIBS openxr_loader)
+endif()
+
 target_compile_definitions(KDGpuExample PRIVATE KDGPUEXAMPLE_ASSET_PATH="${CMAKE_INSTALL_FULL_DATADIR}/assets")
 
 if(KDGPU_BUILD_SHARED_LIBS)
@@ -118,6 +123,11 @@ configure_file(
 )
 install(
     FILES ${CMAKE_CURRENT_BINARY_DIR}/kdgpuexample_export.h
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/KDGpuExample
+)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h ${CMAKE_BINARY_DIR}/include/KDGpuExample/config.h)
+install(
+    FILES ${CMAKE_BINARY_DIR}/include/KDGpuExample/config.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/KDGpuExample
 )
 
