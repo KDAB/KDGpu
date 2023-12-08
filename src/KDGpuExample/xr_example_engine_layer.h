@@ -76,6 +76,9 @@ protected:
     void createXrInstance();
     void destroyXrInstance();
 
+    void createXrDebugMessenger();
+    void destroyXrDebugMessenger();
+
     virtual void recreateSwapChain();
     void recreateDepthTexture();
     void recreateSampleDependentResources();
@@ -115,6 +118,7 @@ protected:
     std::vector<const char *> m_xrActiveInstanceExtensions{};
 
     XrInstance m_xrInstance{ XR_NULL_HANDLE };
+    XrDebugUtilsMessengerEXT m_debugUtilsMessenger{};
 };
 
 } // namespace KDGpuExample

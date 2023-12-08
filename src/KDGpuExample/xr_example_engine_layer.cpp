@@ -17,6 +17,37 @@
 #define XR_USE_GRAPHICS_API_VULKAN
 #include <openxr/openxr_platform.h>
 
+namespace {
+
+static XRAPI_ATTR XrBool32 XRAPI_CALL debugCallback(
+        XrDebugUtilsMessageSeverityFlagsEXT messageSeverity,
+        XrDebugUtilsMessageTypeFlagsEXT messageType,
+        const XrDebugUtilsMessengerCallbackDataEXT *pCallbackData,
+        void *pUserData)
+{
+    switch (messageSeverity) {
+    case XR_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
+        SPDLOG_LOGGER_DEBUG(KDGpu::Logger::logger(), "openxr message: {}", pCallbackData->message);
+        break;
+    case XR_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
+        SPDLOG_LOGGER_INFO(KDGpu::Logger::logger(), "openxr message: {}", pCallbackData->message);
+        break;
+    case XR_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
+        SPDLOG_LOGGER_WARN(KDGpu::Logger::logger(), "openxr message: {}", pCallbackData->message);
+        break;
+    case XR_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
+        SPDLOG_LOGGER_ERROR(KDGpu::Logger::logger(), "openxr message: {}", pCallbackData->message);
+        break;
+    default:
+        SPDLOG_LOGGER_TRACE(KDGpu::Logger::logger(), "openxr message: {}", pCallbackData->message);
+        break;
+    }
+
+    return XR_FALSE;
+}
+
+} // namespace
+
 namespace KDGpuExample {
 
 XrExampleEngineLayer::XrExampleEngineLayer()
@@ -36,6 +67,7 @@ void XrExampleEngineLayer::onAttached()
 {
     // OpenXR Setup
     createXrInstance();
+    createXrDebugMessenger();
 
     // Vulkan Setup
 
@@ -49,6 +81,7 @@ void XrExampleEngineLayer::onAttached()
 
 void XrExampleEngineLayer::onDetached()
 {
+    destroyXrDebugMessenger();
     destroyXrInstance();
 }
 
@@ -147,6 +180,53 @@ void XrExampleEngineLayer::destroyXrInstance()
     if (xrDestroyInstance(m_xrInstance) != XR_SUCCESS) {
         SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to destroy OpenXR Instance.");
         return;
+    }
+}
+
+void XrExampleEngineLayer::createXrDebugMessenger()
+{
+    bool found = false;
+    for (const auto &extension : m_xrActiveInstanceExtensions) {
+        if (strcmp(extension, XR_EXT_DEBUG_UTILS_EXTENSION_NAME) == 0) {
+            found = true;
+            break;
+        }
+    }
+
+    if (found == true) {
+        XrDebugUtilsMessengerCreateInfoEXT debugUtilsMessengerCreateInfo{ XR_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT };
+        debugUtilsMessengerCreateInfo.messageSeverities = XR_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | XR_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT | XR_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | XR_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+        debugUtilsMessengerCreateInfo.messageTypes = XR_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | XR_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | XR_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT | XR_DEBUG_UTILS_MESSAGE_TYPE_CONFORMANCE_BIT_EXT;
+        debugUtilsMessengerCreateInfo.userCallback = (PFN_xrDebugUtilsMessengerCallbackEXT)debugCallback;
+        debugUtilsMessengerCreateInfo.userData = nullptr;
+
+        // Load xrCreateDebugUtilsMessengerEXT() function pointer as it is not default loaded by the OpenXR loader.
+        PFN_xrCreateDebugUtilsMessengerEXT xrCreateDebugUtilsMessengerEXT;
+        if (xrGetInstanceProcAddr(m_xrInstance, "xrCreateDebugUtilsMessengerEXT", (PFN_xrVoidFunction *)&xrCreateDebugUtilsMessengerEXT) != XR_SUCCESS) {
+            SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to get InstanceProcAddr.");
+            return;
+        }
+
+        // Finally create and return the XrDebugUtilsMessengerEXT.
+        if (xrCreateDebugUtilsMessengerEXT(m_xrInstance, &debugUtilsMessengerCreateInfo, &m_debugUtilsMessenger) != XR_SUCCESS) {
+            SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to create DebugUtilsMessenger.");
+            return;
+        }
+    }
+}
+
+void XrExampleEngineLayer::destroyXrDebugMessenger()
+{
+    // Load xrDestroyDebugUtilsMessengerEXT() function pointer as it is not default loaded by the OpenXR loader.
+    PFN_xrDestroyDebugUtilsMessengerEXT xrDestroyDebugUtilsMessengerEXT;
+    if (xrGetInstanceProcAddr(m_xrInstance, "xrDestroyDebugUtilsMessengerEXT", (PFN_xrVoidFunction *)&xrDestroyDebugUtilsMessengerEXT) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to get InstanceProcAddr.");
+        return;
+    }
+
+    // Destroy the provided XrDebugUtilsMessengerEXT.
+    if (xrDestroyDebugUtilsMessengerEXT(m_debugUtilsMessenger) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to destroy DebugUtilsMessenger.");
     }
 }
 
