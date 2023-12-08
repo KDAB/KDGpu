@@ -66,6 +66,11 @@ set(HEADERS
     simple_example_engine_layer.h
 )
 
+if(KDGPU_OPENXR_SUPPORT)
+    list(APPEND SOURCES xr_example_engine_layer.cpp)
+    list(APPEND HEADERS xr_example_engine_layer.h)
+endif()
+
 add_library(
     KDGpuExample
     ${SOURCES} ${PUBLIC_HEADERS} ${PRIVATE_HEADERS}

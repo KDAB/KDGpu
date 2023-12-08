@@ -64,3 +64,7 @@ add_subdirectory(bindgroup_indexing)
 if(KDGPU_HLSL_SUPPORT)
     add_subdirectory(hello_triangle_hlsl)
 endif()
+
+if(KDGPU_OPENXR_SUPPORT)
+    add_subdirectory(hello_xr)
+endif()
