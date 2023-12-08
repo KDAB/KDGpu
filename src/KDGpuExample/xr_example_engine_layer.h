@@ -80,6 +80,7 @@ protected:
     void destroyXrDebugMessenger();
 
     void getXrInstanceProperties();
+    void getXrSystemId();
 
     virtual void recreateSwapChain();
     void recreateDepthTexture();
@@ -121,6 +122,10 @@ protected:
 
     XrInstance m_xrInstance{ XR_NULL_HANDLE };
     XrDebugUtilsMessengerEXT m_debugUtilsMessenger{};
+
+    XrFormFactor m_formFactor{ XR_FORM_FACTOR_HEAD_MOUNTED_DISPLAY };
+    XrSystemId m_systemID = {};
+    XrSystemProperties m_systemProperties{ XR_TYPE_SYSTEM_PROPERTIES };
 };
 
 } // namespace KDGpuExample

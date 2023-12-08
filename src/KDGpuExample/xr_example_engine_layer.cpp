@@ -69,6 +69,7 @@ void XrExampleEngineLayer::onAttached()
     createXrInstance();
     createXrDebugMessenger();
     getXrInstanceProperties();
+    getXrSystemId();
 
     // Vulkan Setup
 
@@ -244,6 +245,30 @@ void XrExampleEngineLayer::getXrInstanceProperties()
                        XR_VERSION_MAJOR(instanceProperties.runtimeVersion),
                        XR_VERSION_MINOR(instanceProperties.runtimeVersion),
                        XR_VERSION_PATCH(instanceProperties.runtimeVersion));
+}
+
+void XrExampleEngineLayer::getXrSystemId()
+{
+    XrSystemGetInfo systemGetInfo{ XR_TYPE_SYSTEM_GET_INFO };
+    systemGetInfo.formFactor = m_formFactor;
+    if (const auto result = xrGetSystem(m_xrInstance, &systemGetInfo, &m_systemID) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to get SystemID. Error: {}", result); // TODO: Add formatter for XrResult
+        return;
+    }
+
+    // Get the System's properties for some general information about the hardware and the vendor.
+    if (xrGetSystemProperties(m_xrInstance, m_systemID, &m_systemProperties) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to get SystemProperties.");
+        return;
+    }
+
+    SPDLOG_LOGGER_INFO(m_logger, "OpenXR System: {}", m_systemProperties.systemName);
+    SPDLOG_LOGGER_INFO(m_logger, "OpenXR System Id: {}", m_systemProperties.systemId);
+    SPDLOG_LOGGER_INFO(m_logger, "OpenXR Vendor Id: {}", m_systemProperties.vendorId);
+    SPDLOG_LOGGER_INFO(m_logger, "Maximum swapchain dimensions: {}x{}",
+                       m_systemProperties.graphicsProperties.maxSwapchainImageWidth,
+                       m_systemProperties.graphicsProperties.maxSwapchainImageHeight);
+    SPDLOG_LOGGER_INFO(m_logger, "Maximum layers: {}", m_systemProperties.graphicsProperties.maxLayerCount);
 }
 
 void XrExampleEngineLayer::recreateSwapChain()
