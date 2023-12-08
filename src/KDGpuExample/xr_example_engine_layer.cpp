@@ -68,6 +68,7 @@ void XrExampleEngineLayer::onAttached()
     // OpenXR Setup
     createXrInstance();
     createXrDebugMessenger();
+    getXrInstanceProperties();
 
     // Vulkan Setup
 
@@ -228,6 +229,21 @@ void XrExampleEngineLayer::destroyXrDebugMessenger()
     if (xrDestroyDebugUtilsMessengerEXT(m_debugUtilsMessenger) != XR_SUCCESS) {
         SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to destroy DebugUtilsMessenger.");
     }
+}
+
+void XrExampleEngineLayer::getXrInstanceProperties()
+{
+    XrInstanceProperties instanceProperties{ XR_TYPE_INSTANCE_PROPERTIES };
+    if (xrGetInstanceProperties(m_xrInstance, &instanceProperties) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to get InstanceProperties.");
+        return;
+    }
+
+    SPDLOG_LOGGER_INFO(m_logger, "OpenXR Runtime: {}", instanceProperties.runtimeName);
+    SPDLOG_LOGGER_INFO(m_logger, "OpenXR API Version: {}.{}.{}",
+                       XR_VERSION_MAJOR(instanceProperties.runtimeVersion),
+                       XR_VERSION_MINOR(instanceProperties.runtimeVersion),
+                       XR_VERSION_PATCH(instanceProperties.runtimeVersion));
 }
 
 void XrExampleEngineLayer::recreateSwapChain()

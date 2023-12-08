@@ -79,6 +79,8 @@ protected:
     void createXrDebugMessenger();
     void destroyXrDebugMessenger();
 
+    void getXrInstanceProperties();
+
     virtual void recreateSwapChain();
     void recreateDepthTexture();
     void recreateSampleDependentResources();
