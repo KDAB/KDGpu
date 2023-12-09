@@ -28,6 +28,8 @@
 #include <KDBindings/property.h>
 
 #include <openxr/openxr.h>
+#define XR_USE_GRAPHICS_API_VULKAN
+#include <openxr/openxr_platform.h>
 
 #include <array>
 #include <functional>
@@ -71,6 +73,10 @@ protected:
     void onDetached() override;
     void update() override;
     void event(KDFoundation::EventReceiver *target, KDFoundation::Event *ev) override;
+
+    // Graphics API related helpers
+    void createGraphicsInstance();
+    void destroyGraphicsInstance();
 
     // XR related helpers
     void createXrInstance();
@@ -124,8 +130,13 @@ protected:
     XrDebugUtilsMessengerEXT m_debugUtilsMessenger{};
 
     XrFormFactor m_formFactor{ XR_FORM_FACTOR_HEAD_MOUNTED_DISPLAY };
-    XrSystemId m_systemID = {};
+    XrSystemId m_systemId = {};
     XrSystemProperties m_systemProperties{ XR_TYPE_SYSTEM_PROPERTIES };
+
+    PFN_xrGetVulkanGraphicsRequirementsKHR m_xrGetVulkanGraphicsRequirementsKHR{ nullptr };
+    PFN_xrGetVulkanInstanceExtensionsKHR m_xrGetVulkanInstanceExtensionsKHR{ nullptr };
+    PFN_xrGetVulkanDeviceExtensionsKHR m_xrGetVulkanDeviceExtensionsKHR{ nullptr };
+    PFN_xrGetVulkanGraphicsDeviceKHR m_xrGetVulkanGraphicsDeviceKHR{ nullptr };
 };
 
 } // namespace KDGpuExample

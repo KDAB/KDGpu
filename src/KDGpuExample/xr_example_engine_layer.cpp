@@ -14,9 +14,6 @@
 
 #include <KDGui/gui_application.h>
 
-#define XR_USE_GRAPHICS_API_VULKAN
-#include <openxr/openxr_platform.h>
-
 namespace {
 
 static XRAPI_ATTR XrBool32 XRAPI_CALL debugCallback(
@@ -71,18 +68,14 @@ void XrExampleEngineLayer::onAttached()
     getXrInstanceProperties();
     getXrSystemId();
 
-    // Vulkan Setup
-
-    // Request an instance of the api with whatever layers and extensions we wish to request.
-    InstanceOptions instanceOptions = {
-        .applicationName = KDGui::GuiApplication::instance()->applicationName(),
-        .applicationVersion = KDGPU_MAKE_API_VERSION(0, 1, 0, 0)
-    };
-    m_instance = m_api->createInstance(instanceOptions);
+    // Graphics Setup
+    createGraphicsInstance();
 }
 
 void XrExampleEngineLayer::onDetached()
 {
+    destroyGraphicsInstance();
+
     destroyXrDebugMessenger();
     destroyXrInstance();
 }
@@ -95,6 +88,59 @@ void XrExampleEngineLayer::event(KDFoundation::EventReceiver *target, KDFoundati
 {
 }
 
+void XrExampleEngineLayer::createGraphicsInstance()
+{
+    // Query the minimum and maximum supported Vulkan API versions
+    XrGraphicsRequirementsVulkanKHR graphicsRequirements{ XR_TYPE_GRAPHICS_REQUIREMENTS_VULKAN_KHR };
+    if (m_xrGetVulkanGraphicsRequirementsKHR(m_xrInstance, m_systemId, &graphicsRequirements) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to get Graphics Requirements for Vulkan.");
+        return;
+    }
+    SPDLOG_LOGGER_INFO(m_logger, "Minimum Vulkan API Version: {}.{}.{}",
+                       XR_VERSION_MAJOR(graphicsRequirements.minApiVersionSupported),
+                       XR_VERSION_MINOR(graphicsRequirements.minApiVersionSupported),
+                       XR_VERSION_PATCH(graphicsRequirements.minApiVersionSupported));
+    SPDLOG_LOGGER_INFO(m_logger, "Maximum Vulkan API Version: {}.{}.{}",
+                       XR_VERSION_MAJOR(graphicsRequirements.maxApiVersionSupported),
+                       XR_VERSION_MINOR(graphicsRequirements.maxApiVersionSupported),
+                       XR_VERSION_PATCH(graphicsRequirements.maxApiVersionSupported));
+
+    // Query the required Vulkan instance extensions
+    uint32_t instanceExtensionCount = 0;
+    std::vector<char> instanceExtensionProperties;
+    if (m_xrGetVulkanInstanceExtensionsKHR(m_xrInstance, m_systemId, 0, &instanceExtensionCount, nullptr) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to get Vulkan Instance Extension Properties buffer size.");
+        return;
+    }
+    instanceExtensionProperties.resize(instanceExtensionCount);
+    if (m_xrGetVulkanInstanceExtensionsKHR(m_xrInstance, m_systemId, instanceExtensionCount, &instanceExtensionCount, instanceExtensionProperties.data()) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to get Vulkan Instance Extension Properties.");
+        return;
+    }
+
+    // Each required instance extension is delimited by a space character.
+    std::stringstream streamData(instanceExtensionProperties.data());
+    std::vector<std::string> vkInstanceExtensions;
+    std::string vkInstanceExtension;
+    while (std::getline(streamData, vkInstanceExtension, ' ')) {
+        vkInstanceExtensions.push_back(vkInstanceExtension);
+        SPDLOG_LOGGER_DEBUG(m_logger, "Requesting Vulkan Instance Extension: {}", vkInstanceExtension);
+    }
+
+    // Request an instance of the api with whatever layers and extensions we wish to request.
+    InstanceOptions instanceOptions = {
+        .applicationName = KDGui::GuiApplication::instance()->applicationName(),
+        .applicationVersion = KDGPU_MAKE_API_VERSION(0, 1, 0, 0),
+        .extensions = vkInstanceExtensions
+    };
+    m_instance = m_api->createInstance(instanceOptions);
+}
+
+void XrExampleEngineLayer::destroyGraphicsInstance()
+{
+    m_instance = {};
+}
+
 void XrExampleEngineLayer::createXrInstance()
 {
     XrApplicationInfo xrApplicationInfo = {};
@@ -104,8 +150,6 @@ void XrExampleEngineLayer::createXrInstance()
     strncpy(xrApplicationInfo.engineName, "KDGpuExample XR Engine", XR_MAX_ENGINE_NAME_SIZE);
     xrApplicationInfo.engineVersion = 1;
     xrApplicationInfo.apiVersion = XR_CURRENT_API_VERSION;
-
-    std::vector<std::string> instanceExtensions = { XR_EXT_DEBUG_UTILS_EXTENSION_NAME, XR_KHR_VULKAN_ENABLE_EXTENSION_NAME };
 
     // Query and check layers
     uint32_t apiLayerCount = 0;
@@ -146,6 +190,7 @@ void XrExampleEngineLayer::createXrInstance()
         return;
     }
 
+    m_xrRequestedInstanceExtensions = { XR_EXT_DEBUG_UTILS_EXTENSION_NAME, XR_KHR_VULKAN_ENABLE_EXTENSION_NAME };
     for (auto &requestedInstanceExtension : m_xrRequestedInstanceExtensions) {
         bool found = false;
         for (auto &extensionProperty : extensionProperties) {
@@ -173,6 +218,27 @@ void XrExampleEngineLayer::createXrInstance()
     instanceCI.enabledExtensionNames = m_xrActiveInstanceExtensions.data();
     if (xrCreateInstance(&instanceCI, &m_xrInstance) != XR_SUCCESS) {
         SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to create OpenXR Instance.");
+        return;
+    }
+
+    // Resolve some functions we will need later
+    if (xrGetInstanceProcAddr(m_xrInstance, "xrGetVulkanGraphicsRequirementsKHR", (PFN_xrVoidFunction *)&m_xrGetVulkanGraphicsRequirementsKHR) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to get InstanceProcAddr for xrGetVulkanGraphicsRequirementsKHR.");
+        return;
+    }
+
+    if (xrGetInstanceProcAddr(m_xrInstance, "xrGetVulkanInstanceExtensionsKHR", (PFN_xrVoidFunction *)&m_xrGetVulkanInstanceExtensionsKHR) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to get InstanceProcAddr for xrGetVulkanInstanceExtensionsKHR.");
+        return;
+    }
+
+    if (xrGetInstanceProcAddr(m_xrInstance, "xrGetVulkanDeviceExtensionsKHR", (PFN_xrVoidFunction *)&m_xrGetVulkanDeviceExtensionsKHR) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to get InstanceProcAddr for xrGetVulkanDeviceExtensionsKHR.");
+        return;
+    }
+
+    if (xrGetInstanceProcAddr(m_xrInstance, "xrGetVulkanGraphicsDeviceKHR", (PFN_xrVoidFunction *)&m_xrGetVulkanGraphicsDeviceKHR) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to get InstanceProcAddr for xrGetVulkanGraphicsDeviceKHR.");
         return;
     }
 }
@@ -251,13 +317,13 @@ void XrExampleEngineLayer::getXrSystemId()
 {
     XrSystemGetInfo systemGetInfo{ XR_TYPE_SYSTEM_GET_INFO };
     systemGetInfo.formFactor = m_formFactor;
-    if (const auto result = xrGetSystem(m_xrInstance, &systemGetInfo, &m_systemID) != XR_SUCCESS) {
+    if (const auto result = xrGetSystem(m_xrInstance, &systemGetInfo, &m_systemId) != XR_SUCCESS) {
         SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to get SystemID. Error: {}", result); // TODO: Add formatter for XrResult
         return;
     }
 
     // Get the System's properties for some general information about the hardware and the vendor.
-    if (xrGetSystemProperties(m_xrInstance, m_systemID, &m_systemProperties) != XR_SUCCESS) {
+    if (xrGetSystemProperties(m_xrInstance, m_systemId, &m_systemProperties) != XR_SUCCESS) {
         SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to get SystemProperties.");
         return;
     }
