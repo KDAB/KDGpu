@@ -147,6 +147,7 @@ protected:
     PFN_xrGetVulkanGraphicsDeviceKHR m_xrGetVulkanGraphicsDeviceKHR{ nullptr };
 
     XrSession m_xrSession{ XR_NULL_HANDLE };
+    XrSessionState m_xrSessionState{ XR_SESSION_STATE_UNKNOWN };
     bool m_xrSessionRunning{ false };
 };
 

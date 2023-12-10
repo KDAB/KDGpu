@@ -535,6 +535,8 @@ void XrExampleEngineLayer::pollXrEvents()
                 break;
             }
             }
+
+            m_xrSessionState = sessionStateChanged->state;
         }
         }
     }
