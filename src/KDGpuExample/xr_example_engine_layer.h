@@ -98,11 +98,10 @@ protected:
     void createXrReferenceSpace();
     void destroyXrReferenceSpace();
 
-    void pollXrEvents();
+    void createXrSwapchains();
+    void destroyXrSwapchains();
 
-    virtual void recreateSwapChain();
-    void recreateDepthTexture();
-    void recreateSampleDependentResources();
+    void pollXrEvents();
 
     void uploadBufferData(const BufferUploadOptions &options);
     void uploadTextureData(const TextureUploadOptions &options);
@@ -162,6 +161,28 @@ protected:
     bool m_xrSessionRunning{ false };
 
     XrSpace m_xrReferenceSpace{ XR_NULL_HANDLE };
+
+    struct SwapchainInfo {
+        XrSwapchain swapchain{ XR_NULL_HANDLE };
+        std::vector<Texture> images;
+        std::vector<void *> imageViews; // TODO: Use TextureView
+    };
+    std::vector<SwapchainInfo> m_colorSwapchainInfos;
+    std::vector<SwapchainInfo> m_depthSwapchainInfos;
+
+    std::vector<Format> m_applicationColorSwapchainFormats{
+        Format::B8G8R8A8_SRGB,
+        Format::R8G8B8A8_SRGB,
+        Format::B8G8R8A8_UNORM,
+        Format::R8G8B8A8_UNORM
+    };
+    std::vector<Format> m_applicationDepthSwapchainFormats{
+        Format::D32_SFLOAT,
+        Format::D16_UNORM
+    };
+    std::vector<int64_t> m_xrSwapchainFormats;
+    int64_t m_xrColorSwapchainFormat{ 0 };
+    int64_t m_xrDepthSwapchainFormat{ 0 };
 };
 
 } // namespace KDGpuExample
