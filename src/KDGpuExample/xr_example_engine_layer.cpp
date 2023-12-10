@@ -14,6 +14,8 @@
 
 #include <KDGui/gui_application.h>
 
+#include <assert.h>
+
 namespace {
 
 static XRAPI_ATTR XrBool32 XRAPI_CALL debugCallback(
@@ -70,10 +72,12 @@ void XrExampleEngineLayer::onAttached()
 
     // Graphics Setup
     createGraphicsInstance();
+    createGraphicsDevice();
 }
 
 void XrExampleEngineLayer::onDetached()
 {
+    destroyGraphicsDevice();
     destroyGraphicsInstance();
 
     destroyXrDebugMessenger();
@@ -139,6 +143,71 @@ void XrExampleEngineLayer::createGraphicsInstance()
 void XrExampleEngineLayer::destroyGraphicsInstance()
 {
     m_instance = {};
+}
+
+void XrExampleEngineLayer::createGraphicsDevice()
+{
+    // Query which physical device we should use for the given XR system
+    VulkanResourceManager *vulkanResourceManager = dynamic_cast<VulkanResourceManager *>(m_api->resourceManager());
+    assert(vulkanResourceManager);
+    VulkanInstance *vulkanInstance = vulkanResourceManager->getInstance(m_instance);
+    assert(vulkanInstance);
+    VkPhysicalDevice physicalDeviceFromXR;
+    if (m_xrGetVulkanGraphicsDeviceKHR(m_xrInstance, m_systemId, vulkanInstance->instance, &physicalDeviceFromXR) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to get Vulkan Graphics Device from OpenXR.");
+        return;
+    }
+
+    // Now look up the adapter that matches the physical device we got from OpenXR
+    const auto adapters = m_instance.adapters();
+    Adapter *selectedAdapter = nullptr;
+    for (auto *adapter : adapters) {
+        auto vulkanAdapter = vulkanResourceManager->getAdapter(adapter->handle());
+        if (vulkanAdapter->physicalDevice == physicalDeviceFromXR) {
+            selectedAdapter = adapter;
+            break;
+        }
+    }
+    if (!selectedAdapter) {
+        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to find Adapter that matches the physical device from OpenXR.");
+        return;
+    }
+
+    // Query the required Vulkan device extensions
+    uint32_t deviceExtensionCount = 0;
+    std::vector<char> deviceExtensionProperties;
+    if (m_xrGetVulkanDeviceExtensionsKHR(m_xrInstance, m_systemId, 0, &deviceExtensionCount, nullptr) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to get Vulkan Device Extension Properties buffer size.");
+        return;
+    }
+    deviceExtensionProperties.resize(deviceExtensionCount);
+    if (m_xrGetVulkanDeviceExtensionsKHR(m_xrInstance, m_systemId, deviceExtensionCount, &deviceExtensionCount, deviceExtensionProperties.data()) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to get Vulkan Device Extension Properties.");
+        return;
+    }
+
+    // Each required device extension is delimited by a space character.
+    std::stringstream streamData(deviceExtensionProperties.data());
+    std::vector<std::string> vkDeviceExtensions;
+    std::string vkDeviceExtension;
+    while (std::getline(streamData, vkDeviceExtension, ' ')) {
+        vkDeviceExtensions.push_back(vkDeviceExtension);
+        SPDLOG_LOGGER_DEBUG(m_logger, "Requesting Vulkan Device Extension: {}", vkDeviceExtension);
+    }
+
+    // Request a device of the api with whatever layers and extensions we wish to request.
+    DeviceOptions deviceOptions = {
+        .extensions = vkDeviceExtensions,
+        .requestedFeatures = selectedAdapter->features()
+    };
+    m_device = selectedAdapter->createDevice(deviceOptions);
+    m_queue = m_device.queues()[0];
+}
+
+void XrExampleEngineLayer::destroyGraphicsDevice()
+{
+    m_queue = {};
+    m_device = {};
 }
 
 void XrExampleEngineLayer::createXrInstance()

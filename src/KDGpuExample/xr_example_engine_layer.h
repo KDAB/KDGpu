@@ -78,6 +78,9 @@ protected:
     void createGraphicsInstance();
     void destroyGraphicsInstance();
 
+    void createGraphicsDevice();
+    void destroyGraphicsDevice();
+
     // XR related helpers
     void createXrInstance();
     void destroyXrInstance();
