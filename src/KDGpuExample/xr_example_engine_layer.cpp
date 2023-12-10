@@ -73,10 +73,15 @@ void XrExampleEngineLayer::onAttached()
     // Graphics Setup
     createGraphicsInstance();
     createGraphicsDevice();
+
+    // OpenXR Session Setup
+    createXrSession();
 }
 
 void XrExampleEngineLayer::onDetached()
 {
+    destroyXrSession();
+
     destroyGraphicsDevice();
     destroyGraphicsInstance();
 
@@ -404,6 +409,42 @@ void XrExampleEngineLayer::getXrSystemId()
                        m_systemProperties.graphicsProperties.maxSwapchainImageWidth,
                        m_systemProperties.graphicsProperties.maxSwapchainImageHeight);
     SPDLOG_LOGGER_INFO(m_logger, "Maximum layers: {}", m_systemProperties.graphicsProperties.maxLayerCount);
+}
+
+void XrExampleEngineLayer::createXrSession()
+{
+    VulkanResourceManager *vulkanResourceManager = dynamic_cast<VulkanResourceManager *>(m_api->resourceManager());
+    assert(vulkanResourceManager);
+    VulkanInstance *vulkanInstance = vulkanResourceManager->getInstance(m_instance);
+    assert(vulkanInstance);
+    VulkanAdapter *vulkanAdapter = vulkanResourceManager->getAdapter(m_device.adapter()->handle());
+    assert(vulkanAdapter);
+    VulkanDevice *vulkanDevice = vulkanResourceManager->getDevice(m_device);
+    assert(vulkanDevice);
+
+    XrGraphicsBindingVulkanKHR graphicsBinding{ XR_TYPE_GRAPHICS_BINDING_VULKAN_KHR };
+    graphicsBinding.instance = vulkanInstance->instance;
+    graphicsBinding.physicalDevice = vulkanAdapter->physicalDevice;
+    graphicsBinding.device = vulkanDevice->device;
+    graphicsBinding.queueFamilyIndex = m_queue.queueTypeIndex();
+    graphicsBinding.queueIndex = 0;
+
+    XrSessionCreateInfo sessionCreateInfo{ XR_TYPE_SESSION_CREATE_INFO };
+    sessionCreateInfo.next = &graphicsBinding;
+    sessionCreateInfo.systemId = m_systemId;
+
+    if (xrCreateSession(m_xrInstance, &sessionCreateInfo, &m_xrSession) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to create OpenXR Session.");
+        return;
+    }
+}
+
+void XrExampleEngineLayer::destroyXrSession()
+{
+    if (xrDestroySession(m_xrSession) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to destroy OpenXR Session.");
+        return;
+    }
 }
 
 void XrExampleEngineLayer::recreateSwapChain()

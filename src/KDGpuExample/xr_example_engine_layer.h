@@ -91,6 +91,9 @@ protected:
     void getXrInstanceProperties();
     void getXrSystemId();
 
+    void createXrSession();
+    void destroyXrSession();
+
     virtual void recreateSwapChain();
     void recreateDepthTexture();
     void recreateSampleDependentResources();
@@ -140,6 +143,8 @@ protected:
     PFN_xrGetVulkanInstanceExtensionsKHR m_xrGetVulkanInstanceExtensionsKHR{ nullptr };
     PFN_xrGetVulkanDeviceExtensionsKHR m_xrGetVulkanDeviceExtensionsKHR{ nullptr };
     PFN_xrGetVulkanGraphicsDeviceKHR m_xrGetVulkanGraphicsDeviceKHR{ nullptr };
+
+    XrSession m_xrSession{ XR_NULL_HANDLE };
 };
 
 } // namespace KDGpuExample
