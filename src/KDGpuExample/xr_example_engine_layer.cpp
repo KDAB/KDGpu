@@ -69,6 +69,7 @@ void XrExampleEngineLayer::onAttached()
     createXrDebugMessenger();
     getXrInstanceProperties();
     getXrSystemId();
+    getXrViewConfigurations();
 
     // Graphics Setup
     createGraphicsInstance();
@@ -410,6 +411,63 @@ void XrExampleEngineLayer::getXrSystemId()
                        m_systemProperties.graphicsProperties.maxSwapchainImageWidth,
                        m_systemProperties.graphicsProperties.maxSwapchainImageHeight);
     SPDLOG_LOGGER_INFO(m_logger, "Maximum layers: {}", m_systemProperties.graphicsProperties.maxLayerCount);
+}
+
+void XrExampleEngineLayer::getXrViewConfigurations()
+{
+    // Query the number of view configurations supported by the system
+    uint32_t viewConfigurationCount = 0;
+    if (xrEnumerateViewConfigurations(m_xrInstance, m_systemId, 0, &viewConfigurationCount, nullptr) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to enumerate ViewConfigurations.");
+        return;
+    }
+
+    // Query the view configurations supported by the system
+    m_xrViewConfigurationTypes.resize(viewConfigurationCount);
+    if (xrEnumerateViewConfigurations(m_xrInstance, m_systemId, viewConfigurationCount, &viewConfigurationCount, m_xrViewConfigurationTypes.data()) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to enumerate ViewConfigurations.");
+        return;
+    }
+
+    // Pick the first application supported View Configuration Type supported by the hardware.
+    for (const XrViewConfigurationType &viewConfiguration : m_xrApplicationViewConfigurationTypes) {
+        if (std::find(m_xrViewConfigurationTypes.begin(), m_xrViewConfigurationTypes.end(), viewConfiguration) != m_xrViewConfigurationTypes.end()) {
+            m_xrViewConfiguration = viewConfiguration;
+            break;
+        }
+    }
+    if (m_xrViewConfiguration == XR_VIEW_CONFIGURATION_TYPE_MAX_ENUM) {
+        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to find a supported ViewConfiguration. Defaulting to XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO");
+        m_xrViewConfiguration = XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO;
+    }
+
+    // Query the number of environment blend modes supported by the system
+    uint32_t environmentBlendModeCount = 0;
+    if (xrEnumerateEnvironmentBlendModes(m_xrInstance, m_systemId, m_xrViewConfiguration, 0, &environmentBlendModeCount, nullptr) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to enumerate EnvironmentBlendModes.");
+        return;
+    }
+
+    // Query the environment blend modes supported by the system
+    m_xrEnvironmentBlendModes.resize(environmentBlendModeCount);
+    if (xrEnumerateEnvironmentBlendModes(m_xrInstance, m_systemId, m_xrViewConfiguration, environmentBlendModeCount, &environmentBlendModeCount, m_xrEnvironmentBlendModes.data()) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to enumerate EnvironmentBlendModes.");
+        return;
+    }
+
+    // Query the number of view configuration views in the first view configuration supported by the system
+    uint32_t viewConfigurationViewCount = 0;
+    if (xrEnumerateViewConfigurationViews(m_xrInstance, m_systemId, m_xrViewConfiguration, 0, &viewConfigurationViewCount, nullptr) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to enumerate ViewConfigurationViews.");
+        return;
+    }
+
+    // Query the view configuration views in the first view configuration supported by the system
+    m_xrViewConfigurationViews.resize(viewConfigurationViewCount, { XR_TYPE_VIEW_CONFIGURATION_VIEW });
+    if (xrEnumerateViewConfigurationViews(m_xrInstance, m_systemId, m_xrViewConfiguration, viewConfigurationViewCount, &viewConfigurationViewCount, m_xrViewConfigurationViews.data()) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to enumerate ViewConfigurationViews.");
+        return;
+    }
 }
 
 void XrExampleEngineLayer::createXrSession()

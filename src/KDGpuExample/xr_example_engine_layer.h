@@ -90,6 +90,7 @@ protected:
 
     void getXrInstanceProperties();
     void getXrSystemId();
+    void getXrViewConfigurations();
 
     void createXrSession();
     void destroyXrSession();
@@ -140,6 +141,13 @@ protected:
     XrFormFactor m_formFactor{ XR_FORM_FACTOR_HEAD_MOUNTED_DISPLAY };
     XrSystemId m_systemId = {};
     XrSystemProperties m_systemProperties{ XR_TYPE_SYSTEM_PROPERTIES };
+
+    std::vector<XrViewConfigurationType> m_xrApplicationViewConfigurationTypes{ XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO, XR_VIEW_CONFIGURATION_TYPE_PRIMARY_MONO };
+    std::vector<XrViewConfigurationType> m_xrViewConfigurationTypes;
+
+    XrViewConfigurationType m_xrViewConfiguration{ XR_VIEW_CONFIGURATION_TYPE_MAX_ENUM };
+    std::vector<XrEnvironmentBlendMode> m_xrEnvironmentBlendModes;
+    std::vector<XrViewConfigurationView> m_xrViewConfigurationViews;
 
     PFN_xrGetVulkanGraphicsRequirementsKHR m_xrGetVulkanGraphicsRequirementsKHR{ nullptr };
     PFN_xrGetVulkanInstanceExtensionsKHR m_xrGetVulkanInstanceExtensionsKHR{ nullptr };
