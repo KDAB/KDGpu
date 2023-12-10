@@ -77,10 +77,12 @@ void XrExampleEngineLayer::onAttached()
 
     // OpenXR Session Setup
     createXrSession();
+    createXrReferenceSpace();
 }
 
 void XrExampleEngineLayer::onDetached()
 {
+    destroyXrReferenceSpace();
     destroyXrSession();
 
     destroyGraphicsDevice();
@@ -502,6 +504,27 @@ void XrExampleEngineLayer::destroyXrSession()
 {
     if (xrDestroySession(m_xrSession) != XR_SUCCESS) {
         SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to destroy OpenXR Session.");
+        return;
+    }
+}
+
+void XrExampleEngineLayer::createXrReferenceSpace()
+{
+    const XrQuaternionf orientation{ 0.0f, 0.0f, 0.0f, 1.0f };
+    const XrVector3f offset{ 0.0f, 0.0f, 0.0f };
+    XrReferenceSpaceCreateInfo referenceSpaceCreateInfo{ XR_TYPE_REFERENCE_SPACE_CREATE_INFO };
+    referenceSpaceCreateInfo.referenceSpaceType = XR_REFERENCE_SPACE_TYPE_LOCAL;
+    referenceSpaceCreateInfo.poseInReferenceSpace = { orientation, offset };
+    if (xrCreateReferenceSpace(m_xrSession, &referenceSpaceCreateInfo, &m_xrReferenceSpace) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to create OpenXR Reference Space.");
+        return;
+    }
+}
+
+void XrExampleEngineLayer::destroyXrReferenceSpace()
+{
+    if (xrDestroySpace(m_xrReferenceSpace) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to destroy OpenXR Reference Space.");
         return;
     }
 }
