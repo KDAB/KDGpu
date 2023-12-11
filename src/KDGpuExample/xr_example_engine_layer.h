@@ -149,6 +149,7 @@ protected:
 
     XrViewConfigurationType m_xrViewConfiguration{ XR_VIEW_CONFIGURATION_TYPE_MAX_ENUM };
     std::vector<XrEnvironmentBlendMode> m_xrEnvironmentBlendModes;
+    XrEnvironmentBlendMode m_xrEnvironmentBlendMode{ XR_ENVIRONMENT_BLEND_MODE_MAX_ENUM };
     std::vector<XrViewConfigurationView> m_xrViewConfigurationViews;
 
     PFN_xrGetVulkanGraphicsRequirementsKHR m_xrGetVulkanGraphicsRequirementsKHR{ nullptr };
@@ -183,6 +184,23 @@ protected:
     std::vector<int64_t> m_xrSwapchainFormats;
     int64_t m_xrColorSwapchainFormat{ 0 };
     int64_t m_xrDepthSwapchainFormat{ 0 };
+
+    // TODO: Extent so this supports other types of composition layers beyond projection
+    struct CompositorLayerInfo {
+        XrTime predictedDisplayTime{ 0 };
+        std::vector<XrCompositionLayerBaseHeader *> layers;
+        std::vector<XrCompositionLayerProjection> layerProjections;
+        std::vector<XrCompositionLayerProjectionView> layerProjectionViews;
+
+        void reset(XrTime displayTime)
+        {
+            predictedDisplayTime = displayTime;
+            layers.clear();
+            layerProjections.clear();
+            layerProjectionViews.clear();
+        }
+    };
+    CompositorLayerInfo m_xrCompositorLayerInfo;
 };
 
 } // namespace KDGpuExample

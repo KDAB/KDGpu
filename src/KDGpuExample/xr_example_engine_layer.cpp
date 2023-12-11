@@ -102,6 +102,119 @@ void XrExampleEngineLayer::update()
     releaseStagingBuffers();
 
     pollXrEvents();
+
+    if (!m_xrSessionRunning)
+        return;
+
+    // Get timing information from OpenXR
+    XrFrameState frameState{ XR_TYPE_FRAME_STATE };
+    XrFrameWaitInfo frameWaitInfo{ XR_TYPE_FRAME_WAIT_INFO };
+    if (xrWaitFrame(m_xrSession, &frameWaitInfo, &frameState) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to wait for frame.");
+        return;
+    }
+
+    // Inform the OpenXR compositor that we are beginning to render the frame
+    XrFrameBeginInfo frameBeginInfo{ XR_TYPE_FRAME_BEGIN_INFO };
+    if (xrBeginFrame(m_xrSession, &frameBeginInfo) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to begin frame.");
+        return;
+    }
+
+    // Start off with no layers to compose and set the predicted display time
+    m_xrCompositorLayerInfo.reset(frameState.predictedDisplayTime);
+
+    const bool sessionActive = (m_xrSessionState == XR_SESSION_STATE_SYNCHRONIZED || m_xrSessionState == XR_SESSION_STATE_VISIBLE || m_xrSessionState == XR_SESSION_STATE_FOCUSED);
+    if (sessionActive && frameState.shouldRender) {
+        // For now, we will use only a single projection layer. Later we can extend this to support multiple compositor layer types
+        // in any configuration. At this time we assume the scene in the subclass is the only thing to be composited.
+
+        // Locate the views from the view configuration within the (reference) space at the display time.
+        std::vector<XrView> views(m_xrViewConfigurationViews.size(), { XR_TYPE_VIEW });
+
+        XrViewState viewState{ XR_TYPE_VIEW_STATE }; // Contains information on whether the position and/or orientation is valid and/or tracked.
+        XrViewLocateInfo viewLocateInfo{ XR_TYPE_VIEW_LOCATE_INFO };
+        viewLocateInfo.viewConfigurationType = m_xrViewConfiguration;
+        viewLocateInfo.displayTime = m_xrCompositorLayerInfo.predictedDisplayTime;
+        viewLocateInfo.space = m_xrReferenceSpace;
+        uint32_t viewCount = 0;
+        if (xrLocateViews(m_xrSession, &viewLocateInfo, &viewState, static_cast<uint32_t>(views.size()), &viewCount, views.data()) != XR_SUCCESS) {
+            SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to locate views.");
+        } else {
+            // TODO: Call updateScene() function to update scene state.
+            // updateScene();
+
+            m_xrCompositorLayerInfo.layerProjectionViews.resize(viewCount, { XR_TYPE_COMPOSITION_LAYER_PROJECTION_VIEW });
+
+            for (uint32_t viewIndex = 0; viewIndex < viewCount; ++viewIndex) {
+                // Acquire and wait for the swapchain images to become available for the color and depth swapchains
+                SwapchainInfo &colorSwapchainInfo = m_colorSwapchainInfos[viewIndex];
+                SwapchainInfo &depthSwapchainInfo = m_depthSwapchainInfos[viewIndex];
+
+                uint32_t colorImageIndex = 0;
+                uint32_t depthImageIndex = 0;
+                XrSwapchainImageAcquireInfo acquireInfo{ XR_TYPE_SWAPCHAIN_IMAGE_ACQUIRE_INFO };
+                if (xrAcquireSwapchainImage(colorSwapchainInfo.swapchain, &acquireInfo, &colorImageIndex) != XR_SUCCESS) {
+                    SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to acquire Image from the Color Swapchain");
+                }
+                if (xrAcquireSwapchainImage(depthSwapchainInfo.swapchain, &acquireInfo, &depthImageIndex) != XR_SUCCESS) {
+                    SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to acquire Image from the Depth Swapchain");
+                }
+
+                XrSwapchainImageWaitInfo waitInfo = { XR_TYPE_SWAPCHAIN_IMAGE_WAIT_INFO };
+                waitInfo.timeout = XR_INFINITE_DURATION;
+                if (xrWaitSwapchainImage(colorSwapchainInfo.swapchain, &waitInfo) != XR_SUCCESS) {
+                    SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to wait for Image from the Color Swapchain");
+                }
+                if (xrWaitSwapchainImage(depthSwapchainInfo.swapchain, &waitInfo) != XR_SUCCESS) {
+                    SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to wait for Image from the Depth Swapchain");
+                }
+
+                const uint32_t &width = m_xrViewConfigurationViews[viewIndex].recommendedImageRectWidth;
+                const uint32_t &height = m_xrViewConfigurationViews[viewIndex].recommendedImageRectHeight;
+
+                m_xrCompositorLayerInfo.layerProjectionViews[viewIndex].pose = views[viewIndex].pose;
+                m_xrCompositorLayerInfo.layerProjectionViews[viewIndex].fov = views[viewIndex].fov;
+                m_xrCompositorLayerInfo.layerProjectionViews[viewIndex].subImage.swapchain = colorSwapchainInfo.swapchain;
+                m_xrCompositorLayerInfo.layerProjectionViews[viewIndex].subImage.imageRect = { 0, 0, static_cast<int32_t>(width), static_cast<int32_t>(height) };
+                m_xrCompositorLayerInfo.layerProjectionViews[viewIndex].subImage.imageArrayIndex = 0;
+
+                // TODO: Call subclass render() function to record and submit drawing commands
+                // render();
+
+                // Give the swapchain image back to OpenXR, allowing the compositor to use the image.
+                XrSwapchainImageReleaseInfo releaseInfo{ XR_TYPE_SWAPCHAIN_IMAGE_RELEASE_INFO };
+                if (xrReleaseSwapchainImage(colorSwapchainInfo.swapchain, &releaseInfo) != XR_SUCCESS) {
+                    SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to release Image back to the Color Swapchain");
+                }
+                if (xrReleaseSwapchainImage(depthSwapchainInfo.swapchain, &releaseInfo) != XR_SUCCESS) {
+                    SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to release Image back to the Depth Swapchain");
+                }
+            }
+
+            // Set up the projection layer
+            XrCompositionLayerProjection projectionLayer{ XR_TYPE_COMPOSITION_LAYER_PROJECTION };
+            projectionLayer.layerFlags = XR_COMPOSITION_LAYER_BLEND_TEXTURE_SOURCE_ALPHA_BIT | XR_COMPOSITION_LAYER_CORRECT_CHROMATIC_ABERRATION_BIT;
+            projectionLayer.space = m_xrReferenceSpace;
+            projectionLayer.viewCount = m_xrCompositorLayerInfo.layerProjectionViews.size();
+            projectionLayer.views = m_xrCompositorLayerInfo.layerProjectionViews.data();
+
+            m_xrCompositorLayerInfo.layerProjections.emplace_back(projectionLayer);
+            m_xrCompositorLayerInfo.layers.push_back(reinterpret_cast<XrCompositionLayerBaseHeader *>(&m_xrCompositorLayerInfo.layerProjections.back()));
+        }
+    }
+
+    // Inform the OpenXR compositor that we are done rendering the frame. We must specify the display time,
+    // environment blend mode, and the list of layers to compose.
+    XrFrameEndInfo frameEndInfo{ XR_TYPE_FRAME_END_INFO };
+    frameEndInfo.displayTime = frameState.predictedDisplayTime;
+    frameEndInfo.environmentBlendMode = m_xrEnvironmentBlendMode;
+    frameEndInfo.layerCount = static_cast<uint32_t>(m_xrCompositorLayerInfo.layers.size());
+    frameEndInfo.layers = m_xrCompositorLayerInfo.layers.data();
+    if (xrEndFrame(m_xrSession, &frameEndInfo) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to end frame.");
+        return;
+    }
 }
 
 void XrExampleEngineLayer::event(KDFoundation::EventReceiver *target, KDFoundation::Event *ev)
@@ -463,6 +576,9 @@ void XrExampleEngineLayer::getXrViewConfigurations()
         SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to enumerate EnvironmentBlendModes.");
         return;
     }
+
+    // We will just use the first environment blend mode supported by the system
+    m_xrEnvironmentBlendMode = m_xrEnvironmentBlendModes[0];
 
     // Query the number of view configuration views in the first view configuration supported by the system
     uint32_t viewConfigurationViewCount = 0;
