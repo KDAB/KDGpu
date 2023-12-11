@@ -165,7 +165,7 @@ protected:
     struct SwapchainInfo {
         XrSwapchain swapchain{ XR_NULL_HANDLE };
         std::vector<Texture> images;
-        std::vector<void *> imageViews; // TODO: Use TextureView
+        std::vector<TextureView> imageViews;
     };
     std::vector<SwapchainInfo> m_colorSwapchainInfos;
     std::vector<SwapchainInfo> m_depthSwapchainInfos;

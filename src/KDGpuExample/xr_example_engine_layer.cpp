@@ -12,6 +12,8 @@
 
 #include <KDGpuExample/engine.h>
 
+#include <KDGpu/texture_options.h>
+
 #include <KDGui/gui_application.h>
 
 #include <assert.h>
@@ -582,6 +584,9 @@ void XrExampleEngineLayer::createXrSwapchains()
     m_colorSwapchainInfos.resize(m_xrViewConfigurationViews.size());
     m_depthSwapchainInfos.resize(m_xrViewConfigurationViews.size());
 
+    auto vulkanApi = dynamic_cast<VulkanGraphicsApi *>(m_api.get());
+    assert(vulkanApi);
+
     // Per view, create a color and depth swapchain, and their associated image views.
     for (size_t i = 0; i < m_xrViewConfigurationViews.size(); ++i) {
         {
@@ -617,8 +622,26 @@ void XrExampleEngineLayer::createXrSwapchains()
                 return;
             }
 
-            // TODO: Convert the swapchain images to KDGpu images and create image views for them.
+            // Convert the swapchain images to KDGpu images and create image views for them.
+            colorSwapchainInfo.images.resize(swapchainImageCount);
             colorSwapchainInfo.imageViews.resize(swapchainImageCount);
+            for (int j = 0; j < swapchainImageCount; ++j) {
+                const TextureOptions options = {
+                    .type = TextureType::TextureType2D,
+                    .format = static_cast<KDGpu::Format>(m_xrColorSwapchainFormat),
+                    .extent = {
+                            .width = m_xrViewConfigurationViews[i].recommendedImageRectWidth,
+                            .height = m_xrViewConfigurationViews[i].recommendedImageRectHeight,
+                            .depth = 1 },
+                    .mipLevels = 1,
+                    .samples = static_cast<SampleCountFlagBits>(m_xrViewConfigurationViews[i].recommendedSwapchainSampleCount),
+                    .usage = TextureUsageFlagBits::SampledBit | TextureUsageFlagBits::ColorAttachmentBit,
+                    .memoryUsage = MemoryUsage::GpuOnly
+                };
+                Texture texture = vulkanApi->createTextureFromExistingVkImage(m_device, options, swapchainImages[j].image);
+                colorSwapchainInfo.images[j] = std::move(texture);
+                colorSwapchainInfo.imageViews[j] = colorSwapchainInfo.images[j].createView();
+            }
         }
 
         {
@@ -654,8 +677,26 @@ void XrExampleEngineLayer::createXrSwapchains()
                 return;
             }
 
-            // TODO: Convert the swapchain images to KDGpu images and create image views for them.
+            // Convert the swapchain images to KDGpu images and create image views for them.
+            depthSwapchainInfo.images.resize(swapchainImageCount);
             depthSwapchainInfo.imageViews.resize(swapchainImageCount);
+            for (int j = 0; j < swapchainImageCount; ++j) {
+                const TextureOptions options = {
+                    .type = TextureType::TextureType2D,
+                    .format = static_cast<KDGpu::Format>(m_xrDepthSwapchainFormat),
+                    .extent = {
+                            .width = m_xrViewConfigurationViews[i].recommendedImageRectWidth,
+                            .height = m_xrViewConfigurationViews[i].recommendedImageRectHeight,
+                            .depth = 1 },
+                    .mipLevels = 1,
+                    .samples = static_cast<SampleCountFlagBits>(m_xrViewConfigurationViews[i].recommendedSwapchainSampleCount),
+                    .usage = TextureUsageFlagBits::SampledBit | TextureUsageFlagBits::DepthStencilAttachmentBit,
+                    .memoryUsage = MemoryUsage::GpuOnly
+                };
+                Texture texture = vulkanApi->createTextureFromExistingVkImage(m_device, options, swapchainImages[j].image);
+                depthSwapchainInfo.images[j] = std::move(texture);
+                depthSwapchainInfo.imageViews[j] = depthSwapchainInfo.images[j].createView();
+            }
         }
     }
 }
