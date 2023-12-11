@@ -25,7 +25,7 @@
 
 #include <KDFoundation/logging.h>
 
-#include <KDBindings/property.h>
+#include <kdbindings/property.h>
 
 #include <openxr/openxr.h>
 #define XR_USE_GRAPHICS_API_VULKAN
