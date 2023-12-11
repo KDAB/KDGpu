@@ -7,7 +7,9 @@
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
 # OpenXR SDK
-if(NOT TARGET openxr_loader)
+find_package(OpenXR QUIET)
+
+if(NOT TARGET OpenXR::openxr_loader)
     set(BUILD_TESTS
         OFF
         CACHE INTERNAL "Build tests"
