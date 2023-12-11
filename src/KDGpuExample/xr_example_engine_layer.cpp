@@ -703,6 +703,23 @@ void XrExampleEngineLayer::createXrSwapchains()
 
 void XrExampleEngineLayer::destroyXrSwapchains()
 {
+    for (auto &colorSwapchainInfo : m_colorSwapchainInfos) {
+        colorSwapchainInfo.imageViews.clear();
+        colorSwapchainInfo.images.clear();
+        if (xrDestroySwapchain(colorSwapchainInfo.swapchain) != XR_SUCCESS) {
+            SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to destroy OpenXR Color Swapchain.");
+        }
+    }
+    m_colorSwapchainInfos.clear();
+
+    for (auto &depthSwapchainInfo : m_depthSwapchainInfos) {
+        depthSwapchainInfo.imageViews.clear();
+        depthSwapchainInfo.images.clear();
+        if (xrDestroySwapchain(depthSwapchainInfo.swapchain) != XR_SUCCESS) {
+            SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to destroy OpenXR Depth Swapchain.");
+        }
+    }
+    m_depthSwapchainInfos.clear();
 }
 
 void XrExampleEngineLayer::pollXrEvents()
