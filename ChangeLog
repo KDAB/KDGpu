@@ -1,3 +1,7 @@
+- v0.4.4
+  - Fix TextureOploadOptions/WaitForTextureOploadOptions logic and initialization
+  - Handle now has operator < to allow std::map storage
+  - doctest dependency fix when using local KDUtils package
 - v0.4.3
   - Fix logging registry to check for existing logger before creation
   - Add createTextureFromExistingVkImage
