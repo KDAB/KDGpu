@@ -98,6 +98,9 @@ void XrExampleEngineLayer::onDetached()
 
 void XrExampleEngineLayer::update()
 {
+    // Release any staging buffers we are done with
+    releaseStagingBuffers();
+
     pollXrEvents();
 }
 
@@ -818,14 +821,24 @@ void XrExampleEngineLayer::pollXrEvents()
 
 void XrExampleEngineLayer::uploadBufferData(const BufferUploadOptions &options)
 {
+    m_stagingBuffers.emplace_back(m_queue.uploadBufferData(options));
 }
 
 void XrExampleEngineLayer::uploadTextureData(const TextureUploadOptions &options)
 {
+    m_stagingBuffers.emplace_back(m_queue.uploadTextureData(options));
 }
 
 void XrExampleEngineLayer::releaseStagingBuffers()
 {
+    // Loop over any staging buffers and see if the corresponding fence has been signalled.
+    // If so, we can dispose of them
+    const auto removedCount = std::erase_if(m_stagingBuffers, [](const UploadStagingBuffer &stagingBuffer) {
+        return stagingBuffer.fence.status() == FenceStatus::Signalled;
+    });
+    if (removedCount) {
+        SPDLOG_LOGGER_INFO(m_logger, "Released {} staging buffers", removedCount);
+    }
 }
 
 } // namespace KDGpuExample
