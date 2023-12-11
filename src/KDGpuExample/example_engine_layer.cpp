@@ -118,8 +118,9 @@ void ExampleEngineLayer::releaseStagingBuffers()
     const auto removedCount = std::erase_if(m_stagingBuffers, [](const UploadStagingBuffer &stagingBuffer) {
         return stagingBuffer.fence.status() == FenceStatus::Signalled;
     });
-    if (removedCount)
+    if (removedCount) {
         SPDLOG_LOGGER_INFO(m_logger, "Released {} staging buffers", removedCount);
+    }
 }
 
 void ExampleEngineLayer::recreateImGuiOverlay()
