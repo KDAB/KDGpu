@@ -44,12 +44,6 @@ using namespace KDGpu;
 
 namespace KDGpuExample {
 
-// This determines the maximum number of frames that can be in-flight at any one time.
-// With the default setting of 2, we can be recording the commands for frame N+1 whilst
-// the GPU is executing those for frame N. We cannot then record commands for frame N+2
-// until the GPU signals it is done with frame N.
-constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;
-
 /**
     @class XrExampleEngineLayer
     @brief XrExampleEngineLayer provides a base for OpenXR examples.
@@ -66,7 +60,7 @@ protected:
     virtual void initializeScene() = 0;
     virtual void cleanupScene() = 0;
     virtual void updateScene() = 0;
-    virtual void render() = 0;
+    virtual void renderView() = 0; // To render a single view at a time
     virtual void resize() = 0;
 
     void onAttached() override;
@@ -116,14 +110,6 @@ protected:
     Surface m_surface;
     Device m_device;
     Queue m_queue;
-    Swapchain m_swapchain;
-    std::vector<TextureView> m_swapchainViews;
-    Texture m_depthTexture;
-    TextureView m_depthTextureView;
-
-    uint32_t m_currentSwapchainImageIndex{ 0 };
-    uint32_t m_inFlightIndex{ 0 };
-    TextureUsageFlags m_depthTextureUsageFlags{};
 
     std::vector<UploadStagingBuffer> m_stagingBuffers;
 
@@ -201,6 +187,11 @@ protected:
         }
     };
     CompositorLayerInfo m_xrCompositorLayerInfo;
+
+    uint32_t m_currentViewIndex{ 0 };
+    XrView m_currentView{ XR_TYPE_VIEW };
+    uint32_t m_currentColorImageIndex{ 0 };
+    uint32_t m_currentDepthImageIndex{ 0 };
 };
 
 } // namespace KDGpuExample

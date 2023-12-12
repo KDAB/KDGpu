@@ -81,6 +81,9 @@ void XrExampleEngineLayer::onAttached()
     createXrSession();
     createXrReferenceSpace();
     createXrSwapchains();
+
+    // Delegate to subclass to initialize scene
+    initializeScene();
 }
 
 void XrExampleEngineLayer::onDetached()
@@ -141,23 +144,22 @@ void XrExampleEngineLayer::update()
         if (xrLocateViews(m_xrSession, &viewLocateInfo, &viewState, static_cast<uint32_t>(views.size()), &viewCount, views.data()) != XR_SUCCESS) {
             SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to locate views.");
         } else {
-            // TODO: Call updateScene() function to update scene state.
-            // updateScene();
+            // Call updateScene() function to update scene state.
+            // TODO: Can we do this once, or should it be per view?
+            updateScene();
 
             m_xrCompositorLayerInfo.layerProjectionViews.resize(viewCount, { XR_TYPE_COMPOSITION_LAYER_PROJECTION_VIEW });
 
-            for (uint32_t viewIndex = 0; viewIndex < viewCount; ++viewIndex) {
+            for (m_currentViewIndex = 0; m_currentViewIndex < viewCount; ++m_currentViewIndex) {
                 // Acquire and wait for the swapchain images to become available for the color and depth swapchains
-                SwapchainInfo &colorSwapchainInfo = m_colorSwapchainInfos[viewIndex];
-                SwapchainInfo &depthSwapchainInfo = m_depthSwapchainInfos[viewIndex];
+                SwapchainInfo &colorSwapchainInfo = m_colorSwapchainInfos[m_currentViewIndex];
+                SwapchainInfo &depthSwapchainInfo = m_depthSwapchainInfos[m_currentViewIndex];
 
-                uint32_t colorImageIndex = 0;
-                uint32_t depthImageIndex = 0;
                 XrSwapchainImageAcquireInfo acquireInfo{ XR_TYPE_SWAPCHAIN_IMAGE_ACQUIRE_INFO };
-                if (xrAcquireSwapchainImage(colorSwapchainInfo.swapchain, &acquireInfo, &colorImageIndex) != XR_SUCCESS) {
+                if (xrAcquireSwapchainImage(colorSwapchainInfo.swapchain, &acquireInfo, &m_currentColorImageIndex) != XR_SUCCESS) {
                     SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to acquire Image from the Color Swapchain");
                 }
-                if (xrAcquireSwapchainImage(depthSwapchainInfo.swapchain, &acquireInfo, &depthImageIndex) != XR_SUCCESS) {
+                if (xrAcquireSwapchainImage(depthSwapchainInfo.swapchain, &acquireInfo, &m_currentDepthImageIndex) != XR_SUCCESS) {
                     SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to acquire Image from the Depth Swapchain");
                 }
 
@@ -170,17 +172,18 @@ void XrExampleEngineLayer::update()
                     SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to wait for Image from the Depth Swapchain");
                 }
 
-                const uint32_t &width = m_xrViewConfigurationViews[viewIndex].recommendedImageRectWidth;
-                const uint32_t &height = m_xrViewConfigurationViews[viewIndex].recommendedImageRectHeight;
+                const uint32_t &width = m_xrViewConfigurationViews[m_currentViewIndex].recommendedImageRectWidth;
+                const uint32_t &height = m_xrViewConfigurationViews[m_currentViewIndex].recommendedImageRectHeight;
 
-                m_xrCompositorLayerInfo.layerProjectionViews[viewIndex].pose = views[viewIndex].pose;
-                m_xrCompositorLayerInfo.layerProjectionViews[viewIndex].fov = views[viewIndex].fov;
-                m_xrCompositorLayerInfo.layerProjectionViews[viewIndex].subImage.swapchain = colorSwapchainInfo.swapchain;
-                m_xrCompositorLayerInfo.layerProjectionViews[viewIndex].subImage.imageRect = { 0, 0, static_cast<int32_t>(width), static_cast<int32_t>(height) };
-                m_xrCompositorLayerInfo.layerProjectionViews[viewIndex].subImage.imageArrayIndex = 0;
+                m_xrCompositorLayerInfo.layerProjectionViews[m_currentViewIndex].pose = views[m_currentViewIndex].pose;
+                m_xrCompositorLayerInfo.layerProjectionViews[m_currentViewIndex].fov = views[m_currentViewIndex].fov;
+                m_xrCompositorLayerInfo.layerProjectionViews[m_currentViewIndex].subImage.swapchain = colorSwapchainInfo.swapchain;
+                m_xrCompositorLayerInfo.layerProjectionViews[m_currentViewIndex].subImage.imageRect = { 0, 0, static_cast<int32_t>(width), static_cast<int32_t>(height) };
+                m_xrCompositorLayerInfo.layerProjectionViews[m_currentViewIndex].subImage.imageArrayIndex = 0;
 
-                // TODO: Call subclass render() function to record and submit drawing commands
-                // render();
+                // Call subclass renderView() function to record and submit drawing commands for the current view
+                m_currentView = views[m_currentViewIndex];
+                renderView();
 
                 // Give the swapchain image back to OpenXR, allowing the compositor to use the image.
                 XrSwapchainImageReleaseInfo releaseInfo{ XR_TYPE_SWAPCHAIN_IMAGE_RELEASE_INFO };

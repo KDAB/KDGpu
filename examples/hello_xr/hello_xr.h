@@ -28,7 +28,7 @@ protected:
     void initializeScene() override;
     void cleanupScene() override;
     void updateScene() override;
-    void render() override;
+    void renderView() override;
     void resize() override;
 
 private:
@@ -42,4 +42,5 @@ private:
     glm::mat4 m_transform;
     Buffer m_transformBuffer;
     BindGroup m_transformBindGroup;
+    Fence m_fence;
 };

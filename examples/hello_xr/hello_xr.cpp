@@ -198,10 +198,18 @@ void HelloXr::initializeScene()
             }
         },
         .depthStencilAttachment = {
-            .view = m_depthTextureView,
+            .view = {} // Not setting the depth texture view just yet
         }
     };
     // clang-format on
+
+    // We will use a fence to synchronize CPU and GPU. When we render image for each view (eye), we
+    // shall wait for the fence to be signaled before we update any shared resources such as a view
+    // matrix UBO (not used yet). An alternative would be to index into an array of such matrices.
+    const FenceOptions fenceOptions = {
+        .label = "View Fence"
+    };
+    m_fence = m_device.createFence(fenceOptions);
 }
 
 void HelloXr::cleanupScene()
@@ -235,15 +243,18 @@ void HelloXr::updateScene()
 
 void HelloXr::resize()
 {
-    // Swapchain might have been resized and texture views recreated. Ensure we update the PassOptions accordingly
-    m_opaquePassOptions.depthStencilAttachment.view = m_depthTextureView;
 }
 
-void HelloXr::render()
+void HelloXr::renderView()
 {
+    m_fence.wait();
+    m_fence.reset();
+
     auto commandRecorder = m_device.createCommandRecorder();
 
-    m_opaquePassOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex);
+    // Set up the render pass using the current color and depth texture views
+    m_opaquePassOptions.colorAttachments[0].view = m_colorSwapchainInfos[m_currentViewIndex].imageViews[m_currentColorImageIndex];
+    m_opaquePassOptions.depthStencilAttachment.view = m_depthSwapchainInfos[m_currentViewIndex].imageViews[m_currentDepthImageIndex];
     auto opaquePass = commandRecorder.beginRenderPass(m_opaquePassOptions);
 
     opaquePass.setPipeline(m_pipeline);
@@ -255,10 +266,9 @@ void HelloXr::render()
     opaquePass.end();
     m_commandBuffer = commandRecorder.finish();
 
-    // const SubmitOptions submitOptions = {
-    //     .commandBuffers = { m_commandBuffer },
-    //     .waitSemaphores = { m_presentCompleteSemaphores[m_inFlightIndex] },
-    //     .signalSemaphores = { m_renderCompleteSemaphores[m_inFlightIndex] }
-    // };
-    // m_queue.submit(submitOptions);
+    const SubmitOptions submitOptions = {
+        .commandBuffers = { m_commandBuffer },
+        .signalFence = m_fence
+    };
+    m_queue.submit(submitOptions);
 }
