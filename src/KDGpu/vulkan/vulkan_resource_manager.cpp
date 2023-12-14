@@ -46,9 +46,16 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
     // https://github.com/KhronosGroup/Vulkan-ValidationLayers/issues/1340
     //
     // Ignore this false positive.
-    const char *ignore = "VUID-VkSwapchainCreateInfoKHR-imageExtent-01274";
-    if (pCallbackData->pMessageIdName != nullptr && strcmp(ignore, pCallbackData->pMessageIdName) == 0)
-        return false;
+    std::vector<const char *> ignore = {
+        "VUID-VkSwapchainCreateInfoKHR-imageExtent-01274",
+        "VUID-VkImageMemoryBarrier-oldLayout-01208", // Meta XR Simulator
+        "UNASSIGNED-CoreValidation-DrawState-InvalidImageAspect" // Meta XR Simulator
+    };
+
+    for (const char *i : ignore) {
+        if (pCallbackData->pMessageIdName != nullptr && strcmp(i, pCallbackData->pMessageIdName) == 0)
+            return false;
+    }
 
     switch (messageSeverity) {
     case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:

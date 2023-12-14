@@ -52,6 +52,7 @@ set(SOURCES
     imgui_item.cpp
     imgui_renderer.cpp
     simple_example_engine_layer.cpp
+    view_projection.cpp
 )
 
 set(HEADERS
@@ -64,6 +65,7 @@ set(HEADERS
     imgui_item.h
     imgui_renderer.h
     simple_example_engine_layer.h
+    view_projection.h
 )
 
 if(KDGPU_OPENXR_SUPPORT)
@@ -85,6 +87,7 @@ set(KDGPUEXAMPLE_PUBLIC_LIBS
     KDUtils::KDUtils
     imgui::imgui
     KDGpu::KDGpuKDGui
+    glm::glm
 )
 
 if(KDGPU_OPENXR_SUPPORT)

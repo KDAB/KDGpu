@@ -144,8 +144,34 @@ void XrExampleEngineLayer::update()
         if (xrLocateViews(m_xrSession, &viewLocateInfo, &viewState, static_cast<uint32_t>(views.size()), &viewCount, views.data()) != XR_SUCCESS) {
             SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to locate views.");
         } else {
+            // Store the XrView data for use in the subclass render functions
+            for (uint32_t i = 0; i < viewCount; ++i) {
+                // clang-format off
+                m_views[i] = {
+                    .pose = {
+                        .orientation = glm::quat{
+                            views[i].pose.orientation.w,
+                            views[i].pose.orientation.x,
+                            views[i].pose.orientation.y,
+                            views[i].pose.orientation.z
+                        },
+                        .position = {
+                            views[i].pose.position.x,
+                            views[i].pose.position.y,
+                            views[i].pose.position.z
+                        }
+                    },
+                    .fieldOfView = {
+                        .angleLeft = views[i].fov.angleLeft,
+                        .angleRight = views[i].fov.angleRight,
+                        .angleUp = views[i].fov.angleUp,
+                        .angleDown = views[i].fov.angleDown
+                    }
+                };
+                // clang-format on
+            }
+
             // Call updateScene() function to update scene state.
-            // TODO: Can we do this once, or should it be per view?
             updateScene();
 
             m_xrCompositorLayerInfo.layerProjectionViews.resize(viewCount, { XR_TYPE_COMPOSITION_LAYER_PROJECTION_VIEW });
@@ -182,7 +208,6 @@ void XrExampleEngineLayer::update()
                 m_xrCompositorLayerInfo.layerProjectionViews[m_currentViewIndex].subImage.imageArrayIndex = 0;
 
                 // Call subclass renderView() function to record and submit drawing commands for the current view
-                m_currentView = views[m_currentViewIndex];
                 renderView();
 
                 // Give the swapchain image back to OpenXR, allowing the compositor to use the image.
@@ -823,7 +848,7 @@ void XrExampleEngineLayer::createXrSwapchains()
                 };
                 Texture texture = vulkanApi->createTextureFromExistingVkImage(m_device, options, swapchainImages[j].image);
                 depthSwapchainInfo.images[j] = std::move(texture);
-                depthSwapchainInfo.imageViews[j] = depthSwapchainInfo.images[j].createView();
+                depthSwapchainInfo.imageViews[j] = depthSwapchainInfo.images[j].createView({ .range = { .aspectMask = TextureAspectFlagBits::DepthBit } });
             }
         }
     }

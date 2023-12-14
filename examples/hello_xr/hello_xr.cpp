@@ -12,12 +12,16 @@
 
 #include <KDGpuExample/engine.h>
 #include <KDGpuExample/kdgpuexample.h>
+#include <KDGpuExample/view_projection.h>
 
 #include <KDGpu/bind_group_layout_options.h>
 #include <KDGpu/bind_group_options.h>
 #include <KDGpu/buffer_options.h>
 #include <KDGpu/graphics_pipeline_options.h>
 
+#include <KDFoundation/formatters.h>
+
+#include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
 
 #include <cmath>
@@ -46,16 +50,18 @@ void HelloXr::initializeScene()
 
     // Create a buffer to hold triangle vertex data
     {
+        // This is in model space which is y-up in this example. Note this is upside down vs the hello_triangle example which
+        // draws the triangle directly in NDC space which is y-down.
         const float r = 0.8f;
         const std::array<Vertex, 3> vertexData = {
             Vertex{ // Bottom-left, red
-                    .position = { r * cosf(7.0f * M_PI / 6.0f), -r * sinf(7.0f * M_PI / 6.0f), 0.0f },
+                    .position = { r * cosf(7.0f * M_PI / 6.0f), r * sinf(7.0f * M_PI / 6.0f), 0.0f },
                     .color = { 1.0f, 0.0f, 0.0f } },
             Vertex{ // Bottom-right, green
-                    .position = { r * cosf(11.0f * M_PI / 6.0f), -r * sinf(11.0f * M_PI / 6.0f), 0.0f },
+                    .position = { r * cosf(11.0f * M_PI / 6.0f), r * sinf(11.0f * M_PI / 6.0f), 0.0f },
                     .color = { 0.0f, 1.0f, 0.0f } },
             Vertex{ // Top, blue
-                    .position = { 0.0f, -r, 0.0f },
+                    .position = { 0.0f, r, 0.0f },
                     .color = { 0.0f, 0.0f, 1.0f } }
         };
 
@@ -98,7 +104,7 @@ void HelloXr::initializeScene()
         uploadBufferData(uploadOptions);
     }
 
-    // Create a buffer to hold the transformation matrix
+    // Create a buffer to hold the entity transformation matrix
     {
         const BufferOptions bufferOptions = {
             .label = "Transformation Buffer",
@@ -115,17 +121,36 @@ void HelloXr::initializeScene()
         m_transformBuffer.unmap();
     }
 
+    // Create a buffer to hold the camera view and projection matrices
+    {
+        const BufferOptions bufferOptions = {
+            .label = "Camera Buffer",
+            .size = sizeof(glm::mat4) * 2,
+            .usage = BufferUsageFlagBits::UniformBufferBit,
+            .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
+        };
+        m_cameraBuffer = m_device.createBuffer(bufferOptions);
+
+        // Upload identity matrices. Updated below in updateScene()
+        glm::mat4 viewMatrix(1.0f);
+        glm::mat4 projectionMatrix(1.0f);
+        auto bufferData = static_cast<float *>(m_cameraBuffer.map());
+        std::memcpy(bufferData, glm::value_ptr(viewMatrix), sizeof(glm::mat4));
+        std::memcpy(bufferData + 16, glm::value_ptr(projectionMatrix), sizeof(glm::mat4));
+        m_cameraBuffer.unmap();
+    }
+
     // Create a vertex shader and fragment shader
-    const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_triangle/hello_triangle.vert.spv";
+    const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_xr/hello_xr.vert.spv";
     auto vertexShader = m_device.createShaderModule(KDGpuExample::readShaderFile(vertexShaderPath));
 
-    const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_triangle/hello_triangle.frag.spv";
+    const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_xr/hello_xr.frag.spv";
     auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
 
-    // Create bind group layout consisting of a single binding holding a UBO
+    // Create bind group layout consisting of a single binding holding a UBO for the entity transform
     // clang-format off
-    const BindGroupLayoutOptions bindGroupLayoutOptions = {
-        .label = "Transform Bind Group",
+    const BindGroupLayoutOptions entityBindGroupLayoutOptions = {
+        .label = "Entity Transform Bind Group",
         .bindings = {{
             .binding = 0,
             .resourceType = ResourceBindingType::UniformBuffer,
@@ -133,12 +158,25 @@ void HelloXr::initializeScene()
         }}
     };
     // clang-format on
-    const BindGroupLayout bindGroupLayout = m_device.createBindGroupLayout(bindGroupLayoutOptions);
+    const BindGroupLayout entityBindGroupLayout = m_device.createBindGroupLayout(entityBindGroupLayoutOptions);
+
+    // Create bind group layout consisting of a single binding holding a UBO for the camera view and projection matrices
+    // clang-format off
+    const BindGroupLayoutOptions cameraBindGroupLayoutOptions = {
+        .label = "Camera Transform Bind Group",
+        .bindings = {{
+            .binding = 0,
+            .resourceType = ResourceBindingType::UniformBuffer,
+            .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit)
+        }}
+    };
+    // clang-format on
+    const BindGroupLayout cameraBindGroupLayout = m_device.createBindGroupLayout(cameraBindGroupLayoutOptions);
 
     // Create a pipeline layout (array of bind group layouts)
     const PipelineLayoutOptions pipelineLayoutOptions = {
         .label = "Triangle",
-        .bindGroupLayouts = { bindGroupLayout }
+        .bindGroupLayouts = { entityBindGroupLayout, cameraBindGroupLayout }
     };
     m_pipelineLayout = m_device.createPipelineLayout(pipelineLayoutOptions);
 
@@ -167,23 +205,39 @@ void HelloXr::initializeScene()
             .format = m_depthSwapchainFormat,
             .depthWritesEnabled = true,
             .depthCompareOperation = CompareOperation::Less
+        },
+        .primitive = {
+            .cullMode = CullModeFlagBits::None
         }
     };
     // clang-format on
     m_pipeline = m_device.createGraphicsPipeline(pipelineOptions);
 
-    // Create a bindGroup to hold the UBO with the transform
+    // Create a bindGroup to hold the UBO with the entity transform
     // clang-format off
-    const BindGroupOptions bindGroupOptions = {
+    const BindGroupOptions entityBindGroupOptions = {
         .label = "Transform Bind Group",
-        .layout = bindGroupLayout,
+        .layout = entityBindGroupLayout,
         .resources = {{
             .binding = 0,
             .resource = UniformBufferBinding{ .buffer = m_transformBuffer }
         }}
     };
     // clang-format on
-    m_transformBindGroup = m_device.createBindGroup(bindGroupOptions);
+    m_entityTransformBindGroup = m_device.createBindGroup(entityBindGroupOptions);
+
+    // Create a bindGroup to hold the UBO with the camera view and projection matrices
+    // clang-format off
+    const BindGroupOptions cameraBindGroupOptions = {
+        .label = "Camera Bind Group",
+        .layout = cameraBindGroupLayout,
+        .resources = {{
+            .binding = 0,
+            .resource = UniformBufferBinding{ .buffer = m_cameraBuffer }
+        }}
+    };
+    // clang-format on
+    m_cameraBindGroup = m_device.createBindGroup(cameraBindGroupOptions);
 
     // Most of the render pass is the same between frames. The only thing that changes, is which image
     // of the swapchain we wish to render to. So set up what we can here, and in the render loop we will
@@ -194,7 +248,7 @@ void HelloXr::initializeScene()
             {
                 .view = {}, // Not setting the swapchain texture view just yet
                 .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
-                .finalLayout = TextureLayout::PresentSrc
+                .finalLayout = TextureLayout::ColorAttachmentOptimal
             }
         },
         .depthStencilAttachment = {
@@ -218,13 +272,36 @@ void HelloXr::cleanupScene()
     m_pipelineLayout = {};
     m_buffer = {};
     m_indexBuffer = {};
-    m_transformBindGroup = {};
+    m_entityTransformBindGroup = {};
     m_transformBuffer = {};
     m_commandBuffer = {};
 }
 
+// In this function we will update our local copy of the view matrices and transform
+// data. Note that we do not update the UBOs here as the GPU may still be reading from
+// them at this stage. We cannot be sure it is safe to update the GPU data until we
+// have waited for the fence to be signaled in the renderView() function.
 void HelloXr::updateScene()
 {
+    // Update the camera data for each view
+    for (uint32_t viewIndex = 0; viewIndex < MAX_VIEWS; ++viewIndex) {
+        // clang-format off
+        m_cameraData[viewIndex].view = viewMatrix({
+            .orientation = m_views[viewIndex].pose.orientation,
+            .position = m_views[viewIndex].pose.position
+        });
+        m_cameraData[viewIndex].projection = perspective({
+            .leftFieldOfView = m_views[viewIndex].fieldOfView.angleLeft,
+            .rightFieldOfView = m_views[viewIndex].fieldOfView.angleRight,
+            .upFieldOfView = m_views[viewIndex].fieldOfView.angleUp,
+            .downFieldOfView = m_views[viewIndex].fieldOfView.angleDown,
+            .nearPlane = m_nearPlane,
+            .farPlane = m_farPlane,
+            .applyPostViewCorrection = ApplyPostViewCorrection::Yes
+        });
+        // clang-format on
+    }
+
     // Each frame we want to rotate the triangle a little
     static float angle = 0.0f;
     const float angularSpeed = 3.0f; // degrees per second
@@ -233,22 +310,47 @@ void HelloXr::updateScene()
     if (angle > 360.0f)
         angle -= 360.0f;
 
-    m_transform = glm::mat4(1.0f);
-    m_transform = glm::rotate(m_transform, glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
+    const float t = engine()->simulationTime().count() / 1.0e9;
+    float xPos = 0.0f;
+    // Uncomment to make the triangle slide from side to side
+    xPos = 2.0f * std::sin(t);
 
-    auto bufferData = m_transformBuffer.map();
-    std::memcpy(bufferData, &m_transform, sizeof(glm::mat4));
-    m_transformBuffer.unmap();
+    m_transform = glm::mat4(1.0f);
+    m_transform = glm::translate(m_transform, glm::vec3(xPos, 0.0f, -0.5f)); // Move triangle to 1.5m above the ground and 2m in front of the camera
+    m_transform = glm::rotate(m_transform, glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
 }
 
 void HelloXr::resize()
 {
 }
 
+void HelloXr::updateTransformUbo()
+{
+    auto bufferData = m_transformBuffer.map();
+    std::memcpy(bufferData, &m_transform, sizeof(glm::mat4));
+    m_transformBuffer.unmap();
+}
+
+void HelloXr::updateViewUbo()
+{
+    auto cameraBufferData = static_cast<float *>(m_cameraBuffer.map());
+    std::memcpy(cameraBufferData, glm::value_ptr(m_cameraData[m_currentViewIndex].projection), sizeof(glm::mat4));
+    std::memcpy(cameraBufferData + 16, glm::value_ptr(m_cameraData[m_currentViewIndex].view), sizeof(glm::mat4));
+    m_cameraBuffer.unmap();
+}
+
 void HelloXr::renderView()
 {
     m_fence.wait();
     m_fence.reset();
+
+    // Update the scene data once per frame
+    if (m_currentViewIndex == 0) {
+        updateTransformUbo();
+    }
+
+    // Update the per-view camera matrices
+    updateViewUbo();
 
     auto commandRecorder = m_device.createCommandRecorder();
 
@@ -260,7 +362,8 @@ void HelloXr::renderView()
     opaquePass.setPipeline(m_pipeline);
     opaquePass.setVertexBuffer(0, m_buffer);
     opaquePass.setIndexBuffer(m_indexBuffer);
-    opaquePass.setBindGroup(0, m_transformBindGroup);
+    opaquePass.setBindGroup(0, m_cameraBindGroup);
+    opaquePass.setBindGroup(1, m_entityTransformBindGroup);
     const DrawIndexedCommand drawCmd = { .indexCount = 3 };
     opaquePass.drawIndexed(drawCmd);
     opaquePass.end();

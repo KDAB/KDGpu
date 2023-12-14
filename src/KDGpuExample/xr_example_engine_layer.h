@@ -27,6 +27,9 @@
 
 #include <kdbindings/property.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+
 #include <openxr/openxr.h>
 #define XR_USE_GRAPHICS_API_VULKAN
 #include <openxr/openxr_platform.h>
@@ -41,8 +44,9 @@ class RenderPassCommandRecorder;
 }
 
 using namespace KDGpu;
-
 namespace KDGpuExample {
+
+constexpr uint32_t MAX_VIEWS = 2;
 
 /**
     @class XrExampleEngineLayer
@@ -189,9 +193,28 @@ protected:
     CompositorLayerInfo m_xrCompositorLayerInfo;
 
     uint32_t m_currentViewIndex{ 0 };
-    XrView m_currentView{ XR_TYPE_VIEW };
     uint32_t m_currentColorImageIndex{ 0 };
     uint32_t m_currentDepthImageIndex{ 0 };
+
+    // TODO: Extract into structs in KDXr
+    struct Pose {
+        glm::quat orientation{};
+        glm::vec3 position{ 0.0f };
+    };
+
+    struct FieldOfView {
+        float angleLeft{ 0.0f };
+        float angleRight{ 0.0f };
+        float angleUp{ 0.0f };
+        float angleDown{ 0.0f };
+    };
+
+    struct View {
+        Pose pose{};
+        FieldOfView fieldOfView{};
+    };
+
+    std::array<View, MAX_VIEWS> m_views;
 };
 
 } // namespace KDGpuExample

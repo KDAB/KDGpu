@@ -19,6 +19,8 @@
 
 #include <glm/glm.hpp>
 
+#include <array>
+
 using namespace KDGpuExample;
 
 class HelloXr : public XrExampleEngineLayer
@@ -32,6 +34,20 @@ protected:
     void resize() override;
 
 private:
+    void updateTransformUbo();
+    void updateViewUbo();
+
+    struct CameraData {
+        glm::mat4 view;
+        glm::mat4 projection;
+    };
+
+    std::array<CameraData, MAX_VIEWS> m_cameraData;
+    float m_nearPlane{ 0.05f };
+    float m_farPlane{ 100.0f };
+    Buffer m_cameraBuffer;
+    BindGroup m_cameraBindGroup;
+
     Buffer m_buffer;
     Buffer m_indexBuffer;
     PipelineLayout m_pipelineLayout;
@@ -41,6 +57,6 @@ private:
 
     glm::mat4 m_transform;
     Buffer m_transformBuffer;
-    BindGroup m_transformBindGroup;
+    BindGroup m_entityTransformBindGroup;
     Fence m_fence;
 };
