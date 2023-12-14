@@ -689,6 +689,9 @@ void XrExampleEngineLayer::createXrSwapchains()
         return;
     }
 
+    // Store the swapchain format for the subclass to use
+    m_colorSwapchainFormat = static_cast<KDGpu::Format>(m_xrColorSwapchainFormat);
+
     // Pick the first application supported depth swapchain format supported by the hardware.
     for (const auto &swapchainFormat : m_applicationDepthSwapchainFormats) {
         const int64_t swapchainFormatInt = static_cast<int64_t>(swapchainFormat);
@@ -702,6 +705,9 @@ void XrExampleEngineLayer::createXrSwapchains()
         SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to find a supported SwapchainFormat.");
         return;
     }
+
+    // Store the depth swapchain format for the subclass to use
+    m_depthSwapchainFormat = static_cast<KDGpu::Format>(m_xrDepthSwapchainFormat);
 
     m_colorSwapchainInfos.resize(m_xrViewConfigurationViews.size());
     m_depthSwapchainInfos.resize(m_xrViewConfigurationViews.size());

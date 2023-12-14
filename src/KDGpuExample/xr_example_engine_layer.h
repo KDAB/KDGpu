@@ -113,8 +113,8 @@ protected:
 
     std::vector<UploadStagingBuffer> m_stagingBuffers;
 
-    const Format m_swapchainFormat{ Format::B8G8R8A8_UNORM };
-    Format m_depthFormat;
+    Format m_colorSwapchainFormat{ Format::UNDEFINED };
+    Format m_depthSwapchainFormat{ Format::UNDEFINED };
 
     // Xr related members
     std::vector<std::string> m_xrRequestedApiLayers{};

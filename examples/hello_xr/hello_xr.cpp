@@ -161,10 +161,10 @@ void HelloXr::initializeScene()
             }
         },
         .renderTargets = {
-            { .format = m_swapchainFormat }
+            { .format = m_colorSwapchainFormat }
         },
         .depthStencil = {
-            .format = m_depthFormat,
+            .format = m_depthSwapchainFormat,
             .depthWritesEnabled = true,
             .depthCompareOperation = CompareOperation::Less
         }
