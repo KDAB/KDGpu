@@ -18,27 +18,12 @@
 #include <KDGpu/texture_options.h>
 #include <KDGui/gui_events.h>
 
-// TODO: Move to a better location. This is just to test the OpenXR integration
-#if defined(KDGPU_OPENXR)
-#include <openxr/openxr.h>
-#endif
-
 #include <algorithm>
 
 namespace KDGpuExample {
 
 SimpleExampleEngineLayer::~SimpleExampleEngineLayer()
 {
-#if defined(KDGPU_OPENXR)
-    // Just try calling something simple in OpenXR to see if it works
-    uint32_t apiLayerCount = 0;
-    std::vector<XrApiLayerProperties> apiLayerProperties;
-    if (xrEnumerateApiLayerProperties(0, &apiLayerCount, nullptr) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to enumerate API layers");
-        return;
-    }
-    SPDLOG_LOGGER_CRITICAL(m_logger, "Found {} OpenXR API layers", apiLayerCount);
-#endif
 }
 
 void SimpleExampleEngineLayer::update()
