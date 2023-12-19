@@ -12,6 +12,10 @@ if(KDGPU_BUILD_KDGPUKDGUI)
     add_subdirectory(KDGpuKDGui)
 endif()
 
+if(KDGPU_BUILD_KDXR)
+    add_subdirectory(kdxr)
+endif()
+
 if(KDGPU_BUILD_KDGPUEXAMPLE)
     add_subdirectory(KDGpuExample)
 endif()

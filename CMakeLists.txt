@@ -81,6 +81,7 @@ cmake_dependent_option(
 )
 option(KDGPU_HLSL_SUPPORT "Try to find and use the dxc HLSL to SPIR-V compiler" OFF)
 
+option(KDGPU_BUILD_KDXR "Build KDXr" ON)
 option(KDGPU_OPENXR_SUPPORT "Enable support for OpenXR" ON)
 if(KDGPU_OPENXR_SUPPORT)
     add_feature_info(OpenXR ON "Enable support for OpenXR")
