@@ -129,7 +129,7 @@ void ImGuiInputHandler::event(EventReceiver *target, Event *ev)
 
 ImGuiMouseButton ImGuiInputHandler::mapMouseButton(const KDGui::MouseButtons button) const
 {
-    switch (button) {
+    switch (button.toInt()) {
     case NoButton:
     case LeftButton:
         return ImGuiMouseButton_Left;
@@ -193,6 +193,8 @@ ImGuiKey ImGuiInputHandler::mapKeyCode(const KDGui::Key key) const
         return ImGuiMod_Ctrl;
     case KDGui::Key_LeftShift:
         return ImGuiMod_Shift;
+    default:
+        break;
     }
 
     return ImGuiKey_None;
