@@ -43,6 +43,12 @@ if(NOT TARGET glm::glm)
         glm INTERFACE GLM_FORCE_RADIANS GLM_FORCE_DEPTH_ZERO_TO_ONE GLM_ENABLE_EXPERIMENTAL GLM_LANG_STL11_FORCED
     )
 
+    if (APPLE)
+        target_compile_options(
+            glm INTERFACE -Wno-deprecated-volatile
+        )
+    endif()
+
     install(DIRECTORY ${glm_SOURCE_DIR}/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/glm)
 
     # Create CMake Package File for glm so that it can be found with find_package(glm)
