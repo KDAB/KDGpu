@@ -294,11 +294,19 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
     deviceDescriptorIndexingFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES;
     stdLayoutFeatures.pNext = &deviceDescriptorIndexingFeatures; // So that it gets filled by the vkGetPhysicalDeviceFeatures2 call
 
+    VkPhysicalDeviceVulkan12Features physicalDeviceFeatures12{};
+    physicalDeviceFeatures12.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+    deviceDescriptorIndexingFeatures.pNext = &physicalDeviceFeatures12;
+
+    VkPhysicalDeviceAccelerationStructureFeaturesKHR accelerationStructureFeaturesKhr{};
+    accelerationStructureFeaturesKhr.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
+    physicalDeviceFeatures12.pNext = &accelerationStructureFeaturesKhr;
+
 #if defined(VK_KHR_synchronization2)
     VkPhysicalDeviceSynchronization2Features synchronization2Features{};
     synchronization2Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES;
 
-    deviceDescriptorIndexingFeatures.pNext = &synchronization2Features;
+    accelerationStructureFeaturesKhr.pNext = &synchronization2Features;
 #endif
 
     vkGetPhysicalDeviceFeatures2(physicalDevice, &deviceFeatures2);
@@ -384,6 +392,8 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
         .bindGroupBindingPartiallyBound = static_cast<bool>(deviceDescriptorIndexingFeatures.descriptorBindingPartiallyBound),
         .bindGroupBindingVariableDescriptorCount = static_cast<bool>(deviceDescriptorIndexingFeatures.descriptorBindingVariableDescriptorCount),
         .runtimeBindGroupArray = static_cast<bool>(deviceDescriptorIndexingFeatures.runtimeDescriptorArray),
+        .bufferDeviceAddress = static_cast<bool>(physicalDeviceFeatures12.bufferDeviceAddress),
+        .accelerationStructures = static_cast<bool>(accelerationStructureFeaturesKhr.accelerationStructure)
     };
 
 #if defined(VK_KHR_synchronization2)

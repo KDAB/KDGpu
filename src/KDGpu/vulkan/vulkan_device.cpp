@@ -27,6 +27,7 @@ VulkanDevice::VulkanDevice(VkDevice _device,
                            uint32_t _apiVersion,
                            VulkanResourceManager *_vulkanResourceManager,
                            const Handle<Adapter_t> &_adapterHandle,
+                           const AdapterFeatures &requestedFeatures,
                            bool _isOwned) noexcept
     : ApiDevice()
     , device(_device)
@@ -43,6 +44,8 @@ VulkanDevice::VulkanDevice(VkDevice _device,
     allocatorInfo.instance = vulkanInstance->instance;
     allocatorInfo.physicalDevice = vulkanAdapter->physicalDevice;
     allocatorInfo.device = device;
+    if (requestedFeatures.bufferDeviceAddress)
+        allocatorInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
 
     if (vmaCreateAllocator(&allocatorInfo, &allocator) != VK_SUCCESS)
         SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to create Vulkan memory allocator!");
@@ -91,6 +94,32 @@ VulkanDevice::VulkanDevice(VkDevice _device,
         }
     }
 #endif
+
+    if (vulkanAdapter->queryAdapterFeatures().accelerationStructures) {
+        const auto adapterExtensions = vulkanAdapter->extensions();
+        for (const auto &extension : adapterExtensions) {
+            if (extension.name == VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME) {
+                PFN_vkCmdBuildAccelerationStructuresKHR vkCmdBuildAccelerationStructuresKHR = PFN_vkCmdBuildAccelerationStructuresKHR(
+                        vkGetDeviceProcAddr(device, "vkCmdBuildAccelerationStructuresKHR"));
+                this->vkCmdBuildAccelerationStructuresKHR = vkCmdBuildAccelerationStructuresKHR;
+
+                PFN_vkGetAccelerationStructureDeviceAddressKHR vkGetAccelerationStructureDeviceAddressKHR = PFN_vkGetAccelerationStructureDeviceAddressKHR(
+                        vkGetDeviceProcAddr(device, "vkGetAccelerationStructureDeviceAddressKHR"));
+                this->vkGetAccelerationStructureDeviceAddressKHR = vkGetAccelerationStructureDeviceAddressKHR;
+
+                PFN_vkCreateAccelerationStructureKHR vkCreateAccelerationStructureKHR = PFN_vkCreateAccelerationStructureKHR(
+                        vkGetDeviceProcAddr(device, "vkCreateAccelerationStructureKHR"));
+                this->vkCreateAccelerationStructureKHR = vkCreateAccelerationStructureKHR;
+                PFN_vkDestroyAccelerationStructureKHR vkDestroyAccelerationStructureKHR = PFN_vkDestroyAccelerationStructureKHR(
+                        vkGetDeviceProcAddr(device, "vkDestroyAccelerationStructureKHR"));
+                this->vkDestroyAccelerationStructureKHR = vkDestroyAccelerationStructureKHR;
+
+                PFN_vkGetAccelerationStructureBuildSizesKHR vkGetAccelerationStructureBuildSizesKHR = PFN_vkGetAccelerationStructureBuildSizesKHR(
+                        vkGetDeviceProcAddr(device, "vkGetAccelerationStructureBuildSizesKHR"));
+                this->vkGetAccelerationStructureBuildSizesKHR = vkGetAccelerationStructureBuildSizesKHR;
+            }
+        }
+    }
 
 #if defined(KDGPU_PLATFORM_LINUX)
     vkGetSemaphoreFdKHR = (PFN_vkGetSemaphoreFdKHR)vkGetDeviceProcAddr(device, "vkGetSemaphoreFdKHR");

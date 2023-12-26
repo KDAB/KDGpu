@@ -437,9 +437,20 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     deviceGroupInfo.sType = VK_STRUCTURE_TYPE_DEVICE_GROUP_DEVICE_CREATE_INFO_KHR;
     deviceGroupInfo.physicalDeviceCount = 0;
 
+    VkPhysicalDeviceBufferDeviceAddressFeatures bufferDeviceFeature = {};
+    bufferDeviceFeature.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
+    bufferDeviceFeature.bufferDeviceAddress = options.requestedFeatures.bufferDeviceAddress;
+
+    // Enable raytracing acceleration structure
+    VkPhysicalDeviceAccelerationStructureFeaturesKHR accelerationStructureFeaturesKhr{};
+    accelerationStructureFeaturesKhr.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
+    accelerationStructureFeaturesKhr.accelerationStructure = options.requestedFeatures.accelerationStructures;
+
     physicalDeviceFeatures2.pNext = &multiViewFeatures;
     multiViewFeatures.pNext = &descriptorIndexingFeatures;
     descriptorIndexingFeatures.pNext = &deviceGroupInfo;
+    deviceGroupInfo.pNext = &bufferDeviceFeature;
+    bufferDeviceFeature.pNext = &accelerationStructureFeaturesKhr;
 
     std::vector<VkPhysicalDevice> devicesInGroup;
     const size_t adapterCount = options.adapterGroup.adapters.size();
@@ -464,7 +475,7 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     sync2Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES_KHR;
     sync2Features.synchronization2 = vulkanAdapter->supportsSynchronization2;
 
-    deviceGroupInfo.pNext = &sync2Features;
+    accelerationStructureFeaturesKhr.pNext = &sync2Features;
 #endif
 
     VkDeviceCreateInfo createInfo = {};
@@ -562,14 +573,16 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     if (result != VK_SUCCESS)
         throw std::runtime_error(std::string{ "Failed to create a logical device: " } + getResultAsString(result));
 
-    const auto deviceHandle = m_devices.emplace(vkDevice, apiVersion, this, adapterHandle);
+    const auto deviceHandle = m_devices.emplace(vkDevice, apiVersion, this, adapterHandle, options.requestedFeatures);
 
     return deviceHandle;
 }
 
 Handle<Device_t> VulkanResourceManager::createDeviceFromExistingVkDevice(const Handle<Adapter_t> &adapterHandle, VkDevice vkDevice)
 {
-    const auto deviceHandle = m_devices.emplace(vkDevice, VK_API_VERSION_1_2, this, adapterHandle, false);
+    VulkanAdapter *adapter = getAdapter(adapterHandle);
+    assert(adapter != nullptr);
+    const auto deviceHandle = m_devices.emplace(vkDevice, VK_API_VERSION_1_2, this, adapterHandle, adapter->queryAdapterFeatures(), false);
 
     return deviceHandle;
 }

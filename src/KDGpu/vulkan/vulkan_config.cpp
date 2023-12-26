@@ -73,6 +73,8 @@ std::vector<const char *> getDefaultRequestedDeviceExtensions()
     extensions.push_back(VK_KHR_EXTERNAL_MEMORY_FD_EXTENSION_NAME);
     extensions.push_back(VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME);
     extensions.push_back(VK_KHR_EXTERNAL_FENCE_FD_EXTENSION_NAME);
+    extensions.push_back(VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME);
+    extensions.push_back(VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME);
 #elif defined(KDGPU_PLATFORM_WIN32)
     extensions.push_back(VK_KHR_EXTERNAL_MEMORY_WIN32_EXTENSION_NAME);
     extensions.push_back(VK_KHR_EXTERNAL_SEMAPHORE_WIN32_EXTENSION_NAME);

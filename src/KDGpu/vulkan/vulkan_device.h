@@ -44,6 +44,7 @@ struct KDGPU_EXPORT VulkanDevice : public ApiDevice {
                           uint32_t _apiVersion,
                           VulkanResourceManager *_vulkanResourceManager,
                           const Handle<Adapter_t> &_adapterHandle,
+                          const AdapterFeatures &requestedFeatures,
                           bool _isOwned = true) noexcept;
 
     // Non Copyable
@@ -92,6 +93,11 @@ struct KDGPU_EXPORT VulkanDevice : public ApiDevice {
 #endif
 
     PFN_vkCreateRenderPass2 vkCreateRenderPass2{ nullptr };
+    PFN_vkCmdBuildAccelerationStructuresKHR vkCmdBuildAccelerationStructuresKHR{ nullptr };
+    PFN_vkGetAccelerationStructureDeviceAddressKHR vkGetAccelerationStructureDeviceAddressKHR{ nullptr };
+    PFN_vkCreateAccelerationStructureKHR vkCreateAccelerationStructureKHR{ nullptr };
+    PFN_vkDestroyAccelerationStructureKHR vkDestroyAccelerationStructureKHR{ nullptr };
+    PFN_vkGetAccelerationStructureBuildSizesKHR vkGetAccelerationStructureBuildSizesKHR{ nullptr };
 
     bool isOwned{ true };
 };

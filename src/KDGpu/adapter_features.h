@@ -100,6 +100,8 @@ struct AdapterFeatures {
     bool bindGroupBindingPartiallyBound;
     bool bindGroupBindingVariableDescriptorCount;
     bool runtimeBindGroupArray;
+    bool bufferDeviceAddress;
+    bool accelerationStructures;
 };
 
 /*! @} */
