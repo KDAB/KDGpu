@@ -34,13 +34,9 @@ BindGroupLayout::BindGroupLayout(GraphicsApi *api,
 
 BindGroupLayout::BindGroupLayout(BindGroupLayout &&other)
 {
-    m_api = other.m_api;
-    m_device = other.m_device;
-    m_bindGroupLayout = other.m_bindGroupLayout;
-
-    other.m_api = nullptr;
-    other.m_device = {};
-    other.m_bindGroupLayout = {};
+    m_api = std::exchange(other.m_api, nullptr);
+    m_device = std::exchange(other.m_device, {});
+    m_bindGroupLayout = std::exchange(other.m_bindGroupLayout, {});
 }
 
 BindGroupLayout &BindGroupLayout::operator=(BindGroupLayout &&other)
@@ -49,13 +45,9 @@ BindGroupLayout &BindGroupLayout::operator=(BindGroupLayout &&other)
         if (isValid())
             m_api->resourceManager()->deleteBindGroupLayout(handle());
 
-        m_api = other.m_api;
-        m_device = other.m_device;
-        m_bindGroupLayout = other.m_bindGroupLayout;
-
-        other.m_api = nullptr;
-        other.m_device = {};
-        other.m_bindGroupLayout = {};
+        m_api = std::exchange(other.m_api, nullptr);
+        m_device = std::exchange(other.m_device, {});
+        m_bindGroupLayout = std::exchange(other.m_bindGroupLayout, {});
     }
     return *this;
 }

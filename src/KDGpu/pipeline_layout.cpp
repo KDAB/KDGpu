@@ -28,13 +28,9 @@ PipelineLayout::PipelineLayout(GraphicsApi *api,
 
 PipelineLayout::PipelineLayout(PipelineLayout &&other)
 {
-    m_api = other.m_api;
-    m_device = other.m_device;
-    m_pipelineLayout = other.m_pipelineLayout;
-
-    other.m_api = nullptr;
-    other.m_device = {};
-    other.m_pipelineLayout = {};
+    m_api = std::exchange(other.m_api, nullptr);
+    m_device = std::exchange(other.m_device, {});
+    m_pipelineLayout = std::exchange(other.m_pipelineLayout, {});
 }
 
 PipelineLayout &PipelineLayout::operator=(PipelineLayout &&other)
@@ -43,13 +39,9 @@ PipelineLayout &PipelineLayout::operator=(PipelineLayout &&other)
         if (isValid())
             m_api->resourceManager()->deletePipelineLayout(handle());
 
-        m_api = other.m_api;
-        m_device = other.m_device;
-        m_pipelineLayout = other.m_pipelineLayout;
-
-        other.m_api = nullptr;
-        other.m_device = {};
-        other.m_pipelineLayout = {};
+        m_api = std::exchange(other.m_api, nullptr);
+        m_device = std::exchange(other.m_device, {});
+        m_pipelineLayout = std::exchange(other.m_pipelineLayout, {});
     }
     return *this;
 }

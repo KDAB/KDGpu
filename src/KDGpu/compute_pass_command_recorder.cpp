@@ -32,13 +32,9 @@ ComputePassCommandRecorder::~ComputePassCommandRecorder()
 
 ComputePassCommandRecorder::ComputePassCommandRecorder(ComputePassCommandRecorder &&other)
 {
-    m_api = other.m_api;
-    m_device = other.m_device;
-    m_computePassCommandRecorder = other.m_computePassCommandRecorder;
-
-    other.m_api = nullptr;
-    other.m_device = {};
-    other.m_computePassCommandRecorder = {};
+    m_api = std::exchange(other.m_api, nullptr);
+    m_device = std::exchange(other.m_device, {});
+    m_computePassCommandRecorder = std::exchange(other.m_computePassCommandRecorder, {});
 }
 
 ComputePassCommandRecorder &ComputePassCommandRecorder::operator=(ComputePassCommandRecorder &&other)
@@ -47,13 +43,9 @@ ComputePassCommandRecorder &ComputePassCommandRecorder::operator=(ComputePassCom
         if (isValid())
             m_api->resourceManager()->deleteComputePassCommandRecorder(handle());
 
-        m_api = other.m_api;
-        m_device = other.m_device;
-        m_computePassCommandRecorder = other.m_computePassCommandRecorder;
-
-        other.m_api = nullptr;
-        other.m_device = {};
-        other.m_computePassCommandRecorder = {};
+        m_api = std::exchange(other.m_api, nullptr);
+        m_device = std::exchange(other.m_device, {});
+        m_computePassCommandRecorder = std::exchange(other.m_computePassCommandRecorder, {});
     }
     return *this;
 }

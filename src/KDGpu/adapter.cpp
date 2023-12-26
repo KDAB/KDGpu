@@ -77,17 +77,11 @@ Adapter::~Adapter()
 
 Adapter::Adapter(Adapter &&other)
 {
-    m_api = other.m_api;
-    m_adapter = other.m_adapter;
-    m_features = other.m_features;
-    m_properties = other.m_properties;
-    m_queueTypes = other.m_queueTypes;
-
-    other.m_api = nullptr;
-    other.m_adapter = {};
-    other.m_features = {};
-    other.m_properties = {};
-    other.m_queueTypes = {};
+    m_api = std::exchange(other.m_api, nullptr);
+    m_adapter = std::exchange(other.m_adapter, {});
+    m_features = std::exchange(other.m_features, {});
+    m_properties = std::exchange(other.m_properties, {});
+    m_queueTypes = std::exchange(other.m_queueTypes, {});
 }
 
 Adapter &Adapter::operator=(Adapter &&other)
@@ -96,17 +90,11 @@ Adapter &Adapter::operator=(Adapter &&other)
         if (isValid())
             m_api->resourceManager()->removeAdapter(m_adapter);
 
-        m_api = other.m_api;
-        m_adapter = other.m_adapter;
-        m_features = other.m_features;
-        m_properties = other.m_properties;
-        m_queueTypes = other.m_queueTypes;
-
-        other.m_api = nullptr;
-        other.m_adapter = {};
-        other.m_features = {};
-        other.m_properties = {};
-        other.m_queueTypes = {};
+        m_api = std::exchange(other.m_api, nullptr);
+        m_adapter = std::exchange(other.m_adapter, {});
+        m_features = std::exchange(other.m_features, {});
+        m_properties = std::exchange(other.m_properties, {});
+        m_queueTypes = std::exchange(other.m_queueTypes, {});
     }
     return *this;
 }

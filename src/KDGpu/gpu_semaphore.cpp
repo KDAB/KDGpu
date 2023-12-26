@@ -35,13 +35,9 @@ GpuSemaphore::~GpuSemaphore()
 
 GpuSemaphore::GpuSemaphore(GpuSemaphore &&other)
 {
-    m_api = other.m_api;
-    m_device = other.m_device;
-    m_gpuSemaphore = other.m_gpuSemaphore;
-
-    other.m_api = nullptr;
-    other.m_device = {};
-    other.m_gpuSemaphore = {};
+    m_api = std::exchange(other.m_api, nullptr);
+    m_device = std::exchange(other.m_device, {});
+    m_gpuSemaphore = std::exchange(other.m_gpuSemaphore, {});
 }
 
 GpuSemaphore &GpuSemaphore::operator=(GpuSemaphore &&other)
@@ -50,13 +46,9 @@ GpuSemaphore &GpuSemaphore::operator=(GpuSemaphore &&other)
         if (isValid())
             m_api->resourceManager()->deleteGpuSemaphore(handle());
 
-        m_api = other.m_api;
-        m_device = other.m_device;
-        m_gpuSemaphore = other.m_gpuSemaphore;
-
-        other.m_api = nullptr;
-        other.m_device = {};
-        other.m_gpuSemaphore = {};
+        m_api = std::exchange(other.m_api, nullptr);
+        m_device = std::exchange(other.m_device, {});
+        m_gpuSemaphore = std::exchange(other.m_gpuSemaphore, {});
     }
     return *this;
 }

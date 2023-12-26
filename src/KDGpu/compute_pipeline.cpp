@@ -33,13 +33,9 @@ ComputePipeline::ComputePipeline(GraphicsApi *api,
 
 ComputePipeline::ComputePipeline(ComputePipeline &&other)
 {
-    m_api = other.m_api;
-    m_device = other.m_device;
-    m_computePipeline = other.m_computePipeline;
-
-    other.m_api = nullptr;
-    other.m_device = {};
-    other.m_computePipeline = {};
+    m_api = std::exchange(other.m_api, nullptr);
+    m_device = std::exchange(other.m_device, {});
+    m_computePipeline = std::exchange(other.m_computePipeline, {});
 }
 
 ComputePipeline &ComputePipeline::operator=(ComputePipeline &&other)
@@ -47,13 +43,10 @@ ComputePipeline &ComputePipeline::operator=(ComputePipeline &&other)
     if (this != &other) {
         if (isValid())
             m_api->resourceManager()->deleteComputePipeline(handle());
-        m_api = other.m_api;
-        m_device = other.m_device;
-        m_computePipeline = other.m_computePipeline;
 
-        other.m_api = nullptr;
-        other.m_device = {};
-        other.m_computePipeline = {};
+        m_api = std::exchange(other.m_api, nullptr);
+        m_device = std::exchange(other.m_device, {});
+        m_computePipeline = std::exchange(other.m_computePipeline, {});
     }
     return *this;
 }

@@ -32,13 +32,9 @@ Sampler::Sampler(GraphicsApi *api, const Handle<Device_t> &device, const Sampler
 
 Sampler::Sampler(Sampler &&other)
 {
-    m_api = other.m_api;
-    m_device = other.m_device;
-    m_sampler = other.m_sampler;
-
-    other.m_api = nullptr;
-    other.m_device = {};
-    other.m_sampler = {};
+    m_api = std::exchange(other.m_api, nullptr);
+    m_device = std::exchange(other.m_device, {});
+    m_sampler = std::exchange(other.m_sampler, {});
 }
 
 Sampler &Sampler::operator=(Sampler &&other)
@@ -47,13 +43,9 @@ Sampler &Sampler::operator=(Sampler &&other)
         if (isValid())
             m_api->resourceManager()->deleteSampler(handle());
 
-        m_api = other.m_api;
-        m_device = other.m_device;
-        m_sampler = other.m_sampler;
-
-        other.m_api = nullptr;
-        other.m_device = {};
-        other.m_sampler = {};
+        m_api = std::exchange(other.m_api, nullptr);
+        m_device = std::exchange(other.m_device, {});
+        m_sampler = std::exchange(other.m_sampler, {});
     }
     return *this;
 }

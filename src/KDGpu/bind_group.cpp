@@ -28,13 +28,9 @@ BindGroup::~BindGroup()
 
 BindGroup::BindGroup(BindGroup &&other)
 {
-    m_api = other.m_api;
-    m_device = other.m_device;
-    m_bindGroup = other.m_bindGroup;
-
-    other.m_api = nullptr;
-    other.m_device = {};
-    other.m_bindGroup = {};
+    m_api = std::exchange(other.m_api, nullptr);
+    m_device = std::exchange(other.m_device, {});
+    m_bindGroup = std::exchange(other.m_bindGroup, {});
 }
 
 BindGroup &BindGroup::operator=(BindGroup &&other)
@@ -43,13 +39,9 @@ BindGroup &BindGroup::operator=(BindGroup &&other)
         if (isValid())
             m_api->resourceManager()->deleteBindGroup(handle());
 
-        m_api = other.m_api;
-        m_device = other.m_device;
-        m_bindGroup = other.m_bindGroup;
-
-        other.m_api = nullptr;
-        other.m_device = {};
-        other.m_bindGroup = {};
+        m_api = std::exchange(other.m_api, nullptr);
+        m_device = std::exchange(other.m_device, {});
+        m_bindGroup = std::exchange(other.m_bindGroup, {});
     }
     return *this;
 }

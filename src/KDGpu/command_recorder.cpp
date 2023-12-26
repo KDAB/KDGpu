@@ -33,15 +33,10 @@ CommandRecorder::~CommandRecorder()
 
 CommandRecorder::CommandRecorder(CommandRecorder &&other)
 {
-    m_api = other.m_api;
-    m_device = other.m_device;
-    m_commandRecorder = other.m_commandRecorder;
-    m_level = other.m_level;
-
-    other.m_api = nullptr;
-    other.m_device = {};
-    other.m_commandRecorder = {};
-    other.m_level = CommandBufferLevel::MaxEnum;
+    m_api = std::exchange(other.m_api, nullptr);
+    m_device = std::exchange(other.m_device, {});
+    m_commandRecorder = std::exchange(other.m_commandRecorder, {});
+    m_level = std::exchange(other.m_level, CommandBufferLevel::MaxEnum);
 }
 
 CommandRecorder &CommandRecorder::operator=(CommandRecorder &&other)
@@ -50,15 +45,10 @@ CommandRecorder &CommandRecorder::operator=(CommandRecorder &&other)
         if (isValid())
             m_api->resourceManager()->deleteCommandRecorder(handle());
 
-        m_api = other.m_api;
-        m_device = other.m_device;
-        m_commandRecorder = other.m_commandRecorder;
-        m_level = other.m_level;
-
-        other.m_api = nullptr;
-        other.m_device = {};
-        other.m_commandRecorder = {};
-        other.m_level = CommandBufferLevel::MaxEnum;
+        m_api = std::exchange(other.m_api, nullptr);
+        m_device = std::exchange(other.m_device, {});
+        m_commandRecorder = std::exchange(other.m_commandRecorder, {});
+        m_level = std::exchange(other.m_level, CommandBufferLevel::MaxEnum);
     }
     return *this;
 }

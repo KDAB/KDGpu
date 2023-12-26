@@ -28,13 +28,9 @@ CommandBuffer::CommandBuffer(GraphicsApi *api,
 
 CommandBuffer::CommandBuffer(CommandBuffer &&other)
 {
-    m_api = other.m_api;
-    m_device = other.m_device;
-    m_commandBuffer = other.m_commandBuffer;
-
-    other.m_api = nullptr;
-    other.m_device = {};
-    other.m_commandBuffer = {};
+    m_api = std::exchange(other.m_api, nullptr);
+    m_device = std::exchange(other.m_device, {});
+    m_commandBuffer = std::exchange(other.m_commandBuffer, {});
 }
 
 CommandBuffer &CommandBuffer::operator=(CommandBuffer &&other)
@@ -43,13 +39,9 @@ CommandBuffer &CommandBuffer::operator=(CommandBuffer &&other)
         if (isValid())
             m_api->resourceManager()->deleteCommandBuffer(handle());
 
-        m_api = other.m_api;
-        m_device = other.m_device;
-        m_commandBuffer = other.m_commandBuffer;
-
-        other.m_api = nullptr;
-        other.m_device = {};
-        other.m_commandBuffer = {};
+        m_api = std::exchange(other.m_api, nullptr);
+        m_device = std::exchange(other.m_device, {});
+        m_commandBuffer = std::exchange(other.m_commandBuffer, {});
     }
     return *this;
 }

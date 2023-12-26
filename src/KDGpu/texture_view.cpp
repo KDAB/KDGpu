@@ -34,11 +34,8 @@ TextureView::~TextureView()
 
 TextureView::TextureView(TextureView &&other)
 {
-    m_api = other.m_api;
-    m_textureView = other.m_textureView;
-
-    other.m_api = nullptr;
-    other.m_textureView = {};
+    m_api = std::exchange(other.m_api, nullptr);
+    m_textureView = std::exchange(other.m_textureView, {});
 }
 
 TextureView &TextureView::operator=(TextureView &&other)
@@ -47,11 +44,8 @@ TextureView &TextureView::operator=(TextureView &&other)
         if (isValid())
             m_api->resourceManager()->deleteTextureView(handle());
 
-        m_api = other.m_api;
-        m_textureView = other.m_textureView;
-
-        other.m_api = nullptr;
-        other.m_textureView = {};
+        m_api = std::exchange(other.m_api, nullptr);
+        m_textureView = std::exchange(other.m_textureView, {});
     }
     return *this;
 }

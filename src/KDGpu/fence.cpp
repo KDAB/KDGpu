@@ -20,13 +20,9 @@ Fence::Fence() = default;
 
 Fence::Fence(Fence &&other)
 {
-    m_api = other.m_api;
-    m_device = other.m_device;
-    m_fence = other.m_fence;
-
-    other.m_api = nullptr;
-    other.m_device = {};
-    other.m_fence = {};
+    m_api = std::exchange(other.m_api, nullptr);
+    m_device = std::exchange(other.m_device, {});
+    m_fence = std::exchange(other.m_fence, {});
 }
 
 Fence &Fence::operator=(Fence &&other)
@@ -36,13 +32,9 @@ Fence &Fence::operator=(Fence &&other)
         if (isValid())
             m_api->resourceManager()->deleteFence(handle());
 
-        m_api = other.m_api;
-        m_device = other.m_device;
-        m_fence = other.m_fence;
-
-        other.m_api = nullptr;
-        other.m_device = {};
-        other.m_fence = {};
+        m_api = std::exchange(other.m_api, nullptr);
+        m_device = std::exchange(other.m_device, {});
+        m_fence = std::exchange(other.m_fence, {});
     }
     return *this;
 }

@@ -79,15 +79,10 @@ Device::Device(Adapter *adapter, GraphicsApi *api, const DeviceOptions &options)
 
 Device::Device(Device &&other)
 {
-    m_api = other.m_api;
-    m_device = other.m_device;
-    m_queues = std::move(other.m_queues);
-    m_adapter = other.m_adapter;
-
-    other.m_api = nullptr;
-    other.m_device = {};
-    other.m_queues = {};
-    other.m_adapter = {};
+    m_api = std::exchange(other.m_api, nullptr);
+    m_device = std::exchange(other.m_device, {});
+    m_queues = std::exchange(other.m_queues, {});
+    m_adapter = std::exchange(other.m_adapter, {});
 }
 
 Device &Device::operator=(Device &&other)
@@ -96,15 +91,10 @@ Device &Device::operator=(Device &&other)
         if (isValid())
             m_api->resourceManager()->deleteDevice(handle());
 
-        m_api = other.m_api;
-        m_device = other.m_device;
-        m_queues = std::move(other.m_queues);
-        m_adapter = other.m_adapter;
-
-        other.m_api = nullptr;
-        other.m_device = {};
-        other.m_queues = {};
-        other.m_adapter = {};
+        m_api = std::exchange(other.m_api, nullptr);
+        m_device = std::exchange(other.m_device, {});
+        m_queues = std::exchange(other.m_queues, {});
+        m_adapter = std::exchange(other.m_adapter, {});
     }
     return *this;
 }

@@ -27,11 +27,8 @@ Surface::Surface(GraphicsApi *api, const Handle<Surface_t> &surface)
 
 Surface::Surface(Surface &&other)
 {
-    m_api = other.m_api;
-    m_surface = other.m_surface;
-
-    other.m_api = nullptr;
-    other.m_surface = {};
+    m_api = std::exchange(other.m_api, nullptr);
+    m_surface = std::exchange(other.m_surface, {});
 }
 
 Surface &Surface::operator=(Surface &&other)
@@ -40,11 +37,8 @@ Surface &Surface::operator=(Surface &&other)
         if (isValid())
             m_api->resourceManager()->deleteSurface(m_surface);
 
-        m_api = other.m_api;
-        m_surface = other.m_surface;
-
-        other.m_api = nullptr;
-        other.m_surface = {};
+        m_api = std::exchange(other.m_api, nullptr);
+        m_surface = std::exchange(other.m_surface, {});
     }
     return *this;
 }

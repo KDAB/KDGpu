@@ -44,28 +44,19 @@ public:
     Pool &operator=(Pool const &other) = delete;
 
     Pool(Pool &&other) noexcept
-        : m_data(std::move(other.m_data))
-        , m_generations(std::move(other.m_generations))
-        , m_freeIndices(std::move(other.m_freeIndices))
-        , m_capacity(std::move(other.m_capacity))
+        : m_data(std::exchange(other.m_data, {}))
+        , m_generations(std::exchange(other.m_generations, {}))
+        , m_freeIndices(std::exchange(other.m_freeIndices, {}))
+        , m_capacity(std::exchange(other.m_capacity, 0))
     {
-        other.m_data = {};
-        other.m_generations = {};
-        other.m_freeIndices = {};
-        other.m_capacity = 0;
     }
 
     Pool &operator=(Pool &&other) noexcept
     {
-        m_data = std::move(other.m_data);
-        m_generations = std::move(other.m_generations);
-        m_freeIndices = std::move(other.m_freeIndices);
-        m_capacity = std::move(other.m_capacity);
-
-        other.m_data = {};
-        other.m_generations = {};
-        other.m_freeIndices = {};
-        other.m_capacity = 0;
+        m_data = std::exchange(other.m_data, {});
+        m_generations = std::exchange(other.m_generations, {});
+        m_freeIndices = std::exchange(other.m_freeIndices, {});
+        m_capacity = std::exchange(other.m_capacity, 0);
 
         return *this;
     }

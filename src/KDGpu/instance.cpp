@@ -72,12 +72,9 @@ Instance::~Instance()
 
 Instance::Instance(Instance &&other)
 {
-    m_api = other.m_api;
-    m_instance = other.m_instance;
-    m_adapters = std::move(other.m_adapters);
-
-    other.m_api = nullptr;
-    other.m_instance = {};
+    m_api = std::exchange(other.m_api, nullptr);
+    m_instance = std::exchange(other.m_instance, {});
+    m_adapters = std::exchange(other.m_adapters, {});
 }
 
 Instance &Instance::operator=(Instance &&other)
@@ -86,12 +83,9 @@ Instance &Instance::operator=(Instance &&other)
         if (isValid())
             m_api->resourceManager()->deleteInstance(handle());
 
-        m_api = other.m_api;
-        m_instance = other.m_instance;
-        m_adapters = std::move(other.m_adapters);
-
-        other.m_api = nullptr;
-        other.m_instance = {};
+        m_api = std::exchange(other.m_api, nullptr);
+        m_instance = std::exchange(other.m_instance, {});
+        m_adapters = std::exchange(other.m_adapters, {});
     }
     return *this;
 }

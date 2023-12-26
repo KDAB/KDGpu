@@ -29,13 +29,9 @@ GraphicsPipeline::GraphicsPipeline(GraphicsApi *api,
 
 GraphicsPipeline::GraphicsPipeline(GraphicsPipeline &&other)
 {
-    m_api = other.m_api;
-    m_device = other.m_device;
-    m_graphicsPipeline = other.m_graphicsPipeline;
-
-    other.m_api = nullptr;
-    other.m_device = {};
-    other.m_graphicsPipeline = {};
+    m_api = std::exchange(other.m_api, nullptr);
+    m_device = std::exchange(other.m_device, {});
+    m_graphicsPipeline = std::exchange(other.m_graphicsPipeline, {});
 }
 
 GraphicsPipeline &GraphicsPipeline::operator=(GraphicsPipeline &&other)
@@ -44,13 +40,9 @@ GraphicsPipeline &GraphicsPipeline::operator=(GraphicsPipeline &&other)
         if (isValid())
             m_api->resourceManager()->deleteGraphicsPipeline(handle());
 
-        m_api = other.m_api;
-        m_device = other.m_device;
-        m_graphicsPipeline = other.m_graphicsPipeline;
-
-        other.m_api = nullptr;
-        other.m_device = {};
-        other.m_graphicsPipeline = {};
+        m_api = std::exchange(other.m_api, nullptr);
+        m_device = std::exchange(other.m_device, {});
+        m_graphicsPipeline = std::exchange(other.m_graphicsPipeline, {});
     }
     return *this;
 }

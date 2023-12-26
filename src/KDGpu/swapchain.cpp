@@ -37,14 +37,10 @@ Swapchain::Swapchain(GraphicsApi *api, const Handle<Device_t> &device, const Swa
 
 Swapchain::Swapchain(Swapchain &&other)
 {
-    m_api = other.m_api;
-    m_device = other.m_device;
-    m_swapchain = other.m_swapchain;
-    m_textures = std::move(other.m_textures);
-
-    other.m_api = nullptr;
-    other.m_device = {};
-    other.m_swapchain = {};
+    m_api = std::exchange(other.m_api, nullptr);
+    m_device = std::exchange(other.m_device, {});
+    m_swapchain = std::exchange(other.m_swapchain, {});
+    m_textures = std::exchange(other.m_textures, {});
 }
 
 Swapchain &Swapchain::operator=(Swapchain &&other)
@@ -53,14 +49,10 @@ Swapchain &Swapchain::operator=(Swapchain &&other)
         if (isValid())
             m_api->resourceManager()->deleteSwapchain(handle());
 
-        m_api = other.m_api;
-        m_device = other.m_device;
-        m_swapchain = other.m_swapchain;
-        m_textures = std::move(other.m_textures);
-
-        other.m_api = nullptr;
-        other.m_device = {};
-        other.m_swapchain = {};
+        m_api = std::exchange(other.m_api, nullptr);
+        m_device = std::exchange(other.m_device, {});
+        m_swapchain = std::exchange(other.m_swapchain, {});
+        m_textures = std::exchange(other.m_textures, {});
     }
     return *this;
 }

@@ -28,13 +28,9 @@ Buffer::Buffer(GraphicsApi *api, const Handle<Device_t> &device, const BufferOpt
 
 Buffer::Buffer(Buffer &&other)
 {
-    m_api = other.m_api;
-    m_device = other.m_device;
-    m_buffer = other.m_buffer;
-
-    other.m_api = nullptr;
-    other.m_device = {};
-    other.m_buffer = {};
+    m_api = std::exchange(other.m_api, nullptr);
+    m_device = std::exchange(other.m_device, {});
+    m_buffer = std::exchange(other.m_buffer, {});
 }
 
 Buffer &Buffer::operator=(Buffer &&other)
@@ -43,13 +39,9 @@ Buffer &Buffer::operator=(Buffer &&other)
         if (isValid())
             m_api->resourceManager()->deleteBuffer(handle());
 
-        m_api = other.m_api;
-        m_device = other.m_device;
-        m_buffer = other.m_buffer;
-
-        other.m_api = nullptr;
-        other.m_device = {};
-        other.m_buffer = {};
+        m_api = std::exchange(other.m_api, nullptr);
+        m_device = std::exchange(other.m_device, {});
+        m_buffer = std::exchange(other.m_buffer, {});
     }
     return *this;
 }

@@ -32,10 +32,10 @@ TimestampQueryRecorder::~TimestampQueryRecorder()
 
 TimestampQueryRecorder::TimestampQueryRecorder(TimestampQueryRecorder &&other)
 {
-    m_api = other.m_api;
-    m_device = other.m_device;
-    m_timestampQueryRecorder = other.m_timestampQueryRecorder;
-    m_timestampPeriod = other.m_timestampPeriod;
+    m_api = std::exchange(other.m_api, nullptr);
+    m_device = std::exchange(other.m_device, {});
+    m_timestampQueryRecorder = std::exchange(other.m_timestampQueryRecorder, {});
+    m_timestampPeriod = std::exchange(other.m_timestampPeriod, {});
 }
 
 TimestampQueryRecorder &TimestampQueryRecorder::operator=(TimestampQueryRecorder &&other)
@@ -44,10 +44,10 @@ TimestampQueryRecorder &TimestampQueryRecorder::operator=(TimestampQueryRecorder
         if (isValid())
             m_api->resourceManager()->deleteTimestampQueryRecorder(handle());
 
-        m_api = other.m_api;
-        m_device = other.m_device;
-        m_timestampQueryRecorder = other.m_timestampQueryRecorder;
-        m_timestampPeriod = other.m_timestampPeriod;
+        m_api = std::exchange(other.m_api, nullptr);
+        m_device = std::exchange(other.m_device, {});
+        m_timestampQueryRecorder = std::exchange(other.m_timestampQueryRecorder, {});
+        m_timestampPeriod = std::exchange(other.m_timestampPeriod, {});
     }
     return *this;
 }

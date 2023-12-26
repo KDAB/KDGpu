@@ -36,13 +36,9 @@ ShaderModule::~ShaderModule()
 
 ShaderModule::ShaderModule(ShaderModule &&other)
 {
-    m_api = other.m_api;
-    m_device = other.m_device;
-    m_shaderModule = other.m_shaderModule;
-
-    other.m_api = nullptr;
-    other.m_device = {};
-    other.m_shaderModule = {};
+    m_api = std::exchange(other.m_api, nullptr);
+    m_device = std::exchange(other.m_device, {});
+    m_shaderModule = std::exchange(other.m_shaderModule, {});
 }
 
 ShaderModule &ShaderModule::operator=(ShaderModule &&other)
@@ -51,13 +47,9 @@ ShaderModule &ShaderModule::operator=(ShaderModule &&other)
         if (isValid())
             m_api->resourceManager()->deleteShaderModule(handle());
 
-        m_api = other.m_api;
-        m_device = other.m_device;
-        m_shaderModule = other.m_shaderModule;
-
-        other.m_api = nullptr;
-        other.m_device = {};
-        other.m_shaderModule = {};
+        m_api = std::exchange(other.m_api, nullptr);
+        m_device = std::exchange(other.m_device, {});
+        m_shaderModule = std::exchange(other.m_shaderModule, {});
     }
     return *this;
 }
