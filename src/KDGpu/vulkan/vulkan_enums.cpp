@@ -405,4 +405,14 @@ VkDescriptorBindingFlags resourceBindingFlagsToVkDescriptorBindingFlags(Resource
     return static_cast<VkDescriptorBindingFlags>(flags.toInt());
 }
 
+VkBuildAccelerationStructureModeKHR accelerationStructureModeToVkStructureMode(BuildAccelerationStructureMode mode)
+{
+    return static_cast<VkBuildAccelerationStructureModeKHR>(mode);
+}
+
+VkAccelerationStructureTypeKHR accelerationStructureTypeToVkAccelerationStructureType(AccelerationStructureType type)
+{
+    return static_cast<VkAccelerationStructureTypeKHR>(type);
+}
+
 } // namespace KDGpu

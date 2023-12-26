@@ -12,6 +12,7 @@ if(NOT TARGET Vulkan::Vulkan)
 endif()
 
 set(SOURCES
+    acceleration_structure.cpp
     adapter.cpp
     buffer.cpp
     bind_group.cpp
@@ -38,6 +39,7 @@ set(SOURCES
     texture_view.cpp
     timestamp_query_recorder.cpp
     utils/logging.cpp
+    vulkan/vulkan_acceleration_structure.cpp
     vulkan/vulkan_adapter.cpp
     vulkan/vulkan_bind_group.cpp
     vulkan/vulkan_bind_group_layout.cpp
@@ -71,6 +73,8 @@ set(SOURCES
 )
 
 set(HEADERS
+    acceleration_structure_options.h
+    acceleration_structure.h
     adapter_features.h
     adapter_group.h
     adapter_properties.h
@@ -150,6 +154,7 @@ set(HEADERS
     utils/formatters.h
     utils/hash_utils.h
     utils/logging.h
+    vulkan/vulkan_acceleration_structure.h
     vulkan/vulkan_adapter.h
     vulkan/vulkan_bind_group.h
     vulkan/vulkan_bind_group_layout.h

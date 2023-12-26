@@ -24,7 +24,7 @@ using HANDLE = void *;
 #define KDGPU_API_VERSION_VARIANT(version) ((uint32_t)(version) >> 29U)
 #define KDGPU_API_VERSION_MAJOR(version) (((uint32_t)(version) >> 22U) & 0x7FU)
 #define KDGPU_API_VERSION_MINOR(version) (((uint32_t)(version) >> 12U) & 0x3FFU)
-#define KDGPU_API_VERSION_PATCH(version) ((uint32_t)(version)&0xFFFU)
+#define KDGPU_API_VERSION_PATCH(version) ((uint32_t)(version) & 0xFFFU)
 
 namespace KDGpu {
 
@@ -1159,6 +1159,17 @@ using StencilFaceFlags = KDGpu::Flags<StencilFaceFlagBits>;
 
 enum class DynamicState {
     StencilReference = 8,
+};
+
+enum class BuildAccelerationStructureMode {
+    Build = 0,
+    Update = 1
+};
+
+enum class AccelerationStructureType {
+    TopLevel = 0,
+    BottomLevel = 1,
+    Generic = 2
 };
 
 /*! @} */

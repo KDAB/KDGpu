@@ -130,4 +130,8 @@ VkDynamicState dynamicStateToVkDynamicState(DynamicState state);
 
 VkDescriptorBindingFlags resourceBindingFlagsToVkDescriptorBindingFlags(ResourceBindingFlags flags);
 
+VkBuildAccelerationStructureModeKHR accelerationStructureModeToVkStructureMode(BuildAccelerationStructureMode mode);
+
+VkAccelerationStructureTypeKHR accelerationStructureTypeToVkAccelerationStructureType(AccelerationStructureType type);
+
 } // namespace KDGpu

@@ -26,6 +26,8 @@
 #include <KDGpu/sampler_options.h>
 #include <KDGpu/shader_module.h>
 #include <KDGpu/swapchain.h>
+#include <KDGpu/acceleration_structure.h>
+#include <KDGpu/acceleration_structure_options.h>
 
 #include <KDGpu/kdgpu_export.h>
 
@@ -101,6 +103,8 @@ public:
     Sampler createSampler(const SamplerOptions &options = SamplerOptions());
 
     Fence createFence(const FenceOptions &options = FenceOptions());
+
+    AccelerationStructure createAccelerationStructure(const AccelerationStructureOptions &options = AccelerationStructureOptions());
 
     GraphicsApi *graphicsApi() const;
 

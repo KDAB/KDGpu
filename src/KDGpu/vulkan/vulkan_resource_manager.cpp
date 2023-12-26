@@ -2728,6 +2728,105 @@ void VulkanResourceManager::setObjectName(VulkanDevice *device, const VkObjectTy
     device->vkSetDebugUtilsObjectNameEXT(device->device, &nameInfo);
 }
 
+Handle<AccelerationStructure_t> VulkanResourceManager::createAccelerationStructure(const Handle<Device_t> &deviceHandle, const AccelerationStructureOptions &options)
+{
+    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
+
+    std::vector<VkAccelerationStructureGeometryKHR> geometries;
+    geometries.reserve(options.geometries.size());
+
+    for (const auto &geometry : options.geometries) {
+        VkAccelerationStructureGeometryKHR geometryKhr = { VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR };
+
+        std::visit([&geometryKhr](auto &&arg) {
+            using T = std::decay_t<decltype(arg)>;
+            if constexpr (std::is_same_v<T, AccelerationStructureGeometryTrianglesData>) {
+                VkAccelerationStructureGeometryTrianglesDataKHR trianglesDataKhr{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR };
+                trianglesDataKhr.vertexFormat = formatToVkFormat(arg.vertexFormat);
+                trianglesDataKhr.vertexStride = arg.vertexStride;
+                trianglesDataKhr.maxVertex = arg.maxVertex;
+                trianglesDataKhr.indexType = indexTypeToVkIndexType(arg.indexType);
+
+                // TODO: transformData deviceAddress should be set, spec says it needs to be checked if not NULL
+
+                geometryKhr.geometryType = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
+                geometryKhr.geometry.triangles = trianglesDataKhr;
+            } else if constexpr (std::is_same_v<T, AccelerationStructureGeometryInstancesData>) {
+                VkAccelerationStructureGeometryInstancesDataKHR instancesDataKhr{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_INSTANCES_DATA_KHR };
+
+                geometryKhr.geometryType = VK_GEOMETRY_TYPE_INSTANCES_KHR;
+                geometryKhr.geometry.instances = instancesDataKhr;
+            } else if constexpr (std::is_same_v<T, AccelerationStructureGeometryAabbsData>) {
+                VkAccelerationStructureGeometryAabbsDataKHR aabbsDataKhr{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_AABBS_DATA_KHR };
+                aabbsDataKhr.stride = arg.stride;
+
+                geometryKhr.geometryType = VK_GEOMETRY_TYPE_AABBS_KHR;
+                geometryKhr.geometry.aabbs = aabbsDataKhr;
+            } else {
+                static_assert(false, "non-exhaustive visitor!");
+            }
+        },
+                   geometry);
+
+        geometries.push_back(geometryKhr);
+    }
+
+    const auto createAccelerationBuffer = [&](const VkDeviceSize size) -> Handle<Buffer_t> {
+        return createBuffer(deviceHandle, BufferOptions{
+                                                  .size = size,
+                                                  .usage = BufferUsageFlagBits::StorageBufferBit | BufferUsageFlagBits::AccelerationStructureStorageBit | BufferUsageFlagBits::ShaderDeviceAddressBit,
+                                                  .memoryUsage = MemoryUsage::GpuOnly,
+                                          },
+                            nullptr);
+    };
+
+    VkAccelerationStructureBuildGeometryInfoKHR geometryInfoKhr{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR };
+    geometryInfoKhr.mode = accelerationStructureModeToVkStructureMode(options.mode);
+    geometryInfoKhr.type = accelerationStructureTypeToVkAccelerationStructureType(options.type);
+    geometryInfoKhr.pGeometries = geometries.data();
+    geometryInfoKhr.geometryCount = geometries.size();
+
+    VkAccelerationStructureBuildSizesInfoKHR buildSizesInfoKhr{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR };
+
+    // TODO: this needs to be dynamically set
+    std::vector<uint32_t> maxGeometries = { 1 };
+    vulkanDevice->vkGetAccelerationStructureBuildSizesKHR(vulkanDevice->device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_HOST_KHR, &geometryInfoKhr, maxGeometries.data(), &buildSizesInfoKhr);
+
+    Handle<Buffer_t> scratchBufferH = createAccelerationBuffer(buildSizesInfoKhr.buildScratchSize);
+    Handle<Buffer_t> backingBufferH = createAccelerationBuffer(buildSizesInfoKhr.accelerationStructureSize);
+
+    VulkanBuffer *backingBuffer = getBuffer(backingBufferH);
+
+    VkAccelerationStructureCreateInfoKHR createInfoKhr = { VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR };
+    createInfoKhr.size = buildSizesInfoKhr.accelerationStructureSize;
+    createInfoKhr.buffer = backingBuffer->buffer;
+    createInfoKhr.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR;
+
+    VkAccelerationStructureKHR accelerationStructureKhr = VK_NULL_HANDLE;
+    vulkanDevice->vkCreateAccelerationStructureKHR(vulkanDevice->device, &createInfoKhr, nullptr, &accelerationStructureKhr);
+
+    auto accelerationStructureHandle = m_accelerationStructures.emplace(VulkanAccelerationStructure(deviceHandle, this, accelerationStructureKhr, backingBufferH, scratchBufferH));
+    return accelerationStructureHandle;
+}
+
+void VulkanResourceManager::deleteAccelerationStructure(const Handle<AccelerationStructure_t> &handle)
+{
+    VulkanAccelerationStructure *accelerationStructure = m_accelerationStructures.get(handle);
+    VulkanDevice *vulkanDevice = m_devices.get(accelerationStructure->deviceHandle);
+
+    vulkanDevice->vkDestroyAccelerationStructureKHR(vulkanDevice->device, accelerationStructure->accelerationStructure, nullptr);
+
+    deleteBuffer(accelerationStructure->scratchBuffer);
+    deleteBuffer(accelerationStructure->backingBuffer);
+
+    m_accelerationStructures.remove(handle);
+}
+
+VulkanAccelerationStructure *VulkanResourceManager::getAccelerationStructure(const Handle<AccelerationStructure_t> &handle) const
+{
+    return m_accelerationStructures.get(handle);
+}
+
 std::string VulkanResourceManager::getMemoryStats(const Handle<Device_t> &device) const
 {
     VulkanDevice *vulkanDevice = m_devices.get(device);

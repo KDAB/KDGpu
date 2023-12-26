@@ -39,6 +39,7 @@
 #include <KDGpu/vulkan/vulkan_texture.h>
 #include <KDGpu/vulkan/vulkan_texture_view.h>
 #include <KDGpu/vulkan/vulkan_timestamp_query_recorder.h>
+#include <KDGpu/vulkan/vulkan_acceleration_structure.h>
 
 #include <KDGpu/kdgpu_export.h>
 
@@ -173,6 +174,10 @@ public:
     void deleteFence(const Handle<Fence_t> &handle) final;
     VulkanFence *getFence(const Handle<Fence_t> &handle) const final;
 
+    Handle<AccelerationStructure_t> createAccelerationStructure(const Handle<Device_t> &deviceHandle, const AccelerationStructureOptions &options) final;
+    void deleteAccelerationStructure(const Handle<AccelerationStructure_t> &handle) final;
+    VulkanAccelerationStructure *getAccelerationStructure(const Handle<AccelerationStructure_t> &handle) const final;
+
     std::string getMemoryStats(const Handle<Device_t> &device) const;
 
     KDGpu::Format formatFromTextureView(const Handle<TextureView_t> &viewHandle) const;
@@ -241,6 +246,7 @@ private:
     Pool<VulkanSampler, Sampler_t> m_samplers{ 16 };
     Pool<VulkanFence, Fence_t> m_fences{ 16 };
     Pool<VulkanTimestampQueryRecorder, TimestampQueryRecorder_t> m_timestampQueryRecorders{ 4 };
+    Pool<VulkanAccelerationStructure, AccelerationStructure_t> m_accelerationStructures{ 32 };
 
     struct TimestampQueryBucket {
         uint32_t start;

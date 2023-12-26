@@ -144,6 +144,9 @@ AdapterAndDevice Instance::createDefaultDevice(const Surface &surface,
     const bool supportsUBOIndexing = selectedAdapter->features().shaderUniformBufferArrayNonUniformIndexing && selectedAdapter->features().bindGroupBindingUniformBufferUpdateAfterBind;
     SPDLOG_LOGGER_INFO(Logger::logger(), "Supports Uniform Bind Group Dynamic Indexing: {}", supportsUBOIndexing);
 
+    const bool supportsAccelerationStructures = selectedAdapter->features().accelerationStructures;
+    SPDLOG_LOGGER_INFO(Logger::logger(), "Supports acceleration structures: {}", supportsAccelerationStructures);
+
     // Now we can create a device from the selected adapter that we can then use to interact with the GPU.
     auto device = selectedAdapter->createDevice(DeviceOptions{
             .requestedFeatures = selectedAdapter->features() });

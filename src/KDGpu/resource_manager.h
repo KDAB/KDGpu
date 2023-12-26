@@ -18,6 +18,7 @@
 #include <KDGpu/queue_description.h>
 #include <KDGpu/bind_group_options.h>
 #include <KDGpu/command_recorder.h>
+#include <KDGpu/acceleration_structure_options.h>
 
 namespace KDGpu {
 
@@ -45,6 +46,7 @@ struct ApiSurface;
 struct ApiTexture;
 struct ApiTextureView;
 struct ApiTimestampQueryRecorder;
+struct ApiAccelerationStructure;
 
 struct BindGroupOptions;
 struct BufferOptions;
@@ -86,6 +88,7 @@ struct ComputePassCommandRecorder_t;
 struct TimestampQueryRecorder_t;
 struct CommandBuffer_t;
 struct BindGroupLayout_t;
+struct AccelerationStructure_t;
 
 // TODO: Should this class have create/destroy functions or should we put those onto the
 // parent resource type structs? For example VulkanDevice could have a createTexture()
@@ -205,6 +208,10 @@ public:
     virtual Handle<Fence_t> createFence(const Handle<Device_t> &deviceHandle, const FenceOptions &options) = 0;
     virtual void deleteFence(const Handle<Fence_t> &handle) = 0;
     virtual ApiFence *getFence(const Handle<Fence_t> &handle) const = 0;
+
+    virtual Handle<AccelerationStructure_t> createAccelerationStructure(const Handle<Device_t> &deviceHandle, const AccelerationStructureOptions &options) = 0;
+    virtual void deleteAccelerationStructure(const Handle<AccelerationStructure_t> &handle) = 0;
+    virtual ApiAccelerationStructure *getAccelerationStructure(const Handle<AccelerationStructure_t> &handle) const = 0;
 
 protected:
     ResourceManager();
