@@ -159,4 +159,10 @@ void CommandRecorder::resolveTexture(const TextureResolveOptions &options)
     apiCommandRecorder->resolveTexture(options);
 }
 
+void CommandRecorder::buildAccelerationStructures(const BuildAccelerationStructureOptions &options)
+{
+    auto apiCommandRecorder = m_api->resourceManager()->getCommandRecorder(m_commandRecorder);
+    apiCommandRecorder->buildAccelerationStructures(options);
+}
+
 } // namespace KDGpu
