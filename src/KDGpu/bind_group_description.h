@@ -22,6 +22,7 @@ namespace KDGpu {
 struct Buffer_t;
 struct TextureView_t;
 struct Sampler_t;
+struct AccelerationStructure_t;
 
 struct TextureViewSamplerBinding {
     Handle<TextureView_t> textureView{};
@@ -61,6 +62,10 @@ struct DynamicUniformBufferBinding {
     Handle<Buffer_t> buffer{};
     uint32_t offset{ 0 };
     uint32_t size{ WholeSize };
+};
+
+struct AccelerationStructureBinding {
+    Handle<AccelerationStructure_t> accelerationStructure{};
 };
 
 class BindingResource
@@ -108,6 +113,12 @@ public:
         m_resource.dynamicUniformBuffer = buffer;
     }
 
+    BindingResource(const AccelerationStructureBinding &buffer)
+        : m_type(ResourceBindingType::AccelerationStructure)
+    {
+        m_resource.accelerationStructure = buffer;
+    }
+
     ResourceBindingType type() const { return m_type; }
     const UniformBufferBinding &uniformBufferBinding() const { return m_resource.uniformBuffer; }
     const StorageBufferBinding &storageBufferBinding() const { return m_resource.storageBuffer; }
@@ -116,6 +127,7 @@ public:
     const TextureViewBinding &textureViewBinding() const { return m_resource.textureView; }
     const TextureViewSamplerBinding &textureViewSamplerBinding() const { return m_resource.combineTextureViewSampler; }
     const DynamicUniformBufferBinding &dynamicUniformBufferBinding() const { return m_resource.dynamicUniformBuffer; }
+    const AccelerationStructureBinding &accelerationStructure() const { return m_resource.accelerationStructure; }
 
 private:
     union Resource {
@@ -128,6 +140,7 @@ private:
         UniformBufferBinding uniformBuffer;
         StorageBufferBinding storageBuffer;
         DynamicUniformBufferBinding dynamicUniformBuffer;
+        AccelerationStructureBinding accelerationStructure;
     } m_resource;
     ResourceBindingType m_type;
 };

@@ -757,6 +757,7 @@ enum class ResourceBindingType {
     DynamicUniformBuffer = 8,
     DynamicStorageBuffer = 9,
     InputAttachment = 10,
+    AccelerationStructure = 1000150000,
     MaxEnum = 0x7fffffff
 };
 

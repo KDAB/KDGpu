@@ -46,6 +46,8 @@ void VulkanBindGroup::update(const BindGroupEntry &entry)
     descriptorWrite.pBufferInfo = nullptr;
     descriptorWrite.pTexelBufferView = nullptr;
 
+    VkWriteDescriptorSetAccelerationStructureKHR accelerationStructureKhr { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR };
+
     switch (entry.resource.type()) {
     case ResourceBindingType::CombinedImageSampler: {
         const TextureViewSamplerBinding &textureViewBinding = entry.resource.textureViewSamplerBinding();
@@ -132,6 +134,19 @@ void VulkanBindGroup::update(const BindGroupEntry &entry)
         descriptorWrite.descriptorCount = 1;
         descriptorWrite.pBufferInfo = &bufferInfo;
         descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+        break;
+    }
+    case ResourceBindingType::AccelerationStructure: {
+        const AccelerationStructureBinding &bufferBinding = entry.resource.accelerationStructure();
+        VulkanAccelerationStructure *buffer = vulkanResourceManager->getAccelerationStructure(bufferBinding.accelerationStructure);
+        assert(buffer != nullptr);
+
+        accelerationStructureKhr.accelerationStructureCount = 1;
+        accelerationStructureKhr.pAccelerationStructures = &buffer->accelerationStructure;
+
+        descriptorWrite.descriptorCount = 1;
+        descriptorWrite.pNext = &accelerationStructureKhr;
+        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
         break;
     }
     default:
