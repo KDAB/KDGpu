@@ -50,3 +50,12 @@ License: LicenseRef-Longform
 Files: tests/doctest/doctest.h
 Copyright: 2016-2021 Viktor Kirilov <vik.kirilov@gmail.com>
 License: MIT
+
+# Apple specific example
+Files: examples/hello_triangle_apple/Application/* examples/hello_triangle_apple/Renderer/AAPLRenderer.*
+Copyright: © 2020 Apple Inc.
+License: LicenseRef-Apple-Sample-Code
+
+Files: examples/hello_triangle_apple/*.frag examples/hello_triangle_apple/*.vert
+Copyright: 2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+License: MIT

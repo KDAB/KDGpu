@@ -71,3 +71,7 @@ if(TARGET KDGpu::KDGpuExample)
         add_subdirectory(hello_triangle_hlsl)
     endif()
 endif()
+
+if(APPLE)
+    add_subdirectory(hello_triangle_apple)
+endif()
