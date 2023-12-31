@@ -6,7 +6,10 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
-find_package(Vulkan REQUIRED)
+
+if(NOT TARGET Vulkan::Vulkan)
+    find_package(Vulkan REQUIRED)
+endif()
 
 set(SOURCES
     adapter.cpp
@@ -214,8 +217,16 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    set(KDGPU_PLATFORM_APPLE ON)
     set(KDGPU_PLATFORM_MACOS ON)
-    target_compile_definitions(KDGpu PRIVATE PLATFORM_MACOS)
+    target_compile_definitions(KDGpu PRIVATE PLATFORM_APPLE PLATFORM_MACOS)
+    target_sources(KDGpu PRIVATE vulkan/vulkan_utils.mm)
+endif()
+
+if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
+    set(KDGPU_PLATFORM_APPLE ON)
+    set(KDGPU_PLATFORM_IOS ON)
+    target_compile_definitions(KDGpu PRIVATE PLATFORM_APPLE PLATFORM_IOS)
     target_sources(KDGpu PRIVATE vulkan/vulkan_utils.mm)
 endif()
 

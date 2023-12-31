@@ -25,7 +25,7 @@
 #include <vulkan/vulkan_wayland.h>
 #endif
 
-#if defined(KDGPU_PLATFORM_MACOS)
+#if defined(KDGPU_PLATFORM_APPLE)
 extern VkSurfaceKHR createVulkanSurface(VkInstance instance, const KDGpu::SurfaceOptions &options);
 #endif
 
@@ -153,7 +153,7 @@ Handle<Surface_t> VulkanInstance::createSurface(const SurfaceOptions &options)
     }
 #endif
 
-#if defined(KDGPU_PLATFORM_MACOS)
+#if defined(KDGPU_PLATFORM_APPLE)
     vkSurface = createVulkanSurface(instance, options);
 #endif
 

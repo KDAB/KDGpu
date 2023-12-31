@@ -12,8 +12,6 @@ project(
     LANGUAGES CXX
 )
 
-find_package(Vulkan REQUIRED)
-
 add_kdgpu_example(
     NAME
     ${PROJECT_NAME}

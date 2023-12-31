@@ -25,7 +25,7 @@ struct wl_display;
 struct wl_surface;
 #endif
 
-#if defined(KDGPU_PLATFORM_MACOS)
+#if defined(KDGPU_PLATFORM_APPLE)
 #ifdef __OBJC__
 @class CAMetalLayer;
 #else
@@ -50,7 +50,7 @@ struct SurfaceOptions {
     wl_display *display = nullptr;
     wl_surface *surface = nullptr;
 #endif
-#if defined(KDGPU_PLATFORM_MACOS)
+#if defined(KDGPU_PLATFORM_APPLE)
     CAMetalLayer *layer;
 #endif
 #if defined(KDGPU_PLATFORM_ANDROID)

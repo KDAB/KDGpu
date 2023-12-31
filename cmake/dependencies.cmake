@@ -25,7 +25,8 @@ else()
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/spdlog.cmake)
 endif()
 
-# VMA
+# Vulkan & VMA
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/vulkan.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/vulkan_memory_allocator.cmake)
 
 if(KDGPU_BUILD_EXAMPLES)

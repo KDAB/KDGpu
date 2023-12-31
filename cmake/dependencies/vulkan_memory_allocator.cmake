@@ -24,8 +24,6 @@ if(NOT TARGET GPUOpen::VulkanMemoryAllocator)
         add_compile_options(-Wno-nullability-completeness)
     endif()
 
-    find_package(Vulkan REQUIRED)
-
     add_library(vulkan-memory-allocator INTERFACE)
     target_link_libraries(vulkan-memory-allocator INTERFACE Vulkan::Vulkan)
     set_property(TARGET vulkan-memory-allocator PROPERTY CXX_STANDARD 17)

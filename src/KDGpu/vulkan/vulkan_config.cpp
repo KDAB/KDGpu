@@ -30,7 +30,7 @@ struct wl_surface;
 #include <vulkan/vulkan_wayland.h>
 #endif
 
-#if defined(KDGPU_PLATFORM_MACOS)
+#if defined(KDGPU_PLATFORM_APPLE)
 #include <vulkan/vulkan_metal.h>
 #include <vulkan/vulkan_beta.h>
 #endif
@@ -50,7 +50,7 @@ std::vector<const char *> getDefaultRequestedInstanceExtensions()
     extensions.push_back(VK_KHR_WAYLAND_SURFACE_EXTENSION_NAME);
 #elif defined(KDGPU_PLATFORM_WIN32)
     extensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
-#elif defined(KDGPU_PLATFORM_MACOS)
+#elif defined(KDGPU_PLATFORM_APPLE)
     extensions.push_back(VK_EXT_METAL_SURFACE_EXTENSION_NAME);
     extensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
     extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);

@@ -72,22 +72,18 @@ cmake_dependent_option(
     KDGPU_BUILD_KDGPUKDGUI
     OFF
 )
+option(KDGPU_BUILD_EXAMPLES "Build examples" ON)
 cmake_dependent_option(
-    KDGPU_BUILD_EXAMPLES
-    "Build examples"
+    KDGPU_BUILD_ASSETS
+    "Build Assets"
     ON
-    KDGPU_BUILD_KDGPUEXAMPLE
+    KDGPU_BUILD_EXAMPLES
     OFF
 )
 option(KDGPU_HLSL_SUPPORT "Try to find and use the dxc HLSL to SPIR-V compiler" OFF)
 
-if(KDGPU_BUILD_KDGPUKDGUI)
-    add_feature_info(KDGpuKDGui ON "Build KDGpuKDGui")
-endif()
-
-if(KDGPU_BUILD_KDGPUEXAMPLE)
-    add_feature_info(KDGpuExample ON "Build KDGpuExample")
-endif()
+add_feature_info(KDGpuKDGui ${KDGPU_BUILD_KDGPUKDGUI} "Build KDGpuKDGui")
+add_feature_info(KDGpuExample ${KDGPU_BUILD_KDGPUEXAMPLE} "Build KDGpuExample")
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies.cmake)
 
@@ -100,24 +96,28 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
 endif()
 
 add_subdirectory(src)
-add_subdirectory(assets)
 
+add_feature_info(KDGpu-Assets ${KDGPU_BUILD_ASSETS} "Build Assets")
+if(KDGPU_BUILD_ASSETS)
+    add_subdirectory(assets)
+endif()
+
+add_feature_info(KDGpu-Tests ${KDGPU_BUILD_TESTS} "Build Tests")
 if(KDGPU_BUILD_TESTS)
-    add_feature_info(KDGpu-Tests ON "Build Tests")
     enable_testing()
     add_subdirectory(tests)
 endif()
 
+add_feature_info(KDGpu-Examples ${KDGPU_BUILD_EXAMPLES} "Build Examples")
 if(KDGPU_BUILD_EXAMPLES)
-    add_feature_info(KDGpu-Examples ON "Build Examples")
     add_subdirectory(examples)
 endif()
 
 option(KDGPU_DOCS "Build the API documentation" OFF)
 
+add_feature_info(KDGpu-Documentation ${KDGPU_DOCS} "Build Documentation")
 if(KDGPU_DOCS)
-    add_feature_info(KDGpu-Documentation ON "Build Documentation")
     add_subdirectory(docs)
 endif()
 
-feature_summary(WHAT PACKAGES_FOUND ENABLED_FEATURES PACKAGES_NOT_FOUND DISABLED_FEATURES INCLUDE_QUIET_PACKAGES)
+feature_summary(WHAT PACKAGES_FOUND PACKAGES_NOT_FOUND ENABLED_FEATURES DISABLED_FEATURES INCLUDE_QUIET_PACKAGES)

@@ -81,7 +81,7 @@ private:
     TextureToTextureCopy m_copyOptions;
 
     const Format m_colorFormat{ Format::R8G8B8A8_UNORM };
-#if defined(KDGPU_PLATFORM_MACOS)
+#if defined(KDGPU_PLATFORM_APPLE)
     const Format m_depthFormat{ Format::D32_SFLOAT_S8_UINT };
 #else
     const Format m_depthFormat{ Format::D24_UNORM_S8_UINT };

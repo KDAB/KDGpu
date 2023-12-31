@@ -40,7 +40,9 @@ cmrc_add_resource_library(
 )
 target_compile_features(KDGpuExampleResources PUBLIC cxx_std_17)
 
-find_package(Vulkan REQUIRED)
+if(NOT TARGET Vulkan::Vulkan)
+    find_package(Vulkan REQUIRED)
+endif()
 
 set(SOURCES
     advanced_example_engine_layer.cpp
