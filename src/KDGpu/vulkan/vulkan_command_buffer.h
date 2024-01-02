@@ -18,6 +18,7 @@
 
 namespace KDGpu {
 
+struct Buffer_t;
 struct Device_t;
 class VulkanResourceManager;
 
@@ -41,6 +42,7 @@ struct KDGPU_EXPORT VulkanCommandBuffer : public ApiCommandBuffer {
     VkCommandBufferLevel commandLevel{ VK_COMMAND_BUFFER_LEVEL_PRIMARY };
     VulkanResourceManager *vulkanResourceManager{ nullptr };
     Handle<Device_t> deviceHandle;
+    std::vector<Handle<Buffer_t>> temporaryBuffersToRelease;
 };
 
 } // namespace KDGpu

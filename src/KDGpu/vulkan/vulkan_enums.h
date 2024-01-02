@@ -134,4 +134,6 @@ VkBuildAccelerationStructureModeKHR accelerationStructureModeToVkStructureMode(B
 
 VkAccelerationStructureTypeKHR accelerationStructureTypeToVkAccelerationStructureType(AccelerationStructureType type);
 
+VkGeometryInstanceFlagsKHR geometryInstanceFlagsToVkGeometryInstanceFlags(GeometryInstanceFlags flags);
+
 } // namespace KDGpu

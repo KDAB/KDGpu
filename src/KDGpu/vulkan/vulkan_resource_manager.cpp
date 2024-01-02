@@ -1755,6 +1755,9 @@ void VulkanResourceManager::deleteCommandBuffer(const Handle<CommandBuffer_t> &h
     VulkanCommandBuffer *commandBuffer = m_commandBuffers.get(handle);
     VulkanDevice *vulkanDevice = m_devices.get(commandBuffer->deviceHandle);
 
+    for (const Handle<Buffer_t> buf : commandBuffer->temporaryBuffersToRelease)
+        deleteBuffer(buf);
+
     vkFreeCommandBuffers(vulkanDevice->device, commandBuffer->commandPool, 1, &commandBuffer->commandBuffer);
 
     m_commandBuffers.remove(handle);

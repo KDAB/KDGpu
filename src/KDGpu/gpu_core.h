@@ -1173,6 +1173,15 @@ enum class AccelerationStructureType {
     Generic = 2
 };
 
+enum class GeometryInstanceFlagBits {
+    None = 0,
+    TriangleFacingCullDisable = 0x00000001,
+    TriangleFlipFacing = 0x00000002,
+    ForceOpaque = 0x00000004,
+    ForceNoOpaque = 0x00000008
+};
+using GeometryInstanceFlags = KDGpu::Flags<GeometryInstanceFlagBits>;
+
 /*! @} */
 
 } // namespace KDGpu
@@ -1191,3 +1200,4 @@ OPERATORS_FOR_FLAGS(KDGpu::ExternalSemaphoreHandleTypeFlags)
 OPERATORS_FOR_FLAGS(KDGpu::ExternalMemoryHandleTypeFlags)
 OPERATORS_FOR_FLAGS(KDGpu::ResolveModeFlags)
 OPERATORS_FOR_FLAGS(KDGpu::StencilFaceFlags)
+OPERATORS_FOR_FLAGS(KDGpu::GeometryInstanceFlags)

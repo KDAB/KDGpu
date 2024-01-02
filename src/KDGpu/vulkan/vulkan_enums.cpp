@@ -415,4 +415,9 @@ VkAccelerationStructureTypeKHR accelerationStructureTypeToVkAccelerationStructur
     return static_cast<VkAccelerationStructureTypeKHR>(type);
 }
 
+VkGeometryInstanceFlagsKHR geometryInstanceFlagsToVkGeometryInstanceFlags(GeometryInstanceFlags flags)
+{
+    return static_cast<VkGeometryInstanceFlagsKHR>(flags.toInt());
+}
+
 } // namespace KDGpu
