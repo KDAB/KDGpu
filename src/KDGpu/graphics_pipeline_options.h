@@ -26,6 +26,7 @@ struct ShaderStage {
     Handle<ShaderModule_t> shaderModule;
     ShaderStageFlagBits stage;
     std::string entryPoint{ "main" };
+    std::vector<SpecializationConstant> specializationConstants;
 };
 
 struct VertexBufferLayout {

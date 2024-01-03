@@ -77,6 +77,39 @@ bool findExtension(const std::vector<KDGpu::Extension> &extensions, const std::s
     return it != std::end(extensions);
 };
 
+struct SpecializationConstantData {
+    uint32_t byteSize;
+    std::vector<uint8_t> byteValues;
+};
+
+SpecializationConstantData getByteOffsetSizeAndRawValueForSpecializationConstant(const KDGpu::SpecializationConstant &specializationConstant)
+{
+    uint32_t byteSize = 0;
+    std::vector<uint8_t> rawValues;
+
+    // clang-format off
+    std::visit([&](auto &&arg) {
+        using T = std::decay_t<decltype(arg)>;
+        if constexpr (std::is_same_v<T, bool>) {
+            byteSize = sizeof(VkBool32);
+            rawValues.resize(byteSize);
+            VkBool32 b(arg);
+            std::memcpy(rawValues.data(), &b, byteSize);
+        } else {
+            byteSize = sizeof(T);
+            rawValues.resize(byteSize);
+            std::memcpy(rawValues.data(), &arg, byteSize);
+        }
+    },
+    specializationConstant.value);
+    // clang-format on
+
+    return SpecializationConstantData{
+        .byteSize = byteSize,
+        .byteValues = std::move(rawValues),
+    };
+}
+
 } // namespace
 namespace KDGpu {
 
@@ -1060,6 +1093,11 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     std::vector<VkPipelineShaderStageCreateInfo> shaderInfos;
     const uint32_t shaderCount = static_cast<uint32_t>(options.shaderStages.size());
     shaderInfos.reserve(shaderCount);
+
+    std::vector<VkSpecializationInfo> shaderSpecializationInfos(shaderCount);
+    std::vector<std::vector<VkSpecializationMapEntry>> shaderSpecializationMapEntries(shaderCount);
+    std::vector<std::vector<uint8_t>> shaderSpecializationRawData(shaderCount);
+
     for (uint32_t i = 0; i < shaderCount; ++i) {
         const auto &shaderStage = options.shaderStages.at(i);
 
@@ -1073,6 +1111,41 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
             return {};
         shaderInfo.module = vulkanShaderModule->shaderModule;
         shaderInfo.pName = shaderStage.entryPoint.data();
+
+        // Specialization Constants
+        if (!shaderStage.specializationConstants.empty()) {
+            std::vector<VkSpecializationMapEntry> &specializationConstantEntries = shaderSpecializationMapEntries[i];
+            std::vector<uint8_t> &specializationRawData = shaderSpecializationRawData[i];
+            uint32_t byteOffset = 0;
+
+            const size_t specializationConstantsCount = shaderStage.specializationConstants.size();
+            specializationConstantEntries.reserve(specializationConstantsCount);
+
+            for (size_t sCI = 0; sCI < specializationConstantsCount; ++sCI) {
+                const SpecializationConstant &specializationConstant = shaderStage.specializationConstants[sCI];
+                const SpecializationConstantData &specializationConstantData = getByteOffsetSizeAndRawValueForSpecializationConstant(specializationConstant);
+
+                specializationConstantEntries.emplace_back(VkSpecializationMapEntry{
+                        .constantID = specializationConstant.constantId,
+                        .offset = byteOffset,
+                        .size = specializationConstantData.byteSize,
+                });
+
+                // Append Raw Byte Values
+                const std::vector<uint8_t> &rawData = specializationConstantData.byteValues;
+                specializationRawData.insert(specializationRawData.end(), rawData.begin(), rawData.end());
+
+                // Increase offset
+                byteOffset += specializationConstantData.byteSize;
+            }
+
+            VkSpecializationInfo &specializationInfo = shaderSpecializationInfos[i];
+            specializationInfo.mapEntryCount = specializationConstantsCount;
+            specializationInfo.pMapEntries = specializationConstantEntries.data();
+            specializationInfo.dataSize = specializationRawData.size();
+            specializationInfo.pData = specializationRawData.data();
+            shaderInfo.pSpecializationInfo = &specializationInfo;
+        }
 
         shaderInfos.emplace_back(shaderInfo);
     }
@@ -1349,12 +1422,46 @@ Handle<ComputePipeline_t> VulkanResourceManager::createComputePipeline(const Han
     computeShaderInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     computeShaderInfo.stage = VK_SHADER_STAGE_COMPUTE_BIT;
 
+    VkSpecializationInfo shaderSpecializationInfo;
+    std::vector<VkSpecializationMapEntry> shaderSpecializationMapEntries;
+    std::vector<uint8_t> shaderSpecializationRawData;
+
     // Lookup the shader module
     const auto vulkanShaderModule = getShaderModule(options.shaderStage.shaderModule);
     if (!vulkanShaderModule)
         return {};
     computeShaderInfo.module = vulkanShaderModule->shaderModule;
     computeShaderInfo.pName = options.shaderStage.entryPoint.data();
+
+    if (!options.shaderStage.specializationConstants.empty()) {
+        uint32_t byteOffset = 0;
+        const size_t specializationConstantsCount = options.shaderStage.specializationConstants.size();
+        shaderSpecializationMapEntries.reserve(specializationConstantsCount);
+
+        for (size_t sCI = 0; sCI < specializationConstantsCount; ++sCI) {
+            const SpecializationConstant &specializationConstant = options.shaderStage.specializationConstants[sCI];
+            const SpecializationConstantData &specializationConstantData = getByteOffsetSizeAndRawValueForSpecializationConstant(specializationConstant);
+
+            shaderSpecializationMapEntries.emplace_back(VkSpecializationMapEntry{
+                    .constantID = specializationConstant.constantId,
+                    .offset = byteOffset,
+                    .size = specializationConstantData.byteSize,
+            });
+
+            // Append Raw Byte Values
+            const std::vector<uint8_t> &rawData = specializationConstantData.byteValues;
+            shaderSpecializationRawData.insert(shaderSpecializationRawData.end(), rawData.begin(), rawData.end());
+
+            // Increase offset
+            byteOffset += specializationConstantData.byteSize;
+        }
+
+        shaderSpecializationInfo.mapEntryCount = specializationConstantsCount;
+        shaderSpecializationInfo.pMapEntries = shaderSpecializationMapEntries.data();
+        shaderSpecializationInfo.dataSize = shaderSpecializationRawData.size();
+        shaderSpecializationInfo.pData = shaderSpecializationRawData.data();
+        computeShaderInfo.pSpecializationInfo = &shaderSpecializationInfo;
+    }
 
     VkComputePipelineCreateInfo pipelineInfo = {};
     pipelineInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;

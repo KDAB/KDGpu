@@ -12,3 +12,9 @@ add_custom_target(
     DEPENDS KDGpu_EmptyCompute
     COMMENT "Target to compile the empty shader"
 )
+CompileShader(KDGpu_EmptyComputeSpecializationConstant specialization_constant.comp specialization_constant.comp.spv)
+add_custom_target(
+    KDGpu_EmptyComputeSpecializationConstantsTmp ALL
+    DEPENDS KDGpu_EmptyComputeSpecializationConstant
+    COMMENT "Target to compile the empty shader"
+)

@@ -328,4 +328,71 @@ TEST_SUITE("GraphicsPipeline")
             CHECK(a != b);
         }
     }
+
+    TEST_CASE("Specialization Constants")
+    {
+        REQUIRE(device.isValid());
+
+        SUBCASE("A GraphicsPipeline from a Vulkan API with specialization constants")
+        {
+            // GIVEN
+            const auto sCVertexShaderPath = assetPath() + "/shaders/tests/graphics_pipeline/specialization_constants.vert.spv";
+            auto sCVertexShader = device.createShaderModule(readShaderFile(sCVertexShaderPath));
+
+            const auto sCFragmentShaderPath = assetPath() + "/shaders/tests/graphics_pipeline/specialization_constants.frag.spv";
+            auto sCFragmentShader = device.createShaderModule(readShaderFile(sCFragmentShaderPath));
+
+            PipelineLayoutOptions pipelineLayoutOptions{};
+            PipelineLayout pipelineLayout = device.createPipelineLayout(pipelineLayoutOptions);
+            const Format depthFormat = selectDepthFormat(adapter);
+            REQUIRE(depthFormat != Format::UNDEFINED);
+
+            GraphicsPipelineOptions pipelineOptions = {
+                .shaderStages = {
+                        {
+                                .shaderModule = sCVertexShader.handle(),
+                                .stage = ShaderStageFlagBits::VertexBit,
+                                .specializationConstants = {
+                                        { .constantId = 0, .value = 16 },
+                                        { .constantId = 1, .value = 32 },
+                                },
+                        },
+                        {
+                                .shaderModule = sCFragmentShader.handle(),
+                                .stage = ShaderStageFlagBits::FragmentBit,
+                                .specializationConstants = {
+                                        { .constantId = 2, .value = 8 },
+                                },
+
+                        },
+                },
+                .layout = pipelineLayout.handle(),
+                .vertex = {
+                        .buffers = {
+                                { .binding = 0, .stride = 2 * 4 * sizeof(float) },
+                        },
+                        .attributes = {
+                                { .location = 0, .binding = 0, .format = Format::R32G32B32A32_SFLOAT }, // Position
+                        },
+                },
+                .renderTargets = {
+                        { .format = Format::R8G8B8A8_UNORM },
+                },
+                .depthStencil = {
+                        .format = depthFormat,
+                        .depthWritesEnabled = true,
+                        .depthCompareOperation = CompareOperation::Less,
+                        .resolveDepthStencil = true,
+                },
+                .primitive = {},
+                .multisample = {}
+            };
+
+            // WHEN
+            GraphicsPipeline g = device.createGraphicsPipeline(pipelineOptions);
+
+            // THEN
+            CHECK(g.isValid());
+        }
+    }
 }

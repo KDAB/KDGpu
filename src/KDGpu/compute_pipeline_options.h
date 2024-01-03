@@ -21,6 +21,7 @@ struct ShaderModule_t;
 struct ComputeShaderStage {
     Handle<ShaderModule_t> shaderModule;
     std::string entryPoint{ "main" };
+    std::vector<SpecializationConstant> specializationConstants;
 };
 
 struct ComputePipelineOptions {

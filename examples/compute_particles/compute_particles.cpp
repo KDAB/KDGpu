@@ -166,7 +166,16 @@ void ComputeParticles::initializeScene()
 
         const ComputePipelineOptions pipelineOptions{
             .layout = m_computePipelineLayout,
-            .shaderStage = { .shaderModule = computeShader }
+            .shaderStage = {
+                    .shaderModule = computeShader,
+                    // Use a specialization constant to set the local X workgroup size
+                    .specializationConstants = {
+                            {
+                                    .constantId = 0,
+                                    .value = 256,
+                            },
+                    },
+            }
         };
 
         m_computePipeline = m_device.createComputePipeline(pipelineOptions);

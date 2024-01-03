@@ -184,4 +184,33 @@ TEST_SUITE("ComputePipeline")
             CHECK(a != b);
         }
     }
+
+    TEST_CASE("Specialization Constants")
+    {
+        SUBCASE("A constructed ComputePipeline from a Vulkan API with specialization constants")
+        {
+            // GIVEN
+            PipelineLayoutOptions pipelineLayoutOptions{};
+            PipelineLayout pipelineLayout = device.createPipelineLayout(pipelineLayoutOptions);
+
+            const auto sCComputeShaderPath = assetPath() + "/shaders/tests/compute_pipeline/specialization_constant.comp.spv";
+            auto sCComputeShader = device.createShaderModule(readShaderFile(sCComputeShaderPath));
+
+            const ComputePipelineOptions computePipelineOptions{
+                .layout = pipelineLayout,
+                .shaderStage = ComputeShaderStage{
+                        .shaderModule = sCComputeShader.handle(),
+                        .specializationConstants = {
+                                { .constantId = 0, .value = 256 },
+                        },
+                },
+            };
+
+            // WHEN
+            ComputePipeline c = device.createComputePipeline(computePipelineOptions);
+
+            // THEN
+            CHECK(c.isValid());
+        }
+    }
 }

@@ -125,6 +125,11 @@ struct Viewport {
     friend bool operator==(const Viewport &, const Viewport &) = default;
 };
 
+struct SpecializationConstant {
+    uint32_t constantId;
+    std::variant<bool, int32_t, uint32_t, float, double> value;
+};
+
 enum class SampleCountFlagBits {
     Samples1Bit = 0x00000001,
     Samples2Bit = 0x00000002,
