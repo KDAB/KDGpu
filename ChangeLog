@@ -1,3 +1,7 @@
+- v0.4.5
+  - Warn about missing Vulkan layers
+  - Use std::exchange in move ctors
+  - Support for specialization constants
 - v0.4.4
   - Fix TextureOploadOptions/WaitForTextureOploadOptions logic and initialization
   - Handle now has operator < to allow std::map storage
