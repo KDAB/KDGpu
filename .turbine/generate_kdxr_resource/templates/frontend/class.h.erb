@@ -1,0 +1,54 @@
+/*
+  This file is part of KDXr.
+
+  SPDX-FileCopyrightText: <%= Time.now.strftime('%Y') %> Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+
+  SPDX-License-Identifier: MIT
+
+  Contact KDAB at <info@kdab.com> for commercial licensing options.
+*/
+
+#pragma once
+
+#include <KDXr/kdxr_core.h>
+#include <KDXr/handle.h>
+#include <KDXr/kdxr_export.h>
+
+namespace KDXr {
+
+struct <%= class_name %>_t;
+
+/**
+    @brief Holds option fields used for <%= class_name %> creation
+    @ingroup public
+    @headerfile <%= file_name %>.h <KDXr/<%= file_name %>.h>
+ */
+struct <%= class_name %>Options {
+
+};
+
+class KDXR_EXPORT <%= class_name %>
+{
+public:
+    <%= class_name %>();
+    ~<%= class_name %>();
+
+    <%= class_name %>(<%= class_name %> &&);
+    <%= class_name %> &operator=(<%= class_name %> &&);
+
+    <%= class_name %>(const <%= class_name %> &) = delete;
+    <%= class_name %> &operator=(const <%= class_name %> &) = delete;
+
+    Handle<<%= class_name %>_t> handle() const noexcept { return m_<%= variable_name %>; }
+    bool isValid() const { return m_<%= variable_name %>.isValid(); }
+
+    operator Handle<<%= class_name %>_t>() const noexcept { return m_<%= variable_name %>; }
+
+private:
+    <%= class_name %>(XrApi *api, const <%= class_name %>Options &options);
+
+    XrApi *m_api{ nullptr };
+    Handle<<%= class_name %>_t> m_<%= variable_name %>;
+};
+
+} // namespace KDXr

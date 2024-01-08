@@ -1,0 +1,87 @@
+/*
+  This file is part of KDXr.
+
+  SPDX-FileCopyrightText: <%= Time.now.strftime('%Y') %> Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+
+  SPDX-License-Identifier: MIT
+
+  Contact KDAB at <info@kdab.com> for commercial licensing options.
+*/
+
+#include "<%= name.downcase %>.h"
+
+#include <KDXr/xr_api.h>
+#include <KDXr/resource_manager.h>
+#include <KDXr/api/api_<%= file_name %>.h>
+
+#include <KDXr/utils/logging.h>
+
+namespace KDXr {
+
+/**
+    @class <%= class_name %>
+    @brief <%= class_name %> is used to initialize the XR API.
+    @ingroup public
+    @headerfile <%= file_name %>.h <KDXr/<%= file_name %>.h>
+
+    @sa <%= class_name %>Options
+ */
+
+/**
+    @fn <%= class_name %>::handle()
+    @brief Returns the handle used to retrieve the underlying XR API specific <%= class_name %>
+
+    @return Handle<<%= class_name %>_t>
+    @sa ResourceManager
+ */
+
+/**
+    @fn <%= class_name %>::isValid()
+    @brief Convenience function to check whether the object is actually referencing a valid API specific resource
+ */
+
+<%= class_name %>::<%= class_name %>()
+{
+}
+
+<%= class_name %>::<%= class_name %>(XrApi *api, const <%= class_name %>Options &options)
+{
+    // Create an <%= name %> using the underlying API
+    m_api = api;
+    // TODO: Implement resource manager create function
+    // m_<%= variable_name %> = m_api->resourceManager()->create<%= class_name %>(options);
+}
+
+<%= name %>::~<%= name %>()
+{
+    // TODO: Implement resource manager delete function
+    // if (isValid())
+    //    m_api->resourceManager()->delete<%= class_name %>(handle());
+}
+
+<%= name %>::<%= name %>(<%= name %> &&other)
+{
+    m_api = other.m_api;
+    m_<%= variable_name %> = other.m_<%= variable_name %>;
+
+    other.m_api = nullptr;
+    other.m_<%= variable_name %> = {};
+}
+
+<%= class_name %> &<%= class_name %>::operator=(<%= class_name %> &&other)
+{
+    if (this != &other) {
+        // TODO: Implement resource manager create function
+        // if (isValid())
+        //    m_api->resourceManager()->delete<%= class_name %>(handle());
+
+        m_api = other.m_api;
+        m_<%= variable_name %> = other.m_<%= variable_name %>;
+
+        other.m_api = nullptr;
+        other.m_<%= variable_name %> = {};
+    }
+    return *this;
+}
+
+} // namespace KDXr
