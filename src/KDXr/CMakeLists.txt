@@ -10,6 +10,7 @@ set(SOURCES
     instance.cpp
     resource_manager.cpp
     xr_api.cpp
+    openxr/openxr_api.cpp
     openxr/openxr_instance.cpp
     openxr/openxr_resource_manager.cpp
     utils/logging.cpp
@@ -22,6 +23,7 @@ set(HEADERS
     resource_manager.h
     xr_api.h
     api/api_instance.h
+    openxr/openxr_api.h
     openxr/openxr_instance.h
     openxr/openxr_resource_manager.h
     utils/hash_utils.h
@@ -36,7 +38,7 @@ add_library(
     KDXr::KDXr ALIAS KDXr
 )
 
-set(KDXR_PUBLIC_LIBS spdlog::spdlog OpenXR::openxr_loader)
+set(KDXR_PUBLIC_LIBS KDGpu::KDGpu spdlog::spdlog OpenXR::openxr_loader)
 
 set(KDXR_EXPORT_TARGETS KDXr)
 

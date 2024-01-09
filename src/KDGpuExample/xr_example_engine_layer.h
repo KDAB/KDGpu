@@ -12,6 +12,9 @@
 
 #include <KDGpuExample/engine_layer.h>
 
+#include <KDXr/instance.h>
+#include <KDXr/openxr/openxr_api.h>
+
 #include <KDGpu/device.h>
 #include <KDGpu/gpu_semaphore.h>
 #include <KDGpu/instance.h>
@@ -44,6 +47,7 @@ class RenderPassCommandRecorder;
 }
 
 using namespace KDGpu;
+
 namespace KDGpuExample {
 
 constexpr uint32_t MAX_VIEWS = 2;
@@ -121,6 +125,9 @@ protected:
     Format m_depthSwapchainFormat{ Format::UNDEFINED };
 
     // Xr related members
+    std::unique_ptr<KDXr::XrApi> m_xrApi;
+    KDXr::Instance m_kdxrInstance; // TODO: Rename to m_xrInstance etc as we replace raw OpenXR calls with KDXr
+
     std::vector<std::string> m_xrRequestedApiLayers{};
     std::vector<const char *> m_xrActiveApiLayers{};
 

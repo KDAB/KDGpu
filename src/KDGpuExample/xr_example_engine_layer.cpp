@@ -54,6 +54,7 @@ namespace KDGpuExample {
 XrExampleEngineLayer::XrExampleEngineLayer()
     : EngineLayer()
     , m_api(std::make_unique<VulkanGraphicsApi>())
+    , m_xrApi(std::make_unique<KDXr::OpenXrApi>())
 {
     m_logger = spdlog::get("engine");
     if (!m_logger)
@@ -377,6 +378,8 @@ void XrExampleEngineLayer::createXrInstance()
     xrApplicationInfo.engineVersion = 1;
     xrApplicationInfo.apiVersion = XR_CURRENT_API_VERSION;
 
+    // TODO: Add api to KDXr::OpenXrApi to get the available api layers and extensions.
+
     // Query and check layers
     uint32_t apiLayerCount = 0;
     std::vector<XrApiLayerProperties> apiLayerProperties;
@@ -391,6 +394,7 @@ void XrExampleEngineLayer::createXrInstance()
     }
 
     // Check the requested API layers against the ones enumerated from OpenXR. If found add it to the active api Layers.
+    std::vector<std::string> activeApiLayers;
     for (auto &requestedLayer : m_xrRequestedApiLayers) {
         for (auto &layerProperty : apiLayerProperties) {
             // strcmp returns 0 if the strings match.
@@ -398,6 +402,7 @@ void XrExampleEngineLayer::createXrInstance()
                 continue;
             } else {
                 m_xrActiveApiLayers.push_back(requestedLayer.c_str());
+                activeApiLayers.push_back(requestedLayer);
                 break;
             }
         }
@@ -416,6 +421,7 @@ void XrExampleEngineLayer::createXrInstance()
         return;
     }
 
+    std::vector<std::string> activeInstanceExtensions;
     m_xrRequestedInstanceExtensions = { XR_EXT_DEBUG_UTILS_EXTENSION_NAME, XR_KHR_VULKAN_ENABLE_EXTENSION_NAME };
     for (auto &requestedInstanceExtension : m_xrRequestedInstanceExtensions) {
         bool found = false;
@@ -425,6 +431,7 @@ void XrExampleEngineLayer::createXrInstance()
                 continue;
             } else {
                 m_xrActiveInstanceExtensions.push_back(requestedInstanceExtension.c_str());
+                activeInstanceExtensions.push_back(requestedInstanceExtension);
                 found = true;
                 break;
             }
@@ -447,6 +454,7 @@ void XrExampleEngineLayer::createXrInstance()
         return;
     }
 
+    // TODO: Move these into the OpenXrInstance or OpenXrSystem class as needed
     // Resolve some functions we will need later
     if (xrGetInstanceProcAddr(m_xrInstance, "xrGetVulkanGraphicsRequirementsKHR", (PFN_xrVoidFunction *)&m_xrGetVulkanGraphicsRequirementsKHR) != XR_SUCCESS) {
         SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to get InstanceProcAddr for xrGetVulkanGraphicsRequirementsKHR.");
@@ -467,6 +475,15 @@ void XrExampleEngineLayer::createXrInstance()
         SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to get InstanceProcAddr for xrGetVulkanGraphicsDeviceKHR.");
         return;
     }
+
+    // Create the instance and debug message handler
+    KDXr::InstanceOptions instanceOptions = {
+        .applicationName = KDGui::GuiApplication::instance()->applicationName(),
+        .applicationVersion = KDGPU_MAKE_API_VERSION(0, 1, 0, 0),
+        .layers = activeApiLayers,
+        .extensions = activeInstanceExtensions
+    };
+    m_kdxrInstance = m_xrApi->createInstance(instanceOptions);
 }
 
 void XrExampleEngineLayer::destroyXrInstance()

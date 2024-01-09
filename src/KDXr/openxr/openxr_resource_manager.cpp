@@ -12,11 +12,46 @@
 
 #include <KDXr/config.h>
 #include <KDXr/instance.h>
+#include <KDXr/utils/logging.h>
+
+// TODO: Abstract away the choice of graphics API
+#include <vulkan/vulkan.h>
+
+#include <openxr/openxr.h>
+#define XR_USE_GRAPHICS_API_VULKAN
+#include <openxr/openxr_platform.h>
 
 #include <cassert>
 #include <stdexcept>
 
 namespace {
+
+static XRAPI_ATTR XrBool32 XRAPI_CALL debugCallback(
+        XrDebugUtilsMessageSeverityFlagsEXT messageSeverity,
+        XrDebugUtilsMessageTypeFlagsEXT messageType,
+        const XrDebugUtilsMessengerCallbackDataEXT *pCallbackData,
+        void *pUserData)
+{
+    switch (messageSeverity) {
+    case XR_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
+        SPDLOG_LOGGER_DEBUG(KDXr::Logger::logger(), "KDXr message: {}", pCallbackData->message);
+        break;
+    case XR_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
+        SPDLOG_LOGGER_INFO(KDXr::Logger::logger(), "KDXr message: {}", pCallbackData->message);
+        break;
+    case XR_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
+        SPDLOG_LOGGER_WARN(KDXr::Logger::logger(), "KDXr message: {}", pCallbackData->message);
+        break;
+    case XR_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
+        SPDLOG_LOGGER_ERROR(KDXr::Logger::logger(), "KDXr message: {}", pCallbackData->message);
+        break;
+    default:
+        SPDLOG_LOGGER_TRACE(KDXr::Logger::logger(), "KDXr message: {}", pCallbackData->message);
+        break;
+    }
+
+    return XR_FALSE;
+}
 
 bool findExtension(const std::vector<KDXr::Extension> &extensions, const std::string_view &name)
 {
@@ -25,6 +60,7 @@ bool findExtension(const std::vector<KDXr::Extension> &extensions, const std::st
 };
 
 } // namespace
+
 namespace KDXr {
 
 OpenXrResourceManager::OpenXrResourceManager()
@@ -37,20 +73,142 @@ OpenXrResourceManager::~OpenXrResourceManager()
 
 Handle<Instance_t> OpenXrResourceManager::createInstance(const InstanceOptions &options)
 {
-    // TODO: Implement me!
-    return {};
+    XrApplicationInfo xrApplicationInfo = {};
+    strncpy(xrApplicationInfo.applicationName, options.applicationName.data(), XR_MAX_APPLICATION_NAME_SIZE);
+    xrApplicationInfo.applicationVersion = 1;
+    strncpy(xrApplicationInfo.engineName, "KDXr Engine", XR_MAX_ENGINE_NAME_SIZE);
+    xrApplicationInfo.engineVersion = 1;
+    xrApplicationInfo.apiVersion = XR_CURRENT_API_VERSION;
+
+    // Query and check layers
+    uint32_t apiLayerCount = 0;
+    std::vector<XrApiLayerProperties> apiLayerProperties;
+    if (xrEnumerateApiLayerProperties(0, &apiLayerCount, nullptr) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to enumerate ApiLayerProperties.");
+    }
+    apiLayerProperties.resize(apiLayerCount, { XR_TYPE_API_LAYER_PROPERTIES });
+    if (xrEnumerateApiLayerProperties(apiLayerCount, &apiLayerCount, apiLayerProperties.data()) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to enumerate ApiLayerProperties.");
+    }
+
+    // Check the requested API layers against the ones enumerated from OpenXR. If found add it to the active api Layers.
+    std::vector<const char *> xrActiveApiLayers{};
+    for (auto &requestedLayer : options.layers) {
+        for (auto &layerProperty : apiLayerProperties) {
+            // strcmp returns 0 if the strings match.
+            if (strcmp(requestedLayer.c_str(), layerProperty.layerName) != 0) {
+                continue;
+            } else {
+                xrActiveApiLayers.push_back(requestedLayer.c_str());
+                break;
+            }
+        }
+    }
+
+    // Query and check instance extensions
+    uint32_t extensionCount = 0;
+    std::vector<XrExtensionProperties> extensionProperties;
+    if (xrEnumerateInstanceExtensionProperties(nullptr, 0, &extensionCount, nullptr) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to enumerate InstanceExtensionProperties.");
+    }
+    extensionProperties.resize(extensionCount, { XR_TYPE_EXTENSION_PROPERTIES });
+    if (xrEnumerateInstanceExtensionProperties(nullptr, extensionCount, &extensionCount, extensionProperties.data()) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to enumerate InstanceExtensionProperties.");
+    }
+
+    // TODO: Get from options
+    std::vector<std::string> m_xrRequestedInstanceExtensions = { XR_EXT_DEBUG_UTILS_EXTENSION_NAME, XR_KHR_VULKAN_ENABLE_EXTENSION_NAME };
+    std::vector<const char *> xrActiveInstanceExtensions;
+    for (auto &requestedInstanceExtension : m_xrRequestedInstanceExtensions) {
+        bool found = false;
+        for (auto &extensionProperty : extensionProperties) {
+            // strcmp returns 0 if the strings match.
+            if (strcmp(requestedInstanceExtension.c_str(), extensionProperty.extensionName) != 0) {
+                continue;
+            } else {
+                xrActiveInstanceExtensions.push_back(requestedInstanceExtension.c_str());
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            SPDLOG_LOGGER_WARN(Logger::logger(), "Failed to find requested instance extension: {}", requestedInstanceExtension);
+        }
+    }
+
+    // Create the XR Instance
+    XrInstanceCreateInfo instanceCI{ XR_TYPE_INSTANCE_CREATE_INFO };
+    instanceCI.createFlags = 0;
+    instanceCI.applicationInfo = xrApplicationInfo;
+    instanceCI.enabledApiLayerCount = static_cast<uint32_t>(xrActiveApiLayers.size());
+    instanceCI.enabledApiLayerNames = xrActiveApiLayers.data();
+    instanceCI.enabledExtensionCount = static_cast<uint32_t>(xrActiveInstanceExtensions.size());
+    instanceCI.enabledExtensionNames = xrActiveInstanceExtensions.data();
+
+    XrInstance xrInstance{ XR_NULL_HANDLE };
+    if (xrCreateInstance(&instanceCI, &xrInstance) != XR_SUCCESS) {
+        throw std::runtime_error("Failed to create OpenXR Instance.");
+    }
+
+    OpenXrInstance openXrInstance(this, xrInstance);
+
+    // Create the debug logger
+    bool foundDebugUtilsExtension = false;
+    for (const auto &extension : xrActiveInstanceExtensions) {
+        if (strcmp(extension, XR_EXT_DEBUG_UTILS_EXTENSION_NAME) == 0) {
+            foundDebugUtilsExtension = true;
+            break;
+        }
+    }
+
+    if (foundDebugUtilsExtension == true) {
+        XrDebugUtilsMessengerCreateInfoEXT debugUtilsMessengerCreateInfo{ XR_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT };
+        debugUtilsMessengerCreateInfo.messageSeverities = XR_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | XR_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT | XR_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | XR_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+        debugUtilsMessengerCreateInfo.messageTypes = XR_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | XR_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | XR_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT | XR_DEBUG_UTILS_MESSAGE_TYPE_CONFORMANCE_BIT_EXT;
+        debugUtilsMessengerCreateInfo.userCallback = (PFN_xrDebugUtilsMessengerCallbackEXT)debugCallback;
+        debugUtilsMessengerCreateInfo.userData = nullptr;
+
+        // Load xrCreateDebugUtilsMessengerEXT() function pointer as it is not default loaded by the OpenXR loader.
+        PFN_xrCreateDebugUtilsMessengerEXT xrCreateDebugUtilsMessengerEXT;
+        if (xrGetInstanceProcAddr(openXrInstance.instance, "xrCreateDebugUtilsMessengerEXT", (PFN_xrVoidFunction *)&xrCreateDebugUtilsMessengerEXT) != XR_SUCCESS) {
+            SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to get InstanceProcAddr.");
+        }
+
+        // Finally create and return the XrDebugUtilsMessengerEXT.
+        if (xrCreateDebugUtilsMessengerEXT != nullptr) {
+            if (xrCreateDebugUtilsMessengerEXT(openXrInstance.instance, &debugUtilsMessengerCreateInfo, &openXrInstance.debugMessenger) != XR_SUCCESS) {
+                SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to create DebugUtilsMessenger.");
+            }
+        }
+    }
+
+    auto h = m_instances.emplace(openXrInstance);
+    return h;
 }
 
 void OpenXrResourceManager::deleteInstance(const Handle<Instance_t> &handle)
 {
-    OpenXrInstance *instance = m_instances.get(handle);
+    OpenXrInstance *openXrInstance = m_instances.get(handle);
 
     // Only destroy instances that we have allocated
-    if (instance->isOwned) {
+    if (openXrInstance->isOwned) {
+        // Destroy debug logger if we have one
+        if (openXrInstance->debugMessenger) {
+            // Load xrDestroyDebugUtilsMessengerEXT() function pointer as it is not default loaded by the OpenXR loader.
+            PFN_xrDestroyDebugUtilsMessengerEXT xrDestroyDebugUtilsMessengerEXT;
+            if (xrGetInstanceProcAddr(openXrInstance->instance, "xrDestroyDebugUtilsMessengerEXT", (PFN_xrVoidFunction *)&xrDestroyDebugUtilsMessengerEXT) != XR_SUCCESS) {
+                SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to get InstanceProcAddr.");
+            }
 
-        // TODO: Destroy debug logger if we have one
+            // Destroy the provided XrDebugUtilsMessengerEXT.
+            if (xrDestroyDebugUtilsMessengerEXT != nullptr) {
+                if (xrDestroyDebugUtilsMessengerEXT(openXrInstance->debugMessenger) != XR_SUCCESS) {
+                    SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to destroy DebugUtilsMessenger.");
+                }
+            }
+        }
 
-        xrDestroyInstance(instance->instance);
+        xrDestroyInstance(openXrInstance->instance);
     }
 
     m_instances.remove(handle);
