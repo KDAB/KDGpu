@@ -15,7 +15,7 @@
 #include <KDGpuExample/kdgpuexample_export.h>
 
 #include <KDFoundation/object.h>
-#include <KDFoundation/logging.h>
+#include <KDUtils/logging.h>
 
 #include <kdbindings/property.h>
 

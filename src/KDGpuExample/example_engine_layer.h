@@ -25,7 +25,7 @@
 
 #include <KDGpuExample/kdgpuexample_export.h>
 
-#include <KDFoundation/logging.h>
+#include <KDUtils/logging.h>
 
 #include <array>
 #include <functional>
