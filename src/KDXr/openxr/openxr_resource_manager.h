@@ -34,6 +34,9 @@ public:
     OpenXrResourceManager();
     ~OpenXrResourceManager() final;
 
+    std::vector<ApiLayer> availableApiLayers() const final;
+    std::vector<Extension> availableInstanceExtensions() const final;
+
     Handle<Instance_t> createInstance(const InstanceOptions &options) final;
     void deleteInstance(const Handle<Instance_t> &handle) final;
     OpenXrInstance *getInstance(const Handle<Instance_t> &handle) const final;

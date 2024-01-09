@@ -35,6 +35,9 @@ class KDXR_EXPORT XrApi
 public:
     virtual ~XrApi();
 
+    std::vector<ApiLayer> availableApiLayers() const;
+    std::vector<Extension> availableInstanceExtensions() const;
+
     /**
      * @brief Create an Instance object given the InstanceOptions @a options
      */

@@ -28,4 +28,14 @@ ResourceManager::~ResourceManager()
 {
 }
 
+std::vector<ApiLayer> ResourceManager::availableApiLayers() const
+{
+    return {};
+}
+
+std::vector<Extension> ResourceManager::availableInstanceExtensions() const
+{
+    return {};
+}
+
 } // namespace KDXr

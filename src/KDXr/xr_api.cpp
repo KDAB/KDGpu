@@ -20,6 +20,16 @@ XrApi::~XrApi()
 {
 }
 
+std::vector<ApiLayer> XrApi::availableApiLayers() const
+{
+    return m_resourceManager->availableApiLayers();
+}
+
+std::vector<Extension> XrApi::availableInstanceExtensions() const
+{
+    return m_resourceManager->availableInstanceExtensions();
+}
+
 Instance XrApi::createInstance(const InstanceOptions &options)
 {
     return Instance(this, options);

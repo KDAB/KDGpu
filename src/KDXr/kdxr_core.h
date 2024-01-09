@@ -30,9 +30,18 @@ namespace KDXr {
  *  @{
  */
 
+struct ApiLayer {
+    std::string name;
+    std::string description;
+    uint64_t specVersion{ 0 };
+    uint32_t layerVersion{ 0 };
+
+    friend bool operator==(const ApiLayer &, const ApiLayer &) = default;
+};
+
 struct Extension {
     std::string name;
-    uint32_t version{ 0 };
+    uint32_t extensionVersion{ 0 };
 
     friend bool operator==(const Extension &, const Extension &) = default;
 };

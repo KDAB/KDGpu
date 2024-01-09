@@ -71,6 +71,52 @@ OpenXrResourceManager::~OpenXrResourceManager()
 {
 }
 
+std::vector<ApiLayer> OpenXrResourceManager::availableApiLayers() const
+{
+    uint32_t apiLayerCount = 0;
+    std::vector<XrApiLayerProperties> apiLayerProperties;
+    if (xrEnumerateApiLayerProperties(0, &apiLayerCount, nullptr) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to enumerate ApiLayerProperties.");
+    }
+    apiLayerProperties.resize(apiLayerCount, { XR_TYPE_API_LAYER_PROPERTIES });
+    if (xrEnumerateApiLayerProperties(apiLayerCount, &apiLayerCount, apiLayerProperties.data()) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to enumerate ApiLayerProperties.");
+    }
+
+    std::vector<ApiLayer> layers;
+    layers.reserve(apiLayerCount);
+    for (const auto &apiLayerProperty : apiLayerProperties) {
+        layers.emplace_back(ApiLayer{ .name = apiLayerProperty.layerName,
+                                      .description = apiLayerProperty.description,
+                                      .specVersion = apiLayerProperty.specVersion,
+                                      .layerVersion = apiLayerProperty.layerVersion });
+    }
+
+    return layers;
+}
+
+std::vector<Extension> OpenXrResourceManager::availableInstanceExtensions() const
+{
+    uint32_t extensionCount = 0;
+    std::vector<XrExtensionProperties> extensionProperties;
+    if (xrEnumerateInstanceExtensionProperties(nullptr, 0, &extensionCount, nullptr) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to enumerate InstanceExtensionProperties.");
+    }
+    extensionProperties.resize(extensionCount, { XR_TYPE_EXTENSION_PROPERTIES });
+    if (xrEnumerateInstanceExtensionProperties(nullptr, extensionCount, &extensionCount, extensionProperties.data()) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to enumerate InstanceExtensionProperties.");
+    }
+
+    std::vector<Extension> extensions;
+    extensions.reserve(extensionCount);
+    for (const auto &extensionProperty : extensionProperties) {
+        extensions.emplace_back(Extension{ .name = extensionProperty.extensionName,
+                                           .extensionVersion = extensionProperty.extensionVersion });
+    }
+
+    return extensions;
+}
+
 Handle<Instance_t> OpenXrResourceManager::createInstance(const InstanceOptions &options)
 {
     XrApplicationInfo xrApplicationInfo = {};

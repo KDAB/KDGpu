@@ -11,7 +11,10 @@
 #pragma once
 
 #include <KDXr/kdxr_export.h>
+#include <KDXr/kdxr_core.h>
 #include <KDXr/handle.h>
+
+#include <vector>
 
 namespace KDXr {
 
@@ -25,6 +28,9 @@ class KDXR_EXPORT ResourceManager
 {
 public:
     virtual ~ResourceManager();
+
+    virtual std::vector<ApiLayer> availableApiLayers() const;
+    virtual std::vector<Extension> availableInstanceExtensions() const;
 
     virtual Handle<Instance_t> createInstance(const InstanceOptions &options) = 0;
     virtual void deleteInstance(const Handle<Instance_t> &handle) = 0;

@@ -370,6 +370,16 @@ void XrExampleEngineLayer::destroyGraphicsDevice()
 
 void XrExampleEngineLayer::createXrInstance()
 {
+    auto layers = m_xrApi->availableApiLayers();
+    for (const auto &layer : layers) {
+        SPDLOG_LOGGER_INFO(m_logger, "Available ApiLayer: {}", layer.name);
+    }
+
+    auto instanceExtensions = m_xrApi->availableInstanceExtensions();
+    for (const auto &extension : instanceExtensions) {
+        SPDLOG_LOGGER_INFO(m_logger, "Available InstanceExtension: {}", extension.name);
+    }
+
     XrApplicationInfo xrApplicationInfo = {};
     const auto appName = KDGui::GuiApplication::instance()->applicationName();
     strncpy(xrApplicationInfo.applicationName, appName.data(), XR_MAX_APPLICATION_NAME_SIZE);
