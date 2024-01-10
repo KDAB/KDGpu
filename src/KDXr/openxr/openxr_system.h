@@ -31,6 +31,8 @@ struct KDXR_EXPORT OpenXrSystem : public ApiSystem {
                           XrSystemId _system,
                           const Handle<Instance_t> &instanceHandle) noexcept;
 
+    SystemProperties queryProperties() const final;
+
     OpenXrResourceManager *openxrResourceManager{ nullptr };
     XrSystemId system{ XR_NULL_SYSTEM_ID };
     Handle<Instance_t> instanceHandle;

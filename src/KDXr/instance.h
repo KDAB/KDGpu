@@ -58,7 +58,7 @@ public:
 
     InstanceProperties properties() const;
 
-    System *system(const SystemOptions &options);
+    System *system(const SystemOptions &options = SystemOptions());
 
 private:
     Instance(XrApi *api, const InstanceOptions &options);

@@ -23,7 +23,7 @@ struct System_t;
  *
  */
 struct ApiSystem {
-    // TODO: Add pure virtual functions here
+    virtual SystemProperties queryProperties() const = 0;
 };
 
 } // namespace KDXr

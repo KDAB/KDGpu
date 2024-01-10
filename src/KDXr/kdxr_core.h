@@ -55,6 +55,24 @@ struct InstanceProperties {
     uint64_t runtimeVersion{ 0 };
 };
 
+struct SystemGraphicsProperties {
+    uint32_t maxSwapchainWidth{ 0 };
+    uint32_t maxSwapchainHeight{ 0 };
+    uint32_t maxLayerCount{ 0 };
+};
+
+struct SystemTrackingProperties {
+    bool hasOrientationTracking{ false };
+    bool hasPositionTracking{ false };
+};
+
+struct SystemProperties {
+    uint32_t vendorId{ 0 };
+    std::string systemName;
+    SystemGraphicsProperties graphicsProperties{};
+    SystemTrackingProperties trackingProperties{};
+};
+
 enum class FormFactor : uint32_t {
     HeadMountedDisplay = 1,
     HandheldDisplay = 2,

@@ -72,6 +72,9 @@ void XrExampleEngineLayer::onAttached()
     createXrDebugMessenger();
     getXrInstanceProperties();
     getXrSystemId();
+    m_kdxrSystem = m_kdxrInstance.system();
+    const auto systemProperties = m_kdxrSystem->properties();
+
     getXrViewConfigurations();
 
     // Graphics Setup

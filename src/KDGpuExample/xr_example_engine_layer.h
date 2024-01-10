@@ -127,6 +127,7 @@ protected:
     // Xr related members
     std::unique_ptr<KDXr::XrApi> m_xrApi;
     KDXr::Instance m_kdxrInstance; // TODO: Rename to m_xrInstance etc as we replace raw OpenXR calls with KDXr
+    KDXr::System *m_kdxrSystem{ nullptr };
 
     std::vector<std::string> m_xrRequestedApiLayers{};
     std::vector<const char *> m_xrActiveApiLayers{};

@@ -26,4 +26,33 @@ OpenXrSystem::OpenXrSystem(OpenXrResourceManager *_openxrResourceManager,
 {
 }
 
+SystemProperties OpenXrSystem::queryProperties() const
+{
+    auto openxrInstance = openxrResourceManager->getInstance(instanceHandle);
+
+    XrSystemProperties systemProperties{ XR_TYPE_SYSTEM_PROPERTIES };
+    if (xrGetSystemProperties(openxrInstance->instance, system, &systemProperties) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to query system properties.");
+        return {};
+    }
+
+    // clang-format off
+    SystemProperties properties {
+        .vendorId = systemProperties.vendorId,
+        .systemName = systemProperties.systemName,
+        .graphicsProperties = {
+            .maxSwapchainWidth = systemProperties.graphicsProperties.maxSwapchainImageWidth,
+            .maxSwapchainHeight = systemProperties.graphicsProperties.maxSwapchainImageHeight,
+            .maxLayerCount = systemProperties.graphicsProperties.maxLayerCount
+        },
+        .trackingProperties = {
+            .hasOrientationTracking = static_cast<bool>(systemProperties.trackingProperties.orientationTracking),
+            .hasPositionTracking = static_cast<bool>(systemProperties.trackingProperties.positionTracking)
+        }
+    };
+    // clang-format on
+
+    return properties;
+}
+
 } // namespace KDXr

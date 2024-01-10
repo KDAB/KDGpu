@@ -45,11 +45,14 @@ public:
 
     operator Handle<System_t>() const noexcept { return m_system; }
 
+    SystemProperties properties() const;
+
 private:
     explicit System(XrApi *api, const Handle<System_t> &system);
 
     XrApi *m_api{ nullptr };
     Handle<System_t> m_system;
+    SystemProperties m_properties;
 
     friend class Instance;
 };
