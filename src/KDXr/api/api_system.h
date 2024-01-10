@@ -27,6 +27,7 @@ struct System_t;
 struct ApiSystem {
     virtual SystemProperties queryProperties() const = 0;
     virtual std::vector<ViewConfigurationType> queryViewConfigurations() const = 0;
+    virtual std::vector<EnvironmentBlendMode> queryEnvironmentBlendModes(ViewConfigurationType viewConfiguration) const = 0;
 };
 
 } // namespace KDXr

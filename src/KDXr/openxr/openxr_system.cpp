@@ -81,4 +81,32 @@ std::vector<ViewConfigurationType> OpenXrSystem::queryViewConfigurations() const
     return viewConfigurationTypes;
 }
 
+std::vector<EnvironmentBlendMode> OpenXrSystem::queryEnvironmentBlendModes(ViewConfigurationType viewConfiguration) const
+{
+    auto openxrInstance = openxrResourceManager->getInstance(instanceHandle);
+    const XrViewConfigurationType xrViewConfiguration = static_cast<XrViewConfigurationType>(viewConfiguration);
+
+    std::vector<XrEnvironmentBlendMode> xrEnvironmentBlendModes;
+    uint32_t environmentBlendModeCount = 0;
+    if (xrEnumerateEnvironmentBlendModes(openxrInstance->instance, system, xrViewConfiguration, 0, &environmentBlendModeCount, nullptr) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to enumerate EnvironmentBlendModes.");
+        return {};
+    }
+
+    // Query the environment blend modes supported by the system
+    xrEnvironmentBlendModes.resize(environmentBlendModeCount);
+    if (xrEnumerateEnvironmentBlendModes(openxrInstance->instance, system, xrViewConfiguration, environmentBlendModeCount, &environmentBlendModeCount, xrEnvironmentBlendModes.data()) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to enumerate EnvironmentBlendModes.");
+        return {};
+    }
+
+    std::vector<EnvironmentBlendMode> environmentBlendModes;
+    environmentBlendModes.reserve(environmentBlendModeCount);
+    for (const auto &environmentBlendMode : xrEnvironmentBlendModes) {
+        environmentBlendModes.push_back(static_cast<EnvironmentBlendMode>(environmentBlendMode));
+    }
+
+    return environmentBlendModes;
+}
+
 } // namespace KDXr

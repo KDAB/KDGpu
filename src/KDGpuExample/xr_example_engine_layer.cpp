@@ -86,6 +86,9 @@ void XrExampleEngineLayer::onAttached()
         }
     }
 
+    // We will just use the first environment blend mode supported by the system
+    m_selectedEnvironmentBlendMode = m_kdxrSystem->environmentBlendModes(m_selectedViewConfiguration)[0];
+
     // Graphics Setup
     createGraphicsInstance();
     createGraphicsDevice();

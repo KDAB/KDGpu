@@ -88,4 +88,10 @@ std::span<const ViewConfigurationType> System::viewConfigurations() const
     return m_viewConfigurations;
 }
 
+std::vector<EnvironmentBlendMode> System::environmentBlendModes(ViewConfigurationType viewConfiguration) const
+{
+    auto apiSystem = m_api->resourceManager()->getSystem(m_system);
+    return apiSystem->queryEnvironmentBlendModes(viewConfiguration);
+}
+
 } // namespace KDXr

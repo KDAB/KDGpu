@@ -86,4 +86,11 @@ enum class ViewConfigurationType : uint32_t {
     MaxEnum = 0x7fffffff
 };
 
+enum class EnvironmentBlendMode : uint32_t {
+    Opaque = 1,
+    Additive = 2,
+    AlphaBlend = 3,
+    MaxEnum = 0x7fffffff
+};
+
 } // namespace KDXr
