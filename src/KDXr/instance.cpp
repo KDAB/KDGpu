@@ -108,4 +108,10 @@ std::vector<Extension> Instance::enabledExtensions() const
     return apiInstance->enabledExtensions();
 }
 
+InstanceProperties Instance::properties() const
+{
+    auto apiInstance = m_api->resourceManager()->getInstance(m_instance);
+    return apiInstance->properties();
+}
+
 } // namespace KDXr

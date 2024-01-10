@@ -18,6 +18,10 @@ using HANDLE = void *;
 #define KDXR_MAKE_API_VERSION(variant, major, minor, patch) \
     ((((uint32_t)(variant)) << 29) | (((uint32_t)(major)) << 22) | (((uint32_t)(minor)) << 12) | ((uint32_t)(patch)))
 
+#define KDXR_VERSION_MAJOR(version) (uint16_t)(((uint64_t)(version) >> 48) & 0xffffULL)
+#define KDXR_VERSION_MINOR(version) (uint16_t)(((uint64_t)(version) >> 32) & 0xffffULL)
+#define KDXR_VERSION_PATCH(version) (uint32_t)((uint64_t)(version)&0xffffffffULL)
+
 namespace KDXr {
 
 /**
@@ -44,6 +48,11 @@ struct Extension {
     uint32_t extensionVersion{ 0 };
 
     friend bool operator==(const Extension &, const Extension &) = default;
+};
+
+struct InstanceProperties {
+    std::string runtimeName;
+    uint64_t runtimeVersion{ 0 };
 };
 
 } // namespace KDXr

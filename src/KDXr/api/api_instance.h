@@ -25,6 +25,7 @@ struct Instance_t;
  *
  */
 struct ApiInstance {
+    virtual InstanceProperties properties() const = 0;
     virtual std::vector<ApiLayer> enabledApiLayers() const = 0;
     virtual std::vector<Extension> enabledExtensions() const = 0;
 };

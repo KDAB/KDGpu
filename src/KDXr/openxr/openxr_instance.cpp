@@ -30,6 +30,17 @@ OpenXrInstance::OpenXrInstance(OpenXrResourceManager *_openxrResourceManager,
 {
 }
 
+InstanceProperties OpenXrInstance::properties() const
+{
+    XrInstanceProperties instanceProperties{ XR_TYPE_INSTANCE_PROPERTIES };
+    if (xrGetInstanceProperties(instance, &instanceProperties) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to get InstanceProperties.");
+        return {};
+    }
+    return { .runtimeName = instanceProperties.runtimeName,
+             .runtimeVersion = instanceProperties.runtimeVersion };
+}
+
 std::vector<ApiLayer> OpenXrInstance::enabledApiLayers() const
 {
     return apiLayers;

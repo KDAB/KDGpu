@@ -32,6 +32,7 @@ struct KDXR_EXPORT OpenXrInstance : public ApiInstance {
                             std::vector<Extension> &_extensions,
                             bool _isOwned = true) noexcept;
 
+    InstanceProperties properties() const final;
     std::vector<ApiLayer> enabledApiLayers() const final;
     std::vector<Extension> enabledExtensions() const final;
 

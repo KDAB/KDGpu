@@ -55,6 +55,8 @@ public:
     std::vector<ApiLayer> enabledApiLayers() const;
     std::vector<Extension> enabledExtensions() const;
 
+    InstanceProperties properties() const;
+
 private:
     Instance(XrApi *api, const InstanceOptions &options);
 

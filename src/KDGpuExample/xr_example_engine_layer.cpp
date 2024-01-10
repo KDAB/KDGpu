@@ -481,6 +481,12 @@ void XrExampleEngineLayer::createXrInstance()
         .extensions = { XR_EXT_DEBUG_UTILS_EXTENSION_NAME, XR_KHR_VULKAN_ENABLE_EXTENSION_NAME }
     };
     m_kdxrInstance = m_xrApi->createInstance(instanceOptions);
+    const auto properties = m_kdxrInstance.properties();
+    SPDLOG_LOGGER_INFO(m_logger, "OpenXR Runtime: {}", properties.runtimeName);
+    SPDLOG_LOGGER_INFO(m_logger, "OpenXR API Version: {}.{}.{}",
+                       KDXR_VERSION_MAJOR(properties.runtimeVersion),
+                       KDXR_VERSION_MINOR(properties.runtimeVersion),
+                       KDXR_VERSION_PATCH(properties.runtimeVersion));
 }
 
 void XrExampleEngineLayer::destroyXrInstance()
