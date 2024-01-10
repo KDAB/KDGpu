@@ -114,4 +114,15 @@ InstanceProperties Instance::properties() const
     return apiInstance->properties();
 }
 
+System *Instance::system(const SystemOptions &options)
+{
+    if (!m_system.isValid()) {
+        auto apiInstance = m_api->resourceManager()->getInstance(m_instance);
+        auto systemHandle = apiInstance->querySystem(options, m_instance);
+        m_system = std::move(System(m_api, systemHandle));
+    }
+
+    return &m_system;
+}
+
 } // namespace KDXr

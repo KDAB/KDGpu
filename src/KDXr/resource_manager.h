@@ -19,10 +19,12 @@
 namespace KDXr {
 
 struct ApiInstance;
+struct ApiSystem;
 
 struct InstanceOptions;
 
 struct Instance_t;
+struct System_t;
 
 class KDXR_EXPORT ResourceManager
 {
@@ -35,6 +37,9 @@ public:
     virtual Handle<Instance_t> createInstance(const InstanceOptions &options) = 0;
     virtual void deleteInstance(const Handle<Instance_t> &handle) = 0;
     virtual ApiInstance *getInstance(const Handle<Instance_t> &handle) const = 0;
+
+    virtual void removeSystem(const Handle<System_t> &handle) = 0;
+    virtual ApiSystem *getSystem(const Handle<System_t> &handle) const = 0;
 
 protected:
     ResourceManager();

@@ -18,6 +18,8 @@
 namespace KDXr {
 
 struct Instance_t;
+struct System_t;
+struct SystemOptions;
 
 /**
  * @brief ApiInstance
@@ -28,6 +30,7 @@ struct ApiInstance {
     virtual InstanceProperties properties() const = 0;
     virtual std::vector<ApiLayer> enabledApiLayers() const = 0;
     virtual std::vector<Extension> enabledExtensions() const = 0;
+    virtual Handle<System_t> querySystem(const SystemOptions &options, const Handle<Instance_t> &instanceHandle) = 0;
 };
 
 } // namespace KDXr

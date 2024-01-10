@@ -10,7 +10,10 @@
 
 #include "openxr_instance.h"
 
+#include <KDXr/system.h>
+
 #include <KDXr/openxr/openxr_resource_manager.h>
+#include <KDXr/openxr/openxr_enums.h>
 
 #include <KDXr/utils/logging.h>
 
@@ -49,6 +52,23 @@ std::vector<ApiLayer> OpenXrInstance::enabledApiLayers() const
 std::vector<Extension> OpenXrInstance::enabledExtensions() const
 {
     return extensions;
+}
+
+Handle<System_t> OpenXrInstance::querySystem(const SystemOptions &options, const Handle<Instance_t> &instanceHandle)
+{
+    XrSystemGetInfo systemGetInfo{ XR_TYPE_SYSTEM_GET_INFO };
+    systemGetInfo.formFactor = formFactorToXrFormFactor(options.formFactor);
+
+    XrSystemId systemId{ XR_NULL_SYSTEM_ID };
+    if (const auto result = xrGetSystem(instance, &systemGetInfo, &systemId) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to get SystemID. Error: {}", result); // TODO: Add formatter for XrResult
+        return {};
+    }
+
+    OpenXrSystem openXrSystem(openxrResourceManager, systemId, instanceHandle);
+    systemHandle = openxrResourceManager->insertSystem(openXrSystem);
+
+    return systemHandle;
 }
 
 } // namespace KDXr

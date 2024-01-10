@@ -35,6 +35,7 @@ struct KDXR_EXPORT OpenXrInstance : public ApiInstance {
     InstanceProperties properties() const final;
     std::vector<ApiLayer> enabledApiLayers() const final;
     std::vector<Extension> enabledExtensions() const final;
+    Handle<System_t> querySystem(const SystemOptions &options, const Handle<Instance_t> &instanceHandle) final;
 
     OpenXrResourceManager *openxrResourceManager{ nullptr };
     XrInstance instance{ XR_NULL_HANDLE };
@@ -42,6 +43,7 @@ struct KDXR_EXPORT OpenXrInstance : public ApiInstance {
     bool isOwned{ true };
     std::vector<ApiLayer> apiLayers;
     std::vector<Extension> extensions;
+    Handle<System_t> systemHandle;
 };
 
 } // namespace KDXr

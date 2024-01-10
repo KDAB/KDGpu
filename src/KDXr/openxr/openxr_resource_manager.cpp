@@ -251,4 +251,19 @@ OpenXrInstance *OpenXrResourceManager::getInstance(const Handle<Instance_t> &han
     return m_instances.get(handle);
 }
 
+Handle<System_t> OpenXrResourceManager::insertSystem(const OpenXrSystem &openXrSystem)
+{
+    return m_systems.emplace(openXrSystem);
+}
+
+void OpenXrResourceManager::removeSystem(const Handle<System_t> &handle)
+{
+    m_systems.remove(handle);
+}
+
+OpenXrSystem *OpenXrResourceManager::getSystem(const Handle<System_t> &handle) const
+{
+    return m_systems.get(handle);
+}
+
 } // namespace KDXr

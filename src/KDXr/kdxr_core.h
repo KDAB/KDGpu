@@ -55,4 +55,10 @@ struct InstanceProperties {
     uint64_t runtimeVersion{ 0 };
 };
 
+enum class FormFactor : uint32_t {
+    HeadMountedDisplay = 1,
+    HandheldDisplay = 2,
+    MaxEnum = 0x7fffffff
+};
+
 } // namespace KDXr

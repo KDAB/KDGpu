@@ -10,9 +10,10 @@
 
 #pragma once
 
-#include <KDXr/kdxr_core.h>
 #include <KDXr/handle.h>
+#include <KDXr/kdxr_core.h>
 #include <KDXr/kdxr_export.h>
+#include <KDXr/system.h>
 
 #include <span>
 #include <string>
@@ -57,11 +58,14 @@ public:
 
     InstanceProperties properties() const;
 
+    System *system(const SystemOptions &options);
+
 private:
     Instance(XrApi *api, const InstanceOptions &options);
 
     XrApi *m_api{ nullptr };
     Handle<Instance_t> m_instance;
+    System m_system;
 
     friend class XrApi;
     friend class OpenXrGraphicsApi;

@@ -8,26 +8,33 @@
 #
 set(SOURCES
     instance.cpp
-    resource_manager.cpp
-    xr_api.cpp
     openxr/openxr_api.cpp
+    openxr/openxr_enums.cpp
     openxr/openxr_instance.cpp
     openxr/openxr_resource_manager.cpp
+    openxr/openxr_system.cpp
+    resource_manager.cpp
+    system.cpp
     utils/logging.cpp
+    xr_api.cpp
 )
 
 set(HEADERS
+    api/api_instance.h
+    api/api_system.h
     handle.h
     instance.h
-    pool.h
-    resource_manager.h
-    xr_api.h
-    api/api_instance.h
     openxr/openxr_api.h
+    openxr/openxr_enums.h
     openxr/openxr_instance.h
     openxr/openxr_resource_manager.h
+    openxr/openxr_system.h
+    pool.h
+    resource_manager.h
+    system.h
     utils/hash_utils.h
     utils/logging.h
+    xr_api.h
 )
 
 add_library(
