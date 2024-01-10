@@ -79,4 +79,11 @@ enum class FormFactor : uint32_t {
     MaxEnum = 0x7fffffff
 };
 
+enum class ViewConfigurationType : uint32_t {
+    PrimaryMono = 1,
+    PrimaryStereo = 2,
+    PrimaryQuadVarjo = 1000037000,
+    MaxEnum = 0x7fffffff
+};
+
 } // namespace KDXr

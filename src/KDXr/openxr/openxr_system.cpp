@@ -55,4 +55,30 @@ SystemProperties OpenXrSystem::queryProperties() const
     return properties;
 }
 
+std::vector<ViewConfigurationType> OpenXrSystem::queryViewConfigurations() const
+{
+    auto openxrInstance = openxrResourceManager->getInstance(instanceHandle);
+
+    std::vector<XrViewConfigurationType> xrViewConfigurationTypes;
+    uint32_t viewConfigurationCount = 0;
+    if (xrEnumerateViewConfigurations(openxrInstance->instance, system, 0, &viewConfigurationCount, nullptr) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to enumerate ViewConfigurations.");
+        return {};
+    }
+
+    xrViewConfigurationTypes.resize(viewConfigurationCount);
+    if (xrEnumerateViewConfigurations(openxrInstance->instance, system, viewConfigurationCount, &viewConfigurationCount, xrViewConfigurationTypes.data()) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to enumerate ViewConfigurations.");
+        return {};
+    }
+
+    std::vector<ViewConfigurationType> viewConfigurationTypes;
+    viewConfigurationTypes.reserve(viewConfigurationCount);
+    for (const auto &viewConfigurationType : xrViewConfigurationTypes) {
+        viewConfigurationTypes.push_back(static_cast<ViewConfigurationType>(viewConfigurationType));
+    }
+
+    return viewConfigurationTypes;
+}
+
 } // namespace KDXr

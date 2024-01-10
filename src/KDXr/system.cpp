@@ -47,6 +47,7 @@ System::System(XrApi *api, const Handle<System_t> &system)
     // TODO: Query system properties
     auto apiSystem = m_api->resourceManager()->getSystem(m_system);
     m_properties = apiSystem->queryProperties();
+    m_viewConfigurations = apiSystem->queryViewConfigurations();
 }
 
 System::~System()
@@ -60,6 +61,7 @@ System::System(System &&other)
     m_api = std::exchange(other.m_api, nullptr);
     m_system = std::exchange(other.m_system, {});
     m_properties = std::exchange(other.m_properties, {});
+    m_viewConfigurations = std::exchange(other.m_viewConfigurations, {});
 }
 
 System &System::operator=(System &&other)
@@ -71,6 +73,7 @@ System &System::operator=(System &&other)
         m_api = std::exchange(other.m_api, nullptr);
         m_system = std::exchange(other.m_system, {});
         m_properties = std::exchange(other.m_properties, {});
+        m_viewConfigurations = std::exchange(other.m_viewConfigurations, {});
     }
     return *this;
 }
@@ -78,6 +81,11 @@ System &System::operator=(System &&other)
 SystemProperties System::properties() const
 {
     return m_properties;
+}
+
+std::span<const ViewConfigurationType> System::viewConfigurations() const
+{
+    return m_viewConfigurations;
 }
 
 } // namespace KDXr

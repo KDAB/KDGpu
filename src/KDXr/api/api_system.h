@@ -13,6 +13,8 @@
 #include <KDXr/kdxr_core.h>
 #include <KDXr/handle.h>
 
+#include <vector>
+
 namespace KDXr {
 
 struct System_t;
@@ -24,6 +26,7 @@ struct System_t;
  */
 struct ApiSystem {
     virtual SystemProperties queryProperties() const = 0;
+    virtual std::vector<ViewConfigurationType> queryViewConfigurations() const = 0;
 };
 
 } // namespace KDXr

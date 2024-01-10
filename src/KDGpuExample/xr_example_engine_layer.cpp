@@ -77,6 +77,15 @@ void XrExampleEngineLayer::onAttached()
 
     getXrViewConfigurations();
 
+    // Pick the first application supported View Configuration Type supported by the hardware.
+    auto viewConfigurations = m_kdxrSystem->viewConfigurations();
+    for (auto &viewConfiguration : viewConfigurations) {
+        if (std::find(m_applicationViewConfigurations.begin(), m_applicationViewConfigurations.end(), viewConfiguration) != m_applicationViewConfigurations.end()) {
+            m_selectedViewConfiguration = viewConfiguration;
+            break;
+        }
+    }
+
     // Graphics Setup
     createGraphicsInstance();
     createGraphicsDevice();

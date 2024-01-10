@@ -129,6 +129,10 @@ protected:
     KDXr::Instance m_kdxrInstance; // TODO: Rename to m_xrInstance etc as we replace raw OpenXR calls with KDXr
     KDXr::System *m_kdxrSystem{ nullptr };
 
+    std::vector<KDXr::ViewConfigurationType> m_applicationViewConfigurations{ KDXr::ViewConfigurationType::PrimaryStereo, KDXr::ViewConfigurationType::PrimaryMono };
+    KDXr::ViewConfigurationType m_selectedViewConfiguration{ KDXr::ViewConfigurationType::MaxEnum };
+
+    // OpenXR related members (to be removed once KDXr is suitable for use)
     std::vector<std::string> m_xrRequestedApiLayers{};
     std::vector<const char *> m_xrActiveApiLayers{};
 

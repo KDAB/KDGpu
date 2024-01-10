@@ -14,6 +14,9 @@
 #include <KDXr/handle.h>
 #include <KDXr/kdxr_export.h>
 
+#include <span>
+#include <vector>
+
 namespace KDXr {
 
 struct System_t;
@@ -47,12 +50,15 @@ public:
 
     SystemProperties properties() const;
 
+    std::span<const ViewConfigurationType> viewConfigurations() const;
+
 private:
     explicit System(XrApi *api, const Handle<System_t> &system);
 
     XrApi *m_api{ nullptr };
     Handle<System_t> m_system;
     SystemProperties m_properties;
+    std::vector<ViewConfigurationType> m_viewConfigurations;
 
     friend class Instance;
 };
