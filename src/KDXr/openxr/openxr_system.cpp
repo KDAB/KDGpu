@@ -109,4 +109,38 @@ std::vector<EnvironmentBlendMode> OpenXrSystem::queryEnvironmentBlendModes(ViewC
     return environmentBlendModes;
 }
 
+std::vector<ViewConfigurationView> OpenXrSystem::queryViews(ViewConfigurationType viewConfiguration) const
+{
+    auto openxrInstance = openxrResourceManager->getInstance(instanceHandle);
+    const XrViewConfigurationType xrViewConfiguration = static_cast<XrViewConfigurationType>(viewConfiguration);
+
+    std::vector<XrViewConfigurationView> xrViewConfigurationViews;
+    uint32_t viewConfigurationViewCount = 0;
+    if (xrEnumerateViewConfigurationViews(openxrInstance->instance, system, xrViewConfiguration, 0, &viewConfigurationViewCount, nullptr) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to enumerate ViewConfigurationViews.");
+        return {};
+    }
+
+    // Query the view configuration views in the first view configuration supported by the system
+    xrViewConfigurationViews.resize(viewConfigurationViewCount, { XR_TYPE_VIEW_CONFIGURATION_VIEW });
+    if (xrEnumerateViewConfigurationViews(openxrInstance->instance, system, xrViewConfiguration, viewConfigurationViewCount, &viewConfigurationViewCount, xrViewConfigurationViews.data()) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to enumerate ViewConfigurationViews.");
+        return {};
+    }
+
+    std::vector<ViewConfigurationView> viewConfigurationViews;
+    viewConfigurationViews.reserve(viewConfigurationViewCount);
+    for (const auto &xrViewConfigurationView : xrViewConfigurationViews) {
+        viewConfigurationViews.emplace_back(ViewConfigurationView{
+                .recommendedTextureWidth = xrViewConfigurationView.recommendedImageRectWidth,
+                .maxTextureWidth = xrViewConfigurationView.maxImageRectWidth,
+                .recommendedTextureHeight = xrViewConfigurationView.recommendedImageRectHeight,
+                .maxTextureHeight = xrViewConfigurationView.maxImageRectHeight,
+                .recommendedSwapchainSampleCount = xrViewConfigurationView.recommendedSwapchainSampleCount,
+                .maxSwapchainSampleCount = xrViewConfigurationView.maxSwapchainSampleCount });
+    }
+
+    return viewConfigurationViews;
+}
+
 } // namespace KDXr

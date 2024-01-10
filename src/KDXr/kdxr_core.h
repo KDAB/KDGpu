@@ -93,4 +93,13 @@ enum class EnvironmentBlendMode : uint32_t {
     MaxEnum = 0x7fffffff
 };
 
+struct ViewConfigurationView {
+    uint32_t recommendedTextureWidth{ 0 };
+    uint32_t maxTextureWidth{ 0 };
+    uint32_t recommendedTextureHeight{ 0 };
+    uint32_t maxTextureHeight{ 0 };
+    uint32_t recommendedSwapchainSampleCount{ 0 };
+    uint32_t maxSwapchainSampleCount{ 0 };
+};
+
 } // namespace KDXr

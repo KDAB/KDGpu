@@ -132,6 +132,7 @@ protected:
     std::vector<KDXr::ViewConfigurationType> m_applicationViewConfigurations{ KDXr::ViewConfigurationType::PrimaryStereo, KDXr::ViewConfigurationType::PrimaryMono };
     KDXr::ViewConfigurationType m_selectedViewConfiguration{ KDXr::ViewConfigurationType::MaxEnum };
     KDXr::EnvironmentBlendMode m_selectedEnvironmentBlendMode{ KDXr::EnvironmentBlendMode::MaxEnum };
+    std::vector<KDXr::ViewConfigurationView> m_viewConfigurationViews;
 
     // OpenXR related members (to be removed once KDXr is suitable for use)
     std::vector<std::string> m_xrRequestedApiLayers{};

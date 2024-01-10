@@ -94,4 +94,10 @@ std::vector<EnvironmentBlendMode> System::environmentBlendModes(ViewConfiguratio
     return apiSystem->queryEnvironmentBlendModes(viewConfiguration);
 }
 
+std::vector<ViewConfigurationView> System::views(ViewConfigurationType viewConfiguration) const
+{
+    auto apiSystem = m_api->resourceManager()->getSystem(m_system);
+    return apiSystem->queryViews(viewConfiguration);
+}
+
 } // namespace KDXr

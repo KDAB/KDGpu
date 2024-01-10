@@ -52,6 +52,7 @@ public:
 
     std::span<const ViewConfigurationType> viewConfigurations() const;
     std::vector<EnvironmentBlendMode> environmentBlendModes(ViewConfigurationType viewConfiguration) const;
+    std::vector<ViewConfigurationView> views(ViewConfigurationType viewConfiguration) const;
 
 private:
     explicit System(XrApi *api, const Handle<System_t> &system);

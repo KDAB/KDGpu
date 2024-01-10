@@ -34,6 +34,7 @@ struct KDXR_EXPORT OpenXrSystem : public ApiSystem {
     SystemProperties queryProperties() const final;
     std::vector<ViewConfigurationType> queryViewConfigurations() const final;
     std::vector<EnvironmentBlendMode> queryEnvironmentBlendModes(ViewConfigurationType viewConfiguration) const final;
+    std::vector<ViewConfigurationView> queryViews(ViewConfigurationType viewConfiguration) const final;
 
     OpenXrResourceManager *openxrResourceManager{ nullptr };
     XrSystemId system{ XR_NULL_SYSTEM_ID };
