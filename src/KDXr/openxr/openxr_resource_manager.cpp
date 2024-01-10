@@ -126,53 +126,39 @@ Handle<Instance_t> OpenXrResourceManager::createInstance(const InstanceOptions &
     xrApplicationInfo.engineVersion = 1;
     xrApplicationInfo.apiVersion = XR_CURRENT_API_VERSION;
 
-    // Query and check layers
-    uint32_t apiLayerCount = 0;
-    std::vector<XrApiLayerProperties> apiLayerProperties;
-    if (xrEnumerateApiLayerProperties(0, &apiLayerCount, nullptr) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to enumerate ApiLayerProperties.");
-    }
-    apiLayerProperties.resize(apiLayerCount, { XR_TYPE_API_LAYER_PROPERTIES });
-    if (xrEnumerateApiLayerProperties(apiLayerCount, &apiLayerCount, apiLayerProperties.data()) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to enumerate ApiLayerProperties.");
-    }
-
     // Check the requested API layers against the ones enumerated from OpenXR. If found add it to the active api Layers.
-    std::vector<const char *> xrActiveApiLayers{};
+    auto apiLayers = availableApiLayers();
+    std::vector<const char *> xrActiveApiLayers{}; // To pass to xrCreateInstance
+    std::vector<ApiLayer> openXrActiveApiLayers; // To store in OpenXrInstance
     for (auto &requestedLayer : options.layers) {
-        for (auto &layerProperty : apiLayerProperties) {
-            // strcmp returns 0 if the strings match.
-            if (strcmp(requestedLayer.c_str(), layerProperty.layerName) != 0) {
+        bool found = false;
+        for (auto &layerProperty : apiLayers) {
+            if (requestedLayer != layerProperty.name) {
                 continue;
             } else {
                 xrActiveApiLayers.push_back(requestedLayer.c_str());
+                openXrActiveApiLayers.push_back(layerProperty);
+                found = true;
                 break;
             }
+        }
+        if (!found) {
+            SPDLOG_LOGGER_WARN(Logger::logger(), "Failed to find requested api layer: {}", requestedLayer);
         }
     }
 
     // Query and check instance extensions
-    uint32_t extensionCount = 0;
-    std::vector<XrExtensionProperties> extensionProperties;
-    if (xrEnumerateInstanceExtensionProperties(nullptr, 0, &extensionCount, nullptr) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to enumerate InstanceExtensionProperties.");
-    }
-    extensionProperties.resize(extensionCount, { XR_TYPE_EXTENSION_PROPERTIES });
-    if (xrEnumerateInstanceExtensionProperties(nullptr, extensionCount, &extensionCount, extensionProperties.data()) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to enumerate InstanceExtensionProperties.");
-    }
-
-    // TODO: Get from options
-    std::vector<std::string> m_xrRequestedInstanceExtensions = { XR_EXT_DEBUG_UTILS_EXTENSION_NAME, XR_KHR_VULKAN_ENABLE_EXTENSION_NAME };
-    std::vector<const char *> xrActiveInstanceExtensions;
-    for (auto &requestedInstanceExtension : m_xrRequestedInstanceExtensions) {
+    auto instanceExtensions = availableInstanceExtensions();
+    std::vector<const char *> xrActiveInstanceExtensions; // To pass to xrCreateInstance
+    std::vector<Extension> openXrActiveExtensions; // To store in OpenXrInstance
+    for (auto &requestedInstanceExtension : options.extensions) {
         bool found = false;
-        for (auto &extensionProperty : extensionProperties) {
-            // strcmp returns 0 if the strings match.
-            if (strcmp(requestedInstanceExtension.c_str(), extensionProperty.extensionName) != 0) {
+        for (auto &extensionProperty : instanceExtensions) {
+            if (requestedInstanceExtension != extensionProperty.name) {
                 continue;
             } else {
                 xrActiveInstanceExtensions.push_back(requestedInstanceExtension.c_str());
+                openXrActiveExtensions.push_back(extensionProperty);
                 found = true;
                 break;
             }
@@ -196,7 +182,7 @@ Handle<Instance_t> OpenXrResourceManager::createInstance(const InstanceOptions &
         throw std::runtime_error("Failed to create OpenXR Instance.");
     }
 
-    OpenXrInstance openXrInstance(this, xrInstance);
+    OpenXrInstance openXrInstance(this, xrInstance, openXrActiveApiLayers, openXrActiveExtensions);
 
     // Create the debug logger
     bool foundDebugUtilsExtension = false;

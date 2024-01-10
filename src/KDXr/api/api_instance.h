@@ -25,7 +25,8 @@ struct Instance_t;
  *
  */
 struct ApiInstance {
-    virtual std::vector<Extension> extensions() const = 0;
+    virtual std::vector<ApiLayer> enabledApiLayers() const = 0;
+    virtual std::vector<Extension> enabledExtensions() const = 0;
 };
 
 } // namespace KDXr

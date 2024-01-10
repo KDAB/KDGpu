@@ -52,7 +52,8 @@ public:
 
     operator Handle<Instance_t>() const noexcept { return m_instance; }
 
-    std::vector<Extension> extensions() const;
+    std::vector<ApiLayer> enabledApiLayers() const;
+    std::vector<Extension> enabledExtensions() const;
 
 private:
     Instance(XrApi *api, const InstanceOptions &options);

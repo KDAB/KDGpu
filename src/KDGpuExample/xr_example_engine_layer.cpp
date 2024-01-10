@@ -98,6 +98,7 @@ void XrExampleEngineLayer::onDetached()
 
     destroyXrDebugMessenger();
     destroyXrInstance();
+    m_kdxrInstance = {};
 }
 
 void XrExampleEngineLayer::update()
@@ -370,16 +371,6 @@ void XrExampleEngineLayer::destroyGraphicsDevice()
 
 void XrExampleEngineLayer::createXrInstance()
 {
-    auto layers = m_xrApi->availableApiLayers();
-    for (const auto &layer : layers) {
-        SPDLOG_LOGGER_INFO(m_logger, "Available ApiLayer: {}", layer.name);
-    }
-
-    auto instanceExtensions = m_xrApi->availableInstanceExtensions();
-    for (const auto &extension : instanceExtensions) {
-        SPDLOG_LOGGER_INFO(m_logger, "Available InstanceExtension: {}", extension.name);
-    }
-
     XrApplicationInfo xrApplicationInfo = {};
     const auto appName = KDGui::GuiApplication::instance()->applicationName();
     strncpy(xrApplicationInfo.applicationName, appName.data(), XR_MAX_APPLICATION_NAME_SIZE);
@@ -387,8 +378,6 @@ void XrExampleEngineLayer::createXrInstance()
     strncpy(xrApplicationInfo.engineName, "KDGpuExample XR Engine", XR_MAX_ENGINE_NAME_SIZE);
     xrApplicationInfo.engineVersion = 1;
     xrApplicationInfo.apiVersion = XR_CURRENT_API_VERSION;
-
-    // TODO: Add api to KDXr::OpenXrApi to get the available api layers and extensions.
 
     // Query and check layers
     uint32_t apiLayerCount = 0;
@@ -431,7 +420,6 @@ void XrExampleEngineLayer::createXrInstance()
         return;
     }
 
-    std::vector<std::string> activeInstanceExtensions;
     m_xrRequestedInstanceExtensions = { XR_EXT_DEBUG_UTILS_EXTENSION_NAME, XR_KHR_VULKAN_ENABLE_EXTENSION_NAME };
     for (auto &requestedInstanceExtension : m_xrRequestedInstanceExtensions) {
         bool found = false;
@@ -441,7 +429,6 @@ void XrExampleEngineLayer::createXrInstance()
                 continue;
             } else {
                 m_xrActiveInstanceExtensions.push_back(requestedInstanceExtension.c_str());
-                activeInstanceExtensions.push_back(requestedInstanceExtension);
                 found = true;
                 break;
             }
@@ -490,8 +477,8 @@ void XrExampleEngineLayer::createXrInstance()
     KDXr::InstanceOptions instanceOptions = {
         .applicationName = KDGui::GuiApplication::instance()->applicationName(),
         .applicationVersion = KDGPU_MAKE_API_VERSION(0, 1, 0, 0),
-        .layers = activeApiLayers,
-        .extensions = activeInstanceExtensions
+        .layers = {}, // No api layers requested
+        .extensions = { XR_EXT_DEBUG_UTILS_EXTENSION_NAME, XR_KHR_VULKAN_ENABLE_EXTENSION_NAME }
     };
     m_kdxrInstance = m_xrApi->createInstance(instanceOptions);
 }

@@ -26,14 +26,21 @@ class OpenXrResourceManager;
  *
  */
 struct KDXR_EXPORT OpenXrInstance : public ApiInstance {
-    explicit OpenXrInstance(OpenXrResourceManager *_openxrResourceManager, XrInstance _instance, bool _isOwned = true) noexcept;
+    explicit OpenXrInstance(OpenXrResourceManager *_openxrResourceManager,
+                            XrInstance _instance,
+                            std::vector<ApiLayer> &_apiLayers,
+                            std::vector<Extension> &_extensions,
+                            bool _isOwned = true) noexcept;
 
-    std::vector<Extension> extensions() const final;
+    std::vector<ApiLayer> enabledApiLayers() const final;
+    std::vector<Extension> enabledExtensions() const final;
 
     OpenXrResourceManager *openxrResourceManager{ nullptr };
     XrInstance instance{ XR_NULL_HANDLE };
     XrDebugUtilsMessengerEXT debugMessenger{ nullptr };
     bool isOwned{ true };
+    std::vector<ApiLayer> apiLayers;
+    std::vector<Extension> extensions;
 };
 
 } // namespace KDXr

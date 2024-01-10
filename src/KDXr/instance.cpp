@@ -96,10 +96,16 @@ Instance &Instance::operator=(Instance &&other)
 /**
  * @brief Returns the extensions requested for the instance
  */
-std::vector<Extension> Instance::extensions() const
+std::vector<ApiLayer> Instance::enabledApiLayers() const
 {
     auto apiInstance = m_api->resourceManager()->getInstance(m_instance);
-    return apiInstance->extensions();
+    return apiInstance->enabledApiLayers();
+}
+
+std::vector<Extension> Instance::enabledExtensions() const
+{
+    auto apiInstance = m_api->resourceManager()->getInstance(m_instance);
+    return apiInstance->enabledExtensions();
 }
 
 } // namespace KDXr
