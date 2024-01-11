@@ -102,4 +102,9 @@ struct ViewConfigurationView {
     uint32_t maxSwapchainSampleCount{ 0 };
 };
 
+struct GraphicsRequirements {
+    uint64_t minApiVersionSupported{ 0 };
+    uint64_t maxApiVersionSupported{ 0 };
+};
+
 } // namespace KDXr

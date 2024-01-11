@@ -17,6 +17,12 @@
 #include <span>
 #include <vector>
 
+namespace KDGpu {
+class Adapter;
+class Instance;
+class GraphicsApi;
+} // namespace KDGpu
+
 namespace KDXr {
 
 struct System_t;
@@ -54,6 +60,15 @@ public:
     std::vector<EnvironmentBlendMode> environmentBlendModes(ViewConfigurationType viewConfiguration) const;
     std::vector<ViewConfigurationView> views(ViewConfigurationType viewConfiguration) const;
 
+    // Is this enough to abstract away the graphics API via KDGpu?
+    void setGraphicsApi(KDGpu::GraphicsApi *graphicsApi) { m_graphicsApi = graphicsApi; }
+    KDGpu::GraphicsApi *graphicsApi() const { return m_graphicsApi; }
+
+    GraphicsRequirements graphicsRequirements() const;
+    std::vector<std::string> requiredGraphicsInstanceExtensions() const;
+    KDGpu::Adapter *requiredGraphicsAdapter(const KDGpu::Instance &graphicsInstance) const;
+    std::vector<std::string> requiredGraphicsDeviceExtensions() const;
+
 private:
     explicit System(XrApi *api, const Handle<System_t> &system);
 
@@ -61,6 +76,8 @@ private:
     Handle<System_t> m_system;
     SystemProperties m_properties;
     std::vector<ViewConfigurationType> m_viewConfigurations;
+
+    KDGpu::GraphicsApi *m_graphicsApi{ nullptr };
 
     friend class Instance;
 };

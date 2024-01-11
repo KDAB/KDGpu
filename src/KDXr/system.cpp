@@ -100,4 +100,40 @@ std::vector<ViewConfigurationView> System::views(ViewConfigurationType viewConfi
     return apiSystem->queryViews(viewConfiguration);
 }
 
+GraphicsRequirements System::graphicsRequirements() const
+{
+    if (!m_graphicsApi) {
+        throw std::runtime_error("System::requiredGraphicsInstanceExtensions: No graphics API set. Please call setGraphicsApi() first.");
+    }
+    auto apiSystem = m_api->resourceManager()->getSystem(m_system);
+    return apiSystem->queryGraphicsRequirements(m_graphicsApi);
+}
+
+std::vector<std::string> System::requiredGraphicsInstanceExtensions() const
+{
+    if (!m_graphicsApi) {
+        throw std::runtime_error("System::requiredGraphicsInstanceExtensions: No graphics API set. Please call setGraphicsApi() first.");
+    }
+    auto apiSystem = m_api->resourceManager()->getSystem(m_system);
+    return apiSystem->requiredGraphicsInstanceExtensions(m_graphicsApi);
+}
+
+KDGpu::Adapter *System::requiredGraphicsAdapter(const KDGpu::Instance &graphicsInstance) const
+{
+    if (!m_graphicsApi) {
+        throw std::runtime_error("System::requiredGraphicsInstanceExtensions: No graphics API set. Please call setGraphicsApi() first.");
+    }
+    auto apiSystem = m_api->resourceManager()->getSystem(m_system);
+    return apiSystem->requiredGraphicsAdapter(m_graphicsApi, graphicsInstance);
+}
+
+std::vector<std::string> System::requiredGraphicsDeviceExtensions() const
+{
+    if (!m_graphicsApi) {
+        throw std::runtime_error("System::requiredGraphicsInstanceExtensions: No graphics API set. Please call setGraphicsApi() first.");
+    }
+    auto apiSystem = m_api->resourceManager()->getSystem(m_system);
+    return apiSystem->requiredGraphicsDeviceExtensions(m_graphicsApi);
+}
+
 } // namespace KDXr
