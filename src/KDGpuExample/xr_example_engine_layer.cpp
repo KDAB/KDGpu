@@ -68,14 +68,23 @@ XrExampleEngineLayer::~XrExampleEngineLayer()
 void XrExampleEngineLayer::onAttached()
 {
     // OpenXR Setup
-    createXrInstance();
-    createXrDebugMessenger();
-    getXrInstanceProperties();
-    getXrSystemId();
+    // Create the instance and debug message handler
+    KDXr::InstanceOptions xrInstanceOptions = {
+        .applicationName = KDGui::GuiApplication::instance()->applicationName(),
+        .applicationVersion = KDGPU_MAKE_API_VERSION(0, 1, 0, 0),
+        .layers = {}, // No api layers requested
+        .extensions = { XR_EXT_DEBUG_UTILS_EXTENSION_NAME, XR_KHR_VULKAN_ENABLE_EXTENSION_NAME }
+    };
+    m_kdxrInstance = m_xrApi->createInstance(xrInstanceOptions);
+    const auto properties = m_kdxrInstance.properties();
+    SPDLOG_LOGGER_INFO(m_logger, "OpenXR Runtime: {}", properties.runtimeName);
+    SPDLOG_LOGGER_INFO(m_logger, "OpenXR API Version: {}.{}.{}",
+                       KDXR_VERSION_MAJOR(properties.runtimeVersion),
+                       KDXR_VERSION_MINOR(properties.runtimeVersion),
+                       KDXR_VERSION_PATCH(properties.runtimeVersion));
+
     m_kdxrSystem = m_kdxrInstance.system();
     const auto systemProperties = m_kdxrSystem->properties();
-
-    getXrViewConfigurations();
 
     // Pick the first application supported View Configuration Type supported by the hardware.
     auto viewConfigurations = m_kdxrSystem->viewConfigurations();
@@ -92,9 +101,64 @@ void XrExampleEngineLayer::onAttached()
     // Get the view details for the selected view configuration
     m_viewConfigurationViews = m_kdxrSystem->views(m_selectedViewConfiguration);
 
-    // Graphics Setup
-    createGraphicsInstance();
-    createGraphicsDevice();
+    // Check which versions of the graphics API are supported by the OpenXR runtime
+    m_kdxrSystem->setGraphicsApi(m_api.get());
+    auto graphicsRequirements = m_kdxrSystem->graphicsRequirements();
+    SPDLOG_LOGGER_INFO(m_logger, "Minimum Vulkan API Version: {}.{}.{}",
+                       KDXR_VERSION_MAJOR(graphicsRequirements.minApiVersionSupported),
+                       KDXR_VERSION_MINOR(graphicsRequirements.minApiVersionSupported),
+                       KDXR_VERSION_PATCH(graphicsRequirements.minApiVersionSupported));
+    SPDLOG_LOGGER_INFO(m_logger, "Maximum Vulkan API Version: {}.{}.{}",
+                       KDXR_VERSION_MAJOR(graphicsRequirements.maxApiVersionSupported),
+                       KDXR_VERSION_MINOR(graphicsRequirements.maxApiVersionSupported),
+                       KDXR_VERSION_PATCH(graphicsRequirements.maxApiVersionSupported));
+
+    // Request an instance of the api with whatever layers and extensions we wish to request.
+    const auto requiredGraphicsInstanceExtensions = m_kdxrSystem->requiredGraphicsInstanceExtensions();
+    for (auto &requiredGraphicsInstanceExtension : requiredGraphicsInstanceExtensions) {
+        SPDLOG_LOGGER_INFO(m_logger, "Requesting Vulkan Instance Extension: {}", requiredGraphicsInstanceExtension);
+    }
+    InstanceOptions instanceOptions = {
+        .applicationName = KDGui::GuiApplication::instance()->applicationName(),
+        .applicationVersion = KDGPU_MAKE_API_VERSION(0, 1, 0, 0),
+        .extensions = requiredGraphicsInstanceExtensions
+    };
+    m_instance = m_api->createInstance(instanceOptions);
+
+    // Find which Adapter we should use for the given XR system
+    Adapter *selectedAdapter = m_kdxrSystem->requiredGraphicsAdapter(m_instance);
+    if (!selectedAdapter) {
+        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to find required Vulkan Adapter.");
+        throw std::runtime_error("Failed to find required Vulkan Adapter.");
+    }
+    const auto apiVersion = selectedAdapter->properties().apiVersion;
+    SPDLOG_LOGGER_INFO(m_logger, "Graphics API Version: {}.{}.{}",
+                       KDGPU_API_VERSION_MAJOR(apiVersion),
+                       KDGPU_API_VERSION_MINOR(apiVersion),
+                       KDGPU_API_VERSION_PATCH(apiVersion));
+
+    // Request a device of the api with whatever layers and extensions we wish to request.
+    const auto requiredGraphicsDeviceExtensions = m_kdxrSystem->requiredGraphicsDeviceExtensions();
+    for (auto &requiredGraphicsDeviceExtension : requiredGraphicsDeviceExtensions) {
+        SPDLOG_LOGGER_INFO(m_logger, "Requesting Vulkan Device Extension: {}", requiredGraphicsDeviceExtension);
+    }
+    DeviceOptions deviceOptions = {
+        .extensions = requiredGraphicsDeviceExtensions,
+        .requestedFeatures = selectedAdapter->features()
+    };
+    m_device = selectedAdapter->createDevice(deviceOptions);
+    m_queue = m_device.queues()[0];
+
+    // TODO: Remove this temporary exposure of underlying OpenXR resources once KDXr is suitable for use.
+    // It just allows us to use the raw C api for the stuff that is not implemented in KDXr yet.
+    auto *openXrResourceManager = dynamic_cast<KDXr::OpenXrResourceManager *>(m_xrApi->resourceManager());
+    assert(openXrResourceManager);
+    auto *openxrInstance = openXrResourceManager->getInstance(m_kdxrInstance.handle());
+    assert(openxrInstance);
+    m_xrInstance = openxrInstance->instance;
+    auto *openxrSystem = openXrResourceManager->getSystem(m_kdxrSystem->handle());
+    assert(openxrSystem);
+    m_systemId = openxrSystem->system;
 
     // OpenXR Session Setup
     createXrSession();
@@ -111,11 +175,9 @@ void XrExampleEngineLayer::onDetached()
     destroyXrReferenceSpace();
     destroyXrSession();
 
-    destroyGraphicsDevice();
-    destroyGraphicsInstance();
-
-    destroyXrDebugMessenger();
-    destroyXrInstance();
+    m_queue = {};
+    m_device = {};
+    m_instance = {};
     m_kdxrInstance = {};
 }
 
@@ -153,11 +215,11 @@ void XrExampleEngineLayer::update()
         // in any configuration. At this time we assume the scene in the subclass is the only thing to be composited.
 
         // Locate the views from the view configuration within the (reference) space at the display time.
-        std::vector<XrView> views(m_xrViewConfigurationViews.size(), { XR_TYPE_VIEW });
+        std::vector<XrView> views(m_viewConfigurationViews.size(), { XR_TYPE_VIEW });
 
         XrViewState viewState{ XR_TYPE_VIEW_STATE }; // Contains information on whether the position and/or orientation is valid and/or tracked.
         XrViewLocateInfo viewLocateInfo{ XR_TYPE_VIEW_LOCATE_INFO };
-        viewLocateInfo.viewConfigurationType = m_xrViewConfiguration;
+        viewLocateInfo.viewConfigurationType = static_cast<XrViewConfigurationType>(m_selectedViewConfiguration); // TODO: Add conversion helper function to KDXr
         viewLocateInfo.displayTime = m_xrCompositorLayerInfo.predictedDisplayTime;
         viewLocateInfo.space = m_xrReferenceSpace;
         uint32_t viewCount = 0;
@@ -218,8 +280,8 @@ void XrExampleEngineLayer::update()
                     SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to wait for Image from the Depth Swapchain");
                 }
 
-                const uint32_t &width = m_xrViewConfigurationViews[m_currentViewIndex].recommendedImageRectWidth;
-                const uint32_t &height = m_xrViewConfigurationViews[m_currentViewIndex].recommendedImageRectHeight;
+                const uint32_t &width = m_viewConfigurationViews[m_currentViewIndex].recommendedTextureWidth;
+                const uint32_t &height = m_viewConfigurationViews[m_currentViewIndex].recommendedTextureHeight;
 
                 m_xrCompositorLayerInfo.layerProjectionViews[m_currentViewIndex].pose = views[m_currentViewIndex].pose;
                 m_xrCompositorLayerInfo.layerProjectionViews[m_currentViewIndex].fov = views[m_currentViewIndex].fov;
@@ -256,7 +318,7 @@ void XrExampleEngineLayer::update()
     // environment blend mode, and the list of layers to compose.
     XrFrameEndInfo frameEndInfo{ XR_TYPE_FRAME_END_INFO };
     frameEndInfo.displayTime = frameState.predictedDisplayTime;
-    frameEndInfo.environmentBlendMode = m_xrEnvironmentBlendMode;
+    frameEndInfo.environmentBlendMode = static_cast<XrEnvironmentBlendMode>(m_selectedEnvironmentBlendMode); // TODO: Add conversion helper function to KDXr
     frameEndInfo.layerCount = static_cast<uint32_t>(m_xrCompositorLayerInfo.layers.size());
     frameEndInfo.layers = m_xrCompositorLayerInfo.layers.data();
     if (xrEndFrame(m_xrSession, &frameEndInfo) != XR_SUCCESS) {
@@ -267,398 +329,6 @@ void XrExampleEngineLayer::update()
 
 void XrExampleEngineLayer::event(KDFoundation::EventReceiver *target, KDFoundation::Event *ev)
 {
-}
-
-void XrExampleEngineLayer::createGraphicsInstance()
-{
-    // Query the minimum and maximum supported Vulkan API versions
-    XrGraphicsRequirementsVulkanKHR graphicsRequirements{ XR_TYPE_GRAPHICS_REQUIREMENTS_VULKAN_KHR };
-    if (m_xrGetVulkanGraphicsRequirementsKHR(m_xrInstance, m_systemId, &graphicsRequirements) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to get Graphics Requirements for Vulkan.");
-        return;
-    }
-    SPDLOG_LOGGER_INFO(m_logger, "Minimum Vulkan API Version: {}.{}.{}",
-                       XR_VERSION_MAJOR(graphicsRequirements.minApiVersionSupported),
-                       XR_VERSION_MINOR(graphicsRequirements.minApiVersionSupported),
-                       XR_VERSION_PATCH(graphicsRequirements.minApiVersionSupported));
-    SPDLOG_LOGGER_INFO(m_logger, "Maximum Vulkan API Version: {}.{}.{}",
-                       XR_VERSION_MAJOR(graphicsRequirements.maxApiVersionSupported),
-                       XR_VERSION_MINOR(graphicsRequirements.maxApiVersionSupported),
-                       XR_VERSION_PATCH(graphicsRequirements.maxApiVersionSupported));
-
-    // Query the required Vulkan instance extensions
-    uint32_t instanceExtensionCount = 0;
-    std::vector<char> instanceExtensionProperties;
-    if (m_xrGetVulkanInstanceExtensionsKHR(m_xrInstance, m_systemId, 0, &instanceExtensionCount, nullptr) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to get Vulkan Instance Extension Properties buffer size.");
-        return;
-    }
-    instanceExtensionProperties.resize(instanceExtensionCount);
-    if (m_xrGetVulkanInstanceExtensionsKHR(m_xrInstance, m_systemId, instanceExtensionCount, &instanceExtensionCount, instanceExtensionProperties.data()) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to get Vulkan Instance Extension Properties.");
-        return;
-    }
-
-    // Each required instance extension is delimited by a space character.
-    std::stringstream streamData(instanceExtensionProperties.data());
-    std::vector<std::string> vkInstanceExtensions;
-    std::string vkInstanceExtension;
-    while (std::getline(streamData, vkInstanceExtension, ' ')) {
-        vkInstanceExtensions.push_back(vkInstanceExtension);
-        SPDLOG_LOGGER_DEBUG(m_logger, "Requesting Vulkan Instance Extension: {}", vkInstanceExtension);
-    }
-
-    // Request an instance of the api with whatever layers and extensions we wish to request.
-    InstanceOptions instanceOptions = {
-        .applicationName = KDGui::GuiApplication::instance()->applicationName(),
-        .applicationVersion = KDGPU_MAKE_API_VERSION(0, 1, 0, 0),
-        .extensions = vkInstanceExtensions
-    };
-    m_instance = m_api->createInstance(instanceOptions);
-}
-
-void XrExampleEngineLayer::destroyGraphicsInstance()
-{
-    m_instance = {};
-}
-
-void XrExampleEngineLayer::createGraphicsDevice()
-{
-    // Query which physical device we should use for the given XR system
-    VulkanResourceManager *vulkanResourceManager = dynamic_cast<VulkanResourceManager *>(m_api->resourceManager());
-    assert(vulkanResourceManager);
-    VulkanInstance *vulkanInstance = vulkanResourceManager->getInstance(m_instance);
-    assert(vulkanInstance);
-    VkPhysicalDevice physicalDeviceFromXR;
-    if (m_xrGetVulkanGraphicsDeviceKHR(m_xrInstance, m_systemId, vulkanInstance->instance, &physicalDeviceFromXR) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to get Vulkan Graphics Device from OpenXR.");
-        return;
-    }
-
-    // Now look up the adapter that matches the physical device we got from OpenXR
-    const auto adapters = m_instance.adapters();
-    Adapter *selectedAdapter = nullptr;
-    for (auto *adapter : adapters) {
-        auto vulkanAdapter = vulkanResourceManager->getAdapter(adapter->handle());
-        if (vulkanAdapter->physicalDevice == physicalDeviceFromXR) {
-            selectedAdapter = adapter;
-            break;
-        }
-    }
-    if (!selectedAdapter) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to find Adapter that matches the physical device from OpenXR.");
-        return;
-    }
-
-    // Query the required Vulkan device extensions
-    uint32_t deviceExtensionCount = 0;
-    std::vector<char> deviceExtensionProperties;
-    if (m_xrGetVulkanDeviceExtensionsKHR(m_xrInstance, m_systemId, 0, &deviceExtensionCount, nullptr) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to get Vulkan Device Extension Properties buffer size.");
-        return;
-    }
-    deviceExtensionProperties.resize(deviceExtensionCount);
-    if (m_xrGetVulkanDeviceExtensionsKHR(m_xrInstance, m_systemId, deviceExtensionCount, &deviceExtensionCount, deviceExtensionProperties.data()) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to get Vulkan Device Extension Properties.");
-        return;
-    }
-
-    // Each required device extension is delimited by a space character.
-    std::stringstream streamData(deviceExtensionProperties.data());
-    std::vector<std::string> vkDeviceExtensions;
-    std::string vkDeviceExtension;
-    while (std::getline(streamData, vkDeviceExtension, ' ')) {
-        vkDeviceExtensions.push_back(vkDeviceExtension);
-        SPDLOG_LOGGER_DEBUG(m_logger, "Requesting Vulkan Device Extension: {}", vkDeviceExtension);
-    }
-
-    // Request a device of the api with whatever layers and extensions we wish to request.
-    DeviceOptions deviceOptions = {
-        .extensions = vkDeviceExtensions,
-        .requestedFeatures = selectedAdapter->features()
-    };
-    m_device = selectedAdapter->createDevice(deviceOptions);
-    m_queue = m_device.queues()[0];
-}
-
-void XrExampleEngineLayer::destroyGraphicsDevice()
-{
-    m_queue = {};
-    m_device = {};
-}
-
-void XrExampleEngineLayer::createXrInstance()
-{
-    XrApplicationInfo xrApplicationInfo = {};
-    const auto appName = KDGui::GuiApplication::instance()->applicationName();
-    strncpy(xrApplicationInfo.applicationName, appName.data(), XR_MAX_APPLICATION_NAME_SIZE);
-    xrApplicationInfo.applicationVersion = 1;
-    strncpy(xrApplicationInfo.engineName, "KDGpuExample XR Engine", XR_MAX_ENGINE_NAME_SIZE);
-    xrApplicationInfo.engineVersion = 1;
-    xrApplicationInfo.apiVersion = XR_CURRENT_API_VERSION;
-
-    // Query and check layers
-    uint32_t apiLayerCount = 0;
-    std::vector<XrApiLayerProperties> apiLayerProperties;
-    if (xrEnumerateApiLayerProperties(0, &apiLayerCount, nullptr) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to enumerate ApiLayerProperties.");
-        return;
-    }
-    apiLayerProperties.resize(apiLayerCount, { XR_TYPE_API_LAYER_PROPERTIES });
-    if (xrEnumerateApiLayerProperties(apiLayerCount, &apiLayerCount, apiLayerProperties.data()) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to enumerate ApiLayerProperties.");
-        return;
-    }
-
-    // Check the requested API layers against the ones enumerated from OpenXR. If found add it to the active api Layers.
-    std::vector<std::string> activeApiLayers;
-    for (auto &requestedLayer : m_xrRequestedApiLayers) {
-        for (auto &layerProperty : apiLayerProperties) {
-            // strcmp returns 0 if the strings match.
-            if (strcmp(requestedLayer.c_str(), layerProperty.layerName) != 0) {
-                continue;
-            } else {
-                m_xrActiveApiLayers.push_back(requestedLayer.c_str());
-                activeApiLayers.push_back(requestedLayer);
-                break;
-            }
-        }
-    }
-
-    // Query and check instance extensions
-    uint32_t extensionCount = 0;
-    std::vector<XrExtensionProperties> extensionProperties;
-    if (xrEnumerateInstanceExtensionProperties(nullptr, 0, &extensionCount, nullptr) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to enumerate InstanceExtensionProperties.");
-        return;
-    }
-    extensionProperties.resize(extensionCount, { XR_TYPE_EXTENSION_PROPERTIES });
-    if (xrEnumerateInstanceExtensionProperties(nullptr, extensionCount, &extensionCount, extensionProperties.data()) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to enumerate InstanceExtensionProperties.");
-        return;
-    }
-
-    m_xrRequestedInstanceExtensions = { XR_EXT_DEBUG_UTILS_EXTENSION_NAME, XR_KHR_VULKAN_ENABLE_EXTENSION_NAME };
-    for (auto &requestedInstanceExtension : m_xrRequestedInstanceExtensions) {
-        bool found = false;
-        for (auto &extensionProperty : extensionProperties) {
-            // strcmp returns 0 if the strings match.
-            if (strcmp(requestedInstanceExtension.c_str(), extensionProperty.extensionName) != 0) {
-                continue;
-            } else {
-                m_xrActiveInstanceExtensions.push_back(requestedInstanceExtension.c_str());
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            SPDLOG_LOGGER_WARN(m_logger, "Failed to find requested instance extension: {}", requestedInstanceExtension);
-        }
-    }
-
-    // Create the XR Instance
-    XrInstanceCreateInfo instanceCI{ XR_TYPE_INSTANCE_CREATE_INFO };
-    instanceCI.createFlags = 0;
-    instanceCI.applicationInfo = xrApplicationInfo;
-    instanceCI.enabledApiLayerCount = static_cast<uint32_t>(m_xrActiveApiLayers.size());
-    instanceCI.enabledApiLayerNames = m_xrActiveApiLayers.data();
-    instanceCI.enabledExtensionCount = static_cast<uint32_t>(m_xrActiveInstanceExtensions.size());
-    instanceCI.enabledExtensionNames = m_xrActiveInstanceExtensions.data();
-    if (xrCreateInstance(&instanceCI, &m_xrInstance) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to create OpenXR Instance.");
-        return;
-    }
-
-    // TODO: Move these into the OpenXrInstance or OpenXrSystem class as needed
-    // Resolve some functions we will need later
-    if (xrGetInstanceProcAddr(m_xrInstance, "xrGetVulkanGraphicsRequirementsKHR", (PFN_xrVoidFunction *)&m_xrGetVulkanGraphicsRequirementsKHR) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to get InstanceProcAddr for xrGetVulkanGraphicsRequirementsKHR.");
-        return;
-    }
-
-    if (xrGetInstanceProcAddr(m_xrInstance, "xrGetVulkanInstanceExtensionsKHR", (PFN_xrVoidFunction *)&m_xrGetVulkanInstanceExtensionsKHR) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to get InstanceProcAddr for xrGetVulkanInstanceExtensionsKHR.");
-        return;
-    }
-
-    if (xrGetInstanceProcAddr(m_xrInstance, "xrGetVulkanDeviceExtensionsKHR", (PFN_xrVoidFunction *)&m_xrGetVulkanDeviceExtensionsKHR) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to get InstanceProcAddr for xrGetVulkanDeviceExtensionsKHR.");
-        return;
-    }
-
-    if (xrGetInstanceProcAddr(m_xrInstance, "xrGetVulkanGraphicsDeviceKHR", (PFN_xrVoidFunction *)&m_xrGetVulkanGraphicsDeviceKHR) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to get InstanceProcAddr for xrGetVulkanGraphicsDeviceKHR.");
-        return;
-    }
-
-    // Create the instance and debug message handler
-    KDXr::InstanceOptions instanceOptions = {
-        .applicationName = KDGui::GuiApplication::instance()->applicationName(),
-        .applicationVersion = KDGPU_MAKE_API_VERSION(0, 1, 0, 0),
-        .layers = {}, // No api layers requested
-        .extensions = { XR_EXT_DEBUG_UTILS_EXTENSION_NAME, XR_KHR_VULKAN_ENABLE_EXTENSION_NAME }
-    };
-    m_kdxrInstance = m_xrApi->createInstance(instanceOptions);
-    const auto properties = m_kdxrInstance.properties();
-    SPDLOG_LOGGER_INFO(m_logger, "OpenXR Runtime: {}", properties.runtimeName);
-    SPDLOG_LOGGER_INFO(m_logger, "OpenXR API Version: {}.{}.{}",
-                       KDXR_VERSION_MAJOR(properties.runtimeVersion),
-                       KDXR_VERSION_MINOR(properties.runtimeVersion),
-                       KDXR_VERSION_PATCH(properties.runtimeVersion));
-}
-
-void XrExampleEngineLayer::destroyXrInstance()
-{
-    if (xrDestroyInstance(m_xrInstance) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to destroy OpenXR Instance.");
-        return;
-    }
-}
-
-void XrExampleEngineLayer::createXrDebugMessenger()
-{
-    bool found = false;
-    for (const auto &extension : m_xrActiveInstanceExtensions) {
-        if (strcmp(extension, XR_EXT_DEBUG_UTILS_EXTENSION_NAME) == 0) {
-            found = true;
-            break;
-        }
-    }
-
-    if (found == true) {
-        XrDebugUtilsMessengerCreateInfoEXT debugUtilsMessengerCreateInfo{ XR_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT };
-        debugUtilsMessengerCreateInfo.messageSeverities = XR_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | XR_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT | XR_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | XR_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-        debugUtilsMessengerCreateInfo.messageTypes = XR_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | XR_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | XR_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT | XR_DEBUG_UTILS_MESSAGE_TYPE_CONFORMANCE_BIT_EXT;
-        debugUtilsMessengerCreateInfo.userCallback = (PFN_xrDebugUtilsMessengerCallbackEXT)debugCallback;
-        debugUtilsMessengerCreateInfo.userData = nullptr;
-
-        // Load xrCreateDebugUtilsMessengerEXT() function pointer as it is not default loaded by the OpenXR loader.
-        PFN_xrCreateDebugUtilsMessengerEXT xrCreateDebugUtilsMessengerEXT;
-        if (xrGetInstanceProcAddr(m_xrInstance, "xrCreateDebugUtilsMessengerEXT", (PFN_xrVoidFunction *)&xrCreateDebugUtilsMessengerEXT) != XR_SUCCESS) {
-            SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to get InstanceProcAddr.");
-            return;
-        }
-
-        // Finally create and return the XrDebugUtilsMessengerEXT.
-        if (xrCreateDebugUtilsMessengerEXT(m_xrInstance, &debugUtilsMessengerCreateInfo, &m_debugUtilsMessenger) != XR_SUCCESS) {
-            SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to create DebugUtilsMessenger.");
-            return;
-        }
-    }
-}
-
-void XrExampleEngineLayer::destroyXrDebugMessenger()
-{
-    // Load xrDestroyDebugUtilsMessengerEXT() function pointer as it is not default loaded by the OpenXR loader.
-    PFN_xrDestroyDebugUtilsMessengerEXT xrDestroyDebugUtilsMessengerEXT;
-    if (xrGetInstanceProcAddr(m_xrInstance, "xrDestroyDebugUtilsMessengerEXT", (PFN_xrVoidFunction *)&xrDestroyDebugUtilsMessengerEXT) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to get InstanceProcAddr.");
-        return;
-    }
-
-    // Destroy the provided XrDebugUtilsMessengerEXT.
-    if (xrDestroyDebugUtilsMessengerEXT(m_debugUtilsMessenger) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to destroy DebugUtilsMessenger.");
-    }
-}
-
-void XrExampleEngineLayer::getXrInstanceProperties()
-{
-    XrInstanceProperties instanceProperties{ XR_TYPE_INSTANCE_PROPERTIES };
-    if (xrGetInstanceProperties(m_xrInstance, &instanceProperties) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to get InstanceProperties.");
-        return;
-    }
-
-    SPDLOG_LOGGER_INFO(m_logger, "OpenXR Runtime: {}", instanceProperties.runtimeName);
-    SPDLOG_LOGGER_INFO(m_logger, "OpenXR API Version: {}.{}.{}",
-                       XR_VERSION_MAJOR(instanceProperties.runtimeVersion),
-                       XR_VERSION_MINOR(instanceProperties.runtimeVersion),
-                       XR_VERSION_PATCH(instanceProperties.runtimeVersion));
-}
-
-void XrExampleEngineLayer::getXrSystemId()
-{
-    XrSystemGetInfo systemGetInfo{ XR_TYPE_SYSTEM_GET_INFO };
-    systemGetInfo.formFactor = m_formFactor;
-    if (const auto result = xrGetSystem(m_xrInstance, &systemGetInfo, &m_systemId) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to get SystemID. Error: {}", result); // TODO: Add formatter for XrResult
-        return;
-    }
-
-    // Get the System's properties for some general information about the hardware and the vendor.
-    if (xrGetSystemProperties(m_xrInstance, m_systemId, &m_systemProperties) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to get SystemProperties.");
-        return;
-    }
-
-    SPDLOG_LOGGER_INFO(m_logger, "OpenXR System: {}", m_systemProperties.systemName);
-    SPDLOG_LOGGER_INFO(m_logger, "OpenXR System Id: {}", m_systemProperties.systemId);
-    SPDLOG_LOGGER_INFO(m_logger, "OpenXR Vendor Id: {}", m_systemProperties.vendorId);
-    SPDLOG_LOGGER_INFO(m_logger, "Maximum swapchain dimensions: {}x{}",
-                       m_systemProperties.graphicsProperties.maxSwapchainImageWidth,
-                       m_systemProperties.graphicsProperties.maxSwapchainImageHeight);
-    SPDLOG_LOGGER_INFO(m_logger, "Maximum layers: {}", m_systemProperties.graphicsProperties.maxLayerCount);
-}
-
-void XrExampleEngineLayer::getXrViewConfigurations()
-{
-    // Query the number of view configurations supported by the system
-    uint32_t viewConfigurationCount = 0;
-    if (xrEnumerateViewConfigurations(m_xrInstance, m_systemId, 0, &viewConfigurationCount, nullptr) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to enumerate ViewConfigurations.");
-        return;
-    }
-
-    // Query the view configurations supported by the system
-    m_xrViewConfigurationTypes.resize(viewConfigurationCount);
-    if (xrEnumerateViewConfigurations(m_xrInstance, m_systemId, viewConfigurationCount, &viewConfigurationCount, m_xrViewConfigurationTypes.data()) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to enumerate ViewConfigurations.");
-        return;
-    }
-
-    // Pick the first application supported View Configuration Type supported by the hardware.
-    for (const XrViewConfigurationType &viewConfiguration : m_xrApplicationViewConfigurationTypes) {
-        if (std::find(m_xrViewConfigurationTypes.begin(), m_xrViewConfigurationTypes.end(), viewConfiguration) != m_xrViewConfigurationTypes.end()) {
-            m_xrViewConfiguration = viewConfiguration;
-            break;
-        }
-    }
-    if (m_xrViewConfiguration == XR_VIEW_CONFIGURATION_TYPE_MAX_ENUM) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to find a supported ViewConfiguration. Defaulting to XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO");
-        m_xrViewConfiguration = XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO;
-    }
-
-    // Query the number of environment blend modes supported by the system
-    uint32_t environmentBlendModeCount = 0;
-    if (xrEnumerateEnvironmentBlendModes(m_xrInstance, m_systemId, m_xrViewConfiguration, 0, &environmentBlendModeCount, nullptr) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to enumerate EnvironmentBlendModes.");
-        return;
-    }
-
-    // Query the environment blend modes supported by the system
-    m_xrEnvironmentBlendModes.resize(environmentBlendModeCount);
-    if (xrEnumerateEnvironmentBlendModes(m_xrInstance, m_systemId, m_xrViewConfiguration, environmentBlendModeCount, &environmentBlendModeCount, m_xrEnvironmentBlendModes.data()) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to enumerate EnvironmentBlendModes.");
-        return;
-    }
-
-    // We will just use the first environment blend mode supported by the system
-    m_xrEnvironmentBlendMode = m_xrEnvironmentBlendModes[0];
-
-    // Query the number of view configuration views in the first view configuration supported by the system
-    uint32_t viewConfigurationViewCount = 0;
-    if (xrEnumerateViewConfigurationViews(m_xrInstance, m_systemId, m_xrViewConfiguration, 0, &viewConfigurationViewCount, nullptr) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to enumerate ViewConfigurationViews.");
-        return;
-    }
-
-    // Query the view configuration views in the first view configuration supported by the system
-    m_xrViewConfigurationViews.resize(viewConfigurationViewCount, { XR_TYPE_VIEW_CONFIGURATION_VIEW });
-    if (xrEnumerateViewConfigurationViews(m_xrInstance, m_systemId, m_xrViewConfiguration, viewConfigurationViewCount, &viewConfigurationViewCount, m_xrViewConfigurationViews.data()) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to enumerate ViewConfigurationViews.");
-        return;
-    }
 }
 
 void XrExampleEngineLayer::createXrSession()
@@ -772,14 +442,14 @@ void XrExampleEngineLayer::createXrSwapchains()
     // Store the depth swapchain format for the subclass to use
     m_depthSwapchainFormat = static_cast<KDGpu::Format>(m_xrDepthSwapchainFormat);
 
-    m_colorSwapchainInfos.resize(m_xrViewConfigurationViews.size());
-    m_depthSwapchainInfos.resize(m_xrViewConfigurationViews.size());
+    m_colorSwapchainInfos.resize(m_viewConfigurationViews.size());
+    m_depthSwapchainInfos.resize(m_viewConfigurationViews.size());
 
     auto vulkanApi = dynamic_cast<VulkanGraphicsApi *>(m_api.get());
     assert(vulkanApi);
 
     // Per view, create a color and depth swapchain, and their associated image views.
-    for (size_t i = 0; i < m_xrViewConfigurationViews.size(); ++i) {
+    for (size_t i = 0; i < m_viewConfigurationViews.size(); ++i) {
         {
             // Create a color swapchain. This will also create the underlying images which we can enumerate later.
             SwapchainInfo &colorSwapchainInfo = m_colorSwapchainInfos[i];
@@ -788,9 +458,9 @@ void XrExampleEngineLayer::createXrSwapchains()
             swapchainCreateInfo.createFlags = 0;
             swapchainCreateInfo.usageFlags = XR_SWAPCHAIN_USAGE_SAMPLED_BIT | XR_SWAPCHAIN_USAGE_COLOR_ATTACHMENT_BIT;
             swapchainCreateInfo.format = m_xrColorSwapchainFormat;
-            swapchainCreateInfo.sampleCount = m_xrViewConfigurationViews[i].recommendedSwapchainSampleCount;
-            swapchainCreateInfo.width = m_xrViewConfigurationViews[i].recommendedImageRectWidth;
-            swapchainCreateInfo.height = m_xrViewConfigurationViews[i].recommendedImageRectHeight;
+            swapchainCreateInfo.sampleCount = m_viewConfigurationViews[i].recommendedSwapchainSampleCount;
+            swapchainCreateInfo.width = m_viewConfigurationViews[i].recommendedTextureWidth;
+            swapchainCreateInfo.height = m_viewConfigurationViews[i].recommendedTextureHeight;
             swapchainCreateInfo.faceCount = 1;
             swapchainCreateInfo.arraySize = 1;
             swapchainCreateInfo.mipCount = 1;
@@ -821,11 +491,11 @@ void XrExampleEngineLayer::createXrSwapchains()
                     .type = TextureType::TextureType2D,
                     .format = static_cast<KDGpu::Format>(m_xrColorSwapchainFormat),
                     .extent = {
-                            .width = m_xrViewConfigurationViews[i].recommendedImageRectWidth,
-                            .height = m_xrViewConfigurationViews[i].recommendedImageRectHeight,
+                            .width = m_viewConfigurationViews[i].recommendedTextureWidth,
+                            .height = m_viewConfigurationViews[i].recommendedTextureHeight,
                             .depth = 1 },
                     .mipLevels = 1,
-                    .samples = static_cast<SampleCountFlagBits>(m_xrViewConfigurationViews[i].recommendedSwapchainSampleCount),
+                    .samples = static_cast<SampleCountFlagBits>(m_viewConfigurationViews[i].recommendedSwapchainSampleCount),
                     .usage = TextureUsageFlagBits::SampledBit | TextureUsageFlagBits::ColorAttachmentBit,
                     .memoryUsage = MemoryUsage::GpuOnly
                 };
@@ -843,9 +513,9 @@ void XrExampleEngineLayer::createXrSwapchains()
             swapchainCreateInfo.createFlags = 0;
             swapchainCreateInfo.usageFlags = XR_SWAPCHAIN_USAGE_SAMPLED_BIT | XR_SWAPCHAIN_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
             swapchainCreateInfo.format = m_xrDepthSwapchainFormat;
-            swapchainCreateInfo.sampleCount = m_xrViewConfigurationViews[i].recommendedSwapchainSampleCount;
-            swapchainCreateInfo.width = m_xrViewConfigurationViews[i].recommendedImageRectWidth;
-            swapchainCreateInfo.height = m_xrViewConfigurationViews[i].recommendedImageRectHeight;
+            swapchainCreateInfo.sampleCount = m_viewConfigurationViews[i].recommendedSwapchainSampleCount;
+            swapchainCreateInfo.width = m_viewConfigurationViews[i].recommendedTextureWidth;
+            swapchainCreateInfo.height = m_viewConfigurationViews[i].recommendedTextureHeight;
             swapchainCreateInfo.faceCount = 1;
             swapchainCreateInfo.arraySize = 1;
             swapchainCreateInfo.mipCount = 1;
@@ -876,11 +546,11 @@ void XrExampleEngineLayer::createXrSwapchains()
                     .type = TextureType::TextureType2D,
                     .format = static_cast<KDGpu::Format>(m_xrDepthSwapchainFormat),
                     .extent = {
-                            .width = m_xrViewConfigurationViews[i].recommendedImageRectWidth,
-                            .height = m_xrViewConfigurationViews[i].recommendedImageRectHeight,
+                            .width = m_viewConfigurationViews[i].recommendedTextureWidth,
+                            .height = m_viewConfigurationViews[i].recommendedTextureHeight,
                             .depth = 1 },
                     .mipLevels = 1,
-                    .samples = static_cast<SampleCountFlagBits>(m_xrViewConfigurationViews[i].recommendedSwapchainSampleCount),
+                    .samples = static_cast<SampleCountFlagBits>(m_viewConfigurationViews[i].recommendedSwapchainSampleCount),
                     .usage = TextureUsageFlagBits::SampledBit | TextureUsageFlagBits::DepthStencilAttachmentBit,
                     .memoryUsage = MemoryUsage::GpuOnly
                 };

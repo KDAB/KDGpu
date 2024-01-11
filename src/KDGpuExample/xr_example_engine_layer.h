@@ -76,24 +76,6 @@ protected:
     void update() override;
     void event(KDFoundation::EventReceiver *target, KDFoundation::Event *ev) override;
 
-    // Graphics API related helpers
-    void createGraphicsInstance();
-    void destroyGraphicsInstance();
-
-    void createGraphicsDevice();
-    void destroyGraphicsDevice();
-
-    // XR related helpers
-    void createXrInstance();
-    void destroyXrInstance();
-
-    void createXrDebugMessenger();
-    void destroyXrDebugMessenger();
-
-    void getXrInstanceProperties();
-    void getXrSystemId();
-    void getXrViewConfigurations();
-
     void createXrSession();
     void destroyXrSession();
 
@@ -135,31 +117,12 @@ protected:
     std::vector<KDXr::ViewConfigurationView> m_viewConfigurationViews;
 
     // OpenXR related members (to be removed once KDXr is suitable for use)
-    std::vector<std::string> m_xrRequestedApiLayers{};
-    std::vector<const char *> m_xrActiveApiLayers{};
-
-    std::vector<std::string> m_xrRequestedInstanceExtensions{};
-    std::vector<const char *> m_xrActiveInstanceExtensions{};
-
     XrInstance m_xrInstance{ XR_NULL_HANDLE };
     XrDebugUtilsMessengerEXT m_debugUtilsMessenger{};
 
     XrFormFactor m_formFactor{ XR_FORM_FACTOR_HEAD_MOUNTED_DISPLAY };
-    XrSystemId m_systemId = {};
+    XrSystemId m_systemId = { XR_NULL_SYSTEM_ID };
     XrSystemProperties m_systemProperties{ XR_TYPE_SYSTEM_PROPERTIES };
-
-    std::vector<XrViewConfigurationType> m_xrApplicationViewConfigurationTypes{ XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO, XR_VIEW_CONFIGURATION_TYPE_PRIMARY_MONO };
-    std::vector<XrViewConfigurationType> m_xrViewConfigurationTypes;
-
-    XrViewConfigurationType m_xrViewConfiguration{ XR_VIEW_CONFIGURATION_TYPE_MAX_ENUM };
-    std::vector<XrEnvironmentBlendMode> m_xrEnvironmentBlendModes;
-    XrEnvironmentBlendMode m_xrEnvironmentBlendMode{ XR_ENVIRONMENT_BLEND_MODE_MAX_ENUM };
-    std::vector<XrViewConfigurationView> m_xrViewConfigurationViews;
-
-    PFN_xrGetVulkanGraphicsRequirementsKHR m_xrGetVulkanGraphicsRequirementsKHR{ nullptr };
-    PFN_xrGetVulkanInstanceExtensionsKHR m_xrGetVulkanInstanceExtensionsKHR{ nullptr };
-    PFN_xrGetVulkanDeviceExtensionsKHR m_xrGetVulkanDeviceExtensionsKHR{ nullptr };
-    PFN_xrGetVulkanGraphicsDeviceKHR m_xrGetVulkanGraphicsDeviceKHR{ nullptr };
 
     XrSession m_xrSession{ XR_NULL_HANDLE };
     XrSessionState m_xrSessionState{ XR_SESSION_STATE_UNKNOWN };
