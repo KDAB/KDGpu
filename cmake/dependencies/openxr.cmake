@@ -18,6 +18,10 @@ if(NOT TARGET OpenXR::openxr_loader)
         ON
         CACHE INTERNAL "Use OpenXR layers"
     )
+    set(DYNAMIC_LOADER
+        ON
+        CACHE INTERNAL "Use dynamic loader"
+    )
     FetchContent_Declare(
         OpenXR
         GIT_REPOSITORY https://github.com/KhronosGroup/OpenXR-SDK-Source.git
