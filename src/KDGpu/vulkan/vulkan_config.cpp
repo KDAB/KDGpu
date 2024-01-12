@@ -18,6 +18,23 @@
 #include <vulkan/vulkan_win32.h>
 #endif
 
+#if defined(KDGPU_PLATFORM_LINUX)
+typedef struct xcb_connection_t xcb_connection_t;
+typedef uint32_t xcb_window_t;
+typedef uint32_t xcb_visualid_t;
+
+#include <vulkan/vulkan_xcb.h>
+
+struct wl_display;
+struct wl_surface;
+#include <vulkan/vulkan_wayland.h>
+#endif
+
+#if defined(KDGPU_PLATFORM_MACOS)
+#include <vulkan/vulkan_metal.h>
+#include <vulkan/vulkan_beta.h>
+#endif
+
 namespace KDGpu {
 
 std::vector<const char *> getDefaultRequestedInstanceExtensions()
@@ -25,12 +42,12 @@ std::vector<const char *> getDefaultRequestedInstanceExtensions()
     std::vector<const char *> extensions;
     extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
 #if defined(KDGPU_PLATFORM_LINUX)
-    extensions.push_back("VK_KHR_xcb_surface");
-    extensions.push_back("VK_KHR_wayland_surface");
+    extensions.push_back(VK_KHR_XCB_SURFACE_EXTENSION_NAME);
+    extensions.push_back(VK_KHR_WAYLAND_SURFACE_EXTENSION_NAME);
 #elif defined(KDGPU_PLATFORM_WIN32)
-    extensions.push_back("VK_KHR_win32_surface");
+    extensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
 #elif defined(KDGPU_PLATFORM_MACOS)
-    extensions.push_back("VK_EXT_metal_surface");
+    extensions.push_back(VK_EXT_METAL_SURFACE_EXTENSION_NAME);
     extensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
     extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
 #endif
@@ -59,7 +76,7 @@ std::vector<const char *> getDefaultRequestedDeviceExtensions()
     extensions.push_back(VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME);
 #endif
 #if defined(KDGPU_PLATFORM_MACOS)
-    extensions.push_back("VK_KHR_portability_subset");
+    extensions.push_back(VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME);
 #endif
     return extensions;
 }
