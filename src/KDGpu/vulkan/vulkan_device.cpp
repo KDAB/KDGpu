@@ -100,6 +100,19 @@ VulkanDevice::VulkanDevice(VkDevice _device,
     vkGetSemaphoreWin32HandleKHR = (PFN_vkGetSemaphoreWin32HandleKHR)vkGetDeviceProcAddr(device, "vkGetSemaphoreWin32HandleKHR");
     vkGetFenceWin32HandleKHR = (PFN_vkGetFenceWin32HandleKHR)vkGetDeviceProcAddr(device, "vkGetFenceWin32HandleKHR");
 #endif
+
+    // If we request the extension version of renderpass2, then use that. Otherwise fall back to the core 1.2 version.
+    const auto adapterExtensions = vulkanAdapter->extensions();
+    for (const auto &extension : adapterExtensions) {
+        if (extension.name == "VK_KHR_create_renderpass2") {
+            this->vkCreateRenderPass2 = (PFN_vkCreateRenderPass2)vkGetDeviceProcAddr(device, "vkCreateRenderPass2KHR");
+            break;
+        }
+    }
+
+    if (this->vkCreateRenderPass2 == nullptr) {
+        this->vkCreateRenderPass2 = ::vkCreateRenderPass2;
+    }
 }
 
 std::vector<QueueDescription> VulkanDevice::getQueues(ResourceManager *resourceManager,

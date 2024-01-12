@@ -90,6 +90,8 @@ struct KDGPU_EXPORT VulkanDevice : public ApiDevice {
     PFN_vkGetFenceFdKHR vkGetFenceFdKHR{ nullptr };
 #endif
 
+    PFN_vkCreateRenderPass2 vkCreateRenderPass2{ nullptr };
+
     bool isOwned{ true };
 };
 

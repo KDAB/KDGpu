@@ -396,30 +396,10 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     physicalDeviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
     physicalDeviceFeatures2.features = deviceFeatures;
 
-    VkPhysicalDeviceVulkan12Features physicalDeviceFeatures12 = {};
-    physicalDeviceFeatures12.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
-    physicalDeviceFeatures12.uniformBufferStandardLayout = options.requestedFeatures.uniformBufferStandardLayout;
-    physicalDeviceFeatures12.shaderInputAttachmentArrayDynamicIndexing = options.requestedFeatures.shaderInputAttachmentArrayDynamicIndexing;
-    physicalDeviceFeatures12.shaderUniformTexelBufferArrayDynamicIndexing = options.requestedFeatures.shaderUniformTexelBufferArrayDynamicIndexing;
-    physicalDeviceFeatures12.shaderStorageTexelBufferArrayDynamicIndexing = options.requestedFeatures.shaderStorageTexelBufferArrayDynamicIndexing;
-    physicalDeviceFeatures12.shaderUniformBufferArrayNonUniformIndexing = options.requestedFeatures.shaderUniformBufferArrayNonUniformIndexing;
-    physicalDeviceFeatures12.shaderSampledImageArrayNonUniformIndexing = options.requestedFeatures.shaderSampledImageArrayNonUniformIndexing;
-    physicalDeviceFeatures12.shaderStorageBufferArrayNonUniformIndexing = options.requestedFeatures.shaderStorageBufferArrayNonUniformIndexing;
-    physicalDeviceFeatures12.shaderStorageImageArrayNonUniformIndexing = options.requestedFeatures.shaderStorageImageArrayNonUniformIndexing;
-    physicalDeviceFeatures12.shaderInputAttachmentArrayNonUniformIndexing = options.requestedFeatures.shaderInputAttachmentArrayNonUniformIndexing;
-    physicalDeviceFeatures12.shaderUniformTexelBufferArrayNonUniformIndexing = options.requestedFeatures.shaderUniformTexelBufferArrayNonUniformIndexing;
-    physicalDeviceFeatures12.shaderStorageTexelBufferArrayNonUniformIndexing = options.requestedFeatures.shaderStorageTexelBufferArrayNonUniformIndexing;
-    physicalDeviceFeatures12.descriptorBindingUniformBufferUpdateAfterBind = options.requestedFeatures.bindGroupBindingUniformBufferUpdateAfterBind;
-    physicalDeviceFeatures12.descriptorBindingSampledImageUpdateAfterBind = options.requestedFeatures.bindGroupBindingSampledImageUpdateAfterBind;
-    physicalDeviceFeatures12.descriptorBindingStorageImageUpdateAfterBind = options.requestedFeatures.bindGroupBindingStorageImageUpdateAfterBind;
-    physicalDeviceFeatures12.descriptorBindingStorageBufferUpdateAfterBind = options.requestedFeatures.bindGroupBindingStorageBufferUpdateAfterBind;
-    physicalDeviceFeatures12.descriptorBindingUniformTexelBufferUpdateAfterBind = options.requestedFeatures.bindGroupBindingUniformTexelBufferUpdateAfterBind;
-    physicalDeviceFeatures12.descriptorBindingStorageTexelBufferUpdateAfterBind = options.requestedFeatures.bindGroupBindingStorageTexelBufferUpdateAfterBind;
-    physicalDeviceFeatures12.descriptorBindingUpdateUnusedWhilePending = options.requestedFeatures.bindGroupBindingUpdateUnusedWhilePending;
-    physicalDeviceFeatures12.descriptorBindingPartiallyBound = options.requestedFeatures.bindGroupBindingPartiallyBound;
-    physicalDeviceFeatures12.descriptorBindingVariableDescriptorCount = options.requestedFeatures.bindGroupBindingVariableDescriptorCount;
-    physicalDeviceFeatures12.runtimeDescriptorArray = options.requestedFeatures.runtimeBindGroupArray;
-    physicalDeviceFeatures2.pNext = &physicalDeviceFeatures12;
+    // Allows to use std430 for uniform buffers which gives much nicer packing of data
+    VkPhysicalDeviceUniformBufferStandardLayoutFeatures stdLayoutFeatures = {};
+    stdLayoutFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_UNIFORM_BUFFER_STANDARD_LAYOUT_FEATURES;
+    stdLayoutFeatures.uniformBufferStandardLayout = options.requestedFeatures.uniformBufferStandardLayout;
 
     // Enable multiview rendering if requested
     VkPhysicalDeviceMultiviewFeatures multiViewFeatures{};
@@ -427,14 +407,39 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     multiViewFeatures.multiview = options.requestedFeatures.multiView;
     multiViewFeatures.multiviewGeometryShader = options.requestedFeatures.multiViewGeometryShader;
     multiViewFeatures.multiviewTessellationShader = options.requestedFeatures.multiViewTessellationShader;
-    physicalDeviceFeatures12.pNext = &multiViewFeatures;
+
+    // Enable Descriptor Indexing if requested
+    VkPhysicalDeviceDescriptorIndexingFeatures descriptorIndexingFeatures{};
+    descriptorIndexingFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES;
+    descriptorIndexingFeatures.shaderInputAttachmentArrayDynamicIndexing = options.requestedFeatures.shaderInputAttachmentArrayDynamicIndexing;
+    descriptorIndexingFeatures.shaderUniformTexelBufferArrayDynamicIndexing = options.requestedFeatures.shaderUniformTexelBufferArrayDynamicIndexing;
+    descriptorIndexingFeatures.shaderStorageTexelBufferArrayDynamicIndexing = options.requestedFeatures.shaderStorageTexelBufferArrayDynamicIndexing;
+    descriptorIndexingFeatures.shaderUniformBufferArrayNonUniformIndexing = options.requestedFeatures.shaderUniformBufferArrayNonUniformIndexing;
+    descriptorIndexingFeatures.shaderSampledImageArrayNonUniformIndexing = options.requestedFeatures.shaderSampledImageArrayNonUniformIndexing;
+    descriptorIndexingFeatures.shaderStorageBufferArrayNonUniformIndexing = options.requestedFeatures.shaderStorageBufferArrayNonUniformIndexing;
+    descriptorIndexingFeatures.shaderStorageImageArrayNonUniformIndexing = options.requestedFeatures.shaderStorageImageArrayNonUniformIndexing;
+    descriptorIndexingFeatures.shaderInputAttachmentArrayNonUniformIndexing = options.requestedFeatures.shaderInputAttachmentArrayNonUniformIndexing;
+    descriptorIndexingFeatures.shaderUniformTexelBufferArrayNonUniformIndexing = options.requestedFeatures.shaderUniformTexelBufferArrayNonUniformIndexing;
+    descriptorIndexingFeatures.shaderStorageTexelBufferArrayNonUniformIndexing = options.requestedFeatures.shaderStorageTexelBufferArrayNonUniformIndexing;
+    descriptorIndexingFeatures.descriptorBindingUniformBufferUpdateAfterBind = options.requestedFeatures.bindGroupBindingUniformBufferUpdateAfterBind;
+    descriptorIndexingFeatures.descriptorBindingSampledImageUpdateAfterBind = options.requestedFeatures.bindGroupBindingSampledImageUpdateAfterBind;
+    descriptorIndexingFeatures.descriptorBindingStorageImageUpdateAfterBind = options.requestedFeatures.bindGroupBindingStorageImageUpdateAfterBind;
+    descriptorIndexingFeatures.descriptorBindingStorageBufferUpdateAfterBind = options.requestedFeatures.bindGroupBindingStorageBufferUpdateAfterBind;
+    descriptorIndexingFeatures.descriptorBindingUniformTexelBufferUpdateAfterBind = options.requestedFeatures.bindGroupBindingUniformTexelBufferUpdateAfterBind;
+    descriptorIndexingFeatures.descriptorBindingStorageTexelBufferUpdateAfterBind = options.requestedFeatures.bindGroupBindingStorageTexelBufferUpdateAfterBind;
+    descriptorIndexingFeatures.descriptorBindingUpdateUnusedWhilePending = options.requestedFeatures.bindGroupBindingUpdateUnusedWhilePending;
+    descriptorIndexingFeatures.descriptorBindingPartiallyBound = options.requestedFeatures.bindGroupBindingPartiallyBound;
+    descriptorIndexingFeatures.descriptorBindingVariableDescriptorCount = options.requestedFeatures.bindGroupBindingVariableDescriptorCount;
+    descriptorIndexingFeatures.runtimeDescriptorArray = options.requestedFeatures.runtimeBindGroupArray;
 
     // Create a Device that targets several physical devices if a group was specified
     VkDeviceGroupDeviceCreateInfo deviceGroupInfo = {};
     deviceGroupInfo.sType = VK_STRUCTURE_TYPE_DEVICE_GROUP_DEVICE_CREATE_INFO_KHR;
     deviceGroupInfo.physicalDeviceCount = 0;
 
-    multiViewFeatures.pNext = &deviceGroupInfo;
+    physicalDeviceFeatures2.pNext = &multiViewFeatures;
+    multiViewFeatures.pNext = &descriptorIndexingFeatures;
+    descriptorIndexingFeatures.pNext = &deviceGroupInfo;
 
     std::vector<VkPhysicalDevice> devicesInGroup;
     const size_t adapterCount = options.adapterGroup.adapters.size();
@@ -488,6 +493,19 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
         } else {
             SPDLOG_LOGGER_WARN(Logger::logger(), "Unable to find default requested device extension {}", requestedDeviceExtension);
         }
+    }
+
+    // check for Vulkan API support, fall back to extensions if needed
+    const auto adapterProperties = vulkanAdapter->queryAdapterProperties();
+    const bool hasVulkan12 = adapterProperties.apiVersion >= VK_API_VERSION_1_2;
+    const bool hasVulkan11 = adapterProperties.apiVersion >= VK_API_VERSION_1_1;
+
+    if (!hasVulkan12 && hasVulkan11) {
+        SPDLOG_LOGGER_INFO(Logger::logger(), "Vulkan 1.2 is unavailable, falling back to Vulkan 1.1...");
+        requestedDeviceExtensions.push_back(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME);
+        requestedDeviceExtensions.push_back(VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME);
+    } else if (!hasVulkan12 && !hasVulkan11) {
+        throw std::runtime_error("At least Vulkan 1.1 is required!");
     }
 
     if (!requestedDeviceExtensions.empty()) {
@@ -2294,7 +2312,7 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
     }
 
     VkRenderPass vkRenderPass{ VK_NULL_HANDLE };
-    if (auto result = vkCreateRenderPass2(vulkanDevice->device, &renderPassInfo, nullptr, &vkRenderPass); result != VK_SUCCESS) {
+    if (auto result = vulkanDevice->vkCreateRenderPass2(vulkanDevice->device, &renderPassInfo, nullptr, &vkRenderPass); result != VK_SUCCESS) {
         SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating render pass: {}", result);
         return {};
     }
