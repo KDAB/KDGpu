@@ -49,12 +49,12 @@ ReferenceSpace Session::createReferenceSpace(const ReferenceSpaceOptions &option
     return ReferenceSpace(m_session, m_api, options);
 }
 
-Session::Session(System *system, XrApi *api, const SessionOptions &options)
+Session::Session(const Handle<System_t> &systemHandle, XrApi *api, const SessionOptions &options)
     : m_api(api)
-    , m_system(system)
+    , m_systemHandle(systemHandle)
 {
     // Create an Session using the underlying API
-    m_session = m_api->resourceManager()->createSession(options);
+    m_session = m_api->resourceManager()->createSession(m_systemHandle, options);
 }
 
 Session::~Session()
@@ -66,7 +66,7 @@ Session::~Session()
 Session::Session(Session &&other)
 {
     m_api = std::exchange(other.m_api, nullptr);
-    m_system = std::exchange(other.m_system, nullptr);
+    m_systemHandle = std::exchange(other.m_systemHandle, {});
     m_session = std::exchange(other.m_session, {});
 }
 
@@ -77,7 +77,7 @@ Session &Session::operator=(Session &&other)
             m_api->resourceManager()->deleteSession(handle());
 
         m_api = std::exchange(other.m_api, nullptr);
-        m_system = std::exchange(other.m_system, nullptr);
+        m_systemHandle = std::exchange(other.m_systemHandle, {});
         m_session = std::exchange(other.m_session, {});
     }
     return *this;

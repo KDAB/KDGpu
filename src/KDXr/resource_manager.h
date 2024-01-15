@@ -47,7 +47,7 @@ public:
     virtual void removeSystem(const Handle<System_t> &handle) = 0;
     virtual ApiSystem *getSystem(const Handle<System_t> &handle) const = 0;
 
-    virtual Handle<Session_t> createSession(const SessionOptions &options) = 0;
+    virtual Handle<Session_t> createSession(const Handle<System_t> &systemHandle, const SessionOptions &options) = 0;
     virtual void deleteSession(const Handle<Session_t> &handle) = 0;
     virtual ApiSession *getSession(const Handle<Session_t> &handle) const = 0;
 

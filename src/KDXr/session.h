@@ -36,7 +36,6 @@ class XrApi;
     @headerfile session.h <KDXr/session.h>
  */
 struct SessionOptions {
-    Handle<System_t> system;
     KDGpu::GraphicsApi *graphicsApi{ nullptr };
     KDGpu::Handle<KDGpu::Device_t> device;
     uint32_t queueIndex{ 0 };
@@ -62,10 +61,10 @@ public:
     ReferenceSpace createReferenceSpace(const ReferenceSpaceOptions &options = ReferenceSpaceOptions());
 
 private:
-    Session(System *system, XrApi *api, const SessionOptions &options);
+    Session(const Handle<System_t> &systemHandle, XrApi *api, const SessionOptions &options);
 
     XrApi *m_api{ nullptr };
-    System *m_system{ nullptr };
+    Handle<System_t> m_systemHandle;
     Handle<Session_t> m_session;
 
     friend class System;

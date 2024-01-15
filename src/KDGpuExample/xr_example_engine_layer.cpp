@@ -150,12 +150,7 @@ void XrExampleEngineLayer::onAttached()
     m_queue = m_device.queues()[0];
 
     // Create the XR session
-    const KDXr::SessionOptions sessionOptions = {
-        .system = m_kdxrSystem->handle(),
-        .graphicsApi = m_api.get(),
-        .device = m_device,
-    };
-    m_kdxrSession = m_kdxrSystem->createSession(sessionOptions);
+    m_kdxrSession = m_kdxrSystem->createSession({ .graphicsApi = m_api.get(), .device = m_device });
 
     // Create a reference space - default to local space
     m_kdxrReferenceSpace = m_kdxrSession.createReferenceSpace();

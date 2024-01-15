@@ -268,9 +268,9 @@ OpenXrSystem *OpenXrResourceManager::getSystem(const Handle<System_t> &handle) c
     return m_systems.get(handle);
 }
 
-Handle<Session_t> OpenXrResourceManager::createSession(const SessionOptions &options)
+Handle<Session_t> OpenXrResourceManager::createSession(const Handle<System_t> &systemHandle, const SessionOptions &options)
 {
-    OpenXrSystem *openXrSystem = m_systems.get(options.system);
+    OpenXrSystem *openXrSystem = m_systems.get(systemHandle);
     assert(openXrSystem);
     OpenXrInstance *openXrInstance = m_instances.get(openXrSystem->instanceHandle);
     assert(openXrInstance);
@@ -309,7 +309,7 @@ Handle<Session_t> OpenXrResourceManager::createSession(const SessionOptions &opt
         return {};
     }
 
-    auto h = m_sessions.emplace(OpenXrSession{ this, xrSession, options.system, options.graphicsApi, options.device, options.queueIndex });
+    auto h = m_sessions.emplace(OpenXrSession{ this, xrSession, systemHandle, options.graphicsApi, options.device, options.queueIndex });
     return h;
 }
 
