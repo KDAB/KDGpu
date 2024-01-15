@@ -25,12 +25,12 @@ module Turbine
 
     def add_to_cmakelists
       if ::File.exist?("src/KDXr/CMakeLists.txt")
-        inject_into_file("src/KDXr/CMakeLists.txt", "    openxr/openxr_#{file_name}.h\n", after: "set(HEADERS\r\n")
-        inject_into_file("src/KDXr/CMakeLists.txt", "    api/api_#{file_name}.h\n", after: "set(HEADERS\r\n")
-        inject_into_file("src/KDXr/CMakeLists.txt", "    #{file_name}.h\n", after: "set(HEADERS\r\n")
+        inject_into_file("src/KDXr/CMakeLists.txt", "    openxr/openxr_#{file_name}.h\n", after: "set(HEADERS\n")
+        inject_into_file("src/KDXr/CMakeLists.txt", "    api/api_#{file_name}.h\n", after: "set(HEADERS\n")
+        inject_into_file("src/KDXr/CMakeLists.txt", "    #{file_name}.h\n", after: "set(HEADERS\n")
 
-        inject_into_file("src/KDXr/CMakeLists.txt", "    openxr/openxr_#{file_name}.cpp\n", after: "set(SOURCES\r\n")
-        inject_into_file("src/KDXr/CMakeLists.txt", "    #{file_name}.cpp\n", after: "set(SOURCES\r\n")
+        inject_into_file("src/KDXr/CMakeLists.txt", "    openxr/openxr_#{file_name}.cpp\n", after: "set(SOURCES\n")
+        inject_into_file("src/KDXr/CMakeLists.txt", "    #{file_name}.cpp\n", after: "set(SOURCES\n")
       else
         say_status(:unchanged, "Did not add files to CMakeLists.txt", :blue)
       end
