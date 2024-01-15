@@ -155,6 +155,14 @@ void XrExampleEngineLayer::onAttached()
     // Create a reference space - default to local space
     m_kdxrReferenceSpace = m_kdxrSession.createReferenceSpace();
 
+    // Query the set of supported swapchain formats
+    std::span<const KDGpu::Format> supportedSwapchainFormats = m_kdxrSession.supportedSwapchainFormats();
+    for (const auto &supportedSwapchainFormat : supportedSwapchainFormats) {
+        SPDLOG_LOGGER_INFO(m_logger, "Supported Swapchain Format: {}", static_cast<int64_t>(supportedSwapchainFormat));
+    }
+
+    // TODO: Create color and depth swapchains for each view
+
     // TODO: Remove this temporary exposure of underlying OpenXR resources once KDXr is suitable for use.
     // It just allows us to use the raw C api for the stuff that is not implemented in KDXr yet.
     auto *openXrResourceManager = dynamic_cast<KDXr::OpenXrResourceManager *>(m_xrApi->resourceManager());

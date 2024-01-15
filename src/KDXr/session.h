@@ -16,6 +16,10 @@
 #include <KDXr/reference_space.h>
 
 #include <KDGpu/handle.h>
+#include <KDGpu/gpu_core.h>
+
+#include <span>
+#include <vector>
 
 namespace KDGpu {
 struct Device_t;
@@ -60,12 +64,16 @@ public:
 
     ReferenceSpace createReferenceSpace(const ReferenceSpaceOptions &options = ReferenceSpaceOptions());
 
+    std::span<const KDGpu::Format> supportedSwapchainFormats() const;
+
 private:
     Session(const Handle<System_t> &systemHandle, XrApi *api, const SessionOptions &options);
 
     XrApi *m_api{ nullptr };
     Handle<System_t> m_systemHandle;
     Handle<Session_t> m_session;
+
+    mutable std::vector<KDGpu::Format> m_supportedSwapchainFormats;
 
     friend class System;
 };

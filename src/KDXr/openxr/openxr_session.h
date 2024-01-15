@@ -41,6 +41,8 @@ struct KDXR_EXPORT OpenXrSession : public ApiSession {
                            KDGpu::Handle<KDGpu::Device_t> _device,
                            uint32_t queueIndex) noexcept;
 
+    std::vector<KDGpu::Format> supportedSwapchainFormats() const final;
+
     OpenXrResourceManager *openxrResourceManager{ nullptr };
     XrSession session{ XR_NULL_HANDLE };
     Handle<System_t> systemHandle;

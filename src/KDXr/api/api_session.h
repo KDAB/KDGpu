@@ -13,6 +13,10 @@
 #include <KDXr/kdxr_core.h>
 #include <KDXr/handle.h>
 
+#include <KDGpu/gpu_core.h>
+
+#include <vector>
+
 namespace KDXr {
 
 struct Session_t;
@@ -23,7 +27,7 @@ struct Session_t;
  *
  */
 struct ApiSession {
-    // TODO: Add pure virtual functions here
+    virtual std::vector<KDGpu::Format> supportedSwapchainFormats() const = 0;
 };
 
 } // namespace KDXr

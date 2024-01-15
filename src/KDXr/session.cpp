@@ -83,4 +83,13 @@ Session &Session::operator=(Session &&other)
     return *this;
 }
 
+std::span<const KDGpu::Format> Session::supportedSwapchainFormats() const
+{
+    if (m_supportedSwapchainFormats.empty()) {
+        auto apiSession = m_api->resourceManager()->getSession(m_session);
+        m_supportedSwapchainFormats = apiSession->supportedSwapchainFormats();
+    }
+    return m_supportedSwapchainFormats;
+}
+
 } // namespace KDXr
