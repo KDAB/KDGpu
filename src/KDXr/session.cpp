@@ -44,6 +44,11 @@ Session::Session()
 {
 }
 
+ReferenceSpace Session::createReferenceSpace(const ReferenceSpaceOptions &options)
+{
+    return ReferenceSpace(m_session, m_api, options);
+}
+
 Session::Session(System *system, XrApi *api, const SessionOptions &options)
     : m_api(api)
     , m_system(system)

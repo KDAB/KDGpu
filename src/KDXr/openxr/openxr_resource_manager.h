@@ -15,6 +15,7 @@
 #include <KDXr/pool.h>
 
 #include <KDXr/openxr/openxr_instance.h>
+#include <KDXr/openxr/openxr_reference_space.h>
 #include <KDXr/openxr/openxr_session.h>
 #include <KDXr/openxr/openxr_system.h>
 
@@ -51,10 +52,15 @@ public:
     void deleteSession(const Handle<Session_t> &handle) final;
     OpenXrSession *getSession(const Handle<Session_t> &handle) const final;
 
+    Handle<ReferenceSpace_t> createReferenceSpace(const Handle<Session_t> &sessionHandle, const ReferenceSpaceOptions &options) final;
+    void deleteReferenceSpace(const Handle<ReferenceSpace_t> &handle) final;
+    OpenXrReferenceSpace *getReferenceSpace(const Handle<ReferenceSpace_t> &handle) const final;
+
 private:
     Pool<OpenXrInstance, Instance_t> m_instances{ 1 };
     Pool<OpenXrSystem, System_t> m_systems{ 1 };
     Pool<OpenXrSession, Session_t> m_sessions{ 1 };
+    Pool<OpenXrReferenceSpace, ReferenceSpace_t> m_referenceSpaces{ 4 };
 };
 
 } // namespace KDXr

@@ -19,13 +19,16 @@
 namespace KDXr {
 
 struct ApiInstance;
+struct ApiReferenceSpace;
 struct ApiSession;
 struct ApiSystem;
 
 struct InstanceOptions;
+struct ReferenceSpaceOptions;
 struct SessionOptions;
 
 struct Instance_t;
+struct ReferenceSpace_t;
 struct Session_t;
 struct System_t;
 
@@ -47,6 +50,10 @@ public:
     virtual Handle<Session_t> createSession(const SessionOptions &options) = 0;
     virtual void deleteSession(const Handle<Session_t> &handle) = 0;
     virtual ApiSession *getSession(const Handle<Session_t> &handle) const = 0;
+
+    virtual Handle<ReferenceSpace_t> createReferenceSpace(const Handle<Session_t> &sessionHandle, const ReferenceSpaceOptions &options) = 0;
+    virtual void deleteReferenceSpace(const Handle<ReferenceSpace_t> &handle) = 0;
+    virtual ApiReferenceSpace *getReferenceSpace(const Handle<ReferenceSpace_t> &handle) const = 0;
 
 protected:
     ResourceManager();

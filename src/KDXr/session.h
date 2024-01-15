@@ -13,6 +13,7 @@
 #include <KDXr/kdxr_core.h>
 #include <KDXr/handle.h>
 #include <KDXr/kdxr_export.h>
+#include <KDXr/reference_space.h>
 
 #include <KDGpu/handle.h>
 
@@ -57,6 +58,8 @@ public:
     bool isValid() const { return m_session.isValid(); }
 
     operator Handle<Session_t>() const noexcept { return m_session; }
+
+    ReferenceSpace createReferenceSpace(const ReferenceSpaceOptions &options = ReferenceSpaceOptions());
 
 private:
     Session(System *system, XrApi *api, const SessionOptions &options);

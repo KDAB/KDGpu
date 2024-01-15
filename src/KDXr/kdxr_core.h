@@ -107,4 +107,30 @@ struct GraphicsRequirements {
     uint64_t maxApiVersionSupported{ 0 };
 };
 
+enum class ReferenceSpaceType : uint32_t {
+    View = 1,
+    Local = 2,
+    Stage = 3,
+    LocalFloor = 1000426000,
+    MaxEnum = 0x7fffffff
+};
+
+struct Quaternion {
+    float x{ 0.0f };
+    float y{ 0.0f };
+    float z{ 0.0f };
+    float w{ 1.0f };
+};
+
+struct Vector3 {
+    float x{ 0.0f };
+    float y{ 0.0f };
+    float z{ 0.0f };
+};
+
+struct Pose {
+    Quaternion orientation{};
+    Vector3 position{};
+};
+
 } // namespace KDXr

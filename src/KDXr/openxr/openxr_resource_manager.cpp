@@ -327,4 +327,37 @@ OpenXrSession *OpenXrResourceManager::getSession(const Handle<Session_t> &handle
     return m_sessions.get(handle);
 }
 
+Handle<ReferenceSpace_t> OpenXrResourceManager::createReferenceSpace(const Handle<Session_t> &sessionHandle, const ReferenceSpaceOptions &options)
+{
+    OpenXrSession *openXrSession = m_sessions.get(sessionHandle);
+
+    const XrQuaternionf orientation{ options.pose.orientation.x, options.pose.orientation.y, options.pose.orientation.z, options.pose.orientation.w };
+    const XrVector3f offset{ options.pose.position.x, options.pose.position.y, options.pose.position.z };
+    XrReferenceSpaceCreateInfo referenceSpaceCreateInfo{ XR_TYPE_REFERENCE_SPACE_CREATE_INFO };
+    referenceSpaceCreateInfo.referenceSpaceType = static_cast<XrReferenceSpaceType>(options.type); // TODO: Add conversion function
+    referenceSpaceCreateInfo.poseInReferenceSpace = { orientation, offset };
+    XrSpace xrReferenceSpace{ XR_NULL_HANDLE };
+    if (xrCreateReferenceSpace(openXrSession->session, &referenceSpaceCreateInfo, &xrReferenceSpace) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to create OpenXR Reference Space.");
+        return {};
+    }
+
+    auto h = m_referenceSpaces.emplace(OpenXrReferenceSpace{ this, xrReferenceSpace, sessionHandle, options.type, options.pose });
+    return h;
+}
+
+void OpenXrResourceManager::deleteReferenceSpace(const Handle<ReferenceSpace_t> &handle)
+{
+    OpenXrReferenceSpace *openXrReferenceSpace = m_referenceSpaces.get(handle);
+    if (xrDestroySpace(openXrReferenceSpace->referenceSpace) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to destroy OpenXR ReferenceSpace.");
+    }
+    m_referenceSpaces.remove(handle);
+}
+
+OpenXrReferenceSpace *OpenXrResourceManager::getReferenceSpace(const Handle<ReferenceSpace_t> &handle) const
+{
+    return m_referenceSpaces.get(handle);
+}
+
 } // namespace KDXr

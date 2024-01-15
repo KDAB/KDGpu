@@ -157,6 +157,9 @@ void XrExampleEngineLayer::onAttached()
     };
     m_kdxrSession = m_kdxrSystem->createSession(sessionOptions);
 
+    // Create a reference space - default to local space
+    m_kdxrReferenceSpace = m_kdxrSession.createReferenceSpace();
+
     // TODO: Remove this temporary exposure of underlying OpenXR resources once KDXr is suitable for use.
     // It just allows us to use the raw C api for the stuff that is not implemented in KDXr yet.
     auto *openXrResourceManager = dynamic_cast<KDXr::OpenXrResourceManager *>(m_xrApi->resourceManager());
@@ -169,9 +172,9 @@ void XrExampleEngineLayer::onAttached()
     m_systemId = openxrSystem->system;
     auto *openXrSession = openXrResourceManager->getSession(m_kdxrSession.handle());
     m_xrSession = openXrSession->session;
+    auto *openxrReferenceSpace = openXrResourceManager->getReferenceSpace(m_kdxrReferenceSpace.handle());
+    m_xrReferenceSpace = openxrReferenceSpace->referenceSpace;
 
-    // OpenXR Session Setup
-    createXrReferenceSpace();
     createXrSwapchains();
 
     // Delegate to subclass to initialize scene
@@ -181,7 +184,7 @@ void XrExampleEngineLayer::onAttached()
 void XrExampleEngineLayer::onDetached()
 {
     destroyXrSwapchains();
-    destroyXrReferenceSpace();
+    m_kdxrReferenceSpace = {};
     m_kdxrSession = {};
     m_queue = {};
     m_device = {};
@@ -337,27 +340,6 @@ void XrExampleEngineLayer::update()
 
 void XrExampleEngineLayer::event(KDFoundation::EventReceiver *target, KDFoundation::Event *ev)
 {
-}
-
-void XrExampleEngineLayer::createXrReferenceSpace()
-{
-    const XrQuaternionf orientation{ 0.0f, 0.0f, 0.0f, 1.0f };
-    const XrVector3f offset{ 0.0f, 0.0f, 0.0f };
-    XrReferenceSpaceCreateInfo referenceSpaceCreateInfo{ XR_TYPE_REFERENCE_SPACE_CREATE_INFO };
-    referenceSpaceCreateInfo.referenceSpaceType = XR_REFERENCE_SPACE_TYPE_LOCAL;
-    referenceSpaceCreateInfo.poseInReferenceSpace = { orientation, offset };
-    if (xrCreateReferenceSpace(m_xrSession, &referenceSpaceCreateInfo, &m_xrReferenceSpace) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to create OpenXR Reference Space.");
-        return;
-    }
-}
-
-void XrExampleEngineLayer::destroyXrReferenceSpace()
-{
-    if (xrDestroySpace(m_xrReferenceSpace) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to destroy OpenXR Reference Space.");
-        return;
-    }
 }
 
 void XrExampleEngineLayer::createXrSwapchains()
