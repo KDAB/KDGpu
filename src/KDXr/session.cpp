@@ -92,4 +92,16 @@ std::span<const KDGpu::Format> Session::supportedSwapchainFormats() const
     return m_supportedSwapchainFormats;
 }
 
+KDGpu::Format Session::selectSwapchainFormat(std::span<const KDGpu::Format> preferredFormats) const
+{
+    auto availableFormats = supportedSwapchainFormats();
+    for (const auto &swapchainFormat : preferredFormats) {
+        if (std::find(availableFormats.begin(), availableFormats.end(), swapchainFormat) != availableFormats.end())
+            return swapchainFormat;
+    }
+
+    SPDLOG_LOGGER_ERROR(Logger::logger(), "No supported swapchain format found");
+    return KDGpu::Format::UNDEFINED;
+}
+
 } // namespace KDXr

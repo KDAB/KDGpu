@@ -155,10 +155,22 @@ void XrExampleEngineLayer::onAttached()
     // Create a reference space - default to local space
     m_kdxrReferenceSpace = m_kdxrSession.createReferenceSpace();
 
-    // Query the set of supported swapchain formats
+    // Query the set of supported swapchain formats and select the color and depth formats to use
     std::span<const KDGpu::Format> supportedSwapchainFormats = m_kdxrSession.supportedSwapchainFormats();
     for (const auto &supportedSwapchainFormat : supportedSwapchainFormats) {
         SPDLOG_LOGGER_INFO(m_logger, "Supported Swapchain Format: {}", static_cast<int64_t>(supportedSwapchainFormat));
+    }
+
+    m_colorSwapchainFormat = m_kdxrSession.selectSwapchainFormat(m_applicationColorSwapchainFormats);
+    if (m_colorSwapchainFormat == Format::UNDEFINED) {
+        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to find a supported SwapchainFormat.");
+        throw std::runtime_error("Failed to find a supported color swapchain format.");
+    }
+
+    m_depthSwapchainFormat = m_kdxrSession.selectSwapchainFormat(m_applicationDepthSwapchainFormats);
+    if (m_depthSwapchainFormat == Format::UNDEFINED) {
+        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to find a supported SwapchainFormat.");
+        throw std::runtime_error("Failed to find a supported depth swapchain format.");
     }
 
     // TODO: Create color and depth swapchains for each view

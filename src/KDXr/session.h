@@ -65,6 +65,7 @@ public:
     ReferenceSpace createReferenceSpace(const ReferenceSpaceOptions &options = ReferenceSpaceOptions());
 
     std::span<const KDGpu::Format> supportedSwapchainFormats() const;
+    KDGpu::Format selectSwapchainFormat(std::span<const KDGpu::Format> preferredFormats) const;
 
 private:
     Session(const Handle<System_t> &systemHandle, XrApi *api, const SessionOptions &options);

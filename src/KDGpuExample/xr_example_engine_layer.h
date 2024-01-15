@@ -99,9 +99,6 @@ protected:
 
     std::vector<UploadStagingBuffer> m_stagingBuffers;
 
-    Format m_colorSwapchainFormat{ Format::UNDEFINED };
-    Format m_depthSwapchainFormat{ Format::UNDEFINED };
-
     // Xr related members
     std::unique_ptr<KDXr::XrApi> m_xrApi;
     KDXr::Instance m_kdxrInstance; // TODO: Rename to m_xrInstance etc as we replace raw OpenXR calls with KDXr
@@ -113,6 +110,9 @@ protected:
     KDXr::ViewConfigurationType m_selectedViewConfiguration{ KDXr::ViewConfigurationType::MaxEnum };
     KDXr::EnvironmentBlendMode m_selectedEnvironmentBlendMode{ KDXr::EnvironmentBlendMode::MaxEnum };
     std::vector<KDXr::ViewConfigurationView> m_viewConfigurationViews;
+
+    Format m_colorSwapchainFormat{ Format::UNDEFINED };
+    Format m_depthSwapchainFormat{ Format::UNDEFINED };
 
     // OpenXR related members (to be removed once KDXr is suitable for use)
     XrInstance m_xrInstance{ XR_NULL_HANDLE };
@@ -136,13 +136,13 @@ protected:
     std::vector<SwapchainInfo> m_colorSwapchainInfos;
     std::vector<SwapchainInfo> m_depthSwapchainInfos;
 
-    std::vector<Format> m_applicationColorSwapchainFormats{
+    const std::vector<Format> m_applicationColorSwapchainFormats{
         Format::B8G8R8A8_SRGB,
         Format::R8G8B8A8_SRGB,
         Format::B8G8R8A8_UNORM,
         Format::R8G8B8A8_UNORM
     };
-    std::vector<Format> m_applicationDepthSwapchainFormats{
+    const std::vector<Format> m_applicationDepthSwapchainFormats{
         Format::D32_SFLOAT,
         Format::D16_UNORM
     };
