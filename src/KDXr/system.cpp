@@ -136,4 +136,9 @@ std::vector<std::string> System::requiredGraphicsDeviceExtensions() const
     return apiSystem->requiredGraphicsDeviceExtensions(m_graphicsApi);
 }
 
+Session System::createSession(const SessionOptions &options)
+{
+    return Session(this, m_api, options);
+}
+
 } // namespace KDXr

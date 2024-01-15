@@ -13,6 +13,7 @@
 #include <KDGpuExample/engine_layer.h>
 
 #include <KDXr/instance.h>
+#include <KDXr/session.h>
 #include <KDXr/openxr/openxr_api.h>
 
 #include <KDGpu/device.h>
@@ -76,9 +77,6 @@ protected:
     void update() override;
     void event(KDFoundation::EventReceiver *target, KDFoundation::Event *ev) override;
 
-    void createXrSession();
-    void destroyXrSession();
-
     void createXrReferenceSpace();
     void destroyXrReferenceSpace();
 
@@ -110,6 +108,7 @@ protected:
     std::unique_ptr<KDXr::XrApi> m_xrApi;
     KDXr::Instance m_kdxrInstance; // TODO: Rename to m_xrInstance etc as we replace raw OpenXR calls with KDXr
     KDXr::System *m_kdxrSystem{ nullptr };
+    KDXr::Session m_kdxrSession;
 
     std::vector<KDXr::ViewConfigurationType> m_applicationViewConfigurations{ KDXr::ViewConfigurationType::PrimaryStereo, KDXr::ViewConfigurationType::PrimaryMono };
     KDXr::ViewConfigurationType m_selectedViewConfiguration{ KDXr::ViewConfigurationType::MaxEnum };

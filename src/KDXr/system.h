@@ -13,6 +13,7 @@
 #include <KDXr/kdxr_core.h>
 #include <KDXr/handle.h>
 #include <KDXr/kdxr_export.h>
+#include <KDXr/session.h>
 
 #include <span>
 #include <vector>
@@ -68,6 +69,8 @@ public:
     std::vector<std::string> requiredGraphicsInstanceExtensions() const;
     KDGpu::Adapter *requiredGraphicsAdapter(const KDGpu::Instance &graphicsInstance) const;
     std::vector<std::string> requiredGraphicsDeviceExtensions() const;
+
+    Session createSession(const SessionOptions &options);
 
 private:
     explicit System(XrApi *api, const Handle<System_t> &system);

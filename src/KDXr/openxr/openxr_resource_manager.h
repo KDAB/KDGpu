@@ -15,6 +15,7 @@
 #include <KDXr/pool.h>
 
 #include <KDXr/openxr/openxr_instance.h>
+#include <KDXr/openxr/openxr_session.h>
 #include <KDXr/openxr/openxr_system.h>
 
 #include <KDXr/kdxr_export.h>
@@ -46,9 +47,14 @@ public:
     void removeSystem(const Handle<System_t> &handle) final;
     OpenXrSystem *getSystem(const Handle<System_t> &handle) const final;
 
+    Handle<Session_t> createSession(const SessionOptions &options) final;
+    void deleteSession(const Handle<Session_t> &handle) final;
+    OpenXrSession *getSession(const Handle<Session_t> &handle) const final;
+
 private:
     Pool<OpenXrInstance, Instance_t> m_instances{ 1 };
     Pool<OpenXrSystem, System_t> m_systems{ 1 };
+    Pool<OpenXrSession, Session_t> m_sessions{ 1 };
 };
 
 } // namespace KDXr

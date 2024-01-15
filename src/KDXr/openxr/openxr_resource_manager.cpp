@@ -14,6 +14,8 @@
 #include <KDXr/instance.h>
 #include <KDXr/utils/logging.h>
 
+#include <KDGpu/vulkan/vulkan_graphics_api.h>
+
 // TODO: Abstract away the choice of graphics API
 #include <vulkan/vulkan.h>
 
@@ -264,6 +266,65 @@ void OpenXrResourceManager::removeSystem(const Handle<System_t> &handle)
 OpenXrSystem *OpenXrResourceManager::getSystem(const Handle<System_t> &handle) const
 {
     return m_systems.get(handle);
+}
+
+Handle<Session_t> OpenXrResourceManager::createSession(const SessionOptions &options)
+{
+    OpenXrSystem *openXrSystem = m_systems.get(options.system);
+    assert(openXrSystem);
+    OpenXrInstance *openXrInstance = m_instances.get(openXrSystem->instanceHandle);
+    assert(openXrInstance);
+
+    XrSessionCreateInfo sessionCI{ XR_TYPE_SESSION_CREATE_INFO };
+    sessionCI.systemId = openXrSystem->system;
+
+    // Determine which graphics API is in use
+    if (auto vulkanGraphicsApi = dynamic_cast<KDGpu::VulkanGraphicsApi *>(options.graphicsApi)) {
+        // Vulkan is in use
+        auto graphicsResourceManager = dynamic_cast<KDGpu::VulkanResourceManager *>(vulkanGraphicsApi->resourceManager());
+        assert(graphicsResourceManager);
+
+        auto vulkanDevice = graphicsResourceManager->getDevice(options.device);
+        auto vulkanAdapter = graphicsResourceManager->getAdapter(vulkanDevice->adapterHandle);
+        auto vulkanInstance = graphicsResourceManager->getInstance(vulkanAdapter->instanceHandle);
+        assert(options.queueIndex < vulkanDevice->queueDescriptions.size());
+        const auto &queueDescription = vulkanDevice->queueDescriptions[options.queueIndex];
+
+        XrGraphicsBindingVulkanKHR graphicsBinding{ XR_TYPE_GRAPHICS_BINDING_VULKAN_KHR };
+        graphicsBinding.instance = vulkanInstance->instance;
+        graphicsBinding.physicalDevice = vulkanAdapter->physicalDevice;
+        graphicsBinding.device = vulkanDevice->device;
+        graphicsBinding.queueFamilyIndex = queueDescription.queueTypeIndex;
+        graphicsBinding.queueIndex = options.queueIndex;
+
+        // Set graphics binding on the session create info
+        sessionCI.next = &graphicsBinding;
+    } else {
+        throw std::runtime_error("Only Vulkan is supported at the moment.");
+    }
+
+    XrSession xrSession{ XR_NULL_HANDLE };
+    if (xrCreateSession(openXrInstance->instance, &sessionCI, &xrSession) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to create OpenXR Session.");
+        return {};
+    }
+
+    auto h = m_sessions.emplace(OpenXrSession{ this, xrSession, options.system, options.graphicsApi, options.device, options.queueIndex });
+    return h;
+}
+
+void OpenXrResourceManager::deleteSession(const Handle<Session_t> &handle)
+{
+    OpenXrSession *openXrSession = m_sessions.get(handle);
+    if (xrDestroySession(openXrSession->session) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to destroy OpenXR Session.");
+    }
+    m_sessions.remove(handle);
+}
+
+OpenXrSession *OpenXrResourceManager::getSession(const Handle<Session_t> &handle) const
+{
+    return m_sessions.get(handle);
 }
 
 } // namespace KDXr

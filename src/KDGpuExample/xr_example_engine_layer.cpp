@@ -149,6 +149,14 @@ void XrExampleEngineLayer::onAttached()
     m_device = selectedAdapter->createDevice(deviceOptions);
     m_queue = m_device.queues()[0];
 
+    // Create the XR session
+    const KDXr::SessionOptions sessionOptions = {
+        .system = m_kdxrSystem->handle(),
+        .graphicsApi = m_api.get(),
+        .device = m_device,
+    };
+    m_kdxrSession = m_kdxrSystem->createSession(sessionOptions);
+
     // TODO: Remove this temporary exposure of underlying OpenXR resources once KDXr is suitable for use.
     // It just allows us to use the raw C api for the stuff that is not implemented in KDXr yet.
     auto *openXrResourceManager = dynamic_cast<KDXr::OpenXrResourceManager *>(m_xrApi->resourceManager());
@@ -159,9 +167,10 @@ void XrExampleEngineLayer::onAttached()
     auto *openxrSystem = openXrResourceManager->getSystem(m_kdxrSystem->handle());
     assert(openxrSystem);
     m_systemId = openxrSystem->system;
+    auto *openXrSession = openXrResourceManager->getSession(m_kdxrSession.handle());
+    m_xrSession = openXrSession->session;
 
     // OpenXR Session Setup
-    createXrSession();
     createXrReferenceSpace();
     createXrSwapchains();
 
@@ -173,8 +182,7 @@ void XrExampleEngineLayer::onDetached()
 {
     destroyXrSwapchains();
     destroyXrReferenceSpace();
-    destroyXrSession();
-
+    m_kdxrSession = {};
     m_queue = {};
     m_device = {};
     m_instance = {};
@@ -329,42 +337,6 @@ void XrExampleEngineLayer::update()
 
 void XrExampleEngineLayer::event(KDFoundation::EventReceiver *target, KDFoundation::Event *ev)
 {
-}
-
-void XrExampleEngineLayer::createXrSession()
-{
-    VulkanResourceManager *vulkanResourceManager = dynamic_cast<VulkanResourceManager *>(m_api->resourceManager());
-    assert(vulkanResourceManager);
-    VulkanInstance *vulkanInstance = vulkanResourceManager->getInstance(m_instance);
-    assert(vulkanInstance);
-    VulkanAdapter *vulkanAdapter = vulkanResourceManager->getAdapter(m_device.adapter()->handle());
-    assert(vulkanAdapter);
-    VulkanDevice *vulkanDevice = vulkanResourceManager->getDevice(m_device);
-    assert(vulkanDevice);
-
-    XrGraphicsBindingVulkanKHR graphicsBinding{ XR_TYPE_GRAPHICS_BINDING_VULKAN_KHR };
-    graphicsBinding.instance = vulkanInstance->instance;
-    graphicsBinding.physicalDevice = vulkanAdapter->physicalDevice;
-    graphicsBinding.device = vulkanDevice->device;
-    graphicsBinding.queueFamilyIndex = m_queue.queueTypeIndex();
-    graphicsBinding.queueIndex = 0;
-
-    XrSessionCreateInfo sessionCreateInfo{ XR_TYPE_SESSION_CREATE_INFO };
-    sessionCreateInfo.next = &graphicsBinding;
-    sessionCreateInfo.systemId = m_systemId;
-
-    if (xrCreateSession(m_xrInstance, &sessionCreateInfo, &m_xrSession) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to create OpenXR Session.");
-        return;
-    }
-}
-
-void XrExampleEngineLayer::destroyXrSession()
-{
-    if (xrDestroySession(m_xrSession) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to destroy OpenXR Session.");
-        return;
-    }
 }
 
 void XrExampleEngineLayer::createXrReferenceSpace()

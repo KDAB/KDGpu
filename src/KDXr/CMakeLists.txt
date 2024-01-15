@@ -12,8 +12,10 @@ set(SOURCES
     openxr/openxr_enums.cpp
     openxr/openxr_instance.cpp
     openxr/openxr_resource_manager.cpp
+    openxr/openxr_session.cpp
     openxr/openxr_system.cpp
     resource_manager.cpp
+    session.cpp
     system.cpp
     utils/logging.cpp
     xr_api.cpp
@@ -21,6 +23,7 @@ set(SOURCES
 
 set(HEADERS
     api/api_instance.h
+    api/api_session.h
     api/api_system.h
     handle.h
     instance.h
@@ -28,9 +31,11 @@ set(HEADERS
     openxr/openxr_enums.h
     openxr/openxr_instance.h
     openxr/openxr_resource_manager.h
+    openxr/openxr_session.h
     openxr/openxr_system.h
     pool.h
     resource_manager.h
+    session.h
     system.h
     utils/hash_utils.h
     utils/logging.h
