@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include <KDGpu/utils/flags.h>
+
 #include <stdint.h>
 #include <string>
 
@@ -133,4 +135,19 @@ struct Pose {
     Vector3 position{};
 };
 
+enum class SwapchainUsageFlagBits : uint32_t {
+    ColorAttachmentBit = 0x00000001,
+    DepthStencilAttachmentBit = 0x00000002,
+    UnorderedAccessBit = 0x00000004,
+    TransferSrcBit = 0x00000008,
+    TransferDstBit = 0x00000010,
+    SampledBit = 0x00000020,
+    MutableFormatBit = 0x00000040,
+    InputAttachmentBit = 0x00000080,
+    MaxEnum = 0x7fffffff
+};
+using SwapchainUsageFlags = KDGpu::Flags<SwapchainUsageFlagBits>;
+
 } // namespace KDXr
+
+OPERATORS_FOR_FLAGS(KDXr::SwapchainUsageFlags)
