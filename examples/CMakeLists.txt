@@ -60,6 +60,7 @@ add_subdirectory(render_to_texture)
 add_subdirectory(textured_quad)
 add_subdirectory(depth_texture_lookup)
 add_subdirectory(bindgroup_indexing)
+add_subdirectory(bindgroup_partially_bound)
 
 if(KDGPU_HLSL_SUPPORT)
     add_subdirectory(hello_triangle_hlsl)

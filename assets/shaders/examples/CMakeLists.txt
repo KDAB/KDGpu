@@ -7,6 +7,7 @@
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
 add_subdirectory(bindgroup_indexing)
+add_subdirectory(bindgroup_partially_bound)
 add_subdirectory(compute_particles)
 add_subdirectory(depth_texture_lookup)
 add_subdirectory(dynamic_ubo)

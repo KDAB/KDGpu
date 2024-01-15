@@ -1,0 +1,84 @@
+/*
+  This file is part of KDGpu.
+
+  SPDX-FileCopyrightText: 2024 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+
+  SPDX-License-Identifier: MIT
+
+  Contact KDAB at <info@kdab.com> for commercial licensing options.
+*/
+
+/**
+    @page bindgroup_partially_bound BindGroup Partially Bound
+    @ingroup kdgpu-examples
+
+    @brief This example shows how to enable partially bound bindgroups.
+
+    Partially bound BindGroups are BindGroups with one or more binding entries that have yet to be set.
+    Usually, if binding a bind group whose bindings have yet to be specified will lead to Validation warnings.
+    In some cases though, we might want our shader to only conditionally to access some bindings at run
+    time and having to specify all bindings might no be possible.
+    For these cases, we can enable the bindGroupBindingPartiallyBound feature on our Adapter and allocate
+    BindGroupLayouts with the ResourceBindingFlagBits::PartiallyBoundBit flag on bindings that don't always
+    have to be bound. The only thing one needs to ensure is that resources have been bound when the shader
+    finally accesses a partially bound bind group.
+
+    This example tries to demonstrate this very feature by:
+    - Defining a BindGroup for a single TextureViewSamplerBinding with nothing bound initially
+    - Updating the bind group at a later time with an actual texture.
+
+    To do so, after the usual vertex data initialization, we initialize our shader resources.
+
+    We start by allocating a texture and associated textureView.
+
+    @snippet bindgroup_partially_bound/bindgroup_partially_bound.cpp 1
+
+    Next, we allocate a BindGroupLayout for a CombinedImageSampler with the PartiallyBoundBit flag.
+
+    @snippet bindgroup_partially_bound/bindgroup_partially_bound.cpp 2
+
+    This is followed by allocating an empty bind group with the above BindGroupLayout as layout.
+
+    @snippet bindgroup_partially_bound/bindgroup_partially_bound.cpp 3
+
+    Then, we specify our PushConstantRanges.
+
+    @snippet bindgroup_partially_bound/bindgroup_partially_bound.cpp 4
+
+    And finally we can create the Pipeline.
+
+    @snippet bindgroup_partially_bound/bindgroup_partially_bound.cpp 5
+
+    On each frame update, we will update a rotation matrix.
+
+    @snippet bindgroup_partially_bound/bindgroup_partially_bound.cpp 6
+
+    As for the actual rendering, first we will conditionally bind our TextureViewSamplerBinding to the bind group.
+    Note that until we have rendered 1000 frames, our texture binding will remain unbound.
+
+    @snippet bindgroup_partially_bound/bindgroup_partially_bound.cpp 7
+
+    Then we will simply bind the pipeline, buffers and bind groups and render. The information whether we use the
+    texture or not will be provided to the shader through the pushConstant.
+
+    @snippet bindgroup_partially_bound/bindgroup_partially_bound.cpp 8
+
+    When it comes to our shader, the interesting lies in the fragment shader which will conditionally read from
+    our texture based on the useTexture field of the pushConstant.
+
+    @code
+    layout(set = 0, binding = 0) uniform sampler2D colorTexture;
+
+    layout(push_constant) uniform PushConstants
+    {
+        layout(offset = 64) vec2 viewportSize;
+        bool useTexture;
+    }
+    fragPushConstants;
+
+    void main()
+    {
+        fragColor = fragPushConstants.useTexture ? texture(colorTexture, gl_FragCoord.xy / fragPushConstants.viewportSize) : vec4(color, 1.0);
+    }
+    @endcode
+*/
