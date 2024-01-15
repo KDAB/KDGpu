@@ -88,6 +88,18 @@ std::span<const ViewConfigurationType> System::viewConfigurations() const
     return m_viewConfigurations;
 }
 
+ViewConfigurationType System::selectViewConfiguration(std::span<ViewConfigurationType> preferredViewConfigurations) const
+{
+    auto availableViewConfigurations = viewConfigurations();
+    for (auto preferredViewConfiguration : preferredViewConfigurations) {
+        if (std::find(availableViewConfigurations.begin(), availableViewConfigurations.end(), preferredViewConfiguration) != availableViewConfigurations.end()) {
+            return preferredViewConfiguration;
+        }
+    }
+    SPDLOG_LOGGER_ERROR(Logger::logger(), "System::selectedViewConfiguration: No preferred view configuration found.");
+    return ViewConfigurationType::MaxEnum;
+}
+
 std::vector<EnvironmentBlendMode> System::environmentBlendModes(ViewConfigurationType viewConfiguration) const
 {
     auto apiSystem = m_api->resourceManager()->getSystem(m_system);

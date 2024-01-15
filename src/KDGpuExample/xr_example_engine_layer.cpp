@@ -87,12 +87,10 @@ void XrExampleEngineLayer::onAttached()
     const auto systemProperties = m_kdxrSystem->properties();
 
     // Pick the first application supported View Configuration Type supported by the hardware.
-    auto viewConfigurations = m_kdxrSystem->viewConfigurations();
-    for (auto &viewConfiguration : viewConfigurations) {
-        if (std::find(m_applicationViewConfigurations.begin(), m_applicationViewConfigurations.end(), viewConfiguration) != m_applicationViewConfigurations.end()) {
-            m_selectedViewConfiguration = viewConfiguration;
-            break;
-        }
+    m_selectedViewConfiguration = m_kdxrSystem->selectViewConfiguration(m_applicationViewConfigurations);
+    if (m_selectedViewConfiguration == KDXr::ViewConfigurationType::MaxEnum) {
+        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to find a supported ViewConfigurationType.");
+        throw std::runtime_error("Failed to find a supported ViewConfigurationType.");
     }
 
     // We will just use the first environment blend mode supported by the system
