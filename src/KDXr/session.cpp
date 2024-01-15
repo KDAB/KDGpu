@@ -44,11 +44,6 @@ Session::Session()
 {
 }
 
-ReferenceSpace Session::createReferenceSpace(const ReferenceSpaceOptions &options)
-{
-    return ReferenceSpace(m_session, m_api, options);
-}
-
 Session::Session(const Handle<System_t> &systemHandle, XrApi *api, const SessionOptions &options)
     : m_api(api)
     , m_systemHandle(systemHandle)
@@ -81,6 +76,11 @@ Session &Session::operator=(Session &&other)
         m_session = std::exchange(other.m_session, {});
     }
     return *this;
+}
+
+ReferenceSpace Session::createReferenceSpace(const ReferenceSpaceOptions &options)
+{
+    return ReferenceSpace(m_session, m_api, options);
 }
 
 std::span<const KDGpu::Format> Session::supportedSwapchainFormats() const
