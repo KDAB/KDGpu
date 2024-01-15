@@ -16,7 +16,7 @@
 namespace KDGpu {
 
 VulkanGraphicsApi::VulkanGraphicsApi()
-    : GraphicsApi()
+    : GraphicsApi(Api::Vulkan)
     , m_vulkanResourceManager{ std::make_unique<VulkanResourceManager>() }
 {
     m_resourceManager = m_vulkanResourceManager.get();
@@ -24,6 +24,11 @@ VulkanGraphicsApi::VulkanGraphicsApi()
 
 VulkanGraphicsApi::~VulkanGraphicsApi()
 {
+}
+
+const char *VulkanGraphicsApi::apiName() const noexcept
+{
+    return "Vulkan";
 }
 
 Instance VulkanGraphicsApi::createInstanceFromExistingVkInstance(VkInstance vkInstance)

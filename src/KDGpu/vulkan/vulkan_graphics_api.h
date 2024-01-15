@@ -41,6 +41,8 @@ public:
     VulkanGraphicsApi();
     ~VulkanGraphicsApi() final;
 
+    const char *apiName() const noexcept final;
+
     Instance createInstanceFromExistingVkInstance(VkInstance vkInstance);
     Surface createSurfaceFromExistingVkSurface(const Handle<Instance_t> &instanceH, VkSurfaceKHR vkSurface);
     Adapter createAdapterFromExistingVkPhysicalDevice(const Handle<Instance_t> &instanceH, VkPhysicalDevice vkPhysicalDevice);
