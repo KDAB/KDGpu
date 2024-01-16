@@ -18,37 +18,6 @@
 
 #include <assert.h>
 
-namespace {
-
-static XRAPI_ATTR XrBool32 XRAPI_CALL debugCallback(
-        XrDebugUtilsMessageSeverityFlagsEXT messageSeverity,
-        XrDebugUtilsMessageTypeFlagsEXT messageType,
-        const XrDebugUtilsMessengerCallbackDataEXT *pCallbackData,
-        void *pUserData)
-{
-    switch (messageSeverity) {
-    case XR_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
-        SPDLOG_LOGGER_DEBUG(KDGpu::Logger::logger(), "openxr message: {}", pCallbackData->message);
-        break;
-    case XR_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
-        SPDLOG_LOGGER_INFO(KDGpu::Logger::logger(), "openxr message: {}", pCallbackData->message);
-        break;
-    case XR_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
-        SPDLOG_LOGGER_WARN(KDGpu::Logger::logger(), "openxr message: {}", pCallbackData->message);
-        break;
-    case XR_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
-        SPDLOG_LOGGER_ERROR(KDGpu::Logger::logger(), "openxr message: {}", pCallbackData->message);
-        break;
-    default:
-        SPDLOG_LOGGER_TRACE(KDGpu::Logger::logger(), "openxr message: {}", pCallbackData->message);
-        break;
-    }
-
-    return XR_FALSE;
-}
-
-} // namespace
-
 namespace KDGpuExample {
 
 XrExampleEngineLayer::XrExampleEngineLayer()
