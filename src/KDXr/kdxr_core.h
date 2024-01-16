@@ -148,6 +148,18 @@ enum class SwapchainUsageFlagBits : uint32_t {
 };
 using SwapchainUsageFlags = KDGpu::Flags<SwapchainUsageFlagBits>;
 
+enum class AcquireSwapchainTextureResult : int32_t {
+    Success = 0,
+    SessionLossPending = 3,
+    ValidationFailure = -1,
+    RuntimeFailure = -2,
+    HandleInvalid = -12,
+    InstanceLost = -13,
+    SessionLost = -17,
+    CallOrderInvalid = -37,
+    MaxEnum = 0x7fffffff
+};
+
 } // namespace KDXr
 
 OPERATORS_FOR_FLAGS(KDXr::SwapchainUsageFlags)
