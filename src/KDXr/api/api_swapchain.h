@@ -11,17 +11,24 @@
 #pragma once
 
 #include <KDXr/kdxr_core.h>
+#include <KDXr/handle.h>
 
-#include <KDGpu/gpu_core.h>
+#include <KDGpu/handle.h>
+#include <KDGpu/texture.h>
 
-#include <openxr/openxr.h>
+#include <vector>
 
 namespace KDXr {
 
-XrFormFactor formFactorToXrFormFactor(FormFactor formFactor);
+struct Swapchain_t;
 
-XrSwapchainUsageFlags swapchainUsageFlagsToXrSwapchainUsageFlags(SwapchainUsageFlags flags);
-
-KDGpu::TextureUsageFlags kdxrSwapchainUsageFlagsToKDGpuTextureUsageFlags(SwapchainUsageFlags flags);
+/**
+ * @brief ApiSwapchain
+ * \ingroup api
+ *
+ */
+struct ApiSwapchain {
+    virtual std::vector<KDGpu::Texture> getTextures() = 0;
+};
 
 } // namespace KDXr

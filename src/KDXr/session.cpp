@@ -104,4 +104,9 @@ KDGpu::Format Session::selectSwapchainFormat(std::span<const KDGpu::Format> pref
     return KDGpu::Format::UNDEFINED;
 }
 
+Swapchain Session::createSwapchain(const SwapchainOptions &options)
+{
+    return Swapchain(m_api, m_session, options);
+}
+
 } // namespace KDXr

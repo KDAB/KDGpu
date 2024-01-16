@@ -355,8 +355,8 @@ void HelloXr::renderView()
     auto commandRecorder = m_device.createCommandRecorder();
 
     // Set up the render pass using the current color and depth texture views
-    m_opaquePassOptions.colorAttachments[0].view = m_colorSwapchainInfos[m_currentViewIndex].imageViews[m_currentColorImageIndex];
-    m_opaquePassOptions.depthStencilAttachment.view = m_depthSwapchainInfos[m_currentViewIndex].imageViews[m_currentDepthImageIndex];
+    m_opaquePassOptions.colorAttachments[0].view = m_colorSwapchains[m_currentViewIndex].textureViews[m_currentColorImageIndex];
+    m_opaquePassOptions.depthStencilAttachment.view = m_depthSwapchains[m_currentViewIndex].textureViews[m_currentDepthImageIndex];
     auto opaquePass = commandRecorder.beginRenderPass(m_opaquePassOptions);
 
     opaquePass.setPipeline(m_pipeline);

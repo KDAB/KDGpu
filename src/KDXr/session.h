@@ -14,6 +14,7 @@
 #include <KDXr/handle.h>
 #include <KDXr/kdxr_export.h>
 #include <KDXr/reference_space.h>
+#include <KDXr/swapchain.h>
 
 #include <KDGpu/handle.h>
 #include <KDGpu/gpu_core.h>
@@ -66,6 +67,8 @@ public:
 
     std::span<const KDGpu::Format> supportedSwapchainFormats() const;
     KDGpu::Format selectSwapchainFormat(std::span<const KDGpu::Format> preferredFormats) const;
+
+    Swapchain createSwapchain(const SwapchainOptions &options);
 
 private:
     Session(const Handle<System_t> &systemHandle, XrApi *api, const SessionOptions &options);

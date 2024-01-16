@@ -17,6 +17,7 @@
 #include <KDXr/openxr/openxr_instance.h>
 #include <KDXr/openxr/openxr_reference_space.h>
 #include <KDXr/openxr/openxr_session.h>
+#include <KDXr/openxr/openxr_swapchain.h>
 #include <KDXr/openxr/openxr_system.h>
 
 #include <KDXr/kdxr_export.h>
@@ -56,11 +57,16 @@ public:
     void deleteReferenceSpace(const Handle<ReferenceSpace_t> &handle) final;
     OpenXrReferenceSpace *getReferenceSpace(const Handle<ReferenceSpace_t> &handle) const final;
 
+    Handle<Swapchain_t> createSwapchain(const Handle<Session_t> &sessionHandle, const SwapchainOptions &options) final;
+    void deleteSwapchain(const Handle<Swapchain_t> &handle) final;
+    OpenXrSwapchain *getSwapchain(const Handle<Swapchain_t> &handle) const final;
+
 private:
     Pool<OpenXrInstance, Instance_t> m_instances{ 1 };
     Pool<OpenXrSystem, System_t> m_systems{ 1 };
     Pool<OpenXrSession, Session_t> m_sessions{ 1 };
     Pool<OpenXrReferenceSpace, ReferenceSpace_t> m_referenceSpaces{ 4 };
+    Pool<OpenXrSwapchain, Swapchain_t> m_swapchains{ 4 };
 };
 
 } // namespace KDXr

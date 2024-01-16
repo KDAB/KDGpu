@@ -78,9 +78,6 @@ protected:
     void update() override;
     void event(KDFoundation::EventReceiver *target, KDFoundation::Event *ev) override;
 
-    void createXrSwapchains();
-    void destroyXrSwapchains();
-
     void pollXrEvents();
 
     void uploadBufferData(const BufferUploadOptions &options);
@@ -114,6 +111,14 @@ protected:
     Format m_colorSwapchainFormat{ Format::UNDEFINED };
     Format m_depthSwapchainFormat{ Format::UNDEFINED };
 
+    struct KDXrSwapchainInfo {
+        KDXr::Swapchain swapchain;
+        XrSwapchain xrSwapchain{ XR_NULL_HANDLE }; // TODO: Remove once KDXr is suitable for use
+        std::vector<TextureView> textureViews;
+    };
+    std::vector<KDXrSwapchainInfo> m_colorSwapchains;
+    std::vector<KDXrSwapchainInfo> m_depthSwapchains;
+
     // OpenXR related members (to be removed once KDXr is suitable for use)
     XrInstance m_xrInstance{ XR_NULL_HANDLE };
     XrDebugUtilsMessengerEXT m_debugUtilsMessenger{};
@@ -127,14 +132,6 @@ protected:
     bool m_xrSessionRunning{ false };
 
     XrSpace m_xrReferenceSpace{ XR_NULL_HANDLE };
-
-    struct SwapchainInfo {
-        XrSwapchain swapchain{ XR_NULL_HANDLE };
-        std::vector<Texture> images;
-        std::vector<TextureView> imageViews;
-    };
-    std::vector<SwapchainInfo> m_colorSwapchainInfos;
-    std::vector<SwapchainInfo> m_depthSwapchainInfos;
 
     const std::vector<Format> m_applicationColorSwapchainFormats{
         Format::B8G8R8A8_SRGB,

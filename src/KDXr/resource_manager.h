@@ -21,15 +21,18 @@ namespace KDXr {
 struct ApiInstance;
 struct ApiReferenceSpace;
 struct ApiSession;
+struct ApiSwapchain;
 struct ApiSystem;
 
 struct InstanceOptions;
 struct ReferenceSpaceOptions;
 struct SessionOptions;
+struct SwapchainOptions;
 
 struct Instance_t;
 struct ReferenceSpace_t;
 struct Session_t;
+struct Swapchain_t;
 struct System_t;
 
 class KDXR_EXPORT ResourceManager
@@ -54,6 +57,10 @@ public:
     virtual Handle<ReferenceSpace_t> createReferenceSpace(const Handle<Session_t> &sessionHandle, const ReferenceSpaceOptions &options) = 0;
     virtual void deleteReferenceSpace(const Handle<ReferenceSpace_t> &handle) = 0;
     virtual ApiReferenceSpace *getReferenceSpace(const Handle<ReferenceSpace_t> &handle) const = 0;
+
+    virtual Handle<Swapchain_t> createSwapchain(const Handle<Session_t> &sessionHandle, const SwapchainOptions &options) = 0;
+    virtual void deleteSwapchain(const Handle<Swapchain_t> &handle) = 0;
+    virtual ApiSwapchain *getSwapchain(const Handle<Swapchain_t> &handle) const = 0;
 
 protected:
     ResourceManager();

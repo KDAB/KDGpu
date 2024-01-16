@@ -14,10 +14,12 @@ set(SOURCES
     openxr/openxr_reference_space.cpp
     openxr/openxr_resource_manager.cpp
     openxr/openxr_session.cpp
+    openxr/openxr_swapchain.cpp
     openxr/openxr_system.cpp
     reference_space.cpp
     resource_manager.cpp
     session.cpp
+    swapchain.cpp
     system.cpp
     utils/logging.cpp
     xr_api.cpp
@@ -27,6 +29,7 @@ set(HEADERS
     api/api_instance.h
     api/api_reference_space.h
     api/api_session.h
+    api/api_swapchain.h
     api/api_system.h
     handle.h
     instance.h
@@ -36,11 +39,13 @@ set(HEADERS
     openxr/openxr_reference_space.h
     openxr/openxr_resource_manager.h
     openxr/openxr_session.h
+    openxr/openxr_swapchain.h
     openxr/openxr_system.h
     pool.h
     reference_space.h
     resource_manager.h
     session.h
+    swapchain.h
     system.h
     utils/hash_utils.h
     utils/logging.h

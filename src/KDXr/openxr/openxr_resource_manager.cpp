@@ -12,6 +12,7 @@
 
 #include <KDXr/config.h>
 #include <KDXr/instance.h>
+#include <KDXr/openxr/openxr_enums.h>
 #include <KDXr/utils/logging.h>
 
 #include <KDGpu/vulkan/vulkan_graphics_api.h>
@@ -358,6 +359,49 @@ void OpenXrResourceManager::deleteReferenceSpace(const Handle<ReferenceSpace_t> 
 OpenXrReferenceSpace *OpenXrResourceManager::getReferenceSpace(const Handle<ReferenceSpace_t> &handle) const
 {
     return m_referenceSpaces.get(handle);
+}
+
+Handle<Swapchain_t> OpenXrResourceManager::createSwapchain(const Handle<Session_t> &sessionHandle, const SwapchainOptions &options)
+{
+    OpenXrSession *openXrSession = m_sessions.get(sessionHandle);
+
+    XrSwapchainCreateInfo swapchainCreateInfo{ XR_TYPE_SWAPCHAIN_CREATE_INFO };
+    swapchainCreateInfo.createFlags = 0;
+    swapchainCreateInfo.usageFlags = swapchainUsageFlagsToXrSwapchainUsageFlags(options.usage);
+    swapchainCreateInfo.format = static_cast<int64_t>(options.format);
+    swapchainCreateInfo.sampleCount = options.sampleCount;
+    swapchainCreateInfo.width = options.width;
+    swapchainCreateInfo.height = options.height;
+    swapchainCreateInfo.faceCount = options.faceCount;
+    swapchainCreateInfo.arraySize = options.arrayLayers;
+    swapchainCreateInfo.mipCount = options.mipLevels;
+
+    XrSwapchain xrSwapchain{ XR_NULL_HANDLE };
+    if (xrCreateSwapchain(openXrSession->session, &swapchainCreateInfo, &xrSwapchain) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to create OpenXR Color Swapchain.");
+        return {};
+    }
+
+    auto h = m_swapchains.emplace(OpenXrSwapchain{
+            this,
+            xrSwapchain,
+            sessionHandle,
+            options });
+    return h;
+}
+
+void OpenXrResourceManager::deleteSwapchain(const Handle<Swapchain_t> &handle)
+{
+    OpenXrSwapchain *openXrSwapchain = m_swapchains.get(handle);
+    if (xrDestroySwapchain(openXrSwapchain->swapchain) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to destroy OpenXR Swapchain.");
+    }
+    m_swapchains.remove(handle);
+}
+
+OpenXrSwapchain *OpenXrResourceManager::getSwapchain(const Handle<Swapchain_t> &handle) const
+{
+    return m_swapchains.get(handle);
 }
 
 } // namespace KDXr

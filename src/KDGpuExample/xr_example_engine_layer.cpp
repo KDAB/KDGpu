@@ -171,12 +171,48 @@ void XrExampleEngineLayer::onAttached()
         throw std::runtime_error("Failed to find a supported depth swapchain format.");
     }
 
-    // TODO: Create color and depth swapchains for each view
+    // TODO: Handle multiview rendering option
+    // Create color and depth swapchains for each view
+    const uint32_t viewCount = m_viewConfigurationViews.size();
+    m_colorSwapchains.resize(viewCount);
+    m_depthSwapchains.resize(viewCount);
+
+    // TODO: Remove this temporary exposure of underlying OpenXR resources once KDXr is suitable for use.
+    auto *openXrResourceManager = dynamic_cast<KDXr::OpenXrResourceManager *>(m_xrApi->resourceManager());
+    assert(openXrResourceManager);
+
+    for (size_t i = 0; i < viewCount; ++i) {
+        // Color swapchain and texture views
+        auto &colorSwapchain = m_colorSwapchains[i];
+        colorSwapchain.swapchain = m_kdxrSession.createSwapchain({ .format = m_colorSwapchainFormat,
+                                                                   .usage = KDXr::SwapchainUsageFlagBits::SampledBit | KDXr::SwapchainUsageFlagBits::ColorAttachmentBit,
+                                                                   .width = m_viewConfigurationViews[i].recommendedTextureWidth,
+                                                                   .height = m_viewConfigurationViews[i].recommendedTextureHeight,
+                                                                   .sampleCount = m_viewConfigurationViews[i].recommendedSwapchainSampleCount });
+        colorSwapchain.xrSwapchain = openXrResourceManager->getSwapchain(colorSwapchain.swapchain.handle())->swapchain;
+        const auto &textures = colorSwapchain.swapchain.textures();
+        const auto textureCount = textures.size();
+        colorSwapchain.textureViews.reserve(textureCount);
+        for (size_t j = 0; j < textureCount; ++j)
+            colorSwapchain.textureViews.emplace_back(textures[j].createView());
+
+        // Depth swapchain and texture views
+        auto &depthSwapchain = m_depthSwapchains[i];
+        depthSwapchain.swapchain = m_kdxrSession.createSwapchain({ .format = m_depthSwapchainFormat,
+                                                                   .usage = KDXr::SwapchainUsageFlagBits::SampledBit | KDXr::SwapchainUsageFlagBits::DepthStencilAttachmentBit,
+                                                                   .width = m_viewConfigurationViews[i].recommendedTextureWidth,
+                                                                   .height = m_viewConfigurationViews[i].recommendedTextureHeight,
+                                                                   .sampleCount = m_viewConfigurationViews[i].recommendedSwapchainSampleCount });
+        depthSwapchain.xrSwapchain = openXrResourceManager->getSwapchain(depthSwapchain.swapchain.handle())->swapchain;
+        const auto &depthTextures = depthSwapchain.swapchain.textures();
+        const auto depthTextureCount = depthTextures.size();
+        depthSwapchain.textureViews.reserve(depthTextureCount);
+        for (size_t j = 0; j < depthTextureCount; ++j)
+            depthSwapchain.textureViews.emplace_back(depthTextures[j].createView());
+    }
 
     // TODO: Remove this temporary exposure of underlying OpenXR resources once KDXr is suitable for use.
     // It just allows us to use the raw C api for the stuff that is not implemented in KDXr yet.
-    auto *openXrResourceManager = dynamic_cast<KDXr::OpenXrResourceManager *>(m_xrApi->resourceManager());
-    assert(openXrResourceManager);
     auto *openxrInstance = openXrResourceManager->getInstance(m_kdxrInstance.handle());
     assert(openxrInstance);
     m_xrInstance = openxrInstance->instance;
@@ -188,15 +224,14 @@ void XrExampleEngineLayer::onAttached()
     auto *openxrReferenceSpace = openXrResourceManager->getReferenceSpace(m_kdxrReferenceSpace.handle());
     m_xrReferenceSpace = openxrReferenceSpace->referenceSpace;
 
-    createXrSwapchains();
-
     // Delegate to subclass to initialize scene
     initializeScene();
 }
 
 void XrExampleEngineLayer::onDetached()
 {
-    destroyXrSwapchains();
+    m_colorSwapchains.clear();
+    m_depthSwapchains.clear();
     m_kdxrReferenceSpace = {};
     m_kdxrSession = {};
     m_queue = {};
@@ -284,23 +319,23 @@ void XrExampleEngineLayer::update()
 
             for (m_currentViewIndex = 0; m_currentViewIndex < viewCount; ++m_currentViewIndex) {
                 // Acquire and wait for the swapchain images to become available for the color and depth swapchains
-                SwapchainInfo &colorSwapchainInfo = m_colorSwapchainInfos[m_currentViewIndex];
-                SwapchainInfo &depthSwapchainInfo = m_depthSwapchainInfos[m_currentViewIndex];
+                KDXrSwapchainInfo &colorSwapchainInfo = m_colorSwapchains[m_currentViewIndex];
+                KDXrSwapchainInfo &depthSwapchainInfo = m_depthSwapchains[m_currentViewIndex];
 
                 XrSwapchainImageAcquireInfo acquireInfo{ XR_TYPE_SWAPCHAIN_IMAGE_ACQUIRE_INFO };
-                if (xrAcquireSwapchainImage(colorSwapchainInfo.swapchain, &acquireInfo, &m_currentColorImageIndex) != XR_SUCCESS) {
+                if (xrAcquireSwapchainImage(colorSwapchainInfo.xrSwapchain, &acquireInfo, &m_currentColorImageIndex) != XR_SUCCESS) {
                     SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to acquire Image from the Color Swapchain");
                 }
-                if (xrAcquireSwapchainImage(depthSwapchainInfo.swapchain, &acquireInfo, &m_currentDepthImageIndex) != XR_SUCCESS) {
+                if (xrAcquireSwapchainImage(depthSwapchainInfo.xrSwapchain, &acquireInfo, &m_currentDepthImageIndex) != XR_SUCCESS) {
                     SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to acquire Image from the Depth Swapchain");
                 }
 
                 XrSwapchainImageWaitInfo waitInfo = { XR_TYPE_SWAPCHAIN_IMAGE_WAIT_INFO };
                 waitInfo.timeout = XR_INFINITE_DURATION;
-                if (xrWaitSwapchainImage(colorSwapchainInfo.swapchain, &waitInfo) != XR_SUCCESS) {
+                if (xrWaitSwapchainImage(colorSwapchainInfo.xrSwapchain, &waitInfo) != XR_SUCCESS) {
                     SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to wait for Image from the Color Swapchain");
                 }
-                if (xrWaitSwapchainImage(depthSwapchainInfo.swapchain, &waitInfo) != XR_SUCCESS) {
+                if (xrWaitSwapchainImage(depthSwapchainInfo.xrSwapchain, &waitInfo) != XR_SUCCESS) {
                     SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to wait for Image from the Depth Swapchain");
                 }
 
@@ -309,7 +344,7 @@ void XrExampleEngineLayer::update()
 
                 m_xrCompositorLayerInfo.layerProjectionViews[m_currentViewIndex].pose = views[m_currentViewIndex].pose;
                 m_xrCompositorLayerInfo.layerProjectionViews[m_currentViewIndex].fov = views[m_currentViewIndex].fov;
-                m_xrCompositorLayerInfo.layerProjectionViews[m_currentViewIndex].subImage.swapchain = colorSwapchainInfo.swapchain;
+                m_xrCompositorLayerInfo.layerProjectionViews[m_currentViewIndex].subImage.swapchain = colorSwapchainInfo.xrSwapchain;
                 m_xrCompositorLayerInfo.layerProjectionViews[m_currentViewIndex].subImage.imageRect = { 0, 0, static_cast<int32_t>(width), static_cast<int32_t>(height) };
                 m_xrCompositorLayerInfo.layerProjectionViews[m_currentViewIndex].subImage.imageArrayIndex = 0;
 
@@ -318,10 +353,10 @@ void XrExampleEngineLayer::update()
 
                 // Give the swapchain image back to OpenXR, allowing the compositor to use the image.
                 XrSwapchainImageReleaseInfo releaseInfo{ XR_TYPE_SWAPCHAIN_IMAGE_RELEASE_INFO };
-                if (xrReleaseSwapchainImage(colorSwapchainInfo.swapchain, &releaseInfo) != XR_SUCCESS) {
+                if (xrReleaseSwapchainImage(colorSwapchainInfo.xrSwapchain, &releaseInfo) != XR_SUCCESS) {
                     SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to release Image back to the Color Swapchain");
                 }
-                if (xrReleaseSwapchainImage(depthSwapchainInfo.swapchain, &releaseInfo) != XR_SUCCESS) {
+                if (xrReleaseSwapchainImage(depthSwapchainInfo.xrSwapchain, &releaseInfo) != XR_SUCCESS) {
                     SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to release Image back to the Depth Swapchain");
                 }
             }
@@ -353,201 +388,6 @@ void XrExampleEngineLayer::update()
 
 void XrExampleEngineLayer::event(KDFoundation::EventReceiver *target, KDFoundation::Event *ev)
 {
-}
-
-void XrExampleEngineLayer::createXrSwapchains()
-{
-    // Query the number of swapchain formats supported by the system
-    uint32_t swapchainFormatCount = 0;
-    if (xrEnumerateSwapchainFormats(m_xrSession, 0, &swapchainFormatCount, nullptr) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to enumerate SwapchainFormats.");
-        return;
-    }
-
-    // Query the swapchain formats supported by the system
-    m_xrSwapchainFormats.resize(swapchainFormatCount);
-    if (xrEnumerateSwapchainFormats(m_xrSession, swapchainFormatCount, &swapchainFormatCount, m_xrSwapchainFormats.data()) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to enumerate SwapchainFormats.");
-        return;
-    }
-
-    // Note: KDGpu formats have the same value as the Vulkan formats. So if we are using the Vulkan backend we can just
-    // use the KDGpu formats directly. If we are using the Metal or DX12 backend we need to convert the KDGpu formats to the
-    // Metal or DX12 formats.
-
-    // Pick the first application supported color swapchain format supported by the hardware.
-    for (const auto &swapchainFormat : m_applicationColorSwapchainFormats) {
-        const int64_t swapchainFormatInt = static_cast<int64_t>(swapchainFormat);
-        if (std::find(m_xrSwapchainFormats.begin(), m_xrSwapchainFormats.end(), swapchainFormatInt) != m_xrSwapchainFormats.end()) {
-            m_xrColorSwapchainFormat = static_cast<int64_t>(swapchainFormat);
-            SPDLOG_LOGGER_INFO(m_logger, "Found a supported depth swapchain format: {}", swapchainFormatInt);
-            break;
-        }
-    }
-    if (m_xrColorSwapchainFormat == 0) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to find a supported SwapchainFormat.");
-        return;
-    }
-
-    // Store the swapchain format for the subclass to use
-    m_colorSwapchainFormat = static_cast<KDGpu::Format>(m_xrColorSwapchainFormat);
-
-    // Pick the first application supported depth swapchain format supported by the hardware.
-    for (const auto &swapchainFormat : m_applicationDepthSwapchainFormats) {
-        const int64_t swapchainFormatInt = static_cast<int64_t>(swapchainFormat);
-        if (std::find(m_xrSwapchainFormats.begin(), m_xrSwapchainFormats.end(), swapchainFormatInt) != m_xrSwapchainFormats.end()) {
-            m_xrDepthSwapchainFormat = static_cast<int64_t>(swapchainFormat);
-            SPDLOG_LOGGER_INFO(m_logger, "Found a supported depth swapchain format: {}", swapchainFormatInt);
-            break;
-        }
-    }
-    if (m_xrDepthSwapchainFormat == 0) {
-        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to find a supported SwapchainFormat.");
-        return;
-    }
-
-    // Store the depth swapchain format for the subclass to use
-    m_depthSwapchainFormat = static_cast<KDGpu::Format>(m_xrDepthSwapchainFormat);
-
-    m_colorSwapchainInfos.resize(m_viewConfigurationViews.size());
-    m_depthSwapchainInfos.resize(m_viewConfigurationViews.size());
-
-    auto vulkanApi = dynamic_cast<VulkanGraphicsApi *>(m_api.get());
-    assert(vulkanApi);
-
-    // Per view, create a color and depth swapchain, and their associated image views.
-    for (size_t i = 0; i < m_viewConfigurationViews.size(); ++i) {
-        {
-            // Create a color swapchain. This will also create the underlying images which we can enumerate later.
-            SwapchainInfo &colorSwapchainInfo = m_colorSwapchainInfos[i];
-
-            XrSwapchainCreateInfo swapchainCreateInfo{ XR_TYPE_SWAPCHAIN_CREATE_INFO };
-            swapchainCreateInfo.createFlags = 0;
-            swapchainCreateInfo.usageFlags = XR_SWAPCHAIN_USAGE_SAMPLED_BIT | XR_SWAPCHAIN_USAGE_COLOR_ATTACHMENT_BIT;
-            swapchainCreateInfo.format = m_xrColorSwapchainFormat;
-            swapchainCreateInfo.sampleCount = m_viewConfigurationViews[i].recommendedSwapchainSampleCount;
-            swapchainCreateInfo.width = m_viewConfigurationViews[i].recommendedTextureWidth;
-            swapchainCreateInfo.height = m_viewConfigurationViews[i].recommendedTextureHeight;
-            swapchainCreateInfo.faceCount = 1;
-            swapchainCreateInfo.arraySize = 1;
-            swapchainCreateInfo.mipCount = 1;
-            if (xrCreateSwapchain(m_xrSession, &swapchainCreateInfo, &colorSwapchainInfo.swapchain) != XR_SUCCESS) {
-                SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to create OpenXR Color Swapchain.");
-                return;
-            }
-
-            // Query the number of images in the swapchain
-            uint32_t swapchainImageCount = 0;
-            if (xrEnumerateSwapchainImages(colorSwapchainInfo.swapchain, 0, &swapchainImageCount, nullptr) != XR_SUCCESS) {
-                SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to enumerate swapchain image count.");
-                return;
-            }
-            SPDLOG_LOGGER_INFO(m_logger, "Color swapchain image count: {}", swapchainImageCount);
-
-            std::vector<XrSwapchainImageVulkanKHR> swapchainImages(swapchainImageCount, { XR_TYPE_SWAPCHAIN_IMAGE_VULKAN_KHR });
-            if (xrEnumerateSwapchainImages(colorSwapchainInfo.swapchain, swapchainImageCount, &swapchainImageCount, reinterpret_cast<XrSwapchainImageBaseHeader *>(swapchainImages.data())) != XR_SUCCESS) {
-                SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to enumerate swapchain images.");
-                return;
-            }
-
-            // Convert the swapchain images to KDGpu images and create image views for them.
-            colorSwapchainInfo.images.resize(swapchainImageCount);
-            colorSwapchainInfo.imageViews.resize(swapchainImageCount);
-            for (int j = 0; j < swapchainImageCount; ++j) {
-                const TextureOptions options = {
-                    .type = TextureType::TextureType2D,
-                    .format = static_cast<KDGpu::Format>(m_xrColorSwapchainFormat),
-                    .extent = {
-                            .width = m_viewConfigurationViews[i].recommendedTextureWidth,
-                            .height = m_viewConfigurationViews[i].recommendedTextureHeight,
-                            .depth = 1 },
-                    .mipLevels = 1,
-                    .samples = static_cast<SampleCountFlagBits>(m_viewConfigurationViews[i].recommendedSwapchainSampleCount),
-                    .usage = TextureUsageFlagBits::SampledBit | TextureUsageFlagBits::ColorAttachmentBit,
-                    .memoryUsage = MemoryUsage::GpuOnly
-                };
-                Texture texture = vulkanApi->createTextureFromExistingVkImage(m_device, options, swapchainImages[j].image);
-                colorSwapchainInfo.images[j] = std::move(texture);
-                colorSwapchainInfo.imageViews[j] = colorSwapchainInfo.images[j].createView();
-            }
-        }
-
-        {
-            // Create a depth swapchain
-            SwapchainInfo &depthSwapchainInfo = m_depthSwapchainInfos[i];
-
-            XrSwapchainCreateInfo swapchainCreateInfo{ XR_TYPE_SWAPCHAIN_CREATE_INFO };
-            swapchainCreateInfo.createFlags = 0;
-            swapchainCreateInfo.usageFlags = XR_SWAPCHAIN_USAGE_SAMPLED_BIT | XR_SWAPCHAIN_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-            swapchainCreateInfo.format = m_xrDepthSwapchainFormat;
-            swapchainCreateInfo.sampleCount = m_viewConfigurationViews[i].recommendedSwapchainSampleCount;
-            swapchainCreateInfo.width = m_viewConfigurationViews[i].recommendedTextureWidth;
-            swapchainCreateInfo.height = m_viewConfigurationViews[i].recommendedTextureHeight;
-            swapchainCreateInfo.faceCount = 1;
-            swapchainCreateInfo.arraySize = 1;
-            swapchainCreateInfo.mipCount = 1;
-            if (xrCreateSwapchain(m_xrSession, &swapchainCreateInfo, &depthSwapchainInfo.swapchain) != XR_SUCCESS) {
-                SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to create OpenXR Depth Swapchain.");
-                return;
-            }
-
-            // Query the number of images in the swapchain
-            uint32_t swapchainImageCount = 0;
-            if (xrEnumerateSwapchainImages(depthSwapchainInfo.swapchain, 0, &swapchainImageCount, nullptr) != XR_SUCCESS) {
-                SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to enumerate swapchain image count.");
-                return;
-            }
-            SPDLOG_LOGGER_INFO(m_logger, "Depth swapchain image count: {}", swapchainImageCount);
-
-            std::vector<XrSwapchainImageVulkanKHR> swapchainImages(swapchainImageCount, { XR_TYPE_SWAPCHAIN_IMAGE_VULKAN_KHR });
-            if (xrEnumerateSwapchainImages(depthSwapchainInfo.swapchain, swapchainImageCount, &swapchainImageCount, reinterpret_cast<XrSwapchainImageBaseHeader *>(swapchainImages.data())) != XR_SUCCESS) {
-                SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to enumerate swapchain images.");
-                return;
-            }
-
-            // Convert the swapchain images to KDGpu images and create image views for them.
-            depthSwapchainInfo.images.resize(swapchainImageCount);
-            depthSwapchainInfo.imageViews.resize(swapchainImageCount);
-            for (int j = 0; j < swapchainImageCount; ++j) {
-                const TextureOptions options = {
-                    .type = TextureType::TextureType2D,
-                    .format = static_cast<KDGpu::Format>(m_xrDepthSwapchainFormat),
-                    .extent = {
-                            .width = m_viewConfigurationViews[i].recommendedTextureWidth,
-                            .height = m_viewConfigurationViews[i].recommendedTextureHeight,
-                            .depth = 1 },
-                    .mipLevels = 1,
-                    .samples = static_cast<SampleCountFlagBits>(m_viewConfigurationViews[i].recommendedSwapchainSampleCount),
-                    .usage = TextureUsageFlagBits::SampledBit | TextureUsageFlagBits::DepthStencilAttachmentBit,
-                    .memoryUsage = MemoryUsage::GpuOnly
-                };
-                Texture texture = vulkanApi->createTextureFromExistingVkImage(m_device, options, swapchainImages[j].image);
-                depthSwapchainInfo.images[j] = std::move(texture);
-                depthSwapchainInfo.imageViews[j] = depthSwapchainInfo.images[j].createView({ .range = { .aspectMask = TextureAspectFlagBits::DepthBit } });
-            }
-        }
-    }
-}
-
-void XrExampleEngineLayer::destroyXrSwapchains()
-{
-    for (auto &colorSwapchainInfo : m_colorSwapchainInfos) {
-        colorSwapchainInfo.imageViews.clear();
-        colorSwapchainInfo.images.clear();
-        if (xrDestroySwapchain(colorSwapchainInfo.swapchain) != XR_SUCCESS) {
-            SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to destroy OpenXR Color Swapchain.");
-        }
-    }
-    m_colorSwapchainInfos.clear();
-
-    for (auto &depthSwapchainInfo : m_depthSwapchainInfos) {
-        depthSwapchainInfo.imageViews.clear();
-        depthSwapchainInfo.images.clear();
-        if (xrDestroySwapchain(depthSwapchainInfo.swapchain) != XR_SUCCESS) {
-            SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to destroy OpenXR Depth Swapchain.");
-        }
-    }
-    m_depthSwapchainInfos.clear();
 }
 
 void XrExampleEngineLayer::pollXrEvents()
