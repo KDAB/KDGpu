@@ -84,4 +84,14 @@ std::vector<KDGpu::Texture> OpenXrSwapchain::getTextures()
     return {};
 }
 
+AcquireSwapchainTextureResult OpenXrSwapchain::getNextTextureIndex(uint32_t &textureIndex)
+{
+    XrSwapchainImageAcquireInfo acquireInfo{ XR_TYPE_SWAPCHAIN_IMAGE_ACQUIRE_INFO };
+    const auto result = xrAcquireSwapchainImage(swapchain, &acquireInfo, &textureIndex);
+    if (result != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to acquire Image from the swapchain");
+    }
+    return static_cast<AcquireSwapchainTextureResult>(result);
+}
+
 } // namespace KDXr

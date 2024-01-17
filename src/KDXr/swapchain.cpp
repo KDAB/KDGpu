@@ -82,4 +82,10 @@ Swapchain &Swapchain::operator=(Swapchain &&other)
     return *this;
 }
 
+AcquireSwapchainTextureResult Swapchain::getNextTextureIndex(uint32_t &textureIndex)
+{
+    auto apiSwapchain = m_api->resourceManager()->getSwapchain(m_swapchain);
+    return apiSwapchain->getNextTextureIndex(textureIndex);
+}
+
 } // namespace KDXr

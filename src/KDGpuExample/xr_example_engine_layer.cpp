@@ -291,13 +291,8 @@ void XrExampleEngineLayer::update()
                 KDXrSwapchainInfo &colorSwapchainInfo = m_colorSwapchains[m_currentViewIndex];
                 KDXrSwapchainInfo &depthSwapchainInfo = m_depthSwapchains[m_currentViewIndex];
 
-                XrSwapchainImageAcquireInfo acquireInfo{ XR_TYPE_SWAPCHAIN_IMAGE_ACQUIRE_INFO };
-                if (xrAcquireSwapchainImage(colorSwapchainInfo.xrSwapchain, &acquireInfo, &m_currentColorImageIndex) != XR_SUCCESS) {
-                    SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to acquire Image from the Color Swapchain");
-                }
-                if (xrAcquireSwapchainImage(depthSwapchainInfo.xrSwapchain, &acquireInfo, &m_currentDepthImageIndex) != XR_SUCCESS) {
-                    SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to acquire Image from the Depth Swapchain");
-                }
+                colorSwapchainInfo.swapchain.getNextTextureIndex(m_currentColorImageIndex);
+                depthSwapchainInfo.swapchain.getNextTextureIndex(m_currentDepthImageIndex);
 
                 XrSwapchainImageWaitInfo waitInfo = { XR_TYPE_SWAPCHAIN_IMAGE_WAIT_INFO };
                 waitInfo.timeout = XR_INFINITE_DURATION;

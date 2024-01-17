@@ -29,6 +29,7 @@ struct Swapchain_t;
  */
 struct ApiSwapchain {
     virtual std::vector<KDGpu::Texture> getTextures() = 0;
+    virtual AcquireSwapchainTextureResult getNextTextureIndex(uint32_t &textureIndex) = 0;
 };
 
 } // namespace KDXr

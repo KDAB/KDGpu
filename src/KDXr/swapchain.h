@@ -60,6 +60,8 @@ public:
 
     const std::vector<KDGpu::Texture> &textures() const { return m_textures; }
 
+    AcquireSwapchainTextureResult getNextTextureIndex(uint32_t &textureIndex);
+
 private:
     explicit Swapchain(XrApi *api, const Handle<Session_t> &sessionHandle, const SwapchainOptions &options);
 
