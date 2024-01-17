@@ -36,6 +36,10 @@ namespace KDXr {
  *  @{
  */
 
+constexpr int64_t InfiniteDuration = 0x7fffffffffffffffLL;
+
+using Duration = int64_t;
+
 struct ApiLayer {
     std::string name;
     std::string description;
@@ -150,6 +154,19 @@ using SwapchainUsageFlags = KDGpu::Flags<SwapchainUsageFlagBits>;
 
 enum class AcquireSwapchainTextureResult : int32_t {
     Success = 0,
+    SessionLossPending = 3,
+    ValidationFailure = -1,
+    RuntimeFailure = -2,
+    HandleInvalid = -12,
+    InstanceLost = -13,
+    SessionLost = -17,
+    CallOrderInvalid = -37,
+    MaxEnum = 0x7fffffff
+};
+
+enum class WaitSwapchainTextureResult : int32_t {
+    Success = 0,
+    TimeoutExpired = 1,
     SessionLossPending = 3,
     ValidationFailure = -1,
     RuntimeFailure = -2,

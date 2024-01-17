@@ -34,6 +34,7 @@ struct KDXR_EXPORT OpenXrSwapchain : public ApiSwapchain {
 
     std::vector<KDGpu::Texture> getTextures() final;
     AcquireSwapchainTextureResult getNextTextureIndex(uint32_t &textureIndex) final;
+    WaitSwapchainTextureResult waitForTexture(Duration timeout = InfiniteDuration) const final;
 
     OpenXrResourceManager *openxrResourceManager{ nullptr };
     XrSwapchain swapchain{ XR_NULL_HANDLE };

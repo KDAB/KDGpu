@@ -94,4 +94,15 @@ AcquireSwapchainTextureResult OpenXrSwapchain::getNextTextureIndex(uint32_t &tex
     return static_cast<AcquireSwapchainTextureResult>(result);
 }
 
+WaitSwapchainTextureResult OpenXrSwapchain::waitForTexture(Duration timeout) const
+{
+    XrSwapchainImageWaitInfo waitInfo = { XR_TYPE_SWAPCHAIN_IMAGE_WAIT_INFO };
+    waitInfo.timeout = timeout;
+    const auto result = xrWaitSwapchainImage(swapchain, &waitInfo);
+    if (result != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to wait for Image from the swapchain");
+    }
+    return static_cast<WaitSwapchainTextureResult>(result);
+}
+
 } // namespace KDXr

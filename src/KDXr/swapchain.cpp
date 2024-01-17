@@ -88,4 +88,10 @@ AcquireSwapchainTextureResult Swapchain::getNextTextureIndex(uint32_t &textureIn
     return apiSwapchain->getNextTextureIndex(textureIndex);
 }
 
+WaitSwapchainTextureResult Swapchain::waitForTexture(Duration timeout) const
+{
+    auto apiSwapchain = m_api->resourceManager()->getSwapchain(m_swapchain);
+    return apiSwapchain->waitForTexture(timeout);
+}
+
 } // namespace KDXr

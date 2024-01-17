@@ -294,14 +294,8 @@ void XrExampleEngineLayer::update()
                 colorSwapchainInfo.swapchain.getNextTextureIndex(m_currentColorImageIndex);
                 depthSwapchainInfo.swapchain.getNextTextureIndex(m_currentDepthImageIndex);
 
-                XrSwapchainImageWaitInfo waitInfo = { XR_TYPE_SWAPCHAIN_IMAGE_WAIT_INFO };
-                waitInfo.timeout = XR_INFINITE_DURATION;
-                if (xrWaitSwapchainImage(colorSwapchainInfo.xrSwapchain, &waitInfo) != XR_SUCCESS) {
-                    SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to wait for Image from the Color Swapchain");
-                }
-                if (xrWaitSwapchainImage(depthSwapchainInfo.xrSwapchain, &waitInfo) != XR_SUCCESS) {
-                    SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to wait for Image from the Depth Swapchain");
-                }
+                colorSwapchainInfo.swapchain.waitForTexture();
+                depthSwapchainInfo.swapchain.waitForTexture();
 
                 const uint32_t &width = m_viewConfigurationViews[m_currentViewIndex].recommendedTextureWidth;
                 const uint32_t &height = m_viewConfigurationViews[m_currentViewIndex].recommendedTextureHeight;
