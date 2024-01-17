@@ -11,6 +11,7 @@
 #pragma once
 
 #include <KDXr/api/api_session.h>
+#include <KDXr/kdxr_core.h>
 #include <KDXr/kdxr_export.h>
 #include <KDXr/config.h>
 
@@ -41,7 +42,10 @@ struct KDXR_EXPORT OpenXrSession : public ApiSession {
                            KDGpu::Handle<KDGpu::Device_t> _device,
                            uint32_t queueIndex) noexcept;
 
+    void initialize(Session *_frontendSession) final;
     std::vector<KDGpu::Format> supportedSwapchainFormats() const final;
+
+    void setSessionState(SessionState state);
 
     OpenXrResourceManager *openxrResourceManager{ nullptr };
     XrSession session{ XR_NULL_HANDLE };
@@ -51,6 +55,8 @@ struct KDXR_EXPORT OpenXrSession : public ApiSession {
     KDGpu::GraphicsApi *graphicsApi{ nullptr };
     KDGpu::Handle<KDGpu::Device_t> deviceHandle;
     uint32_t queueIndex{ 0 };
+
+    Session *frontendSession{ nullptr };
 };
 
 } // namespace KDXr

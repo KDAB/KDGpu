@@ -50,6 +50,8 @@ Session::Session(const Handle<System_t> &systemHandle, XrApi *api, const Session
 {
     // Create an Session using the underlying API
     m_session = m_api->resourceManager()->createSession(m_systemHandle, options);
+    auto apiSession = m_api->resourceManager()->getSession(m_session);
+    apiSession->initialize(this);
 }
 
 Session::~Session()
@@ -63,6 +65,9 @@ Session::Session(Session &&other)
     m_api = std::exchange(other.m_api, nullptr);
     m_systemHandle = std::exchange(other.m_systemHandle, {});
     m_session = std::exchange(other.m_session, {});
+
+    auto apiSession = m_api->resourceManager()->getSession(m_session);
+    apiSession->initialize(this);
 }
 
 Session &Session::operator=(Session &&other)
@@ -74,6 +79,9 @@ Session &Session::operator=(Session &&other)
         m_api = std::exchange(other.m_api, nullptr);
         m_systemHandle = std::exchange(other.m_systemHandle, {});
         m_session = std::exchange(other.m_session, {});
+
+        auto apiSession = m_api->resourceManager()->getSession(m_session);
+        apiSession->initialize(this);
     }
     return *this;
 }

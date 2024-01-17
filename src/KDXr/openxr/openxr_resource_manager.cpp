@@ -311,12 +311,24 @@ Handle<Session_t> OpenXrResourceManager::createSession(const Handle<System_t> &s
     }
 
     auto h = m_sessions.emplace(OpenXrSession{ this, xrSession, systemHandle, options.graphicsApi, options.device, options.queueIndex });
+
+    // Register the session with the instance so that we can look it up when processing OpenXR events
+    openXrInstance->m_sessionToHandle.insert({ xrSession, h });
+
     return h;
 }
 
 void OpenXrResourceManager::deleteSession(const Handle<Session_t> &handle)
 {
+    // Unregister the session from the instance
     OpenXrSession *openXrSession = m_sessions.get(handle);
+    assert(openXrSession);
+    OpenXrSystem *openXrSystem = m_systems.get(openXrSession->systemHandle);
+    assert(openXrSystem);
+    OpenXrInstance *openXrInstance = m_instances.get(openXrSystem->instanceHandle);
+    assert(openXrInstance);
+    openXrInstance->m_sessionToHandle.erase(openXrSession->session);
+
     if (xrDestroySession(openXrSession->session) != XR_SUCCESS) {
         SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to destroy OpenXR Session.");
     }

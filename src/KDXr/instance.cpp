@@ -61,6 +61,8 @@ Instance::Instance(XrApi *api, const InstanceOptions &options)
     // Create an instance using the underlying API
     m_api = api;
     m_instance = m_api->resourceManager()->createInstance(options);
+    auto apiInstance = m_api->resourceManager()->getInstance(m_instance);
+    apiInstance->initialize(this);
 }
 
 Instance::~Instance()
@@ -71,11 +73,11 @@ Instance::~Instance()
 
 Instance::Instance(Instance &&other)
 {
-    m_api = other.m_api;
-    m_instance = other.m_instance;
+    m_api = std::exchange(other.m_api, nullptr);
+    m_instance = std::exchange(other.m_instance, {});
 
-    other.m_api = nullptr;
-    other.m_instance = {};
+    auto apiInstance = m_api->resourceManager()->getInstance(m_instance);
+    apiInstance->initialize(this);
 }
 
 Instance &Instance::operator=(Instance &&other)
@@ -84,11 +86,11 @@ Instance &Instance::operator=(Instance &&other)
         if (isValid())
             m_api->resourceManager()->deleteInstance(handle());
 
-        m_api = other.m_api;
-        m_instance = other.m_instance;
+        m_api = std::exchange(other.m_api, nullptr);
+        m_instance = std::exchange(other.m_instance, {});
 
-        other.m_api = nullptr;
-        other.m_instance = {};
+        auto apiInstance = m_api->resourceManager()->getInstance(m_instance);
+        apiInstance->initialize(this);
     }
     return *this;
 }
@@ -123,6 +125,12 @@ System *Instance::system(const SystemOptions &options)
     }
 
     return &m_system;
+}
+
+ProcessEventsResult Instance::processEvents()
+{
+    auto apiInstance = m_api->resourceManager()->getInstance(m_instance);
+    return apiInstance->processEvents();
 }
 
 } // namespace KDXr

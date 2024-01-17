@@ -19,6 +19,7 @@
 
 namespace KDXr {
 
+class Session;
 struct Session_t;
 
 /**
@@ -27,6 +28,7 @@ struct Session_t;
  *
  */
 struct ApiSession {
+    virtual void initialize(Session *frontendSession) = 0;
     virtual std::vector<KDGpu::Format> supportedSwapchainFormats() const = 0;
 };
 

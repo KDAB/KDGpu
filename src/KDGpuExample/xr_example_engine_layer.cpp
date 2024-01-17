@@ -45,6 +45,7 @@ void XrExampleEngineLayer::onAttached()
         .extensions = { XR_EXT_DEBUG_UTILS_EXTENSION_NAME, XR_KHR_VULKAN_ENABLE_EXTENSION_NAME }
     };
     m_kdxrInstance = m_xrApi->createInstance(xrInstanceOptions);
+    m_kdxrInstance.instanceLost.connect(&XrExampleEngineLayer::onInstanceLost, this);
     const auto properties = m_kdxrInstance.properties();
     SPDLOG_LOGGER_INFO(m_logger, "OpenXR Runtime: {}", properties.runtimeName);
     SPDLOG_LOGGER_INFO(m_logger, "OpenXR API Version: {}.{}.{}",
@@ -116,8 +117,10 @@ void XrExampleEngineLayer::onAttached()
     m_device = selectedAdapter->createDevice(deviceOptions);
     m_queue = m_device.queues()[0];
 
-    // Create the XR session
+    // Create the XR session and track the state changes.
+    // TODO: Add option to auto-begin/end a session
     m_kdxrSession = m_kdxrSystem->createSession({ .graphicsApi = m_api.get(), .device = m_device });
+    m_kdxrSession.state.valueChanged().connect(&XrExampleEngineLayer::onSessionStateChanged, this);
 
     // Create a reference space - default to local space
     m_kdxrReferenceSpace = m_kdxrSession.createReferenceSpace();
@@ -214,7 +217,8 @@ void XrExampleEngineLayer::update()
     // Release any staging buffers we are done with
     releaseStagingBuffers();
 
-    pollXrEvents();
+    // Process XR events
+    m_kdxrInstance.processEvents();
 
     if (!m_xrSessionRunning)
         return;
@@ -343,98 +347,63 @@ void XrExampleEngineLayer::event(KDFoundation::EventReceiver *target, KDFoundati
 {
 }
 
-void XrExampleEngineLayer::pollXrEvents()
+void XrExampleEngineLayer::onInstanceLost()
 {
-    XrEventDataBuffer eventData{ XR_TYPE_EVENT_DATA_BUFFER };
-    auto XrPollEvents = [&]() -> bool {
-        eventData = { XR_TYPE_EVENT_DATA_BUFFER };
-        return xrPollEvent(m_xrInstance, &eventData) == XR_SUCCESS;
-    };
+    SPDLOG_LOGGER_ERROR(m_logger, "Instance Lost.");
+    // TODO: Gracefully handle shutting down the application
+}
 
-    while (XrPollEvents()) {
-        switch (eventData.type) {
-        case XR_TYPE_EVENT_DATA_EVENTS_LOST: {
-            SPDLOG_LOGGER_WARN(m_logger, "OpenXR Events Lost.");
-            break;
-        }
-
-        case XR_TYPE_EVENT_DATA_INSTANCE_LOSS_PENDING: {
-            SPDLOG_LOGGER_WARN(m_logger, "OpenXR Instance Loss Pending.");
-            m_xrSessionRunning = false;
-            break;
-        }
-
-        case XR_TYPE_EVENT_DATA_INTERACTION_PROFILE_CHANGED: {
-            SPDLOG_LOGGER_INFO(m_logger, "OpenXR Interaction Profile Changed.");
-            // TODO: Handle this event
-            break;
-        }
-
-        case XR_TYPE_EVENT_DATA_REFERENCE_SPACE_CHANGE_PENDING: {
-            SPDLOG_LOGGER_INFO(m_logger, "OpenXR Reference Space Change Pending.");
-            // TODO: Handle this event
-            break;
-        }
-
-        case XR_TYPE_EVENT_DATA_SESSION_STATE_CHANGED: {
-            const auto *sessionStateChanged = reinterpret_cast<const XrEventDataSessionStateChanged *>(&eventData);
-
-            if (sessionStateChanged->session != m_xrSession) {
-                SPDLOG_LOGGER_WARN(m_logger, "OpenXR Session State Changed for unknown session.");
-                break;
-            }
-
-            switch (sessionStateChanged->state) {
-            case XR_SESSION_STATE_READY: {
-                SPDLOG_LOGGER_INFO(m_logger, "OpenXR Session State Changed: Ready.");
-                XrSessionBeginInfo sessionBeginInfo{ XR_TYPE_SESSION_BEGIN_INFO };
-                sessionBeginInfo.primaryViewConfigurationType = XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO;
-                if (xrBeginSession(m_xrSession, &sessionBeginInfo) != XR_SUCCESS) {
-                    SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to begin OpenXR Session.");
-                    return;
-                }
-                m_xrSessionRunning = true;
-                break;
-            }
-
-            case XR_SESSION_STATE_SYNCHRONIZED: {
-                SPDLOG_LOGGER_INFO(m_logger, "OpenXR Session State Changed: Synchronized.");
-                break;
-            }
-
-            case XR_SESSION_STATE_VISIBLE: {
-                SPDLOG_LOGGER_INFO(m_logger, "OpenXR Session State Changed: Visible.");
-                break;
-            }
-
-            case XR_SESSION_STATE_FOCUSED: {
-                SPDLOG_LOGGER_INFO(m_logger, "OpenXR Session State Changed: Focused.");
-                break;
-            }
-
-            case XR_SESSION_STATE_STOPPING: {
-                SPDLOG_LOGGER_INFO(m_logger, "OpenXR Session State Changed: Stopping.");
-                m_xrSessionRunning = false;
-                break;
-            }
-
-            case XR_SESSION_STATE_LOSS_PENDING: {
-                SPDLOG_LOGGER_INFO(m_logger, "OpenXR Session State Changed: Loss Pending.");
-                m_xrSessionRunning = false;
-                // TODO: Handle this event and exit the application or try to recreate the XrInstance and XrSession.
-                break;
-            }
-
-            default: {
-                SPDLOG_LOGGER_INFO(m_logger, "OpenXR Session State Changed: Unknown.");
-                break;
-            }
-            }
-
-            m_xrSessionState = sessionStateChanged->state;
-        }
-        }
+void XrExampleEngineLayer::onSessionStateChanged(KDXr::SessionState state)
+{
+    switch (state) {
+    case KDXr::SessionState::Idle: {
+        SPDLOG_LOGGER_INFO(m_logger, "Session State Changed: Idle.");
+        break;
     }
+
+    case KDXr::SessionState::Ready: {
+        XrSessionBeginInfo sessionBeginInfo{ XR_TYPE_SESSION_BEGIN_INFO };
+        sessionBeginInfo.primaryViewConfigurationType = XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO;
+        if (xrBeginSession(m_xrSession, &sessionBeginInfo) != XR_SUCCESS) {
+            SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to begin Session.");
+            return;
+        }
+        m_xrSessionRunning = true;
+        break;
+    }
+
+    case KDXr::SessionState::Synchronized: {
+        SPDLOG_LOGGER_INFO(m_logger, "Session State Changed: Synchronized.");
+        break;
+    }
+
+    case KDXr::SessionState::Visible: {
+        SPDLOG_LOGGER_INFO(m_logger, "Session State Changed: Visible.");
+        break;
+    }
+
+    case KDXr::SessionState::Focused: {
+        SPDLOG_LOGGER_INFO(m_logger, "Session State Changed: Focused.");
+        break;
+    }
+
+    case KDXr::SessionState::Stopping: {
+        SPDLOG_LOGGER_INFO(m_logger, "Session State Changed: Stopping.");
+        if (xrEndSession(m_xrSession) != XR_SUCCESS) {
+            SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to end Session.");
+            return;
+        }
+        m_xrSessionRunning = false;
+        break;
+    }
+
+    default: {
+        SPDLOG_LOGGER_INFO(m_logger, "Session State Changed: Unknown.");
+        break;
+    }
+    }
+
+    m_xrSessionState = static_cast<XrSessionState>(state);
 }
 
 void XrExampleEngineLayer::uploadBufferData(const BufferUploadOptions &options)

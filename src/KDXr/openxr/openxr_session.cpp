@@ -10,8 +10,8 @@
 
 #include "openxr_session.h"
 
+#include <KDXr/session.h>
 #include <KDXr/openxr/openxr_resource_manager.h>
-
 #include <KDXr/utils/logging.h>
 
 #include <KDGpu/graphics_api.h>
@@ -32,6 +32,11 @@ OpenXrSession::OpenXrSession(OpenXrResourceManager *_openxrResourceManager,
     , deviceHandle(_device)
     , queueIndex(queueIndex)
 {
+}
+
+void OpenXrSession::initialize(Session *_frontendSession)
+{
+    frontendSession = _frontendSession;
 }
 
 std::vector<KDGpu::Format> OpenXrSession::supportedSwapchainFormats() const
@@ -65,6 +70,12 @@ std::vector<KDGpu::Format> OpenXrSession::supportedSwapchainFormats() const
         SPDLOG_LOGGER_CRITICAL(Logger::logger(), "OpenXrSession::supportedSwapchainFormats(). Unsupported graphics API.");
         return {};
     }
+}
+
+void OpenXrSession::setSessionState(SessionState state)
+{
+    // Forward on fine-grained state to frontend session
+    frontendSession->state = state;
 }
 
 } // namespace KDXr

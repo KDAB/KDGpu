@@ -19,6 +19,8 @@
 #include <KDGpu/handle.h>
 #include <KDGpu/gpu_core.h>
 
+#include <kdbindings/property.h>
+
 #include <span>
 #include <vector>
 
@@ -49,6 +51,9 @@ struct SessionOptions {
 class KDXR_EXPORT Session
 {
 public:
+    KDBindings::Property<SessionState> state{ SessionState::Unknown };
+    KDBindings::Property<bool> running{ false };
+
     Session();
     ~Session();
 

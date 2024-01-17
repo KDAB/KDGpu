@@ -52,4 +52,9 @@ KDGpu::TextureUsageFlags kdxrSwapchainUsageFlagsToKDGpuTextureUsageFlags(Swapcha
     return result;
 }
 
+SessionState xrSessionStateToSessionState(XrSessionState state)
+{
+    return static_cast<SessionState>(static_cast<uint32_t>(state));
+}
+
 } // namespace KDXr

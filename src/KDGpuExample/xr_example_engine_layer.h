@@ -73,12 +73,13 @@ protected:
     virtual void renderView() = 0; // To render a single view at a time
     virtual void resize() = 0;
 
+    virtual void onInstanceLost();
+    virtual void onSessionStateChanged(KDXr::SessionState state);
+
     void onAttached() override;
     void onDetached() override;
     void update() override;
     void event(KDFoundation::EventReceiver *target, KDFoundation::Event *ev) override;
-
-    void pollXrEvents();
 
     void uploadBufferData(const BufferUploadOptions &options);
     void uploadTextureData(const TextureUploadOptions &options);

@@ -10,6 +10,7 @@
 
 #include "openxr_instance.h"
 
+#include <KDXr/instance.h>
 #include <KDXr/system.h>
 
 #include <KDXr/openxr/openxr_resource_manager.h>
@@ -31,6 +32,11 @@ OpenXrInstance::OpenXrInstance(OpenXrResourceManager *_openxrResourceManager,
     , apiLayers(_apiLayers)
     , extensions(_extensions)
 {
+}
+
+void OpenXrInstance::initialize(Instance *_frontendInstance)
+{
+    frontendInstance = _frontendInstance;
 }
 
 InstanceProperties OpenXrInstance::properties() const
@@ -69,6 +75,74 @@ Handle<System_t> OpenXrInstance::querySystem(const SystemOptions &options, const
     systemHandle = openxrResourceManager->insertSystem(openXrSystem);
 
     return systemHandle;
+}
+
+ProcessEventsResult OpenXrInstance::processEvents()
+{
+    ProcessEventsResult result{ ProcessEventsResult::Success };
+    XrEventDataBuffer eventData{ XR_TYPE_EVENT_DATA_BUFFER };
+    auto XrPollEvents = [&]() -> bool {
+        eventData = { XR_TYPE_EVENT_DATA_BUFFER };
+        result = static_cast<ProcessEventsResult>(xrPollEvent(instance, &eventData));
+        return result == ProcessEventsResult::Success;
+    };
+
+    while (XrPollEvents()) {
+        switch (eventData.type) {
+        case XR_TYPE_EVENT_DATA_EVENTS_LOST: {
+            SPDLOG_LOGGER_WARN(Logger::logger(), "OpenXR Events Lost.");
+            break;
+        }
+
+        case XR_TYPE_EVENT_DATA_INSTANCE_LOSS_PENDING: {
+            SPDLOG_LOGGER_WARN(Logger::logger(), "OpenXR Instance Loss Pending.");
+            // Find all sessions and set state to LossPending
+            for (auto [xrSession, sessionHandle] : m_sessionToHandle) {
+                OpenXrSession *openXrSession = openxrResourceManager->getSession(sessionHandle);
+                assert(openXrSession);
+                openXrSession->setSessionState(SessionState::LossPending);
+            }
+            frontendInstance->instanceLost.emit();
+            break;
+        }
+
+        case XR_TYPE_EVENT_DATA_INTERACTION_PROFILE_CHANGED: {
+            SPDLOG_LOGGER_INFO(Logger::logger(), "OpenXR Interaction Profile Changed.");
+            // TODO: Handle this event
+            break;
+        }
+
+        case XR_TYPE_EVENT_DATA_REFERENCE_SPACE_CHANGE_PENDING: {
+            SPDLOG_LOGGER_INFO(Logger::logger(), "OpenXR Reference Space Change Pending.");
+            // TODO: Handle this event
+            break;
+        }
+
+        case XR_TYPE_EVENT_DATA_SESSION_STATE_CHANGED: {
+            const auto *sessionStateChangedEvent = reinterpret_cast<const XrEventDataSessionStateChanged *>(&eventData);
+            processSessionStateChangedEvent(sessionStateChangedEvent);
+            break;
+        }
+
+        } // switch (eventData.type)
+    } // while (XrPollEvents())
+
+    return result;
+}
+
+void OpenXrInstance::processSessionStateChangedEvent(const XrEventDataSessionStateChanged *eventData)
+{
+    // Lookup the OpenXR session
+    auto sessionHandle = m_sessionToHandle.find(eventData->session);
+    if (sessionHandle == m_sessionToHandle.end()) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Failed to find OpenXR Session.");
+        return;
+    }
+    OpenXrSession *openXrSession = openxrResourceManager->getSession(sessionHandle->second);
+    assert(openXrSession);
+
+    // Delegate session state changes to the OpenXR session which in turn will pass it on to the frontend session
+    openXrSession->setSessionState(xrSessionStateToSessionState(eventData->state));
 }
 
 } // namespace KDXr

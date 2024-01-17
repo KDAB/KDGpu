@@ -16,8 +16,11 @@
 
 #include <openxr/openxr.h>
 
+#include <map>
+
 namespace KDXr {
 
+struct Session_t;
 class OpenXrResourceManager;
 
 /**
@@ -32,10 +35,13 @@ struct KDXR_EXPORT OpenXrInstance : public ApiInstance {
                             std::vector<Extension> &_extensions,
                             bool _isOwned = true) noexcept;
 
+    void initialize(Instance *_frontendInstance) final;
     InstanceProperties properties() const final;
     std::vector<ApiLayer> enabledApiLayers() const final;
     std::vector<Extension> enabledExtensions() const final;
     Handle<System_t> querySystem(const SystemOptions &options, const Handle<Instance_t> &instanceHandle) final;
+    virtual ProcessEventsResult processEvents() final;
+    void processSessionStateChangedEvent(const XrEventDataSessionStateChanged *eventData);
 
     OpenXrResourceManager *openxrResourceManager{ nullptr };
     XrInstance instance{ XR_NULL_HANDLE };
@@ -44,6 +50,9 @@ struct KDXR_EXPORT OpenXrInstance : public ApiInstance {
     std::vector<ApiLayer> apiLayers;
     std::vector<Extension> extensions;
     Handle<System_t> systemHandle;
+
+    Instance *frontendInstance{ nullptr };
+    std::map<XrSession, Handle<Session_t>> m_sessionToHandle;
 };
 
 } // namespace KDXr

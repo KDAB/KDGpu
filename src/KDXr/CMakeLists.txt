@@ -60,7 +60,7 @@ add_library(
     KDXr::KDXr ALIAS KDXr
 )
 
-set(KDXR_PUBLIC_LIBS KDGpu::KDGpu spdlog::spdlog OpenXR::openxr_loader)
+set(KDXR_PUBLIC_LIBS KDGpu::KDGpu KDAB::KDBindings spdlog::spdlog OpenXR::openxr_loader)
 
 set(KDXR_EXPORT_TARGETS KDXr)
 

@@ -24,4 +24,6 @@ XrSwapchainUsageFlags swapchainUsageFlagsToXrSwapchainUsageFlags(SwapchainUsageF
 
 KDGpu::TextureUsageFlags kdxrSwapchainUsageFlagsToKDGpuTextureUsageFlags(SwapchainUsageFlags flags);
 
+SessionState xrSessionStateToSessionState(XrSessionState state);
+
 } // namespace KDXr

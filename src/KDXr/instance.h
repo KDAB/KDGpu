@@ -15,6 +15,8 @@
 #include <KDXr/kdxr_export.h>
 #include <KDXr/system.h>
 
+#include <kdbindings/signal.h>
+
 #include <span>
 #include <string>
 #include <vector>
@@ -60,6 +62,10 @@ public:
 
     System *system(const SystemOptions &options = SystemOptions());
 
+    ProcessEventsResult processEvents();
+
+    KDBindings::Signal<> instanceLost;
+
 private:
     Instance(XrApi *api, const InstanceOptions &options);
 
@@ -68,7 +74,6 @@ private:
     System m_system;
 
     friend class XrApi;
-    friend class OpenXrGraphicsApi;
 };
 
 } // namespace KDXr

@@ -179,6 +179,29 @@ enum class WaitSwapchainTextureResult : int32_t {
     MaxEnum = 0x7fffffff
 };
 
+enum class ProcessEventsResult : int32_t {
+    Success = 0,
+    EventUnavailable = 4,
+    ValidationFailure = -1,
+    RuntimeFailure = -2,
+    HandleInvalid = -12,
+    InstanceLost = -13,
+    MaxEnum = 0x7fffffff
+};
+
+enum class SessionState : int32_t {
+    Unknown = 0,
+    Idle = 1,
+    Ready = 2,
+    Synchronized = 3,
+    Visible = 4,
+    Focused = 5,
+    Stopping = 6,
+    LossPending = 7,
+    Exiting = 8,
+    MaxEnum = 0x7fffffff
+};
+
 } // namespace KDXr
 
 OPERATORS_FOR_FLAGS(KDXr::SwapchainUsageFlags)
