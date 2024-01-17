@@ -164,6 +164,8 @@ enum class AcquireSwapchainTextureResult : int32_t {
     MaxEnum = 0x7fffffff
 };
 
+using ReleaseTextureResult = AcquireSwapchainTextureResult;
+
 enum class WaitSwapchainTextureResult : int32_t {
     Success = 0,
     TimeoutExpired = 1,

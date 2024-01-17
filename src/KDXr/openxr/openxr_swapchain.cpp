@@ -105,4 +105,14 @@ WaitSwapchainTextureResult OpenXrSwapchain::waitForTexture(Duration timeout) con
     return static_cast<WaitSwapchainTextureResult>(result);
 }
 
+ReleaseTextureResult OpenXrSwapchain::releaseTexture()
+{
+    XrSwapchainImageReleaseInfo releaseInfo{ XR_TYPE_SWAPCHAIN_IMAGE_RELEASE_INFO };
+    const auto result = xrReleaseSwapchainImage(swapchain, &releaseInfo);
+    if (result != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to release Image from the swapchain");
+    }
+    return static_cast<ReleaseTextureResult>(result);
+}
+
 } // namespace KDXr

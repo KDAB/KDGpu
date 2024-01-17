@@ -287,7 +287,7 @@ void XrExampleEngineLayer::update()
             m_xrCompositorLayerInfo.layerProjectionViews.resize(viewCount, { XR_TYPE_COMPOSITION_LAYER_PROJECTION_VIEW });
 
             for (m_currentViewIndex = 0; m_currentViewIndex < viewCount; ++m_currentViewIndex) {
-                // Acquire and wait for the swapchain images to become available for the color and depth swapchains
+                // Acquire and wait for the next swapchain textures to become available for the color and depth swapchains
                 KDXrSwapchainInfo &colorSwapchainInfo = m_colorSwapchains[m_currentViewIndex];
                 KDXrSwapchainInfo &depthSwapchainInfo = m_depthSwapchains[m_currentViewIndex];
 
@@ -309,14 +309,9 @@ void XrExampleEngineLayer::update()
                 // Call subclass renderView() function to record and submit drawing commands for the current view
                 renderView();
 
-                // Give the swapchain image back to OpenXR, allowing the compositor to use the image.
-                XrSwapchainImageReleaseInfo releaseInfo{ XR_TYPE_SWAPCHAIN_IMAGE_RELEASE_INFO };
-                if (xrReleaseSwapchainImage(colorSwapchainInfo.xrSwapchain, &releaseInfo) != XR_SUCCESS) {
-                    SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to release Image back to the Color Swapchain");
-                }
-                if (xrReleaseSwapchainImage(depthSwapchainInfo.xrSwapchain, &releaseInfo) != XR_SUCCESS) {
-                    SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to release Image back to the Depth Swapchain");
-                }
+                // Give the swapchain textures back to the XR runtime, allowing the compositor to use the image.
+                colorSwapchainInfo.swapchain.releaseTexture();
+                depthSwapchainInfo.swapchain.releaseTexture();
             }
 
             // Set up the projection layer

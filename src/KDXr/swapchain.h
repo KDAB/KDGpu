@@ -62,6 +62,7 @@ public:
 
     AcquireSwapchainTextureResult getNextTextureIndex(uint32_t &textureIndex);
     WaitSwapchainTextureResult waitForTexture(Duration timeout = InfiniteDuration) const;
+    ReleaseTextureResult releaseTexture();
 
 private:
     explicit Swapchain(XrApi *api, const Handle<Session_t> &sessionHandle, const SwapchainOptions &options);

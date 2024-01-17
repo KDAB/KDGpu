@@ -94,4 +94,10 @@ WaitSwapchainTextureResult Swapchain::waitForTexture(Duration timeout) const
     return apiSwapchain->waitForTexture(timeout);
 }
 
+ReleaseTextureResult Swapchain::releaseTexture()
+{
+    auto apiSwapchain = m_api->resourceManager()->getSwapchain(m_swapchain);
+    return apiSwapchain->releaseTexture();
+}
+
 } // namespace KDXr
