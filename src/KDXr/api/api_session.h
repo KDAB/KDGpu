@@ -31,6 +31,7 @@ struct ApiSession {
     virtual void initialize(Session *frontendSession) = 0;
     virtual std::vector<KDGpu::Format> supportedSwapchainFormats() const = 0;
     virtual FrameState waitForFrame() = 0;
+    virtual BeginFrameResult beginFrame() = 0;
 };
 
 } // namespace KDXr

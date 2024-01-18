@@ -232,9 +232,8 @@ void XrExampleEngineLayer::update()
         return;
     }
 
-    // Inform the OpenXR compositor that we are beginning to render the frame
-    XrFrameBeginInfo frameBeginInfo{ XR_TYPE_FRAME_BEGIN_INFO };
-    if (xrBeginFrame(m_xrSession, &frameBeginInfo) != XR_SUCCESS) {
+    // Inform the XR compositor that we are beginning to render the frame
+    if (m_kdxrSession.beginFrame() != KDXr::BeginFrameResult::Success) {
         SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to begin frame.");
         return;
     }

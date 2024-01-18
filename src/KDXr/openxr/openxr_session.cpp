@@ -92,6 +92,16 @@ FrameState OpenXrSession::waitForFrame()
     };
 }
 
+BeginFrameResult OpenXrSession::beginFrame()
+{
+    XrFrameBeginInfo frameBeginInfo{ XR_TYPE_FRAME_BEGIN_INFO };
+    const auto result = xrBeginFrame(session, &frameBeginInfo);
+    if (result != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to begin frame.");
+    }
+    return static_cast<BeginFrameResult>(result);
+}
+
 void OpenXrSession::setSessionState(SessionState state)
 {
     // Forward on fine-grained state to frontend session

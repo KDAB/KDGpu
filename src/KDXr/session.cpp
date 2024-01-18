@@ -123,4 +123,10 @@ FrameState Session::waitForFrame()
     return apiSession->waitForFrame();
 }
 
+BeginFrameResult Session::beginFrame()
+{
+    auto apiSession = m_api->resourceManager()->getSession(m_session);
+    return apiSession->beginFrame();
+}
+
 } // namespace KDXr

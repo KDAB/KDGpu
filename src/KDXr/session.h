@@ -82,6 +82,7 @@ public:
     bool isActive() const { return state() == SessionState::Synchronized || state() == SessionState::Focused || state() == SessionState::Visible; }
 
     FrameState waitForFrame();
+    BeginFrameResult beginFrame();
 
 private:
     Session(const Handle<System_t> &systemHandle, XrApi *api, const SessionOptions &options);
