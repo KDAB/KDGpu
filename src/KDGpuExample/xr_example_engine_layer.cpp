@@ -225,10 +225,9 @@ void XrExampleEngineLayer::update()
     if (!m_kdxrSession.running())
         return;
 
-    // Get timing information from OpenXR
-    XrFrameState frameState{ XR_TYPE_FRAME_STATE };
-    XrFrameWaitInfo frameWaitInfo{ XR_TYPE_FRAME_WAIT_INFO };
-    if (xrWaitFrame(m_xrSession, &frameWaitInfo, &frameState) != XR_SUCCESS) {
+    // Get timing information from the XR runtime and throttle the frame rate
+    const KDXr::FrameState frameState = m_kdxrSession.waitForFrame();
+    if (frameState.waitFrameResult != KDXr::WaitFrameResult::Success) {
         SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to wait for frame.");
         return;
     }

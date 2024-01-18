@@ -44,6 +44,7 @@ struct KDXR_EXPORT OpenXrSession : public ApiSession {
 
     void initialize(Session *_frontendSession) final;
     std::vector<KDGpu::Format> supportedSwapchainFormats() const final;
+    FrameState waitForFrame() final;
 
     void setSessionState(SessionState state);
 

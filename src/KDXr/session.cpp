@@ -117,4 +117,10 @@ Swapchain Session::createSwapchain(const SwapchainOptions &options)
     return Swapchain(m_api, m_session, options);
 }
 
+FrameState Session::waitForFrame()
+{
+    auto apiSession = m_api->resourceManager()->getSession(m_session);
+    return apiSession->waitForFrame();
+}
+
 } // namespace KDXr

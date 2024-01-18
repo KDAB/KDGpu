@@ -74,6 +74,24 @@ std::vector<KDGpu::Format> OpenXrSession::supportedSwapchainFormats() const
     }
 }
 
+FrameState OpenXrSession::waitForFrame()
+{
+    XrFrameState frameState{ XR_TYPE_FRAME_STATE };
+    XrFrameWaitInfo frameWaitInfo{ XR_TYPE_FRAME_WAIT_INFO };
+    const auto result = xrWaitFrame(session, &frameWaitInfo, &frameState);
+    if (result != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to wait for frame.");
+        return {};
+    }
+
+    return FrameState{
+        .waitFrameResult = static_cast<WaitFrameResult>(result),
+        .predictedDisplayTime = frameState.predictedDisplayTime,
+        .predictedDisplayPeriod = frameState.predictedDisplayPeriod,
+        .shouldRender = static_cast<bool>(frameState.shouldRender)
+    };
+}
+
 void OpenXrSession::setSessionState(SessionState state)
 {
     // Forward on fine-grained state to frontend session

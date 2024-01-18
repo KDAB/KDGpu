@@ -38,6 +38,7 @@ namespace KDXr {
 
 constexpr int64_t InfiniteDuration = 0x7fffffffffffffffLL;
 
+using Time = int64_t;
 using Duration = int64_t;
 
 struct ApiLayer {
@@ -200,6 +201,25 @@ enum class SessionState : int32_t {
     LossPending = 7,
     Exiting = 8,
     MaxEnum = 0x7fffffff
+};
+
+enum class WaitFrameResult : int32_t {
+    Success = 0,
+    SessionLossPending = 3,
+    ValidationFailure = -1,
+    RuntimeFailure = -2,
+    HandleInvalid = -12,
+    InstanceLost = -13,
+    SessionNotRunning = -16,
+    SessionLost = -17,
+    MaxEnum = 0x7fffffff
+};
+
+struct FrameState {
+    WaitFrameResult waitFrameResult{ WaitFrameResult::MaxEnum };
+    Time predictedDisplayTime{ 0 };
+    Duration predictedDisplayPeriod{ 0 };
+    bool shouldRender{ false };
 };
 
 } // namespace KDXr
