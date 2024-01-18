@@ -101,8 +101,8 @@ Stay up-to-date with KDAB product announcements:
 
 ## Licensing
 
-KDGpu is (C) 2022-2023, Klarälvdalens Datakonsult AB, and is available under the
-terms of the [MIT](https://github.com/KDAB/KDGpu/blob/main/LICENSES/MIT.txt) license.
+KDGpu is © Klarälvdalens Datakonsult AB and is available under the terms of
+the [MIT](https://github.com/KDAB/KDGpu/blob/main/LICENSES/MIT.txt) license.
 
 Contact KDAB at <info@kdab.com> if you need different licensing options.
 

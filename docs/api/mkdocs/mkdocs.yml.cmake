@@ -1,6 +1,6 @@
 # This file is part of KDGpu.
 #
-# SPDX-FileCopyrightText: 2018-2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+# SPDX-FileCopyrightText: 2018 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
 #
 # SPDX-License-Identifier: MIT
 #
@@ -27,7 +27,7 @@ theme:
     text: 'Open Sans'
   favicon: assets/assets_logo_tree.svg
   logo: assets/transparentWhiteKDAB.svg
-copyright: "Copyright &copy; 2007-2023 Klar&auml;lvdalens Datakonsult AB (KDAB)<br>The Qt, C++ and OpenGL Experts<br><a href='https://www.kdab.com'>https://www.kdab.com/</a>"
+copyright: "Copyright &copy; Klar&auml;lvdalens Datakonsult AB (KDAB)<br>The Qt, C++ and OpenGL Experts<br><a href='https://www.kdab.com'>https://www.kdab.com/</a>"
 extra:
   # Disabling the generator notice is currently a
   # Insiders only feature.
