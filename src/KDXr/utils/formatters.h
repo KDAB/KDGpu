@@ -42,6 +42,11 @@ inline std::string getSessionStateAsString(SessionState state)
     }
 }
 
+inline std::string getVersionAsString(uint64_t version)
+{
+    return fmt::format("{}.{}.{}", KDXR_VERSION_MAJOR(version), KDXR_VERSION_MINOR(version), KDXR_VERSION_PATCH(version));
+}
+
 } // namespace KDXr
 
 template<>

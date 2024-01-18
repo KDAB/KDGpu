@@ -11,9 +11,8 @@
 #include "xr_example_engine_layer.h"
 
 #include <KDGpuExample/engine.h>
-
+#include <KDXr/utils/formatters.h>
 #include <KDGpu/texture_options.h>
-
 #include <KDGui/gui_application.h>
 
 #include <assert.h>
@@ -47,11 +46,8 @@ void XrExampleEngineLayer::onAttached()
     m_kdxrInstance = m_xrApi->createInstance(xrInstanceOptions);
     m_kdxrInstance.instanceLost.connect(&XrExampleEngineLayer::onInstanceLost, this);
     const auto properties = m_kdxrInstance.properties();
-    SPDLOG_LOGGER_INFO(m_logger, "OpenXR Runtime: {}", properties.runtimeName);
-    SPDLOG_LOGGER_INFO(m_logger, "OpenXR API Version: {}.{}.{}",
-                       KDXR_VERSION_MAJOR(properties.runtimeVersion),
-                       KDXR_VERSION_MINOR(properties.runtimeVersion),
-                       KDXR_VERSION_PATCH(properties.runtimeVersion));
+    SPDLOG_LOGGER_INFO(m_logger, "XR Runtime: {}", properties.runtimeName);
+    SPDLOG_LOGGER_INFO(m_logger, "XR Runtime Version: {}", KDXr::getVersionAsString(properties.runtimeVersion));
 
     m_kdxrSystem = m_kdxrInstance.system();
     const auto systemProperties = m_kdxrSystem->properties();
@@ -72,14 +68,8 @@ void XrExampleEngineLayer::onAttached()
     // Check which versions of the graphics API are supported by the OpenXR runtime
     m_kdxrSystem->setGraphicsApi(m_api.get());
     auto graphicsRequirements = m_kdxrSystem->graphicsRequirements();
-    SPDLOG_LOGGER_INFO(m_logger, "Minimum Vulkan API Version: {}.{}.{}",
-                       KDXR_VERSION_MAJOR(graphicsRequirements.minApiVersionSupported),
-                       KDXR_VERSION_MINOR(graphicsRequirements.minApiVersionSupported),
-                       KDXR_VERSION_PATCH(graphicsRequirements.minApiVersionSupported));
-    SPDLOG_LOGGER_INFO(m_logger, "Maximum Vulkan API Version: {}.{}.{}",
-                       KDXR_VERSION_MAJOR(graphicsRequirements.maxApiVersionSupported),
-                       KDXR_VERSION_MINOR(graphicsRequirements.maxApiVersionSupported),
-                       KDXR_VERSION_PATCH(graphicsRequirements.maxApiVersionSupported));
+    SPDLOG_LOGGER_INFO(m_logger, "Minimum Vulkan API Version: {}", KDXr::getVersionAsString(graphicsRequirements.minApiVersionSupported));
+    SPDLOG_LOGGER_INFO(m_logger, "Maximum Vulkan API Version: {}", KDXr::getVersionAsString(graphicsRequirements.maxApiVersionSupported));
 
     // Request an instance of the api with whatever layers and extensions we wish to request.
     const auto requiredGraphicsInstanceExtensions = m_kdxrSystem->requiredGraphicsInstanceExtensions();
