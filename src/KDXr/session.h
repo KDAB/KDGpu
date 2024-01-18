@@ -53,6 +53,7 @@ class KDXR_EXPORT Session
 public:
     KDBindings::Property<SessionState> state{ SessionState::Unknown };
     KDBindings::Property<bool> running{ false };
+    KDBindings::Property<bool> autoRun{ true };
 
     Session();
     ~Session();
@@ -75,6 +76,9 @@ public:
 
     Swapchain createSwapchain(const SwapchainOptions &options);
 
+    void setViewConfigurationType(ViewConfigurationType viewConfigurationType) { m_viewConfigurationType = viewConfigurationType; }
+    ViewConfigurationType viewConfigurationType() const { return m_viewConfigurationType; }
+
 private:
     Session(const Handle<System_t> &systemHandle, XrApi *api, const SessionOptions &options);
 
@@ -83,6 +87,7 @@ private:
     Handle<Session_t> m_session;
 
     mutable std::vector<KDGpu::Format> m_supportedSwapchainFormats;
+    ViewConfigurationType m_viewConfigurationType{ ViewConfigurationType::PrimaryStereo };
 
     friend class System;
 };

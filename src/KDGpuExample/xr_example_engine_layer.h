@@ -130,7 +130,6 @@ protected:
 
     XrSession m_xrSession{ XR_NULL_HANDLE };
     XrSessionState m_xrSessionState{ XR_SESSION_STATE_UNKNOWN };
-    bool m_xrSessionRunning{ false };
 
     XrSpace m_xrReferenceSpace{ XR_NULL_HANDLE };
 

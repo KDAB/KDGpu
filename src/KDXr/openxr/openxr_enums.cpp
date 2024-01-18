@@ -57,4 +57,9 @@ SessionState xrSessionStateToSessionState(XrSessionState state)
     return static_cast<SessionState>(static_cast<uint32_t>(state));
 }
 
+XrViewConfigurationType viewConfigurationTypeToXrViewConfigurationType(ViewConfigurationType type)
+{
+    return static_cast<XrViewConfigurationType>(static_cast<uint32_t>(type));
+}
+
 } // namespace KDXr

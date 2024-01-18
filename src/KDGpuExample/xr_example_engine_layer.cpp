@@ -121,6 +121,9 @@ void XrExampleEngineLayer::onAttached()
     // TODO: Add option to auto-begin/end a session
     m_kdxrSession = m_kdxrSystem->createSession({ .graphicsApi = m_api.get(), .device = m_device });
     m_kdxrSession.state.valueChanged().connect(&XrExampleEngineLayer::onSessionStateChanged, this);
+    m_kdxrSession.running.valueChanged().connect([this](bool running) {
+        SPDLOG_LOGGER_INFO(m_logger, "Session Running: {}", running);
+    });
 
     // Create a reference space - default to local space
     m_kdxrReferenceSpace = m_kdxrSession.createReferenceSpace();
@@ -220,7 +223,7 @@ void XrExampleEngineLayer::update()
     // Process XR events
     m_kdxrInstance.processEvents();
 
-    if (!m_xrSessionRunning)
+    if (!m_kdxrSession.running())
         return;
 
     // Get timing information from OpenXR
@@ -362,13 +365,7 @@ void XrExampleEngineLayer::onSessionStateChanged(KDXr::SessionState state)
     }
 
     case KDXr::SessionState::Ready: {
-        XrSessionBeginInfo sessionBeginInfo{ XR_TYPE_SESSION_BEGIN_INFO };
-        sessionBeginInfo.primaryViewConfigurationType = XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO;
-        if (xrBeginSession(m_xrSession, &sessionBeginInfo) != XR_SUCCESS) {
-            SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to begin Session.");
-            return;
-        }
-        m_xrSessionRunning = true;
+        SPDLOG_LOGGER_INFO(m_logger, "Session State Changed: Ready.");
         break;
     }
 
@@ -389,11 +386,6 @@ void XrExampleEngineLayer::onSessionStateChanged(KDXr::SessionState state)
 
     case KDXr::SessionState::Stopping: {
         SPDLOG_LOGGER_INFO(m_logger, "Session State Changed: Stopping.");
-        if (xrEndSession(m_xrSession) != XR_SUCCESS) {
-            SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to end Session.");
-            return;
-        }
-        m_xrSessionRunning = false;
         break;
     }
 

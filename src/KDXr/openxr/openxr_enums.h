@@ -26,4 +26,6 @@ KDGpu::TextureUsageFlags kdxrSwapchainUsageFlagsToKDGpuTextureUsageFlags(Swapcha
 
 SessionState xrSessionStateToSessionState(XrSessionState state);
 
+XrViewConfigurationType viewConfigurationTypeToXrViewConfigurationType(ViewConfigurationType type);
+
 } // namespace KDXr

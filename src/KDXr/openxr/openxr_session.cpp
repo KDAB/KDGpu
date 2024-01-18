@@ -11,6 +11,7 @@
 #include "openxr_session.h"
 
 #include <KDXr/session.h>
+#include <KDXr/openxr/openxr_enums.h>
 #include <KDXr/openxr/openxr_resource_manager.h>
 #include <KDXr/utils/logging.h>
 
@@ -76,6 +77,27 @@ void OpenXrSession::setSessionState(SessionState state)
 {
     // Forward on fine-grained state to frontend session
     frontendSession->state = state;
+
+    if (frontendSession->autoRun() != true)
+        return;
+
+    if (state == SessionState::Ready) {
+        XrSessionBeginInfo sessionBeginInfo{ XR_TYPE_SESSION_BEGIN_INFO };
+        sessionBeginInfo.primaryViewConfigurationType = viewConfigurationTypeToXrViewConfigurationType(frontendSession->viewConfigurationType());
+        if (xrBeginSession(session, &sessionBeginInfo) != XR_SUCCESS) {
+            SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to begin session.");
+            return;
+        }
+
+        frontendSession->running = true;
+    } else if (state == SessionState::Stopping) {
+        if (xrEndSession(session) != XR_SUCCESS) {
+            SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to end session.");
+            return;
+        }
+
+        frontendSession->running = false;
+    }
 }
 
 } // namespace KDXr
