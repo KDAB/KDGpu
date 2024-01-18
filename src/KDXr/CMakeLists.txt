@@ -47,6 +47,7 @@ set(HEADERS
     session.h
     swapchain.h
     system.h
+    utils/formatters.h
     utils/hash_utils.h
     utils/logging.h
     xr_api.h

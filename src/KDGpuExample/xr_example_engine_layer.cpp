@@ -120,7 +120,6 @@ void XrExampleEngineLayer::onAttached()
     // Create the XR session and track the state changes.
     // TODO: Add option to auto-begin/end a session
     m_kdxrSession = m_kdxrSystem->createSession({ .graphicsApi = m_api.get(), .device = m_device });
-    m_kdxrSession.state.valueChanged().connect(&XrExampleEngineLayer::onSessionStateChanged, this);
     m_kdxrSession.running.valueChanged().connect([this](bool running) {
         SPDLOG_LOGGER_INFO(m_logger, "Session Running: {}", running);
     });
@@ -244,8 +243,7 @@ void XrExampleEngineLayer::update()
     // Start off with no layers to compose and set the predicted display time
     m_xrCompositorLayerInfo.reset(frameState.predictedDisplayTime);
 
-    const bool sessionActive = (m_xrSessionState == XR_SESSION_STATE_SYNCHRONIZED || m_xrSessionState == XR_SESSION_STATE_VISIBLE || m_xrSessionState == XR_SESSION_STATE_FOCUSED);
-    if (sessionActive && frameState.shouldRender) {
+    if (m_kdxrSession.isActive() && frameState.shouldRender) {
         // For now, we will use only a single projection layer. Later we can extend this to support multiple compositor layer types
         // in any configuration. At this time we assume the scene in the subclass is the only thing to be composited.
 
@@ -354,48 +352,6 @@ void XrExampleEngineLayer::onInstanceLost()
 {
     SPDLOG_LOGGER_ERROR(m_logger, "Instance Lost.");
     // TODO: Gracefully handle shutting down the application
-}
-
-void XrExampleEngineLayer::onSessionStateChanged(KDXr::SessionState state)
-{
-    switch (state) {
-    case KDXr::SessionState::Idle: {
-        SPDLOG_LOGGER_INFO(m_logger, "Session State Changed: Idle.");
-        break;
-    }
-
-    case KDXr::SessionState::Ready: {
-        SPDLOG_LOGGER_INFO(m_logger, "Session State Changed: Ready.");
-        break;
-    }
-
-    case KDXr::SessionState::Synchronized: {
-        SPDLOG_LOGGER_INFO(m_logger, "Session State Changed: Synchronized.");
-        break;
-    }
-
-    case KDXr::SessionState::Visible: {
-        SPDLOG_LOGGER_INFO(m_logger, "Session State Changed: Visible.");
-        break;
-    }
-
-    case KDXr::SessionState::Focused: {
-        SPDLOG_LOGGER_INFO(m_logger, "Session State Changed: Focused.");
-        break;
-    }
-
-    case KDXr::SessionState::Stopping: {
-        SPDLOG_LOGGER_INFO(m_logger, "Session State Changed: Stopping.");
-        break;
-    }
-
-    default: {
-        SPDLOG_LOGGER_INFO(m_logger, "Session State Changed: Unknown.");
-        break;
-    }
-    }
-
-    m_xrSessionState = static_cast<XrSessionState>(state);
 }
 
 void XrExampleEngineLayer::uploadBufferData(const BufferUploadOptions &options)

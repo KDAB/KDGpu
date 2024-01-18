@@ -79,6 +79,8 @@ public:
     void setViewConfigurationType(ViewConfigurationType viewConfigurationType) { m_viewConfigurationType = viewConfigurationType; }
     ViewConfigurationType viewConfigurationType() const { return m_viewConfigurationType; }
 
+    bool isActive() const { return state() == SessionState::Synchronized || state() == SessionState::Focused || state() == SessionState::Visible; }
+
 private:
     Session(const Handle<System_t> &systemHandle, XrApi *api, const SessionOptions &options);
 

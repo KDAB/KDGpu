@@ -13,6 +13,7 @@
 #include <KDXr/session.h>
 #include <KDXr/openxr/openxr_enums.h>
 #include <KDXr/openxr/openxr_resource_manager.h>
+#include <KDXr/utils/formatters.h>
 #include <KDXr/utils/logging.h>
 
 #include <KDGpu/graphics_api.h>
@@ -76,6 +77,7 @@ std::vector<KDGpu::Format> OpenXrSession::supportedSwapchainFormats() const
 void OpenXrSession::setSessionState(SessionState state)
 {
     // Forward on fine-grained state to frontend session
+    SPDLOG_LOGGER_INFO(Logger::logger(), "OpenXrSession::setSessionState() state: {}", state);
     frontendSession->state = state;
 
     if (frontendSession->autoRun() != true)

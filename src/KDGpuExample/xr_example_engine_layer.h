@@ -74,7 +74,6 @@ protected:
     virtual void resize() = 0;
 
     virtual void onInstanceLost();
-    virtual void onSessionStateChanged(KDXr::SessionState state);
 
     void onAttached() override;
     void onDetached() override;
@@ -129,7 +128,6 @@ protected:
     XrSystemProperties m_systemProperties{ XR_TYPE_SYSTEM_PROPERTIES };
 
     XrSession m_xrSession{ XR_NULL_HANDLE };
-    XrSessionState m_xrSessionState{ XR_SESSION_STATE_UNKNOWN };
 
     XrSpace m_xrReferenceSpace{ XR_NULL_HANDLE };
 
