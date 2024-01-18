@@ -108,7 +108,6 @@ void XrExampleEngineLayer::onAttached()
     m_queue = m_device.queues()[0];
 
     // Create the XR session and track the state changes.
-    // TODO: Add option to auto-begin/end a session
     m_kdxrSession = m_kdxrSystem->createSession({ .graphicsApi = m_api.get(), .device = m_device });
     m_kdxrSession.running.valueChanged().connect([this](bool running) {
         SPDLOG_LOGGER_INFO(m_logger, "Session Running: {}", running);
