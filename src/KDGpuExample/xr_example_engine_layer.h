@@ -166,25 +166,7 @@ protected:
     uint32_t m_currentColorImageIndex{ 0 };
     uint32_t m_currentDepthImageIndex{ 0 };
 
-    // TODO: Extract into structs in KDXr
-    struct Pose {
-        glm::quat orientation{};
-        glm::vec3 position{ 0.0f };
-    };
-
-    struct FieldOfView {
-        float angleLeft{ 0.0f };
-        float angleRight{ 0.0f };
-        float angleUp{ 0.0f };
-        float angleDown{ 0.0f };
-    };
-
-    struct View {
-        Pose pose{};
-        FieldOfView fieldOfView{};
-    };
-
-    std::array<View, MAX_VIEWS> m_views;
+    std::array<KDXr::View, MAX_VIEWS> m_views;
 };
 
 } // namespace KDGpuExample

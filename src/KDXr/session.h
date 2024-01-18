@@ -13,6 +13,7 @@
 #include <KDXr/kdxr_core.h>
 #include <KDXr/handle.h>
 #include <KDXr/kdxr_export.h>
+#include <KDXr/locate_views_options.h>
 #include <KDXr/reference_space.h>
 #include <KDXr/swapchain.h>
 
@@ -83,6 +84,9 @@ public:
 
     FrameState waitForFrame();
     BeginFrameResult beginFrame();
+    // TODO: Implement endFrame() once we have a nice way to describe the compositor layers
+
+    LocateViewsResult locateViews(const LocateViewsOptions &options, ViewState &viewState);
 
 private:
     Session(const Handle<System_t> &systemHandle, XrApi *api, const SessionOptions &options);

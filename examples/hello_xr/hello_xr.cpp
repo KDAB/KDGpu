@@ -285,10 +285,13 @@ void HelloXr::updateScene()
 {
     // Update the camera data for each view
     for (uint32_t viewIndex = 0; viewIndex < MAX_VIEWS; ++viewIndex) {
+        const KDXr::Quaternion &orientation = m_views[viewIndex].pose.orientation;
+        const KDXr::Vector3 &position = m_views[viewIndex].pose.position;
+
         // clang-format off
         m_cameraData[viewIndex].view = viewMatrix({
-            .orientation = m_views[viewIndex].pose.orientation,
-            .position = m_views[viewIndex].pose.position
+            .orientation = glm::quat(orientation.w, orientation.x, orientation.y, orientation.z),
+            .position = glm::vec3(position.x, position.y, position.z)
         });
         m_cameraData[viewIndex].projection = perspective({
             .leftFieldOfView = m_views[viewIndex].fieldOfView.angleLeft,

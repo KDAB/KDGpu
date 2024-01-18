@@ -12,6 +12,7 @@
 
 #include <KDGpu/utils/flags.h>
 
+#include <span>
 #include <stdint.h>
 #include <string>
 
@@ -92,6 +93,20 @@ enum class ViewConfigurationType : uint32_t {
     PrimaryQuadVarjo = 1000037000,
     MaxEnum = 0x7fffffff
 };
+
+inline uint32_t viewCount(ViewConfigurationType viewConfigurationType)
+{
+    switch (viewConfigurationType) {
+    case ViewConfigurationType::PrimaryMono:
+        return 1;
+    case ViewConfigurationType::PrimaryStereo:
+        return 2;
+    case ViewConfigurationType::PrimaryQuadVarjo:
+        return 4;
+    default:
+        return 0;
+    }
+}
 
 enum class EnvironmentBlendMode : uint32_t {
     Opaque = 1,
@@ -236,6 +251,48 @@ enum class BeginFrameResult : int32_t {
     MaxEnum = 0x7fffffff
 };
 
+enum class ViewStateFlagBits : uint32_t {
+    OrientationValidBit = 0x00000001,
+    PositionValidBit = 0x00000002,
+    OrientationTrackedBit = 0x00000004,
+    PositionTrackedBit = 0x00000008,
+    MaxEnum = 0x7fffffff
+};
+
+using ViewStateFlags = KDGpu::Flags<ViewStateFlagBits>;
+
+struct FieldOfView {
+    float angleLeft{ 0.0f };
+    float angleRight{ 0.0f };
+    float angleUp{ 0.0f };
+    float angleDown{ 0.0f };
+};
+
+struct View {
+    Pose pose{};
+    FieldOfView fieldOfView{};
+};
+struct ViewState {
+    ViewStateFlags viewStateFlags{ ViewStateFlagBits::MaxEnum };
+    uint32_t viewCount{ 0 };
+    std::span<View> views;
+};
+
+enum class LocateViewsResult : int64_t {
+    Success = 0,
+    SessionLossPending = 3,
+    ValidationFailure = -1,
+    RuntimeFailure = -2,
+    SizeInsufficient = -11,
+    HandleInvalid = -12,
+    InstanceLost = -13,
+    SessionLost = -17,
+    TimeInvalid = -30,
+    ViewConfigurationTypeUnsupported = -41,
+    MaxEnum = 0x7fffffffffffffff
+};
+
 } // namespace KDXr
 
 OPERATORS_FOR_FLAGS(KDXr::SwapchainUsageFlags)
+OPERATORS_FOR_FLAGS(KDXr::ViewStateFlags)

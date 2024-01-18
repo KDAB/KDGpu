@@ -28,4 +28,6 @@ SessionState xrSessionStateToSessionState(XrSessionState state);
 
 XrViewConfigurationType viewConfigurationTypeToXrViewConfigurationType(ViewConfigurationType type);
 
+ViewStateFlags xrViewStateFlagsToViewStateFlags(XrViewStateFlags flags);
+
 } // namespace KDXr

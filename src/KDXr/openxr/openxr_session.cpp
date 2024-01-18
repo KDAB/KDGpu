@@ -18,6 +18,28 @@
 
 #include <KDGpu/graphics_api.h>
 
+namespace {
+
+KDXr::Pose xrPoseToPose(const XrPosef &xrPose)
+{
+    return KDXr::Pose{
+        .orientation = KDXr::Quaternion{ xrPose.orientation.x, xrPose.orientation.y, xrPose.orientation.z, xrPose.orientation.w },
+        .position = KDXr::Vector3{ xrPose.position.x, xrPose.position.y, xrPose.position.z }
+    };
+}
+
+KDXr::FieldOfView xrFovToFov(const XrFovf &xrFov)
+{
+    return KDXr::FieldOfView{
+        .angleLeft = xrFov.angleLeft,
+        .angleRight = xrFov.angleRight,
+        .angleUp = xrFov.angleUp,
+        .angleDown = xrFov.angleDown
+    };
+}
+
+} // namespace
+
 namespace KDXr {
 
 OpenXrSession::OpenXrSession(OpenXrResourceManager *_openxrResourceManager,
@@ -100,6 +122,48 @@ BeginFrameResult OpenXrSession::beginFrame()
         SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to begin frame.");
     }
     return static_cast<BeginFrameResult>(result);
+}
+
+LocateViewsResult OpenXrSession::locateViews(const LocateViewsOptions &options, ViewConfigurationType viewConfigurationType, ViewState &viewState)
+{
+    OpenXrReferenceSpace *openxrReferenceSpace = openxrResourceManager->getReferenceSpace(options.referenceSpace);
+    assert(openxrReferenceSpace);
+
+    // Ensure our local storage is large enough to hold the number of views in the session
+    const auto requiredViewCount = viewCount(viewConfigurationType);
+    if (xrViews.size() < requiredViewCount) {
+        xrViews.resize(requiredViewCount, { XR_TYPE_VIEW });
+    }
+
+    // Locate the views relative to the reference space
+    XrViewState xrViewState{ XR_TYPE_VIEW_STATE }; // Contains information on whether the position and/or orientation is valid and/or tracked.
+    XrViewLocateInfo viewLocateInfo{ XR_TYPE_VIEW_LOCATE_INFO };
+    viewLocateInfo.viewConfigurationType = viewConfigurationTypeToXrViewConfigurationType(viewConfigurationType);
+    viewLocateInfo.displayTime = options.displayTime;
+    viewLocateInfo.space = openxrReferenceSpace->referenceSpace;
+    uint32_t viewCount = 0;
+    const auto result = xrLocateViews(session, &viewLocateInfo, &xrViewState, requiredViewCount, &viewCount, xrViews.data());
+    if (result != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to locate views.");
+        return static_cast<LocateViewsResult>(result);
+    }
+
+    // Ensure the viewState views container is large enough
+    if (viewState.views.size() < viewCount)
+        return LocateViewsResult::SizeInsufficient;
+
+    // Update the view state
+    viewState.viewStateFlags = xrViewStateFlagsToViewStateFlags(xrViewState.viewStateFlags);
+    viewState.viewCount = viewCount;
+    for (uint32_t i = 0; i < viewCount; ++i) {
+        auto &view = viewState.views[i];
+        const auto &xrView = xrViews[i];
+
+        view.pose = xrPoseToPose(xrView.pose);
+        view.fieldOfView = xrFovToFov(xrView.fov);
+    }
+
+    return LocateViewsResult::Success;
 }
 
 void OpenXrSession::setSessionState(SessionState state)

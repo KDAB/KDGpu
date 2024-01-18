@@ -62,4 +62,9 @@ XrViewConfigurationType viewConfigurationTypeToXrViewConfigurationType(ViewConfi
     return static_cast<XrViewConfigurationType>(static_cast<uint32_t>(type));
 }
 
+ViewStateFlags xrViewStateFlagsToViewStateFlags(XrViewStateFlags flags)
+{
+    return ViewStateFlags::fromInt(static_cast<int64_t>(flags));
+}
+
 } // namespace KDXr

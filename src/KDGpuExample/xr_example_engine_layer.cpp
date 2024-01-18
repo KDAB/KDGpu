@@ -246,50 +246,21 @@ void XrExampleEngineLayer::update()
         // in any configuration. At this time we assume the scene in the subclass is the only thing to be composited.
 
         // Locate the views from the view configuration within the (reference) space at the display time.
-        std::vector<XrView> views(m_viewConfigurationViews.size(), { XR_TYPE_VIEW });
-
-        XrViewState viewState{ XR_TYPE_VIEW_STATE }; // Contains information on whether the position and/or orientation is valid and/or tracked.
-        XrViewLocateInfo viewLocateInfo{ XR_TYPE_VIEW_LOCATE_INFO };
-        viewLocateInfo.viewConfigurationType = static_cast<XrViewConfigurationType>(m_selectedViewConfiguration); // TODO: Add conversion helper function to KDXr
-        viewLocateInfo.displayTime = m_xrCompositorLayerInfo.predictedDisplayTime;
-        viewLocateInfo.space = m_xrReferenceSpace;
-        uint32_t viewCount = 0;
-        if (xrLocateViews(m_xrSession, &viewLocateInfo, &viewState, static_cast<uint32_t>(views.size()), &viewCount, views.data()) != XR_SUCCESS) {
+        const auto locateViewsOptions = KDXr::LocateViewsOptions{
+            .displayTime = frameState.predictedDisplayTime,
+            .referenceSpace = m_kdxrReferenceSpace
+        };
+        KDXr::ViewState viewState{ .views = m_views };
+        const auto result = m_kdxrSession.locateViews(locateViewsOptions, viewState);
+        if (result != KDXr::LocateViewsResult::Success) {
             SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to locate views.");
         } else {
-            // Store the XrView data for use in the subclass render functions
-            for (uint32_t i = 0; i < viewCount; ++i) {
-                // clang-format off
-                m_views[i] = {
-                    .pose = {
-                        .orientation = glm::quat{
-                            views[i].pose.orientation.w,
-                            views[i].pose.orientation.x,
-                            views[i].pose.orientation.y,
-                            views[i].pose.orientation.z
-                        },
-                        .position = {
-                            views[i].pose.position.x,
-                            views[i].pose.position.y,
-                            views[i].pose.position.z
-                        }
-                    },
-                    .fieldOfView = {
-                        .angleLeft = views[i].fov.angleLeft,
-                        .angleRight = views[i].fov.angleRight,
-                        .angleUp = views[i].fov.angleUp,
-                        .angleDown = views[i].fov.angleDown
-                    }
-                };
-                // clang-format on
-            }
-
             // Call updateScene() function to update scene state.
             updateScene();
 
-            m_xrCompositorLayerInfo.layerProjectionViews.resize(viewCount, { XR_TYPE_COMPOSITION_LAYER_PROJECTION_VIEW });
+            m_xrCompositorLayerInfo.layerProjectionViews.resize(viewState.viewCount, { XR_TYPE_COMPOSITION_LAYER_PROJECTION_VIEW });
 
-            for (m_currentViewIndex = 0; m_currentViewIndex < viewCount; ++m_currentViewIndex) {
+            for (m_currentViewIndex = 0; m_currentViewIndex < viewState.viewCount; ++m_currentViewIndex) {
                 // Acquire and wait for the next swapchain textures to become available for the color and depth swapchains
                 KDXrSwapchainInfo &colorSwapchainInfo = m_colorSwapchains[m_currentViewIndex];
                 KDXrSwapchainInfo &depthSwapchainInfo = m_depthSwapchains[m_currentViewIndex];
@@ -300,11 +271,24 @@ void XrExampleEngineLayer::update()
                 colorSwapchainInfo.swapchain.waitForTexture();
                 depthSwapchainInfo.swapchain.waitForTexture();
 
+                // TODO: Implement compositor handling into KDXr and remove this
                 const uint32_t &width = m_viewConfigurationViews[m_currentViewIndex].recommendedTextureWidth;
                 const uint32_t &height = m_viewConfigurationViews[m_currentViewIndex].recommendedTextureHeight;
+                const auto &pose = m_views[m_currentViewIndex].pose;
+                const XrPosef xrPose = {
+                    .orientation = { pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w },
+                    .position = { pose.position.x, pose.position.y, pose.position.z }
+                };
+                const auto &fov = m_views[m_currentViewIndex].fieldOfView;
+                const XrFovf xrFov = {
+                    .angleLeft = fov.angleLeft,
+                    .angleRight = fov.angleRight,
+                    .angleUp = fov.angleUp,
+                    .angleDown = fov.angleDown
+                };
 
-                m_xrCompositorLayerInfo.layerProjectionViews[m_currentViewIndex].pose = views[m_currentViewIndex].pose;
-                m_xrCompositorLayerInfo.layerProjectionViews[m_currentViewIndex].fov = views[m_currentViewIndex].fov;
+                m_xrCompositorLayerInfo.layerProjectionViews[m_currentViewIndex].pose = xrPose;
+                m_xrCompositorLayerInfo.layerProjectionViews[m_currentViewIndex].fov = xrFov;
                 m_xrCompositorLayerInfo.layerProjectionViews[m_currentViewIndex].subImage.swapchain = colorSwapchainInfo.xrSwapchain;
                 m_xrCompositorLayerInfo.layerProjectionViews[m_currentViewIndex].subImage.imageRect = { 0, 0, static_cast<int32_t>(width), static_cast<int32_t>(height) };
                 m_xrCompositorLayerInfo.layerProjectionViews[m_currentViewIndex].subImage.imageArrayIndex = 0;

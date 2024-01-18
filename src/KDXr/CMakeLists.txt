@@ -33,6 +33,7 @@ set(HEADERS
     api/api_system.h
     handle.h
     instance.h
+    locate_views_options.h
     openxr/openxr_api.h
     openxr/openxr_enums.h
     openxr/openxr_instance.h

@@ -19,6 +19,8 @@
 
 #include <openxr/openxr.h>
 
+#include <vector>
+
 namespace KDGpu {
 class GraphicsApi;
 struct Device_t;
@@ -47,6 +49,8 @@ struct KDXR_EXPORT OpenXrSession : public ApiSession {
     FrameState waitForFrame() final;
     BeginFrameResult beginFrame() final;
 
+    LocateViewsResult locateViews(const LocateViewsOptions &options, ViewConfigurationType viewConfigurationType, ViewState &viewState) final;
+
     void setSessionState(SessionState state);
 
     OpenXrResourceManager *openxrResourceManager{ nullptr };
@@ -59,6 +63,11 @@ struct KDXR_EXPORT OpenXrSession : public ApiSession {
     uint32_t queueIndex{ 0 };
 
     Session *frontendSession{ nullptr };
+
+    // Local storage to avoid using a temporary vector every frame and the allocations that entails.
+    // This will maintain a high-water mark of the number of views in the session. Initialised to 2
+    // as that is the most common number of views.
+    std::vector<XrView> xrViews{ 2, { XR_TYPE_VIEW } };
 };
 
 } // namespace KDXr
