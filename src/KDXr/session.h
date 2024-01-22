@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include <KDXr/compositor.h>
 #include <KDXr/kdxr_core.h>
 #include <KDXr/handle.h>
 #include <KDXr/kdxr_export.h>
@@ -84,7 +85,7 @@ public:
 
     FrameState waitForFrame();
     BeginFrameResult beginFrame();
-    // TODO: Implement endFrame() once we have a nice way to describe the compositor layers
+    EndFrameResult endFrame(const EndFrameOptions &options);
 
     LocateViewsResult locateViews(const LocateViewsOptions &options, ViewState &viewState);
 

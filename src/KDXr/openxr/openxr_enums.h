@@ -30,4 +30,8 @@ XrViewConfigurationType viewConfigurationTypeToXrViewConfigurationType(ViewConfi
 
 ViewStateFlags xrViewStateFlagsToViewStateFlags(XrViewStateFlags flags);
 
+XrCompositionLayerFlags compositionLayerFlagsToXrCompositionLayerFlags(CompositionLayerFlags flags);
+
+XrEnvironmentBlendMode environmentBlendModeToXrEnvironmentBlendMode(EnvironmentBlendMode mode);
+
 } // namespace KDXr

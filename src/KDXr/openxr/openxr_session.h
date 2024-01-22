@@ -48,6 +48,7 @@ struct KDXR_EXPORT OpenXrSession : public ApiSession {
     std::vector<KDGpu::Format> supportedSwapchainFormats() const final;
     FrameState waitForFrame() final;
     BeginFrameResult beginFrame() final;
+    EndFrameResult endFrame(const EndFrameOptions &options) final;
 
     LocateViewsResult locateViews(const LocateViewsOptions &options, ViewConfigurationType viewConfigurationType, ViewState &viewState) final;
 
@@ -68,6 +69,12 @@ struct KDXR_EXPORT OpenXrSession : public ApiSession {
     // This will maintain a high-water mark of the number of views in the session. Initialised to 2
     // as that is the most common number of views.
     std::vector<XrView> xrViews{ 2, { XR_TYPE_VIEW } };
+
+    // Composition layers
+    // Local storage to avoid using a temporary vectors every frame and the allocations that entails.
+    std::vector<XrCompositionLayerBaseHeader *> xrLayers;
+    std::vector<XrCompositionLayerProjection> xrLayerProjections;
+    std::vector<XrCompositionLayerProjectionView> xrLayerProjectionViews;
 };
 
 } // namespace KDXr

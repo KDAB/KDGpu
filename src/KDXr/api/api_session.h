@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include <KDXr/compositor.h>
 #include <KDXr/kdxr_core.h>
 #include <KDXr/handle.h>
 #include <KDXr/locate_views_options.h>
@@ -33,6 +34,7 @@ struct ApiSession {
     virtual std::vector<KDGpu::Format> supportedSwapchainFormats() const = 0;
     virtual FrameState waitForFrame() = 0;
     virtual BeginFrameResult beginFrame() = 0;
+    virtual EndFrameResult endFrame(const EndFrameOptions &options) = 0;
     virtual LocateViewsResult locateViews(const LocateViewsOptions &options, ViewConfigurationType viewConfigurationType, ViewState &viewState) = 0;
 };
 

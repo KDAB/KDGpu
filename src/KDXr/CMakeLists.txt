@@ -31,6 +31,7 @@ set(HEADERS
     api/api_session.h
     api/api_swapchain.h
     api/api_system.h
+    compositor.h
     handle.h
     instance.h
     locate_views_options.h

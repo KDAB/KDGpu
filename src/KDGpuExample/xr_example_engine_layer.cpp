@@ -227,8 +227,8 @@ void XrExampleEngineLayer::update()
         return;
     }
 
-    // Start off with no layers to compose and set the predicted display time
-    m_xrCompositorLayerInfo.reset(frameState.predictedDisplayTime);
+    // Reset the compositor layers
+    m_compositorLayers.clear();
 
     if (m_kdxrSession.isActive() && frameState.shouldRender) {
         // For now, we will use only a single projection layer. Later we can extend this to support multiple compositor layer types
@@ -247,7 +247,8 @@ void XrExampleEngineLayer::update()
             // Call updateScene() function to update scene state.
             updateScene();
 
-            m_xrCompositorLayerInfo.layerProjectionViews.resize(viewState.viewCount, { XR_TYPE_COMPOSITION_LAYER_PROJECTION_VIEW });
+            // m_xrCompositorLayerInfo.layerProjectionViews.resize(viewState.viewCount, { XR_TYPE_COMPOSITION_LAYER_PROJECTION_VIEW });
+            m_projectionLayerViews.resize(viewState.viewCount);
 
             for (m_currentViewIndex = 0; m_currentViewIndex < viewState.viewCount; ++m_currentViewIndex) {
                 // Acquire and wait for the next swapchain textures to become available for the color and depth swapchains
@@ -260,27 +261,23 @@ void XrExampleEngineLayer::update()
                 colorSwapchainInfo.swapchain.waitForTexture();
                 depthSwapchainInfo.swapchain.waitForTexture();
 
-                // TODO: Implement compositor handling into KDXr and remove this
-                const uint32_t &width = m_viewConfigurationViews[m_currentViewIndex].recommendedTextureWidth;
-                const uint32_t &height = m_viewConfigurationViews[m_currentViewIndex].recommendedTextureHeight;
-                const auto &pose = m_views[m_currentViewIndex].pose;
-                const XrPosef xrPose = {
-                    .orientation = { pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w },
-                    .position = { pose.position.x, pose.position.y, pose.position.z }
+                // Update the projection layer view for the current view
+                // clang-format off
+                m_projectionLayerViews[m_currentViewIndex] = {
+                    .pose = m_views[m_currentViewIndex].pose,
+                    .fieldOfView = m_views[m_currentViewIndex].fieldOfView,
+                    .swapchainSubTexture = {
+                        .swapchain = colorSwapchainInfo.swapchain,
+                        .rect = {
+                            .offset = { .x = 0, .y = 0 },
+                            .extent = {
+                                .width = m_viewConfigurationViews[m_currentViewIndex].recommendedTextureWidth,
+                                .height = m_viewConfigurationViews[m_currentViewIndex].recommendedTextureHeight
+                            }
+                        }
+                    }
                 };
-                const auto &fov = m_views[m_currentViewIndex].fieldOfView;
-                const XrFovf xrFov = {
-                    .angleLeft = fov.angleLeft,
-                    .angleRight = fov.angleRight,
-                    .angleUp = fov.angleUp,
-                    .angleDown = fov.angleDown
-                };
-
-                m_xrCompositorLayerInfo.layerProjectionViews[m_currentViewIndex].pose = xrPose;
-                m_xrCompositorLayerInfo.layerProjectionViews[m_currentViewIndex].fov = xrFov;
-                m_xrCompositorLayerInfo.layerProjectionViews[m_currentViewIndex].subImage.swapchain = colorSwapchainInfo.xrSwapchain;
-                m_xrCompositorLayerInfo.layerProjectionViews[m_currentViewIndex].subImage.imageRect = { 0, 0, static_cast<int32_t>(width), static_cast<int32_t>(height) };
-                m_xrCompositorLayerInfo.layerProjectionViews[m_currentViewIndex].subImage.imageArrayIndex = 0;
+                // clang-format on
 
                 // Call subclass renderView() function to record and submit drawing commands for the current view
                 renderView();
@@ -291,27 +288,25 @@ void XrExampleEngineLayer::update()
             }
 
             // Set up the projection layer
-            XrCompositionLayerProjection projectionLayer{ XR_TYPE_COMPOSITION_LAYER_PROJECTION };
-            projectionLayer.layerFlags = XR_COMPOSITION_LAYER_BLEND_TEXTURE_SOURCE_ALPHA_BIT | XR_COMPOSITION_LAYER_CORRECT_CHROMATIC_ABERRATION_BIT;
-            projectionLayer.space = m_xrReferenceSpace;
-            projectionLayer.viewCount = m_xrCompositorLayerInfo.layerProjectionViews.size();
-            projectionLayer.views = m_xrCompositorLayerInfo.layerProjectionViews.data();
-
-            m_xrCompositorLayerInfo.layerProjections.emplace_back(projectionLayer);
-            m_xrCompositorLayerInfo.layers.push_back(reinterpret_cast<XrCompositionLayerBaseHeader *>(&m_xrCompositorLayerInfo.layerProjections.back()));
+            m_projectionLayers[0] = {
+                .type = KDXr::CompositionLayerType::Projection,
+                .referenceSpace = m_kdxrReferenceSpace,
+                .flags = KDXr::CompositionLayerFlagBits::BlendTextureSourceAlphaBit | KDXr::CompositionLayerFlagBits::CorrectChromaticAberrationBit,
+                .views = m_projectionLayerViews // All views - adjust to relevant subset if we add support for multiple projection layers
+            };
+            m_compositorLayers.push_back(reinterpret_cast<KDXr::CompositionLayer *>(&m_projectionLayers[0]));
         }
     }
 
-    // Inform the OpenXR compositor that we are done rendering the frame. We must specify the display time,
+    // Inform the XR compositor that we are done rendering the frame. We must specify the display time,
     // environment blend mode, and the list of layers to compose.
-    XrFrameEndInfo frameEndInfo{ XR_TYPE_FRAME_END_INFO };
-    frameEndInfo.displayTime = frameState.predictedDisplayTime;
-    frameEndInfo.environmentBlendMode = static_cast<XrEnvironmentBlendMode>(m_selectedEnvironmentBlendMode); // TODO: Add conversion helper function to KDXr
-    frameEndInfo.layerCount = static_cast<uint32_t>(m_xrCompositorLayerInfo.layers.size());
-    frameEndInfo.layers = m_xrCompositorLayerInfo.layers.data();
-    if (xrEndFrame(m_xrSession, &frameEndInfo) != XR_SUCCESS) {
+    const auto endFrameOptions = KDXr::EndFrameOptions{
+        .displayTime = frameState.predictedDisplayTime,
+        .environmentBlendMode = m_selectedEnvironmentBlendMode,
+        .layers = m_compositorLayers
+    };
+    if (m_kdxrSession.endFrame(endFrameOptions) != KDXr::EndFrameResult::Success) {
         SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to end frame.");
-        return;
     }
 }
 

@@ -129,6 +129,12 @@ BeginFrameResult Session::beginFrame()
     return apiSession->beginFrame();
 }
 
+EndFrameResult Session::endFrame(const EndFrameOptions &options)
+{
+    auto apiSession = m_api->resourceManager()->getSession(m_session);
+    return apiSession->endFrame(options);
+}
+
 LocateViewsResult Session::locateViews(const LocateViewsOptions &options, ViewState &viewState)
 {
     auto apiSession = m_api->resourceManager()->getSession(m_session);

@@ -67,4 +67,14 @@ ViewStateFlags xrViewStateFlagsToViewStateFlags(XrViewStateFlags flags)
     return ViewStateFlags::fromInt(static_cast<int64_t>(flags));
 }
 
+XrCompositionLayerFlags compositionLayerFlagsToXrCompositionLayerFlags(CompositionLayerFlags flags)
+{
+    return static_cast<XrCompositionLayerFlags>(flags.toInt());
+}
+
+XrEnvironmentBlendMode environmentBlendModeToXrEnvironmentBlendMode(EnvironmentBlendMode mode)
+{
+    return static_cast<XrEnvironmentBlendMode>(static_cast<uint32_t>(mode));
+}
+
 } // namespace KDXr

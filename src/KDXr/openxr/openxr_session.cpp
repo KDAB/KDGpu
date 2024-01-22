@@ -28,6 +28,14 @@ KDXr::Pose xrPoseToPose(const XrPosef &xrPose)
     };
 }
 
+XrPosef poseToXrPose(const KDXr::Pose &pose)
+{
+    return XrPosef{
+        .orientation = XrQuaternionf{ pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w },
+        .position = XrVector3f{ pose.position.x, pose.position.y, pose.position.z }
+    };
+}
+
 KDXr::FieldOfView xrFovToFov(const XrFovf &xrFov)
 {
     return KDXr::FieldOfView{
@@ -35,6 +43,24 @@ KDXr::FieldOfView xrFovToFov(const XrFovf &xrFov)
         .angleRight = xrFov.angleRight,
         .angleUp = xrFov.angleUp,
         .angleDown = xrFov.angleDown
+    };
+}
+
+XrFovf fovToXrFov(const KDXr::FieldOfView &fov)
+{
+    return XrFovf{
+        .angleLeft = fov.angleLeft,
+        .angleRight = fov.angleRight,
+        .angleUp = fov.angleUp,
+        .angleDown = fov.angleDown
+    };
+}
+
+XrRect2Di rect2DToXrRecti(const KDGpu::Rect2D &rect)
+{
+    return XrRect2Di{
+        .offset = XrOffset2Di{ rect.offset.x, rect.offset.y },
+        .extent = XrExtent2Di{ static_cast<int32_t>(rect.extent.width), static_cast<int32_t>(rect.extent.height) }
     };
 }
 
@@ -122,6 +148,71 @@ BeginFrameResult OpenXrSession::beginFrame()
         SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to begin frame.");
     }
     return static_cast<BeginFrameResult>(result);
+}
+
+EndFrameResult OpenXrSession::endFrame(const EndFrameOptions &options)
+{
+    // Create the corresponding OpenXR composition layer structures
+    const auto layerCount = options.layers.size();
+    xrLayers.resize(layerCount);
+
+    // Clear the various types of projection layer containers. The first time we call endFrame(),
+    // the vectors will begin to grow to the size of the number of layers. After that, they will
+    // maintain a high-water mark of the number of layers of each type.
+    xrLayerProjections.clear();
+    xrLayerProjectionViews.clear();
+
+    for (size_t layerIndex = 0; layerIndex < layerCount; ++layerIndex) {
+        switch (options.layers[layerIndex]->type) {
+        case CompositionLayerType::Projection: {
+            auto &projectionLayer = reinterpret_cast<ProjectionLayer &>(*options.layers[layerIndex]);
+            const auto viewCount = projectionLayer.views.size();
+
+            for (size_t viewIndex = 0; viewIndex < viewCount; ++viewIndex) {
+                auto openxrSwapchain = openxrResourceManager->getSwapchain(projectionLayer.views[viewIndex].swapchainSubTexture.swapchain);
+                assert(openxrSwapchain);
+
+                xrLayerProjectionViews.push_back({ XR_TYPE_COMPOSITION_LAYER_PROJECTION_VIEW });
+                auto &projectionView = xrLayerProjectionViews.back();
+                projectionView.pose = poseToXrPose(projectionLayer.views[viewIndex].pose);
+                projectionView.fov = fovToXrFov(projectionLayer.views[viewIndex].fieldOfView);
+                projectionView.subImage.swapchain = openxrSwapchain->swapchain;
+                projectionView.subImage.imageRect = rect2DToXrRecti(projectionLayer.views[viewIndex].swapchainSubTexture.rect);
+                projectionView.subImage.imageArrayIndex = projectionLayer.views[viewIndex].swapchainSubTexture.arrayIndex;
+            }
+
+            auto openxrReferenceSpace = openxrResourceManager->getReferenceSpace(projectionLayer.referenceSpace);
+            assert(openxrReferenceSpace);
+
+            xrLayerProjections.push_back({ XR_TYPE_COMPOSITION_LAYER_PROJECTION });
+            auto &projectionLayerProjection = xrLayerProjections.back();
+            projectionLayerProjection.layerFlags = compositionLayerFlagsToXrCompositionLayerFlags(projectionLayer.flags);
+            projectionLayerProjection.space = openxrReferenceSpace->referenceSpace;
+            projectionLayerProjection.viewCount = static_cast<uint32_t>(viewCount);
+            projectionLayerProjection.views = xrLayerProjectionViews.data() + xrLayerProjectionViews.size() - viewCount;
+
+            xrLayers[layerIndex] = reinterpret_cast<XrCompositionLayerBaseHeader *>(&projectionLayerProjection);
+
+            break;
+        }
+
+        default: {
+            SPDLOG_LOGGER_CRITICAL(Logger::logger(), "OpenXrSession::endFrame(). Unsupported layer type. Ignoring layer.");
+        }
+        }
+    }
+
+    // Submit the frame
+    XrFrameEndInfo frameEndInfo{ XR_TYPE_FRAME_END_INFO };
+    frameEndInfo.displayTime = options.displayTime;
+    frameEndInfo.environmentBlendMode = environmentBlendModeToXrEnvironmentBlendMode(options.environmentBlendMode);
+    frameEndInfo.layerCount = static_cast<uint32_t>(layerCount);
+    frameEndInfo.layers = xrLayers.data();
+    const auto result = xrEndFrame(session, &frameEndInfo);
+    if (result != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to end frame.");
+    }
+    return static_cast<EndFrameResult>(result);
 }
 
 LocateViewsResult OpenXrSession::locateViews(const LocateViewsOptions &options, ViewConfigurationType viewConfigurationType, ViewState &viewState)

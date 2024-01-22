@@ -145,22 +145,12 @@ protected:
     int64_t m_xrColorSwapchainFormat{ 0 };
     int64_t m_xrDepthSwapchainFormat{ 0 };
 
-    // TODO: Extent so this supports other types of composition layers beyond projection
-    struct CompositorLayerInfo {
-        XrTime predictedDisplayTime{ 0 };
-        std::vector<XrCompositionLayerBaseHeader *> layers;
-        std::vector<XrCompositionLayerProjection> layerProjections;
-        std::vector<XrCompositionLayerProjectionView> layerProjectionViews;
-
-        void reset(XrTime displayTime)
-        {
-            predictedDisplayTime = displayTime;
-            layers.clear();
-            layerProjections.clear();
-            layerProjectionViews.clear();
-        }
-    };
-    CompositorLayerInfo m_xrCompositorLayerInfo;
+    // TODO: Add api to the example engine layer to manage layers for the compositor.
+    // For now we assume a single projection layer with however many views were queried.
+    std::vector<KDXr::CompositionLayer *> m_compositorLayers; // Pointers to all the layers to be rendered
+    std::vector<KDXr::ProjectionLayer> m_projectionLayers{ 1 }; // Projection layers to be rendered. Default to 1 projection layer
+    std::vector<KDXr::ProjectionLayerView> m_projectionLayerViews{ MAX_VIEWS }; // Projection layer views. One per view for each projection layer
+    // TODO: Add support for other types of layers
 
     uint32_t m_currentViewIndex{ 0 };
     uint32_t m_currentColorImageIndex{ 0 };

@@ -251,6 +251,25 @@ enum class BeginFrameResult : int32_t {
     MaxEnum = 0x7fffffff
 };
 
+enum class EndFrameResult : int32_t {
+    Success = 0,
+    SessionLossPending = 3,
+    ValidationFailure = -1,
+    RuntimeFailure = -2,
+    HandleInvalid = -12,
+    InstanceLost = -13,
+    SessionNotRunning = -16,
+    SessionLost = -17,
+    LayerInvalid = -23,
+    LayerLimitExceeded = -24,
+    SwapchainRectInvalid = -25,
+    TimeInvalid = -30,
+    CallOrderInvalid = -37,
+    PoseInvalid = -39,
+    EnvironmentBlendModeUnsupported = -42,
+    MaxEnum = 0x7fffffff
+};
+
 enum class ViewStateFlagBits : uint32_t {
     OrientationValidBit = 0x00000001,
     PositionValidBit = 0x00000002,
@@ -292,7 +311,17 @@ enum class LocateViewsResult : int64_t {
     MaxEnum = 0x7fffffffffffffff
 };
 
+enum class CompositionLayerFlagBits : uint32_t {
+    CorrectChromaticAberrationBit = 0x00000001,
+    BlendTextureSourceAlphaBit = 0x00000002,
+    UnpremultiplyAlphaBit = 0x00000004,
+    MaxEnum = 0x7fffffff
+};
+
+using CompositionLayerFlags = KDGpu::Flags<CompositionLayerFlagBits>;
+
 } // namespace KDXr
 
+OPERATORS_FOR_FLAGS(KDXr::CompositionLayerFlags)
 OPERATORS_FOR_FLAGS(KDXr::SwapchainUsageFlags)
 OPERATORS_FOR_FLAGS(KDXr::ViewStateFlags)
