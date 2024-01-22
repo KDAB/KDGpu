@@ -57,6 +57,16 @@ struct ProjectionLayer {
     std::span<ProjectionLayerView> views;
 };
 
+struct QuadLayer {
+    CompositionLayerType type;
+    Handle<ReferenceSpace_t> referenceSpace;
+    CompositionLayerFlags flags{ CompositionLayerFlagBits::MaxEnum };
+    EyeVisibility eyeVisibility;
+    SwapchainSubTexture swapchainSubTexture{};
+    Pose pose{};
+    KDGpu::Extent2Df size{};
+};
+
 struct EndFrameOptions {
     Time displayTime{ 0 };
     EnvironmentBlendMode environmentBlendMode{ EnvironmentBlendMode::MaxEnum };

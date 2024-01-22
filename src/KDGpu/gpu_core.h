@@ -73,6 +73,13 @@ struct Extent2D {
     friend bool operator==(const Extent2D &, const Extent2D &) = default;
 };
 
+struct Extent2Df {
+    float width{ 0.0f };
+    float height{ 0.0f };
+
+    friend bool operator==(const Extent2Df &, const Extent2Df &) = default;
+};
+
 struct Extent3D {
     uint32_t width;
     uint32_t height;

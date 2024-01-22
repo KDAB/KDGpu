@@ -161,6 +161,7 @@ EndFrameResult OpenXrSession::endFrame(const EndFrameOptions &options)
     // maintain a high-water mark of the number of layers of each type.
     xrLayerProjections.clear();
     xrLayerProjectionViews.clear();
+    xrLayerQuads.clear();
 
     for (size_t layerIndex = 0; layerIndex < layerCount; ++layerIndex) {
         switch (options.layers[layerIndex]->type) {
@@ -192,6 +193,30 @@ EndFrameResult OpenXrSession::endFrame(const EndFrameOptions &options)
             projectionLayerProjection.views = xrLayerProjectionViews.data() + xrLayerProjectionViews.size() - viewCount;
 
             xrLayers[layerIndex] = reinterpret_cast<XrCompositionLayerBaseHeader *>(&projectionLayerProjection);
+
+            break;
+        }
+
+        case CompositionLayerType::Quad: {
+            auto &quadLayer = reinterpret_cast<QuadLayer &>(*options.layers[layerIndex]);
+
+            auto openxrSwapchain = openxrResourceManager->getSwapchain(quadLayer.swapchainSubTexture.swapchain);
+            assert(openxrSwapchain);
+            auto openxrReferenceSpace = openxrResourceManager->getReferenceSpace(quadLayer.referenceSpace);
+            assert(openxrReferenceSpace);
+
+            xrLayerQuads.push_back({ XR_TYPE_COMPOSITION_LAYER_QUAD });
+            auto &quadLayerQuad = xrLayerQuads.back();
+            quadLayerQuad.layerFlags = compositionLayerFlagsToXrCompositionLayerFlags(quadLayer.flags);
+            quadLayerQuad.space = openxrReferenceSpace->referenceSpace;
+            quadLayerQuad.eyeVisibility = eyeVisibilityToXrEyeVisibility(quadLayer.eyeVisibility);
+            quadLayerQuad.subImage.swapchain = openxrSwapchain->swapchain;
+            quadLayerQuad.subImage.imageRect = rect2DToXrRecti(quadLayer.swapchainSubTexture.rect);
+            quadLayerQuad.subImage.imageArrayIndex = quadLayer.swapchainSubTexture.arrayIndex;
+            quadLayerQuad.pose = poseToXrPose(quadLayer.pose);
+            quadLayerQuad.size = XrExtent2Df{ quadLayer.size.width, quadLayer.size.height };
+
+            xrLayers[layerIndex] = reinterpret_cast<XrCompositionLayerBaseHeader *>(&quadLayerQuad);
 
             break;
         }

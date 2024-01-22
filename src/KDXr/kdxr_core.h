@@ -320,6 +320,13 @@ enum class CompositionLayerFlagBits : uint32_t {
 
 using CompositionLayerFlags = KDGpu::Flags<CompositionLayerFlagBits>;
 
+enum class EyeVisibility : uint32_t {
+    Both = 0,
+    Left = 1,
+    Right = 2,
+    MaxEnum = 0x7fffffff
+};
+
 } // namespace KDXr
 
 OPERATORS_FOR_FLAGS(KDXr::CompositionLayerFlags)

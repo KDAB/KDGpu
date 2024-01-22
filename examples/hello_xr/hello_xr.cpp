@@ -255,6 +255,18 @@ void HelloXr::initializeScene()
             .view = {} // Not setting the depth texture view just yet
         }
     };
+    m_imguiPassOptions = {
+        .colorAttachments = {
+            {
+                .view = {}, // Not setting the swapchain texture view just yet
+                .clearValue = { 0.0f, 0.0f, 0.0f, 0.7f },
+                .finalLayout = TextureLayout::ColorAttachmentOptimal
+            }
+        },
+        .depthStencilAttachment = {
+            .view = {} // Not setting the depth texture view just yet
+        }
+    };
     // clang-format on
 
     // We will use a fence to synchronize CPU and GPU. When we render image for each view (eye), we
@@ -370,6 +382,30 @@ void HelloXr::renderView()
     const DrawIndexedCommand drawCmd = { .indexCount = 3 };
     opaquePass.drawIndexed(drawCmd);
     opaquePass.end();
+    m_commandBuffer = commandRecorder.finish();
+
+    const SubmitOptions submitOptions = {
+        .commandBuffers = { m_commandBuffer },
+        .signalFence = m_fence
+    };
+    m_queue.submit(submitOptions);
+}
+
+void HelloXr::renderQuad()
+{
+    m_fence.wait();
+    m_fence.reset();
+
+    auto commandRecorder = m_device.createCommandRecorder();
+
+    // Set up the render pass using the current color and depth texture views
+    m_imguiPassOptions.colorAttachments[0].view = m_quadColorSwapchain.textureViews[m_currentColorImageIndex];
+    m_imguiPassOptions.depthStencilAttachment.view = m_quadDepthSwapchain.textureViews[m_currentDepthImageIndex];
+    auto imguiPass = commandRecorder.beginRenderPass(m_imguiPassOptions);
+
+    renderImGuiOverlay(&imguiPass, m_currentColorImageIndex);
+
+    imguiPass.end();
     m_commandBuffer = commandRecorder.finish();
 
     const SubmitOptions submitOptions = {

@@ -31,6 +31,7 @@ protected:
     void cleanupScene() override;
     void updateScene() override;
     void renderView() override;
+    void renderQuad() override;
     void resize() override;
 
 private:
@@ -53,6 +54,7 @@ private:
     PipelineLayout m_pipelineLayout;
     GraphicsPipeline m_pipeline;
     RenderPassCommandRecorderOptions m_opaquePassOptions;
+    RenderPassCommandRecorderOptions m_imguiPassOptions;
     CommandBuffer m_commandBuffer;
 
     glm::mat4 m_transform;

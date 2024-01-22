@@ -11,9 +11,14 @@
 #include "xr_example_engine_layer.h"
 
 #include <KDGpuExample/engine.h>
+#include <KDGpuExample/imgui_input_handler.h>
+#include <KDGpuExample/imgui_item.h>
+#include <KDGpuExample/imgui_renderer.h>
 #include <KDXr/utils/formatters.h>
 #include <KDGpu/texture_options.h>
 #include <KDGui/gui_application.h>
+
+#include <imgui.h>
 
 #include <assert.h>
 
@@ -168,12 +173,43 @@ void XrExampleEngineLayer::onAttached()
             depthSwapchain.textureViews.emplace_back(depthTextures[j].createView());
     }
 
+    // Create quad color and depth swapchains
+    m_quadColorSwapchain.swapchain = m_kdxrSession.createSwapchain({ .format = m_colorSwapchainFormat,
+                                                                     .usage = KDXr::SwapchainUsageFlagBits::SampledBit | KDXr::SwapchainUsageFlagBits::ColorAttachmentBit,
+                                                                     .width = m_quadSize.width,
+                                                                     .height = m_quadSize.height,
+                                                                     .sampleCount = 1 });
+    const auto &quadTextures = m_quadColorSwapchain.swapchain.textures();
+    const auto quadTextureCount = quadTextures.size();
+    m_quadColorSwapchain.textureViews.reserve(quadTextureCount);
+    for (size_t j = 0; j < quadTextureCount; ++j)
+        m_quadColorSwapchain.textureViews.emplace_back(quadTextures[j].createView());
+
+    m_quadDepthSwapchain.swapchain = m_kdxrSession.createSwapchain({ .format = m_depthSwapchainFormat,
+                                                                     .usage = KDXr::SwapchainUsageFlagBits::SampledBit | KDXr::SwapchainUsageFlagBits::DepthStencilAttachmentBit,
+                                                                     .width = m_quadSize.width,
+                                                                     .height = m_quadSize.height,
+                                                                     .sampleCount = 1 });
+    const auto &quadDepthTextures = m_quadDepthSwapchain.swapchain.textures();
+    const auto quadDepthTextureCount = quadDepthTextures.size();
+    m_quadDepthSwapchain.textureViews.reserve(quadDepthTextureCount);
+    for (size_t j = 0; j < quadDepthTextureCount; ++j)
+        m_quadDepthSwapchain.textureViews.emplace_back(quadDepthTextures[j].createView());
+
+    // Initialize the ImGui overlay
+    recreateImGuiOverlay();
+
     // Delegate to subclass to initialize scene
     initializeScene();
 }
 
 void XrExampleEngineLayer::onDetached()
 {
+    m_imguiOverlay = {};
+    m_quadColorSwapchain.textureViews.clear();
+    m_quadColorSwapchain.swapchain = {};
+    m_quadDepthSwapchain.textureViews.clear();
+    m_quadDepthSwapchain.swapchain = {};
     m_colorSwapchains.clear();
     m_depthSwapchains.clear();
     m_kdxrReferenceSpace = {};
@@ -188,6 +224,10 @@ void XrExampleEngineLayer::update()
 {
     // Release any staging buffers we are done with
     releaseStagingBuffers();
+
+    // TODO: Handle events and pass on to ImGui as needed
+    // Update the ImGui overlay
+    updateImGuiOverlay();
 
     // Process XR events
     m_kdxrInstance.processEvents();
@@ -228,7 +268,7 @@ void XrExampleEngineLayer::update()
             // Call updateScene() function to update scene state.
             updateScene();
 
-            // m_xrCompositorLayerInfo.layerProjectionViews.resize(viewState.viewCount, { XR_TYPE_COMPOSITION_LAYER_PROJECTION_VIEW });
+            // Render the projection layer
             m_projectionLayerViews.resize(viewState.viewCount);
 
             for (m_currentViewIndex = 0; m_currentViewIndex < viewState.viewCount; ++m_currentViewIndex) {
@@ -276,6 +316,44 @@ void XrExampleEngineLayer::update()
                 .views = m_projectionLayerViews // All views - adjust to relevant subset if we add support for multiple projection layers
             };
             m_compositorLayers.push_back(reinterpret_cast<KDXr::CompositionLayer *>(&m_projectionLayers[0]));
+
+            // Render the quad layer
+            // Acquire and wait for the next swapchain textures to become available for the color and depth swapchains
+            m_quadColorSwapchain.swapchain.getNextTextureIndex(m_currentColorImageIndex);
+            m_quadDepthSwapchain.swapchain.getNextTextureIndex(m_currentDepthImageIndex);
+
+            m_quadColorSwapchain.swapchain.waitForTexture();
+            m_quadDepthSwapchain.swapchain.waitForTexture();
+
+            // Call subclass renderQuad() function to record and submit drawing commands for the quad
+            renderQuad();
+
+            // Give the swapchain textures back to the XR runtime, allowing the compositor to use the image.
+            m_quadColorSwapchain.swapchain.releaseTexture();
+            m_quadDepthSwapchain.swapchain.releaseTexture();
+
+            // Set up the quad layer
+            // clang-format off
+            m_quadLayers[0] = {
+                .type = KDXr::CompositionLayerType::Quad,
+                .referenceSpace = m_kdxrReferenceSpace,
+                .flags = KDXr::CompositionLayerFlagBits::BlendTextureSourceAlphaBit | KDXr::CompositionLayerFlagBits::CorrectChromaticAberrationBit,
+                .eyeVisibility = KDXr::EyeVisibility::Both,
+                .swapchainSubTexture = {
+                    .swapchain = m_quadColorSwapchain.swapchain,
+                    .rect = {
+                        .offset = { .x = 0, .y = 0 },
+                        .extent = {
+                            .width = m_quadSize.width,
+                            .height = m_quadSize.height
+                        }
+                    }
+                },
+                .pose = m_quadPose,
+                .size = m_quadWorldSize
+            };
+            // clang-format on
+            m_compositorLayers.push_back(reinterpret_cast<KDXr::CompositionLayer *>(&m_quadLayers[0]));
         }
     }
 
@@ -321,6 +399,69 @@ void XrExampleEngineLayer::releaseStagingBuffers()
     if (removedCount) {
         SPDLOG_LOGGER_INFO(m_logger, "Released {} staging buffers", removedCount);
     }
+}
+
+void XrExampleEngineLayer::drawImGuiOverlay(ImGuiContext *ctx)
+{
+    ImGui::SetCurrentContext(ctx);
+    ImGui::SetNextWindowPos(ImVec2(10, 20));
+    ImGui::SetNextWindowSize(ImVec2(0, 0), ImGuiCond_FirstUseEver);
+    ImGui::Begin(
+            "Basic Info",
+            nullptr,
+            ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize);
+
+    ImGui::Text("App: %s", KDGui::GuiApplication::instance()->applicationName().data());
+    ImGui::Text("GPU: %s", m_device.adapter()->properties().deviceName.c_str());
+    const auto fps = engine()->fps();
+    ImGui::Text("%.2f ms/frame (%.1f fps)", (1000.0f / fps), fps);
+    ImGui::End();
+
+    for (const auto &func : m_imGuiOverlayDrawFunctions)
+        func(ctx);
+}
+
+void XrExampleEngineLayer::renderImGuiOverlay(RenderPassCommandRecorder *recorder, uint32_t inFlightIndex)
+{
+    // Updates the geometry buffers used by ImGui and records the commands needed to
+    // get the ui into a render target.
+    const Extent2D extent{ m_quadSize.width, m_quadSize.height };
+    m_imguiOverlay->render(recorder, extent, inFlightIndex);
+}
+
+void XrExampleEngineLayer::registerImGuiOverlayDrawFunction(const std::function<void(ImGuiContext *)> &func)
+{
+    m_imGuiOverlayDrawFunctions.push_back(func);
+}
+
+void XrExampleEngineLayer::clearImGuiOverlayDrawFunctions()
+{
+    m_imGuiOverlayDrawFunctions.clear();
+}
+
+void XrExampleEngineLayer::recreateImGuiOverlay()
+{
+    m_imguiOverlay = std::make_unique<ImGuiItem>(&m_device, &m_queue);
+    m_imguiOverlay->initialize(1.0f, m_samples.get(), m_colorSwapchainFormat, m_depthSwapchainFormat);
+}
+
+void XrExampleEngineLayer::updateImGuiOverlay()
+{
+    ImGuiContext *context = m_imguiOverlay->context();
+    ImGui::SetCurrentContext(context);
+
+    // Set frame time and display size.
+    ImGuiIO &io = ImGui::GetIO();
+    io.DeltaTime = engine()->deltaTimeSeconds();
+    io.DisplaySize = ImVec2(static_cast<float>(m_quadSize.width), static_cast<float>(m_quadSize.height));
+
+    // Call our imgui drawing function
+    ImGui::NewFrame();
+    drawImGuiOverlay(context);
+
+    // Process the ImGui drawing functions to generate geometry and commands. The actual buffers will be updated
+    // and commands translated by the ImGuiRenderer later in the frame.
+    ImGui::Render();
 }
 
 } // namespace KDGpuExample

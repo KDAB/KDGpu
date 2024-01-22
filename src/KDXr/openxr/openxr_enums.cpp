@@ -77,4 +77,9 @@ XrEnvironmentBlendMode environmentBlendModeToXrEnvironmentBlendMode(EnvironmentB
     return static_cast<XrEnvironmentBlendMode>(static_cast<uint32_t>(mode));
 }
 
+XrEyeVisibility eyeVisibilityToXrEyeVisibility(EyeVisibility visibility)
+{
+    return static_cast<XrEyeVisibility>(static_cast<uint32_t>(visibility));
+}
+
 } // namespace KDXr

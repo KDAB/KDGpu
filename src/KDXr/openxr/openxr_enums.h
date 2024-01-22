@@ -34,4 +34,6 @@ XrCompositionLayerFlags compositionLayerFlagsToXrCompositionLayerFlags(Compositi
 
 XrEnvironmentBlendMode environmentBlendModeToXrEnvironmentBlendMode(EnvironmentBlendMode mode);
 
+XrEyeVisibility eyeVisibilityToXrEyeVisibility(EyeVisibility visibility);
+
 } // namespace KDXr
