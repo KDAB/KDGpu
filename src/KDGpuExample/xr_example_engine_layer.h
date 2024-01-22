@@ -113,23 +113,10 @@ protected:
 
     struct KDXrSwapchainInfo {
         KDXr::Swapchain swapchain;
-        XrSwapchain xrSwapchain{ XR_NULL_HANDLE }; // TODO: Remove once KDXr is suitable for use
         std::vector<TextureView> textureViews;
     };
     std::vector<KDXrSwapchainInfo> m_colorSwapchains;
     std::vector<KDXrSwapchainInfo> m_depthSwapchains;
-
-    // OpenXR related members (to be removed once KDXr is suitable for use)
-    XrInstance m_xrInstance{ XR_NULL_HANDLE };
-    XrDebugUtilsMessengerEXT m_debugUtilsMessenger{};
-
-    XrFormFactor m_formFactor{ XR_FORM_FACTOR_HEAD_MOUNTED_DISPLAY };
-    XrSystemId m_systemId = { XR_NULL_SYSTEM_ID };
-    XrSystemProperties m_systemProperties{ XR_TYPE_SYSTEM_PROPERTIES };
-
-    XrSession m_xrSession{ XR_NULL_HANDLE };
-
-    XrSpace m_xrReferenceSpace{ XR_NULL_HANDLE };
 
     const std::vector<Format> m_applicationColorSwapchainFormats{
         Format::B8G8R8A8_SRGB,
@@ -141,9 +128,6 @@ protected:
         Format::D32_SFLOAT,
         Format::D16_UNORM
     };
-    std::vector<int64_t> m_xrSwapchainFormats;
-    int64_t m_xrColorSwapchainFormat{ 0 };
-    int64_t m_xrDepthSwapchainFormat{ 0 };
 
     // TODO: Add api to the example engine layer to manage layers for the compositor.
     // For now we assume a single projection layer with however many views were queried.

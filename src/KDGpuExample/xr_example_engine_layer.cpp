@@ -140,10 +140,6 @@ void XrExampleEngineLayer::onAttached()
     m_colorSwapchains.resize(viewCount);
     m_depthSwapchains.resize(viewCount);
 
-    // TODO: Remove this temporary exposure of underlying OpenXR resources once KDXr is suitable for use.
-    auto *openXrResourceManager = dynamic_cast<KDXr::OpenXrResourceManager *>(m_xrApi->resourceManager());
-    assert(openXrResourceManager);
-
     for (size_t i = 0; i < viewCount; ++i) {
         // Color swapchain and texture views
         auto &colorSwapchain = m_colorSwapchains[i];
@@ -152,7 +148,6 @@ void XrExampleEngineLayer::onAttached()
                                                                    .width = m_viewConfigurationViews[i].recommendedTextureWidth,
                                                                    .height = m_viewConfigurationViews[i].recommendedTextureHeight,
                                                                    .sampleCount = m_viewConfigurationViews[i].recommendedSwapchainSampleCount });
-        colorSwapchain.xrSwapchain = openXrResourceManager->getSwapchain(colorSwapchain.swapchain.handle())->swapchain;
         const auto &textures = colorSwapchain.swapchain.textures();
         const auto textureCount = textures.size();
         colorSwapchain.textureViews.reserve(textureCount);
@@ -166,26 +161,12 @@ void XrExampleEngineLayer::onAttached()
                                                                    .width = m_viewConfigurationViews[i].recommendedTextureWidth,
                                                                    .height = m_viewConfigurationViews[i].recommendedTextureHeight,
                                                                    .sampleCount = m_viewConfigurationViews[i].recommendedSwapchainSampleCount });
-        depthSwapchain.xrSwapchain = openXrResourceManager->getSwapchain(depthSwapchain.swapchain.handle())->swapchain;
         const auto &depthTextures = depthSwapchain.swapchain.textures();
         const auto depthTextureCount = depthTextures.size();
         depthSwapchain.textureViews.reserve(depthTextureCount);
         for (size_t j = 0; j < depthTextureCount; ++j)
             depthSwapchain.textureViews.emplace_back(depthTextures[j].createView());
     }
-
-    // TODO: Remove this temporary exposure of underlying OpenXR resources once KDXr is suitable for use.
-    // It just allows us to use the raw C api for the stuff that is not implemented in KDXr yet.
-    auto *openxrInstance = openXrResourceManager->getInstance(m_kdxrInstance.handle());
-    assert(openxrInstance);
-    m_xrInstance = openxrInstance->instance;
-    auto *openxrSystem = openXrResourceManager->getSystem(m_kdxrSystem->handle());
-    assert(openxrSystem);
-    m_systemId = openxrSystem->system;
-    auto *openXrSession = openXrResourceManager->getSession(m_kdxrSession.handle());
-    m_xrSession = openXrSession->session;
-    auto *openxrReferenceSpace = openXrResourceManager->getReferenceSpace(m_kdxrReferenceSpace.handle());
-    m_xrReferenceSpace = openxrReferenceSpace->referenceSpace;
 
     // Delegate to subclass to initialize scene
     initializeScene();
