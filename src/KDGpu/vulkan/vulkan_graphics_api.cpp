@@ -10,10 +10,13 @@
 
 #include "vulkan_graphics_api.h"
 
+#include <KDGpu/vulkan/vulkan_config.h>
 #include <KDGpu/vulkan/vulkan_enums.h>
 #include <KDGpu/texture_options.h>
 
 namespace KDGpu {
+
+std::vector<std::string> VulkanGraphicsApi::ms_ignoredErrors = KDGpu::defaultIgnoredErrors;
 
 VulkanGraphicsApi::VulkanGraphicsApi()
     : GraphicsApi()
@@ -111,6 +114,16 @@ Texture VulkanGraphicsApi::createTextureFromExistingVkImage(const Handle<Device_
 std::string VulkanGraphicsApi::getMemoryStats(const Handle<Device_t> &device) const
 {
     return m_vulkanResourceManager->getMemoryStats(device);
+}
+
+void VulkanGraphicsApi::addValidationMessageToIgnore(const std::string &messageToIgnore)
+{
+    ms_ignoredErrors.push_back(messageToIgnore);
+}
+
+const std::vector<std::string> &VulkanGraphicsApi::validationMessagesToIgnore()
+{
+    return ms_ignoredErrors;
 }
 
 } // namespace KDGpu

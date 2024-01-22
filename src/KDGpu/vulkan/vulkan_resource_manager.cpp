@@ -28,9 +28,11 @@
 #include <KDGpu/vulkan/vulkan_config.h>
 #include <KDGpu/vulkan/vulkan_enums.h>
 #include <KDGpu/vulkan/vulkan_formatters.h>
+#include <KDGpu/vulkan/vulkan_graphics_api.h>
 
 #include <cassert>
 #include <stdexcept>
+#include <algorithm>
 
 namespace {
 
@@ -40,14 +42,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
         const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
         void *pUserData)
 {
-    // The validation layers do not cache the queried swapchain extent range and so
-    // can race on X11 when resizing rapidly. See
-    //
-    // https://github.com/KhronosGroup/Vulkan-ValidationLayers/issues/1340
-    //
-    // Ignore this false positive.
-    const char *ignore = "VUID-VkSwapchainCreateInfoKHR-imageExtent-01274";
-    if (pCallbackData->pMessageIdName != nullptr && strcmp(ignore, pCallbackData->pMessageIdName) == 0)
+    if (std::ranges::any_of(KDGpu::VulkanGraphicsApi::validationMessagesToIgnore(), [pCallbackData](const std::string &error) -> bool { return error == pCallbackData->pMessageIdName; }))
         return false;
 
     switch (messageSeverity) {

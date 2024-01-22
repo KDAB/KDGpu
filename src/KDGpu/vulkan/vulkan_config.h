@@ -16,6 +16,7 @@
 
 #include <array>
 #include <vector>
+#include <string>
 
 namespace KDGpu {
 
@@ -50,5 +51,15 @@ std::vector<const char *> KDGPU_EXPORT getDefaultRequestedInstanceExtensions();
 // Device Config
 //
 std::vector<const char *> KDGPU_EXPORT getDefaultRequestedDeviceExtensions();
+
+const std::vector<std::string> defaultIgnoredErrors = {
+    // The validation layers do not cache the queried swapchain extent range and so
+    // can race on X11 when resizing rapidly. See
+    //
+    // https://github.com/KhronosGroup/Vulkan-ValidationLayers/issues/1340
+    //
+    // Ignore this false positive.
+    "VUID-VkSwapchainCreateInfoKHR-imageExtent-01274"
+};
 
 } // namespace KDGpu

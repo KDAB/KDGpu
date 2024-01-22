@@ -53,8 +53,12 @@ public:
 
     std::string getMemoryStats(const Handle<Device_t> &device) const;
 
+    static void addValidationMessageToIgnore(const std::string &messageToIgnore);
+    static const std::vector<std::string> &validationMessagesToIgnore();
+
 private:
     std::unique_ptr<VulkanResourceManager> m_vulkanResourceManager;
+    static std::vector<std::string> ms_ignoredErrors;
 };
 
 } // namespace KDGpu
