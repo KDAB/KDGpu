@@ -92,7 +92,7 @@ public:
             // SPDLOG_LOGGER_WARN(Logger::logger(), "Grow {} {} {}", __FUNCTION__, typeid(T).name(), m_data.size());
 
             // No gaps in the m_data vector, add a new element at the end
-            m_data.emplace_back(args...);
+            m_data.emplace_back(std::forward<Args>(args)...);
             m_generations.emplace_back(GenerationEntry{ 1, true });
 
             Handle<H> handle(m_data.size() - 1, 1);
