@@ -124,19 +124,14 @@ protected:
     Format m_colorSwapchainFormat{ Format::UNDEFINED };
     Format m_depthSwapchainFormat{ Format::UNDEFINED };
 
-    struct KDXrSwapchainInfo {
-        KDXr::Swapchain swapchain;
-        std::vector<TextureView> textureViews;
-    };
-
     // For projection layer
-    std::vector<KDXrSwapchainInfo> m_colorSwapchains;
-    std::vector<KDXrSwapchainInfo> m_depthSwapchains;
+    std::vector<KDXr::SwapchainInfo> m_colorSwapchains;
+    std::vector<KDXr::SwapchainInfo> m_depthSwapchains;
 
     // For quad layer
     const KDGpu::Extent2D m_quadSize{ 1280, 720 };
-    KDXrSwapchainInfo m_quadColorSwapchain;
-    KDXrSwapchainInfo m_quadDepthSwapchain;
+    KDXr::SwapchainInfo m_quadColorSwapchain;
+    KDXr::SwapchainInfo m_quadDepthSwapchain;
     KDXr::Pose m_quadPose{ .orientation = { 0.0f, 0.0f, 0.0f, 1.0f }, .position = { 0.0f, 0.75f, -1.5f } };
     KDGpu::Extent2Df m_quadWorldSize{ 2.0f, 2.0f * m_quadSize.height / m_quadSize.width };
 

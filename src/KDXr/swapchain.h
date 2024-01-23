@@ -16,6 +16,7 @@
 
 #include <KDGpu/gpu_core.h>
 #include <KDGpu/texture.h>
+#include <KDGpu/texture_view.h>
 
 #include <vector>
 
@@ -73,6 +74,11 @@ private:
     std::vector<KDGpu::Texture> m_textures;
 
     friend class Session;
+};
+
+struct SwapchainInfo {
+    Swapchain swapchain;
+    std::vector<KDGpu::TextureView> textureViews;
 };
 
 } // namespace KDXr

@@ -273,8 +273,8 @@ void XrExampleEngineLayer::update()
 
             for (m_currentViewIndex = 0; m_currentViewIndex < viewState.viewCount; ++m_currentViewIndex) {
                 // Acquire and wait for the next swapchain textures to become available for the color and depth swapchains
-                KDXrSwapchainInfo &colorSwapchainInfo = m_colorSwapchains[m_currentViewIndex];
-                KDXrSwapchainInfo &depthSwapchainInfo = m_depthSwapchains[m_currentViewIndex];
+                KDXr::SwapchainInfo &colorSwapchainInfo = m_colorSwapchains[m_currentViewIndex];
+                KDXr::SwapchainInfo &depthSwapchainInfo = m_depthSwapchains[m_currentViewIndex];
 
                 colorSwapchainInfo.swapchain.getNextTextureIndex(m_currentColorImageIndex);
                 depthSwapchainInfo.swapchain.getNextTextureIndex(m_currentDepthImageIndex);
