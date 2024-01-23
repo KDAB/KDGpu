@@ -69,8 +69,24 @@ set(HEADERS
 )
 
 if(KDGPU_OPENXR_SUPPORT)
-    list(APPEND SOURCES xr_example_engine_layer.cpp)
-    list(APPEND HEADERS xr_example_engine_layer.h)
+    set(XR_SOURCES
+        xr_compositor/xr_compositor_layer.cpp
+        xr_compositor/xr_projection_layer.cpp
+        xr_compositor/xr_quad_layer.cpp
+        xr_compositor/xr_quad_imgui_layer.cpp
+        xr_example_engine_layer.cpp
+    )
+
+    set(XR_HEADERS
+        xr_compositor/xr_compositor_layer.h
+        xr_compositor/xr_projection_layer.h
+        xr_compositor/xr_quad_layer.h
+        xr_compositor/xr_quad_imgui_layer.h
+        xr_example_engine_layer.h
+    )
+
+    list(APPEND SOURCES ${XR_SOURCES})
+    list(APPEND HEADERS ${XR_HEADERS})
 endif()
 
 add_library(

@@ -11,6 +11,7 @@
 #pragma once
 
 #include <KDGpuExample/engine_layer.h>
+#include <KDGpuExample/xr_compositor/xr_compositor_layer.h>
 
 #include <KDXr/instance.h>
 #include <KDXr/reference_space.h>
@@ -44,8 +45,6 @@
 #include <memory>
 #include <vector>
 
-struct ImGuiContext;
-
 namespace KDGpu {
 class RenderPassCommandRecorder;
 }
@@ -53,8 +52,6 @@ class RenderPassCommandRecorder;
 using namespace KDGpu;
 
 namespace KDGpuExample {
-
-class ImGuiItem;
 
 constexpr uint32_t MAX_VIEWS = 2;
 
@@ -70,21 +67,53 @@ public:
     XrExampleEngineLayer();
     ~XrExampleEngineLayer() override;
 
+    template<typename T>
+    XrCompositorLayer *addCompositorLayer(std::unique_ptr<T> &&layer)
+    {
+        // Caller has to transfer ownership to us so there should not be an old parent
+        assert(layer->m_engineLayer == nullptr);
+
+        layer->m_engineLayer = this;
+        m_compositorLayerObjects.push_back(std::move(layer));
+        XrCompositorLayer *layerPtr = m_compositorLayerObjects.back().get();
+        return layerPtr;
+    }
+
+    template<typename T, typename... Ts>
+    T *createCompositorLayer(Ts... args)
+    {
+        auto layer = std::make_unique<T>(std::forward<Ts>(args)...);
+        return static_cast<T *>(this->addCompositorLayer(std::move(layer)));
+    }
+
+    template<typename T>
+    std::unique_ptr<XrCompositorLayer> takeCompositorLayer(T *layer)
+    {
+        // Find the layer from the raw pointer
+        auto layerIt = std::find_if(
+                m_compositorLayerObjects.begin(),
+                m_compositorLayerObjects.end(),
+                [layer](const auto &v) {
+                    return v.get() == layer;
+                });
+
+        // Didn't find a matching layer?
+        if (layerIt == m_compositorLayerObjects.end())
+            return {};
+
+        // Unparent the layer and return it along with ownership!
+        auto takenLayer = std::move(*layerIt);
+        takenLayer->m_engineLayer = nullptr;
+        m_compositorLayerObjects.erase(layerIt);
+        return takenLayer;
+    }
+
 protected:
     virtual void initializeScene() = 0;
     virtual void cleanupScene() = 0;
     virtual void updateScene() = 0;
     virtual void renderView() = 0; // To render a single view at a time for the projection layer
-    virtual void renderQuad() = 0; // To render the quad layer
     virtual void resize() = 0;
-
-    // TODO: Can we share this with ExampleEngineLayer?
-    virtual void drawImGuiOverlay(ImGuiContext *ctx);
-    virtual void renderImGuiOverlay(RenderPassCommandRecorder *recorder, uint32_t inFlightIndex = 0);
-    void registerImGuiOverlayDrawFunction(const std::function<void(ImGuiContext *)> &func);
-    void clearImGuiOverlayDrawFunctions();
-    void recreateImGuiOverlay();
-    void updateImGuiOverlay();
 
     virtual void onInstanceLost();
 
@@ -128,16 +157,6 @@ protected:
     std::vector<KDXr::SwapchainInfo> m_colorSwapchains;
     std::vector<KDXr::SwapchainInfo> m_depthSwapchains;
 
-    // For quad layer
-    const KDGpu::Extent2D m_quadSize{ 1280, 720 };
-    KDXr::SwapchainInfo m_quadColorSwapchain;
-    KDXr::SwapchainInfo m_quadDepthSwapchain;
-    KDXr::Pose m_quadPose{ .orientation = { 0.0f, 0.0f, 0.0f, 1.0f }, .position = { 0.0f, 0.75f, -1.5f } };
-    KDGpu::Extent2Df m_quadWorldSize{ 2.0f, 2.0f * m_quadSize.height / m_quadSize.width };
-
-    std::unique_ptr<ImGuiItem> m_imguiOverlay;
-    std::vector<std::function<void(ImGuiContext *)>> m_imGuiOverlayDrawFunctions;
-
     const std::vector<Format> m_applicationColorSwapchainFormats{
         Format::B8G8R8A8_SRGB,
         Format::R8G8B8A8_SRGB,
@@ -154,14 +173,14 @@ protected:
     std::vector<KDXr::CompositionLayer *> m_compositorLayers; // Pointers to all the layers to be rendered
     std::vector<KDXr::ProjectionLayer> m_projectionLayers{ 1 }; // Projection layers to be rendered. Default to 1 projection layer
     std::vector<KDXr::ProjectionLayerView> m_projectionLayerViews{ MAX_VIEWS }; // Projection layer views. One per view for each projection layer
-    std::vector<KDXr::QuadLayer> m_quadLayers{ 1 }; // Quad layers to be rendered. Default to 1 quad layer
-    // TODO: Add support for other types of layers
 
     uint32_t m_currentViewIndex{ 0 };
     uint32_t m_currentColorImageIndex{ 0 };
     uint32_t m_currentDepthImageIndex{ 0 };
 
     std::array<KDXr::View, MAX_VIEWS> m_views;
+
+    std::vector<std::unique_ptr<XrCompositorLayer>> m_compositorLayerObjects;
 };
 
 } // namespace KDGpuExample

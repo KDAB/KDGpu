@@ -142,12 +142,16 @@ struct Quaternion {
     float y{ 0.0f };
     float z{ 0.0f };
     float w{ 1.0f };
+
+    bool operator==(const Quaternion &other) const = default;
 };
 
 struct Vector3 {
     float x{ 0.0f };
     float y{ 0.0f };
     float z{ 0.0f };
+
+    bool operator==(const Vector3 &other) const = default;
 };
 
 struct Pose {

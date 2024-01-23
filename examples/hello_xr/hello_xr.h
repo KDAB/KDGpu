@@ -21,6 +21,10 @@
 
 #include <array>
 
+namespace KDGpuExample {
+class XrQuadImGuiLayer;
+}
+
 using namespace KDGpuExample;
 
 class HelloXr : public XrExampleEngineLayer
@@ -31,7 +35,6 @@ protected:
     void cleanupScene() override;
     void updateScene() override;
     void renderView() override;
-    void renderQuad() override;
     void resize() override;
 
 private:
@@ -54,11 +57,12 @@ private:
     PipelineLayout m_pipelineLayout;
     GraphicsPipeline m_pipeline;
     RenderPassCommandRecorderOptions m_opaquePassOptions;
-    RenderPassCommandRecorderOptions m_imguiPassOptions;
     CommandBuffer m_commandBuffer;
 
     glm::mat4 m_transform;
     Buffer m_transformBuffer;
     BindGroup m_entityTransformBindGroup;
     Fence m_fence;
+
+    XrQuadImGuiLayer *m_imguiLayer{ nullptr };
 };
