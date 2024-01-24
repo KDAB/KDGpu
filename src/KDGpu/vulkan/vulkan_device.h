@@ -41,6 +41,7 @@ struct Adapter_t;
  */
 struct KDGPU_EXPORT VulkanDevice : public ApiDevice {
     explicit VulkanDevice(VkDevice _device,
+                          uint32_t _apiVersion,
                           VulkanResourceManager *_vulkanResourceManager,
                           const Handle<Adapter_t> &_adapterHandle,
                           bool _isOwned = true) noexcept;

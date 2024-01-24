@@ -514,14 +514,14 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     if (result != VK_SUCCESS)
         throw std::runtime_error(std::string{ "Failed to create a logical device: " } + getResultAsString(result));
 
-    const auto deviceHandle = m_devices.emplace(vkDevice, this, adapterHandle);
+    const auto deviceHandle = m_devices.emplace(vkDevice, adapterProperties.apiVersion, this, adapterHandle);
 
     return deviceHandle;
 }
 
 Handle<Device_t> VulkanResourceManager::createDeviceFromExistingVkDevice(const Handle<Adapter_t> &adapterHandle, VkDevice vkDevice)
 {
-    const auto deviceHandle = m_devices.emplace(vkDevice, this, adapterHandle, false);
+    const auto deviceHandle = m_devices.emplace(vkDevice, VK_API_VERSION_1_2, this, adapterHandle, false);
 
     return deviceHandle;
 }

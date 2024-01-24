@@ -24,6 +24,7 @@
 namespace KDGpu {
 
 VulkanDevice::VulkanDevice(VkDevice _device,
+                           uint32_t _apiVersion,
                            VulkanResourceManager *_vulkanResourceManager,
                            const Handle<Adapter_t> &_adapterHandle,
                            bool _isOwned) noexcept
@@ -38,7 +39,7 @@ VulkanDevice::VulkanDevice(VkDevice _device,
     VulkanInstance *vulkanInstance = vulkanResourceManager->getInstance(vulkanAdapter->instanceHandle);
 
     VmaAllocatorCreateInfo allocatorInfo = {};
-    allocatorInfo.vulkanApiVersion = VK_API_VERSION_1_2;
+    allocatorInfo.vulkanApiVersion = _apiVersion;
     allocatorInfo.instance = vulkanInstance->instance;
     allocatorInfo.physicalDevice = vulkanAdapter->physicalDevice;
     allocatorInfo.device = device;
