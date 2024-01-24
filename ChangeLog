@@ -1,3 +1,7 @@
+- v0.4.6
+  - Vulkan 1.1 support
+  - Partially bound BindGroup example
+  - Make it possible to ignore specific Validation errors
 - v0.4.5
   - Warn about missing Vulkan layers
   - Use std::exchange in move ctors
