@@ -10,7 +10,7 @@
 
 #include <KDGui/window.h>
 #include <KDGui/platform/cocoa/cocoa_platform_window.h>
-#include <KDFoundation/logging.h>
+#include <KDUtils/logging.h>
 
 #import <QuartzCore/CAMetalLayer.h>
 #import <Cocoa/Cocoa.h>
