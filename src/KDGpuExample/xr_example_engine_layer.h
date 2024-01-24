@@ -43,6 +43,7 @@
 #include <array>
 #include <functional>
 #include <memory>
+#include <span>
 #include <vector>
 
 namespace KDGpu {
@@ -72,6 +73,7 @@ public:
         assert(layer->m_engineLayer == nullptr);
 
         layer->m_engineLayer = this;
+        static_cast<XrCompositorLayer *>(layer.get())->initialize();
         m_compositorLayerObjects.push_back(std::move(layer));
         XrCompositorLayer *layerPtr = m_compositorLayerObjects.back().get();
         return layerPtr;
@@ -101,18 +103,23 @@ public:
 
         // Unparent the layer and return it along with ownership!
         auto takenLayer = std::move(*layerIt);
+        takenLayer->cleanup();
         takenLayer->m_engineLayer = nullptr;
         m_compositorLayerObjects.erase(layerIt);
         return takenLayer;
     }
 
-protected:
-    virtual void initializeScene() = 0;
-    virtual void cleanupScene() = 0;
-    virtual void updateScene() = 0;
-    virtual void renderView() = 0; // To render a single view at a time for the projection layer
-    virtual void resize() = 0;
+    std::span<const std::unique_ptr<XrCompositorLayer>> compositorLayers() const noexcept { return m_compositorLayerObjects; }
 
+    void clearCompositorLayers()
+    {
+        while (!m_compositorLayerObjects.empty())
+            m_compositorLayerObjects.pop_back();
+    }
+
+    std::span<const KDXr::ViewConfigurationView> viewConfigurationViews() const noexcept { return m_viewConfigurationViews; }
+
+protected:
     virtual void onInstanceLost();
 
     void onAttached() override;
@@ -120,6 +127,8 @@ protected:
     void update() override;
     void event(KDFoundation::EventReceiver *target, KDFoundation::Event *ev) override;
 
+    // Helpers for the composition layers to use
+    std::shared_ptr<spdlog::logger> logger() const noexcept { return m_logger; }
     void uploadBufferData(const BufferUploadOptions &options);
     void uploadTextureData(const TextureUploadOptions &options);
     void releaseStagingBuffers();
@@ -154,10 +163,6 @@ protected:
     Format m_colorSwapchainFormat{ Format::UNDEFINED };
     Format m_depthSwapchainFormat{ Format::UNDEFINED };
 
-    // For projection layer
-    std::vector<KDXr::SwapchainInfo> m_colorSwapchains;
-    std::vector<KDXr::SwapchainInfo> m_depthSwapchains;
-
     const std::vector<Format> m_applicationColorSwapchainFormats{
         Format::B8G8R8A8_SRGB,
         Format::R8G8B8A8_SRGB,
@@ -169,19 +174,12 @@ protected:
         Format::D16_UNORM
     };
 
-    // TODO: Cleanup once we have ported the projection layer to the new API
-    // For now we assume a single projection layer with however many views were queried.
-    std::vector<KDXr::CompositionLayer *> m_compositorLayers; // Pointers to all the layers to be rendered
-    std::vector<KDXr::ProjectionLayer> m_projectionLayers{ 1 }; // Projection layers to be rendered. Default to 1 projection layer
-    std::vector<KDXr::ProjectionLayerView> m_projectionLayerViews{ 2 }; // Projection layer views. One per view for each projection layer
-
-    uint32_t m_currentViewIndex{ 0 };
-    uint32_t m_currentColorImageIndex{ 0 };
-    uint32_t m_currentDepthImageIndex{ 0 };
-
-    KDXr::ViewState m_viewState;
-
+    // The vector of composition layers to be submitted to the compositor. Each of the compositor layer objects
+    // will provide a composition layer to be added to this vector.
+    std::vector<KDXr::CompositionLayer *> m_compositorLayers;
     std::vector<std::unique_ptr<XrCompositorLayer>> m_compositorLayerObjects;
+
+    friend class XrCompositorLayer;
 };
 
 } // namespace KDGpuExample

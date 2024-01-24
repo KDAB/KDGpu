@@ -23,10 +23,18 @@ XrQuadLayer::XrQuadLayer(const XrQuadLayerOptions &options)
     , m_depthSwapchainFormat(options.depthSwapchainFormat)
     , m_samples(options.samples)
 {
-    recreateSwapchains();
 }
 
 XrQuadLayer::~XrQuadLayer()
+{
+}
+
+void XrQuadLayer::initialize()
+{
+    recreateSwapchains();
+}
+
+void XrQuadLayer::cleanup()
 {
     m_colorSwapchain.textureViews.clear();
     m_colorSwapchain.swapchain = {};
@@ -34,7 +42,7 @@ XrQuadLayer::~XrQuadLayer()
     m_depthSwapchain.swapchain = {};
 }
 
-void XrQuadLayer::update()
+bool XrQuadLayer::update(const KDXr::FrameState &)
 {
     // Render the quad layer
     // Acquire and wait for the next swapchain textures to become available for the color and depth swapchains
@@ -69,6 +77,8 @@ void XrQuadLayer::update()
         .size = worldSize()
     };
     // clang-format on
+
+    return true;
 }
 
 void XrQuadLayer::recreateSwapchains()

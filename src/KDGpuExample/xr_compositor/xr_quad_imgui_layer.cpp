@@ -31,6 +31,16 @@ namespace KDGpuExample {
 XrQuadImGuiLayer::XrQuadImGuiLayer(const XrQuadLayerOptions &options)
     : XrQuadLayer(options)
 {
+}
+
+XrQuadImGuiLayer::~XrQuadImGuiLayer()
+{
+}
+
+void XrQuadImGuiLayer::initialize()
+{
+    XrQuadLayer::initialize();
+
     // clang-format off
     m_imguiPassOptions = {
         .colorAttachments = {
@@ -52,9 +62,10 @@ XrQuadImGuiLayer::XrQuadImGuiLayer(const XrQuadLayerOptions &options)
     recreateImGuiOverlay();
 }
 
-XrQuadImGuiLayer::~XrQuadImGuiLayer()
+void XrQuadImGuiLayer::cleanup()
 {
     m_imguiOverlay = {};
+    XrQuadLayer::cleanup();
 }
 
 void XrQuadImGuiLayer::renderQuad()

@@ -34,10 +34,21 @@ public:
     explicit XrQuadImGuiLayer(const XrQuadLayerOptions &options);
     ~XrQuadImGuiLayer() override;
 
+    // Not copyable
+    XrQuadImGuiLayer(const XrQuadImGuiLayer &) = delete;
+    XrQuadImGuiLayer &operator=(const XrQuadImGuiLayer &) = delete;
+
+    // Moveable
+    XrQuadImGuiLayer(XrQuadImGuiLayer &&) = default;
+    XrQuadImGuiLayer &operator=(XrQuadImGuiLayer &&) = default;
+
     void registerImGuiOverlayDrawFunction(const std::function<void(ImGuiContext *)> &func);
     void clearImGuiOverlayDrawFunctions();
 
 protected:
+    void initialize() override;
+    void cleanup() override;
+
     void renderQuad() override;
 
     // TODO: Can we share this with ExampleEngineLayer or any other ImGui renderer?

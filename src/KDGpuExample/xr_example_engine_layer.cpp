@@ -63,7 +63,6 @@ void XrExampleEngineLayer::onAttached()
 
     // Get the view details for the selected view configuration
     m_viewConfigurationViews = m_system->views(m_selectedViewConfiguration);
-    m_viewState.views.resize(m_viewConfigurationViews.size());
 
     // Check which versions of the graphics API are supported by the OpenXR runtime
     m_system->setGraphicsApi(m_api.get());
@@ -89,11 +88,6 @@ void XrExampleEngineLayer::onAttached()
         SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to find required Vulkan Adapter.");
         throw std::runtime_error("Failed to find required Vulkan Adapter.");
     }
-    const auto apiVersion = selectedAdapter->properties().apiVersion;
-    SPDLOG_LOGGER_INFO(m_logger, "Graphics API Version: {}.{}.{}",
-                       KDGPU_API_VERSION_MAJOR(apiVersion),
-                       KDGPU_API_VERSION_MINOR(apiVersion),
-                       KDGPU_API_VERSION_PATCH(apiVersion));
 
     // Request a device of the api with whatever layers and extensions we wish to request.
     const auto requiredGraphicsDeviceExtensions = m_system->requiredGraphicsDeviceExtensions();
@@ -117,66 +111,24 @@ void XrExampleEngineLayer::onAttached()
     m_referenceSpace = m_session.createReferenceSpace();
 
     // Query the set of supported swapchain formats and select the color and depth formats to use
-    std::span<const KDGpu::Format> supportedSwapchainFormats = m_session.supportedSwapchainFormats();
-    for (const auto &supportedSwapchainFormat : supportedSwapchainFormats) {
-        SPDLOG_LOGGER_INFO(m_logger, "Supported Swapchain Format: {}", static_cast<int64_t>(supportedSwapchainFormat));
-    }
-
     m_colorSwapchainFormat = m_session.selectSwapchainFormat(m_applicationColorSwapchainFormats);
     if (m_colorSwapchainFormat == Format::UNDEFINED) {
         SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to find a supported SwapchainFormat.");
         throw std::runtime_error("Failed to find a supported color swapchain format.");
     }
-
     m_depthSwapchainFormat = m_session.selectSwapchainFormat(m_applicationDepthSwapchainFormats);
     if (m_depthSwapchainFormat == Format::UNDEFINED) {
         SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to find a supported SwapchainFormat.");
         throw std::runtime_error("Failed to find a supported depth swapchain format.");
     }
 
-    // TODO: Handle multiview rendering option
-    // Create color and depth swapchains for each view
-    const uint32_t viewCount = m_viewConfigurationViews.size();
-    m_colorSwapchains.resize(viewCount);
-    m_depthSwapchains.resize(viewCount);
-
-    for (size_t i = 0; i < viewCount; ++i) {
-        // Color swapchain and texture views
-        auto &colorSwapchain = m_colorSwapchains[i];
-        colorSwapchain.swapchain = m_session.createSwapchain({ .format = m_colorSwapchainFormat,
-                                                               .usage = KDXr::SwapchainUsageFlagBits::SampledBit | KDXr::SwapchainUsageFlagBits::ColorAttachmentBit,
-                                                               .width = m_viewConfigurationViews[i].recommendedTextureWidth,
-                                                               .height = m_viewConfigurationViews[i].recommendedTextureHeight,
-                                                               .sampleCount = m_viewConfigurationViews[i].recommendedSwapchainSampleCount });
-        const auto &textures = colorSwapchain.swapchain.textures();
-        const auto textureCount = textures.size();
-        colorSwapchain.textureViews.reserve(textureCount);
-        for (size_t j = 0; j < textureCount; ++j)
-            colorSwapchain.textureViews.emplace_back(textures[j].createView());
-
-        // Depth swapchain and texture views
-        auto &depthSwapchain = m_depthSwapchains[i];
-        depthSwapchain.swapchain = m_session.createSwapchain({ .format = m_depthSwapchainFormat,
-                                                               .usage = KDXr::SwapchainUsageFlagBits::SampledBit | KDXr::SwapchainUsageFlagBits::DepthStencilAttachmentBit,
-                                                               .width = m_viewConfigurationViews[i].recommendedTextureWidth,
-                                                               .height = m_viewConfigurationViews[i].recommendedTextureHeight,
-                                                               .sampleCount = m_viewConfigurationViews[i].recommendedSwapchainSampleCount });
-        const auto &depthTextures = depthSwapchain.swapchain.textures();
-        const auto depthTextureCount = depthTextures.size();
-        depthSwapchain.textureViews.reserve(depthTextureCount);
-        for (size_t j = 0; j < depthTextureCount; ++j)
-            depthSwapchain.textureViews.emplace_back(depthTextures[j].createView());
-    }
-
-    // Delegate to subclass to initialize scene
-    initializeScene();
+    // Each of the compositor layer objects will be responsible for creating and managing its own swapchains
+    // and any other resources they require.
 }
 
 void XrExampleEngineLayer::onDetached()
 {
     m_compositorLayerObjects.clear();
-    m_colorSwapchains.clear();
-    m_depthSwapchains.clear();
     m_referenceSpace = {};
     m_session = {};
     m_queue = {};
@@ -209,82 +161,16 @@ void XrExampleEngineLayer::update()
         return;
     }
 
-    // Reset the compositor layers
+    // Reset the compositor layers that we will be submitting to the compositor
     m_compositorLayers.clear();
 
     if (m_session.isActive() && frameState.shouldRender) {
-        // For now, we will use only a single projection layer. Later we can extend this to support multiple compositor layer types
-        // in any configuration. At this time we assume the scene in the subclass is the only thing to be composited.
-
-        // TODO: Port the projection layer to use the new KDXr::CompositionLayerProjection class
-
-        // Locate the views from the view configuration within the (reference) space at the display time.
-        const auto locateViewsOptions = KDXr::LocateViewsOptions{
-            .displayTime = frameState.predictedDisplayTime,
-            .referenceSpace = m_referenceSpace
-        };
-
-        const auto result = m_session.locateViews(locateViewsOptions, m_viewState);
-        if (result != KDXr::LocateViewsResult::Success) {
-            SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to locate views.");
-        } else {
-            // Call updateScene() function to update scene state.
-            updateScene();
-
-            // Render the projection layer
-            m_projectionLayerViews.resize(m_viewState.viewCount);
-
-            for (m_currentViewIndex = 0; m_currentViewIndex < m_viewState.viewCount; ++m_currentViewIndex) {
-                // Acquire and wait for the next swapchain textures to become available for the color and depth swapchains
-                KDXr::SwapchainInfo &colorSwapchainInfo = m_colorSwapchains[m_currentViewIndex];
-                KDXr::SwapchainInfo &depthSwapchainInfo = m_depthSwapchains[m_currentViewIndex];
-
-                colorSwapchainInfo.swapchain.getNextTextureIndex(m_currentColorImageIndex);
-                depthSwapchainInfo.swapchain.getNextTextureIndex(m_currentDepthImageIndex);
-
-                colorSwapchainInfo.swapchain.waitForTexture();
-                depthSwapchainInfo.swapchain.waitForTexture();
-
-                // Update the projection layer view for the current view
-                // clang-format off
-                m_projectionLayerViews[m_currentViewIndex] = {
-                    .pose = m_viewState.views[m_currentViewIndex].pose,
-                    .fieldOfView = m_viewState.views[m_currentViewIndex].fieldOfView,
-                    .swapchainSubTexture = {
-                        .swapchain = colorSwapchainInfo.swapchain,
-                        .rect = {
-                            .offset = { .x = 0, .y = 0 },
-                            .extent = {
-                                .width = m_viewConfigurationViews[m_currentViewIndex].recommendedTextureWidth,
-                                .height = m_viewConfigurationViews[m_currentViewIndex].recommendedTextureHeight
-                            }
-                        }
-                    }
-                };
-                // clang-format on
-
-                // Call subclass renderView() function to record and submit drawing commands for the current view
-                renderView();
-
-                // Give the swapchain textures back to the XR runtime, allowing the compositor to use the image.
-                colorSwapchainInfo.swapchain.releaseTexture();
-                depthSwapchainInfo.swapchain.releaseTexture();
-            }
-
-            // Set up the projection layer
-            m_projectionLayers[0] = {
-                .type = KDXr::CompositionLayerType::Projection,
-                .referenceSpace = m_referenceSpace,
-                .flags = KDXr::CompositionLayerFlagBits::BlendTextureSourceAlphaBit | KDXr::CompositionLayerFlagBits::CorrectChromaticAberrationBit,
-                .views = m_projectionLayerViews // All views - adjust to relevant subset if we add support for multiple projection layers
-            };
-            m_compositorLayers.push_back(reinterpret_cast<KDXr::CompositionLayer *>(&m_projectionLayers[0]));
-
-            // Ask each compositor layer object to update its state, render and prepare its composition layer
-            for (auto &compositorLayerObject : m_compositorLayerObjects) {
-                compositorLayerObject->update();
+        // Ask each compositor layer object to update its state, render and prepare its composition layer.
+        // If the compositor layer object has nothing to render or it cannot locate the views, it will return
+        // false and we will not add its composition layer to the list of layers to be submitted to the compositor.
+        for (auto &compositorLayerObject : m_compositorLayerObjects) {
+            if (compositorLayerObject->update(frameState))
                 m_compositorLayers.push_back(compositorLayerObject->compositionLayer());
-            }
         }
     }
 

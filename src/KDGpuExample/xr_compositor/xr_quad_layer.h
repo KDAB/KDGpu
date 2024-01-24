@@ -53,8 +53,18 @@ public:
     explicit XrQuadLayer(const XrQuadLayerOptions &options);
     ~XrQuadLayer() override;
 
+    // Not copyable
+    XrQuadLayer(const XrQuadLayer &) = delete;
+    XrQuadLayer &operator=(const XrQuadLayer &) = delete;
+
+    // Moveable
+    XrQuadLayer(XrQuadLayer &&) = default;
+    XrQuadLayer &operator=(XrQuadLayer &&) = default;
+
 protected:
-    void update() override;
+    void initialize() override;
+    void cleanup() override;
+    bool update(const KDXr::FrameState &frameState) override;
     void recreateSwapchains();
     virtual void renderQuad() = 0;
     KDXr::CompositionLayer *compositionLayer() override { return reinterpret_cast<KDXr::CompositionLayer *>(&m_quadLayer); }

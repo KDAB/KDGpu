@@ -14,6 +14,10 @@
 #include <KDXr/compositor.h>
 #include <KDGpuExample/kdgpuexample_export.h>
 
+#include <KDGpu/queue.h>
+
+#include <spdlog/spdlog.h>
+
 namespace KDXr {
 struct ReferenceSpace_t;
 }
@@ -21,6 +25,7 @@ struct ReferenceSpace_t;
 namespace KDGpuExample {
 
 class XrExampleEngineLayer;
+class Engine;
 
 class KDGPUEXAMPLE_EXPORT XrCompositorLayer
 {
@@ -36,15 +41,34 @@ public:
 
     virtual ~XrCompositorLayer();
 
+    // Not copyable
+    XrCompositorLayer(const XrCompositorLayer &) = delete;
+    XrCompositorLayer &operator=(const XrCompositorLayer &) = delete;
+
+    // Moveable
+    XrCompositorLayer(XrCompositorLayer &&) = default;
+    XrCompositorLayer &operator=(XrCompositorLayer &&) = default;
+
     Type type() const { return m_type; }
 
     void setReferenceSpace(const KDXr::Handle<KDXr::ReferenceSpace_t> &referenceSpace) noexcept { m_referenceSpace = referenceSpace; }
     KDXr::Handle<KDXr::ReferenceSpace_t> referenceSpace() const noexcept { return m_referenceSpace; }
 
+    const XrExampleEngineLayer *engineLayer() const noexcept { return m_engineLayer; }
+    XrExampleEngineLayer *engineLayer() noexcept { return m_engineLayer; }
+    const Engine *engine() const noexcept;
+    Engine *engine() noexcept;
+
 protected:
     explicit XrCompositorLayer(Type type);
-    virtual void update() = 0;
+    virtual void initialize() = 0;
+    virtual void cleanup() = 0;
+    virtual bool update(const KDXr::FrameState &frameState) = 0;
     virtual KDXr::CompositionLayer *compositionLayer() = 0;
+
+    std::shared_ptr<spdlog::logger> logger() const noexcept;
+    void uploadBufferData(const KDGpu::BufferUploadOptions &options);
+    void uploadTextureData(const KDGpu::TextureUploadOptions &options);
 
     Type m_type;
     XrExampleEngineLayer *m_engineLayer{ nullptr };

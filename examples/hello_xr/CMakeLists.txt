@@ -20,6 +20,7 @@ add_kdgpu_example(
     SOURCES
     main.cpp
     hello_xr.cpp
+    projection_layer.cpp
     LIBS
     KDGpu::KDGpuExample
     glm::glm
