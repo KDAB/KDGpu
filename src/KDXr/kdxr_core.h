@@ -297,8 +297,8 @@ struct View {
 };
 struct ViewState {
     ViewStateFlags viewStateFlags{ ViewStateFlagBits::MaxEnum };
-    uint32_t viewCount{ 0 };
     std::vector<View> views;
+    uint32_t viewCount() const noexcept { return static_cast<uint32_t>(views.size()); }
 };
 
 enum class LocateViewsResult : int64_t {
@@ -306,7 +306,6 @@ enum class LocateViewsResult : int64_t {
     SessionLossPending = 3,
     ValidationFailure = -1,
     RuntimeFailure = -2,
-    SizeInsufficient = -11,
     HandleInvalid = -12,
     InstanceLost = -13,
     SessionLost = -17,

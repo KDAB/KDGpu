@@ -266,11 +266,10 @@ LocateViewsResult OpenXrSession::locateViews(const LocateViewsOptions &options, 
 
     // Ensure the viewState views container is large enough
     if (viewState.views.size() < viewCount)
-        return LocateViewsResult::SizeInsufficient;
+        viewState.views.resize(viewCount);
 
     // Update the view state
     viewState.viewStateFlags = xrViewStateFlagsToViewStateFlags(xrViewState.viewStateFlags);
-    viewState.viewCount = viewCount;
     for (uint32_t i = 0; i < viewCount; ++i) {
         auto &view = viewState.views[i];
         const auto &xrView = xrViews[i];

@@ -63,9 +63,9 @@ bool XrProjectionLayer::update(const KDXr::FrameState &frameState)
     updateScene();
 
     // Render the projection layer
-    m_projectionLayerViews.resize(m_viewState.viewCount);
+    m_projectionLayerViews.resize(m_viewState.viewCount());
     const auto &viewConfigurationViews = engineLayer()->viewConfigurationViews();
-    for (m_currentViewIndex = 0; m_currentViewIndex < m_viewState.viewCount; ++m_currentViewIndex) {
+    for (m_currentViewIndex = 0; m_currentViewIndex < m_viewState.viewCount(); ++m_currentViewIndex) {
         // Acquire and wait for the next swapchain textures to become available for the color and depth swapchains
         KDXr::SwapchainInfo &colorSwapchainInfo = m_colorSwapchains[m_currentViewIndex];
         KDXr::SwapchainInfo &depthSwapchainInfo = m_depthSwapchains[m_currentViewIndex];

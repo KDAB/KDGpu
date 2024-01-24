@@ -299,8 +299,8 @@ void ProjectionLayer::cleanup()
 void ProjectionLayer::updateScene()
 {
     // Update the camera data for each view
-    m_cameraData.resize(m_viewState.viewCount);
-    for (uint32_t viewIndex = 0; viewIndex < m_viewState.viewCount; ++viewIndex) {
+    m_cameraData.resize(m_viewState.viewCount());
+    for (uint32_t viewIndex = 0; viewIndex < m_viewState.viewCount(); ++viewIndex) {
         const auto &view = m_viewState.views[viewIndex];
         const KDXr::Quaternion &orientation = view.pose.orientation;
         const KDXr::Vector3 &position = view.pose.position;
