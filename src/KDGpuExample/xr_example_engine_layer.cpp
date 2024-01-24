@@ -14,6 +14,7 @@
 #include <KDXr/utils/formatters.h>
 #include <KDGpu/texture_options.h>
 #include <KDGui/gui_application.h>
+#include <KDUtils/logging.h>
 
 #include <assert.h>
 
@@ -24,9 +25,7 @@ XrExampleEngineLayer::XrExampleEngineLayer()
     , m_api(std::make_unique<VulkanGraphicsApi>())
     , m_xrApi(std::make_unique<KDXr::OpenXrApi>())
 {
-    m_logger = spdlog::get("engine");
-    if (!m_logger)
-        m_logger = spdlog::stdout_color_mt("engine");
+    m_logger = KDUtils::Logger::logger("engine", spdlog::level::info);
 }
 
 XrExampleEngineLayer::~XrExampleEngineLayer()
