@@ -25,7 +25,8 @@ class ProjectionLayer;
 
 namespace KDGpuExample {
 class XrQuadImGuiLayer;
-}
+class XrCylinderImGuiLayer;
+} // namespace KDGpuExample
 
 using namespace KDGpuExample;
 
@@ -37,5 +38,6 @@ protected:
 
 private:
     ProjectionLayer *m_projectionLayer{ nullptr };
-    XrQuadImGuiLayer *m_imguiLayer{ nullptr };
+    XrQuadImGuiLayer *m_quadImguiLayer{ nullptr };
+    XrCylinderImGuiLayer *m_cylinderImguiLayer{ nullptr };
 };

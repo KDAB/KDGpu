@@ -40,7 +40,9 @@ void XrExampleEngineLayer::onAttached()
         .applicationName = KDGui::GuiApplication::instance()->applicationName(),
         .applicationVersion = KDGPU_MAKE_API_VERSION(0, 1, 0, 0),
         .layers = {}, // No api layers requested
-        .extensions = { XR_EXT_DEBUG_UTILS_EXTENSION_NAME, XR_KHR_VULKAN_ENABLE_EXTENSION_NAME }
+        .extensions = { XR_EXT_DEBUG_UTILS_EXTENSION_NAME,
+                        XR_KHR_VULKAN_ENABLE_EXTENSION_NAME,
+                        XR_KHR_COMPOSITION_LAYER_CYLINDER_EXTENSION_NAME }
     };
     m_xrInstance = m_xrApi->createInstance(xrInstanceOptions);
     m_xrInstance.instanceLost.connect(&XrExampleEngineLayer::onInstanceLost, this);
