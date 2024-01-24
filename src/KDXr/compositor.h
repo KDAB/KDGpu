@@ -69,6 +69,18 @@ struct QuadLayer {
     KDGpu::Extent2Df size{};
 };
 
+struct CylinderLayer {
+    CompositionLayerType type;
+    Handle<ReferenceSpace_t> referenceSpace;
+    CompositionLayerFlags flags{ CompositionLayerFlagBits::MaxEnum };
+    EyeVisibility eyeVisibility;
+    SwapchainSubTexture swapchainSubTexture{};
+    Pose pose{};
+    float radius{ 0.0f };
+    float centralAngle{ 0.0f };
+    float aspectRatio{ 1.0f };
+};
+
 struct EndFrameOptions {
     Time displayTime{ 0 };
     EnvironmentBlendMode environmentBlendMode{ EnvironmentBlendMode::MaxEnum };

@@ -71,6 +71,7 @@ set(HEADERS
 if(KDGPU_OPENXR_SUPPORT)
     set(XR_SOURCES
         xr_compositor/xr_compositor_layer.cpp
+        xr_compositor/xr_cylinder_layer.cpp
         xr_compositor/xr_projection_layer.cpp
         xr_compositor/xr_quad_layer.cpp
         xr_compositor/xr_quad_imgui_layer.cpp
@@ -79,6 +80,7 @@ if(KDGPU_OPENXR_SUPPORT)
 
     set(XR_HEADERS
         xr_compositor/xr_compositor_layer.h
+        xr_compositor/xr_cylinder_layer.h
         xr_compositor/xr_projection_layer.h
         xr_compositor/xr_quad_layer.h
         xr_compositor/xr_quad_imgui_layer.h

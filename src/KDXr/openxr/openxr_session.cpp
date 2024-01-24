@@ -221,6 +221,32 @@ EndFrameResult OpenXrSession::endFrame(const EndFrameOptions &options)
             break;
         }
 
+        case CompositionLayerType::Cylinder: {
+            auto &cylinderLayer = reinterpret_cast<CylinderLayer &>(*options.layers[layerIndex]);
+
+            auto openxrSwapchain = openxrResourceManager->getSwapchain(cylinderLayer.swapchainSubTexture.swapchain);
+            assert(openxrSwapchain);
+            auto openxrReferenceSpace = openxrResourceManager->getReferenceSpace(cylinderLayer.referenceSpace);
+            assert(openxrReferenceSpace);
+
+            xrLayerCylinders.push_back({ XR_TYPE_COMPOSITION_LAYER_CYLINDER_KHR });
+            auto &cylinderLayerCylinder = xrLayerCylinders.back();
+            cylinderLayerCylinder.layerFlags = compositionLayerFlagsToXrCompositionLayerFlags(cylinderLayer.flags);
+            cylinderLayerCylinder.space = openxrReferenceSpace->referenceSpace;
+            cylinderLayerCylinder.eyeVisibility = eyeVisibilityToXrEyeVisibility(cylinderLayer.eyeVisibility);
+            cylinderLayerCylinder.subImage.swapchain = openxrSwapchain->swapchain;
+            cylinderLayerCylinder.subImage.imageRect = rect2DToXrRecti(cylinderLayer.swapchainSubTexture.rect);
+            cylinderLayerCylinder.subImage.imageArrayIndex = cylinderLayer.swapchainSubTexture.arrayIndex;
+            cylinderLayerCylinder.pose = poseToXrPose(cylinderLayer.pose);
+            cylinderLayerCylinder.radius = cylinderLayer.radius;
+            cylinderLayerCylinder.centralAngle = cylinderLayer.centralAngle;
+            cylinderLayerCylinder.aspectRatio = cylinderLayer.aspectRatio;
+
+            xrLayers[layerIndex] = reinterpret_cast<XrCompositionLayerBaseHeader *>(&cylinderLayerCylinder);
+
+            break;
+        }
+
         default: {
             SPDLOG_LOGGER_CRITICAL(Logger::logger(), "OpenXrSession::endFrame(). Unsupported layer type. Ignoring layer.");
         }
