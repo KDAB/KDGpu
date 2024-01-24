@@ -15,6 +15,8 @@
 
 #include <KDGpu/gpu_core.h>
 
+#include <span>
+
 namespace KDXr {
 
 struct ReferenceSpace_t;

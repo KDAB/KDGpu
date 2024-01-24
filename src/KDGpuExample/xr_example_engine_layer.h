@@ -53,8 +53,6 @@ using namespace KDGpu;
 
 namespace KDGpuExample {
 
-constexpr uint32_t MAX_VIEWS = 2;
-
 /**
     @class XrExampleEngineLayer
     @brief XrExampleEngineLayer provides a base for OpenXR examples.
@@ -172,13 +170,13 @@ protected:
     // For now we assume a single projection layer with however many views were queried.
     std::vector<KDXr::CompositionLayer *> m_compositorLayers; // Pointers to all the layers to be rendered
     std::vector<KDXr::ProjectionLayer> m_projectionLayers{ 1 }; // Projection layers to be rendered. Default to 1 projection layer
-    std::vector<KDXr::ProjectionLayerView> m_projectionLayerViews{ MAX_VIEWS }; // Projection layer views. One per view for each projection layer
+    std::vector<KDXr::ProjectionLayerView> m_projectionLayerViews{ 2 }; // Projection layer views. One per view for each projection layer
 
     uint32_t m_currentViewIndex{ 0 };
     uint32_t m_currentColorImageIndex{ 0 };
     uint32_t m_currentDepthImageIndex{ 0 };
 
-    std::array<KDXr::View, MAX_VIEWS> m_views;
+    KDXr::ViewState m_viewState;
 
     std::vector<std::unique_ptr<XrCompositorLayer>> m_compositorLayerObjects;
 };

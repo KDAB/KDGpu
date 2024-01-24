@@ -64,6 +64,7 @@ void XrExampleEngineLayer::onAttached()
 
     // Get the view details for the selected view configuration
     m_viewConfigurationViews = m_kdxrSystem->views(m_selectedViewConfiguration);
+    m_viewState.views.resize(m_viewConfigurationViews.size());
 
     // Check which versions of the graphics API are supported by the OpenXR runtime
     m_kdxrSystem->setGraphicsApi(m_api.get());
@@ -223,8 +224,8 @@ void XrExampleEngineLayer::update()
             .displayTime = frameState.predictedDisplayTime,
             .referenceSpace = m_kdxrReferenceSpace
         };
-        KDXr::ViewState viewState{ .views = m_views };
-        const auto result = m_kdxrSession.locateViews(locateViewsOptions, viewState);
+
+        const auto result = m_kdxrSession.locateViews(locateViewsOptions, m_viewState);
         if (result != KDXr::LocateViewsResult::Success) {
             SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to locate views.");
         } else {
@@ -232,9 +233,9 @@ void XrExampleEngineLayer::update()
             updateScene();
 
             // Render the projection layer
-            m_projectionLayerViews.resize(viewState.viewCount);
+            m_projectionLayerViews.resize(m_viewState.viewCount);
 
-            for (m_currentViewIndex = 0; m_currentViewIndex < viewState.viewCount; ++m_currentViewIndex) {
+            for (m_currentViewIndex = 0; m_currentViewIndex < m_viewState.viewCount; ++m_currentViewIndex) {
                 // Acquire and wait for the next swapchain textures to become available for the color and depth swapchains
                 KDXr::SwapchainInfo &colorSwapchainInfo = m_colorSwapchains[m_currentViewIndex];
                 KDXr::SwapchainInfo &depthSwapchainInfo = m_depthSwapchains[m_currentViewIndex];
@@ -248,8 +249,8 @@ void XrExampleEngineLayer::update()
                 // Update the projection layer view for the current view
                 // clang-format off
                 m_projectionLayerViews[m_currentViewIndex] = {
-                    .pose = m_views[m_currentViewIndex].pose,
-                    .fieldOfView = m_views[m_currentViewIndex].fieldOfView,
+                    .pose = m_viewState.views[m_currentViewIndex].pose,
+                    .fieldOfView = m_viewState.views[m_currentViewIndex].fieldOfView,
                     .swapchainSubTexture = {
                         .swapchain = colorSwapchainInfo.swapchain,
                         .rect = {

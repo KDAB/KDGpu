@@ -12,9 +12,9 @@
 
 #include <KDGpu/utils/flags.h>
 
-#include <span>
 #include <stdint.h>
 #include <string>
+#include <vector>
 
 using HANDLE = void *;
 
@@ -298,7 +298,7 @@ struct View {
 struct ViewState {
     ViewStateFlags viewStateFlags{ ViewStateFlagBits::MaxEnum };
     uint32_t viewCount{ 0 };
-    std::span<View> views;
+    std::vector<View> views;
 };
 
 enum class LocateViewsResult : int64_t {

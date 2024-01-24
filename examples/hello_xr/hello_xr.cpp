@@ -298,9 +298,11 @@ void HelloXr::cleanupScene()
 void HelloXr::updateScene()
 {
     // Update the camera data for each view
-    for (uint32_t viewIndex = 0; viewIndex < MAX_VIEWS; ++viewIndex) {
-        const KDXr::Quaternion &orientation = m_views[viewIndex].pose.orientation;
-        const KDXr::Vector3 &position = m_views[viewIndex].pose.position;
+    m_cameraData.resize(m_viewState.viewCount);
+    for (uint32_t viewIndex = 0; viewIndex < m_viewState.viewCount; ++viewIndex) {
+        const auto &view = m_viewState.views[viewIndex];
+        const KDXr::Quaternion &orientation = view.pose.orientation;
+        const KDXr::Vector3 &position = view.pose.position;
 
         // clang-format off
         m_cameraData[viewIndex].view = viewMatrix({
@@ -308,10 +310,10 @@ void HelloXr::updateScene()
             .position = glm::vec3(position.x, position.y, position.z)
         });
         m_cameraData[viewIndex].projection = perspective({
-            .leftFieldOfView = m_views[viewIndex].fieldOfView.angleLeft,
-            .rightFieldOfView = m_views[viewIndex].fieldOfView.angleRight,
-            .upFieldOfView = m_views[viewIndex].fieldOfView.angleUp,
-            .downFieldOfView = m_views[viewIndex].fieldOfView.angleDown,
+            .leftFieldOfView = m_viewState.views[viewIndex].fieldOfView.angleLeft,
+            .rightFieldOfView = m_viewState.views[viewIndex].fieldOfView.angleRight,
+            .upFieldOfView = m_viewState.views[viewIndex].fieldOfView.angleUp,
+            .downFieldOfView = m_viewState.views[viewIndex].fieldOfView.angleDown,
             .nearPlane = m_nearPlane,
             .farPlane = m_farPlane,
             .applyPostViewCorrection = ApplyPostViewCorrection::Yes
