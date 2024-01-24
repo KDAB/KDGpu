@@ -58,7 +58,7 @@ public:
     SystemProperties properties() const;
 
     std::span<const ViewConfigurationType> viewConfigurations() const;
-    ViewConfigurationType selectViewConfiguration(std::span<ViewConfigurationType> preferredViewConfigurations) const;
+    ViewConfigurationType selectViewConfiguration(std::span<const ViewConfigurationType> preferredViewConfigurations) const;
     std::vector<EnvironmentBlendMode> environmentBlendModes(ViewConfigurationType viewConfiguration) const;
     std::vector<ViewConfigurationView> views(ViewConfigurationType viewConfiguration) const;
 

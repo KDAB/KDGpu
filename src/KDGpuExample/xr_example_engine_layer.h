@@ -138,12 +138,15 @@ protected:
 
     // Xr related members
     std::unique_ptr<KDXr::XrApi> m_xrApi;
-    KDXr::Instance m_kdxrInstance; // TODO: Rename to m_xrInstance etc as we replace raw OpenXR calls with KDXr
-    KDXr::System *m_kdxrSystem{ nullptr };
-    KDXr::Session m_kdxrSession;
-    KDXr::ReferenceSpace m_kdxrReferenceSpace;
+    KDXr::Instance m_xrInstance;
+    KDXr::System *m_system{ nullptr };
+    KDXr::Session m_session;
+    KDXr::ReferenceSpace m_referenceSpace;
 
-    std::vector<KDXr::ViewConfigurationType> m_applicationViewConfigurations{ KDXr::ViewConfigurationType::PrimaryStereo, KDXr::ViewConfigurationType::PrimaryMono };
+    const std::vector<KDXr::ViewConfigurationType> m_applicationViewConfigurations{
+        KDXr::ViewConfigurationType::PrimaryStereo,
+        KDXr::ViewConfigurationType::PrimaryMono
+    };
     KDXr::ViewConfigurationType m_selectedViewConfiguration{ KDXr::ViewConfigurationType::MaxEnum };
     KDXr::EnvironmentBlendMode m_selectedEnvironmentBlendMode{ KDXr::EnvironmentBlendMode::MaxEnum };
     std::vector<KDXr::ViewConfigurationView> m_viewConfigurationViews;
@@ -166,7 +169,7 @@ protected:
         Format::D16_UNORM
     };
 
-    // TODO: Add api to the example engine layer to manage layers for the compositor.
+    // TODO: Cleanup once we have ported the projection layer to the new API
     // For now we assume a single projection layer with however many views were queried.
     std::vector<KDXr::CompositionLayer *> m_compositorLayers; // Pointers to all the layers to be rendered
     std::vector<KDXr::ProjectionLayer> m_projectionLayers{ 1 }; // Projection layers to be rendered. Default to 1 projection layer

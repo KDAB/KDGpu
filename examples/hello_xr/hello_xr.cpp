@@ -270,13 +270,13 @@ void HelloXr::initializeScene()
     const XrQuadLayerOptions quadLayerOptions = {
         .device = &m_device,
         .queue = &m_queue,
-        .session = &m_kdxrSession,
+        .session = &m_session,
         .colorSwapchainFormat = m_colorSwapchainFormat,
         .depthSwapchainFormat = m_depthSwapchainFormat,
         .samples = m_samples.get()
     };
     m_imguiLayer = createCompositorLayer<XrQuadImGuiLayer>(quadLayerOptions);
-    m_imguiLayer->setReferenceSpace(m_kdxrReferenceSpace);
+    m_imguiLayer->setReferenceSpace(m_referenceSpace);
     m_imguiLayer->position = { 0.0f, 0.75f, -1.5f };
 }
 

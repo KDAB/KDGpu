@@ -88,7 +88,7 @@ std::span<const ViewConfigurationType> System::viewConfigurations() const
     return m_viewConfigurations;
 }
 
-ViewConfigurationType System::selectViewConfiguration(std::span<ViewConfigurationType> preferredViewConfigurations) const
+ViewConfigurationType System::selectViewConfiguration(std::span<const ViewConfigurationType> preferredViewConfigurations) const
 {
     auto availableViewConfigurations = viewConfigurations();
     for (auto preferredViewConfiguration : preferredViewConfigurations) {

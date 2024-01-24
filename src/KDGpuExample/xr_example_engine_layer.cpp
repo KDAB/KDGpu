@@ -42,37 +42,37 @@ void XrExampleEngineLayer::onAttached()
         .layers = {}, // No api layers requested
         .extensions = { XR_EXT_DEBUG_UTILS_EXTENSION_NAME, XR_KHR_VULKAN_ENABLE_EXTENSION_NAME }
     };
-    m_kdxrInstance = m_xrApi->createInstance(xrInstanceOptions);
-    m_kdxrInstance.instanceLost.connect(&XrExampleEngineLayer::onInstanceLost, this);
-    const auto properties = m_kdxrInstance.properties();
+    m_xrInstance = m_xrApi->createInstance(xrInstanceOptions);
+    m_xrInstance.instanceLost.connect(&XrExampleEngineLayer::onInstanceLost, this);
+    const auto properties = m_xrInstance.properties();
     SPDLOG_LOGGER_INFO(m_logger, "XR Runtime: {}", properties.runtimeName);
     SPDLOG_LOGGER_INFO(m_logger, "XR Runtime Version: {}", KDXr::getVersionAsString(properties.runtimeVersion));
 
-    m_kdxrSystem = m_kdxrInstance.system();
-    const auto systemProperties = m_kdxrSystem->properties();
+    m_system = m_xrInstance.system();
+    const auto systemProperties = m_system->properties();
 
     // Pick the first application supported View Configuration Type supported by the hardware.
-    m_selectedViewConfiguration = m_kdxrSystem->selectViewConfiguration(m_applicationViewConfigurations);
+    m_selectedViewConfiguration = m_system->selectViewConfiguration(m_applicationViewConfigurations);
     if (m_selectedViewConfiguration == KDXr::ViewConfigurationType::MaxEnum) {
         SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to find a supported ViewConfigurationType.");
         throw std::runtime_error("Failed to find a supported ViewConfigurationType.");
     }
 
     // We will just use the first environment blend mode supported by the system
-    m_selectedEnvironmentBlendMode = m_kdxrSystem->environmentBlendModes(m_selectedViewConfiguration)[0];
+    m_selectedEnvironmentBlendMode = m_system->environmentBlendModes(m_selectedViewConfiguration)[0];
 
     // Get the view details for the selected view configuration
-    m_viewConfigurationViews = m_kdxrSystem->views(m_selectedViewConfiguration);
+    m_viewConfigurationViews = m_system->views(m_selectedViewConfiguration);
     m_viewState.views.resize(m_viewConfigurationViews.size());
 
     // Check which versions of the graphics API are supported by the OpenXR runtime
-    m_kdxrSystem->setGraphicsApi(m_api.get());
-    auto graphicsRequirements = m_kdxrSystem->graphicsRequirements();
+    m_system->setGraphicsApi(m_api.get());
+    auto graphicsRequirements = m_system->graphicsRequirements();
     SPDLOG_LOGGER_INFO(m_logger, "Minimum Vulkan API Version: {}", KDXr::getVersionAsString(graphicsRequirements.minApiVersionSupported));
     SPDLOG_LOGGER_INFO(m_logger, "Maximum Vulkan API Version: {}", KDXr::getVersionAsString(graphicsRequirements.maxApiVersionSupported));
 
     // Request an instance of the api with whatever layers and extensions we wish to request.
-    const auto requiredGraphicsInstanceExtensions = m_kdxrSystem->requiredGraphicsInstanceExtensions();
+    const auto requiredGraphicsInstanceExtensions = m_system->requiredGraphicsInstanceExtensions();
     for (auto &requiredGraphicsInstanceExtension : requiredGraphicsInstanceExtensions) {
         SPDLOG_LOGGER_INFO(m_logger, "Requesting Vulkan Instance Extension: {}", requiredGraphicsInstanceExtension);
     }
@@ -84,7 +84,7 @@ void XrExampleEngineLayer::onAttached()
     m_instance = m_api->createInstance(instanceOptions);
 
     // Find which Adapter we should use for the given XR system
-    Adapter *selectedAdapter = m_kdxrSystem->requiredGraphicsAdapter(m_instance);
+    Adapter *selectedAdapter = m_system->requiredGraphicsAdapter(m_instance);
     if (!selectedAdapter) {
         SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to find required Vulkan Adapter.");
         throw std::runtime_error("Failed to find required Vulkan Adapter.");
@@ -96,7 +96,7 @@ void XrExampleEngineLayer::onAttached()
                        KDGPU_API_VERSION_PATCH(apiVersion));
 
     // Request a device of the api with whatever layers and extensions we wish to request.
-    const auto requiredGraphicsDeviceExtensions = m_kdxrSystem->requiredGraphicsDeviceExtensions();
+    const auto requiredGraphicsDeviceExtensions = m_system->requiredGraphicsDeviceExtensions();
     for (auto &requiredGraphicsDeviceExtension : requiredGraphicsDeviceExtensions) {
         SPDLOG_LOGGER_INFO(m_logger, "Requesting Vulkan Device Extension: {}", requiredGraphicsDeviceExtension);
     }
@@ -108,27 +108,27 @@ void XrExampleEngineLayer::onAttached()
     m_queue = m_device.queues()[0];
 
     // Create the XR session and track the state changes.
-    m_kdxrSession = m_kdxrSystem->createSession({ .graphicsApi = m_api.get(), .device = m_device });
-    m_kdxrSession.running.valueChanged().connect([this](bool running) {
+    m_session = m_system->createSession({ .graphicsApi = m_api.get(), .device = m_device });
+    m_session.running.valueChanged().connect([this](bool running) {
         SPDLOG_LOGGER_INFO(m_logger, "Session Running: {}", running);
     });
 
     // Create a reference space - default to local space
-    m_kdxrReferenceSpace = m_kdxrSession.createReferenceSpace();
+    m_referenceSpace = m_session.createReferenceSpace();
 
     // Query the set of supported swapchain formats and select the color and depth formats to use
-    std::span<const KDGpu::Format> supportedSwapchainFormats = m_kdxrSession.supportedSwapchainFormats();
+    std::span<const KDGpu::Format> supportedSwapchainFormats = m_session.supportedSwapchainFormats();
     for (const auto &supportedSwapchainFormat : supportedSwapchainFormats) {
         SPDLOG_LOGGER_INFO(m_logger, "Supported Swapchain Format: {}", static_cast<int64_t>(supportedSwapchainFormat));
     }
 
-    m_colorSwapchainFormat = m_kdxrSession.selectSwapchainFormat(m_applicationColorSwapchainFormats);
+    m_colorSwapchainFormat = m_session.selectSwapchainFormat(m_applicationColorSwapchainFormats);
     if (m_colorSwapchainFormat == Format::UNDEFINED) {
         SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to find a supported SwapchainFormat.");
         throw std::runtime_error("Failed to find a supported color swapchain format.");
     }
 
-    m_depthSwapchainFormat = m_kdxrSession.selectSwapchainFormat(m_applicationDepthSwapchainFormats);
+    m_depthSwapchainFormat = m_session.selectSwapchainFormat(m_applicationDepthSwapchainFormats);
     if (m_depthSwapchainFormat == Format::UNDEFINED) {
         SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to find a supported SwapchainFormat.");
         throw std::runtime_error("Failed to find a supported depth swapchain format.");
@@ -143,11 +143,11 @@ void XrExampleEngineLayer::onAttached()
     for (size_t i = 0; i < viewCount; ++i) {
         // Color swapchain and texture views
         auto &colorSwapchain = m_colorSwapchains[i];
-        colorSwapchain.swapchain = m_kdxrSession.createSwapchain({ .format = m_colorSwapchainFormat,
-                                                                   .usage = KDXr::SwapchainUsageFlagBits::SampledBit | KDXr::SwapchainUsageFlagBits::ColorAttachmentBit,
-                                                                   .width = m_viewConfigurationViews[i].recommendedTextureWidth,
-                                                                   .height = m_viewConfigurationViews[i].recommendedTextureHeight,
-                                                                   .sampleCount = m_viewConfigurationViews[i].recommendedSwapchainSampleCount });
+        colorSwapchain.swapchain = m_session.createSwapchain({ .format = m_colorSwapchainFormat,
+                                                               .usage = KDXr::SwapchainUsageFlagBits::SampledBit | KDXr::SwapchainUsageFlagBits::ColorAttachmentBit,
+                                                               .width = m_viewConfigurationViews[i].recommendedTextureWidth,
+                                                               .height = m_viewConfigurationViews[i].recommendedTextureHeight,
+                                                               .sampleCount = m_viewConfigurationViews[i].recommendedSwapchainSampleCount });
         const auto &textures = colorSwapchain.swapchain.textures();
         const auto textureCount = textures.size();
         colorSwapchain.textureViews.reserve(textureCount);
@@ -156,11 +156,11 @@ void XrExampleEngineLayer::onAttached()
 
         // Depth swapchain and texture views
         auto &depthSwapchain = m_depthSwapchains[i];
-        depthSwapchain.swapchain = m_kdxrSession.createSwapchain({ .format = m_depthSwapchainFormat,
-                                                                   .usage = KDXr::SwapchainUsageFlagBits::SampledBit | KDXr::SwapchainUsageFlagBits::DepthStencilAttachmentBit,
-                                                                   .width = m_viewConfigurationViews[i].recommendedTextureWidth,
-                                                                   .height = m_viewConfigurationViews[i].recommendedTextureHeight,
-                                                                   .sampleCount = m_viewConfigurationViews[i].recommendedSwapchainSampleCount });
+        depthSwapchain.swapchain = m_session.createSwapchain({ .format = m_depthSwapchainFormat,
+                                                               .usage = KDXr::SwapchainUsageFlagBits::SampledBit | KDXr::SwapchainUsageFlagBits::DepthStencilAttachmentBit,
+                                                               .width = m_viewConfigurationViews[i].recommendedTextureWidth,
+                                                               .height = m_viewConfigurationViews[i].recommendedTextureHeight,
+                                                               .sampleCount = m_viewConfigurationViews[i].recommendedSwapchainSampleCount });
         const auto &depthTextures = depthSwapchain.swapchain.textures();
         const auto depthTextureCount = depthTextures.size();
         depthSwapchain.textureViews.reserve(depthTextureCount);
@@ -177,12 +177,12 @@ void XrExampleEngineLayer::onDetached()
     m_compositorLayerObjects.clear();
     m_colorSwapchains.clear();
     m_depthSwapchains.clear();
-    m_kdxrReferenceSpace = {};
-    m_kdxrSession = {};
+    m_referenceSpace = {};
+    m_session = {};
     m_queue = {};
     m_device = {};
     m_instance = {};
-    m_kdxrInstance = {};
+    m_xrInstance = {};
 }
 
 void XrExampleEngineLayer::update()
@@ -191,20 +191,20 @@ void XrExampleEngineLayer::update()
     releaseStagingBuffers();
 
     // Process XR events
-    m_kdxrInstance.processEvents();
+    m_xrInstance.processEvents();
 
-    if (!m_kdxrSession.running())
+    if (!m_session.running())
         return;
 
     // Get timing information from the XR runtime and throttle the frame rate
-    const KDXr::FrameState frameState = m_kdxrSession.waitForFrame();
+    const KDXr::FrameState frameState = m_session.waitForFrame();
     if (frameState.waitFrameResult != KDXr::WaitFrameResult::Success) {
         SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to wait for frame.");
         return;
     }
 
     // Inform the XR compositor that we are beginning to render the frame
-    if (m_kdxrSession.beginFrame() != KDXr::BeginFrameResult::Success) {
+    if (m_session.beginFrame() != KDXr::BeginFrameResult::Success) {
         SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to begin frame.");
         return;
     }
@@ -212,7 +212,7 @@ void XrExampleEngineLayer::update()
     // Reset the compositor layers
     m_compositorLayers.clear();
 
-    if (m_kdxrSession.isActive() && frameState.shouldRender) {
+    if (m_session.isActive() && frameState.shouldRender) {
         // For now, we will use only a single projection layer. Later we can extend this to support multiple compositor layer types
         // in any configuration. At this time we assume the scene in the subclass is the only thing to be composited.
 
@@ -221,10 +221,10 @@ void XrExampleEngineLayer::update()
         // Locate the views from the view configuration within the (reference) space at the display time.
         const auto locateViewsOptions = KDXr::LocateViewsOptions{
             .displayTime = frameState.predictedDisplayTime,
-            .referenceSpace = m_kdxrReferenceSpace
+            .referenceSpace = m_referenceSpace
         };
 
-        const auto result = m_kdxrSession.locateViews(locateViewsOptions, m_viewState);
+        const auto result = m_session.locateViews(locateViewsOptions, m_viewState);
         if (result != KDXr::LocateViewsResult::Success) {
             SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to locate views.");
         } else {
@@ -274,7 +274,7 @@ void XrExampleEngineLayer::update()
             // Set up the projection layer
             m_projectionLayers[0] = {
                 .type = KDXr::CompositionLayerType::Projection,
-                .referenceSpace = m_kdxrReferenceSpace,
+                .referenceSpace = m_referenceSpace,
                 .flags = KDXr::CompositionLayerFlagBits::BlendTextureSourceAlphaBit | KDXr::CompositionLayerFlagBits::CorrectChromaticAberrationBit,
                 .views = m_projectionLayerViews // All views - adjust to relevant subset if we add support for multiple projection layers
             };
@@ -295,7 +295,7 @@ void XrExampleEngineLayer::update()
         .environmentBlendMode = m_selectedEnvironmentBlendMode,
         .layers = m_compositorLayers
     };
-    if (m_kdxrSession.endFrame(endFrameOptions) != KDXr::EndFrameResult::Success) {
+    if (m_session.endFrame(endFrameOptions) != KDXr::EndFrameResult::Success) {
         SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to end frame.");
     }
 }
