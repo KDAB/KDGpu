@@ -33,6 +33,10 @@ function(add_kdgpu_example)
         target_compile_definitions(${KD_ARGS_NAME} PRIVATE UNICODE)
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         target_compile_definitions(${KD_ARGS_NAME} PRIVATE PLATFORM_MACOS)
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Android")
+        target_compile_definitions(
+            ${KD_ARGS_NAME} PRIVATE PLATFORM_ANDROID VK_USE_PLATFORM_ANDROID_KHR=1 VMA_VULKAN_VERSION=1001000
+        )
     endif()
 
     target_compile_features(${KD_ARGS_NAME} PUBLIC cxx_std_20)

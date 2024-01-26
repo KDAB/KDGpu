@@ -416,7 +416,7 @@ AdapterSwapchainProperties VulkanAdapter::querySwapchainProperties(const Handle<
     };
 
     // Get the supported formats and colorspaces
-    uint32_t formatCount;
+    uint32_t formatCount = 0;
     std::vector<VkSurfaceFormatKHR> vkFormats;
     vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface.surface, &formatCount, nullptr);
     if (formatCount != 0) {
@@ -435,7 +435,7 @@ AdapterSwapchainProperties VulkanAdapter::querySwapchainProperties(const Handle<
     properties.formats = std::move(formats);
 
     // Get the supported present modes
-    uint32_t presentModeCount;
+    uint32_t presentModeCount = 0;
     std::vector<VkPresentModeKHR> vkPresentModes;
     vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface.surface, &presentModeCount, nullptr);
     if (presentModeCount != 0) {

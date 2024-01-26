@@ -35,6 +35,10 @@ struct wl_surface;
 #include <vulkan/vulkan_beta.h>
 #endif
 
+#if defined(KDGPU_PLATFORM_ANDROID)
+#include <vulkan/vulkan_android.h>
+#endif
+
 namespace KDGpu {
 
 std::vector<const char *> getDefaultRequestedInstanceExtensions()
@@ -50,6 +54,8 @@ std::vector<const char *> getDefaultRequestedInstanceExtensions()
     extensions.push_back(VK_EXT_METAL_SURFACE_EXTENSION_NAME);
     extensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
     extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+#elif defined(KDGPU_PLATFORM_ANDROID)
+    extensions.push_back(VK_KHR_ANDROID_SURFACE_EXTENSION_NAME);
 #endif
     if (enableValidationLayers)
         extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);

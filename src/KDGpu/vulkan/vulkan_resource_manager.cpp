@@ -497,8 +497,15 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
 
     if (!hasVulkan12 && hasVulkan11) {
         SPDLOG_LOGGER_INFO(Logger::logger(), "Vulkan 1.2 is unavailable, falling back to Vulkan 1.1...");
-        requestedDeviceExtensions.push_back(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME);
-        requestedDeviceExtensions.push_back(VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME);
+        std::vector<const char *> vulkan11Extensions = { VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME, VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME };
+        for (const char *requestedVulkan11Extension : vulkan11Extensions) {
+            if (findExtension(availableDeviceExtensions, requestedVulkan11Extension)) {
+                requestedDeviceExtensions.push_back(requestedVulkan11Extension);
+            } else {
+                SPDLOG_LOGGER_WARN(Logger::logger(), "Unable to find default requested Vulkan 1.1 extension {}", requestedVulkan11Extension);
+            }
+        }
+
     } else if (!hasVulkan12 && !hasVulkan11) {
         throw std::runtime_error("At least Vulkan 1.1 is required!");
     }
