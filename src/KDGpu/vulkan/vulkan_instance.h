@@ -40,7 +40,7 @@ struct KDGPU_EXPORT VulkanInstance : public ApiInstance {
 
     VulkanResourceManager *vulkanResourceManager{ nullptr };
     VkInstance instance{ VK_NULL_HANDLE };
-    VkDebugUtilsMessengerEXT debugMessenger{ nullptr };
+    VkDebugUtilsMessengerEXT debugMessenger{ VK_NULL_HANDLE };
     bool isOwned{ true };
 
 #if defined(KDGPU_PLATFORM_WIN32)
