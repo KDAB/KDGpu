@@ -62,6 +62,15 @@ bool findExtension(const std::vector<KDXr::Extension> &extensions, const std::st
     return it != std::end(extensions);
 };
 
+XrPath createXrPath(XrInstance xrInstance, const std::string &path)
+{
+    XrPath xrPath;
+    if (xrStringToPath(xrInstance, path.c_str(), &xrPath) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(KDXr::Logger::logger(), "Failed to create XrPath.");
+    }
+    return xrPath;
+}
+
 } // namespace
 
 namespace KDXr {
@@ -447,6 +456,50 @@ void OpenXrResourceManager::deleteActionSet(const Handle<ActionSet_t> &handle)
 OpenXrActionSet *OpenXrResourceManager::getActionSet(const Handle<ActionSet_t> &handle) const
 {
     return m_actionSets.get(handle);
+}
+
+Handle<Action_t> OpenXrResourceManager::createAction(const Handle<ActionSet_t> &actionSetHandle, const ActionOptions &options)
+{
+    OpenXrActionSet *openXrActionSet = m_actionSets.get(actionSetHandle);
+    assert(openXrActionSet);
+    OpenXrInstance *openXrInstance = m_instances.get(openXrActionSet->instanceHandle);
+    assert(openXrInstance);
+
+    // Subaction paths, e.g. left and right hand. To distinguish the same action performed on different devices.
+    std::vector<XrPath> xrSubactionPaths;
+    xrSubactionPaths.reserve(options.subactionPaths.size());
+    for (const auto &path : options.subactionPaths)
+        xrSubactionPaths.push_back(createXrPath(openXrInstance->instance, path));
+
+    XrActionCreateInfo actionCreateInfo{ XR_TYPE_ACTION_CREATE_INFO };
+    strncpy(actionCreateInfo.actionName, options.name.data(), XR_MAX_ACTION_NAME_SIZE);
+    actionCreateInfo.actionType = actionTypeToXrActionType(options.type);
+    actionCreateInfo.countSubactionPaths = static_cast<uint32_t>(xrSubactionPaths.size());
+    actionCreateInfo.subactionPaths = xrSubactionPaths.data();
+    strncpy(actionCreateInfo.localizedActionName, options.localizedName.data(), XR_MAX_LOCALIZED_ACTION_NAME_SIZE);
+
+    XrAction xrAction{ XR_NULL_HANDLE };
+    if (xrCreateAction(openXrActionSet->actionSet, &actionCreateInfo, &xrAction) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to create OpenXR Action.");
+        return {};
+    }
+
+    auto h = m_actions.emplace(OpenXrAction{ this, xrAction, actionSetHandle });
+    return h;
+}
+
+void OpenXrResourceManager::deleteAction(const Handle<Action_t> &handle)
+{
+    OpenXrAction *openXrAction = m_actions.get(handle);
+    if (xrDestroyAction(openXrAction->action) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to destroy OpenXR Action.");
+    }
+    m_actions.remove(handle);
+}
+
+OpenXrAction *OpenXrResourceManager::getAction(const Handle<Action_t> &handle) const
+{
+    return m_actions.get(handle);
 }
 
 } // namespace KDXr

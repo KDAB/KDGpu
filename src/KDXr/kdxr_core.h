@@ -330,6 +330,16 @@ enum class EyeVisibility : uint32_t {
     MaxEnum = 0x7fffffff
 };
 
+enum class ActionType : uint32_t {
+    BooleanInput = 1,
+    FloatInput = 2,
+    Vector2fInput = 3,
+    Vector3fInput = 4,
+    PoseInput = 5,
+    VibrationOutput = 100,
+    MaxEnum = 0x7fffffff
+};
+
 } // namespace KDXr
 
 OPERATORS_FOR_FLAGS(KDXr::CompositionLayerFlags)

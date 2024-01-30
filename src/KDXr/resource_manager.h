@@ -18,6 +18,7 @@
 
 namespace KDXr {
 
+struct ApiAction;
 struct ApiActionSet;
 struct ApiInstance;
 struct ApiReferenceSpace;
@@ -25,12 +26,14 @@ struct ApiSession;
 struct ApiSwapchain;
 struct ApiSystem;
 
+struct ActionOptions;
 struct ActionSetOptions;
 struct InstanceOptions;
 struct ReferenceSpaceOptions;
 struct SessionOptions;
 struct SwapchainOptions;
 
+struct Action_t;
 struct ActionSet_t;
 struct Instance_t;
 struct ReferenceSpace_t;
@@ -68,6 +71,10 @@ public:
     virtual Handle<ActionSet_t> createActionSet(const Handle<Instance_t> &instanceHandle, const ActionSetOptions &options) = 0;
     virtual void deleteActionSet(const Handle<ActionSet_t> &handle) = 0;
     virtual ApiActionSet *getActionSet(const Handle<ActionSet_t> &handle) const = 0;
+
+    virtual Handle<Action_t> createAction(const Handle<ActionSet_t> &actionSetHandle, const ActionOptions &options) = 0;
+    virtual void deleteAction(const Handle<Action_t> &handle) = 0;
+    virtual ApiAction *getAction(const Handle<Action_t> &handle) const = 0;
 
 protected:
     ResourceManager();

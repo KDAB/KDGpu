@@ -82,4 +82,9 @@ XrEyeVisibility eyeVisibilityToXrEyeVisibility(EyeVisibility visibility)
     return static_cast<XrEyeVisibility>(static_cast<uint32_t>(visibility));
 }
 
+XrActionType actionTypeToXrActionType(ActionType type)
+{
+    return static_cast<XrActionType>(static_cast<uint32_t>(type));
+}
+
 } // namespace KDXr

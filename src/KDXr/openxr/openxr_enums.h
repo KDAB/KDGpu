@@ -36,4 +36,6 @@ XrEnvironmentBlendMode environmentBlendModeToXrEnvironmentBlendMode(EnvironmentB
 
 XrEyeVisibility eyeVisibilityToXrEyeVisibility(EyeVisibility visibility);
 
+XrActionType actionTypeToXrActionType(ActionType type);
+
 } // namespace KDXr

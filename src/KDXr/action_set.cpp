@@ -77,4 +77,9 @@ ActionSet &ActionSet::operator=(ActionSet &&other) noexcept
     return *this;
 }
 
+Action ActionSet::createAction(const ActionOptions &options)
+{
+    return Action(m_api, m_actionSet, options);
+}
+
 } // namespace KDXr

@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include <KDXr/action.h>
 #include <KDXr/kdxr_core.h>
 #include <KDXr/handle.h>
 #include <KDXr/kdxr_export.h>
@@ -49,6 +50,8 @@ public:
     bool isValid() const { return m_actionSet.isValid(); }
 
     operator Handle<ActionSet_t>() const noexcept { return m_actionSet; }
+
+    Action createAction(const ActionOptions &options);
 
 private:
     ActionSet(XrApi *api, const Handle<Instance_t> &instanceHandle, const ActionSetOptions &options);
