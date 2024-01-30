@@ -61,11 +61,8 @@ namespace KDXr {
 
 <%= name %>::<%= name %>(<%= name %> &&other)
 {
-    m_api = other.m_api;
-    m_<%= variable_name %> = other.m_<%= variable_name %>;
-
-    other.m_api = nullptr;
-    other.m_<%= variable_name %> = {};
+    m_api = std::exchange(other.m_api, nullptr);
+    m_<%= variable_name %> = std::exchange(other.m_<%= variable_name %>, {});
 }
 
 <%= class_name %> &<%= class_name %>::operator=(<%= class_name %> &&other)
@@ -75,11 +72,8 @@ namespace KDXr {
         // if (isValid())
         //    m_api->resourceManager()->delete<%= class_name %>(handle());
 
-        m_api = other.m_api;
-        m_<%= variable_name %> = other.m_<%= variable_name %>;
-
-        other.m_api = nullptr;
-        other.m_<%= variable_name %> = {};
+        m_api = std::exchange(other.m_api, nullptr);
+        m_<%= variable_name %> = std::exchange(other.m_<%= variable_name %>, {});
     }
     return *this;
 }
