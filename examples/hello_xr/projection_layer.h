@@ -12,6 +12,9 @@
 
 #include <KDGpuExample/xr_compositor/xr_projection_layer.h>
 
+#include <KDXr/action.h>
+#include <KDXr/action_set.h>
+
 #include <KDGpu/bind_group.h>
 #include <KDGpu/buffer.h>
 #include <KDGpu/command_buffer.h>
@@ -24,10 +27,14 @@
 using namespace KDGpuExample;
 using namespace KDGpu;
 
+namespace KDXr {
+class Instance;
+}
+
 class ProjectionLayer : public XrProjectionLayer
 {
 public:
-    explicit ProjectionLayer(const XrProjectionLayerOptions &options);
+    explicit ProjectionLayer(const XrProjectionLayerOptions &options, KDXr::Instance *xrInstance);
     ~ProjectionLayer() override;
 
     // Not copyable
@@ -74,4 +81,11 @@ private:
     BindGroup m_entityTransformBindGroup;
 
     Fence m_fence;
+
+    KDXr::Instance *m_xrInstance{ nullptr };
+
+    // Input/output actions
+    KDXr::ActionSet m_actionSet;
+    KDXr::Action m_toggleAnimationAction;
+    KDXr::Action m_buzzAction;
 };

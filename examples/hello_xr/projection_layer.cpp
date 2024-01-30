@@ -38,8 +38,9 @@ inline std::string assetPath()
 
 } // namespace KDGpu
 
-ProjectionLayer::ProjectionLayer(const XrProjectionLayerOptions &options)
+ProjectionLayer::ProjectionLayer(const XrProjectionLayerOptions &options, KDXr::Instance *xrInstance)
     : XrProjectionLayer(options)
+    , m_xrInstance(xrInstance)
 {
 }
 
@@ -267,6 +268,13 @@ void ProjectionLayer::initializeScene()
     // shall wait for the fence to be signaled before we update any shared resources such as a view
     // matrix UBO (not used yet). An alternative would be to index into an array of such matrices.
     m_fence = m_device->createFence({ .label = "Projection Layer Scene Fence" });
+
+    assert(m_xrInstance);
+    m_actionSet = m_xrInstance->createActionSet({ .name = "default", .localizedName = "Default" });
+    m_toggleAnimationAction = m_actionSet.createAction({ .name = "toggle_animation",
+                                                         .localizedName = "Toggle Animation",
+                                                         .type = KDXr::ActionType::BooleanInput });
+    m_buzzAction = m_actionSet.createAction({ .name = "buzz", .localizedName = "Buzz", .type = KDXr::ActionType::VibrationOutput });
 }
 
 void ProjectionLayer::cleanupScene()

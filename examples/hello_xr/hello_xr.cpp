@@ -27,7 +27,7 @@ void HelloXr::onAttached()
         .depthSwapchainFormat = m_depthSwapchainFormat,
         .samples = m_samples.get()
     };
-    m_projectionLayer = createCompositorLayer<ProjectionLayer>(projectionLayerOptions);
+    m_projectionLayer = createCompositorLayer<ProjectionLayer>(projectionLayerOptions, &m_xrInstance);
     m_projectionLayer->setReferenceSpace(m_referenceSpace);
 
     // Create a quad layer to render the ImGui overlay
