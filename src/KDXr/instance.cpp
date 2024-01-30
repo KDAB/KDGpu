@@ -138,4 +138,10 @@ ActionSet Instance::createActionSet(const ActionSetOptions &options)
     return ActionSet(m_api, m_instance, options);
 }
 
+SuggestActionBindingsResult Instance::suggestActionBindings(const SuggestActionBindingsOptions &options)
+{
+    auto apiInstance = m_api->resourceManager()->getInstance(m_instance);
+    return apiInstance->suggestActionBindings(options);
+}
+
 } // namespace KDXr

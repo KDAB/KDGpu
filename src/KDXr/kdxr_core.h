@@ -340,6 +340,17 @@ enum class ActionType : uint32_t {
     MaxEnum = 0x7fffffff
 };
 
+enum class SuggestActionBindingsResult : int32_t {
+    Success = 0,
+    ValidationFailure = -1,
+    RuntimeFailure = -2,
+    HandleInvalid = -12,
+    InstanceLost = -13,
+    PathInvalid = -19,
+    PathUnsupported = -22,
+    MaxEnum = 0x7fffffff
+};
+
 } // namespace KDXr
 
 OPERATORS_FOR_FLAGS(KDXr::CompositionLayerFlags)

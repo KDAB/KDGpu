@@ -269,12 +269,27 @@ void ProjectionLayer::initializeScene()
     // matrix UBO (not used yet). An alternative would be to index into an array of such matrices.
     m_fence = m_device->createFence({ .label = "Projection Layer Scene Fence" });
 
+    // Create an action set and actions
     assert(m_xrInstance);
     m_actionSet = m_xrInstance->createActionSet({ .name = "default", .localizedName = "Default" });
     m_toggleAnimationAction = m_actionSet.createAction({ .name = "toggle_animation",
                                                          .localizedName = "Toggle Animation",
                                                          .type = KDXr::ActionType::BooleanInput });
     m_buzzAction = m_actionSet.createAction({ .name = "buzz", .localizedName = "Buzz", .type = KDXr::ActionType::VibrationOutput });
+
+    // Suggest some bindings for the actions. NB: This assumes we are using a Meta Quest. If you are using a different
+    // device, you will need to change the suggested bindings.
+    const auto bindingOptions = KDXr::SuggestActionBindingsOptions{
+        .interactionProfile = "/interaction_profiles/oculus/touch_controller",
+        .suggestedBindings = {
+                { .action = m_toggleAnimationAction, .binding = "/user/hand/left/input/a/click" },
+                { .action = m_toggleAnimationAction, .binding = "/user/hand/right/input/a/click" },
+                { .action = m_buzzAction, .binding = "/user/hand/left/output/haptic" },
+                { .action = m_buzzAction, .binding = "/user/hand/right/output/haptic" } }
+    };
+    if (m_xrInstance->suggestActionBindings(bindingOptions) != KDXr::SuggestActionBindingsResult::Success) {
+        SPDLOG_LOGGER_ERROR(KDXr::Logger::logger(), "Failed to suggest action bindings.");
+    }
 }
 
 void ProjectionLayer::cleanupScene()

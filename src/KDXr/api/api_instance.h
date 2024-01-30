@@ -19,6 +19,7 @@ namespace KDXr {
 
 struct Instance_t;
 struct System_t;
+struct SuggestActionBindingsOptions;
 struct SystemOptions;
 class Instance;
 
@@ -34,6 +35,7 @@ struct ApiInstance {
     virtual std::vector<Extension> enabledExtensions() const = 0;
     virtual Handle<System_t> querySystem(const SystemOptions &options, const Handle<Instance_t> &instanceHandle) = 0;
     virtual ProcessEventsResult processEvents() = 0;
+    virtual SuggestActionBindingsResult suggestActionBindings(const SuggestActionBindingsOptions &options) = 0;
 };
 
 } // namespace KDXr

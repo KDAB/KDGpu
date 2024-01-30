@@ -145,4 +145,37 @@ void OpenXrInstance::processSessionStateChangedEvent(const XrEventDataSessionSta
     openXrSession->setSessionState(xrSessionStateToSessionState(eventData->state));
 }
 
+SuggestActionBindingsResult OpenXrInstance::suggestActionBindings(const SuggestActionBindingsOptions &options)
+{
+    std::vector<XrActionSuggestedBinding> suggestedBindings;
+    suggestedBindings.reserve(options.suggestedBindings.size());
+    for (const auto &suggestion : options.suggestedBindings) {
+        XrPath xrPath = createXrPath(suggestion.binding);
+        OpenXrAction *openXrAction = openxrResourceManager->getAction(suggestion.action);
+        assert(openXrAction);
+        suggestedBindings.push_back({ .action = openXrAction->action, .binding = xrPath });
+    }
+
+    XrInteractionProfileSuggestedBinding suggestedProfileBinding{ XR_TYPE_INTERACTION_PROFILE_SUGGESTED_BINDING };
+    suggestedProfileBinding.interactionProfile = createXrPath(options.interactionProfile);
+    suggestedProfileBinding.suggestedBindings = suggestedBindings.data();
+    suggestedProfileBinding.countSuggestedBindings = suggestedBindings.size();
+
+    const auto result = xrSuggestInteractionProfileBindings(instance, &suggestedProfileBinding);
+    if (result != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to suggest interaction profile bindings");
+    }
+
+    return static_cast<SuggestActionBindingsResult>(result);
+}
+
+XrPath OpenXrInstance::createXrPath(const std::string &path)
+{
+    XrPath xrPath;
+    if (xrStringToPath(instance, path.c_str(), &xrPath) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(KDXr::Logger::logger(), "Failed to create XrPath.");
+    }
+    return xrPath;
+}
+
 } // namespace KDXr

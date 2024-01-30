@@ -39,6 +39,16 @@ struct InstanceOptions {
     std::vector<std::string> extensions;
 };
 
+struct ActionBindingSuggestion {
+    Handle<Action_t> action;
+    std::string binding;
+};
+
+struct SuggestActionBindingsOptions {
+    std::string interactionProfile;
+    std::vector<ActionBindingSuggestion> suggestedBindings;
+};
+
 class KDXR_EXPORT Instance
 {
 public:
@@ -66,6 +76,7 @@ public:
     ProcessEventsResult processEvents();
 
     ActionSet createActionSet(const ActionSetOptions &options);
+    SuggestActionBindingsResult suggestActionBindings(const SuggestActionBindingsOptions &options);
 
     KDBindings::Signal<> instanceLost;
 

@@ -42,6 +42,9 @@ struct KDXR_EXPORT OpenXrInstance : public ApiInstance {
     Handle<System_t> querySystem(const SystemOptions &options, const Handle<Instance_t> &instanceHandle) final;
     virtual ProcessEventsResult processEvents() final;
     void processSessionStateChangedEvent(const XrEventDataSessionStateChanged *eventData);
+    SuggestActionBindingsResult suggestActionBindings(const SuggestActionBindingsOptions &options) final;
+
+    XrPath createXrPath(const std::string &path);
 
     OpenXrResourceManager *openxrResourceManager{ nullptr };
     XrInstance instance{ XR_NULL_HANDLE };
