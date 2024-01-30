@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include <KDXr/action_set.h>
 #include <KDXr/handle.h>
 #include <KDXr/kdxr_core.h>
 #include <KDXr/kdxr_export.h>
@@ -63,6 +64,8 @@ public:
     System *system(const SystemOptions &options = SystemOptions());
 
     ProcessEventsResult processEvents();
+
+    ActionSet createActionSet(const ActionSetOptions &options);
 
     KDBindings::Signal<> instanceLost;
 

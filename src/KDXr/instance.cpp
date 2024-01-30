@@ -133,4 +133,9 @@ ProcessEventsResult Instance::processEvents()
     return apiInstance->processEvents();
 }
 
+ActionSet Instance::createActionSet(const ActionSetOptions &options)
+{
+    return ActionSet(m_api, m_instance, options);
+}
+
 } // namespace KDXr

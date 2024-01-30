@@ -416,4 +416,37 @@ OpenXrSwapchain *OpenXrResourceManager::getSwapchain(const Handle<Swapchain_t> &
     return m_swapchains.get(handle);
 }
 
+Handle<ActionSet_t> OpenXrResourceManager::createActionSet(const Handle<Instance_t> &instanceHandle, const ActionSetOptions &options)
+{
+    OpenXrInstance *openXrInstance = m_instances.get(instanceHandle);
+
+    XrActionSetCreateInfo actionSetCreateInfo{ XR_TYPE_ACTION_SET_CREATE_INFO };
+    strncpy(actionSetCreateInfo.actionSetName, options.name.data(), XR_MAX_ACTION_SET_NAME_SIZE);
+    strncpy(actionSetCreateInfo.localizedActionSetName, options.localizedName.data(), XR_MAX_LOCALIZED_ACTION_SET_NAME_SIZE);
+    actionSetCreateInfo.priority = options.priority;
+
+    XrActionSet xrActionSet{ XR_NULL_HANDLE };
+    if (xrCreateActionSet(openXrInstance->instance, &actionSetCreateInfo, &xrActionSet) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to create OpenXR ActionSet.");
+        return {};
+    }
+
+    auto h = m_actionSets.emplace(OpenXrActionSet{ this, xrActionSet, instanceHandle });
+    return h;
+}
+
+void OpenXrResourceManager::deleteActionSet(const Handle<ActionSet_t> &handle)
+{
+    OpenXrActionSet *openXrActionSet = m_actionSets.get(handle);
+    if (xrDestroyActionSet(openXrActionSet->actionSet) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to destroy OpenXR ActionSet.");
+    }
+    m_actionSets.remove(handle);
+}
+
+OpenXrActionSet *OpenXrResourceManager::getActionSet(const Handle<ActionSet_t> &handle) const
+{
+    return m_actionSets.get(handle);
+}
+
 } // namespace KDXr

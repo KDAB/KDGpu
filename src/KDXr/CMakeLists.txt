@@ -7,7 +7,9 @@
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
 set(SOURCES
+    action_set.cpp
     instance.cpp
+    openxr/openxr_action_set.cpp
     openxr/openxr_api.cpp
     openxr/openxr_enums.cpp
     openxr/openxr_instance.cpp
@@ -26,6 +28,8 @@ set(SOURCES
 )
 
 set(HEADERS
+    action_set.h
+    api/api_action_set.h
     api/api_instance.h
     api/api_reference_space.h
     api/api_session.h
@@ -35,6 +39,7 @@ set(HEADERS
     handle.h
     instance.h
     locate_views_options.h
+    openxr/openxr_action_set.h
     openxr/openxr_api.h
     openxr/openxr_enums.h
     openxr/openxr_instance.h

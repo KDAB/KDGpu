@@ -18,17 +18,20 @@
 
 namespace KDXr {
 
+struct ApiActionSet;
 struct ApiInstance;
 struct ApiReferenceSpace;
 struct ApiSession;
 struct ApiSwapchain;
 struct ApiSystem;
 
+struct ActionSetOptions;
 struct InstanceOptions;
 struct ReferenceSpaceOptions;
 struct SessionOptions;
 struct SwapchainOptions;
 
+struct ActionSet_t;
 struct Instance_t;
 struct ReferenceSpace_t;
 struct Session_t;
@@ -61,6 +64,10 @@ public:
     virtual Handle<Swapchain_t> createSwapchain(const Handle<Session_t> &sessionHandle, const SwapchainOptions &options) = 0;
     virtual void deleteSwapchain(const Handle<Swapchain_t> &handle) = 0;
     virtual ApiSwapchain *getSwapchain(const Handle<Swapchain_t> &handle) const = 0;
+
+    virtual Handle<ActionSet_t> createActionSet(const Handle<Instance_t> &instanceHandle, const ActionSetOptions &options) = 0;
+    virtual void deleteActionSet(const Handle<ActionSet_t> &handle) = 0;
+    virtual ApiActionSet *getActionSet(const Handle<ActionSet_t> &handle) const = 0;
 
 protected:
     ResourceManager();

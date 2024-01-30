@@ -14,6 +14,7 @@
 
 #include <KDXr/pool.h>
 
+#include <KDXr/openxr/openxr_action_set.h>
 #include <KDXr/openxr/openxr_instance.h>
 #include <KDXr/openxr/openxr_reference_space.h>
 #include <KDXr/openxr/openxr_session.h>
@@ -61,12 +62,17 @@ public:
     void deleteSwapchain(const Handle<Swapchain_t> &handle) final;
     OpenXrSwapchain *getSwapchain(const Handle<Swapchain_t> &handle) const final;
 
+    Handle<ActionSet_t> createActionSet(const Handle<Instance_t> &instanceHandle, const ActionSetOptions &options) final;
+    void deleteActionSet(const Handle<ActionSet_t> &handle) final;
+    OpenXrActionSet *getActionSet(const Handle<ActionSet_t> &handle) const final;
+
 private:
     Pool<OpenXrInstance, Instance_t> m_instances{ 1 };
     Pool<OpenXrSystem, System_t> m_systems{ 1 };
     Pool<OpenXrSession, Session_t> m_sessions{ 1 };
     Pool<OpenXrReferenceSpace, ReferenceSpace_t> m_referenceSpaces{ 4 };
     Pool<OpenXrSwapchain, Swapchain_t> m_swapchains{ 4 };
+    Pool<OpenXrActionSet, ActionSet_t> m_actionSets{ 4 };
 };
 
 } // namespace KDXr
