@@ -30,9 +30,6 @@
 #include <KDGui/platform/cocoa/cocoa_platform_window.h>
 extern CAMetalLayer *createMetalLayer(KDGui::Window *window);
 #endif
-#if defined(KDGUI_PLATFORM_ANDROID)
-#include <KDGui/platform/android/android_platform_window.h>
-#endif
 
 namespace KDGpuKDGui {
 
@@ -101,16 +98,6 @@ KDGpu::SurfaceOptions View::surfaceOptions(KDGui::Window *w)
 #if defined(KDGUI_PLATFORM_COCOA)
         return KDGpu::SurfaceOptions{
             .layer = createMetalLayer(w)
-        };
-#else
-        break;
-#endif
-    }
-    case KDGui::AbstractPlatformWindow::Type::Android: {
-#if defined(KDGUI_PLATFORM_ANDROID)
-        auto androidWindow = static_cast<KDGui::AndroidPlatformWindow *>(w->platformWindow());
-        return KDGpu::SurfaceOptions{
-            .window = androidWindow->nativeWindow()
         };
 #else
         break;

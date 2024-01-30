@@ -157,18 +157,6 @@ Handle<Surface_t> VulkanInstance::createSurface(const SurfaceOptions &options)
     vkSurface = createVulkanSurface(instance, options);
 #endif
 
-#if defined(KDGPU_PLATFORM_ANDROID)
-    const VkAndroidSurfaceCreateInfoKHR createInfo{
-        .sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR,
-        .pNext = nullptr,
-        .flags = 0,
-        .window = options.window
-    };
-
-    if (vkCreateAndroidSurfaceKHR(instance, &createInfo, nullptr, &vkSurface) != VK_SUCCESS)
-        return {};
-#endif
-
     VulkanSurface vulkanSurface(vkSurface, instance);
     auto surfaceHandle = vulkanResourceManager->insertSurface(vulkanSurface);
     return surfaceHandle;

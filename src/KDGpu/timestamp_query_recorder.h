@@ -14,8 +14,6 @@
 #include <KDGpu/handle.h>
 #include <KDGpu/kdgpu_export.h>
 
-#include <vector>
-
 namespace KDGpu {
 
 struct TimestampQueryRecorder_t;

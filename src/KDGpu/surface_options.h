@@ -33,10 +33,6 @@ typedef void CAMetalLayer;
 #endif
 #endif
 
-#if defined(KDGPU_PLATFORM_ANDROID)
-#include <android/native_window.h>
-#endif
-
 namespace KDGpu {
 
 struct SurfaceOptions {
@@ -52,9 +48,6 @@ struct SurfaceOptions {
 #endif
 #if defined(KDGPU_PLATFORM_APPLE)
     CAMetalLayer *layer;
-#endif
-#if defined(KDGPU_PLATFORM_ANDROID)
-    ANativeWindow *window = nullptr;
 #endif
 };
 

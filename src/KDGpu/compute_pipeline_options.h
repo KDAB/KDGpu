@@ -13,8 +13,6 @@
 #include <KDGpu/handle.h>
 #include <KDGpu/gpu_core.h>
 
-#include <vector>
-
 namespace KDGpu {
 
 struct PipelineLayout_t;

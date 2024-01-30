@@ -15,5 +15,4 @@
 #cmakedefine KDGPU_PLATFORM_APPLE
 #cmakedefine KDGPU_PLATFORM_MACOS
 #cmakedefine KDGPU_PLATFORM_IOS
-#cmakedefine KDGPU_PLATFORM_ANDROID
 // clang-format on
