@@ -290,6 +290,12 @@ void ProjectionLayer::initializeScene()
     if (m_xrInstance->suggestActionBindings(bindingOptions) != KDXr::SuggestActionBindingsResult::Success) {
         SPDLOG_LOGGER_ERROR(KDXr::Logger::logger(), "Failed to suggest action bindings.");
     }
+
+    // Attach the action set to the session
+    const auto attachOptions = KDXr::AttachActionSetsOptions{ .actionSets = { m_actionSet } };
+    if (m_session->attachActionSets(attachOptions) != KDXr::AttachActionSetsResult::Success) {
+        SPDLOG_LOGGER_ERROR(KDXr::Logger::logger(), "Failed to attach action set.");
+    }
 }
 
 void ProjectionLayer::cleanupScene()

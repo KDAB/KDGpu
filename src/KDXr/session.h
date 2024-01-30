@@ -34,6 +34,7 @@ class GraphicsApi;
 
 namespace KDXr {
 
+struct ActionSet_t;
 struct Session_t;
 struct System_t;
 class System;
@@ -48,6 +49,10 @@ struct SessionOptions {
     KDGpu::GraphicsApi *graphicsApi{ nullptr };
     KDGpu::Handle<KDGpu::Device_t> device;
     uint32_t queueIndex{ 0 };
+};
+
+struct AttachActionSetsOptions {
+    std::vector<Handle<ActionSet_t>> actionSets;
 };
 
 class KDXR_EXPORT Session
@@ -88,6 +93,8 @@ public:
     EndFrameResult endFrame(const EndFrameOptions &options);
 
     LocateViewsResult locateViews(const LocateViewsOptions &options, ViewState &viewState);
+
+    AttachActionSetsResult attachActionSets(const AttachActionSetsOptions &options);
 
 private:
     Session(const Handle<System_t> &systemHandle, XrApi *api, const SessionOptions &options);

@@ -335,4 +335,25 @@ void OpenXrSession::setSessionState(SessionState state)
     }
 }
 
+AttachActionSetsResult OpenXrSession::attachActionSets(const AttachActionSetsOptions &options)
+{
+    std::vector<XrActionSet> actionSets;
+    actionSets.reserve(options.actionSets.size());
+    for (const auto &actionSet : options.actionSets) {
+        auto openxrActionSet = openxrResourceManager->getActionSet(actionSet);
+        assert(openxrActionSet);
+        actionSets.push_back(openxrActionSet->actionSet);
+    }
+
+    XrSessionActionSetsAttachInfo sessionActionSetsAttachInfo{ XR_TYPE_SESSION_ACTION_SETS_ATTACH_INFO };
+    sessionActionSetsAttachInfo.countActionSets = static_cast<uint32_t>(actionSets.size());
+    sessionActionSetsAttachInfo.actionSets = actionSets.data();
+
+    const auto result = xrAttachSessionActionSets(session, &sessionActionSetsAttachInfo);
+    if (result != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to attach action sets.");
+    }
+    return static_cast<AttachActionSetsResult>(result);
+}
+
 } // namespace KDXr

@@ -141,4 +141,10 @@ LocateViewsResult Session::locateViews(const LocateViewsOptions &options, ViewSt
     return apiSession->locateViews(options, m_viewConfigurationType, viewState);
 }
 
+AttachActionSetsResult Session::attachActionSets(const AttachActionSetsOptions &options)
+{
+    auto apiSession = m_api->resourceManager()->getSession(m_session);
+    return apiSession->attachActionSets(options);
+}
+
 } // namespace KDXr

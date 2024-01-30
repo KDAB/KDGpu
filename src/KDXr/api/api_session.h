@@ -22,6 +22,7 @@
 namespace KDXr {
 
 class Session;
+struct AttachActionSetsOptions;
 struct Session_t;
 
 /**
@@ -36,6 +37,7 @@ struct ApiSession {
     virtual BeginFrameResult beginFrame() = 0;
     virtual EndFrameResult endFrame(const EndFrameOptions &options) = 0;
     virtual LocateViewsResult locateViews(const LocateViewsOptions &options, ViewConfigurationType viewConfigurationType, ViewState &viewState) = 0;
+    virtual AttachActionSetsResult attachActionSets(const AttachActionSetsOptions &options) = 0;
 };
 
 } // namespace KDXr
