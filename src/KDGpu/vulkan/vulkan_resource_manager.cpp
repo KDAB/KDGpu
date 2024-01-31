@@ -49,7 +49,8 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
     std::vector<const char *> ignore = {
         "VUID-VkSwapchainCreateInfoKHR-imageExtent-01274",
         "VUID-VkImageMemoryBarrier-oldLayout-01208", // Meta XR Simulator
-        "UNASSIGNED-CoreValidation-DrawState-InvalidImageAspect" // Meta XR Simulator
+        "UNASSIGNED-CoreValidation-DrawState-InvalidImageAspect", // Meta XR Simulator
+        "UNASSIGNED-CoreValidation-DrawState-InvalidImageLayout" // Meta XR Simulator
     };
 
     for (const char *i : ignore) {
