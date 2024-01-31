@@ -282,7 +282,7 @@ void ProjectionLayer::initializeScene()
     const auto bindingOptions = KDXr::SuggestActionBindingsOptions{
         .interactionProfile = "/interaction_profiles/oculus/touch_controller",
         .suggestedBindings = {
-                { .action = m_toggleAnimationAction, .binding = "/user/hand/left/input/a/click" },
+                { .action = m_toggleAnimationAction, .binding = "/user/hand/left/input/x/click" },
                 { .action = m_toggleAnimationAction, .binding = "/user/hand/right/input/a/click" },
                 { .action = m_buzzAction, .binding = "/user/hand/left/output/haptic" },
                 { .action = m_buzzAction, .binding = "/user/hand/right/output/haptic" } }
