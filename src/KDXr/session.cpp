@@ -147,6 +147,12 @@ AttachActionSetsResult Session::attachActionSets(const AttachActionSetsOptions &
     return apiSession->attachActionSets(options);
 }
 
+InteractionProfileState Session::getInteractionProfile(const GetInterationProfileOptions &options) const
+{
+    auto apiSession = m_api->resourceManager()->getSession(m_session);
+    return apiSession->getInteractionProfile(options);
+}
+
 SyncActionsResult Session::syncActions(const SyncActionsOptions &options)
 {
     auto apiSession = m_api->resourceManager()->getSession(m_session);

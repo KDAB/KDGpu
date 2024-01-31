@@ -23,6 +23,7 @@ namespace KDXr {
 
 class Session;
 struct AttachActionSetsOptions;
+struct GetInterationProfileOptions;
 struct Session_t;
 struct SyncActionsOptions;
 
@@ -39,6 +40,7 @@ struct ApiSession {
     virtual EndFrameResult endFrame(const EndFrameOptions &options) = 0;
     virtual LocateViewsResult locateViews(const LocateViewsOptions &options, ViewConfigurationType viewConfigurationType, ViewState &viewState) = 0;
     virtual AttachActionSetsResult attachActionSets(const AttachActionSetsOptions &options) = 0;
+    virtual InteractionProfileState getInteractionProfile(const GetInterationProfileOptions &options) const = 0;
     virtual SyncActionsResult syncActions(const SyncActionsOptions &options) = 0;
 };
 

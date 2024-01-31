@@ -57,6 +57,7 @@ struct KDXR_EXPORT OpenXrSession : public ApiSession {
     void setSessionState(SessionState state);
 
     AttachActionSetsResult attachActionSets(const AttachActionSetsOptions &options) final;
+    InteractionProfileState getInteractionProfile(const GetInterationProfileOptions &options) const final;
     SyncActionsResult syncActions(const SyncActionsOptions &options) final;
 
     OpenXrResourceManager *openxrResourceManager{ nullptr };

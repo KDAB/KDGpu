@@ -60,6 +60,10 @@ struct ActiveActionSet {
     std::string subactionPath;
 };
 
+struct GetInterationProfileOptions {
+    std::string topLevelUserPath;
+};
+
 struct SyncActionsOptions {
     std::vector<ActiveActionSet> actionSets;
 };
@@ -104,6 +108,7 @@ public:
     LocateViewsResult locateViews(const LocateViewsOptions &options, ViewState &viewState);
 
     AttachActionSetsResult attachActionSets(const AttachActionSetsOptions &options);
+    InteractionProfileState getInteractionProfile(const GetInterationProfileOptions &options) const;
     SyncActionsResult syncActions(const SyncActionsOptions &options);
 
 private:

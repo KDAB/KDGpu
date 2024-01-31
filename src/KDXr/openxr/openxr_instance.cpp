@@ -169,7 +169,22 @@ SuggestActionBindingsResult OpenXrInstance::suggestActionBindings(const SuggestA
     return static_cast<SuggestActionBindingsResult>(result);
 }
 
-XrPath OpenXrInstance::createXrPath(const std::string &path)
+std::string OpenXrInstance::pathToString(XrPath path) const
+{
+    uint32_t strl;
+    char text[XR_MAX_PATH_LENGTH];
+    XrResult res;
+    res = xrPathToString(instance, path, XR_MAX_PATH_LENGTH, &strl, text);
+    std::string str;
+    if (res == XR_SUCCESS) {
+        str = text;
+    } else {
+        SPDLOG_LOGGER_CRITICAL(KDXr::Logger::logger(), "Failed to retrieve path.");
+    }
+    return str;
+}
+
+XrPath OpenXrInstance::createXrPath(const std::string &path) const
 {
     XrPath xrPath;
     if (xrStringToPath(instance, path.c_str(), &xrPath) != XR_SUCCESS) {

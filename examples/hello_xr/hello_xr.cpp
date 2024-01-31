@@ -105,6 +105,20 @@ void HelloXr::onInteractionProfileChanged()
     if (!m_session.isValid())
         return;
     SPDLOG_LOGGER_INFO(m_logger, "Interaction Profile Changed.");
+
+    auto profileState = m_session.getInteractionProfile({ .topLevelUserPath = m_handPaths[0] });
+    if (profileState.result == KDXr::GetInteractionProfileResult::Success) {
+        SPDLOG_LOGGER_INFO(m_logger, "Interaction Profile for {}: {}", m_handPaths[0], profileState.interactionProfile);
+    } else {
+        SPDLOG_LOGGER_ERROR(m_logger, "Failed to get interaction profile.");
+    }
+
+    profileState = m_session.getInteractionProfile({ .topLevelUserPath = m_handPaths[1] });
+    if (profileState.result == KDXr::GetInteractionProfileResult::Success) {
+        SPDLOG_LOGGER_INFO(m_logger, "Interaction Profile for {}: {}", m_handPaths[1], profileState.interactionProfile);
+    } else {
+        SPDLOG_LOGGER_ERROR(m_logger, "Failed to get interaction profile.");
+    }
 }
 
 void HelloXr::pollActions(KDXr::Time predictedDisplayTime)

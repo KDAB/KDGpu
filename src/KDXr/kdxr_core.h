@@ -376,6 +376,25 @@ enum class SyncActionsResult : int32_t {
     MaxEnum = 0x7fffffff
 };
 
+enum class GetInteractionProfileResult : int32_t {
+    Success = 0,
+    SessionLossPending = 3,
+    ValidationFailure = -1,
+    RuntimeFailure = -2,
+    HandleInvalid = -12,
+    InstanceLost = -13,
+    SessionLost = -17,
+    PathInvalid = -19,
+    PathUnsupported = -22,
+    ActionSetNotAttached = -46,
+    MaxEnum = 0x7fffffff
+};
+
+struct InteractionProfileState {
+    GetInteractionProfileResult result{ GetInteractionProfileResult::MaxEnum };
+    std::string interactionProfile;
+};
+
 } // namespace KDXr
 
 OPERATORS_FOR_FLAGS(KDXr::CompositionLayerFlags)

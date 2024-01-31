@@ -358,6 +358,23 @@ AttachActionSetsResult OpenXrSession::attachActionSets(const AttachActionSetsOpt
     return static_cast<AttachActionSetsResult>(result);
 }
 
+InteractionProfileState OpenXrSession::getInteractionProfile(const GetInterationProfileOptions &options) const
+{
+    OpenXrInstance *openxrInstance = openxrResourceManager->getInstance(instanceHandle);
+    assert(openxrInstance);
+    XrPath xrPath = openxrInstance->createXrPath(options.topLevelUserPath);
+    XrInteractionProfileState xrInteractionProfileState{ XR_TYPE_INTERACTION_PROFILE_STATE };
+    const auto result = xrGetCurrentInteractionProfile(session, xrPath, &xrInteractionProfileState);
+    if (result != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to get interaction profile.");
+        return InteractionProfileState{ .result = static_cast<GetInteractionProfileResult>(result) };
+    }
+    return InteractionProfileState{
+        .result = static_cast<GetInteractionProfileResult>(result),
+        .interactionProfile = openxrInstance->pathToString(xrInteractionProfileState.interactionProfile)
+    };
+}
+
 SyncActionsResult OpenXrSession::syncActions(const SyncActionsOptions &options)
 {
     OpenXrInstance *openxrInstance = openxrResourceManager->getInstance(instanceHandle);
