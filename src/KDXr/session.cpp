@@ -159,4 +159,16 @@ SyncActionsResult Session::syncActions(const SyncActionsOptions &options)
     return apiSession->syncActions(options);
 }
 
+GetActionStateResult Session::getBooleanState(const GetActionStateOptions &options, ActionStateBoolean &state) const
+{
+    auto apiSession = m_api->resourceManager()->getSession(m_session);
+    return apiSession->getBooleanState(options, state);
+}
+
+VibrateOutputResult Session::vibrateOutput(const VibrationOutputOptions &options)
+{
+    auto apiSession = m_api->resourceManager()->getSession(m_session);
+    return apiSession->vibrateOutput(options);
+}
+
 } // namespace KDXr

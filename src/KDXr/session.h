@@ -34,6 +34,7 @@ class GraphicsApi;
 
 namespace KDXr {
 
+struct Action_t;
 struct ActionSet_t;
 struct Session_t;
 struct System_t;
@@ -66,6 +67,20 @@ struct GetInterationProfileOptions {
 
 struct SyncActionsOptions {
     std::vector<ActiveActionSet> actionSets;
+};
+
+struct GetActionStateOptions {
+    Handle<Action_t> action;
+    std::string subactionPath;
+};
+
+// TODO: Is this enough? Do we need any other types of output?
+struct VibrationOutputOptions {
+    Handle<Action_t> action;
+    std::string subactionPath;
+    Duration duration{ MinimumHapticDuration };
+    float amplitude{ 0.0f };
+    float frequency{ UnspecifiedHapticFrequency };
 };
 
 class KDXR_EXPORT Session
@@ -110,6 +125,12 @@ public:
     AttachActionSetsResult attachActionSets(const AttachActionSetsOptions &options);
     InteractionProfileState getInteractionProfile(const GetInterationProfileOptions &options) const;
     SyncActionsResult syncActions(const SyncActionsOptions &options);
+
+    // TODO: Should we add per type getters? Or perhaps have type-specific actions and move getState to the actions?
+    // If we do that, then we need the backend actions to be able to know about the session.
+    GetActionStateResult getBooleanState(const GetActionStateOptions &options, ActionStateBoolean &state) const;
+
+    VibrateOutputResult vibrateOutput(const VibrationOutputOptions &options);
 
 private:
     Session(const Handle<System_t> &systemHandle, XrApi *api, const SessionOptions &options);

@@ -23,6 +23,7 @@
 #include <glm/glm.hpp>
 
 #include <array>
+#include <vector>
 
 class ProjectionLayer;
 
@@ -52,4 +53,7 @@ private:
     KDXr::Action m_buzzAction;
 
     const std::vector<std::string> m_handPaths{ "/user/hand/left", "/user/hand/right" };
+
+    std::array<KDXr::ActionStateBoolean, 2> m_toggleAnimationActionStates;
+    std::array<float, 2> m_buzzAmplitudes{ 0.0f, 0.0f };
 };

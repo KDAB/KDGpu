@@ -322,7 +322,10 @@ void ProjectionLayer::updateScene()
         // clang-format on
     }
 
-    // Each frame we want to rotate the triangle a little
+    // If we are animating, each frame we want to rotate the triangle a little and slide back and forth
+    if (!animate())
+        return;
+
     static float angle = 0.0f;
     const float angularSpeed = 3.0f; // degrees per second
     const float dt = engine()->deltaTimeSeconds();

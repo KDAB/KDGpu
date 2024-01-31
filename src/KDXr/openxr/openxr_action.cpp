@@ -16,7 +16,9 @@
 
 namespace KDXr {
 
-OpenXrAction::OpenXrAction(OpenXrResourceManager *_openxrResourceManager, XrAction _action, const Handle<ActionSet_t> &_actionSetHandle) noexcept
+OpenXrAction::OpenXrAction(OpenXrResourceManager *_openxrResourceManager,
+                           XrAction _action,
+                           const Handle<ActionSet_t> &_actionSetHandle) noexcept
     : ApiAction()
     , openxrResourceManager(_openxrResourceManager)
     , actionSetHandle(_actionSetHandle)

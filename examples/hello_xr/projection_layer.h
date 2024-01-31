@@ -19,6 +19,8 @@
 #include <KDGpu/pipeline_layout.h>
 #include <KDGpu/render_pass_command_recorder_options.h>
 
+#include <kdbindings/property.h>
+
 #include <glm/glm.hpp>
 
 using namespace KDGpuExample;
@@ -31,6 +33,8 @@ class Instance;
 class ProjectionLayer : public XrProjectionLayer
 {
 public:
+    KDBindings::Property<bool> animate{ true };
+
     explicit ProjectionLayer(const XrProjectionLayerOptions &options);
     ~ProjectionLayer() override;
 

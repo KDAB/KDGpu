@@ -123,7 +123,7 @@ void HelloXr::onInteractionProfileChanged()
 
 void HelloXr::pollActions(KDXr::Time predictedDisplayTime)
 {
-    // Sync the action set(s) and poll the actions
+    // Sync the action set
     const auto syncActionOptions = KDXr::SyncActionsOptions{ .actionSets = { { m_actionSet } } };
     const auto syncActionResult = m_session.syncActions(syncActionOptions);
     if (syncActionResult != KDXr::SyncActionsResult::Success) {
@@ -131,5 +131,46 @@ void HelloXr::pollActions(KDXr::Time predictedDisplayTime)
         return;
     }
 
-    // TODO: Poll the actions and do something with the results
+    // Poll the actions and do something with the results
+    bool toggleAnimation{ false };
+    int32_t buzzHand{ -1 };
+    for (uint32_t i = 0; i < 2; ++i) {
+        const auto toggleAnimationResult = m_session.getBooleanState(
+                { .action = m_toggleAnimationAction, .subactionPath = m_handPaths[i] },
+                m_toggleAnimationActionStates[i]);
+        if (toggleAnimationResult != KDXr::GetActionStateResult::Success) {
+            SPDLOG_LOGGER_ERROR(KDXr::Logger::logger(), "Failed to get toggle animation action state.");
+            continue;
+        }
+
+        if (m_toggleAnimationActionStates[i].currentState && m_toggleAnimationActionStates[i].changedSinceLastSync) {
+            toggleAnimation = true;
+            buzzHand = i;
+            break;
+        }
+    }
+
+    // If the toggle animation action was pressed, toggle the animation and buzz the controller
+    if (toggleAnimation) {
+        m_projectionLayer->animate = !m_projectionLayer->animate();
+        m_buzzAmplitudes[buzzHand] = 1.0f;
+        SPDLOG_LOGGER_INFO(KDXr::Logger::logger(), "Animation enabled = {}", m_projectionLayer->animate());
+    }
+
+    // Apply any haptic feedback
+    for (uint32_t i = 0; i < 2; ++i) {
+        if (m_buzzAmplitudes[i] > 0.0f) {
+            const auto buzzOptions = KDXr::VibrationOutputOptions{
+                .action = m_buzzAction,
+                .subactionPath = m_handPaths[i],
+                .amplitude = m_buzzAmplitudes[i],
+            };
+            m_session.vibrateOutput(buzzOptions);
+
+            // Decay the amplitude
+            m_buzzAmplitudes[i] *= 0.5f;
+            if (m_buzzAmplitudes[i] < 0.01f)
+                m_buzzAmplitudes[i] = 0.0f;
+        }
+    }
 }

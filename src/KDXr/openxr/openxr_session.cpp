@@ -402,4 +402,61 @@ SyncActionsResult OpenXrSession::syncActions(const SyncActionsOptions &options)
     return static_cast<SyncActionsResult>(result);
 }
 
+GetActionStateResult OpenXrSession::getBooleanState(const GetActionStateOptions &options, ActionStateBoolean &state) const
+{
+    OpenXrInstance *openxrInstance = openxrResourceManager->getInstance(instanceHandle);
+    assert(openxrInstance);
+    XrPath xrPath{ XR_NULL_PATH };
+    if (!options.subactionPath.empty())
+        xrPath = openxrInstance->createXrPath(options.subactionPath);
+
+    OpenXrAction *openxrAction = openxrResourceManager->getAction(options.action);
+    assert(openxrAction);
+
+    XrActionStateGetInfo actionStateGetInfo{ XR_TYPE_ACTION_STATE_GET_INFO };
+    actionStateGetInfo.action = openxrAction->action;
+    actionStateGetInfo.subactionPath = xrPath;
+    XrActionStateBoolean xrActionStateBoolean{ XR_TYPE_ACTION_STATE_BOOLEAN };
+    const auto result = xrGetActionStateBoolean(session, &actionStateGetInfo, &xrActionStateBoolean);
+    if (result != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to get action state.");
+        state = ActionStateBoolean{};
+    } else {
+        state = ActionStateBoolean{
+            .currentState = static_cast<bool>(xrActionStateBoolean.currentState),
+            .changedSinceLastSync = static_cast<bool>(xrActionStateBoolean.changedSinceLastSync),
+            .lastChangeTime = xrActionStateBoolean.lastChangeTime,
+            .active = static_cast<bool>(xrActionStateBoolean.isActive)
+        };
+    }
+
+    return static_cast<GetActionStateResult>(result);
+}
+
+VibrateOutputResult OpenXrSession::vibrateOutput(const VibrationOutputOptions &options)
+{
+    OpenXrInstance *openxrInstance = openxrResourceManager->getInstance(instanceHandle);
+    assert(openxrInstance);
+    XrPath xrPath{ XR_NULL_PATH };
+    if (!options.subactionPath.empty())
+        xrPath = openxrInstance->createXrPath(options.subactionPath);
+
+    OpenXrAction *openxrAction = openxrResourceManager->getAction(options.action);
+    assert(openxrAction);
+
+    XrHapticVibration vibration{ XR_TYPE_HAPTIC_VIBRATION };
+    vibration.amplitude = options.amplitude;
+    vibration.duration = options.duration;
+    vibration.frequency = options.frequency;
+
+    XrHapticActionInfo hapticActionInfo{ XR_TYPE_HAPTIC_ACTION_INFO };
+    hapticActionInfo.action = openxrAction->action;
+    hapticActionInfo.subactionPath = xrPath;
+    const auto result = xrApplyHapticFeedback(session, &hapticActionInfo, reinterpret_cast<const XrHapticBaseHeader *>(&vibration));
+    if (result != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to apply haptic feedback.");
+    }
+    return static_cast<VibrateOutputResult>(result);
+}
+
 } // namespace KDXr

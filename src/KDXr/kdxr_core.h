@@ -37,10 +37,12 @@ namespace KDXr {
  *  @{
  */
 
-constexpr int64_t InfiniteDuration = 0x7fffffffffffffffLL;
-
 using Time = int64_t;
 using Duration = int64_t;
+
+constexpr Duration InfiniteDuration = 0x7fffffffffffffffLL;
+constexpr Duration MinimumHapticDuration = -1;
+constexpr float UnspecifiedHapticFrequency = 0.0f;
 
 struct ApiLayer {
     std::string name;
@@ -393,6 +395,44 @@ enum class GetInteractionProfileResult : int32_t {
 struct InteractionProfileState {
     GetInteractionProfileResult result{ GetInteractionProfileResult::MaxEnum };
     std::string interactionProfile;
+};
+
+enum class GetActionStateResult : int32_t {
+    Success = 0,
+    SessionLossPending = 3,
+    ValidationFailure = -1,
+    RuntimeFailure = -2,
+    HandleInvalid = -12,
+    InstanceLost = -13,
+    SessionLost = -17,
+    PathInvalid = -19,
+    PathUnsupported = -22,
+    ActionTypeMismatch = -27,
+    ActionSetNotAttached = -46,
+    MaxEnum = 0x7fffffff
+};
+
+struct ActionStateBoolean {
+    bool currentState{ false };
+    bool changedSinceLastSync{ false };
+    Time lastChangeTime{ 0 };
+    bool active{ false };
+};
+
+enum class VibrateOutputResult : int32_t {
+    Success = 0,
+    SessionLossPending = 3,
+    SessionNotFocussed = 8,
+    ValidationFailure = -1,
+    RuntimeFailure = -2,
+    HandleInvalid = -12,
+    InstanceLost = -13,
+    SessionLost = -17,
+    PathInvalid = -19,
+    PathUnsupported = -22,
+    ActionTypeMismatch = -27,
+    ActionSetNotAttached = -46,
+    MaxEnum = 0x7fffffff
 };
 
 } // namespace KDXr

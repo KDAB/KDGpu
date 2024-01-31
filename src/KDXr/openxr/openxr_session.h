@@ -59,6 +59,8 @@ struct KDXR_EXPORT OpenXrSession : public ApiSession {
     AttachActionSetsResult attachActionSets(const AttachActionSetsOptions &options) final;
     InteractionProfileState getInteractionProfile(const GetInterationProfileOptions &options) const final;
     SyncActionsResult syncActions(const SyncActionsOptions &options) final;
+    GetActionStateResult getBooleanState(const GetActionStateOptions &options, ActionStateBoolean &state) const final;
+    VibrateOutputResult vibrateOutput(const VibrationOutputOptions &options) final;
 
     OpenXrResourceManager *openxrResourceManager{ nullptr };
     XrSession session{ XR_NULL_HANDLE };

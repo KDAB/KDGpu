@@ -23,9 +23,11 @@ namespace KDXr {
 
 class Session;
 struct AttachActionSetsOptions;
+struct GetActionStateOptions;
 struct GetInterationProfileOptions;
 struct Session_t;
 struct SyncActionsOptions;
+struct VibrationOutputOptions;
 
 /**
  * @brief ApiSession
@@ -42,6 +44,8 @@ struct ApiSession {
     virtual AttachActionSetsResult attachActionSets(const AttachActionSetsOptions &options) = 0;
     virtual InteractionProfileState getInteractionProfile(const GetInterationProfileOptions &options) const = 0;
     virtual SyncActionsResult syncActions(const SyncActionsOptions &options) = 0;
+    virtual GetActionStateResult getBooleanState(const GetActionStateOptions &options, ActionStateBoolean &state) const = 0;
+    virtual VibrateOutputResult vibrateOutput(const VibrationOutputOptions &options) = 0;
 };
 
 } // namespace KDXr
