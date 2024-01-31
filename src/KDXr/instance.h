@@ -79,6 +79,7 @@ public:
     SuggestActionBindingsResult suggestActionBindings(const SuggestActionBindingsOptions &options);
 
     KDBindings::Signal<> instanceLost;
+    KDBindings::Signal<> interactionProfileChanged;
 
 private:
     Instance(XrApi *api, const InstanceOptions &options);

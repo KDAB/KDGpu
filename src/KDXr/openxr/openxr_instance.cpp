@@ -108,7 +108,7 @@ ProcessEventsResult OpenXrInstance::processEvents()
 
         case XR_TYPE_EVENT_DATA_INTERACTION_PROFILE_CHANGED: {
             SPDLOG_LOGGER_INFO(Logger::logger(), "OpenXR Interaction Profile Changed.");
-            // TODO: Handle this event
+            frontendInstance->interactionProfileChanged.emit();
             break;
         }
 

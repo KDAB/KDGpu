@@ -46,6 +46,7 @@ void XrExampleEngineLayer::onAttached()
     };
     m_xrInstance = m_xrApi->createInstance(xrInstanceOptions);
     m_xrInstance.instanceLost.connect(&XrExampleEngineLayer::onInstanceLost, this);
+    m_xrInstance.interactionProfileChanged.connect(&XrExampleEngineLayer::onInteractionProfileChanged, this);
     const auto properties = m_xrInstance.properties();
     SPDLOG_LOGGER_INFO(m_logger, "XR Runtime: {}", properties.runtimeName);
     SPDLOG_LOGGER_INFO(m_logger, "XR Runtime Version: {}", KDXr::getVersionAsString(properties.runtimeVersion));
@@ -196,6 +197,13 @@ void XrExampleEngineLayer::onInstanceLost()
 {
     SPDLOG_LOGGER_ERROR(m_logger, "Instance Lost.");
     // TODO: Gracefully handle shutting down the application
+}
+
+void XrExampleEngineLayer::onInteractionProfileChanged()
+{
+    if (!m_session.isValid())
+        return;
+    SPDLOG_LOGGER_INFO(m_logger, "Interaction Profile Changed.");
 }
 
 void XrExampleEngineLayer::uploadBufferData(const BufferUploadOptions &options)

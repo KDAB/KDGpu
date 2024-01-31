@@ -121,6 +121,7 @@ public:
 
 protected:
     virtual void onInstanceLost();
+    virtual void onInteractionProfileChanged();
 
     void onAttached() override;
     void onDetached() override;
