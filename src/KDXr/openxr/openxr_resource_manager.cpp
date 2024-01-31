@@ -319,7 +319,8 @@ Handle<Session_t> OpenXrResourceManager::createSession(const Handle<System_t> &s
         return {};
     }
 
-    auto h = m_sessions.emplace(OpenXrSession{ this, xrSession, systemHandle, options.graphicsApi, options.device, options.queueIndex });
+    auto h = m_sessions.emplace(OpenXrSession{ this, xrSession, systemHandle, openXrSystem->instanceHandle,
+                                               options.graphicsApi, options.device, options.queueIndex });
 
     // Register the session with the instance so that we can look it up when processing OpenXR events
     openXrInstance->m_sessionToHandle.insert({ xrSession, h });

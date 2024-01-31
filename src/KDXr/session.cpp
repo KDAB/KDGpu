@@ -147,4 +147,10 @@ AttachActionSetsResult Session::attachActionSets(const AttachActionSetsOptions &
     return apiSession->attachActionSets(options);
 }
 
+SyncActionsResult Session::syncActions(const SyncActionsOptions &options)
+{
+    auto apiSession = m_api->resourceManager()->getSession(m_session);
+    return apiSession->syncActions(options);
+}
+
 } // namespace KDXr

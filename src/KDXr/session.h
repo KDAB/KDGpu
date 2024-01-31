@@ -55,6 +55,15 @@ struct AttachActionSetsOptions {
     std::vector<Handle<ActionSet_t>> actionSets;
 };
 
+struct ActiveActionSet {
+    Handle<ActionSet_t> actionSet;
+    std::string subactionPath;
+};
+
+struct SyncActionsOptions {
+    std::vector<ActiveActionSet> actionSets;
+};
+
 class KDXR_EXPORT Session
 {
 public:
@@ -95,6 +104,7 @@ public:
     LocateViewsResult locateViews(const LocateViewsOptions &options, ViewState &viewState);
 
     AttachActionSetsResult attachActionSets(const AttachActionSetsOptions &options);
+    SyncActionsResult syncActions(const SyncActionsOptions &options);
 
 private:
     Session(const Handle<System_t> &systemHandle, XrApi *api, const SessionOptions &options);

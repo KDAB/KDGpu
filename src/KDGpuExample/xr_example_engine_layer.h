@@ -126,6 +126,7 @@ protected:
     void onAttached() override;
     void onDetached() override;
     void update() override;
+    virtual void pollActions(KDXr::Time predictedDisplayTime);
     void event(KDFoundation::EventReceiver *target, KDFoundation::Event *ev) override;
 
     // Helpers for the composition layers to use

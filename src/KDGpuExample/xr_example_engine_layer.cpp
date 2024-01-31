@@ -168,6 +168,8 @@ void XrExampleEngineLayer::update()
     m_compositorLayers.clear();
 
     if (m_session.isActive() && frameState.shouldRender) {
+        pollActions(frameState.predictedDisplayTime);
+
         // Ask each compositor layer object to update its state, render and prepare its composition layer.
         // If the compositor layer object has nothing to render or it cannot locate the views, it will return
         // false and we will not add its composition layer to the list of layers to be submitted to the compositor.
@@ -189,6 +191,11 @@ void XrExampleEngineLayer::update()
     }
 }
 
+void XrExampleEngineLayer::pollActions(KDXr::Time predictedDisplayTime)
+{
+    // Do nothing by default. Subclasses can override this to poll actions and react as needed.
+}
+
 void XrExampleEngineLayer::event(KDFoundation::EventReceiver *target, KDFoundation::Event *ev)
 {
 }
@@ -201,8 +208,6 @@ void XrExampleEngineLayer::onInstanceLost()
 
 void XrExampleEngineLayer::onInteractionProfileChanged()
 {
-    if (!m_session.isValid())
-        return;
     SPDLOG_LOGGER_INFO(m_logger, "Interaction Profile Changed.");
 }
 

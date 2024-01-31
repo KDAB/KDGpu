@@ -29,6 +29,7 @@ struct Device_t;
 namespace KDXr {
 
 class OpenXrResourceManager;
+struct Instance_t;
 struct System_t;
 
 /**
@@ -40,6 +41,7 @@ struct KDXR_EXPORT OpenXrSession : public ApiSession {
     explicit OpenXrSession(OpenXrResourceManager *_openxrResourceManager,
                            XrSession _session,
                            const Handle<System_t> _systemHandle,
+                           const Handle<Instance_t> _instanceHandle,
                            KDGpu::GraphicsApi *_graphicsApi,
                            KDGpu::Handle<KDGpu::Device_t> _device,
                            uint32_t queueIndex) noexcept;
@@ -55,10 +57,12 @@ struct KDXR_EXPORT OpenXrSession : public ApiSession {
     void setSessionState(SessionState state);
 
     AttachActionSetsResult attachActionSets(const AttachActionSetsOptions &options) final;
+    SyncActionsResult syncActions(const SyncActionsOptions &options) final;
 
     OpenXrResourceManager *openxrResourceManager{ nullptr };
     XrSession session{ XR_NULL_HANDLE };
     Handle<System_t> systemHandle;
+    Handle<Instance_t> instanceHandle;
 
     // Graphics related stuff
     KDGpu::GraphicsApi *graphicsApi{ nullptr };

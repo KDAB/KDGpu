@@ -71,6 +71,7 @@ namespace KDXr {
 OpenXrSession::OpenXrSession(OpenXrResourceManager *_openxrResourceManager,
                              XrSession _session,
                              const Handle<System_t> _systemHandle,
+                             const Handle<Instance_t> _instanceHandle,
                              KDGpu::GraphicsApi *_graphicsApi,
                              KDGpu::Handle<KDGpu::Device_t> _device,
                              uint32_t queueIndex) noexcept
@@ -78,6 +79,7 @@ OpenXrSession::OpenXrSession(OpenXrResourceManager *_openxrResourceManager,
     , openxrResourceManager(_openxrResourceManager)
     , session(_session)
     , systemHandle(_systemHandle)
+    , instanceHandle(_instanceHandle)
     , graphicsApi(_graphicsApi)
     , deviceHandle(_device)
     , queueIndex(queueIndex)
@@ -354,6 +356,33 @@ AttachActionSetsResult OpenXrSession::attachActionSets(const AttachActionSetsOpt
         SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to attach action sets.");
     }
     return static_cast<AttachActionSetsResult>(result);
+}
+
+SyncActionsResult OpenXrSession::syncActions(const SyncActionsOptions &options)
+{
+    OpenXrInstance *openxrInstance = openxrResourceManager->getInstance(instanceHandle);
+    assert(openxrInstance);
+
+    std::vector<XrActiveActionSet> activeActionSets;
+    activeActionSets.reserve(options.actionSets.size());
+    for (const auto &actionSet : options.actionSets) {
+        auto openxrActionSet = openxrResourceManager->getActionSet(actionSet.actionSet);
+        assert(openxrActionSet);
+        XrPath xrPath{ XR_NULL_PATH };
+        if (!actionSet.subactionPath.empty())
+            xrPath = openxrInstance->createXrPath(actionSet.subactionPath);
+        activeActionSets.push_back({ openxrActionSet->actionSet, xrPath });
+    }
+
+    XrActionsSyncInfo actionsSyncInfo{ XR_TYPE_ACTIONS_SYNC_INFO };
+    actionsSyncInfo.countActiveActionSets = static_cast<uint32_t>(activeActionSets.size());
+    actionsSyncInfo.activeActionSets = activeActionSets.data();
+
+    const auto result = xrSyncActions(session, &actionsSyncInfo);
+    if (result != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to sync actions.");
+    }
+    return static_cast<SyncActionsResult>(result);
 }
 
 } // namespace KDXr

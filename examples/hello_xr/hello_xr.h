@@ -12,6 +12,9 @@
 
 #include <KDGpuExample/xr_example_engine_layer.h>
 
+#include <KDXr/action.h>
+#include <KDXr/action_set.h>
+
 #include <KDGpu/bind_group.h>
 #include <KDGpu/buffer.h>
 #include <KDGpu/graphics_pipeline.h>
@@ -35,9 +38,18 @@ class HelloXr : public XrExampleEngineLayer
 protected:
     void onAttached() override;
     void onDetached() override;
+    void onInteractionProfileChanged() override;
+    void pollActions(KDXr::Time predictedDisplayTime) override;
 
 private:
     ProjectionLayer *m_projectionLayer{ nullptr };
     XrQuadImGuiLayer *m_quadImguiLayer{ nullptr };
     XrCylinderImGuiLayer *m_cylinderImguiLayer{ nullptr };
+
+    // Input/output actions
+    KDXr::ActionSet m_actionSet;
+    KDXr::Action m_toggleAnimationAction;
+    KDXr::Action m_buzzAction;
+
+    const std::vector<std::string> m_handPaths{ "/user/hand/left", "/user/hand/right" };
 };
