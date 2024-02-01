@@ -21,6 +21,7 @@
 #include <KDGpu/graphics_pipeline_options.h>
 
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/transform.hpp>
 
 #include <array>
@@ -73,7 +74,7 @@ void ProjectionLayer::initializeScene()
 
         const DeviceSize dataByteSize = vertexData.size() * sizeof(Vertex);
         const BufferOptions bufferOptions = {
-            .label = "Vertex Buffer",
+            .label = "Main Triangle Vertex Buffer",
             .size = dataByteSize,
             .usage = BufferUsageFlagBits::VertexBufferBit | BufferUsageFlagBits::TransferDstBit,
             .memoryUsage = MemoryUsage::GpuOnly
@@ -110,6 +111,70 @@ void ProjectionLayer::initializeScene()
         uploadBufferData(uploadOptions);
     }
 
+    // Create a buffer to hold triangle vertex data for the left controller
+    {
+        const std::array<Vertex, 3> vertexData = {
+            Vertex{ // Back-left, red
+                    .position = { -0.05f, 0.0f, 0.0f },
+                    .color = { 1.0f, 0.0f, 0.0f } },
+            Vertex{ // Back-right, red
+                    .position = { 0.05f, 0.0f, 0.0f },
+                    .color = { 1.0f, 0.0f, 0.0f } },
+            Vertex{ // Front-center, red
+                    .position = { 0.0f, 0.0f, -0.2f },
+                    .color = { 1.0f, 0.0f, 0.0f } }
+        };
+
+        const DeviceSize dataByteSize = vertexData.size() * sizeof(Vertex);
+        const BufferOptions bufferOptions = {
+            .label = "Left Hand Triangle Vertex Buffer",
+            .size = dataByteSize,
+            .usage = BufferUsageFlagBits::VertexBufferBit | BufferUsageFlagBits::TransferDstBit,
+            .memoryUsage = MemoryUsage::GpuOnly
+        };
+        m_leftHandBuffer = m_device->createBuffer(bufferOptions);
+        const BufferUploadOptions uploadOptions = {
+            .destinationBuffer = m_leftHandBuffer,
+            .dstStages = PipelineStageFlagBit::VertexAttributeInputBit,
+            .dstMask = AccessFlagBit::VertexAttributeReadBit,
+            .data = vertexData.data(),
+            .byteSize = dataByteSize
+        };
+        uploadBufferData(uploadOptions);
+    }
+
+    // Create a buffer to hold triangle vertex data for the left controller
+    {
+        const std::array<Vertex, 3> vertexData = {
+            Vertex{ // Back-left, blue
+                    .position = { -0.05f, 0.0f, 0.0f },
+                    .color = { 0.0f, 0.0f, 1.0f } },
+            Vertex{ // Back-right, blue
+                    .position = { 0.05f, 0.0f, 0.0f },
+                    .color = { 0.0f, 0.0f, 1.0f } },
+            Vertex{ // Front-center, blue
+                    .position = { 0.0f, 0.0f, -0.2f },
+                    .color = { 0.0f, 0.0f, 1.0f } }
+        };
+
+        const DeviceSize dataByteSize = vertexData.size() * sizeof(Vertex);
+        const BufferOptions bufferOptions = {
+            .label = "Right Hand Triangle Vertex Buffer",
+            .size = dataByteSize,
+            .usage = BufferUsageFlagBits::VertexBufferBit | BufferUsageFlagBits::TransferDstBit,
+            .memoryUsage = MemoryUsage::GpuOnly
+        };
+        m_rightHandBuffer = m_device->createBuffer(bufferOptions);
+        const BufferUploadOptions uploadOptions = {
+            .destinationBuffer = m_rightHandBuffer,
+            .dstStages = PipelineStageFlagBit::VertexAttributeInputBit,
+            .dstMask = AccessFlagBit::VertexAttributeReadBit,
+            .data = vertexData.data(),
+            .byteSize = dataByteSize
+        };
+        uploadBufferData(uploadOptions);
+    }
+
     // Create a buffer to hold the entity transformation matrix
     {
         const BufferOptions bufferOptions = {
@@ -125,6 +190,40 @@ void ProjectionLayer::initializeScene()
         auto bufferData = m_transformBuffer.map();
         std::memcpy(bufferData, &m_transform, sizeof(glm::mat4));
         m_transformBuffer.unmap();
+    }
+
+    // Create a buffer to hold the left hand transformation matrix
+    {
+        const BufferOptions bufferOptions = {
+            .label = "Left Hand Transformation Buffer",
+            .size = sizeof(glm::mat4),
+            .usage = BufferUsageFlagBits::UniformBufferBit,
+            .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
+        };
+        m_leftHandTransformBuffer = m_device->createBuffer(bufferOptions);
+
+        // Upload identity matrix. Updated below in updateScene()
+        m_leftHandTransform = glm::mat4(1.0f);
+        auto bufferData = m_leftHandTransformBuffer.map();
+        std::memcpy(bufferData, &m_leftHandTransform, sizeof(glm::mat4));
+        m_leftHandTransformBuffer.unmap();
+    }
+
+    // Create a buffer to hold the right hand transformation matrix
+    {
+        const BufferOptions bufferOptions = {
+            .label = "Right Hand Transformation Buffer",
+            .size = sizeof(glm::mat4),
+            .usage = BufferUsageFlagBits::UniformBufferBit,
+            .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
+        };
+        m_rightHandTransformBuffer = m_device->createBuffer(bufferOptions);
+
+        // Upload identity matrix. Updated below in updateScene()
+        m_rightHandTransform = glm::mat4(1.0f);
+        auto bufferData = m_rightHandTransformBuffer.map();
+        std::memcpy(bufferData, &m_rightHandTransform, sizeof(glm::mat4));
+        m_rightHandTransformBuffer.unmap();
     }
 
     // Create a buffer to hold the camera view and projection matrices
@@ -231,6 +330,32 @@ void ProjectionLayer::initializeScene()
     };
     // clang-format on
     m_entityTransformBindGroup = m_device->createBindGroup(entityBindGroupOptions);
+
+    // Create a bindGroup to hold the UBO with the left hand transform
+    // clang-format off
+    const BindGroupOptions leftHandBindGroupOptions = {
+        .label = "Left Hand Transform Bind Group",
+        .layout = entityBindGroupLayout,
+        .resources = {{
+            .binding = 0,
+            .resource = UniformBufferBinding{ .buffer = m_leftHandTransformBuffer }
+        }}
+    };
+    // clang-format on
+    m_leftHandTransformBindGroup = m_device->createBindGroup(leftHandBindGroupOptions);
+
+    // Create a bindGroup to hold the UBO with the right hand transform
+    // clang-format off
+    const BindGroupOptions rightHandBindGroupOptions = {
+        .label = "Right Hand Transform Bind Group",
+        .layout = entityBindGroupLayout,
+        .resources = {{
+            .binding = 0,
+            .resource = UniformBufferBinding{ .buffer = m_rightHandTransformBuffer }
+        }}
+    };
+    // clang-format on
+    m_rightHandTransformBindGroup = m_device->createBindGroup(rightHandBindGroupOptions);
 
     // Create a bindGroup to hold the UBO with the camera view and projection matrices
     // clang-format off
@@ -339,6 +464,28 @@ void ProjectionLayer::updateScene()
     m_transform = glm::translate(m_transform, translation());
     m_transform = glm::rotate(m_transform, glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
     m_transform = glm::scale(m_transform, glm::vec3(s, s, s));
+
+    // Update the transformation matrix for the left hand from the pose
+    {
+        const auto &orientation = leftPalmPose().orientation;
+        glm::quat q(orientation.w, orientation.x, orientation.y, orientation.z);
+        glm::mat4 mRot = glm::toMat4(q);
+        const auto &position = leftPalmPose().position;
+        glm::vec3 p(position.x, position.y, position.z);
+        glm::mat4 mTrans = glm::translate(glm::mat4(1.0f), p);
+        m_leftHandTransform = mTrans * mRot;
+    }
+
+    // Update the transformation matrix for the right hand from the pose
+    {
+        const auto &orientation = rightPalmPose().orientation;
+        glm::quat q(orientation.w, orientation.x, orientation.y, orientation.z);
+        glm::mat4 mRot = glm::toMat4(q);
+        const auto &position = rightPalmPose().position;
+        glm::vec3 p(position.x, position.y, position.z);
+        glm::mat4 mTrans = glm::translate(glm::mat4(1.0f), p);
+        m_rightHandTransform = mTrans * mRot;
+    }
 }
 
 void ProjectionLayer::updateTransformUbo()
@@ -346,6 +493,14 @@ void ProjectionLayer::updateTransformUbo()
     auto bufferData = m_transformBuffer.map();
     std::memcpy(bufferData, &m_transform, sizeof(glm::mat4));
     m_transformBuffer.unmap();
+
+    bufferData = m_leftHandTransformBuffer.map();
+    std::memcpy(bufferData, &m_leftHandTransform, sizeof(glm::mat4));
+    m_leftHandTransformBuffer.unmap();
+
+    bufferData = m_rightHandTransformBuffer.map();
+    std::memcpy(bufferData, &m_rightHandTransform, sizeof(glm::mat4));
+    m_rightHandTransformBuffer.unmap();
 }
 
 void ProjectionLayer::updateViewUbo()
@@ -376,6 +531,7 @@ void ProjectionLayer::renderView()
     m_opaquePassOptions.depthStencilAttachment.view = m_depthSwapchains[m_currentViewIndex].textureViews[m_currentDepthImageIndex];
     auto opaquePass = commandRecorder.beginRenderPass(m_opaquePassOptions);
 
+    // Draw the main triangle
     opaquePass.setPipeline(m_pipeline);
     opaquePass.setVertexBuffer(0, m_buffer);
     opaquePass.setIndexBuffer(m_indexBuffer);
@@ -383,6 +539,17 @@ void ProjectionLayer::renderView()
     opaquePass.setBindGroup(1, m_entityTransformBindGroup);
     const DrawIndexedCommand drawCmd = { .indexCount = 3 };
     opaquePass.drawIndexed(drawCmd);
+
+    // Draw the left hand triangle
+    opaquePass.setVertexBuffer(0, m_leftHandBuffer);
+    opaquePass.setBindGroup(1, m_leftHandTransformBindGroup);
+    opaquePass.drawIndexed(drawCmd);
+
+    // Draw the right hand triangle
+    opaquePass.setVertexBuffer(0, m_rightHandBuffer);
+    opaquePass.setBindGroup(1, m_rightHandTransformBindGroup);
+    opaquePass.drawIndexed(drawCmd);
+
     opaquePass.end();
     m_commandBuffer = commandRecorder.finish();
 

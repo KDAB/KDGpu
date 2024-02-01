@@ -76,6 +76,8 @@ private:
     BindGroup m_cameraBindGroup;
 
     Buffer m_buffer;
+    Buffer m_leftHandBuffer;
+    Buffer m_rightHandBuffer;
     Buffer m_indexBuffer;
     PipelineLayout m_pipelineLayout;
     GraphicsPipeline m_pipeline;
@@ -85,6 +87,14 @@ private:
     glm::mat4 m_transform;
     Buffer m_transformBuffer;
     BindGroup m_entityTransformBindGroup;
+
+    glm::mat4 m_leftHandTransform;
+    Buffer m_leftHandTransformBuffer;
+    BindGroup m_leftHandTransformBindGroup;
+
+    glm::mat4 m_rightHandTransform;
+    Buffer m_rightHandTransformBuffer;
+    BindGroup m_rightHandTransformBindGroup;
 
     Fence m_fence;
 };
