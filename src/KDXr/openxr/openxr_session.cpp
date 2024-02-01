@@ -464,6 +464,37 @@ GetActionStateResult OpenXrSession::getFloatState(const GetActionStateOptions &o
     return static_cast<GetActionStateResult>(result);
 }
 
+GetActionStateResult OpenXrSession::getVector2State(const GetActionStateOptions &options, ActionStateVector2 &state) const
+{
+    OpenXrInstance *openxrInstance = openxrResourceManager->getInstance(instanceHandle);
+    assert(openxrInstance);
+    XrPath xrPath{ XR_NULL_PATH };
+    if (!options.subactionPath.empty())
+        xrPath = openxrInstance->createXrPath(options.subactionPath);
+
+    OpenXrAction *openxrAction = openxrResourceManager->getAction(options.action);
+    assert(openxrAction);
+
+    XrActionStateGetInfo actionStateGetInfo{ XR_TYPE_ACTION_STATE_GET_INFO };
+    actionStateGetInfo.action = openxrAction->action;
+    actionStateGetInfo.subactionPath = xrPath;
+    XrActionStateVector2f xrActionStateVector2f{ XR_TYPE_ACTION_STATE_VECTOR2F };
+    const auto result = xrGetActionStateVector2f(session, &actionStateGetInfo, &xrActionStateVector2f);
+    if (result != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to get action state.");
+        state = ActionStateVector2{};
+    } else {
+        state = ActionStateVector2{
+            .currentState = KDXr::Vector2{ xrActionStateVector2f.currentState.x, xrActionStateVector2f.currentState.y },
+            .changedSinceLastSync = static_cast<bool>(xrActionStateVector2f.changedSinceLastSync),
+            .lastChangeTime = xrActionStateVector2f.lastChangeTime,
+            .active = static_cast<bool>(xrActionStateVector2f.isActive)
+        };
+    }
+
+    return static_cast<GetActionStateResult>(result);
+}
+
 VibrateOutputResult OpenXrSession::vibrateOutput(const VibrationOutputOptions &options)
 {
     OpenXrInstance *openxrInstance = openxrResourceManager->getInstance(instanceHandle);

@@ -156,6 +156,13 @@ struct Vector3 {
     bool operator==(const Vector3 &other) const = default;
 };
 
+struct Vector2 {
+    float x{ 0.0f };
+    float y{ 0.0f };
+
+    bool operator==(const Vector2 &other) const = default;
+};
+
 struct Pose {
     Quaternion orientation{};
     Vector3 position{};
@@ -421,6 +428,13 @@ struct ActionStateBoolean {
 
 struct ActionStateFloat {
     float currentState{ false };
+    bool changedSinceLastSync{ false };
+    Time lastChangeTime{ 0 };
+    bool active{ false };
+};
+
+struct ActionStateVector2 {
+    Vector2 currentState{};
     bool changedSinceLastSync{ false };
     Time lastChangeTime{ 0 };
     bool active{ false };

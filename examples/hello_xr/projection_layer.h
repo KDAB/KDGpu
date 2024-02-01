@@ -35,6 +35,7 @@ class ProjectionLayer : public XrProjectionLayer
 public:
     KDBindings::Property<bool> animate{ true };
     KDBindings::Property<float> scale{ 1.0f };
+    KDBindings::Property<glm::vec3> translation{ glm::vec3(0.0f, 0.0f, -1.0f) };
 
     explicit ProjectionLayer(const XrProjectionLayerOptions &options);
     ~ProjectionLayer() override;

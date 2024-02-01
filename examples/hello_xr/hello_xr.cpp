@@ -11,6 +11,7 @@
 #include "hello_xr.h"
 #include "projection_layer.h"
 
+#include <KDGpuExample/engine.h>
 #include <KDGpuExample/xr_compositor/xr_cylinder_imgui_layer.h>
 #include <KDGpuExample/xr_compositor/xr_quad_imgui_layer.h>
 
@@ -70,6 +71,10 @@ void HelloXr::onAttached()
                                                .localizedName = "Scale",
                                                .type = KDXr::ActionType::FloatInput,
                                                .subactionPaths = { m_handPaths[0] } });
+    m_translateAction = m_actionSet.createAction({ .name = "translate",
+                                                   .localizedName = "Translate",
+                                                   .type = KDXr::ActionType::Vector2fInput,
+                                                   .subactionPaths = { m_handPaths[0] } });
     m_buzzAction = m_actionSet.createAction({ .name = "buzz",
                                               .localizedName = "Buzz",
                                               .type = KDXr::ActionType::VibrationOutput,
@@ -83,6 +88,7 @@ void HelloXr::onAttached()
                 { .action = m_toggleAnimationAction, .binding = "/user/hand/left/input/x/click" },
                 { .action = m_toggleAnimationAction, .binding = "/user/hand/right/input/a/click" },
                 { .action = m_scaleAction, .binding = "/user/hand/left/input/trigger/value" },
+                { .action = m_translateAction, .binding = "/user/hand/left/input/thumbstick" },
                 { .action = m_buzzAction, .binding = "/user/hand/left/output/haptic" },
                 { .action = m_buzzAction, .binding = "/user/hand/right/output/haptic" } }
     };
@@ -139,6 +145,7 @@ void HelloXr::pollActions(KDXr::Time predictedDisplayTime)
     // Poll the actions and do something with the results
     processToggleAnimationAction();
     processScaleAction();
+    processTranslateAction();
     processHapticAction();
 }
 
@@ -182,6 +189,24 @@ void HelloXr::processScaleAction()
         m_projectionLayer->scale = scale;
     } else {
         SPDLOG_LOGGER_ERROR(KDXr::Logger::logger(), "Failed to get scale action state.");
+    }
+}
+
+void HelloXr::processTranslateAction()
+{
+    // Query the translate action from the left thumbstick
+    const float dt = engine()->deltaTimeSeconds();
+    glm::vec3 delta{ 0.0f, 0.0f, 0.0f };
+    const auto translateResult = m_session.getVector2State(
+            { .action = m_translateAction, .subactionPath = m_handPaths[0] }, m_translateActionState);
+    if (translateResult == KDXr::GetActionStateResult::Success) {
+        if (m_translateActionState.active) {
+            delta = dt * glm::vec3(m_translateActionState.currentState.x, 0.0f, -m_translateActionState.currentState.y);
+            delta *= m_linearSpeed;
+        }
+        m_projectionLayer->translation = m_projectionLayer->translation() + delta;
+    } else {
+        SPDLOG_LOGGER_ERROR(KDXr::Logger::logger(), "Failed to get translate action state.");
     }
 }
 

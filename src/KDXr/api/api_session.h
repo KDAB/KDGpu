@@ -46,6 +46,7 @@ struct ApiSession {
     virtual SyncActionsResult syncActions(const SyncActionsOptions &options) = 0;
     virtual GetActionStateResult getBooleanState(const GetActionStateOptions &options, ActionStateBoolean &state) const = 0;
     virtual GetActionStateResult getFloatState(const GetActionStateOptions &options, ActionStateFloat &state) const = 0;
+    virtual GetActionStateResult getVector2State(const GetActionStateOptions &options, ActionStateVector2 &state) const = 0;
     virtual VibrateOutputResult vibrateOutput(const VibrationOutputOptions &options) = 0;
 };
 

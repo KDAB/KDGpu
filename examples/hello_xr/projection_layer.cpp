@@ -335,13 +335,8 @@ void ProjectionLayer::updateScene()
             angle -= 360.0f;
     }
 
-    const float t = engine()->simulationTime().count() / 1.0e9;
-    float xPos = 0.0f;
-    // Uncomment to make the triangle slide from side to side
-    // xPos = 2.0f * std::sin(t);
-
     m_transform = glm::mat4(1.0f);
-    m_transform = glm::translate(m_transform, glm::vec3(xPos, 0.0f, -1.0f)); // Move triangle to 1.0m in front of the camera
+    m_transform = glm::translate(m_transform, translation());
     m_transform = glm::rotate(m_transform, glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
     m_transform = glm::scale(m_transform, glm::vec3(s, s, s));
 }

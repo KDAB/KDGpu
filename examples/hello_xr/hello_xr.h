@@ -45,6 +45,7 @@ protected:
 private:
     void processToggleAnimationAction();
     void processScaleAction();
+    void processTranslateAction();
     void processHapticAction();
 
     ProjectionLayer *m_projectionLayer{ nullptr };
@@ -55,12 +56,15 @@ private:
     KDXr::ActionSet m_actionSet;
     KDXr::Action m_toggleAnimationAction;
     KDXr::Action m_scaleAction;
+    KDXr::Action m_translateAction;
     KDXr::Action m_buzzAction;
 
     const std::vector<std::string> m_handPaths{ "/user/hand/left", "/user/hand/right" };
 
     std::array<KDXr::ActionStateBoolean, 2> m_toggleAnimationActionStates;
     KDXr::ActionStateFloat m_scaleActionState;
+    float m_linearSpeed{ 1.0f };
+    KDXr::ActionStateVector2 m_translateActionState;
     int32_t m_buzzHand{ -1 };
     std::array<float, 2> m_buzzAmplitudes{ 0.0f, 0.0f };
 };
