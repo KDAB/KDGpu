@@ -129,6 +129,7 @@ public:
     // TODO: Should we add per type getters? Or perhaps have type-specific actions and move getState to the actions?
     // If we do that, then we need the backend actions to be able to know about the session.
     GetActionStateResult getBooleanState(const GetActionStateOptions &options, ActionStateBoolean &state) const;
+    GetActionStateResult getFloatState(const GetActionStateOptions &options, ActionStateFloat &state) const;
 
     VibrateOutputResult vibrateOutput(const VibrationOutputOptions &options);
 

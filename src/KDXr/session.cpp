@@ -165,6 +165,12 @@ GetActionStateResult Session::getBooleanState(const GetActionStateOptions &optio
     return apiSession->getBooleanState(options, state);
 }
 
+GetActionStateResult Session::getFloatState(const GetActionStateOptions &options, ActionStateFloat &state) const
+{
+    auto apiSession = m_api->resourceManager()->getSession(m_session);
+    return apiSession->getFloatState(options, state);
+}
+
 VibrateOutputResult Session::vibrateOutput(const VibrationOutputOptions &options)
 {
     auto apiSession = m_api->resourceManager()->getSession(m_session);

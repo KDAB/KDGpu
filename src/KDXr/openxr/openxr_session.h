@@ -60,6 +60,7 @@ struct KDXR_EXPORT OpenXrSession : public ApiSession {
     InteractionProfileState getInteractionProfile(const GetInterationProfileOptions &options) const final;
     SyncActionsResult syncActions(const SyncActionsOptions &options) final;
     GetActionStateResult getBooleanState(const GetActionStateOptions &options, ActionStateBoolean &state) const final;
+    GetActionStateResult getFloatState(const GetActionStateOptions &options, ActionStateFloat &state) const final;
     VibrateOutputResult vibrateOutput(const VibrationOutputOptions &options) final;
 
     OpenXrResourceManager *openxrResourceManager{ nullptr };

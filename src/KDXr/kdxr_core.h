@@ -419,6 +419,13 @@ struct ActionStateBoolean {
     bool active{ false };
 };
 
+struct ActionStateFloat {
+    float currentState{ false };
+    bool changedSinceLastSync{ false };
+    Time lastChangeTime{ 0 };
+    bool active{ false };
+};
+
 enum class VibrateOutputResult : int32_t {
     Success = 0,
     SessionLossPending = 3,

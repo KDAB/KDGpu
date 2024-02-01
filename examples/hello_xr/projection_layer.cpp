@@ -322,25 +322,28 @@ void ProjectionLayer::updateScene()
         // clang-format on
     }
 
-    // If we are animating, each frame we want to rotate the triangle a little and slide back and forth
-    if (!animate())
-        return;
+    // Scale the triangle up and down
+    const float s = scale();
 
+    // If we are animating, each frame we want to rotate the triangle a little
     static float angle = 0.0f;
-    const float angularSpeed = 3.0f; // degrees per second
-    const float dt = engine()->deltaTimeSeconds();
-    angle += angularSpeed * dt;
-    if (angle > 360.0f)
-        angle -= 360.0f;
+    if (!animate()) {
+        const float angularSpeed = 10.0f; // degrees per second
+        const float dt = engine()->deltaTimeSeconds();
+        angle += angularSpeed * dt;
+        if (angle > 360.0f)
+            angle -= 360.0f;
+    }
 
     const float t = engine()->simulationTime().count() / 1.0e9;
     float xPos = 0.0f;
     // Uncomment to make the triangle slide from side to side
-    xPos = 2.0f * std::sin(t);
+    // xPos = 2.0f * std::sin(t);
 
     m_transform = glm::mat4(1.0f);
-    m_transform = glm::translate(m_transform, glm::vec3(xPos, 0.0f, -0.5f)); // Move triangle to 1.5m above the ground and 2m in front of the camera
+    m_transform = glm::translate(m_transform, glm::vec3(xPos, 0.0f, -1.0f)); // Move triangle to 1.0m in front of the camera
     m_transform = glm::rotate(m_transform, glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
+    m_transform = glm::scale(m_transform, glm::vec3(s, s, s));
 }
 
 void ProjectionLayer::updateTransformUbo()

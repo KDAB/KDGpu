@@ -433,6 +433,37 @@ GetActionStateResult OpenXrSession::getBooleanState(const GetActionStateOptions 
     return static_cast<GetActionStateResult>(result);
 }
 
+GetActionStateResult OpenXrSession::getFloatState(const GetActionStateOptions &options, ActionStateFloat &state) const
+{
+    OpenXrInstance *openxrInstance = openxrResourceManager->getInstance(instanceHandle);
+    assert(openxrInstance);
+    XrPath xrPath{ XR_NULL_PATH };
+    if (!options.subactionPath.empty())
+        xrPath = openxrInstance->createXrPath(options.subactionPath);
+
+    OpenXrAction *openxrAction = openxrResourceManager->getAction(options.action);
+    assert(openxrAction);
+
+    XrActionStateGetInfo actionStateGetInfo{ XR_TYPE_ACTION_STATE_GET_INFO };
+    actionStateGetInfo.action = openxrAction->action;
+    actionStateGetInfo.subactionPath = xrPath;
+    XrActionStateFloat xrActionStateFloat{ XR_TYPE_ACTION_STATE_FLOAT };
+    const auto result = xrGetActionStateFloat(session, &actionStateGetInfo, &xrActionStateFloat);
+    if (result != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to get action state.");
+        state = ActionStateFloat{};
+    } else {
+        state = ActionStateFloat{
+            .currentState = xrActionStateFloat.currentState,
+            .changedSinceLastSync = static_cast<bool>(xrActionStateFloat.changedSinceLastSync),
+            .lastChangeTime = xrActionStateFloat.lastChangeTime,
+            .active = static_cast<bool>(xrActionStateFloat.isActive)
+        };
+    }
+
+    return static_cast<GetActionStateResult>(result);
+}
+
 VibrateOutputResult OpenXrSession::vibrateOutput(const VibrationOutputOptions &options)
 {
     OpenXrInstance *openxrInstance = openxrResourceManager->getInstance(instanceHandle);

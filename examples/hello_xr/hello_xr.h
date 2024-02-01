@@ -43,6 +43,10 @@ protected:
     void pollActions(KDXr::Time predictedDisplayTime) override;
 
 private:
+    void processToggleAnimationAction();
+    void processScaleAction();
+    void processHapticAction();
+
     ProjectionLayer *m_projectionLayer{ nullptr };
     XrQuadImGuiLayer *m_quadImguiLayer{ nullptr };
     XrCylinderImGuiLayer *m_cylinderImguiLayer{ nullptr };
@@ -50,10 +54,13 @@ private:
     // Input/output actions
     KDXr::ActionSet m_actionSet;
     KDXr::Action m_toggleAnimationAction;
+    KDXr::Action m_scaleAction;
     KDXr::Action m_buzzAction;
 
     const std::vector<std::string> m_handPaths{ "/user/hand/left", "/user/hand/right" };
 
     std::array<KDXr::ActionStateBoolean, 2> m_toggleAnimationActionStates;
+    KDXr::ActionStateFloat m_scaleActionState;
+    int32_t m_buzzHand{ -1 };
     std::array<float, 2> m_buzzAmplitudes{ 0.0f, 0.0f };
 };

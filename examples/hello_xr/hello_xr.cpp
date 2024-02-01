@@ -66,6 +66,10 @@ void HelloXr::onAttached()
                                                          .localizedName = "Toggle Animation",
                                                          .type = KDXr::ActionType::BooleanInput,
                                                          .subactionPaths = m_handPaths });
+    m_scaleAction = m_actionSet.createAction({ .name = "scale",
+                                               .localizedName = "Scale",
+                                               .type = KDXr::ActionType::FloatInput,
+                                               .subactionPaths = { m_handPaths[0] } });
     m_buzzAction = m_actionSet.createAction({ .name = "buzz",
                                               .localizedName = "Buzz",
                                               .type = KDXr::ActionType::VibrationOutput,
@@ -78,6 +82,7 @@ void HelloXr::onAttached()
         .suggestedBindings = {
                 { .action = m_toggleAnimationAction, .binding = "/user/hand/left/input/x/click" },
                 { .action = m_toggleAnimationAction, .binding = "/user/hand/right/input/a/click" },
+                { .action = m_scaleAction, .binding = "/user/hand/left/input/trigger/value" },
                 { .action = m_buzzAction, .binding = "/user/hand/left/output/haptic" },
                 { .action = m_buzzAction, .binding = "/user/hand/right/output/haptic" } }
     };
@@ -132,31 +137,56 @@ void HelloXr::pollActions(KDXr::Time predictedDisplayTime)
     }
 
     // Poll the actions and do something with the results
+    processToggleAnimationAction();
+    processScaleAction();
+    processHapticAction();
+}
+
+void HelloXr::processToggleAnimationAction()
+{
     bool toggleAnimation{ false };
-    int32_t buzzHand{ -1 };
     for (uint32_t i = 0; i < 2; ++i) {
+        // Query the toggle animation action
         const auto toggleAnimationResult = m_session.getBooleanState(
                 { .action = m_toggleAnimationAction, .subactionPath = m_handPaths[i] },
                 m_toggleAnimationActionStates[i]);
-        if (toggleAnimationResult != KDXr::GetActionStateResult::Success) {
+        if (toggleAnimationResult == KDXr::GetActionStateResult::Success) {
+            if (m_toggleAnimationActionStates[i].currentState &&
+                m_toggleAnimationActionStates[i].changedSinceLastSync &&
+                m_toggleAnimationActionStates[i].active) {
+                toggleAnimation = true;
+                m_buzzHand = i;
+                break;
+            }
+        } else {
             SPDLOG_LOGGER_ERROR(KDXr::Logger::logger(), "Failed to get toggle animation action state.");
-            continue;
-        }
-
-        if (m_toggleAnimationActionStates[i].currentState && m_toggleAnimationActionStates[i].changedSinceLastSync) {
-            toggleAnimation = true;
-            buzzHand = i;
-            break;
         }
     }
 
     // If the toggle animation action was pressed, toggle the animation and buzz the controller
     if (toggleAnimation) {
         m_projectionLayer->animate = !m_projectionLayer->animate();
-        m_buzzAmplitudes[buzzHand] = 1.0f;
+        m_buzzAmplitudes[m_buzzHand] = 1.0f;
         SPDLOG_LOGGER_INFO(KDXr::Logger::logger(), "Animation enabled = {}", m_projectionLayer->animate());
     }
+}
 
+void HelloXr::processScaleAction()
+{
+    // Query the scale action from the left trigger value
+    float scale = 1.0f;
+    const auto scaleResult = m_session.getFloatState({ .action = m_scaleAction, .subactionPath = m_handPaths[0] }, m_scaleActionState);
+    if (scaleResult == KDXr::GetActionStateResult::Success) {
+        if (m_scaleActionState.active)
+            scale = 1.0 + m_scaleActionState.currentState;
+        m_projectionLayer->scale = scale;
+    } else {
+        SPDLOG_LOGGER_ERROR(KDXr::Logger::logger(), "Failed to get scale action state.");
+    }
+}
+
+void HelloXr::processHapticAction()
+{
     // Apply any haptic feedback
     for (uint32_t i = 0; i < 2; ++i) {
         if (m_buzzAmplitudes[i] > 0.0f) {
