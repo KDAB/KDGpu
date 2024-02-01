@@ -166,6 +166,8 @@ struct Vector2 {
 struct Pose {
     Quaternion orientation{};
     Vector3 position{};
+
+    bool operator==(const Pose &other) const = default;
 };
 
 enum class SwapchainUsageFlagBits : uint32_t {
@@ -342,9 +344,8 @@ enum class EyeVisibility : uint32_t {
 enum class ActionType : uint32_t {
     BooleanInput = 1,
     FloatInput = 2,
-    Vector2fInput = 3,
-    Vector3fInput = 4,
-    PoseInput = 5,
+    Vector2Input = 3,
+    PoseInput = 4,
     VibrationOutput = 100,
     MaxEnum = 0x7fffffff
 };
@@ -440,6 +441,10 @@ struct ActionStateVector2 {
     bool active{ false };
 };
 
+struct ActionStatePose {
+    bool active{ false };
+};
+
 enum class VibrateOutputResult : int32_t {
     Success = 0,
     SessionLossPending = 3,
@@ -456,8 +461,40 @@ enum class VibrateOutputResult : int32_t {
     MaxEnum = 0x7fffffff
 };
 
+enum class LocateSpaceResult : int32_t {
+    Success = 0,
+    SessionLossPending = 3,
+    ValidationFailure = -1,
+    RuntimeFailure = -2,
+    HandleInvalid = -12,
+    InstanceLost = -13,
+    SessionLost = -17,
+    TimeInvalid = -30,
+    MaxEnum = 0x7fffffff
+};
+
+enum class SpaceStateFlagBits : uint32_t {
+    OrientationValidBit = 0x00000001,
+    PositionValidBit = 0x00000002,
+    OrientationTrackedBit = 0x00000004,
+    PositionTrackedBit = 0x00000008,
+    LinearVelocityValidBit = 0x00000010,
+    AngularVelocityValidBit = 0x00000020,
+    MaxEnum = 0x7fffffff
+};
+
+using SpaceStateFlags = KDGpu::Flags<SpaceStateFlagBits>;
+
+struct SpaceState {
+    SpaceStateFlags spaceStateFlags{ SpaceStateFlagBits::MaxEnum };
+    Pose pose{};
+    Vector3 linearVelocity{};
+    Vector3 angularVelocity{};
+};
+
 } // namespace KDXr
 
 OPERATORS_FOR_FLAGS(KDXr::CompositionLayerFlags)
+OPERATORS_FOR_FLAGS(KDXr::SpaceStateFlags)
 OPERATORS_FOR_FLAGS(KDXr::SwapchainUsageFlags)
 OPERATORS_FOR_FLAGS(KDXr::ViewStateFlags)

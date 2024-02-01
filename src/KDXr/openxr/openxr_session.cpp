@@ -495,6 +495,32 @@ GetActionStateResult OpenXrSession::getVector2State(const GetActionStateOptions 
     return static_cast<GetActionStateResult>(result);
 }
 
+GetActionStateResult OpenXrSession::getPoseState(const GetActionStateOptions &options, ActionStatePose &state) const
+{
+    OpenXrInstance *openxrInstance = openxrResourceManager->getInstance(instanceHandle);
+    assert(openxrInstance);
+    XrPath xrPath{ XR_NULL_PATH };
+    if (!options.subactionPath.empty())
+        xrPath = openxrInstance->createXrPath(options.subactionPath);
+
+    OpenXrAction *openxrAction = openxrResourceManager->getAction(options.action);
+    assert(openxrAction);
+
+    XrActionStateGetInfo actionStateGetInfo{ XR_TYPE_ACTION_STATE_GET_INFO };
+    actionStateGetInfo.action = openxrAction->action;
+    actionStateGetInfo.subactionPath = xrPath;
+    XrActionStatePose xrActionStatePose{ XR_TYPE_ACTION_STATE_POSE };
+    const auto result = xrGetActionStatePose(session, &actionStateGetInfo, &xrActionStatePose);
+    if (result != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to get action state.");
+        state = ActionStatePose{};
+    } else {
+        state = ActionStatePose{ .active = static_cast<bool>(xrActionStatePose.isActive) };
+    }
+
+    return static_cast<GetActionStateResult>(result);
+}
+
 VibrateOutputResult OpenXrSession::vibrateOutput(const VibrationOutputOptions &options)
 {
     OpenXrInstance *openxrInstance = openxrResourceManager->getInstance(instanceHandle);

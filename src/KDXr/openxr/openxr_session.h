@@ -62,6 +62,7 @@ struct KDXR_EXPORT OpenXrSession : public ApiSession {
     GetActionStateResult getBooleanState(const GetActionStateOptions &options, ActionStateBoolean &state) const final;
     GetActionStateResult getFloatState(const GetActionStateOptions &options, ActionStateFloat &state) const final;
     GetActionStateResult getVector2State(const GetActionStateOptions &options, ActionStateVector2 &state) const final;
+    GetActionStateResult getPoseState(const GetActionStateOptions &options, ActionStatePose &state) const final;
     VibrateOutputResult vibrateOutput(const VibrationOutputOptions &options) final;
 
     OpenXrResourceManager *openxrResourceManager{ nullptr };

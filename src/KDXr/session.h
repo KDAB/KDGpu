@@ -126,12 +126,14 @@ public:
     InteractionProfileState getInteractionProfile(const GetInterationProfileOptions &options) const;
     SyncActionsResult syncActions(const SyncActionsOptions &options);
 
+    ReferenceSpace createActionSpace(const ActionSpaceOptions &options);
+
     // TODO: Should we add per type getters? Or perhaps have type-specific actions and move getState to the actions?
     // If we do that, then we need the backend actions to be able to know about the session.
     GetActionStateResult getBooleanState(const GetActionStateOptions &options, ActionStateBoolean &state) const;
     GetActionStateResult getFloatState(const GetActionStateOptions &options, ActionStateFloat &state) const;
     GetActionStateResult getVector2State(const GetActionStateOptions &options, ActionStateVector2 &state) const;
-
+    GetActionStateResult getPoseState(const GetActionStateOptions &options, ActionStatePose &state) const;
     VibrateOutputResult vibrateOutput(const VibrationOutputOptions &options);
 
 private:

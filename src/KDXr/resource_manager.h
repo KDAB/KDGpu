@@ -28,6 +28,7 @@ struct ApiSystem;
 
 struct ActionOptions;
 struct ActionSetOptions;
+struct ActionSpaceOptions;
 struct InstanceOptions;
 struct ReferenceSpaceOptions;
 struct SessionOptions;
@@ -61,6 +62,7 @@ public:
     virtual ApiSession *getSession(const Handle<Session_t> &handle) const = 0;
 
     virtual Handle<ReferenceSpace_t> createReferenceSpace(const Handle<Session_t> &sessionHandle, const ReferenceSpaceOptions &options) = 0;
+    virtual Handle<ReferenceSpace_t> createReferenceSpace(const Handle<Session_t> &sessionHandle, const ActionSpaceOptions &options) = 0;
     virtual void deleteReferenceSpace(const Handle<ReferenceSpace_t> &handle) = 0;
     virtual ApiReferenceSpace *getReferenceSpace(const Handle<ReferenceSpace_t> &handle) const = 0;
 

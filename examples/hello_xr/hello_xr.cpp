@@ -73,12 +73,21 @@ void HelloXr::onAttached()
                                                .subactionPaths = { m_handPaths[0] } });
     m_translateAction = m_actionSet.createAction({ .name = "translate",
                                                    .localizedName = "Translate",
-                                                   .type = KDXr::ActionType::Vector2fInput,
+                                                   .type = KDXr::ActionType::Vector2Input,
                                                    .subactionPaths = { m_handPaths[0] } });
+    m_palmPoseAction = m_actionSet.createAction({ .name = "palm_pose",
+                                                  .localizedName = "Palm Pose",
+                                                  .type = KDXr::ActionType::PoseInput,
+                                                  .subactionPaths = m_handPaths });
     m_buzzAction = m_actionSet.createAction({ .name = "buzz",
                                               .localizedName = "Buzz",
                                               .type = KDXr::ActionType::VibrationOutput,
                                               .subactionPaths = m_handPaths });
+
+    // Create action spaces for the palm poses. Default is no offset from the palm pose. If you wish to
+    // apply an offset, you can do so by setting the poseInActionSpace member of the ActionSpaceOptions.
+    for (uint32_t i = 0; i < 2; ++i)
+        m_palmPoseActionSpaces[i] = m_session.createActionSpace({ .action = m_palmPoseAction, .subactionPath = m_handPaths[i] });
 
     // Suggest some bindings for the actions. NB: This assumes we are using a Meta Quest. If you are using a different
     // device, you will need to change the suggested bindings.
@@ -89,6 +98,8 @@ void HelloXr::onAttached()
                 { .action = m_toggleAnimationAction, .binding = "/user/hand/right/input/a/click" },
                 { .action = m_scaleAction, .binding = "/user/hand/left/input/trigger/value" },
                 { .action = m_translateAction, .binding = "/user/hand/left/input/thumbstick" },
+                { .action = m_palmPoseAction, .binding = "/user/hand/left/input/grip/pose" },
+                { .action = m_palmPoseAction, .binding = "/user/hand/right/input/grip/pose" },
                 { .action = m_buzzAction, .binding = "/user/hand/left/output/haptic" },
                 { .action = m_buzzAction, .binding = "/user/hand/right/output/haptic" } }
     };
@@ -146,6 +157,7 @@ void HelloXr::pollActions(KDXr::Time predictedDisplayTime)
     processToggleAnimationAction();
     processScaleAction();
     processTranslateAction();
+    processPalmPoseAction(predictedDisplayTime);
     processHapticAction();
 }
 
@@ -207,6 +219,33 @@ void HelloXr::processTranslateAction()
         m_projectionLayer->translation = m_projectionLayer->translation() + delta;
     } else {
         SPDLOG_LOGGER_ERROR(KDXr::Logger::logger(), "Failed to get translate action state.");
+    }
+}
+
+void HelloXr::processPalmPoseAction(KDXr::Time predictedDisplayTime)
+{
+    for (uint32_t i = 0; i < 2; ++i) {
+        // Query the palm pose action
+        const auto palmPoseResult = m_session.getPoseState(
+                { .action = m_palmPoseAction, .subactionPath = m_handPaths[i] }, m_palmPoseActionStates[i]);
+        if (palmPoseResult == KDXr::GetActionStateResult::Success) {
+            if (m_palmPoseActionStates[i].active) {
+                // Update the action space for the palm pose
+                const auto locateSpaceResult = m_palmPoseActionSpaces[i].locateSpace(
+                        { .baseSpace = m_referenceSpace, .time = predictedDisplayTime }, m_palmPoseActionSpaceStates[i]);
+                if (locateSpaceResult == KDXr::LocateSpaceResult::Success) {
+                    // Update the pose of the projection layer
+                    if (i == 0)
+                        m_projectionLayer->leftPalmPose = m_palmPoseActionSpaceStates[i].pose;
+                    else
+                        m_projectionLayer->rightPalmPose = m_palmPoseActionSpaceStates[i].pose;
+                } else {
+                    SPDLOG_LOGGER_ERROR(KDXr::Logger::logger(), "Failed to locate space for palm pose.");
+                }
+            }
+        } else {
+            SPDLOG_LOGGER_ERROR(KDXr::Logger::logger(), "Failed to get palm pose action state.");
+        }
     }
 }
 

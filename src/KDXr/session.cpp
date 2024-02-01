@@ -159,6 +159,11 @@ SyncActionsResult Session::syncActions(const SyncActionsOptions &options)
     return apiSession->syncActions(options);
 }
 
+ReferenceSpace Session::createActionSpace(const ActionSpaceOptions &options)
+{
+    return ReferenceSpace(m_session, m_api, options);
+}
+
 GetActionStateResult Session::getBooleanState(const GetActionStateOptions &options, ActionStateBoolean &state) const
 {
     auto apiSession = m_api->resourceManager()->getSession(m_session);
@@ -175,6 +180,12 @@ GetActionStateResult Session::getVector2State(const GetActionStateOptions &optio
 {
     auto apiSession = m_api->resourceManager()->getSession(m_session);
     return apiSession->getVector2State(options, state);
+}
+
+GetActionStateResult Session::getPoseState(const GetActionStateOptions &options, ActionStatePose &state) const
+{
+    auto apiSession = m_api->resourceManager()->getSession(m_session);
+    return apiSession->getPoseState(options, state);
 }
 
 VibrateOutputResult Session::vibrateOutput(const VibrationOutputOptions &options)

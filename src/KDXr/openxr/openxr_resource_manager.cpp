@@ -369,6 +369,38 @@ Handle<ReferenceSpace_t> OpenXrResourceManager::createReferenceSpace(const Handl
     return h;
 }
 
+Handle<ReferenceSpace_t> OpenXrResourceManager::createReferenceSpace(const Handle<Session_t> &sessionHandle, const ActionSpaceOptions &options)
+{
+    OpenXrAction *openXrAction = m_actions.get(options.action);
+    assert(openXrAction);
+    OpenXrSession *openXrSession = m_sessions.get(sessionHandle);
+    assert(openXrSession);
+
+    XrPath xrPath{ XR_NULL_PATH };
+    if (!options.subactionPath.empty()) {
+        OpenXrInstance *openXrInstance = m_instances.get(openXrSession->instanceHandle);
+        assert(openXrInstance);
+        xrPath = openXrInstance->createXrPath(options.subactionPath);
+    }
+
+    const auto &pose = options.poseInActionSpace;
+    const XrQuaternionf orientation{ pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w };
+    const XrVector3f offset{ pose.position.x, pose.position.y, pose.position.z };
+    XrActionSpaceCreateInfo actionSpaceCreateInfo{ XR_TYPE_ACTION_SPACE_CREATE_INFO };
+    actionSpaceCreateInfo.action = openXrAction->action;
+    actionSpaceCreateInfo.poseInActionSpace = { orientation, offset };
+    actionSpaceCreateInfo.subactionPath = xrPath;
+
+    XrSpace xrReferenceSpace{ XR_NULL_HANDLE };
+    if (xrCreateActionSpace(openXrSession->session, &actionSpaceCreateInfo, &xrReferenceSpace) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to create OpenXR Reference Space.");
+        return {};
+    }
+
+    auto h = m_referenceSpaces.emplace(OpenXrReferenceSpace{ this, xrReferenceSpace, sessionHandle, options.action, pose });
+    return h;
+}
+
 void OpenXrResourceManager::deleteReferenceSpace(const Handle<ReferenceSpace_t> &handle)
 {
     OpenXrReferenceSpace *openXrReferenceSpace = m_referenceSpaces.get(handle);

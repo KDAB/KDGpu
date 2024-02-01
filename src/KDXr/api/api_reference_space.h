@@ -15,6 +15,7 @@
 
 namespace KDXr {
 
+struct LocateSpaceOptions;
 struct ReferenceSpace_t;
 
 /**
@@ -23,7 +24,7 @@ struct ReferenceSpace_t;
  *
  */
 struct ApiReferenceSpace {
-    // TODO: Add pure virtual functions here
+    virtual LocateSpaceResult locateSpace(const LocateSpaceOptions &options, SpaceState &state) = 0;
 };
 
 } // namespace KDXr

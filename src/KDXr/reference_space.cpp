@@ -52,6 +52,14 @@ ReferenceSpace::ReferenceSpace(const Handle<Session_t> &sessionHandle, XrApi *ap
     m_referenceSpace = m_api->resourceManager()->createReferenceSpace(m_sessionHandle, options);
 }
 
+ReferenceSpace::ReferenceSpace(const Handle<Session_t> &sessionHandle, XrApi *api, const ActionSpaceOptions &options)
+    : m_api(api)
+    , m_sessionHandle(sessionHandle)
+{
+    // Create an ReferenceSpace using the underlying API
+    m_referenceSpace = m_api->resourceManager()->createReferenceSpace(m_sessionHandle, options);
+}
+
 ReferenceSpace::~ReferenceSpace()
 {
     if (isValid())
@@ -76,6 +84,12 @@ ReferenceSpace &ReferenceSpace::operator=(ReferenceSpace &&other)
         m_referenceSpace = std::exchange(other.m_referenceSpace, {});
     }
     return *this;
+}
+
+LocateSpaceResult ReferenceSpace::locateSpace(const LocateSpaceOptions &options, SpaceState &state) const
+{
+    auto apiSpace = m_api->resourceManager()->getReferenceSpace(m_referenceSpace);
+    return apiSpace->locateSpace(options, state);
 }
 
 } // namespace KDXr

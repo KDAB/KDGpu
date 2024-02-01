@@ -56,6 +56,7 @@ public:
     OpenXrSession *getSession(const Handle<Session_t> &handle) const final;
 
     Handle<ReferenceSpace_t> createReferenceSpace(const Handle<Session_t> &sessionHandle, const ReferenceSpaceOptions &options) final;
+    Handle<ReferenceSpace_t> createReferenceSpace(const Handle<Session_t> &sessionHandle, const ActionSpaceOptions &options) final;
     void deleteReferenceSpace(const Handle<ReferenceSpace_t> &handle) final;
     OpenXrReferenceSpace *getReferenceSpace(const Handle<ReferenceSpace_t> &handle) const final;
 

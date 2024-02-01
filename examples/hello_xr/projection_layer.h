@@ -11,6 +11,7 @@
 #pragma once
 
 #include <KDGpuExample/xr_compositor/xr_projection_layer.h>
+#include <KDXr/kdxr_core.h>
 
 #include <KDGpu/bind_group.h>
 #include <KDGpu/buffer.h>
@@ -36,6 +37,8 @@ public:
     KDBindings::Property<bool> animate{ true };
     KDBindings::Property<float> scale{ 1.0f };
     KDBindings::Property<glm::vec3> translation{ glm::vec3(0.0f, 0.0f, -1.0f) };
+    KDBindings::Property<KDXr::Pose> leftPalmPose{ KDXr::Pose{} };
+    KDBindings::Property<KDXr::Pose> rightPalmPose{ KDXr::Pose{} };
 
     explicit ProjectionLayer(const XrProjectionLayerOptions &options);
     ~ProjectionLayer() override;

@@ -14,8 +14,11 @@
 #include <KDXr/handle.h>
 #include <KDXr/kdxr_export.h>
 
+#include <string>
+
 namespace KDXr {
 
+struct Action_t;
 struct ReferenceSpace_t;
 struct Session_t;
 class XrApi;
@@ -28,6 +31,18 @@ class XrApi;
 struct ReferenceSpaceOptions {
     ReferenceSpaceType type{ ReferenceSpaceType::Local };
     Pose pose{};
+};
+
+struct ActionSpaceOptions {
+    Handle<Action_t> action;
+    std::string subactionPath;
+    Pose poseInActionSpace{};
+};
+
+struct LocateSpaceOptions {
+    Handle<ReferenceSpace_t> baseSpace;
+    Time time{ 0 };
+    bool requestVelocity{ false };
 };
 
 class KDXR_EXPORT ReferenceSpace
@@ -47,8 +62,11 @@ public:
 
     operator Handle<ReferenceSpace_t>() const noexcept { return m_referenceSpace; }
 
+    LocateSpaceResult locateSpace(const LocateSpaceOptions &options, SpaceState &state) const;
+
 private:
     explicit ReferenceSpace(const Handle<Session_t> &sessionHandle, XrApi *api, const ReferenceSpaceOptions &options);
+    explicit ReferenceSpace(const Handle<Session_t> &sessionHandle, XrApi *api, const ActionSpaceOptions &options);
 
     XrApi *m_api{ nullptr };
     Handle<Session_t> m_sessionHandle;

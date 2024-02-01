@@ -87,4 +87,14 @@ XrActionType actionTypeToXrActionType(ActionType type)
     return static_cast<XrActionType>(static_cast<uint32_t>(type));
 }
 
+SpaceStateFlags xrSpaceLocationFlagsToSpaceStateFlags(XrSpaceLocationFlags flags)
+{
+    return SpaceStateFlags::fromInt(static_cast<uint32_t>(flags));
+}
+
+SpaceStateFlags xrSpaceVelocityFlagsToSpaceStateFlags(XrSpaceVelocityFlags flags)
+{
+    return SpaceStateFlags::fromInt(static_cast<uint32_t>(flags) << 1);
+}
+
 } // namespace KDXr

@@ -18,6 +18,7 @@
 
 namespace KDXr {
 
+struct Action_t;
 struct Session_t;
 class OpenXrResourceManager;
 
@@ -33,10 +34,19 @@ struct KDXR_EXPORT OpenXrReferenceSpace : public ApiReferenceSpace {
                                   ReferenceSpaceType _type,
                                   Pose _pose) noexcept;
 
+    explicit OpenXrReferenceSpace(OpenXrResourceManager *_openxrResourceManager,
+                                  XrSpace _referenceSpace,
+                                  const Handle<Session_t> _sessionHandle,
+                                  const Handle<Action_t> _actionHandle,
+                                  Pose _pose) noexcept;
+
+    LocateSpaceResult locateSpace(const LocateSpaceOptions &options, SpaceState &state) final;
+
     OpenXrResourceManager *openxrResourceManager{ nullptr };
     XrSpace referenceSpace{ XR_NULL_HANDLE };
     Handle<Session_t> sessionHandle;
-    ReferenceSpaceType type;
+    Handle<Action_t> actionHandle; // Only set for action spaces
+    ReferenceSpaceType type{ ReferenceSpaceType::MaxEnum }; // Only set for reference spaces
     Pose pose;
 };
 

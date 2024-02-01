@@ -38,4 +38,7 @@ XrEyeVisibility eyeVisibilityToXrEyeVisibility(EyeVisibility visibility);
 
 XrActionType actionTypeToXrActionType(ActionType type);
 
+SpaceStateFlags xrSpaceLocationFlagsToSpaceStateFlags(XrSpaceLocationFlags flags);
+SpaceStateFlags xrSpaceVelocityFlagsToSpaceStateFlags(XrSpaceVelocityFlags flags);
+
 } // namespace KDXr
