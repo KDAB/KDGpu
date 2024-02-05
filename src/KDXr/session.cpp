@@ -66,8 +66,10 @@ Session::Session(Session &&other)
     m_systemHandle = std::exchange(other.m_systemHandle, {});
     m_session = std::exchange(other.m_session, {});
 
-    auto apiSession = m_api->resourceManager()->getSession(m_session);
-    apiSession->initialize(this);
+    if (m_api && m_session.isValid()) {
+        auto apiSession = m_api->resourceManager()->getSession(m_session);
+        apiSession->initialize(this);
+    }
 }
 
 Session &Session::operator=(Session &&other)
@@ -80,8 +82,10 @@ Session &Session::operator=(Session &&other)
         m_systemHandle = std::exchange(other.m_systemHandle, {});
         m_session = std::exchange(other.m_session, {});
 
-        auto apiSession = m_api->resourceManager()->getSession(m_session);
-        apiSession->initialize(this);
+        if (m_api && m_session.isValid()) {
+            auto apiSession = m_api->resourceManager()->getSession(m_session);
+            apiSession->initialize(this);
+        }
     }
     return *this;
 }

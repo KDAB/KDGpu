@@ -76,8 +76,10 @@ Instance::Instance(Instance &&other)
     m_api = std::exchange(other.m_api, nullptr);
     m_instance = std::exchange(other.m_instance, {});
 
-    auto apiInstance = m_api->resourceManager()->getInstance(m_instance);
-    apiInstance->initialize(this);
+    if (m_api && m_instance.isValid()) {
+        auto apiInstance = m_api->resourceManager()->getInstance(m_instance);
+        apiInstance->initialize(this);
+    }
 }
 
 Instance &Instance::operator=(Instance &&other)
@@ -89,8 +91,10 @@ Instance &Instance::operator=(Instance &&other)
         m_api = std::exchange(other.m_api, nullptr);
         m_instance = std::exchange(other.m_instance, {});
 
-        auto apiInstance = m_api->resourceManager()->getInstance(m_instance);
-        apiInstance->initialize(this);
+        if (m_api && m_instance.isValid()) {
+            auto apiInstance = m_api->resourceManager()->getInstance(m_instance);
+            apiInstance->initialize(this);
+        }
     }
     return *this;
 }

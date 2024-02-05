@@ -120,6 +120,7 @@ public:
     std::span<const KDXr::ViewConfigurationView> viewConfigurationViews() const noexcept { return m_viewConfigurationViews; }
 
 protected:
+    virtual void onSessionStateChanged(KDXr::SessionState oldState, KDXr::SessionState newState);
     virtual void onInstanceLost();
     virtual void onInteractionProfileChanged();
 

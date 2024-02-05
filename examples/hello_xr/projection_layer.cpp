@@ -396,6 +396,18 @@ void ProjectionLayer::initializeScene()
 
 void ProjectionLayer::cleanupScene()
 {
+    m_fence = {};
+
+    m_cameraBindGroup = {};
+    m_cameraBuffer = {};
+
+    m_rightHandTransformBindGroup = {};
+    m_rightHandTransformBuffer = {};
+    m_rightHandBuffer = {};
+    m_leftHandTransformBindGroup = {};
+    m_leftHandTransformBuffer = {};
+    m_leftHandBuffer = {};
+
     m_pipeline = {};
     m_pipelineLayout = {};
     m_buffer = {};

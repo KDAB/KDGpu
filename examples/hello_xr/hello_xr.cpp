@@ -116,6 +116,16 @@ void HelloXr::onAttached()
 
 void HelloXr::onDetached()
 {
+    m_palmPoseActionSpaces[0] = {};
+    m_palmPoseActionSpaces[1] = {};
+
+    m_buzzAction = {};
+    m_palmPoseAction = {};
+    m_translateAction = {};
+    m_scaleAction = {};
+    m_toggleAnimationAction = {};
+    m_actionSet = {};
+
     clearCompositorLayers();
     m_quadImguiLayer = nullptr;
     m_projectionLayer = nullptr;

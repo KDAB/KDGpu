@@ -109,6 +109,7 @@ void XrExampleEngineLayer::onAttached()
     m_session.running.valueChanged().connect([this](bool running) {
         SPDLOG_LOGGER_INFO(m_logger, "Session Running: {}", running);
     });
+    m_session.state.valueAboutToChange().connect(&XrExampleEngineLayer::onSessionStateChanged, this);
 
     // Create a reference space - default to local space
     m_referenceSpace = m_session.createReferenceSpace();
@@ -200,10 +201,18 @@ void XrExampleEngineLayer::event(KDFoundation::EventReceiver *target, KDFoundati
 {
 }
 
+void XrExampleEngineLayer::onSessionStateChanged(KDXr::SessionState oldState, KDXr::SessionState newState)
+{
+    SPDLOG_LOGGER_INFO(m_logger, "Session State Changed: {} -> {}", oldState, newState);
+    if (newState == KDXr::SessionState::Exiting)
+        KDGui::GuiApplication::instance()->quit();
+}
+
 void XrExampleEngineLayer::onInstanceLost()
 {
     SPDLOG_LOGGER_ERROR(m_logger, "Instance Lost.");
-    // TODO: Gracefully handle shutting down the application
+    // Try to gracefully handle shutting down the application
+    KDGui::GuiApplication::instance()->quit();
 }
 
 void XrExampleEngineLayer::onInteractionProfileChanged()
