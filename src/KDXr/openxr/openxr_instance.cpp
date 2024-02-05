@@ -60,7 +60,7 @@ std::vector<Extension> OpenXrInstance::enabledExtensions() const
     return extensions;
 }
 
-Handle<System_t> OpenXrInstance::querySystem(const SystemOptions &options, const Handle<Instance_t> &instanceHandle)
+KDGpu::Handle<System_t> OpenXrInstance::querySystem(const SystemOptions &options, const KDGpu::Handle<Instance_t> &instanceHandle)
 {
     XrSystemGetInfo systemGetInfo{ XR_TYPE_SYSTEM_GET_INFO };
     systemGetInfo.formFactor = formFactorToXrFormFactor(options.formFactor);

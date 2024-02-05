@@ -11,7 +11,7 @@
 #pragma once
 
 #include <KDXr/kdxr_core.h>
-#include <KDXr/handle.h>
+#include <KDGpu/handle.h>
 
 namespace KDXr {
 

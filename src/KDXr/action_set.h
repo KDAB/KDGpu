@@ -12,8 +12,9 @@
 
 #include <KDXr/action.h>
 #include <KDXr/kdxr_core.h>
-#include <KDXr/handle.h>
 #include <KDXr/kdxr_export.h>
+
+#include <KDGpu/handle.h>
 
 #include <string>
 
@@ -46,19 +47,19 @@ public:
     ActionSet(const ActionSet &) = delete;
     ActionSet &operator=(const ActionSet &) = delete;
 
-    Handle<ActionSet_t> handle() const noexcept { return m_actionSet; }
+    KDGpu::Handle<ActionSet_t> handle() const noexcept { return m_actionSet; }
     bool isValid() const { return m_actionSet.isValid(); }
 
-    operator Handle<ActionSet_t>() const noexcept { return m_actionSet; }
+    operator KDGpu::Handle<ActionSet_t>() const noexcept { return m_actionSet; }
 
     Action createAction(const ActionOptions &options);
 
 private:
-    ActionSet(XrApi *api, const Handle<Instance_t> &instanceHandle, const ActionSetOptions &options);
+    ActionSet(XrApi *api, const KDGpu::Handle<Instance_t> &instanceHandle, const ActionSetOptions &options);
 
     XrApi *m_api{ nullptr };
-    Handle<Instance_t> m_instanceHandle;
-    Handle<ActionSet_t> m_actionSet;
+    KDGpu::Handle<Instance_t> m_instanceHandle;
+    KDGpu::Handle<ActionSet_t> m_actionSet;
 
     friend class Instance;
 };

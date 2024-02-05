@@ -31,7 +31,7 @@ namespace KDXr {
     @fn Action::handle()
     @brief Returns the handle used to retrieve the underlying XR API specific Action
 
-    @return Handle<Action_t>
+    @return KDGpu::Handle<Action_t>
     @sa ResourceManager
  */
 
@@ -44,7 +44,7 @@ Action::Action()
 {
 }
 
-Action::Action(XrApi *api, const Handle<ActionSet_t> &actionSetHandle, const ActionOptions &options)
+Action::Action(XrApi *api, const KDGpu::Handle<ActionSet_t> &actionSetHandle, const ActionOptions &options)
     : m_api(api)
     , m_actionSetHandle(actionSetHandle)
     , m_action(m_api->resourceManager()->createAction(m_actionSetHandle, options))

@@ -11,8 +11,9 @@
 #pragma once
 
 #include <KDXr/kdxr_core.h>
-#include <KDXr/handle.h>
 #include <KDXr/kdxr_export.h>
+
+#include <KDGpu/handle.h>
 
 #include <string>
 #include <vector>
@@ -47,17 +48,17 @@ public:
     Action(const Action &) = delete;
     Action &operator=(const Action &) = delete;
 
-    Handle<Action_t> handle() const noexcept { return m_action; }
+    KDGpu::Handle<Action_t> handle() const noexcept { return m_action; }
     bool isValid() const { return m_action.isValid(); }
 
-    operator Handle<Action_t>() const noexcept { return m_action; }
+    operator KDGpu::Handle<Action_t>() const noexcept { return m_action; }
 
 private:
-    Action(XrApi *api, const Handle<ActionSet_t> &actionSetHandle, const ActionOptions &options);
+    Action(XrApi *api, const KDGpu::Handle<ActionSet_t> &actionSetHandle, const ActionOptions &options);
 
     XrApi *m_api{ nullptr };
-    Handle<ActionSet_t> m_actionSetHandle;
-    Handle<Action_t> m_action;
+    KDGpu::Handle<ActionSet_t> m_actionSetHandle;
+    KDGpu::Handle<Action_t> m_action;
 
     friend class ActionSet;
 };

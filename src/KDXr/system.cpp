@@ -31,7 +31,7 @@ namespace KDXr {
     @fn System::handle()
     @brief Returns the handle used to retrieve the underlying XR API specific System
 
-    @return Handle<System_t>
+    @return KDGpu::Handle<System_t>
     @sa ResourceManager
  */
 
@@ -40,7 +40,7 @@ namespace KDXr {
     @brief Convenience function to check whether the object is actually referencing a valid API specific resource
  */
 
-System::System(XrApi *api, const Handle<System_t> &system)
+System::System(XrApi *api, const KDGpu::Handle<System_t> &system)
     : m_api(api)
     , m_system(system)
 {

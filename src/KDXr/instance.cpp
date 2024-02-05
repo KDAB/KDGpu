@@ -43,7 +43,7 @@ namespace KDXr {
     @fn Instance::handle()
     @brief Returns the handle used to retrieve the underlying Rendering API specific Instance
 
-    @return Handle<Instance_t>
+    @return KDGpu::Handle<Instance_t>
     @sa ResourceManager
  */
 

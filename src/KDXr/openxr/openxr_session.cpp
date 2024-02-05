@@ -70,8 +70,8 @@ namespace KDXr {
 
 OpenXrSession::OpenXrSession(OpenXrResourceManager *_openxrResourceManager,
                              XrSession _session,
-                             const Handle<System_t> _systemHandle,
-                             const Handle<Instance_t> _instanceHandle,
+                             const KDGpu::Handle<System_t> _systemHandle,
+                             const KDGpu::Handle<Instance_t> _instanceHandle,
                              KDGpu::GraphicsApi *_graphicsApi,
                              KDGpu::Handle<KDGpu::Device_t> _device,
                              uint32_t queueIndex) noexcept

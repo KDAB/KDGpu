@@ -129,7 +129,7 @@ std::vector<Extension> OpenXrResourceManager::availableInstanceExtensions() cons
     return extensions;
 }
 
-Handle<Instance_t> OpenXrResourceManager::createInstance(const InstanceOptions &options)
+KDGpu::Handle<Instance_t> OpenXrResourceManager::createInstance(const InstanceOptions &options)
 {
     XrApplicationInfo xrApplicationInfo = {};
     strncpy(xrApplicationInfo.applicationName, options.applicationName.data(), XR_MAX_APPLICATION_NAME_SIZE);
@@ -230,7 +230,7 @@ Handle<Instance_t> OpenXrResourceManager::createInstance(const InstanceOptions &
     return h;
 }
 
-void OpenXrResourceManager::deleteInstance(const Handle<Instance_t> &handle)
+void OpenXrResourceManager::deleteInstance(const KDGpu::Handle<Instance_t> &handle)
 {
     OpenXrInstance *openXrInstance = m_instances.get(handle);
 
@@ -258,27 +258,27 @@ void OpenXrResourceManager::deleteInstance(const Handle<Instance_t> &handle)
     m_instances.remove(handle);
 }
 
-OpenXrInstance *OpenXrResourceManager::getInstance(const Handle<Instance_t> &handle) const
+OpenXrInstance *OpenXrResourceManager::getInstance(const KDGpu::Handle<Instance_t> &handle) const
 {
     return m_instances.get(handle);
 }
 
-Handle<System_t> OpenXrResourceManager::insertSystem(const OpenXrSystem &openXrSystem)
+KDGpu::Handle<System_t> OpenXrResourceManager::insertSystem(const OpenXrSystem &openXrSystem)
 {
     return m_systems.emplace(openXrSystem);
 }
 
-void OpenXrResourceManager::removeSystem(const Handle<System_t> &handle)
+void OpenXrResourceManager::removeSystem(const KDGpu::Handle<System_t> &handle)
 {
     m_systems.remove(handle);
 }
 
-OpenXrSystem *OpenXrResourceManager::getSystem(const Handle<System_t> &handle) const
+OpenXrSystem *OpenXrResourceManager::getSystem(const KDGpu::Handle<System_t> &handle) const
 {
     return m_systems.get(handle);
 }
 
-Handle<Session_t> OpenXrResourceManager::createSession(const Handle<System_t> &systemHandle, const SessionOptions &options)
+KDGpu::Handle<Session_t> OpenXrResourceManager::createSession(const KDGpu::Handle<System_t> &systemHandle, const SessionOptions &options)
 {
     OpenXrSystem *openXrSystem = m_systems.get(systemHandle);
     assert(openXrSystem);
@@ -328,7 +328,7 @@ Handle<Session_t> OpenXrResourceManager::createSession(const Handle<System_t> &s
     return h;
 }
 
-void OpenXrResourceManager::deleteSession(const Handle<Session_t> &handle)
+void OpenXrResourceManager::deleteSession(const KDGpu::Handle<Session_t> &handle)
 {
     // Unregister the session from the instance
     OpenXrSession *openXrSession = m_sessions.get(handle);
@@ -345,12 +345,12 @@ void OpenXrResourceManager::deleteSession(const Handle<Session_t> &handle)
     m_sessions.remove(handle);
 }
 
-OpenXrSession *OpenXrResourceManager::getSession(const Handle<Session_t> &handle) const
+OpenXrSession *OpenXrResourceManager::getSession(const KDGpu::Handle<Session_t> &handle) const
 {
     return m_sessions.get(handle);
 }
 
-Handle<ReferenceSpace_t> OpenXrResourceManager::createReferenceSpace(const Handle<Session_t> &sessionHandle, const ReferenceSpaceOptions &options)
+KDGpu::Handle<ReferenceSpace_t> OpenXrResourceManager::createReferenceSpace(const KDGpu::Handle<Session_t> &sessionHandle, const ReferenceSpaceOptions &options)
 {
     OpenXrSession *openXrSession = m_sessions.get(sessionHandle);
 
@@ -369,7 +369,7 @@ Handle<ReferenceSpace_t> OpenXrResourceManager::createReferenceSpace(const Handl
     return h;
 }
 
-Handle<ReferenceSpace_t> OpenXrResourceManager::createReferenceSpace(const Handle<Session_t> &sessionHandle, const ActionSpaceOptions &options)
+KDGpu::Handle<ReferenceSpace_t> OpenXrResourceManager::createReferenceSpace(const KDGpu::Handle<Session_t> &sessionHandle, const ActionSpaceOptions &options)
 {
     OpenXrAction *openXrAction = m_actions.get(options.action);
     assert(openXrAction);
@@ -401,7 +401,7 @@ Handle<ReferenceSpace_t> OpenXrResourceManager::createReferenceSpace(const Handl
     return h;
 }
 
-void OpenXrResourceManager::deleteReferenceSpace(const Handle<ReferenceSpace_t> &handle)
+void OpenXrResourceManager::deleteReferenceSpace(const KDGpu::Handle<ReferenceSpace_t> &handle)
 {
     OpenXrReferenceSpace *openXrReferenceSpace = m_referenceSpaces.get(handle);
     if (xrDestroySpace(openXrReferenceSpace->referenceSpace) != XR_SUCCESS) {
@@ -410,12 +410,12 @@ void OpenXrResourceManager::deleteReferenceSpace(const Handle<ReferenceSpace_t> 
     m_referenceSpaces.remove(handle);
 }
 
-OpenXrReferenceSpace *OpenXrResourceManager::getReferenceSpace(const Handle<ReferenceSpace_t> &handle) const
+OpenXrReferenceSpace *OpenXrResourceManager::getReferenceSpace(const KDGpu::Handle<ReferenceSpace_t> &handle) const
 {
     return m_referenceSpaces.get(handle);
 }
 
-Handle<Swapchain_t> OpenXrResourceManager::createSwapchain(const Handle<Session_t> &sessionHandle, const SwapchainOptions &options)
+KDGpu::Handle<Swapchain_t> OpenXrResourceManager::createSwapchain(const KDGpu::Handle<Session_t> &sessionHandle, const SwapchainOptions &options)
 {
     OpenXrSession *openXrSession = m_sessions.get(sessionHandle);
 
@@ -444,7 +444,7 @@ Handle<Swapchain_t> OpenXrResourceManager::createSwapchain(const Handle<Session_
     return h;
 }
 
-void OpenXrResourceManager::deleteSwapchain(const Handle<Swapchain_t> &handle)
+void OpenXrResourceManager::deleteSwapchain(const KDGpu::Handle<Swapchain_t> &handle)
 {
     OpenXrSwapchain *openXrSwapchain = m_swapchains.get(handle);
     if (xrDestroySwapchain(openXrSwapchain->swapchain) != XR_SUCCESS) {
@@ -453,12 +453,12 @@ void OpenXrResourceManager::deleteSwapchain(const Handle<Swapchain_t> &handle)
     m_swapchains.remove(handle);
 }
 
-OpenXrSwapchain *OpenXrResourceManager::getSwapchain(const Handle<Swapchain_t> &handle) const
+OpenXrSwapchain *OpenXrResourceManager::getSwapchain(const KDGpu::Handle<Swapchain_t> &handle) const
 {
     return m_swapchains.get(handle);
 }
 
-Handle<ActionSet_t> OpenXrResourceManager::createActionSet(const Handle<Instance_t> &instanceHandle, const ActionSetOptions &options)
+KDGpu::Handle<ActionSet_t> OpenXrResourceManager::createActionSet(const KDGpu::Handle<Instance_t> &instanceHandle, const ActionSetOptions &options)
 {
     OpenXrInstance *openXrInstance = m_instances.get(instanceHandle);
 
@@ -477,7 +477,7 @@ Handle<ActionSet_t> OpenXrResourceManager::createActionSet(const Handle<Instance
     return h;
 }
 
-void OpenXrResourceManager::deleteActionSet(const Handle<ActionSet_t> &handle)
+void OpenXrResourceManager::deleteActionSet(const KDGpu::Handle<ActionSet_t> &handle)
 {
     OpenXrActionSet *openXrActionSet = m_actionSets.get(handle);
     if (xrDestroyActionSet(openXrActionSet->actionSet) != XR_SUCCESS) {
@@ -486,12 +486,12 @@ void OpenXrResourceManager::deleteActionSet(const Handle<ActionSet_t> &handle)
     m_actionSets.remove(handle);
 }
 
-OpenXrActionSet *OpenXrResourceManager::getActionSet(const Handle<ActionSet_t> &handle) const
+OpenXrActionSet *OpenXrResourceManager::getActionSet(const KDGpu::Handle<ActionSet_t> &handle) const
 {
     return m_actionSets.get(handle);
 }
 
-Handle<Action_t> OpenXrResourceManager::createAction(const Handle<ActionSet_t> &actionSetHandle, const ActionOptions &options)
+KDGpu::Handle<Action_t> OpenXrResourceManager::createAction(const KDGpu::Handle<ActionSet_t> &actionSetHandle, const ActionOptions &options)
 {
     OpenXrActionSet *openXrActionSet = m_actionSets.get(actionSetHandle);
     assert(openXrActionSet);
@@ -521,7 +521,7 @@ Handle<Action_t> OpenXrResourceManager::createAction(const Handle<ActionSet_t> &
     return h;
 }
 
-void OpenXrResourceManager::deleteAction(const Handle<Action_t> &handle)
+void OpenXrResourceManager::deleteAction(const KDGpu::Handle<Action_t> &handle)
 {
     OpenXrAction *openXrAction = m_actions.get(handle);
     if (xrDestroyAction(openXrAction->action) != XR_SUCCESS) {
@@ -530,7 +530,7 @@ void OpenXrResourceManager::deleteAction(const Handle<Action_t> &handle)
     m_actions.remove(handle);
 }
 
-OpenXrAction *OpenXrResourceManager::getAction(const Handle<Action_t> &handle) const
+OpenXrAction *OpenXrResourceManager::getAction(const KDGpu::Handle<Action_t> &handle) const
 {
     return m_actions.get(handle);
 }

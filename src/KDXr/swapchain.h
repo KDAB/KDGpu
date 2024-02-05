@@ -11,10 +11,10 @@
 #pragma once
 
 #include <KDXr/kdxr_core.h>
-#include <KDXr/handle.h>
 #include <KDXr/kdxr_export.h>
 
 #include <KDGpu/gpu_core.h>
+#include <KDGpu/handle.h>
 #include <KDGpu/texture.h>
 #include <KDGpu/texture_view.h>
 
@@ -54,10 +54,10 @@ public:
     Swapchain(const Swapchain &) = delete;
     Swapchain &operator=(const Swapchain &) = delete;
 
-    Handle<Swapchain_t> handle() const noexcept { return m_swapchain; }
+    KDGpu::Handle<Swapchain_t> handle() const noexcept { return m_swapchain; }
     bool isValid() const { return m_swapchain.isValid(); }
 
-    operator Handle<Swapchain_t>() const noexcept { return m_swapchain; }
+    operator KDGpu::Handle<Swapchain_t>() const noexcept { return m_swapchain; }
 
     const std::vector<KDGpu::Texture> &textures() const { return m_textures; }
 
@@ -66,11 +66,11 @@ public:
     ReleaseTextureResult releaseTexture();
 
 private:
-    explicit Swapchain(XrApi *api, const Handle<Session_t> &sessionHandle, const SwapchainOptions &options);
+    explicit Swapchain(XrApi *api, const KDGpu::Handle<Session_t> &sessionHandle, const SwapchainOptions &options);
 
     XrApi *m_api{ nullptr };
-    Handle<Session_t> m_sessionHandle;
-    Handle<Swapchain_t> m_swapchain;
+    KDGpu::Handle<Session_t> m_sessionHandle;
+    KDGpu::Handle<Swapchain_t> m_swapchain;
     std::vector<KDGpu::Texture> m_textures;
 
     friend class Session;

@@ -15,6 +15,8 @@
 #include <KDXr/config.h>
 #include <KDXr/swapchain.h>
 
+#include <KDGpu/handle.h>
+
 #include <openxr/openxr.h>
 
 namespace KDXr {
@@ -29,7 +31,7 @@ class OpenXrResourceManager;
 struct KDXR_EXPORT OpenXrSwapchain : public ApiSwapchain {
     explicit OpenXrSwapchain(OpenXrResourceManager *_openxrResourceManager,
                              XrSwapchain _swapchain,
-                             const Handle<Session_t> &_sessionHandle,
+                             const KDGpu::Handle<Session_t> &_sessionHandle,
                              const SwapchainOptions &_options) noexcept;
 
     std::vector<KDGpu::Texture> getTextures() final;
@@ -39,7 +41,7 @@ struct KDXR_EXPORT OpenXrSwapchain : public ApiSwapchain {
 
     OpenXrResourceManager *openxrResourceManager{ nullptr };
     XrSwapchain swapchain{ XR_NULL_HANDLE };
-    Handle<Session_t> sessionHandle;
+    KDGpu::Handle<Session_t> sessionHandle;
     SwapchainOptions options;
 };
 

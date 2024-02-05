@@ -10,8 +10,8 @@
 
 #pragma once
 
-#include <KDXr/handle.h>
 #include <KDXr/kdxr_core.h>
+#include <KDGpu/handle.h>
 
 namespace KDXr {
 
@@ -19,7 +19,7 @@ struct ReferenceSpace_t;
 
 struct LocateViewsOptions {
     Time displayTime{ 0 };
-    Handle<ReferenceSpace_t> referenceSpace;
+    KDGpu::Handle<ReferenceSpace_t> referenceSpace;
 };
 
 } // namespace KDXr

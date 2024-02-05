@@ -23,7 +23,7 @@ namespace KDXr {
 
 OpenXrSwapchain::OpenXrSwapchain(OpenXrResourceManager *_openxrResourceManager,
                                  XrSwapchain _swapchain,
-                                 const Handle<Session_t> &_sessionHandle,
+                                 const KDGpu::Handle<Session_t> &_sessionHandle,
                                  const SwapchainOptions &_options) noexcept
     : ApiSwapchain()
     , openxrResourceManager(_openxrResourceManager)

@@ -11,9 +11,10 @@
 #pragma once
 
 #include <KDXr/kdxr_core.h>
-#include <KDXr/handle.h>
 #include <KDXr/kdxr_export.h>
 #include <KDXr/session.h>
+
+#include <KDGpu/handle.h>
 
 #include <span>
 #include <vector>
@@ -50,10 +51,10 @@ public:
     System(const System &) = delete;
     System &operator=(const System &) = delete;
 
-    Handle<System_t> handle() const noexcept { return m_system; }
+    KDGpu::Handle<System_t> handle() const noexcept { return m_system; }
     bool isValid() const { return m_system.isValid(); }
 
-    operator Handle<System_t>() const noexcept { return m_system; }
+    operator KDGpu::Handle<System_t>() const noexcept { return m_system; }
 
     SystemProperties properties() const;
 
@@ -74,10 +75,10 @@ public:
     Session createSession(const SessionOptions &options);
 
 private:
-    explicit System(XrApi *api, const Handle<System_t> &system);
+    explicit System(XrApi *api, const KDGpu::Handle<System_t> &system);
 
     XrApi *m_api{ nullptr };
-    Handle<System_t> m_system;
+    KDGpu::Handle<System_t> m_system;
     SystemProperties m_properties;
     std::vector<ViewConfigurationType> m_viewConfigurations;
 

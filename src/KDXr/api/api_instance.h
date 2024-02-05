@@ -11,7 +11,7 @@
 #pragma once
 
 #include <KDXr/kdxr_core.h>
-#include <KDXr/handle.h>
+#include <KDGpu/handle.h>
 
 #include <vector>
 
@@ -33,7 +33,7 @@ struct ApiInstance {
     virtual InstanceProperties properties() const = 0;
     virtual std::vector<ApiLayer> enabledApiLayers() const = 0;
     virtual std::vector<Extension> enabledExtensions() const = 0;
-    virtual Handle<System_t> querySystem(const SystemOptions &options, const Handle<Instance_t> &instanceHandle) = 0;
+    virtual KDGpu::Handle<System_t> querySystem(const SystemOptions &options, const KDGpu::Handle<Instance_t> &instanceHandle) = 0;
     virtual ProcessEventsResult processEvents() = 0;
     virtual SuggestActionBindingsResult suggestActionBindings(const SuggestActionBindingsOptions &options) = 0;
 };

@@ -31,7 +31,7 @@ namespace KDXr {
     @fn ReferenceSpace::handle()
     @brief Returns the handle used to retrieve the underlying XR API specific ReferenceSpace
 
-    @return Handle<ReferenceSpace_t>
+    @return KDGpu::Handle<ReferenceSpace_t>
     @sa ResourceManager
  */
 
@@ -44,7 +44,7 @@ ReferenceSpace::ReferenceSpace()
 {
 }
 
-ReferenceSpace::ReferenceSpace(const Handle<Session_t> &sessionHandle, XrApi *api, const ReferenceSpaceOptions &options)
+ReferenceSpace::ReferenceSpace(const KDGpu::Handle<Session_t> &sessionHandle, XrApi *api, const ReferenceSpaceOptions &options)
     : m_api(api)
     , m_sessionHandle(sessionHandle)
 {
@@ -52,7 +52,7 @@ ReferenceSpace::ReferenceSpace(const Handle<Session_t> &sessionHandle, XrApi *ap
     m_referenceSpace = m_api->resourceManager()->createReferenceSpace(m_sessionHandle, options);
 }
 
-ReferenceSpace::ReferenceSpace(const Handle<Session_t> &sessionHandle, XrApi *api, const ActionSpaceOptions &options)
+ReferenceSpace::ReferenceSpace(const KDGpu::Handle<Session_t> &sessionHandle, XrApi *api, const ActionSpaceOptions &options)
     : m_api(api)
     , m_sessionHandle(sessionHandle)
 {

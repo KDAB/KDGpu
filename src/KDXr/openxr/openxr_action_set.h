@@ -13,7 +13,8 @@
 #include <KDXr/api/api_action_set.h>
 #include <KDXr/kdxr_export.h>
 #include <KDXr/config.h>
-#include <KDXr/handle.h>
+
+#include <KDGpu/handle.h>
 
 #include <openxr/openxr.h>
 
@@ -28,11 +29,13 @@ class OpenXrResourceManager;
  *
  */
 struct KDXR_EXPORT OpenXrActionSet : public ApiActionSet {
-    explicit OpenXrActionSet(OpenXrResourceManager *_openxrResourceManager, XrActionSet _actionSet, const Handle<Instance_t> &_instanceHandle) noexcept;
+    explicit OpenXrActionSet(OpenXrResourceManager *_openxrResourceManager,
+                             XrActionSet _actionSet,
+                             const KDGpu::Handle<Instance_t> &_instanceHandle) noexcept;
 
     OpenXrResourceManager *openxrResourceManager{ nullptr };
     XrActionSet actionSet{ XR_NULL_HANDLE };
-    Handle<Instance_t> instanceHandle;
+    KDGpu::Handle<Instance_t> instanceHandle;
 };
 
 } // namespace KDXr

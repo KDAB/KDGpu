@@ -12,10 +12,10 @@
 
 #include <KDXr/compositor.h>
 #include <KDXr/kdxr_core.h>
-#include <KDXr/handle.h>
 #include <KDXr/locate_views_options.h>
 
 #include <KDGpu/gpu_core.h>
+#include <KDGpu/handle.h>
 
 #include <vector>
 

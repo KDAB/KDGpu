@@ -11,9 +11,6 @@
 #pragma once
 
 #include <KDXr/resource_manager.h>
-
-#include <KDXr/pool.h>
-
 #include <KDXr/openxr/openxr_action.h>
 #include <KDXr/openxr/openxr_action_set.h>
 #include <KDXr/openxr/openxr_instance.h>
@@ -23,6 +20,8 @@
 #include <KDXr/openxr/openxr_system.h>
 
 #include <KDXr/kdxr_export.h>
+
+#include <KDGpu/pool.h>
 
 #include <openxr/openxr.h>
 
@@ -43,43 +42,43 @@ public:
     std::vector<ApiLayer> availableApiLayers() const final;
     std::vector<Extension> availableInstanceExtensions() const final;
 
-    Handle<Instance_t> createInstance(const InstanceOptions &options) final;
-    void deleteInstance(const Handle<Instance_t> &handle) final;
-    OpenXrInstance *getInstance(const Handle<Instance_t> &handle) const final;
+    KDGpu::Handle<Instance_t> createInstance(const InstanceOptions &options) final;
+    void deleteInstance(const KDGpu::Handle<Instance_t> &handle) final;
+    OpenXrInstance *getInstance(const KDGpu::Handle<Instance_t> &handle) const final;
 
-    Handle<System_t> insertSystem(const OpenXrSystem &openXrSystem);
-    void removeSystem(const Handle<System_t> &handle) final;
-    OpenXrSystem *getSystem(const Handle<System_t> &handle) const final;
+    KDGpu::Handle<System_t> insertSystem(const OpenXrSystem &openXrSystem);
+    void removeSystem(const KDGpu::Handle<System_t> &handle) final;
+    OpenXrSystem *getSystem(const KDGpu::Handle<System_t> &handle) const final;
 
-    Handle<Session_t> createSession(const Handle<System_t> &systemHandle, const SessionOptions &options) final;
-    void deleteSession(const Handle<Session_t> &handle) final;
-    OpenXrSession *getSession(const Handle<Session_t> &handle) const final;
+    KDGpu::Handle<Session_t> createSession(const KDGpu::Handle<System_t> &systemHandle, const SessionOptions &options) final;
+    void deleteSession(const KDGpu::Handle<Session_t> &handle) final;
+    OpenXrSession *getSession(const KDGpu::Handle<Session_t> &handle) const final;
 
-    Handle<ReferenceSpace_t> createReferenceSpace(const Handle<Session_t> &sessionHandle, const ReferenceSpaceOptions &options) final;
-    Handle<ReferenceSpace_t> createReferenceSpace(const Handle<Session_t> &sessionHandle, const ActionSpaceOptions &options) final;
-    void deleteReferenceSpace(const Handle<ReferenceSpace_t> &handle) final;
-    OpenXrReferenceSpace *getReferenceSpace(const Handle<ReferenceSpace_t> &handle) const final;
+    KDGpu::Handle<ReferenceSpace_t> createReferenceSpace(const KDGpu::Handle<Session_t> &sessionHandle, const ReferenceSpaceOptions &options) final;
+    KDGpu::Handle<ReferenceSpace_t> createReferenceSpace(const KDGpu::Handle<Session_t> &sessionHandle, const ActionSpaceOptions &options) final;
+    void deleteReferenceSpace(const KDGpu::Handle<ReferenceSpace_t> &handle) final;
+    OpenXrReferenceSpace *getReferenceSpace(const KDGpu::Handle<ReferenceSpace_t> &handle) const final;
 
-    Handle<Swapchain_t> createSwapchain(const Handle<Session_t> &sessionHandle, const SwapchainOptions &options) final;
-    void deleteSwapchain(const Handle<Swapchain_t> &handle) final;
-    OpenXrSwapchain *getSwapchain(const Handle<Swapchain_t> &handle) const final;
+    KDGpu::Handle<Swapchain_t> createSwapchain(const KDGpu::Handle<Session_t> &sessionHandle, const SwapchainOptions &options) final;
+    void deleteSwapchain(const KDGpu::Handle<Swapchain_t> &handle) final;
+    OpenXrSwapchain *getSwapchain(const KDGpu::Handle<Swapchain_t> &handle) const final;
 
-    Handle<ActionSet_t> createActionSet(const Handle<Instance_t> &instanceHandle, const ActionSetOptions &options) final;
-    void deleteActionSet(const Handle<ActionSet_t> &handle) final;
-    OpenXrActionSet *getActionSet(const Handle<ActionSet_t> &handle) const final;
+    KDGpu::Handle<ActionSet_t> createActionSet(const KDGpu::Handle<Instance_t> &instanceHandle, const ActionSetOptions &options) final;
+    void deleteActionSet(const KDGpu::Handle<ActionSet_t> &handle) final;
+    OpenXrActionSet *getActionSet(const KDGpu::Handle<ActionSet_t> &handle) const final;
 
-    Handle<Action_t> createAction(const Handle<ActionSet_t> &actionSetHandle, const ActionOptions &options) final;
-    void deleteAction(const Handle<Action_t> &handle) final;
-    OpenXrAction *getAction(const Handle<Action_t> &handle) const final;
+    KDGpu::Handle<Action_t> createAction(const KDGpu::Handle<ActionSet_t> &actionSetHandle, const ActionOptions &options) final;
+    void deleteAction(const KDGpu::Handle<Action_t> &handle) final;
+    OpenXrAction *getAction(const KDGpu::Handle<Action_t> &handle) const final;
 
 private:
-    Pool<OpenXrInstance, Instance_t> m_instances{ 1 };
-    Pool<OpenXrSystem, System_t> m_systems{ 1 };
-    Pool<OpenXrSession, Session_t> m_sessions{ 1 };
-    Pool<OpenXrReferenceSpace, ReferenceSpace_t> m_referenceSpaces{ 4 };
-    Pool<OpenXrSwapchain, Swapchain_t> m_swapchains{ 4 };
-    Pool<OpenXrActionSet, ActionSet_t> m_actionSets{ 4 };
-    Pool<OpenXrAction, Action_t> m_actions{ 32 };
+    KDGpu::Pool<OpenXrInstance, Instance_t> m_instances{ 1 };
+    KDGpu::Pool<OpenXrSystem, System_t> m_systems{ 1 };
+    KDGpu::Pool<OpenXrSession, Session_t> m_sessions{ 1 };
+    KDGpu::Pool<OpenXrReferenceSpace, ReferenceSpace_t> m_referenceSpaces{ 4 };
+    KDGpu::Pool<OpenXrSwapchain, Swapchain_t> m_swapchains{ 4 };
+    KDGpu::Pool<OpenXrActionSet, ActionSet_t> m_actionSets{ 4 };
+    KDGpu::Pool<OpenXrAction, Action_t> m_actions{ 32 };
 };
 
 } // namespace KDXr

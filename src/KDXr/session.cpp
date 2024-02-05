@@ -31,7 +31,7 @@ namespace KDXr {
     @fn Session::handle()
     @brief Returns the handle used to retrieve the underlying XR API specific Session
 
-    @return Handle<Session_t>
+    @return KDGpu::Handle<Session_t>
     @sa ResourceManager
  */
 
@@ -44,7 +44,7 @@ Session::Session()
 {
 }
 
-Session::Session(const Handle<System_t> &systemHandle, XrApi *api, const SessionOptions &options)
+Session::Session(const KDGpu::Handle<System_t> &systemHandle, XrApi *api, const SessionOptions &options)
     : m_api(api)
     , m_systemHandle(systemHandle)
 {

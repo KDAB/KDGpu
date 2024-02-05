@@ -11,10 +11,11 @@
 #pragma once
 
 #include <KDXr/action_set.h>
-#include <KDXr/handle.h>
 #include <KDXr/kdxr_core.h>
 #include <KDXr/kdxr_export.h>
 #include <KDXr/system.h>
+
+#include <KDGpu/handle.h>
 
 #include <kdbindings/signal.h>
 
@@ -40,7 +41,7 @@ struct InstanceOptions {
 };
 
 struct ActionBindingSuggestion {
-    Handle<Action_t> action;
+    KDGpu::Handle<Action_t> action;
     std::string binding;
 };
 
@@ -61,10 +62,10 @@ public:
     Instance(const Instance &) = delete;
     Instance &operator=(const Instance &) = delete;
 
-    Handle<Instance_t> handle() const noexcept { return m_instance; }
+    KDGpu::Handle<Instance_t> handle() const noexcept { return m_instance; }
     bool isValid() const { return m_instance.isValid(); }
 
-    operator Handle<Instance_t>() const noexcept { return m_instance; }
+    operator KDGpu::Handle<Instance_t>() const noexcept { return m_instance; }
 
     std::vector<ApiLayer> enabledApiLayers() const;
     std::vector<Extension> enabledExtensions() const;
@@ -85,7 +86,7 @@ private:
     Instance(XrApi *api, const InstanceOptions &options);
 
     XrApi *m_api{ nullptr };
-    Handle<Instance_t> m_instance;
+    KDGpu::Handle<Instance_t> m_instance;
     System m_system;
 
     friend class XrApi;

@@ -31,7 +31,7 @@ namespace KDXr {
     @fn Swapchain::handle()
     @brief Returns the handle used to retrieve the underlying XR API specific Swapchain
 
-    @return Handle<Swapchain_t>
+    @return KDGpu::Handle<Swapchain_t>
     @sa ResourceManager
  */
 
@@ -44,7 +44,7 @@ Swapchain::Swapchain()
 {
 }
 
-Swapchain::Swapchain(XrApi *api, const Handle<Session_t> &sessionHandle, const SwapchainOptions &options)
+Swapchain::Swapchain(XrApi *api, const KDGpu::Handle<Session_t> &sessionHandle, const SwapchainOptions &options)
     : m_api(api)
     , m_sessionHandle(sessionHandle)
     , m_swapchain(m_api->resourceManager()->createSwapchain(m_sessionHandle, options))

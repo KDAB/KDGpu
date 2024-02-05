@@ -40,7 +40,6 @@ set(HEADERS
     api/api_swapchain.h
     api/api_system.h
     compositor.h
-    handle.h
     instance.h
     locate_views_options.h
     openxr/openxr_action.h
@@ -53,7 +52,6 @@ set(HEADERS
     openxr/openxr_session.h
     openxr/openxr_swapchain.h
     openxr/openxr_system.h
-    pool.h
     reference_space.h
     resource_manager.h
     session.h

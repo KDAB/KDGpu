@@ -12,7 +12,6 @@
 
 #include <KDXr/compositor.h>
 #include <KDXr/kdxr_core.h>
-#include <KDXr/handle.h>
 #include <KDXr/kdxr_export.h>
 #include <KDXr/locate_views_options.h>
 #include <KDXr/reference_space.h>
@@ -53,11 +52,11 @@ struct SessionOptions {
 };
 
 struct AttachActionSetsOptions {
-    std::vector<Handle<ActionSet_t>> actionSets;
+    std::vector<KDGpu::Handle<ActionSet_t>> actionSets;
 };
 
 struct ActiveActionSet {
-    Handle<ActionSet_t> actionSet;
+    KDGpu::Handle<ActionSet_t> actionSet;
     std::string subactionPath;
 };
 
@@ -70,13 +69,13 @@ struct SyncActionsOptions {
 };
 
 struct GetActionStateOptions {
-    Handle<Action_t> action;
+    KDGpu::Handle<Action_t> action;
     std::string subactionPath;
 };
 
 // TODO: Is this enough? Do we need any other types of output?
 struct VibrationOutputOptions {
-    Handle<Action_t> action;
+    KDGpu::Handle<Action_t> action;
     std::string subactionPath;
     Duration duration{ MinimumHapticDuration };
     float amplitude{ 0.0f };
@@ -99,10 +98,10 @@ public:
     Session(const Session &) = delete;
     Session &operator=(const Session &) = delete;
 
-    Handle<Session_t> handle() const noexcept { return m_session; }
+    KDGpu::Handle<Session_t> handle() const noexcept { return m_session; }
     bool isValid() const { return m_session.isValid(); }
 
-    operator Handle<Session_t>() const noexcept { return m_session; }
+    operator KDGpu::Handle<Session_t>() const noexcept { return m_session; }
 
     ReferenceSpace createReferenceSpace(const ReferenceSpaceOptions &options = ReferenceSpaceOptions());
 
@@ -137,11 +136,11 @@ public:
     VibrateOutputResult vibrateOutput(const VibrationOutputOptions &options);
 
 private:
-    Session(const Handle<System_t> &systemHandle, XrApi *api, const SessionOptions &options);
+    Session(const KDGpu::Handle<System_t> &systemHandle, XrApi *api, const SessionOptions &options);
 
     XrApi *m_api{ nullptr };
-    Handle<System_t> m_systemHandle;
-    Handle<Session_t> m_session;
+    KDGpu::Handle<System_t> m_systemHandle;
+    KDGpu::Handle<Session_t> m_session;
 
     mutable std::vector<KDGpu::Format> m_supportedSwapchainFormats;
     ViewConfigurationType m_viewConfigurationType{ ViewConfigurationType::PrimaryStereo };

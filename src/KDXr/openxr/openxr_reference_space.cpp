@@ -20,7 +20,7 @@ namespace KDXr {
 
 OpenXrReferenceSpace::OpenXrReferenceSpace(OpenXrResourceManager *_openxrResourceManager,
                                            XrSpace _referenceSpace,
-                                           const Handle<Session_t> _sessionHandle,
+                                           const KDGpu::Handle<Session_t> _sessionHandle,
                                            ReferenceSpaceType _type,
                                            Pose _pose) noexcept
     : ApiReferenceSpace()
@@ -34,8 +34,8 @@ OpenXrReferenceSpace::OpenXrReferenceSpace(OpenXrResourceManager *_openxrResourc
 
 OpenXrReferenceSpace::OpenXrReferenceSpace(OpenXrResourceManager *_openxrResourceManager,
                                            XrSpace _referenceSpace,
-                                           const Handle<Session_t> _sessionHandle,
-                                           const Handle<Action_t> _actionHandle,
+                                           const KDGpu::Handle<Session_t> _sessionHandle,
+                                           const KDGpu::Handle<Action_t> _actionHandle,
                                            Pose _pose) noexcept
     : ApiReferenceSpace()
     , openxrResourceManager(_openxrResourceManager)

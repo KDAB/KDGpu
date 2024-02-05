@@ -10,10 +10,10 @@
 
 #pragma once
 
-#include <KDXr/handle.h>
 #include <KDXr/compositor.h>
 #include <KDGpuExample/kdgpuexample_export.h>
 
+#include <KDGpu/handle.h>
 #include <KDGpu/queue.h>
 
 #include <spdlog/spdlog.h>
@@ -51,8 +51,8 @@ public:
 
     Type type() const { return m_type; }
 
-    void setReferenceSpace(const KDXr::Handle<KDXr::ReferenceSpace_t> &referenceSpace) noexcept { m_referenceSpace = referenceSpace; }
-    KDXr::Handle<KDXr::ReferenceSpace_t> referenceSpace() const noexcept { return m_referenceSpace; }
+    void setReferenceSpace(const KDGpu::Handle<KDXr::ReferenceSpace_t> &referenceSpace) noexcept { m_referenceSpace = referenceSpace; }
+    KDGpu::Handle<KDXr::ReferenceSpace_t> referenceSpace() const noexcept { return m_referenceSpace; }
 
     const XrExampleEngineLayer *engineLayer() const noexcept { return m_engineLayer; }
     XrExampleEngineLayer *engineLayer() noexcept { return m_engineLayer; }
@@ -72,7 +72,7 @@ protected:
 
     Type m_type;
     XrExampleEngineLayer *m_engineLayer{ nullptr };
-    KDXr::Handle<KDXr::ReferenceSpace_t> m_referenceSpace;
+    KDGpu::Handle<KDXr::ReferenceSpace_t> m_referenceSpace;
 
     friend class XrExampleEngineLayer;
 };

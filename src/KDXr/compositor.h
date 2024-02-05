@@ -11,9 +11,9 @@
 #pragma once
 
 #include <KDXr/kdxr_core.h>
-#include <KDXr/handle.h>
 
 #include <KDGpu/gpu_core.h>
+#include <KDGpu/handle.h>
 
 #include <span>
 
@@ -36,12 +36,12 @@ enum class CompositionLayerType : uint32_t {
 
 struct CompositionLayer {
     CompositionLayerType type;
-    Handle<ReferenceSpace_t> referenceSpace;
+    KDGpu::Handle<ReferenceSpace_t> referenceSpace;
     CompositionLayerFlags flags;
 };
 
 struct SwapchainSubTexture {
-    Handle<Swapchain_t> swapchain;
+    KDGpu::Handle<Swapchain_t> swapchain;
     KDGpu::Rect2D rect{};
     uint32_t arrayIndex{ 0 };
 };
@@ -54,14 +54,14 @@ struct ProjectionLayerView {
 
 struct ProjectionLayer {
     CompositionLayerType type;
-    Handle<ReferenceSpace_t> referenceSpace;
+    KDGpu::Handle<ReferenceSpace_t> referenceSpace;
     CompositionLayerFlags flags{ CompositionLayerFlagBits::MaxEnum };
     std::span<ProjectionLayerView> views;
 };
 
 struct QuadLayer {
     CompositionLayerType type;
-    Handle<ReferenceSpace_t> referenceSpace;
+    KDGpu::Handle<ReferenceSpace_t> referenceSpace;
     CompositionLayerFlags flags{ CompositionLayerFlagBits::MaxEnum };
     EyeVisibility eyeVisibility;
     SwapchainSubTexture swapchainSubTexture{};
@@ -71,7 +71,7 @@ struct QuadLayer {
 
 struct CylinderLayer {
     CompositionLayerType type;
-    Handle<ReferenceSpace_t> referenceSpace;
+    KDGpu::Handle<ReferenceSpace_t> referenceSpace;
     CompositionLayerFlags flags{ CompositionLayerFlagBits::MaxEnum };
     EyeVisibility eyeVisibility;
     SwapchainSubTexture swapchainSubTexture{};

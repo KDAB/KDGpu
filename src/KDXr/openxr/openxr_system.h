@@ -14,6 +14,8 @@
 #include <KDXr/kdxr_export.h>
 #include <KDXr/config.h>
 
+#include <KDGpu/handle.h>
+
 #include <openxr/openxr.h>
 
 // Define XR_USE_GRAPHICS_API_* and include vulkan.h before openxr_platform.h
@@ -35,7 +37,7 @@ struct Instance_t;
 struct KDXR_EXPORT OpenXrSystem : public ApiSystem {
     explicit OpenXrSystem(OpenXrResourceManager *_openxrResourceManager,
                           XrSystemId _system,
-                          const Handle<Instance_t> &instanceHandle) noexcept;
+                          const KDGpu::Handle<Instance_t> &instanceHandle) noexcept;
 
     SystemProperties queryProperties() const final;
     std::vector<ViewConfigurationType> queryViewConfigurations() const final;
@@ -48,7 +50,7 @@ struct KDXR_EXPORT OpenXrSystem : public ApiSystem {
 
     OpenXrResourceManager *openxrResourceManager{ nullptr };
     XrSystemId system{ XR_NULL_SYSTEM_ID };
-    Handle<Instance_t> instanceHandle;
+    KDGpu::Handle<Instance_t> instanceHandle;
 
     // Vulkan support for OpenXR
     mutable PFN_xrGetVulkanGraphicsRequirementsKHR m_xrGetVulkanGraphicsRequirementsKHR{ nullptr };

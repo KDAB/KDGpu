@@ -31,7 +31,7 @@ namespace KDXr {
     @fn ActionSet::handle()
     @brief Returns the handle used to retrieve the underlying XR API specific ActionSet
 
-    @return Handle<ActionSet_t>
+    @return KDGpu::Handle<ActionSet_t>
     @sa ResourceManager
  */
 
@@ -44,7 +44,7 @@ ActionSet::ActionSet()
 {
 }
 
-ActionSet::ActionSet(XrApi *api, const Handle<Instance_t> &instanceHandle, const ActionSetOptions &options)
+ActionSet::ActionSet(XrApi *api, const KDGpu::Handle<Instance_t> &instanceHandle, const ActionSetOptions &options)
     : m_api(api)
     , m_instanceHandle(instanceHandle)
     , m_actionSet(m_api->resourceManager()->createActionSet(m_instanceHandle, options))

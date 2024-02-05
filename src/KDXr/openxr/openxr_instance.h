@@ -14,6 +14,8 @@
 #include <KDXr/kdxr_export.h>
 #include <KDXr/config.h>
 
+#include <KDGpu/handle.h>
+
 #include <openxr/openxr.h>
 
 #include <map>
@@ -39,7 +41,7 @@ struct KDXR_EXPORT OpenXrInstance : public ApiInstance {
     InstanceProperties properties() const final;
     std::vector<ApiLayer> enabledApiLayers() const final;
     std::vector<Extension> enabledExtensions() const final;
-    Handle<System_t> querySystem(const SystemOptions &options, const Handle<Instance_t> &instanceHandle) final;
+    KDGpu::Handle<System_t> querySystem(const SystemOptions &options, const KDGpu::Handle<Instance_t> &instanceHandle) final;
     virtual ProcessEventsResult processEvents() final;
     void processSessionStateChangedEvent(const XrEventDataSessionStateChanged *eventData);
     SuggestActionBindingsResult suggestActionBindings(const SuggestActionBindingsOptions &options) final;
@@ -53,10 +55,10 @@ struct KDXR_EXPORT OpenXrInstance : public ApiInstance {
     bool isOwned{ true };
     std::vector<ApiLayer> apiLayers;
     std::vector<Extension> extensions;
-    Handle<System_t> systemHandle;
+    KDGpu::Handle<System_t> systemHandle;
 
     Instance *frontendInstance{ nullptr };
-    std::map<XrSession, Handle<Session_t>> m_sessionToHandle;
+    std::map<XrSession, KDGpu::Handle<Session_t>> m_sessionToHandle;
 };
 
 } // namespace KDXr

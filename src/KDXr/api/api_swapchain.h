@@ -11,7 +11,6 @@
 #pragma once
 
 #include <KDXr/kdxr_core.h>
-#include <KDXr/handle.h>
 
 #include <KDGpu/handle.h>
 #include <KDGpu/texture.h>
