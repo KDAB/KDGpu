@@ -149,7 +149,7 @@ void HelloXr::pollActions(KDXr::Time predictedDisplayTime)
     const auto syncActionOptions = KDXr::SyncActionsOptions{ .actionSets = { { m_actionSet } } };
     const auto syncActionResult = m_session.syncActions(syncActionOptions);
     if (syncActionResult != KDXr::SyncActionsResult::Success) {
-        SPDLOG_LOGGER_ERROR(KDXr::Logger::logger(), "Failed to sync action set.");
+        SPDLOG_LOGGER_ERROR(m_logger, "Failed to sync action set.");
         return;
     }
 
@@ -178,7 +178,7 @@ void HelloXr::processToggleAnimationAction()
                 break;
             }
         } else {
-            SPDLOG_LOGGER_ERROR(KDXr::Logger::logger(), "Failed to get toggle animation action state.");
+            SPDLOG_LOGGER_ERROR(m_logger, "Failed to get toggle animation action state.");
         }
     }
 
@@ -186,7 +186,7 @@ void HelloXr::processToggleAnimationAction()
     if (toggleAnimation) {
         m_projectionLayer->animate = !m_projectionLayer->animate();
         m_buzzAmplitudes[m_buzzHand] = 1.0f;
-        SPDLOG_LOGGER_INFO(KDXr::Logger::logger(), "Animation enabled = {}", m_projectionLayer->animate());
+        SPDLOG_LOGGER_INFO(m_logger, "Animation enabled = {}", m_projectionLayer->animate());
     }
 }
 
@@ -200,7 +200,7 @@ void HelloXr::processScaleAction()
             scale = 1.0 + m_scaleActionState.currentState;
         m_projectionLayer->scale = scale;
     } else {
-        SPDLOG_LOGGER_ERROR(KDXr::Logger::logger(), "Failed to get scale action state.");
+        SPDLOG_LOGGER_ERROR(m_logger, "Failed to get scale action state.");
     }
 }
 
@@ -218,7 +218,7 @@ void HelloXr::processTranslateAction()
         }
         m_projectionLayer->translation = m_projectionLayer->translation() + delta;
     } else {
-        SPDLOG_LOGGER_ERROR(KDXr::Logger::logger(), "Failed to get translate action state.");
+        SPDLOG_LOGGER_ERROR(m_logger, "Failed to get translate action state.");
     }
 }
 
@@ -240,11 +240,11 @@ void HelloXr::processPalmPoseAction(KDXr::Time predictedDisplayTime)
                     else
                         m_projectionLayer->rightPalmPose = m_palmPoseActionSpaceStates[i].pose;
                 } else {
-                    SPDLOG_LOGGER_ERROR(KDXr::Logger::logger(), "Failed to locate space for palm pose.");
+                    SPDLOG_LOGGER_ERROR(m_logger, "Failed to locate space for palm pose.");
                 }
             }
         } else {
-            SPDLOG_LOGGER_ERROR(KDXr::Logger::logger(), "Failed to get palm pose action state.");
+            SPDLOG_LOGGER_ERROR(m_logger, "Failed to get palm pose action state.");
         }
     }
 }
