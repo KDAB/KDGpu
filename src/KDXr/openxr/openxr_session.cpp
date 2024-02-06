@@ -249,6 +249,33 @@ EndFrameResult OpenXrSession::endFrame(const EndFrameOptions &options)
             break;
         }
 
+        case CompositionLayerType::Cube: {
+            auto &cubeLayer = reinterpret_cast<CubeLayer &>(*options.layers[layerIndex]);
+
+            auto openxrSwapchain = openxrResourceManager->getSwapchain(cubeLayer.swapchain);
+            assert(openxrSwapchain);
+            auto openxrReferenceSpace = openxrResourceManager->getReferenceSpace(cubeLayer.referenceSpace);
+            assert(openxrReferenceSpace);
+
+            xrLayerCubes.push_back({ XR_TYPE_COMPOSITION_LAYER_CUBE_KHR });
+            auto &cubeLayerCube = xrLayerCubes.back();
+            cubeLayerCube.layerFlags = compositionLayerFlagsToXrCompositionLayerFlags(cubeLayer.flags);
+            cubeLayerCube.space = openxrReferenceSpace->referenceSpace;
+            cubeLayerCube.eyeVisibility = eyeVisibilityToXrEyeVisibility(cubeLayer.eyeVisibility);
+            cubeLayerCube.swapchain = openxrSwapchain->swapchain;
+            cubeLayerCube.imageArrayIndex = cubeLayer.arrayIndex;
+            cubeLayerCube.orientation = XrQuaternionf{
+                cubeLayer.orientation.x,
+                cubeLayer.orientation.y,
+                cubeLayer.orientation.z,
+                cubeLayer.orientation.w
+            };
+
+            xrLayers[layerIndex] = reinterpret_cast<XrCompositionLayerBaseHeader *>(&cubeLayerCube);
+
+            break;
+        }
+
         default: {
             SPDLOG_LOGGER_CRITICAL(Logger::logger(), "OpenXrSession::endFrame(). Unsupported layer type. Ignoring layer.");
         }

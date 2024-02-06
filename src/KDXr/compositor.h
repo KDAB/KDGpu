@@ -81,6 +81,16 @@ struct CylinderLayer {
     float aspectRatio{ 1.0f };
 };
 
+struct CubeLayer {
+    CompositionLayerType type;
+    KDGpu::Handle<ReferenceSpace_t> referenceSpace;
+    CompositionLayerFlags flags{ CompositionLayerFlagBits::MaxEnum };
+    EyeVisibility eyeVisibility;
+    KDGpu::Handle<Swapchain_t> swapchain;
+    uint32_t arrayIndex{ 0 };
+    Quaternion orientation{};
+};
+
 struct EndFrameOptions {
     Time displayTime{ 0 };
     EnvironmentBlendMode environmentBlendMode{ EnvironmentBlendMode::MaxEnum };
