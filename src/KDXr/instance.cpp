@@ -125,6 +125,9 @@ System *Instance::system(const SystemOptions &options)
     if (!m_system.isValid()) {
         auto apiInstance = m_api->resourceManager()->getInstance(m_instance);
         auto systemHandle = apiInstance->querySystem(options, m_instance);
+        if (!systemHandle.isValid()) {
+            return nullptr;
+        }
         m_system = std::move(System(m_api, systemHandle));
     }
 

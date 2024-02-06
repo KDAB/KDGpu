@@ -52,6 +52,11 @@ void XrExampleEngineLayer::onAttached()
     SPDLOG_LOGGER_INFO(m_logger, "XR Runtime Version: {}", KDXr::getVersionAsString(properties.runtimeVersion));
 
     m_system = m_xrInstance.system();
+    if (!m_system) {
+        SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to find an XR system. Please ensure that your XR device is connected and powered on.");
+        KDGui::GuiApplication::instance()->quit();
+        return;
+    }
     const auto systemProperties = m_system->properties();
 
     // Pick the first application supported View Configuration Type supported by the hardware.
@@ -89,7 +94,8 @@ void XrExampleEngineLayer::onAttached()
     Adapter *selectedAdapter = m_system->requiredGraphicsAdapter(m_instance);
     if (!selectedAdapter) {
         SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to find required Vulkan Adapter.");
-        throw std::runtime_error("Failed to find required Vulkan Adapter.");
+        KDGui::GuiApplication::instance()->quit();
+        return;
     }
 
     // Request a device of the api with whatever layers and extensions we wish to request.
@@ -118,13 +124,17 @@ void XrExampleEngineLayer::onAttached()
     m_colorSwapchainFormat = m_session.selectSwapchainFormat(m_applicationColorSwapchainFormats);
     if (m_colorSwapchainFormat == Format::UNDEFINED) {
         SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to find a supported SwapchainFormat.");
-        throw std::runtime_error("Failed to find a supported color swapchain format.");
+        KDGui::GuiApplication::instance()->quit();
+        return;
     }
     m_depthSwapchainFormat = m_session.selectSwapchainFormat(m_applicationDepthSwapchainFormats);
     if (m_depthSwapchainFormat == Format::UNDEFINED) {
         SPDLOG_LOGGER_CRITICAL(m_logger, "Failed to find a supported SwapchainFormat.");
-        throw std::runtime_error("Failed to find a supported depth swapchain format.");
+        KDGui::GuiApplication::instance()->quit();
+        return;
     }
+
+    m_isInitialized = true;
 
     // Each of the compositor layer objects will be responsible for creating and managing its own swapchains
     // and any other resources they require.
@@ -139,6 +149,7 @@ void XrExampleEngineLayer::onDetached()
     m_device = {};
     m_instance = {};
     m_xrInstance = {};
+    m_isInitialized = false;
 }
 
 void XrExampleEngineLayer::update()

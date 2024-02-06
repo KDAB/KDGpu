@@ -138,6 +138,7 @@ protected:
 
     std::shared_ptr<spdlog::logger> m_logger;
     std::unique_ptr<GraphicsApi> m_api;
+    bool m_isInitialized{ false };
 
     KDBindings::Property<SampleCountFlagBits> m_samples{ SampleCountFlagBits::Samples1Bit };
     std::vector<SampleCountFlagBits> m_supportedSampleCounts;

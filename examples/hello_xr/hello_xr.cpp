@@ -20,6 +20,8 @@
 void HelloXr::onAttached()
 {
     XrExampleEngineLayer::onAttached();
+    if (!m_isInitialized)
+        return;
 
     // Create a projection layer to render the 3D scene
     const XrProjectionLayerOptions projectionLayerOptions = {
