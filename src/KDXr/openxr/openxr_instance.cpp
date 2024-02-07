@@ -186,7 +186,7 @@ std::string OpenXrInstance::pathToString(XrPath path) const
 
 XrPath OpenXrInstance::createXrPath(const std::string &path) const
 {
-    XrPath xrPath;
+    XrPath xrPath{ XR_NULL_PATH };
     if (xrStringToPath(instance, path.c_str(), &xrPath) != XR_SUCCESS) {
         SPDLOG_LOGGER_CRITICAL(KDXr::Logger::logger(), "Failed to create XrPath.");
     }

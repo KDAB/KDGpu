@@ -62,15 +62,6 @@ bool findExtension(const std::vector<KDXr::Extension> &extensions, const std::st
     return it != std::end(extensions);
 };
 
-XrPath createXrPath(XrInstance xrInstance, const std::string &path)
-{
-    XrPath xrPath;
-    if (xrStringToPath(xrInstance, path.c_str(), &xrPath) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(KDXr::Logger::logger(), "Failed to create XrPath.");
-    }
-    return xrPath;
-}
-
 } // namespace
 
 namespace KDXr {
@@ -502,7 +493,7 @@ KDGpu::Handle<Action_t> OpenXrResourceManager::createAction(const KDGpu::Handle<
     std::vector<XrPath> xrSubactionPaths;
     xrSubactionPaths.reserve(options.subactionPaths.size());
     for (const auto &path : options.subactionPaths)
-        xrSubactionPaths.push_back(createXrPath(openXrInstance->instance, path));
+        xrSubactionPaths.push_back(openXrInstance->createXrPath(path));
 
     XrActionCreateInfo actionCreateInfo{ XR_TYPE_ACTION_CREATE_INFO };
     strncpy(actionCreateInfo.actionName, options.name.data(), XR_MAX_ACTION_NAME_SIZE);
