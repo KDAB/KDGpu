@@ -34,6 +34,7 @@ struct XrProjectionLayerOptions {
     KDGpu::Format colorSwapchainFormat{ KDGpu::Format::UNDEFINED };
     KDGpu::Format depthSwapchainFormat{ KDGpu::Format::UNDEFINED };
     KDGpu::SampleCountFlagBits samples{ KDGpu::SampleCountFlagBits::Samples1Bit };
+    bool requestMultiview{ true };
 };
 
 class KDGPUEXAMPLE_EXPORT XrProjectionLayer : public XrCompositorLayer
@@ -58,6 +59,7 @@ protected:
     virtual void updateScene();
     virtual void renderView() = 0;
     void recreateSwapchains();
+    uint32_t viewCount() const noexcept { return m_viewCount; }
 
     KDGpu::Device *m_device{ nullptr };
     KDGpu::Queue *m_queue{ nullptr };
@@ -66,10 +68,12 @@ protected:
     KDGpu::Format m_colorSwapchainFormat{ KDGpu::Format::UNDEFINED };
     KDGpu::Format m_depthSwapchainFormat{ KDGpu::Format::UNDEFINED };
     KDGpu::SampleCountFlagBits m_samples{ KDGpu::SampleCountFlagBits::Samples1Bit };
+    bool m_enableMultiview{ true };
 
     std::vector<KDXr::SwapchainInfo> m_colorSwapchains;
     std::vector<KDXr::SwapchainInfo> m_depthSwapchains;
 
+    uint32_t m_viewCount{ 2 };
     uint32_t m_currentViewIndex{ 0 };
     uint32_t m_currentColorImageIndex{ 0 };
     uint32_t m_currentDepthImageIndex{ 0 };
