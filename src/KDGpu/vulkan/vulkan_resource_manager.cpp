@@ -42,7 +42,9 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
         const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
         void *pUserData)
 {
-    if (std::ranges::any_of(KDGpu::VulkanGraphicsApi::validationMessagesToIgnore(), [pCallbackData](const std::string &error) -> bool { return error == pCallbackData->pMessageIdName; }))
+    if (std::ranges::any_of(KDGpu::VulkanGraphicsApi::validationMessagesToIgnore(),
+                            [pCallbackData](const std::string &error) -> bool { return pCallbackData->pMessageIdName != nullptr &&
+                                                                                        error == pCallbackData->pMessageIdName; }))
         return false;
 
     switch (messageSeverity) {
