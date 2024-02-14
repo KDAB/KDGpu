@@ -493,9 +493,22 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     }
 
     // check for Vulkan API support, fall back to extensions if needed
-    const auto adapterProperties = vulkanAdapter->queryAdapterProperties();
-    const bool hasVulkan12 = adapterProperties.apiVersion >= VK_API_VERSION_1_2;
-    const bool hasVulkan11 = adapterProperties.apiVersion >= VK_API_VERSION_1_1;
+    auto apiVersion = vulkanAdapter->queryAdapterProperties().apiVersion;
+
+#if defined(VMA_VULKAN_VERSION)
+    // If we are constraining Vulkan API used by the memory allocator, for compatibility,
+    // we must restrict the API version here.
+#if VMA_VULKAN_VERSION <= 1001000
+    apiVersion = std::min(apiVersion, VK_MAKE_VERSION(1, 1, 0));
+#elif VMA_VULKAN_VERSION <= 1002000
+    apiVersion = std::min(apiVersion, VK_MAKE_VERSION(1, 2, 0));
+#elif VMA_VULKAN_VERSION <= 1003000
+    apiVersion = std::min(apiVersion, VK_MAKE_VERSION(1, 3, 0));
+#endif
+#endif
+
+    const bool hasVulkan12 = apiVersion >= VK_API_VERSION_1_2;
+    const bool hasVulkan11 = apiVersion >= VK_API_VERSION_1_1;
 
     if (!hasVulkan12 && hasVulkan11) {
         SPDLOG_LOGGER_INFO(Logger::logger(), "Vulkan 1.2 is unavailable, falling back to Vulkan 1.1...");
@@ -523,7 +536,7 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     if (result != VK_SUCCESS)
         throw std::runtime_error(std::string{ "Failed to create a logical device: " } + getResultAsString(result));
 
-    const auto deviceHandle = m_devices.emplace(vkDevice, adapterProperties.apiVersion, this, adapterHandle);
+    const auto deviceHandle = m_devices.emplace(vkDevice, apiVersion, this, adapterHandle);
 
     return deviceHandle;
 }
