@@ -52,6 +52,7 @@ void ExampleEngineLayer::recreateSwapChain()
         .format = m_swapchainFormat,
         .minImageCount = getSuitableImageCount(swapchainProperties.capabilities),
         .imageExtent = { .width = m_window->width(), .height = m_window->height() },
+        .compositeAlpha = m_compositeAlpha,
         .presentMode = m_presentMode,
         .oldSwapchain = m_swapchain,
     };
@@ -199,6 +200,8 @@ void ExampleEngineLayer::onAttached()
     m_device = std::move(defaultDevice.device);
     m_queue = m_device.queues()[0];
 
+    const AdapterSwapchainProperties swapchainProperties = m_device.adapter()->swapchainProperties(m_surface);
+
     // Choose a presentation mode from the ones supported
     constexpr std::array<PresentMode, 4> preferredPresentModes = {
         PresentMode::Mailbox,
@@ -206,7 +209,7 @@ void ExampleEngineLayer::onAttached()
         PresentMode::Fifo,
         PresentMode::Immediate
     };
-    const auto &availableModes = defaultDevice.adapter->swapchainProperties(m_surface).presentModes;
+    const auto &availableModes = swapchainProperties.presentModes;
     for (const auto &presentMode : preferredPresentModes) {
         const auto it = std::find(availableModes.begin(), availableModes.end(), presentMode);
         if (it != availableModes.end()) {
@@ -214,6 +217,19 @@ void ExampleEngineLayer::onAttached()
             break;
         }
     }
+
+    // Try to ensure that the chosen format is supported
+    m_swapchainFormat =
+            [this, &swapchainProperties]() {
+                for (const auto &availableFormat : swapchainProperties.formats) {
+                    if (availableFormat.format == m_swapchainFormat &&
+                        availableFormat.colorSpace == ColorSpace::SRgbNonlinear) {
+                        return availableFormat.format;
+                    }
+                }
+                // Fallback to first listed available format
+                return swapchainProperties.formats[0].format;
+            }();
 
     // Choose a depth format from the ones supported
     constexpr std::array<Format, 5> preferredDepthFormat = {
@@ -230,6 +246,30 @@ void ExampleEngineLayer::onAttached()
             break;
         }
     }
+
+    // Try to ensure that the chosen alpha composite mode is supported
+    m_compositeAlpha =
+            [this, &swapchainProperties]() {
+                const auto supportedCompositeAlpha = swapchainProperties.capabilities.supportedCompositeAlpha;
+
+                if (supportedCompositeAlpha.testFlag(m_compositeAlpha))
+                    return m_compositeAlpha;
+
+                // Try to return a single, known, supported alpha bit
+                constexpr std::array<CompositeAlphaFlagBits, 4> compositeAlphaBits = {
+                    CompositeAlphaFlagBits::OpaqueBit,
+                    CompositeAlphaFlagBits::PreMultipliedBit,
+                    CompositeAlphaFlagBits::PostMultipliedBit,
+                    CompositeAlphaFlagBits::InheritBit
+                };
+                for (const auto alphaBit : compositeAlphaBits) {
+                    if (supportedCompositeAlpha.testFlag(alphaBit))
+                        return alphaBit;
+                }
+
+                // If all else fails, do not change
+                return m_compositeAlpha;
+            }();
 
     // TODO: Move swapchain handling to View?
     recreateSwapChain();

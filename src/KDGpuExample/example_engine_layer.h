@@ -117,8 +117,9 @@ protected:
 
     std::vector<UploadStagingBuffer> m_stagingBuffers;
 
-    const Format m_swapchainFormat{ Format::B8G8R8A8_UNORM };
+    Format m_swapchainFormat{ Format::B8G8R8A8_UNORM };
     Format m_depthFormat;
+    CompositeAlphaFlagBits m_compositeAlpha{ CompositeAlphaFlagBits::OpaqueBit };
 
     bool m_showSurfaceCapabilities{ false };
     std::string m_capabilitiesString;
