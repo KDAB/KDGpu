@@ -8,8 +8,6 @@
   Contact KDAB at <info@kdab.com> for commercial licensing options.
 */
 
-#pragma once
-
 #include "xr_quad_imgui_layer.h"
 
 #include <KDGpuExample/engine.h>
