@@ -24,11 +24,16 @@ native APIs or you can checkout the included KDGpuExample library which makes it
 use KDGpu with KDGui::Window. Check out the handy [KDBindings](https://github.com/KDAB/KDBindings)
 repository too for some more syntactic sugar.
 
+In addition to being an enabler for Vulkan, the KDGpu project now also includes a new library,
+KDXr, which aims to be an enabler for OpenXR. Using the combination of KDGpu and KDXr allows
+application developers to very easily create AR and VR application experiences.
+
 More information can be found in the [documentation](https://docs.kdab.com/toy-renderer/unstable/index.html).
 
 ### What does KDGpu provide?
 
 - The KDGpu library
+- The KDXr library to make OpenXR easier to use
 - An example framework called KDGpuExample that provides integration with [KDGui](https://github.com/KDAB/KDUtils)
   to make it easy to experiment. Let us take care of the boring bits so you can make pretty pictures.
 - A set of illustrative examples showing how to use KDGpu for common rendering tasks.
