@@ -13,7 +13,7 @@ if(KDGPU_BUILD_KDGPUKDGUI)
 endif()
 
 if(KDGPU_BUILD_KDXR)
-    add_subdirectory(kdxr)
+    add_subdirectory(KDXr)
 endif()
 
 if(KDGPU_BUILD_KDGPUEXAMPLE)
