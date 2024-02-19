@@ -51,8 +51,8 @@ public:
     XrProjectionLayer &operator=(XrProjectionLayer &&) = default;
 
 protected:
-    void initialize();
-    void cleanup();
+    void initialize() override;
+    void cleanup() override;
     bool update(const KDXr::FrameState &frameState) override;
     KDXr::CompositionLayer *compositionLayer() override { return reinterpret_cast<KDXr::CompositionLayer *>(&m_projectionLayer); }
     virtual void updateScene();
