@@ -21,6 +21,11 @@ using HANDLE = void *;
 #define KDGPU_MAKE_API_VERSION(variant, major, minor, patch) \
     ((((uint32_t)(variant)) << 29) | (((uint32_t)(major)) << 22) | (((uint32_t)(minor)) << 12) | ((uint32_t)(patch)))
 
+#define KDGPU_API_VERSION_VARIANT(version) ((uint32_t)(version) >> 29U)
+#define KDGPU_API_VERSION_MAJOR(version) (((uint32_t)(version) >> 22U) & 0x7FU)
+#define KDGPU_API_VERSION_MINOR(version) (((uint32_t)(version) >> 12U) & 0x3FFU)
+#define KDGPU_API_VERSION_PATCH(version) ((uint32_t)(version)&0xFFFU)
+
 namespace KDGpu {
 
 /**
@@ -66,6 +71,13 @@ struct Extent2D {
     uint32_t height;
 
     friend bool operator==(const Extent2D &, const Extent2D &) = default;
+};
+
+struct Extent2Df {
+    float width{ 0.0f };
+    float height{ 0.0f };
+
+    friend bool operator==(const Extent2Df &, const Extent2Df &) = default;
 };
 
 struct Extent3D {

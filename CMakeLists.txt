@@ -85,6 +85,10 @@ option(KDGPU_HLSL_SUPPORT "Try to find and use the dxc HLSL to SPIR-V compiler" 
 add_feature_info(KDGpuKDGui ${KDGPU_BUILD_KDGPUKDGUI} "Build KDGpuKDGui")
 add_feature_info(KDGpuExample ${KDGPU_BUILD_KDGPUEXAMPLE} "Build KDGpuExample")
 
+option(KDGPU_BUILD_KDXR "Build KDXr" ON)
+option(KDGPU_OPENXR_SUPPORT "Enable support for OpenXR" ON)
+add_feature_info(OpenXR ${KDGPU_OPENXR_SUPPORT} "Enable support for OpenXR")
+
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies.cmake)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)

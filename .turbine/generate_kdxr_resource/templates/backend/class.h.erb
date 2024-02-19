@@ -1,0 +1,35 @@
+/*
+  This file is part of KDXr.
+
+  SPDX-FileCopyrightText: <%= Time.now.strftime('%Y') %> Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+
+  SPDX-License-Identifier: MIT
+
+  Contact KDAB at <info@kdab.com> for commercial licensing options.
+*/
+
+#pragma once
+
+#include <KDXr/api/api_<%= file_name %>.h>
+#include <KDXr/kdxr_export.h>
+#include <KDXr/config.h>
+
+#include <openxr/openxr.h>
+
+namespace KDXr {
+
+class OpenXrResourceManager;
+
+/**
+ * @brief OpenXr<%= class_name %>
+ * \ingroup openxr
+ *
+ */
+struct KDXR_EXPORT OpenXr<%= class_name %> : public Api<%= class_name %> {
+    explicit OpenXr<%= class_name %>(OpenXrResourceManager *_openxrResourceManager, Xr<%= class_name %> _<%= variable_name %>) noexcept;
+
+    OpenXrResourceManager *openxrResourceManager{ nullptr };
+    Xr<%= class_name %> <%= variable_name %>{ XR_NULL_HANDLE };
+};
+
+} // namespace KDXr

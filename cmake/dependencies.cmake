@@ -45,6 +45,11 @@ if(KDGPU_BUILD_EXAMPLES)
     endif()
 endif()
 
+if(KDGPU_OPENXR_SUPPORT)
+    # OpenXR
+    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/openxr.cmake)
+endif()
+
 if(KDGPU_BUILD_TESTS)
     # doctest
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/doctest.cmake)

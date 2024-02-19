@@ -1,0 +1,11 @@
+{
+  "commands": [
+    {
+      "name": "generate_kdxr_resource",
+      "class": "Turbine::GenerateKDXrResource",
+      "path": "./generate_kdxr_resource/generate_kdxr_resource.rb",
+      "usage": "generate_kdxr_resource name",
+      "description": "Generates frontend and backend classes for a new KDXr resource"
+    }
+  ]
+}
