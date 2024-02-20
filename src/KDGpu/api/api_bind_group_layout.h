@@ -19,6 +19,8 @@ namespace KDGpu {
  */
 struct ApiBindGroupLayout {
     // TODO: Complete
+
+    virtual bool isCompatibleWith(const ApiBindGroupLayout &other) const = 0;
 };
 
 } // namespace KDGpu

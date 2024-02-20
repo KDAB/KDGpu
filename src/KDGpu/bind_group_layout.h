@@ -41,6 +41,8 @@ public:
 
     operator Handle<BindGroupLayout_t>() const noexcept { return m_bindGroupLayout; }
 
+    bool isCompatibleWith(const Handle<BindGroupLayout_t> &other) const;
+
 private:
     explicit BindGroupLayout(GraphicsApi *api, const Handle<Device_t> &device, const BindGroupLayoutOptions &options);
 

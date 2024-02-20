@@ -52,9 +52,22 @@ BindGroupLayout &BindGroupLayout::operator=(BindGroupLayout &&other)
     return *this;
 }
 
+bool BindGroupLayout::isCompatibleWith(const Handle<BindGroupLayout_t> &other) const
+{
+    if (!isValid() || !other.isValid())
+        return false;
+
+    auto *apiLayout = m_api->resourceManager()->getBindGroupLayout(handle());
+    auto *otherApiLayout = m_api->resourceManager()->getBindGroupLayout(other);
+    if (apiLayout == nullptr || otherApiLayout == nullptr)
+        return false;
+    return apiLayout->isCompatibleWith(*otherApiLayout);
+}
+
 bool operator==(const BindGroupLayout &a, const BindGroupLayout &b)
 {
-    return (a.m_api == b.m_api && a.m_device == b.m_device && a.m_bindGroupLayout == b.m_bindGroupLayout);
+    return (a.m_api == b.m_api && a.m_device == b.m_device &&
+            (a.m_bindGroupLayout == b.m_bindGroupLayout || a.isCompatibleWith(b)));
 }
 
 bool operator!=(const BindGroupLayout &a, const BindGroupLayout &b)

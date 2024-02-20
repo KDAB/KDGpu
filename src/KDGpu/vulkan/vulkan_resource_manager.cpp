@@ -2548,7 +2548,7 @@ Handle<BindGroupLayout_t> VulkanResourceManager::createBindGroupLayout(const Han
 
     setObjectName(vulkanDevice, VK_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT, reinterpret_cast<uint64_t>(vkDescriptorSetLayout), options.label);
 
-    const auto vulkanBindGroupLayoutHandle = m_bindGroupLayouts.emplace(VulkanBindGroupLayout(vkDescriptorSetLayout, deviceHandle));
+    const auto vulkanBindGroupLayoutHandle = m_bindGroupLayouts.emplace(VulkanBindGroupLayout(vkDescriptorSetLayout, deviceHandle, options.bindings));
     return vulkanBindGroupLayoutHandle;
 }
 

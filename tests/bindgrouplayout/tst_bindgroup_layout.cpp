@@ -151,7 +151,7 @@ TEST_SUITE("BindGroupLayout")
             CHECK(a == b);
         }
 
-        SUBCASE("Compare device created BindGroupLayouts")
+        SUBCASE("Compare device created compatible BindGroupLayouts")
         {
             // GIVEN
             const BindGroupLayoutOptions bindGroupLayoutOptions = {
@@ -167,6 +167,33 @@ TEST_SUITE("BindGroupLayout")
             BindGroupLayout b = device.createBindGroupLayout(bindGroupLayoutOptions);
 
             // THEN
+            CHECK(a.isCompatibleWith(b.handle()));
+            CHECK(a == b);
+        }
+
+        SUBCASE("Compare incompatible BindGroupLayouts")
+        {
+            // GIVEN
+            const BindGroupLayoutOptions bindGroupLayoutOptions1 = {
+                .bindings = { { // Camera uniforms
+                                .binding = 0,
+                                .count = 1,
+                                .resourceType = ResourceBindingType::UniformBuffer,
+                                .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit) } }
+            };
+            const BindGroupLayoutOptions bindGroupLayoutOptions2 = {
+                .bindings = { { .binding = 0,
+                                .count = 1,
+                                .resourceType = ResourceBindingType::UniformBuffer,
+                                .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit) } }
+            };
+
+            // WHEN
+            BindGroupLayout a = device.createBindGroupLayout(bindGroupLayoutOptions1);
+            BindGroupLayout b = device.createBindGroupLayout(bindGroupLayoutOptions2);
+
+            // THEN
+            CHECK(!a.isCompatibleWith(b.handle()));
             CHECK(a != b);
         }
     }

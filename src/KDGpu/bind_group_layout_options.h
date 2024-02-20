@@ -22,13 +22,7 @@ struct ResourceBindingLayout {
     ShaderStageFlags shaderStages;
     ResourceBindingFlags flags{ ResourceBindingFlagBits::None };
 
-    bool isCompatible(const ResourceBindingLayout &other) const noexcept
-    {
-        return binding == other.binding &&
-                count == other.count &&
-                resourceType == other.resourceType &&
-                flags == other.flags;
-    }
+    friend bool operator==(const ResourceBindingLayout &, const ResourceBindingLayout &) = default;
 };
 
 // The following struct describes a bind group (descriptor set) layout and from this we
