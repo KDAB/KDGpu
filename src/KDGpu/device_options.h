@@ -12,6 +12,7 @@
 
 #include <KDGpu/adapter_features.h>
 #include <KDGpu/adapter_group.h>
+#include <KDGpu/gpu_core.h>
 
 #include <stdint.h>
 #include <string>
@@ -27,6 +28,8 @@ struct QueueRequest {
 
 struct DeviceOptions {
     std::string_view label;
+    // Version we want the device to use, can be less than the apiVersion requested for the instance
+    uint32_t apiVersion{ KDGPU_MAKE_API_VERSION(0, 1, 2, 0) };
     std::vector<std::string> layers;
     std::vector<std::string> extensions;
     std::vector<QueueRequest> queues;

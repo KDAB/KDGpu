@@ -127,7 +127,7 @@ Handle<Instance_t> VulkanResourceManager::createInstance(const InstanceOptions &
     appInfo.applicationVersion = options.applicationVersion;
     appInfo.pEngineName = "KDGpu";
     appInfo.engineVersion = VK_MAKE_VERSION(0, 1, 0);
-    appInfo.apiVersion = VK_API_VERSION_1_2;
+    appInfo.apiVersion = options.apiVersion;
 
     VkInstanceCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -493,17 +493,40 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     }
 
     // check for Vulkan API support, fall back to extensions if needed
-    auto apiVersion = vulkanAdapter->queryAdapterProperties().apiVersion;
+    auto maxApiVersionSupportedByPhysicalDevice = vulkanAdapter->queryAdapterProperties().apiVersion;
+    auto apiVersion = options.apiVersion;
+
+    if (maxApiVersionSupportedByPhysicalDevice < apiVersion) {
+        SPDLOG_LOGGER_WARN(Logger::logger(), "Downgrading requested Vulkan API Version {}{}{} because physical device only supports {}{}{}",
+                           VK_VERSION_MAJOR(apiVersion), VK_VERSION_MINOR(apiVersion), VK_VERSION_PATCH(apiVersion),
+                           VK_VERSION_MAJOR(maxApiVersionSupportedByPhysicalDevice), VK_VERSION_MINOR(maxApiVersionSupportedByPhysicalDevice), VK_VERSION_PATCH(maxApiVersionSupportedByPhysicalDevice));
+        apiVersion = maxApiVersionSupportedByPhysicalDevice;
+    }
 
 #if defined(VMA_VULKAN_VERSION)
     // If we are constraining Vulkan API used by the memory allocator, for compatibility,
     // we must restrict the API version here.
-#if VMA_VULKAN_VERSION <= 1001000
-    apiVersion = std::min(apiVersion, VK_MAKE_VERSION(1, 1, 0));
-#elif VMA_VULKAN_VERSION <= 1002000
-    apiVersion = std::min(apiVersion, VK_MAKE_VERSION(1, 2, 0));
-#elif VMA_VULKAN_VERSION <= 1003000
-    apiVersion = std::min(apiVersion, VK_MAKE_VERSION(1, 3, 0));
+#if VMA_VULKAN_VERSION < 1001000
+    if (apiVersion > VK_API_VERSION_1_0) {
+        apiVersion = VK_API_VERSION_1_0;
+        SPDLOG_LOGGER_WARN(Logger::logger(), "Downgrading requested Vulkan API Version {}{}{} because VMA Allocator only supports {}{}{}",
+                           VK_VERSION_MAJOR(option.apiVersion), VK_VERSION_MINOR(option.apiVersion), VK_VERSION_PATCH(option.apiVersion),
+                           1, 0, 0);
+    }
+#elif VMA_VULKAN_VERSION < 1002000
+    if (apiVersion > VK_API_VERSION_1_1) {
+        apiVersion = VK_API_VERSION_1_1;
+        SPDLOG_LOGGER_WARN(Logger::logger(), "Downgrading requested Vulkan API Version {}{}{} because VMA Allocator only supports {}{}{}",
+                           VK_VERSION_MAJOR(option.apiVersion), VK_VERSION_MINOR(option.apiVersion), VK_VERSION_PATCH(option.apiVersion),
+                           1, 1, 0);
+    }
+#elif VMA_VULKAN_VERSION < 1003000
+    if (apiVersion > VK_API_VERSION_1_2) {
+        apiVersion = VK_API_VERSION_1_2;
+        SPDLOG_LOGGER_WARN(Logger::logger(), "Downgrading requested Vulkan API Version {}{}{} because VMA Allocator only supports {}{}{}",
+                           VK_VERSION_MAJOR(option.apiVersion), VK_VERSION_MINOR(option.apiVersion), VK_VERSION_PATCH(option.apiVersion),
+                           1, 2, 0);
+    }
 #endif
 #endif
 

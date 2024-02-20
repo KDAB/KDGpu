@@ -37,6 +37,8 @@ struct Instance_t;
 struct InstanceOptions {
     std::string applicationName{ "KDGpu Application" };
     uint32_t applicationVersion{ KDGPU_MAKE_API_VERSION(0, 1, 0, 0) };
+    // Highest version the application is expected to use
+    uint32_t apiVersion{ KDGPU_MAKE_API_VERSION(0, 1, 2, 0) };
     std::vector<std::string> layers;
     std::vector<std::string> extensions;
 };
