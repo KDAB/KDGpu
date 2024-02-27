@@ -81,7 +81,7 @@ function(add_apple_example)
     target_include_directories(${ARGV0} PRIVATE ${PA_INCLUDE})
     target_compile_definitions(${ARGV0} PRIVATE ${PA_DEFINES})
     target_compile_options(${ARGV0} PRIVATE -fmodules -fobjc-arc)
-    target_link_libraries(${ARGV0} PUBLIC KDGpu::KDGpu ${PA_LIBS})
+    target_link_libraries(${ARGV0} PUBLIC KDGpu::KDGpu glm::glm ${PA_LIBS})
     set_target_properties(
         ${ARGV0}
         PROPERTIES BUNDLE True
