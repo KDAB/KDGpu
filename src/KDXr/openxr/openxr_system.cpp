@@ -18,6 +18,8 @@
 #include <KDGpu/vulkan/vulkan_graphics_api.h>
 #include <KDGpu/vulkan/vulkan_resource_manager.h>
 
+#include <sstream>
+
 namespace KDXr {
 
 OpenXrSystem::OpenXrSystem(OpenXrResourceManager *_openxrResourceManager,

@@ -64,13 +64,13 @@ LocateSpaceResult OpenXrReferenceSpace::locateSpace(const LocateSpaceOptions &op
         state = SpaceState{
             .spaceStateFlags = xrSpaceLocationFlagsToSpaceStateFlags(spaceLocation.locationFlags),
             .pose = Pose{
-                    .orientation = Quaternion(pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w),
-                    .position = Vector3(pose.position.x, pose.position.y, pose.position.z) }
+                    .orientation = Quaternion{ pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w },
+                    .position = Vector3{ pose.position.x, pose.position.y, pose.position.z } }
         };
         if (options.requestVelocity) {
             state.spaceStateFlags |= xrSpaceVelocityFlagsToSpaceStateFlags(spaceVelocity.velocityFlags);
-            state.linearVelocity = Vector3(spaceVelocity.linearVelocity.x, spaceVelocity.linearVelocity.y, spaceVelocity.linearVelocity.z);
-            state.angularVelocity = Vector3(spaceVelocity.angularVelocity.x, spaceVelocity.angularVelocity.y, spaceVelocity.angularVelocity.z);
+            state.linearVelocity = Vector3{ spaceVelocity.linearVelocity.x, spaceVelocity.linearVelocity.y, spaceVelocity.linearVelocity.z };
+            state.angularVelocity = Vector3{ spaceVelocity.angularVelocity.x, spaceVelocity.angularVelocity.y, spaceVelocity.angularVelocity.z };
         }
     }
 
