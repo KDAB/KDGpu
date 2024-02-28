@@ -2,6 +2,14 @@
     "version": 3,
     "configurePresets": [
         {
+            "name": "debug-simulator-msvc_x64",
+            "displayName": "Debug (simulator msvc_x64)",
+            "inherits": ["debug-msvc_x64"],
+            "environment": {
+                "XR_RUNTIME_JSON": "C:/MetaXRSimulator/meta_openxr_simulator.json"
+            }
+        },
+        {
             "name": "install-base",
             "hidden": true,
             "cacheVariables": {

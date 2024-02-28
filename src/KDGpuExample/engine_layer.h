@@ -30,6 +30,7 @@ public:
     ~EngineLayer() override;
 
     const Engine *engine() const noexcept { return m_engine; }
+    Engine *engine() noexcept { return m_engine; }
 
 protected:
     virtual void onAttached();

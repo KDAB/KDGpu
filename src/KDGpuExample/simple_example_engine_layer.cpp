@@ -10,6 +10,7 @@
 
 #include "simple_example_engine_layer.h"
 
+#include <KDGpuExample/config.h>
 #include <KDGpuExample/engine.h>
 
 #include <KDGpu/buffer_options.h>

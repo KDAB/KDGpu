@@ -75,3 +75,7 @@ endif()
 if(APPLE)
     add_subdirectory(hello_triangle_apple)
 endif()
+
+if(KDGPU_OPENXR_SUPPORT)
+    add_subdirectory(hello_xr)
+endif()

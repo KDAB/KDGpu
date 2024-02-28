@@ -54,6 +54,7 @@ set(SOURCES
     imgui_item.cpp
     imgui_renderer.cpp
     simple_example_engine_layer.cpp
+    view_projection.cpp
 )
 
 set(HEADERS
@@ -66,7 +67,35 @@ set(HEADERS
     imgui_item.h
     imgui_renderer.h
     simple_example_engine_layer.h
+    view_projection.h
 )
+
+if(KDGPU_OPENXR_SUPPORT)
+    set(XR_SOURCES
+        xr_compositor/xr_compositor_layer.cpp
+        xr_compositor/xr_cube_layer.cpp
+        xr_compositor/xr_cylinder_layer.cpp
+        xr_compositor/xr_cylinder_imgui_layer.cpp
+        xr_compositor/xr_projection_layer.cpp
+        xr_compositor/xr_quad_layer.cpp
+        xr_compositor/xr_quad_imgui_layer.cpp
+        xr_example_engine_layer.cpp
+    )
+
+    set(XR_HEADERS
+        xr_compositor/xr_compositor_layer.h
+        xr_compositor/xr_cube_layer.h
+        xr_compositor/xr_cylinder_layer.h
+        xr_compositor/xr_cylinder_imgui_layer.h
+        xr_compositor/xr_projection_layer.h
+        xr_compositor/xr_quad_layer.h
+        xr_compositor/xr_quad_imgui_layer.h
+        xr_example_engine_layer.h
+    )
+
+    list(APPEND SOURCES ${XR_SOURCES})
+    list(APPEND HEADERS ${XR_HEADERS})
+endif()
 
 add_library(
     KDGpuExample
@@ -82,7 +111,13 @@ set(KDGPUEXAMPLE_PUBLIC_LIBS
     KDUtils::KDUtils
     imgui::imgui
     KDGpu::KDGpuKDGui
+    glm::glm
 )
+
+if(KDGPU_OPENXR_SUPPORT)
+    set(KDGPU_OPENXR ON)
+    list(APPEND KDGPUEXAMPLE_PUBLIC_LIBS KDXr::KDXr)
+endif()
 
 target_compile_definitions(KDGpuExample PRIVATE KDGPUEXAMPLE_ASSET_PATH="${CMAKE_INSTALL_FULL_DATADIR}/assets")
 
@@ -124,6 +159,11 @@ configure_file(
 )
 install(
     FILES ${CMAKE_CURRENT_BINARY_DIR}/kdgpuexample_export.h
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/KDGpuExample
+)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h ${CMAKE_BINARY_DIR}/include/KDGpuExample/config.h)
+install(
+    FILES ${CMAKE_BINARY_DIR}/include/KDGpuExample/config.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/KDGpuExample
 )
 

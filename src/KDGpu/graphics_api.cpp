@@ -12,7 +12,8 @@
 
 namespace KDGpu {
 
-GraphicsApi::GraphicsApi()
+GraphicsApi::GraphicsApi(Api api)
+    : m_api(api)
 {
 }
 
