@@ -65,6 +65,7 @@ KDGpu builds with CMake. Unpack or clone the KDGpu sources in the directory of y
 
 ### CMake Options
 
+- _KDGPU_BUILD_KDXR=ON_ to enable building of the KDXr library and OpenXR backend
 - _KDGPU_BUILD_EXAMPLES=ON_ to enable building of the examples
 - _KDGPU_BUILD_TESTS=ON_ to enable building of the tests
 - _KDGPU_HLSL_SUPPORT=OFF_ to look for the dxc compiler and build an example using HLSL shaders
