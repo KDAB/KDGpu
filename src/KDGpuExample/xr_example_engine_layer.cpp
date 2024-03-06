@@ -18,6 +18,10 @@
 
 #include <assert.h>
 
+#ifdef PLATFORM_ANDROID
+#include <KDGui/platform/android/android_platform_integration.h>
+#endif
+
 namespace KDGpuExample {
 
 XrExampleEngineLayer::XrExampleEngineLayer()
@@ -26,6 +30,10 @@ XrExampleEngineLayer::XrExampleEngineLayer()
     , m_xrApi(std::make_unique<KDXr::OpenXrApi>())
 {
     m_logger = KDUtils::Logger::logger("engine", spdlog::level::info);
+
+#if defined(PLATFORM_ANDROID)
+    KDXr::OpenXrApi::initializeAndroid(KDGui::AndroidPlatformIntegration::s_androidApp);
+#endif
 }
 
 XrExampleEngineLayer::~XrExampleEngineLayer()

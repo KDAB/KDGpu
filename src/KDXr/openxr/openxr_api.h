@@ -16,6 +16,16 @@
 
 #include <memory>
 
+#if defined(PLATFORM_ANDROID)
+#ifdef __cplusplus
+extern "C" {
+#endif
+struct android_app;
+#ifdef __cplusplus
+}
+#endif
+#endif
+
 namespace KDXr {
 
 /**
@@ -40,6 +50,10 @@ class KDXR_EXPORT OpenXrApi final : public XrApi
 public:
     OpenXrApi();
     ~OpenXrApi() final;
+
+#if defined(PLATFORM_ANDROID)
+    static void initializeAndroid(android_app *androidApp);
+#endif
 
 private:
     std::unique_ptr<OpenXrResourceManager> m_openxrResourceManager;

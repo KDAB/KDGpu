@@ -101,6 +101,9 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Android")
     set(KDXR_PLATFORM_ANDROID ON)
     target_compile_definitions(KDXr PRIVATE PLATFORM_ANDROID)
     target_compile_definitions(KDXr PUBLIC XR_USE_PLATFORM_ANDROID)
+
+    set(APP_GLUE_DIR ${ANDROID_NDK}/sources/android/native_app_glue)
+    target_include_directories(KDXr PRIVATE ${APP_GLUE_DIR})
 endif()
 
 # Require >=C++20 for us and downstream projects

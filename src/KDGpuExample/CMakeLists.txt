@@ -122,7 +122,7 @@ endif()
 target_compile_definitions(KDGpuExample PRIVATE KDGPUEXAMPLE_ASSET_PATH="${CMAKE_INSTALL_FULL_DATADIR}/assets")
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Android")
-    target_compile_definitions(KDGpuExample PRIVATE VK_USE_PLATFORM_ANDROID_KHR=1 VMA_VULKAN_VERSION=1001000)
+    target_compile_definitions(KDGpuExample PRIVATE PLATFORM_ANDROID VK_USE_PLATFORM_ANDROID_KHR=1)
 endif()
 
 if(KDGPU_BUILD_SHARED_LIBS)
