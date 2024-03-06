@@ -21,6 +21,12 @@
 // Define XR_USE_GRAPHICS_API_* and include vulkan.h before openxr_platform.h
 // Add other graphics APIs here as needed
 #define XR_USE_GRAPHICS_API_VULKAN
+
+#ifdef XR_USE_PLATFORM_ANDROID
+// Android OpenXR integration need the definition of jobject
+#include <jni.h>
+#endif
+
 #include <vulkan/vulkan.h>
 #include <openxr/openxr_platform.h>
 

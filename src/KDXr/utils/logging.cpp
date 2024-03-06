@@ -9,7 +9,9 @@
 */
 
 #include "logging.h"
-
+#if defined(ANDROID)
+#include <spdlog/sinks/android_sink.h>
+#endif
 namespace KDXr {
 
 std::shared_ptr<spdlog::logger> Logger::ms_logger = {};

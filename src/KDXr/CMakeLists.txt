@@ -97,6 +97,12 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     target_compile_definitions(KDXr PRIVATE PLATFORM_MACOS)
 endif()
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Android")
+    set(KDXR_PLATFORM_ANDROID ON)
+    target_compile_definitions(KDXr PRIVATE PLATFORM_ANDROID)
+    target_compile_definitions(KDXr PUBLIC XR_USE_PLATFORM_ANDROID)
+endif()
+
 # Require >=C++20 for us and downstream projects
 target_compile_features(KDXr PUBLIC cxx_std_20)
 
