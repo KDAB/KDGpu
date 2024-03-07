@@ -25,7 +25,7 @@ if(NOT TARGET OpenXR::openxr_loader)
     FetchContent_Declare(
         OpenXR
         GIT_REPOSITORY https://github.com/KhronosGroup/OpenXR-SDK-Source.git
-        GIT_TAG release-1.0.31
+        GIT_TAG release-1.1.43
         USES_TERMINAL_DOWNLOAD YES USES_TERMINAL_UPDATE YES
     )
     FetchContent_MakeAvailable(OpenXR)
