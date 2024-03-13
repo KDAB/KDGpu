@@ -1,5 +1,7 @@
 - v0.5.0
   - Introduce initial support for OpenXR via the KDXr library
+  - Fix crash when trying to use with RenderDoc
+  - Builds on Android
 - v0.4.6
   - Vulkan 1.1 support
   - Partially bound BindGroup example
