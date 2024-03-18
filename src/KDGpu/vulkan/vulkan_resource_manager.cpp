@@ -44,7 +44,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 {
     if (std::ranges::any_of(KDGpu::VulkanGraphicsApi::validationMessagesToIgnore(),
                             [pCallbackData](const std::string &error) -> bool { return pCallbackData->pMessageIdName != nullptr &&
-                                                                                        error == pCallbackData->pMessageIdName; }))
+                                                                            error == pCallbackData->pMessageIdName; }))
         return false;
 
     switch (messageSeverity) {
@@ -510,21 +510,21 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     if (apiVersion > VK_API_VERSION_1_0) {
         apiVersion = VK_API_VERSION_1_0;
         SPDLOG_LOGGER_WARN(Logger::logger(), "Downgrading requested Vulkan API Version {}{}{} because VMA Allocator only supports {}{}{}",
-                           VK_VERSION_MAJOR(option.apiVersion), VK_VERSION_MINOR(option.apiVersion), VK_VERSION_PATCH(option.apiVersion),
+                           VK_VERSION_MAJOR(apiVersion), VK_VERSION_MINOR(apiVersion), VK_VERSION_PATCH(apiVersion),
                            1, 0, 0);
     }
 #elif VMA_VULKAN_VERSION < 1002000
     if (apiVersion > VK_API_VERSION_1_1) {
         apiVersion = VK_API_VERSION_1_1;
         SPDLOG_LOGGER_WARN(Logger::logger(), "Downgrading requested Vulkan API Version {}{}{} because VMA Allocator only supports {}{}{}",
-                           VK_VERSION_MAJOR(option.apiVersion), VK_VERSION_MINOR(option.apiVersion), VK_VERSION_PATCH(option.apiVersion),
+                           VK_VERSION_MAJOR(apiVersion), VK_VERSION_MINOR(apiVersion), VK_VERSION_PATCH(apiVersion),
                            1, 1, 0);
     }
 #elif VMA_VULKAN_VERSION < 1003000
     if (apiVersion > VK_API_VERSION_1_2) {
         apiVersion = VK_API_VERSION_1_2;
         SPDLOG_LOGGER_WARN(Logger::logger(), "Downgrading requested Vulkan API Version {}{}{} because VMA Allocator only supports {}{}{}",
-                           VK_VERSION_MAJOR(option.apiVersion), VK_VERSION_MINOR(option.apiVersion), VK_VERSION_PATCH(option.apiVersion),
+                           VK_VERSION_MAJOR(apiVersion), VK_VERSION_MINOR(apiVersion), VK_VERSION_PATCH(apiVersion),
                            1, 2, 0);
     }
 #endif
