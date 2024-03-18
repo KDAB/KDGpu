@@ -1764,7 +1764,8 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
     // For now we take a similar approach to WebGPU or the Vulkan dynamic rendering extension.
 
     // Find or create a render pass object that matches the request
-    const VulkanRenderPassKey renderPassKey{ options };
+
+    const VulkanRenderPassKey renderPassKey(options, this);
     auto itRenderPass = vulkanDevice->renderPasses.find(renderPassKey);
     Handle<RenderPass_t> vulkanRenderPassHandle;
     if (itRenderPass == vulkanDevice->renderPasses.end()) {
@@ -1961,23 +1962,13 @@ void VulkanResourceManager::fillColorAttachmnents(std::vector<VkAttachmentRefere
     {
         for (uint32_t i = 0; i < colorTargetsCount; ++i) {
             const ColorAttachment &renderTarget = colorAttachments.at(i);
-
-            VulkanTextureView *view = getTextureView(renderTarget.view);
-            if (!view) {
-                // Log invalid view requested
-                return;
-            }
-            VulkanTexture *texture = getTexture(view->textureHandle);
-            if (!texture) {
-                // Log invalid texture requested
-                return;
-            }
+            const KDGpu::Format colorFormat = formatFromTextureView(renderTarget.view);
 
             // NB: We don't care about load/store operations and initial/final layouts here
             // so we just set some random values;
             VkAttachmentDescription2 colorAttachment = {};
             colorAttachment.sType = VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_2;
-            colorAttachment.format = formatToVkFormat(texture->format);
+            colorAttachment.format = formatToVkFormat(colorFormat);
             colorAttachment.samples = sampleCountFlagBitsToVkSampleFlagBits(samples);
             colorAttachment.loadOp = attachmentLoadOperationToVkAttachmentLoadOp(renderTarget.loadOperation);
             colorAttachment.storeOp = attachmentStoreOperationToVkAttachmentStoreOp(renderTarget.storeOperation);
@@ -1996,20 +1987,11 @@ void VulkanResourceManager::fillColorAttachmnents(std::vector<VkAttachmentRefere
 
             // If using multisampling, then for each color attachment we need a resolve attachment
             if (usingMultisampling) {
-                VulkanTextureView *view = getTextureView(renderTarget.resolveView);
-                if (!view) {
-                    // Log invalid view requested
-                    return;
-                }
-                VulkanTexture *texture = getTexture(view->textureHandle);
-                if (!texture) {
-                    // Log invalid texture requested
-                    return;
-                }
+                const KDGpu::Format resolveColorFormat = formatFromTextureView(renderTarget.resolveView);
 
                 VkAttachmentDescription2 resolveAttachment = {};
                 resolveAttachment.sType = VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_2;
-                resolveAttachment.format = formatToVkFormat(texture->format);
+                resolveAttachment.format = formatToVkFormat(resolveColorFormat);
                 resolveAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
                 resolveAttachment.loadOp = attachmentLoadOperationToVkAttachmentLoadOp(renderTarget.loadOperation);
                 resolveAttachment.storeOp = attachmentStoreOperationToVkAttachmentStoreOp(renderTarget.storeOperation);
@@ -2153,21 +2135,11 @@ std::pair<bool, bool> VulkanResourceManager::fillDepthAttachments(VkAttachmentRe
 
     if (hasDepthAttachment) {
         const DepthStencilAttachment &renderTarget = depthStencil;
-
-        VulkanTextureView *view = getTextureView(renderTarget.view);
-        if (!view) {
-            return { false, false };
-            // Log invalid view requested
-        }
-        VulkanTexture *texture = getTexture(view->textureHandle);
-        if (!texture) {
-            // Log invalid texture requested
-            return { false, false };
-        }
+        const KDGpu::Format depthFormat = formatFromTextureView(depthStencil.view);
 
         VkAttachmentDescription2 depthStencilAttachment = {};
         depthStencilAttachment.sType = VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_2;
-        depthStencilAttachment.format = formatToVkFormat(texture->format);
+        depthStencilAttachment.format = formatToVkFormat(depthFormat);
         depthStencilAttachment.samples = sampleCountFlagBitsToVkSampleFlagBits(samples);
         depthStencilAttachment.loadOp = attachmentLoadOperationToVkAttachmentLoadOp(renderTarget.depthLoadOperation);
         depthStencilAttachment.storeOp = attachmentStoreOperationToVkAttachmentStoreOp(renderTarget.depthStoreOperation);
@@ -2184,36 +2156,32 @@ std::pair<bool, bool> VulkanResourceManager::fillDepthAttachments(VkAttachmentRe
 
         // If using multisampling, then we might need to resolve the depth attachment
         if (hasDepthResolveAttachment) {
-            VulkanTextureView *resolveView = getTextureView(renderTarget.resolveView);
-            if (resolveView) {
-                VulkanTexture *texture = getTexture(resolveView->textureHandle);
-                if (texture) {
-                    VkAttachmentDescription2 resolveAttachment = {};
-                    resolveAttachment.sType = VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_2;
-                    resolveAttachment.format = formatToVkFormat(texture->format);
-                    resolveAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-                    resolveAttachment.loadOp = attachmentLoadOperationToVkAttachmentLoadOp(renderTarget.depthLoadOperation);
-                    resolveAttachment.storeOp = attachmentStoreOperationToVkAttachmentStoreOp(renderTarget.depthStoreOperation);
-                    resolveAttachment.stencilLoadOp = attachmentLoadOperationToVkAttachmentLoadOp(renderTarget.stencilLoadOperation);
-                    resolveAttachment.stencilStoreOp = attachmentStoreOperationToVkAttachmentStoreOp(renderTarget.stencilStoreOperation);
-                    resolveAttachment.initialLayout = textureLayoutToVkImageLayout(renderTarget.initialLayout);
-                    resolveAttachment.finalLayout = textureLayoutToVkImageLayout(renderTarget.finalLayout);
+            const KDGpu::Format depthResolveFormat = formatFromTextureView(depthStencil.resolveView);
 
-                    depthStencilResolveAttachmentRef.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
-                    depthStencilResolveAttachmentRef.attachment = attachments.size();
-                    depthStencilResolveAttachmentRef.layout = textureLayoutToVkImageLayout(renderTarget.layout);
+            VkAttachmentDescription2 resolveAttachment = {};
+            resolveAttachment.sType = VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_2;
+            resolveAttachment.format = formatToVkFormat(depthResolveFormat);
+            resolveAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+            resolveAttachment.loadOp = attachmentLoadOperationToVkAttachmentLoadOp(renderTarget.depthLoadOperation);
+            resolveAttachment.storeOp = attachmentStoreOperationToVkAttachmentStoreOp(renderTarget.depthStoreOperation);
+            resolveAttachment.stencilLoadOp = attachmentLoadOperationToVkAttachmentLoadOp(renderTarget.stencilLoadOperation);
+            resolveAttachment.stencilStoreOp = attachmentStoreOperationToVkAttachmentStoreOp(renderTarget.stencilStoreOperation);
+            resolveAttachment.initialLayout = textureLayoutToVkImageLayout(renderTarget.initialLayout);
+            resolveAttachment.finalLayout = textureLayoutToVkImageLayout(renderTarget.finalLayout);
 
-                    attachments.emplace_back(resolveAttachment);
+            depthStencilResolveAttachmentRef.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
+            depthStencilResolveAttachmentRef.attachment = attachments.size();
+            depthStencilResolveAttachmentRef.layout = textureLayoutToVkImageLayout(renderTarget.layout);
 
-                    depthResolve.sType = VK_STRUCTURE_TYPE_SUBPASS_DESCRIPTION_DEPTH_STENCIL_RESOLVE;
-                    depthResolve.depthResolveMode = resolveModeToVkResolveMode(renderTarget.depthResolveMode);
-                    depthResolve.stencilResolveMode = resolveModeToVkResolveMode(renderTarget.stencilResolveMode);
-                    depthResolve.pDepthStencilResolveAttachment = &depthStencilResolveAttachmentRef;
+            attachments.emplace_back(resolveAttachment);
 
-                    // set a ptr to a VkSubpassDescriptionDepthStencilResolve on the VkSubpassDescription2::pNext
-                    // to allow resolving of a msaaDepthBuffer
-                }
-            }
+            depthResolve.sType = VK_STRUCTURE_TYPE_SUBPASS_DESCRIPTION_DEPTH_STENCIL_RESOLVE;
+            depthResolve.depthResolveMode = resolveModeToVkResolveMode(renderTarget.depthResolveMode);
+            depthResolve.stencilResolveMode = resolveModeToVkResolveMode(renderTarget.stencilResolveMode);
+            depthResolve.pDepthStencilResolveAttachment = &depthStencilResolveAttachmentRef;
+
+            // set a ptr to a VkSubpassDescriptionDepthStencilResolve on the VkSubpassDescription2::pNext
+            // to allow resolving of a msaaDepthBuffer
         }
     }
 
@@ -2750,6 +2718,20 @@ std::string VulkanResourceManager::getMemoryStats(const Handle<Device_t> &device
     stats.append(statsAllocator);
     stats.append(statsExternalAllocator);
     return stats;
+}
+
+KDGpu::Format VulkanResourceManager::formatFromTextureView(const Handle<KDGpu::TextureView_t> &viewHandle) const
+{
+    VulkanTextureView *view = getTextureView(viewHandle);
+    if (!view) {
+        return KDGpu::Format::UNDEFINED;
+    }
+    VulkanTexture *texture = getTexture(view->textureHandle);
+    if (!texture) {
+        return KDGpu::Format::UNDEFINED;
+    }
+
+    return texture->format;
 }
 
 std::vector<std::string> VulkanResourceManager::getAvailableLayers() const

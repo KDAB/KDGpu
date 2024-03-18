@@ -175,6 +175,8 @@ public:
 
     std::string getMemoryStats(const Handle<Device_t> &device) const;
 
+    KDGpu::Format formatFromTextureView(const Handle<TextureView_t> &viewHandle) const;
+
 private:
     void fillColorAttachmnents(std::vector<VkAttachmentReference2> &colorAttachmentRefs,
                                std::vector<VkAttachmentReference2> &colorResolveAttachmentRefs,

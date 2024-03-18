@@ -8,8 +8,8 @@
   Contact KDAB at <info@kdab.com> for commercial licensing options.
 */
 
-#include "KDGpu/gpu_core.h"
 #include <KDGpu/render_pass_command_recorder_options.h>
+#include <KDGpu/vulkan/vulkan_render_pass.h>
 #include <KDGpu/vulkan/vulkan_graphics_api.h>
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
@@ -35,9 +35,9 @@ TEST_SUITE("VulkanRenderPassKey")
             };
 
             // WHEN
-            VulkanRenderPassKeyColorAttachment keyA(a);
-            VulkanRenderPassKeyColorAttachment keyB(b);
-            VulkanRenderPassKeyColorAttachment keyC(c);
+            VulkanRenderPassKeyColorAttachment keyA(a, KDGpu::Format::UNDEFINED, KDGpu::Format::UNDEFINED);
+            VulkanRenderPassKeyColorAttachment keyB(b, KDGpu::Format::UNDEFINED, KDGpu::Format::UNDEFINED);
+            VulkanRenderPassKeyColorAttachment keyC(c, KDGpu::Format::UNDEFINED, KDGpu::Format::UNDEFINED);
 
             // THEN
             CHECK(keyA != keyB);
@@ -56,8 +56,8 @@ TEST_SUITE("VulkanRenderPassKey")
             };
 
             // WHEN
-            VulkanRenderPassKeyColorAttachment keyA(a);
-            VulkanRenderPassKeyColorAttachment keyB(b);
+            VulkanRenderPassKeyColorAttachment keyA(a, KDGpu::Format::UNDEFINED, KDGpu::Format::UNDEFINED);
+            VulkanRenderPassKeyColorAttachment keyB(b, KDGpu::Format::UNDEFINED, KDGpu::Format::UNDEFINED);
 
             // THEN
             CHECK(keyA != keyB);
@@ -74,8 +74,8 @@ TEST_SUITE("VulkanRenderPassKey")
             };
 
             // WHEN
-            VulkanRenderPassKeyColorAttachment keyA(a);
-            VulkanRenderPassKeyColorAttachment keyB(b);
+            VulkanRenderPassKeyColorAttachment keyA(a, KDGpu::Format::UNDEFINED, KDGpu::Format::UNDEFINED);
+            VulkanRenderPassKeyColorAttachment keyB(b, KDGpu::Format::UNDEFINED, KDGpu::Format::UNDEFINED);
 
             // THEN
             CHECK(keyA != keyB);
@@ -92,8 +92,44 @@ TEST_SUITE("VulkanRenderPassKey")
             };
 
             // WHEN
-            VulkanRenderPassKeyColorAttachment keyA(a);
-            VulkanRenderPassKeyColorAttachment keyB(b);
+            VulkanRenderPassKeyColorAttachment keyA(a, KDGpu::Format::UNDEFINED, KDGpu::Format::UNDEFINED);
+            VulkanRenderPassKeyColorAttachment keyB(b, KDGpu::Format::UNDEFINED, KDGpu::Format::UNDEFINED);
+
+            // THEN
+            CHECK(keyA != keyB);
+        }
+
+        SUBCASE("Check Different Keys for different attachment view format")
+        {
+            // GIVEN
+            ColorAttachment a{
+                .finalLayout = TextureLayout::ColorAttachmentOptimal,
+            };
+            ColorAttachment b{
+                .finalLayout = TextureLayout::ColorAttachmentOptimal,
+            };
+
+            // WHEN
+            VulkanRenderPassKeyColorAttachment keyA(a, KDGpu::Format::R8G8B8A8_UNORM, KDGpu::Format::UNDEFINED);
+            VulkanRenderPassKeyColorAttachment keyB(b, KDGpu::Format::R16G16B16A16_UNORM, KDGpu::Format::UNDEFINED);
+
+            // THEN
+            CHECK(keyA != keyB);
+        }
+
+        SUBCASE("Check Different Keys for different attachment resolveView format")
+        {
+            // GIVEN
+            ColorAttachment a{
+                .finalLayout = TextureLayout::ColorAttachmentOptimal,
+            };
+            ColorAttachment b{
+                .finalLayout = TextureLayout::ColorAttachmentOptimal,
+            };
+
+            // WHEN
+            VulkanRenderPassKeyColorAttachment keyA(a, KDGpu::Format::R8G8B8A8_UNORM, KDGpu::Format::R8G8B8A8_SNORM);
+            VulkanRenderPassKeyColorAttachment keyB(b, KDGpu::Format::R8G8B8A8_UNORM, KDGpu::Format::R8G8B8A8_UNORM);
 
             // THEN
             CHECK(keyA != keyB);
@@ -116,9 +152,9 @@ TEST_SUITE("VulkanRenderPassKey")
             };
 
             // WHEN
-            VulkanRenderPassKeyDepthStencilAttachment keyA(a);
-            VulkanRenderPassKeyDepthStencilAttachment keyB(b);
-            VulkanRenderPassKeyDepthStencilAttachment keyC(c);
+            VulkanRenderPassKeyDepthStencilAttachment keyA(a, KDGpu::Format::UNDEFINED, KDGpu::Format::UNDEFINED);
+            VulkanRenderPassKeyDepthStencilAttachment keyB(b, KDGpu::Format::UNDEFINED, KDGpu::Format::UNDEFINED);
+            VulkanRenderPassKeyDepthStencilAttachment keyC(c, KDGpu::Format::UNDEFINED, KDGpu::Format::UNDEFINED);
 
             // THEN
             CHECK(keyA != keyB);
@@ -136,8 +172,8 @@ TEST_SUITE("VulkanRenderPassKey")
                 .depthStoreOperation = AttachmentStoreOperation::DontCare,
             };
             // WHEN
-            VulkanRenderPassKeyDepthStencilAttachment keyA(a);
-            VulkanRenderPassKeyDepthStencilAttachment keyB(b);
+            VulkanRenderPassKeyDepthStencilAttachment keyA(a, KDGpu::Format::UNDEFINED, KDGpu::Format::UNDEFINED);
+            VulkanRenderPassKeyDepthStencilAttachment keyB(b, KDGpu::Format::UNDEFINED, KDGpu::Format::UNDEFINED);
 
             // THEN
             CHECK(keyA != keyB);
@@ -157,9 +193,9 @@ TEST_SUITE("VulkanRenderPassKey")
             };
 
             // WHEN
-            VulkanRenderPassKeyDepthStencilAttachment keyA(a);
-            VulkanRenderPassKeyDepthStencilAttachment keyB(b);
-            VulkanRenderPassKeyDepthStencilAttachment keyC(c);
+            VulkanRenderPassKeyDepthStencilAttachment keyA(a, KDGpu::Format::UNDEFINED, KDGpu::Format::UNDEFINED);
+            VulkanRenderPassKeyDepthStencilAttachment keyB(b, KDGpu::Format::UNDEFINED, KDGpu::Format::UNDEFINED);
+            VulkanRenderPassKeyDepthStencilAttachment keyC(c, KDGpu::Format::UNDEFINED, KDGpu::Format::UNDEFINED);
 
             // THEN
             CHECK(keyA != keyB);
@@ -177,8 +213,8 @@ TEST_SUITE("VulkanRenderPassKey")
                 .stencilStoreOperation = AttachmentStoreOperation::DontCare,
             };
             // WHEN
-            VulkanRenderPassKeyDepthStencilAttachment keyA(a);
-            VulkanRenderPassKeyDepthStencilAttachment keyB(b);
+            VulkanRenderPassKeyDepthStencilAttachment keyA(a, KDGpu::Format::UNDEFINED, KDGpu::Format::UNDEFINED);
+            VulkanRenderPassKeyDepthStencilAttachment keyB(b, KDGpu::Format::UNDEFINED, KDGpu::Format::UNDEFINED);
 
             // THEN
             CHECK(keyA != keyB);
@@ -195,8 +231,8 @@ TEST_SUITE("VulkanRenderPassKey")
             };
 
             // WHEN
-            VulkanRenderPassKeyDepthStencilAttachment keyA(a);
-            VulkanRenderPassKeyDepthStencilAttachment keyB(b);
+            VulkanRenderPassKeyDepthStencilAttachment keyA(a, KDGpu::Format::UNDEFINED, KDGpu::Format::UNDEFINED);
+            VulkanRenderPassKeyDepthStencilAttachment keyB(b, KDGpu::Format::UNDEFINED, KDGpu::Format::UNDEFINED);
 
             // THEN
             CHECK(keyA != keyB);
@@ -213,8 +249,44 @@ TEST_SUITE("VulkanRenderPassKey")
             };
 
             // WHEN
-            VulkanRenderPassKeyDepthStencilAttachment keyA(a);
-            VulkanRenderPassKeyDepthStencilAttachment keyB(b);
+            VulkanRenderPassKeyDepthStencilAttachment keyA(a, KDGpu::Format::UNDEFINED, KDGpu::Format::UNDEFINED);
+            VulkanRenderPassKeyDepthStencilAttachment keyB(b, KDGpu::Format::UNDEFINED, KDGpu::Format::UNDEFINED);
+
+            // THEN
+            CHECK(keyA != keyB);
+        }
+
+        SUBCASE("Check Different Keys for different attachment view format")
+        {
+            // GIVEN
+            DepthStencilAttachment a{
+                .finalLayout = TextureLayout::ColorAttachmentOptimal,
+            };
+            DepthStencilAttachment b{
+                .finalLayout = TextureLayout::ColorAttachmentOptimal,
+            };
+
+            // WHEN
+            VulkanRenderPassKeyDepthStencilAttachment keyA(a, KDGpu::Format::D16_UNORM, KDGpu::Format::R8G8B8A8_SNORM);
+            VulkanRenderPassKeyDepthStencilAttachment keyB(b, KDGpu::Format::D24_UNORM_S8_UINT, KDGpu::Format::R8G8B8A8_UNORM);
+
+            // THEN
+            CHECK(keyA != keyB);
+        }
+
+        SUBCASE("Check Different Keys for different attachment resolveView format")
+        {
+            // GIVEN
+            DepthStencilAttachment a{
+                .finalLayout = TextureLayout::ColorAttachmentOptimal,
+            };
+            DepthStencilAttachment b{
+                .finalLayout = TextureLayout::ColorAttachmentOptimal,
+            };
+
+            // WHEN
+            VulkanRenderPassKeyDepthStencilAttachment keyA(a, KDGpu::Format::D16_UNORM, KDGpu::Format::D32_SFLOAT);
+            VulkanRenderPassKeyDepthStencilAttachment keyB(b, KDGpu::Format::D16_UNORM, KDGpu::Format::D16_UNORM);
 
             // THEN
             CHECK(keyA != keyB);
@@ -223,30 +295,34 @@ TEST_SUITE("VulkanRenderPassKey")
 
     TEST_CASE("VulkanRenderPassKey")
     {
+        VulkanResourceManager resourceManager;
+
         SUBCASE("Check Different Keys for different loadOperations")
         {
             // GIVEN
             VulkanRenderPassKey a(RenderPassCommandRecorderOptions{
-                    .colorAttachments = {
-                            {
-                                    .loadOperation = AttachmentLoadOperation::Load,
-                            },
-                    },
-                    .depthStencilAttachment = {
-                            .depthLoadOperation = AttachmentLoadOperation::Load,
-                    },
-            });
+                                          .colorAttachments = {
+                                                  {
+                                                          .loadOperation = AttachmentLoadOperation::Load,
+                                                  },
+                                          },
+                                          .depthStencilAttachment = {
+                                                  .depthLoadOperation = AttachmentLoadOperation::Load,
+                                          },
+                                  },
+                                  &resourceManager);
 
             VulkanRenderPassKey b(RenderPassCommandRecorderOptions{
-                    .colorAttachments = {
-                            {
-                                    .loadOperation = AttachmentLoadOperation::Clear,
-                            },
-                    },
-                    .depthStencilAttachment = {
-                            .depthLoadOperation = AttachmentLoadOperation::Clear,
-                    },
-            });
+                                          .colorAttachments = {
+                                                  {
+                                                          .loadOperation = AttachmentLoadOperation::Clear,
+                                                  },
+                                          },
+                                          .depthStencilAttachment = {
+                                                  .depthLoadOperation = AttachmentLoadOperation::Clear,
+                                          },
+                                  },
+                                  &resourceManager);
 
             // THEN
             CHECK(a != b);
