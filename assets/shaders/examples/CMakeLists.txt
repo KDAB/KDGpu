@@ -9,6 +9,7 @@
 add_subdirectory(bindgroup_indexing)
 add_subdirectory(bindgroup_partially_bound)
 add_subdirectory(compute_particles)
+add_subdirectory(compute_oit_transparency)
 add_subdirectory(depth_texture_lookup)
 add_subdirectory(dynamic_ubo)
 add_subdirectory(hello_triangle_msaa)

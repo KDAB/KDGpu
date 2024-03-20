@@ -66,6 +66,7 @@ if(TARGET KDGpu::KDGpuExample)
     add_subdirectory(depth_texture_lookup)
     add_subdirectory(bindgroup_indexing)
     add_subdirectory(bindgroup_partially_bound)
+    add_subdirectory(compute_oit_transparency)
 
     if(KDGPU_HLSL_SUPPORT)
         add_subdirectory(hello_triangle_hlsl)
