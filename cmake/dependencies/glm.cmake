@@ -14,10 +14,13 @@ if(NOT TARGET glm::glm AND TARGET glm)
 endif()
 
 if(NOT TARGET glm::glm)
+    # Use Sean's clone of glm until
+    # https://github.com/seanharmer/glm/commit/a9f29d9c4c33d93619e3ad463b7703136adeff31
+    # is merged upstream
     FetchContent_Declare(
         glm
-        GIT_REPOSITORY https://github.com/g-truc/glm.git
-        GIT_TAG 1.0.1
+        GIT_REPOSITORY https://github.com/seanharmer/glm.git
+        GIT_TAG master
     )
 
     if(NOT glm_POPULATED)
