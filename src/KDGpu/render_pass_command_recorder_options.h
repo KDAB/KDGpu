@@ -69,6 +69,8 @@ struct RenderPassCommandRecorderOptions {
     DepthStencilAttachment depthStencilAttachment;
     SampleCountFlagBits samples{ SampleCountFlagBits::Samples1Bit };
     uint32_t viewCount{ 1 };
+    uint32_t framebufferWidth{ 0 }; // Default to first color attachment width
+    uint32_t framebufferHeight{ 0 }; // Default to first color attachment height
 };
 
 } // namespace KDGpu

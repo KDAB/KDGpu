@@ -289,16 +289,7 @@ void ComputeOitTransparency::initializeParticles()
 void ComputeOitTransparency::initializeAlpha()
 {
     m_alpha.renderPassOptions = {
-        .colorAttachments = {
-                // We need at least one color attachment to create a valid RenderPass even if we don't write anything to it
-                {
-                        .view = {}, // Not setting the swapchain texture view just yet
-                        .loadOperation = AttachmentLoadOperation::DontCare,
-                        .storeOperation = AttachmentStoreOperation::DontCare,
-                        .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
-                        .finalLayout = TextureLayout::ColorAttachmentOptimal,
-                },
-        },
+        .colorAttachments = {},
         .depthStencilAttachment = {}
     };
 
@@ -367,7 +358,7 @@ void ComputeOitTransparency::initializeCompositing()
                     {
                             .view = {}, // Not setting the swapchain texture view just yet
                             .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
-                            .initialLayout = TextureLayout::ColorAttachmentOptimal,
+                            .initialLayout = TextureLayout::Undefined,
                             .finalLayout = TextureLayout::PresentSrc,
                     },
             },
@@ -435,12 +426,7 @@ void ComputeOitTransparency::initializeMeshes()
                                 { .location = 3, .binding = 1, .format = Format::R32G32B32A32_SFLOAT, .offset = 2 * sizeof(glm::vec4) }, // Particle Color
                         },
                 },
-                .renderTargets = {
-                        {
-                                .format = m_swapchainFormat,
-                                .writeMask = ColorComponentFlags(), // Don't write anything out to color attachment,
-                        },
-                },
+                .renderTargets = {},
                 .depthStencil = {
                         .format = KDGpu::Format::UNDEFINED,
                         .depthTestEnabled = false,
@@ -482,12 +468,7 @@ void ComputeOitTransparency::initializeMeshes()
                                 { .location = 1, .binding = 0, .format = Format::R32G32B32_SFLOAT, .offset = sizeof(glm::vec3) }, // Vertex Normal
                         },
                 },
-                .renderTargets = {
-                        {
-                                .format = m_swapchainFormat,
-                                .writeMask = ColorComponentFlags(), // Don't write anything out to color attachment,
-                        },
-                },
+                .renderTargets = {},
                 .depthStencil = {
                         .format = KDGpu::Format::UNDEFINED,
                         .depthTestEnabled = false,
@@ -531,6 +512,10 @@ void ComputeOitTransparency::resize()
 {
     // Swapchain might have been resized and texture views recreated. Ensure we update the PassOptions accordingly
     m_compositing.renderPassOptions.depthStencilAttachment.view = m_depthTextureView;
+
+    // Set FrameBuffer size to use for the Alpha pass which has no color attachment (hence we can't retrieve the framebuffer dimensions from the attachment)
+    m_alpha.renderPassOptions.framebufferWidth = m_window->width();
+    m_alpha.renderPassOptions.framebufferHeight = m_window->height();
 
     // Recreated fragmentHeadsPointer texture
     m_alpha.fragmentHeadsPointer = m_device.createTexture(KDGpu::TextureOptions{
@@ -684,7 +669,6 @@ void ComputeOitTransparency::render()
             });
 
             // Render Alpha meshes to fragment list
-            m_alpha.renderPassOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex);
             auto alphaPass = commandRecorder.beginRenderPass(m_alpha.renderPassOptions);
 
             // Draw Spheres

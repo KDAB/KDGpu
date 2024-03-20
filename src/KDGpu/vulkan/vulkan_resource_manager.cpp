@@ -44,7 +44,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 {
     if (std::ranges::any_of(KDGpu::VulkanGraphicsApi::validationMessagesToIgnore(),
                             [pCallbackData](const std::string &error) -> bool { return pCallbackData->pMessageIdName != nullptr &&
-                                                                            error == pCallbackData->pMessageIdName; }))
+                                                                                        error == pCallbackData->pMessageIdName; }))
         return false;
 
     switch (messageSeverity) {
@@ -1372,28 +1372,27 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     // render targets.
     VkRenderPass vkRenderPass = VK_NULL_HANDLE;
     Handle<RenderPass_t> vulkanRenderPassHandle;
-    if (!options.renderTargets.empty()) {
-        // Specify attachment refs for all color and resolve render targets and any
-        // depth-stencil target. Concrete render passes that want to use this pipeline
-        // to render, must begin a render pass that is compatible with this render pass.
-        // See the detailed description of render pass compatibility at:
-        //
-        // https://registry.khronos.org/vulkan/specs/1.3-extensions/html/vkspec.html#renderpass-compatibility
-        //
-        // But in short, the concrete render pass must match attachment counts of each
-        // type and match the formats and sample counts in each case.
 
-        vulkanRenderPassHandle = createRenderPass(deviceHandle,
-                                                  options.renderTargets,
-                                                  options.depthStencil,
-                                                  options.multisample.samples,
-                                                  options.viewCount);
+    // Specify attachment refs for all color and resolve render targets and any
+    // depth-stencil target. Concrete render passes that want to use this pipeline
+    // to render, must begin a render pass that is compatible with this render pass.
+    // See the detailed description of render pass compatibility at:
+    //
+    // https://registry.khronos.org/vulkan/specs/1.3-extensions/html/vkspec.html#renderpass-compatibility
+    //
+    // But in short, the concrete render pass must match attachment counts of each
+    // type and match the formats and sample counts in each case.
 
-        // Note: at the moment this render pass isn't shared. It might make sense to do so at some point,
-        // in which case, the renderPass handle will have to be added to vulkanDevice->renderPasses
-        VulkanRenderPass *vulkanRenderPass = m_renderPasses.get(vulkanRenderPassHandle);
-        vkRenderPass = vulkanRenderPass->renderPass;
-    }
+    vulkanRenderPassHandle = createRenderPass(deviceHandle,
+                                              options.renderTargets,
+                                              options.depthStencil,
+                                              options.multisample.samples,
+                                              options.viewCount);
+
+    // Note: at the moment this render pass isn't shared. It might make sense to do so at some point,
+    // in which case, the renderPass handle will have to be added to vulkanDevice->renderPasses
+    VulkanRenderPass *vulkanRenderPass = m_renderPasses.get(vulkanRenderPassHandle);
+    vkRenderPass = vulkanRenderPass->renderPass;
 
     // Bring it all together in the all-knowing pipeline create info
     VkGraphicsPipelineCreateInfo pipelineInfo = {};
@@ -1802,19 +1801,27 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
             attachmentKey.addAttachmentView(options.depthStencilAttachment.resolveView);
     }
 
-    // Take the dimensions of the first attachment as the framebuffer dimensions
-    // TODO: Should this be the dimensions of the view rather than the texture itself? i.e. can we
-    // use views to render to a subset of a texture?
-    assert(!options.colorAttachments.empty());
-    VulkanTextureView *firstView = getTextureView(options.colorAttachments.at(0).view);
-    if (!firstView) {
-        SPDLOG_LOGGER_ERROR(Logger::logger(), "Invalid texture view when creating render pass");
-        return {};
-    }
-    VulkanTexture *firstTexture = getTexture(firstView->textureHandle);
-    if (!firstTexture) {
-        SPDLOG_LOGGER_ERROR(Logger::logger(), "Invalid texture when creating render pass");
-        return {};
+    uint32_t fbWidth = options.framebufferWidth;
+    uint32_t fbHeight = options.framebufferHeight;
+    uint32_t fbArrayLayers = 1;
+
+    if ((fbWidth == 0 || fbHeight == 0) && options.colorAttachments.size() > 0) {
+        // Take the dimensions of the first attachment as the framebuffer dimensions
+        // TODO: Should this be the dimensions of the view rather than the texture itself? i.e. can we
+        // use views to render to a subset of a texture?
+        VulkanTextureView *firstView = getTextureView(options.colorAttachments.at(0).view);
+        if (!firstView) {
+            SPDLOG_LOGGER_ERROR(Logger::logger(), "Invalid texture view when creating render pass");
+            return {};
+        }
+        VulkanTexture *firstTexture = getTexture(firstView->textureHandle);
+        if (!firstTexture) {
+            SPDLOG_LOGGER_ERROR(Logger::logger(), "Invalid texture when creating render pass");
+            return {};
+        }
+        fbWidth = firstTexture->extent.width;
+        fbHeight = firstTexture->extent.height;
+        fbArrayLayers = firstTexture->arrayLayers;
     }
 
     // TODO: Use VK_FRAMEBUFFER_CREATE_IMAGELESS_BIT to create just one framebuffer rather than
@@ -1824,9 +1831,9 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
     VulkanFramebufferKey framebufferKey;
     framebufferKey.renderPass = vulkanRenderPassHandle;
     framebufferKey.attachmentsKey = attachmentKey;
-    framebufferKey.width = firstTexture->extent.width;
-    framebufferKey.height = firstTexture->extent.height;
-    framebufferKey.layers = firstTexture->arrayLayers;
+    framebufferKey.width = fbWidth;
+    framebufferKey.height = fbHeight;
+    framebufferKey.layers = fbArrayLayers;
 
     if (options.viewCount > 1)
         framebufferKey.layers = 1;
@@ -1856,7 +1863,7 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
     // Render area - assume full view area for now. Can expose as an option later if needed.
     renderPassInfo.renderArea = {
         .offset = { .x = 0, .y = 0 },
-        .extent = { .width = firstTexture->extent.width, .height = firstTexture->extent.height }
+        .extent = { .width = fbWidth, .height = fbHeight }
     };
 
     // Clear values - at most 2 x color attachments + depth
