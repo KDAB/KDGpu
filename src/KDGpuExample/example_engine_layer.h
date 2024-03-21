@@ -94,6 +94,7 @@ protected:
     std::unique_ptr<GraphicsApi> m_api;
     std::unique_ptr<KDGpuKDGui::View> m_window;
 
+    Extent2D m_swapchainExtent;
     KDBindings::Property<SampleCountFlagBits> m_samples{ SampleCountFlagBits::Samples1Bit };
     std::vector<SampleCountFlagBits> m_supportedSampleCounts;
     Instance m_instance;

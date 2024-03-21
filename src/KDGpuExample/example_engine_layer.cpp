@@ -45,13 +45,21 @@ ExampleEngineLayer::~ExampleEngineLayer()
 void ExampleEngineLayer::recreateSwapChain()
 {
     const AdapterSwapchainProperties swapchainProperties = m_device.adapter()->swapchainProperties(m_surface);
+    const SurfaceCapabilities &surfaceCapabilities = swapchainProperties.capabilities;
+
+    m_swapchainExtent = {
+        .width = std::clamp(m_window->width(), surfaceCapabilities.minImageExtent.width,
+                            surfaceCapabilities.maxImageExtent.width),
+        .height = std::clamp(m_window->height(), surfaceCapabilities.minImageExtent.height,
+                             surfaceCapabilities.maxImageExtent.height),
+    };
 
     // Create a swapchain of images that we will render to.
-    SwapchainOptions swapchainOptions = {
+    const SwapchainOptions swapchainOptions = {
         .surface = m_surface,
         .format = m_swapchainFormat,
-        .minImageCount = getSuitableImageCount(swapchainProperties.capabilities),
-        .imageExtent = { .width = m_window->width(), .height = m_window->height() },
+        .minImageCount = getSuitableImageCount(surfaceCapabilities),
+        .imageExtent = m_swapchainExtent,
         .compositeAlpha = m_compositeAlpha,
         .presentMode = m_presentMode,
         .oldSwapchain = m_swapchain,
@@ -81,7 +89,7 @@ void ExampleEngineLayer::recreateDepthTexture()
     TextureOptions depthTextureOptions = {
         .type = TextureType::TextureType2D,
         .format = m_depthFormat,
-        .extent = { m_window->width(), m_window->height(), 1 },
+        .extent = { m_swapchainExtent.width, m_swapchainExtent.height, 1 },
         .mipLevels = 1,
         .samples = m_samples.get(),
         .usage = TextureUsageFlagBits::DepthStencilAttachmentBit | m_depthTextureUsageFlags,
