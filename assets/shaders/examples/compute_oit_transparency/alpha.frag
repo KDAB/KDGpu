@@ -60,7 +60,8 @@ vec4 adsModel(vec4 color)
 void main()
 {
     // Get next free entry in fragments buffers
-    uint nodeIdx = atomicAdd(alphaFragments.nextIdx, 1);
+    // We treat 0 as the end of the linked list so we offset every value by 1
+    uint nodeIdx = atomicAdd(alphaFragments.nextIdx, 1) + 1;
 
     // If we still have room in the fragments buffers
     if (nodeIdx < alphaFragments.fragments.length()) {
