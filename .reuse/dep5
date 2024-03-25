@@ -24,7 +24,8 @@ Copyright: Christian Robertson
 License: Apache-2.0
 
 #misc config files
-Files: .krazy .clang-format .clang-tidy .cmake-format.py .codespellrc .gitignore .gitreview .mdlrc .mdlrc.rb .pre-commit-config.yaml docs/api/Doxyfile.cmake docs/api/doxybook/config.json docs/api/mkdocs/docs/stylesheets/kdab.css docs/api/mkdocs/requirements.txt docs/api/mkdocs/docs/javascripts/config.js kdgpu-log-config-example.toml  .turbine/generate_kdxr_resource/generate_kdxr_resource.rb .turbine/turbine.json examples/android/hello_triangle/.gitignore examples/android/hello_triangle/.gitignore examples/android/hello_triangle/app/src/main/assets/.gitignoreCopyright: Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+Files: .krazy .clang-format .clang-tidy .cmake-format.py .codespellrc .gitignore .gitreview .mdlrc .mdlrc.rb .pre-commit-config.yaml docs/api/Doxyfile.cmake docs/api/doxybook/config.json docs/api/mkdocs/docs/stylesheets/kdab.css docs/api/mkdocs/requirements.txt docs/api/mkdocs/docs/javascripts/config.js kdgpu-log-config-example.toml  .turbine/generate_kdxr_resource/generate_kdxr_resource.rb .turbine/turbine.json examples/android/hello_triangle/.gitignore examples/android/hello_triangle/.gitignore examples/android/hello_triangle/app/src/main/assets/.gitignore
+Copyright: Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
 License: BSD-3-Clause
 
 #android build system files
@@ -60,6 +61,6 @@ Files: examples/hello_triangle_apple/Application/* examples/hello_triangle_apple
 Copyright: © 2020 Apple Inc.
 License: LicenseRef-Apple-Sample-Code
 
-Files: examples/hello_triangle_apple/*.frag examples/hello_triangle_apple/*.vert
+Files: examples/hello_triangle_apple/*.frag examples/hello_triangle_apple/*.vert examples/hello_triangle_apple/Application/AppKit/macOS/Info.plist.in
 Copyright: 2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
 License: MIT
