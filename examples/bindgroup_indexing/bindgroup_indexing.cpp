@@ -54,8 +54,7 @@ void BindGroupIndexing::initializeScene()
     // Check that our device actually supports the Vulkan Descriptor Indexing features
     const AdapterFeatures &features = m_device.adapter()->features();
     if (!features.shaderUniformBufferArrayNonUniformIndexing ||
-        !features.runtimeBindGroupArray ||
-        !features.shaderUniformBufferArrayNonUniformIndexing) {
+        !features.runtimeBindGroupArray) {
         SPDLOG_CRITICAL("Dynamic BindGroup Indexing is not supported, can't run this example");
         exit(0);
     }
