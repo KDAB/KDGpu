@@ -15,4 +15,8 @@ find_dependency(KDGpuKDGui REQUIRED)
 find_dependency(KDFoundation REQUIRED)
 find_dependency(imgui REQUIRED)
 
+if (@KDGPU_OPENXR_SUPPORT@)
+    find_dependency(KDXr REQUIRED)
+endif ()
+
 include("${CMAKE_CURRENT_LIST_DIR}/KDGpuExampleTargets.cmake")
