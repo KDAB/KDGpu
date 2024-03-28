@@ -38,7 +38,7 @@ if(NOT TARGET KDGpu::KDGpu)
     message(STATUS "KDGpu was not found. Fetching from git")
     FetchContent_Declare(
         KDGpu
-        GIT_REPOSITORY ssh://alistair.baxter@codereview.kdab.com:29418/kdab/toy-renderer
+        GIT_REPOSITORY https://github.com/KDAB/KDGpu.git
         GIT_TAG 6f7885e4962d37b9df8b6da9779f3bdbf7680f44
     )
     FetchContent_MakeAvailable(KDGpu)
