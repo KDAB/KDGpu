@@ -20,10 +20,10 @@ message(STATUS "Checking/updating dependencies. This may take a little while...
 # KDUtils
 if(KDGPU_BUILD_TESTS OR KDGPU_BUILD_KDGPUKDGUI)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/kdutils.cmake)
-else()
-    # If not pulling in KDUtils, which itself pulls in spdlog, we must do it ourselves.
-    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/spdlog.cmake)
 endif()
+
+# spdlog
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/spdlog.cmake)
 
 # Vulkan & VMA
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/vulkan.cmake)
