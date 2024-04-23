@@ -284,7 +284,7 @@ void HelloTriangleMSAA::createRenderTarget()
     const TextureOptions options = {
         .type = TextureType::TextureType2D,
         .format = m_swapchainFormat,
-        .extent = { .width = m_window->width(), .height = m_window->height(), .depth = 1 },
+        .extent = { .width = m_swapchainExtent.width, .height = m_swapchainExtent.height, .depth = 1 },
         .mipLevels = 1,
         .samples = m_samples.get(),
         .usage = TextureUsageFlagBits::ColorAttachmentBit,
