@@ -326,7 +326,7 @@ void RenderToTexture::createOffscreenTexture()
     const TextureOptions colorTextureOptions = {
         .type = TextureType::TextureType2D,
         .format = m_colorFormat,
-        .extent = { m_window->width(), m_window->height(), 1 },
+        .extent = { m_swapchainExtent.width, m_swapchainExtent.height, 1 },
         .mipLevels = 1,
         .usage = TextureUsageFlagBits::ColorAttachmentBit | TextureUsageFlagBits::SampledBit,
         .memoryUsage = MemoryUsage::GpuOnly
