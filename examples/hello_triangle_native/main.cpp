@@ -219,12 +219,20 @@ int main()
 
     auto createSwapchain = [&] {
         const AdapterSwapchainProperties swapchainProperties = device.adapter()->swapchainProperties(surface);
+        const SurfaceCapabilities &surfaceCapabilities = swapchainProperties.capabilities;
 
         // Create a swapchain of images that we will render to.
+        const Extent2D swapchainExtent = {
+            .width = std::clamp(window.width(), surfaceCapabilities.minImageExtent.width,
+                                surfaceCapabilities.maxImageExtent.width),
+            .height = std::clamp(window.height(), surfaceCapabilities.minImageExtent.height,
+                                 surfaceCapabilities.maxImageExtent.height),
+        };
+
         const SwapchainOptions swapchainOptions = {
             .surface = surface.handle(),
             .minImageCount = getSuitableImageCount(swapchainProperties.capabilities),
-            .imageExtent = { .width = window.width(), .height = window.height() },
+            .imageExtent = { .width = swapchainExtent.width, .height = swapchainExtent.height },
             .oldSwapchain = swapchain,
         };
 
@@ -245,7 +253,7 @@ int main()
         const TextureOptions depthTextureOptions = {
             .type = TextureType::TextureType2D,
             .format = Format::D24_UNORM_S8_UINT,
-            .extent = { window.width(), window.height(), 1 },
+            .extent = { swapchainExtent.width, swapchainExtent.height, 1 },
             .mipLevels = 1,
             .usage = TextureUsageFlagBits::DepthStencilAttachmentBit,
             .memoryUsage = MemoryUsage::GpuOnly
@@ -397,11 +405,12 @@ int main()
             // This can happen when swapchain was resized
             // We need to recreate the swapchain and retry
             createSwapchain();
-            result = swapchain.getNextImageIndex(currentImageIndex, imageAvailableSemaphore);
+            continue;
         }
         //![11]
         if (result != AcquireImageResult::Success) {
             SPDLOG_LOGGER_ERROR(appLogger, "Unable to acquire swapchain image");
+            continue;
         }
 
         // Create a command encoder/recorder
