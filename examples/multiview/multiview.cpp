@@ -188,7 +188,7 @@ void MultiView::initializeMultiViewPass()
         .colorAttachments = {
                 { .view = m_multiViewColorOutputView,
                   .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
-                  .finalLayout = TextureLayout::ShaderReadOnlyOptimal },
+                  .finalLayout = TextureLayout::ColorAttachmentOptimal },
         },
         .depthStencilAttachment = { .view = m_multiViewDepthView },
         .viewCount = 2, // Enables multiview rendering
@@ -287,6 +287,22 @@ void MultiView::render()
     mvPass.draw(DrawCommand{ .vertexCount = 3 });
     mvPass.end();
     //![6]
+
+    // Wait for writes to multiview texture to have been completed
+    // Transition it to a shader read only layout
+    commandRecorder.textureMemoryBarrier(TextureMemoryBarrierOptions{
+            .srcStages = PipelineStageFlagBit::ColorAttachmentOutputBit,
+            .srcMask = AccessFlagBit::ColorAttachmentWriteBit,
+            .dstStages = PipelineStageFlagBit::FragmentShaderBit,
+            .dstMask = AccessFlagBit::ShaderReadBit,
+            .oldLayout = TextureLayout::ColorAttachmentOptimal,
+            .newLayout = TextureLayout::ShaderReadOnlyOptimal,
+            .texture = m_multiViewColorOutput,
+            .range = {
+                    .aspectMask = TextureAspectFlagBits::ColorBit,
+                    .levelCount = 1,
+            },
+    });
 
     //![8]
     // FullScreen Pass
