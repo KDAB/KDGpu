@@ -204,14 +204,9 @@ void HelloTriangle::render()
     opaquePass.end();
     m_commandBuffers[m_inFlightIndex] = commandRecorder.finish();
 
-    // Only await presentation completion if we have indeed presented
-    std::vector<Handle<GpuSemaphore_t>> waitSemaphores;
-    if (m_waitForPresentation)
-        waitSemaphores.emplace_back(m_presentCompleteSemaphores[m_inFlightIndex]);
-
     const SubmitOptions submitOptions = {
         .commandBuffers = { m_commandBuffers[m_inFlightIndex] },
-        .waitSemaphores = waitSemaphores,
+        .waitSemaphores = { m_presentCompleteSemaphores[m_inFlightIndex] }, // Wait for swapchain image acquisition
         .signalSemaphores = { m_renderCompleteSemaphores[m_inFlightIndex] },
         .signalFence = m_frameFences[m_inFlightIndex] // Signal Fence once submission and execution is complete
     };

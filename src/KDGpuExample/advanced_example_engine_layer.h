@@ -36,7 +36,6 @@ protected:
     void onDetached() override;
     void update() override;
 
-    bool m_waitForPresentation{ true };
     std::array<Fence, MAX_FRAMES_IN_FLIGHT> m_frameFences;
 };
 

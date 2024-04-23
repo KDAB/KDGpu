@@ -40,6 +40,22 @@ void AdvancedExampleEngineLayer::update()
     // Wait for Fence to be signal (should be done by the queue submission)
     m_frameFences[m_inFlightIndex].wait();
 
+    // Try to acquire image from swapchain
+    const auto result = m_swapchain.getNextImageIndex(m_currentSwapchainImageIndex,
+                                                      m_presentCompleteSemaphores[m_inFlightIndex]);
+    if (result == AcquireImageResult::OutOfDate) {
+        // We need to recreate swapchain
+        recreateSwapChain();
+        // Handle any changes that would be needed when a swapchain resize occurs
+        resize();
+    }
+
+    // Early return if we failed to retrieve the swapchain image (due to resize or other error)
+    // Note: m_presentCompleteSemaphores[m_inFlightIndex] is only valid if image acquisition succeeded
+    if (result != AcquireImageResult::Success) {
+        return;
+    }
+
     // Reset Fence so that we can submit it again
     m_frameFences[m_inFlightIndex].reset();
 
@@ -52,42 +68,22 @@ void AdvancedExampleEngineLayer::update()
     // Call updateScene() function to update scene state.
     updateScene();
 
-    m_waitForPresentation = true;
-
-    const auto result = m_swapchain.getNextImageIndex(m_currentSwapchainImageIndex,
-                                                      m_presentCompleteSemaphores[m_inFlightIndex]);
-    if (result == AcquireImageResult::OutOfDate) {
-        // We need to recreate swapchain
-        recreateSwapChain();
-        // Handle any changes that would be needed when a swapchain resize occurs
-        resize();
-        // We need to call render (to signal the frameFence and prevent a deadlock)
-        // but we should not present this frame
-        m_waitForPresentation = false;
-    } else if (result != AcquireImageResult::Success) {
-        // Something went wrong and we can't recover from it
-        return;
-    }
-
     // Call subclass render() function to record and submit drawing commands
     render();
 
-    if (!m_waitForPresentation)
-        return;
-
     // Present the swapchain image
-    // clang-format off
     PresentOptions presentOptions = {
         .waitSemaphores = { m_renderCompleteSemaphores[m_inFlightIndex] },
-        .swapchainInfos = {{
-            .swapchain = m_swapchain,
-            .imageIndex = m_currentSwapchainImageIndex
-        }}
+        .swapchainInfos = {
+                {
+                        .swapchain = m_swapchain,
+                        .imageIndex = m_currentSwapchainImageIndex,
+                },
+        }
     };
-    // clang-format on
     m_queue.present(presentOptions);
 
-    // Waiting for Fences at the beginning of this functions prevents
+    // Waiting for Fences in this functions prevents
     // us preparing more frames than MAX_FRAMES_IN_FLIGHT
 }
 
