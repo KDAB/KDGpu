@@ -1871,21 +1871,24 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
     assert(2 * options.colorAttachments.size() + 1 <= MaxAttachmentCount);
     std::array<VkClearValue, MaxAttachmentCount> vkClearValues;
     size_t clearIdx = 0;
+    bool isAnyOfTheAttachmentsToBeCleared = false;
     for (const auto &colorAttachment : options.colorAttachments) {
-        if (colorAttachment.loadOperation == AttachmentLoadOperation::Clear) {
-            VkClearValue vkClearValue = {};
-            vkClearValue.color.uint32[0] = colorAttachment.clearValue.uint32[0];
-            vkClearValue.color.uint32[1] = colorAttachment.clearValue.uint32[1];
-            vkClearValue.color.uint32[2] = colorAttachment.clearValue.uint32[2];
-            vkClearValue.color.uint32[3] = colorAttachment.clearValue.uint32[3];
-            vkClearValues[clearIdx++] = vkClearValue;
+        isAnyOfTheAttachmentsToBeCleared |= (colorAttachment.loadOperation == AttachmentLoadOperation::Clear);
+        VkClearValue vkClearValue = {};
+        vkClearValue.color.uint32[0] = colorAttachment.clearValue.uint32[0];
+        vkClearValue.color.uint32[1] = colorAttachment.clearValue.uint32[1];
+        vkClearValue.color.uint32[2] = colorAttachment.clearValue.uint32[2];
+        vkClearValue.color.uint32[3] = colorAttachment.clearValue.uint32[3];
+        vkClearValues[clearIdx++] = vkClearValue;
 
-            // Include resolve clear color again if using MSAA. Must match number of attachments.
-            if (usingMsaa)
-                vkClearValues[clearIdx++] = vkClearValue;
-        }
+        // Include resolve clear color again if using MSAA. Must match number of attachments.
+        if (usingMsaa)
+            vkClearValues[clearIdx++] = vkClearValue;
     }
-    if (options.depthStencilAttachment.view.isValid() && options.depthStencilAttachment.depthLoadOperation == AttachmentLoadOperation::Clear) {
+
+    if (options.depthStencilAttachment.view.isValid()) {
+        isAnyOfTheAttachmentsToBeCleared |= (options.depthStencilAttachment.depthLoadOperation == AttachmentLoadOperation::Clear ||
+                                             options.depthStencilAttachment.stencilLoadOperation == AttachmentLoadOperation::Clear);
         VkClearValue vkClearValue = {};
         vkClearValue.depthStencil.depth = options.depthStencilAttachment.depthClearValue;
         vkClearValue.depthStencil.stencil = options.depthStencilAttachment.stencilClearValue;
@@ -1898,7 +1901,7 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
         }
     }
 
-    renderPassInfo.clearValueCount = clearIdx;
+    renderPassInfo.clearValueCount = isAnyOfTheAttachmentsToBeCleared ? clearIdx : 0;
     renderPassInfo.pClearValues = vkClearValues.data();
 
     VulkanCommandRecorder *vulkanCommandRecorder = m_commandRecorders.get(commandRecorderHandle);

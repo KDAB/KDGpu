@@ -157,7 +157,6 @@ void DepthTextureLookup::initializeScene()
                             .view = {}, // Not setting the swapchain texture view just yet
                             .loadOperation = AttachmentLoadOperation::Load, // Don't clear color
                             .initialLayout = TextureLayout::ColorAttachmentOptimal,
-
                     },
             },
         };
