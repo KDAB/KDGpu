@@ -528,8 +528,8 @@ void Offscreen::createRenderTargets()
     // Insert a texture memory barrier to ensure the rendering to the color render target
     // is completed and to transition it into a layout suitable for copying from
     m_barriers[uint8_t(TextureBarriers::CopySrcPre)] = {
-        .srcStages = PipelineStageFlagBit::TransferBit,
-        .srcMask = AccessFlagBit::MemoryReadBit,
+        .srcStages = PipelineStageFlagBit::ColorAttachmentOutputBit,
+        .srcMask = AccessFlagBit::ColorAttachmentWriteBit,
         .dstStages = PipelineStageFlagBit::TransferBit,
         .dstMask = AccessFlagBit::TransferReadBit,
         .oldLayout = TextureLayout::ColorAttachmentOptimal,
