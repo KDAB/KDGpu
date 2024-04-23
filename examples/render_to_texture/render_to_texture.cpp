@@ -19,6 +19,7 @@
 #include <KDGpu/buffer_options.h>
 #include <KDGpu/graphics_pipeline_options.h>
 #include <KDGpu/texture_options.h>
+#include <KDGpu/memory_barrier.h>
 
 #include <imgui.h>
 
@@ -61,7 +62,6 @@ void RenderToTexture::initializeScene()
             {
                 .view = m_colorOutputView, // We always render to the color texture
                 .clearValue = { 0.0f, 0.0f, 0.0f, 1.0f },
-                .finalLayout = TextureLayout::ShaderReadOnlyOptimal
             }
         },
         .depthStencilAttachment = {
@@ -436,6 +436,37 @@ void RenderToTexture::render()
     opaquePass.setBindGroup(0, m_transformBindGroup);
     opaquePass.drawIndexed(DrawIndexedCommand{ .indexCount = 3 });
     opaquePass.end();
+
+    // Wait for Pass1 writes to offscreen texture to have been completed
+    // Transition it to a shader read only layout
+    commandRecorder.textureMemoryBarrier(TextureMemoryBarrierOptions{
+            .srcStages = PipelineStageFlagBit::ColorAttachmentOutputBit,
+            .srcMask = AccessFlagBit::ColorAttachmentWriteBit,
+            .dstStages = PipelineStageFlagBit::FragmentShaderBit,
+            .dstMask = AccessFlagBit::ShaderReadBit,
+            .oldLayout = TextureLayout::ColorAttachmentOptimal,
+            .newLayout = TextureLayout::ShaderReadOnlyOptimal,
+            .texture = m_colorOutput,
+            .range = {
+                    .aspectMask = TextureAspectFlagBits::ColorBit,
+                    .levelCount = 1,
+            },
+    });
+
+    // Wait for Pass1 writes to depth texture to have been completed
+    commandRecorder.textureMemoryBarrier(KDGpu::TextureMemoryBarrierOptions{
+            .srcStages = PipelineStageFlagBit::AllGraphicsBit,
+            .srcMask = AccessFlagBit::DepthStencilAttachmentWriteBit,
+            .dstStages = PipelineStageFlagBit::TopOfPipeBit,
+            .dstMask = AccessFlagBit::None,
+            .oldLayout = TextureLayout::DepthStencilAttachmentOptimal,
+            .newLayout = TextureLayout::DepthStencilAttachmentOptimal,
+            .texture = m_depthTexture,
+            .range = {
+                    .aspectMask = TextureAspectFlagBits::DepthBit | TextureAspectFlagBits::StencilBit,
+                    .levelCount = 1,
+            },
+    });
 
     // Pass 2: Post process
     m_finalPassOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex);
