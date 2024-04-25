@@ -17,7 +17,7 @@ elseif(NOT TARGET KDUtils)
         FetchContent_Declare(
             KDUtils
             GIT_REPOSITORY https://github.com/KDAB/KDUtils.git
-            GIT_TAG main
+            GIT_TAG kdbinding_1.1.0_beta
             USES_TERMINAL_DOWNLOAD YES USES_TERMINAL_UPDATE YES
         )
 
