@@ -37,6 +37,22 @@ function(CompileShader target shader output)
     )
 endfunction()
 
+function(CompileRTShader target shader output)
+    add_custom_command(
+        OUTPUT ${output}
+        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${shader}
+        COMMAND ${Vulkan_GLSLANG_VALIDATOR_EXECUTABLE} --quiet --target-env vulkan1.2
+                ${CMAKE_CURRENT_SOURCE_DIR}/${shader} -o ${output}
+        COMMENT "Compile shader ${shader} using glslangValidator"
+    )
+
+    add_custom_target(
+        ${target}
+        DEPENDS ${output}
+        COMMENT "Target to compile a shader"
+    )
+endfunction()
+
 # Compile s shader set
 function(CompileShaderSet target name)
     # TODO: in future we probably want to check which shaders we have instead of assuming vert/frag

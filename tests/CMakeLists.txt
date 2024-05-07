@@ -64,6 +64,7 @@ add_subdirectory(timestamp_query_recorder)
 add_subdirectory(memory_stats)
 add_subdirectory(vulkanrenderpasskey)
 add_subdirectory(acceleration_structure)
+add_subdirectory(raytracing_pipeline)
 
 find_package(CUDAToolkit QUIET)
 if(${CUDAToolkit_FOUND})
