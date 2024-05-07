@@ -98,6 +98,7 @@ struct KDGPU_EXPORT VulkanDevice : public ApiDevice {
     PFN_vkCreateAccelerationStructureKHR vkCreateAccelerationStructureKHR{ nullptr };
     PFN_vkDestroyAccelerationStructureKHR vkDestroyAccelerationStructureKHR{ nullptr };
     PFN_vkGetAccelerationStructureBuildSizesKHR vkGetAccelerationStructureBuildSizesKHR{ nullptr };
+    PFN_vkCreateRayTracingPipelinesKHR vkCreateRayTracingPipelinesKHR{ nullptr };
 
     bool isOwned{ true };
 };

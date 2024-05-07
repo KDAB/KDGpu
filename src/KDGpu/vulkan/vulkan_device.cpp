@@ -121,6 +121,17 @@ VulkanDevice::VulkanDevice(VkDevice _device,
         }
     }
 
+    if (vulkanAdapter->queryAdapterFeatures().rayTracingPipeline) {
+        const auto adapterExtensions = vulkanAdapter->extensions();
+        for (const auto &extension : adapterExtensions) {
+            if (extension.name == VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME) {
+                PFN_vkCreateRayTracingPipelinesKHR vkCreateRayTracingPipelinesKHR = PFN_vkCreateRayTracingPipelinesKHR(
+                        vkGetDeviceProcAddr(device, "vkCreateRayTracingPipelinesKHR"));
+                this->vkCreateRayTracingPipelinesKHR = vkCreateRayTracingPipelinesKHR;
+            }
+        }
+    }
+
 #if defined(KDGPU_PLATFORM_LINUX)
     vkGetSemaphoreFdKHR = (PFN_vkGetSemaphoreFdKHR)vkGetDeviceProcAddr(device, "vkGetSemaphoreFdKHR");
     vkGetFenceFdKHR = (PFN_vkGetFenceFdKHR)vkGetDeviceProcAddr(device, "vkGetFenceFdKHR");
