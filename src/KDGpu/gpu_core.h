@@ -1184,6 +1184,12 @@ enum class GeometryInstanceFlagBits {
 };
 using GeometryInstanceFlags = KDGpu::Flags<GeometryInstanceFlagBits>;
 
+enum class RayTracingShaderGroupType {
+    General = 0,
+    TrianglesHit = 1,
+    ProceduralHit = 2,
+};
+
 /*! @} */
 
 } // namespace KDGpu

@@ -420,4 +420,9 @@ VkGeometryInstanceFlagsKHR geometryInstanceFlagsToVkGeometryInstanceFlags(Geomet
     return static_cast<VkGeometryInstanceFlagsKHR>(flags.toInt());
 }
 
+VkRayTracingShaderGroupTypeKHR rayTracingShaderGroupTypeToVkRayTracingShaderGroupType(RayTracingShaderGroupType type)
+{
+    return static_cast<VkRayTracingShaderGroupTypeKHR>(type);
+}
+
 } // namespace KDGpu
