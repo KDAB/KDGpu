@@ -147,6 +147,9 @@ AdapterAndDevice Instance::createDefaultDevice(const Surface &surface,
     const bool supportsAccelerationStructures = selectedAdapter->features().accelerationStructures;
     SPDLOG_LOGGER_INFO(Logger::logger(), "Supports acceleration structures: {}", supportsAccelerationStructures);
 
+    const bool supportsRayTracing = selectedAdapter->features().rayTracingPipeline;
+    SPDLOG_LOGGER_INFO(Logger::logger(), "Supports raytracing: {}", supportsRayTracing);
+
     // Now we can create a device from the selected adapter that we can then use to interact with the GPU.
     auto device = selectedAdapter->createDevice(DeviceOptions{
             .requestedFeatures = selectedAdapter->features() });
