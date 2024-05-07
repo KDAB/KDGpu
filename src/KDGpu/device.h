@@ -28,6 +28,7 @@
 #include <KDGpu/swapchain.h>
 #include <KDGpu/acceleration_structure.h>
 #include <KDGpu/acceleration_structure_options.h>
+#include <KDGpu/raytracing_pipeline.h>
 
 #include <KDGpu/kdgpu_export.h>
 
@@ -51,6 +52,7 @@ struct BindGroupOptions;
 struct BindGroupLayoutOptions;
 struct BindGroupEntry;
 struct ComputePipelineOptions;
+struct RayTracingPipelineOptions;
 
 class KDGPU_EXPORT Device
 {
@@ -91,6 +93,8 @@ public:
     GraphicsPipeline createGraphicsPipeline(const GraphicsPipelineOptions &options);
 
     ComputePipeline createComputePipeline(const ComputePipelineOptions &options);
+
+    RayTracingPipeline createRayTracingPipeline(const RayTracingPipelineOptions &options);
 
     CommandRecorder createCommandRecorder(const CommandRecorderOptions &options = CommandRecorderOptions());
 

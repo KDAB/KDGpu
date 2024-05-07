@@ -154,6 +154,11 @@ ComputePipeline Device::createComputePipeline(const ComputePipelineOptions &opti
     return ComputePipeline(m_api, m_device, options);
 }
 
+RayTracingPipeline Device::createRayTracingPipeline(const RayTracingPipelineOptions &options)
+{
+    return RayTracingPipeline(m_api, m_device, options);
+}
+
 CommandRecorder Device::createCommandRecorder(const CommandRecorderOptions &options)
 {
     return CommandRecorder(m_api, m_device, options);

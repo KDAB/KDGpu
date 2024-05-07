@@ -40,6 +40,7 @@
 #include <KDGpu/vulkan/vulkan_texture_view.h>
 #include <KDGpu/vulkan/vulkan_timestamp_query_recorder.h>
 #include <KDGpu/vulkan/vulkan_acceleration_structure.h>
+#include <KDGpu/vulkan/vulkan_raytracing_pipeline.h>
 
 #include <KDGpu/kdgpu_export.h>
 
@@ -122,6 +123,10 @@ public:
     Handle<ComputePipeline_t> createComputePipeline(const Handle<Device_t> &deviceHandle, const ComputePipelineOptions &options) final;
     void deleteComputePipeline(const Handle<ComputePipeline_t> &handle) final;
     VulkanComputePipeline *getComputePipeline(const Handle<ComputePipeline_t> &handle) const final;
+
+    Handle<RayTracingPipeline_t> createRayTracingPipeline(const Handle<Device_t> &deviceHandle, const RayTracingPipelineOptions &options) final;
+    void deleteRayTracingPipeline(const Handle<RayTracingPipeline_t> &handle) final;
+    VulkanRayTracingPipeline *getRayTracingPipeline(const Handle<RayTracingPipeline_t> &handle) const final;
 
     Handle<GpuSemaphore_t> createGpuSemaphore(const Handle<Device_t> &deviceHandle, const GpuSemaphoreOptions &options) final;
     void deleteGpuSemaphore(const Handle<GpuSemaphore_t> &handle) final;
@@ -247,6 +252,7 @@ private:
     Pool<VulkanBindGroup, BindGroup_t> m_bindGroups{ 128 };
     Pool<VulkanGraphicsPipeline, GraphicsPipeline_t> m_graphicsPipelines{ 64 };
     Pool<VulkanComputePipeline, ComputePipeline_t> m_computePipelines{ 64 };
+    Pool<VulkanRayTracingPipeline, RayTracingPipeline_t> m_rayTracingPipelines{ 64 };
     Pool<VulkanGpuSemaphore, GpuSemaphore_t> m_gpuSemaphores{ 32 };
     Pool<VulkanCommandRecorder, CommandRecorder_t> m_commandRecorders{ 32 };
     Pool<VulkanRenderPassCommandRecorder, RenderPassCommandRecorder_t> m_renderPassCommandRecorders{ 32 };

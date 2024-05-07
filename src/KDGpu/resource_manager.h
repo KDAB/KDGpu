@@ -18,10 +18,10 @@
 #include <KDGpu/queue_description.h>
 #include <KDGpu/bind_group_options.h>
 #include <KDGpu/command_recorder.h>
-#include <KDGpu/acceleration_structure_options.h>
 
 namespace KDGpu {
 
+struct ApiAccelerationStructure;
 struct ApiAdapter;
 struct ApiBindGroup;
 struct ApiBindGroupLayout;
@@ -37,6 +37,7 @@ struct ApiGraphicsPipeline;
 struct ApiInstance;
 struct ApiPipelineLayout;
 struct ApiQueue;
+struct ApiRayTracingPipeline;
 struct ApiRenderPass;
 struct ApiRenderPassCommandRecorder;
 struct ApiSampler;
@@ -46,8 +47,8 @@ struct ApiSurface;
 struct ApiTexture;
 struct ApiTextureView;
 struct ApiTimestampQueryRecorder;
-struct ApiAccelerationStructure;
 
+struct AccelerationStructureOptions;
 struct BindGroupOptions;
 struct BufferOptions;
 struct CommandRecorderOptions;
@@ -58,37 +59,39 @@ struct GpuSemaphoreOptions;
 struct GraphicsPipelineOptions;
 struct InstanceOptions;
 struct PipelineLayoutOptions;
+struct RayTracingPipelineOptions;
 struct RenderPassCommandRecorderOptions;
 struct SamplerOptions;
 struct TextureOptions;
 struct TextureViewOptions;
 struct TimestampQueryRecorderOptions;
 
+struct AccelerationStructure_t;
+struct Adapter_t;
 struct BindGroup_t;
+struct BindGroupLayout_t;
+struct Buffer_t;
+struct CommandBuffer_t;
 struct CommandRecorder_t;
+struct ComputePassCommandRecorder_t;
 struct ComputePipeline_t;
+struct Device_t;
 struct Fence_t;
+struct GpuSemaphore_t;
 struct GraphicsPipeline_t;
+struct Instance_t;
 struct PipelineLayout_t;
+struct Queue_t;
+struct RayTracingPipeline_t;
 struct RenderPass_t;
+struct RenderPassCommandRecorder_t;
 struct Sampler_t;
 struct ShaderModule_t;
-struct Adapter_t;
-struct Instance_t;
 struct Surface_t;
-struct Device_t;
-struct Queue_t;
 struct Swapchain_t;
 struct Texture_t;
 struct TextureView_t;
-struct Buffer_t;
-struct GpuSemaphore_t;
-struct RenderPassCommandRecorder_t;
-struct ComputePassCommandRecorder_t;
 struct TimestampQueryRecorder_t;
-struct CommandBuffer_t;
-struct BindGroupLayout_t;
-struct AccelerationStructure_t;
 
 // TODO: Should this class have create/destroy functions or should we put those onto the
 // parent resource type structs? For example VulkanDevice could have a createTexture()
@@ -159,6 +162,10 @@ public:
     virtual Handle<ComputePipeline_t> createComputePipeline(const Handle<Device_t> &deviceHandle, const ComputePipelineOptions &options) = 0;
     virtual void deleteComputePipeline(const Handle<ComputePipeline_t> &handle) = 0;
     virtual ApiComputePipeline *getComputePipeline(const Handle<ComputePipeline_t> &handle) const = 0;
+
+    virtual Handle<RayTracingPipeline_t> createRayTracingPipeline(const Handle<Device_t> &deviceHandle, const RayTracingPipelineOptions &options) = 0;
+    virtual void deleteRayTracingPipeline(const Handle<RayTracingPipeline_t> &handle) = 0;
+    virtual ApiRayTracingPipeline *getRayTracingPipeline(const Handle<RayTracingPipeline_t> &handle) const = 0;
 
     virtual Handle<GpuSemaphore_t> createGpuSemaphore(const Handle<Device_t> &deviceHandle, const GpuSemaphoreOptions &options) = 0;
     virtual void deleteGpuSemaphore(const Handle<GpuSemaphore_t> &handle) = 0;

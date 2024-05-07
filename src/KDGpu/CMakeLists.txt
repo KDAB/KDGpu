@@ -29,6 +29,7 @@ set(SOURCES
     instance.cpp
     pipeline_layout.cpp
     queue.cpp
+    raytracing_pipeline.cpp
     render_pass_command_recorder.cpp
     resource_manager.cpp
     sampler.cpp
@@ -59,6 +60,7 @@ set(SOURCES
     vulkan/vulkan_instance.cpp
     vulkan/vulkan_pipeline_layout.cpp
     vulkan/vulkan_queue.cpp
+    vulkan/vulkan_raytracing_pipeline.cpp
     vulkan/vulkan_render_pass.cpp
     vulkan/vulkan_render_pass_command_recorder.cpp
     vulkan/vulkan_resource_manager.cpp
@@ -109,6 +111,8 @@ set(HEADERS
     pool.h
     queue.h
     queue_description.h
+    raytracing_pipeline.h
+    raytracing_pipeline_options.h
     render_pass_command_recorder.h
     render_pass_command_recorder_options.h
     resource_manager.h
@@ -141,6 +145,7 @@ set(HEADERS
     api/api_instance.h
     api/api_pipeline_layout.h
     api/api_queue.h
+    api/api_raytracing_pipeline.h
     api/api_render_pass.h
     api/api_render_pass_command_recorder.h
     api/api_sampler.h
@@ -175,6 +180,7 @@ set(HEADERS
     vulkan/vulkan_instance.h
     vulkan/vulkan_pipeline_layout.h
     vulkan/vulkan_queue.h
+    vulkan/vulkan_raytracing_pipeline.h
     vulkan/vulkan_render_pass.h
     vulkan/vulkan_render_pass_command_recorder.h
     vulkan/vulkan_resource_manager.h

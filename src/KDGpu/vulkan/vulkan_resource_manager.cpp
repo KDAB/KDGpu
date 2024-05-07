@@ -16,6 +16,7 @@
 #include <vulkan/vulkan_win32.h>
 #endif
 
+#include <KDGpu/acceleration_structure_options.h>
 #include <KDGpu/bind_group_options.h>
 #include <KDGpu/bind_group_layout_options.h>
 #include <KDGpu/buffer_options.h>
@@ -25,6 +26,7 @@
 #include <KDGpu/sampler_options.h>
 #include <KDGpu/swapchain_options.h>
 #include <KDGpu/texture_options.h>
+#include <KDGpu/raytracing_pipeline_options.h>
 #include <KDGpu/vulkan/vulkan_config.h>
 #include <KDGpu/vulkan/vulkan_enums.h>
 #include <KDGpu/vulkan/vulkan_formatters.h>
@@ -1522,6 +1524,122 @@ void VulkanResourceManager::deleteComputePipeline(const Handle<ComputePipeline_t
 VulkanComputePipeline *VulkanResourceManager::getComputePipeline(const Handle<ComputePipeline_t> &handle) const
 {
     return m_computePipelines.get(handle);
+}
+
+Handle<RayTracingPipeline_t> VulkanResourceManager::createRayTracingPipeline(const Handle<Device_t> &deviceHandle,
+                                                                             const RayTracingPipelineOptions &options)
+{
+    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
+
+    // Fetch the specified pipeline layout
+    VulkanPipelineLayout *vulkanPipelineLayout = getPipelineLayout(options.layout);
+    if (!vulkanPipelineLayout) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Invalid pipeline layout requested");
+        return {};
+    }
+
+    // Shader stages
+    ShaderStagesInfo shaderStagesInfo;
+    if (!fillShaderStageInfos(options.shaderStages, shaderStagesInfo)) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Failed to build shader stages info for Pipeline");
+        return {};
+    }
+
+    // Shader groups
+    std::vector<VkRayTracingShaderGroupCreateInfoKHR> shaderGroupsInfo;
+    shaderGroupsInfo.reserve(options.shaderGroups.size());
+
+    for (const RayTracingShaderGroupOptions &group : options.shaderGroups) {
+        VkRayTracingShaderGroupCreateInfoKHR groupInfo{};
+        groupInfo.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR;
+        groupInfo.type = rayTracingShaderGroupTypeToVkRayTracingShaderGroupType(group.type);
+        groupInfo.generalShader = VK_SHADER_UNUSED_KHR;
+        groupInfo.closestHitShader = VK_SHADER_UNUSED_KHR;
+        groupInfo.anyHitShader = VK_SHADER_UNUSED_KHR;
+        groupInfo.intersectionShader = VK_SHADER_UNUSED_KHR;
+
+        switch (group.type) {
+        case RayTracingShaderGroupType::General: {
+            groupInfo.generalShader = group.generalShaderIndex.value();
+            break;
+        };
+        case RayTracingShaderGroupType::ProceduralHit: {
+            groupInfo.intersectionShader = group.intersectionShaderIndex.value();
+            groupInfo.anyHitShader = group.anyHitShaderIndex.has_value() ? group.anyHitShaderIndex.value() : VK_SHADER_UNUSED_KHR;
+            groupInfo.closestHitShader = group.closestHitShaderIndex.has_value() ? group.closestHitShaderIndex.value() : VK_SHADER_UNUSED_KHR;
+            break;
+        };
+        case RayTracingShaderGroupType::TrianglesHit: {
+            groupInfo.anyHitShader = group.anyHitShaderIndex.has_value() ? group.anyHitShaderIndex.value() : VK_SHADER_UNUSED_KHR;
+            groupInfo.closestHitShader = group.closestHitShaderIndex.has_value() ? group.closestHitShaderIndex.value() : VK_SHADER_UNUSED_KHR;
+            break;
+        };
+        }
+
+        shaderGroupsInfo.emplace_back(groupInfo);
+    };
+
+    // Dynamic pipeline state.
+    std::vector<VkDynamicState> dynamicStates = {
+        // VK_DYNAMIC_STATE_RAY_TRACING_PIPELINE_STACK_SIZE_KHR
+    };
+
+    VkPipelineDynamicStateCreateInfo dynamicStateInfo{};
+    dynamicStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+    dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
+    dynamicStateInfo.pDynamicStates = dynamicStates.data();
+    dynamicStateInfo.flags = 0;
+
+    // MaxRecursionDepth
+    uint32_t maxRecursionDepth = options.maxRecursionDepth;
+    if (maxRecursionDepth == 0) {
+        VulkanAdapter *vulkanAdapter = getAdapter(vulkanDevice->adapterHandle);
+        maxRecursionDepth = vulkanAdapter->queryAdapterProperties().rayTracingProperties.maxRayRecursionDepth;
+    }
+
+    VkRayTracingPipelineCreateInfoKHR pipelineInfo = {};
+    pipelineInfo.sType = VK_STRUCTURE_TYPE_RAY_TRACING_PIPELINE_CREATE_INFO_KHR;
+    pipelineInfo.stageCount = static_cast<uint32_t>(shaderStagesInfo.shaderInfos.size());
+    pipelineInfo.pStages = shaderStagesInfo.shaderInfos.data();
+    pipelineInfo.groupCount = static_cast<uint32_t>(shaderGroupsInfo.size());
+    pipelineInfo.pGroups = shaderGroupsInfo.data();
+    pipelineInfo.maxPipelineRayRecursionDepth = maxRecursionDepth;
+    pipelineInfo.pDynamicState = &dynamicStateInfo;
+    pipelineInfo.layout = vulkanPipelineLayout->pipelineLayout;
+
+    VkPipeline vkPipeline{ VK_NULL_HANDLE };
+
+    assert(vulkanDevice->vkCreateRayTracingPipelinesKHR != nullptr);
+    if (auto result = vulkanDevice->vkCreateRayTracingPipelinesKHR(vulkanDevice->device, VK_NULL_HANDLE, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &vkPipeline); result != VK_SUCCESS) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating raytracing pipeline: {}", result);
+        return {};
+    }
+
+    setObjectName(vulkanDevice, VK_OBJECT_TYPE_PIPELINE, reinterpret_cast<uint64_t>(vkPipeline), options.label);
+
+    // Create VulkanPipeline object and return handle
+    const auto vulkanRayTracingPipelineHandle = m_rayTracingPipelines.emplace(VulkanRayTracingPipeline(
+            vkPipeline,
+            this,
+            deviceHandle,
+            options.layout));
+
+    return vulkanRayTracingPipelineHandle;
+}
+
+void VulkanResourceManager::deleteRayTracingPipeline(const Handle<RayTracingPipeline_t> &handle)
+{
+    VulkanRayTracingPipeline *vulkanPipeline = m_rayTracingPipelines.get(handle);
+    VulkanDevice *vulkanDevice = m_devices.get(vulkanPipeline->deviceHandle);
+
+    vkDestroyPipeline(vulkanDevice->device, vulkanPipeline->pipeline, nullptr);
+
+    m_rayTracingPipelines.remove(handle);
+}
+
+VulkanRayTracingPipeline *VulkanResourceManager::getRayTracingPipeline(const Handle<RayTracingPipeline_t> &handle) const
+{
+    return m_rayTracingPipelines.get(handle);
 }
 
 Handle<GpuSemaphore_t> VulkanResourceManager::createGpuSemaphore(const Handle<Device_t> &deviceHandle, const GpuSemaphoreOptions &options)
