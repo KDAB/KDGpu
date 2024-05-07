@@ -55,6 +55,7 @@ namespace KDGpu {
 
 struct RenderTargetOptions;
 struct DepthStencilOptions;
+struct ShaderStage;
 
 class KDGPU_EXPORT VulkanResourceManager final : public ResourceManager
 {
@@ -208,6 +209,16 @@ private:
                                                VkSubpassDescriptionDepthStencilResolve &depthResolve,
                                                const DepthStencilOptions &depthStencilAttachment,
                                                SampleCountFlagBits samples);
+
+    struct ShaderStagesInfo {
+        std::vector<VkPipelineShaderStageCreateInfo> shaderInfos;
+        std::vector<VkSpecializationInfo> shaderSpecializationInfos;
+        std::vector<std::vector<VkSpecializationMapEntry>> shaderSpecializationMapEntries;
+        std::vector<std::vector<uint8_t>> shaderSpecializationRawData;
+    };
+
+    bool fillShaderStageInfos(const std::vector<ShaderStage> &stages,
+                              ShaderStagesInfo &shaderStagesInfo);
 
     template<typename ColorAtt, typename DepthAtt>
     Handle<RenderPass_t> createRenderPass(const Handle<Device_t> &deviceHandle,

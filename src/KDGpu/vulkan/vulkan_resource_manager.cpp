@@ -1157,65 +1157,18 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
 {
     VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
 
+    // Fetch the specified pipeline layout
+    VulkanPipelineLayout *vulkanPipelineLayout = getPipelineLayout(options.layout);
+    if (!vulkanPipelineLayout) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Invalid pipeline layout requested");
+        return {};
+    }
+
     // Shader stages
-    std::vector<VkPipelineShaderStageCreateInfo> shaderInfos;
-    const uint32_t shaderCount = static_cast<uint32_t>(options.shaderStages.size());
-    shaderInfos.reserve(shaderCount);
-
-    std::vector<VkSpecializationInfo> shaderSpecializationInfos(shaderCount);
-    std::vector<std::vector<VkSpecializationMapEntry>> shaderSpecializationMapEntries(shaderCount);
-    std::vector<std::vector<uint8_t>> shaderSpecializationRawData(shaderCount);
-
-    for (uint32_t i = 0; i < shaderCount; ++i) {
-        const auto &shaderStage = options.shaderStages.at(i);
-
-        VkPipelineShaderStageCreateInfo shaderInfo = {};
-        shaderInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        shaderInfo.stage = shaderStageFlagBitsToVkShaderStageFlagBits(shaderStage.stage);
-
-        // Lookup the shader module
-        const auto vulkanShaderModule = getShaderModule(shaderStage.shaderModule);
-        if (!vulkanShaderModule)
-            return {};
-        shaderInfo.module = vulkanShaderModule->shaderModule;
-        shaderInfo.pName = shaderStage.entryPoint.data();
-
-        // Specialization Constants
-        if (!shaderStage.specializationConstants.empty()) {
-            std::vector<VkSpecializationMapEntry> &specializationConstantEntries = shaderSpecializationMapEntries[i];
-            std::vector<uint8_t> &specializationRawData = shaderSpecializationRawData[i];
-            uint32_t byteOffset = 0;
-
-            const size_t specializationConstantsCount = shaderStage.specializationConstants.size();
-            specializationConstantEntries.reserve(specializationConstantsCount);
-
-            for (size_t sCI = 0; sCI < specializationConstantsCount; ++sCI) {
-                const SpecializationConstant &specializationConstant = shaderStage.specializationConstants[sCI];
-                const SpecializationConstantData &specializationConstantData = getByteOffsetSizeAndRawValueForSpecializationConstant(specializationConstant);
-
-                specializationConstantEntries.emplace_back(VkSpecializationMapEntry{
-                        .constantID = specializationConstant.constantId,
-                        .offset = byteOffset,
-                        .size = specializationConstantData.byteSize,
-                });
-
-                // Append Raw Byte Values
-                const std::vector<uint8_t> &rawData = specializationConstantData.byteValues;
-                specializationRawData.insert(specializationRawData.end(), rawData.begin(), rawData.end());
-
-                // Increase offset
-                byteOffset += specializationConstantData.byteSize;
-            }
-
-            VkSpecializationInfo &specializationInfo = shaderSpecializationInfos[i];
-            specializationInfo.mapEntryCount = specializationConstantsCount;
-            specializationInfo.pMapEntries = specializationConstantEntries.data();
-            specializationInfo.dataSize = specializationRawData.size();
-            specializationInfo.pData = specializationRawData.data();
-            shaderInfo.pSpecializationInfo = &specializationInfo;
-        }
-
-        shaderInfos.emplace_back(shaderInfo);
+    ShaderStagesInfo shaderStagesInfo;
+    if (!fillShaderStageInfos(options.shaderStages, shaderStagesInfo)) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Failed to build shader stages info for Pipeline");
+        return {};
     }
 
     // Vertex input
@@ -1370,13 +1323,6 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     viewportState.scissorCount = 1;
     viewportState.pScissors = nullptr; // Provided by dynamic state
 
-    // Fetch the specified pipeline layout
-    VulkanPipelineLayout *vulkanPipelineLayout = getPipelineLayout(options.layout);
-    if (!vulkanPipelineLayout) {
-        SPDLOG_LOGGER_ERROR(Logger::logger(), "Invalid pipeline layout requested");
-        return {};
-    }
-
     // TODO: Investigate using VK_KHR_dynamic_rendering (core in Vulkan 1.3).
     //       Do the other graphics APIs have an equivalent or perhaps they default
     //       to that sort of model? We also need this to be supported across all
@@ -1415,8 +1361,8 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
     pipelineInfo.basePipelineIndex = -1;
-    pipelineInfo.stageCount = static_cast<uint32_t>(shaderInfos.size());
-    pipelineInfo.pStages = shaderInfos.data();
+    pipelineInfo.stageCount = static_cast<uint32_t>(shaderStagesInfo.shaderInfos.size());
+    pipelineInfo.pStages = shaderStagesInfo.shaderInfos.data();
     pipelineInfo.pVertexInputState = &vertexInputState;
     pipelineInfo.pInputAssemblyState = &inputAssembly;
     pipelineInfo.pTessellationState = &tessellationStateInfo;
@@ -2863,6 +2809,69 @@ KDGpu::Format VulkanResourceManager::formatFromTextureView(const Handle<KDGpu::T
     }
 
     return texture->format;
+}
+
+bool VulkanResourceManager::fillShaderStageInfos(const std::vector<ShaderStage> &stages,
+                                                 ShaderStagesInfo &shaderStagesInfo)
+{
+    const uint32_t shaderCount = static_cast<uint32_t>(stages.size());
+    shaderStagesInfo.shaderInfos.reserve(shaderCount);
+    shaderStagesInfo.shaderSpecializationInfos.resize(shaderCount);
+    shaderStagesInfo.shaderSpecializationMapEntries.resize(shaderCount);
+    shaderStagesInfo.shaderSpecializationRawData.resize(shaderCount);
+
+    for (uint32_t i = 0; i < shaderCount; ++i) {
+        const auto &shaderStage = stages.at(i);
+
+        VkPipelineShaderStageCreateInfo shaderInfo = {};
+        shaderInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        shaderInfo.stage = shaderStageFlagBitsToVkShaderStageFlagBits(shaderStage.stage);
+
+        // Lookup the shader module
+        const auto vulkanShaderModule = getShaderModule(shaderStage.shaderModule);
+        if (!vulkanShaderModule)
+            return false;
+        shaderInfo.module = vulkanShaderModule->shaderModule;
+        shaderInfo.pName = shaderStage.entryPoint.data();
+
+        // Specialization Constants
+        if (!shaderStage.specializationConstants.empty()) {
+            std::vector<VkSpecializationMapEntry> &specializationConstantEntries = shaderStagesInfo.shaderSpecializationMapEntries[i];
+            std::vector<uint8_t> &specializationRawData = shaderStagesInfo.shaderSpecializationRawData[i];
+            uint32_t byteOffset = 0;
+
+            const size_t specializationConstantsCount = shaderStage.specializationConstants.size();
+            specializationConstantEntries.reserve(specializationConstantsCount);
+
+            for (size_t sCI = 0; sCI < specializationConstantsCount; ++sCI) {
+                const SpecializationConstant &specializationConstant = shaderStage.specializationConstants[sCI];
+                const SpecializationConstantData &specializationConstantData = getByteOffsetSizeAndRawValueForSpecializationConstant(specializationConstant);
+
+                specializationConstantEntries.emplace_back(VkSpecializationMapEntry{
+                        .constantID = specializationConstant.constantId,
+                        .offset = byteOffset,
+                        .size = specializationConstantData.byteSize,
+                });
+
+                // Append Raw Byte Values
+                const std::vector<uint8_t> &rawData = specializationConstantData.byteValues;
+                specializationRawData.insert(specializationRawData.end(), rawData.begin(), rawData.end());
+
+                // Increase offset
+                byteOffset += specializationConstantData.byteSize;
+            }
+
+            VkSpecializationInfo &specializationInfo = shaderStagesInfo.shaderSpecializationInfos[i];
+            specializationInfo.mapEntryCount = specializationConstantsCount;
+            specializationInfo.pMapEntries = specializationConstantEntries.data();
+            specializationInfo.dataSize = specializationRawData.size();
+            specializationInfo.pData = specializationRawData.data();
+            shaderInfo.pSpecializationInfo = &specializationInfo;
+        }
+
+        shaderStagesInfo.shaderInfos.emplace_back(shaderInfo);
+    }
+    return true;
 }
 
 std::vector<std::string> VulkanResourceManager::getAvailableLayers() const
