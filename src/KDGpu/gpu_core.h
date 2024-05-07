@@ -710,6 +710,8 @@ enum class VertexRate {
 enum class IndexType {
     Uint16 = 0,
     Uint32 = 1,
+    None = 1000165000,
+    Uint8 = 1000265000,
     MaxEnum = 0x7fffffff
 };
 

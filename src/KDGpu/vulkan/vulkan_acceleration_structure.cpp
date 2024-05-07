@@ -18,13 +18,15 @@ VulkanAccelerationStructure::VulkanAccelerationStructure(Handle<Device_t> _devic
                                                          VulkanResourceManager *_vulkanResourceManager,
                                                          VkAccelerationStructureKHR _accelerationStructure,
                                                          Handle<Buffer_t> _backingBuffer,
-                                                         Handle<Buffer_t> _scratchBuffer)
+                                                         Handle<Buffer_t> _scratchBuffer,
+                                                         AccelerationStructureType _type)
     : ApiAccelerationStructure()
     , deviceHandle(_deviceHandle)
     , vulkanResourceManager(_vulkanResourceManager)
     , accelerationStructure(_accelerationStructure)
     , backingBuffer(_backingBuffer)
     , scratchBuffer(_scratchBuffer)
+    , type(_type)
 {
 }
 

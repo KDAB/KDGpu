@@ -25,7 +25,7 @@ struct AccelerationStructureGeometryTrianglesData {
     Handle<Buffer_t> vertexData;
     size_t vertexStride{ 0 };
     uint32_t maxVertex{ 0 };
-    IndexType indexType{ IndexType::Uint16 };
+    IndexType indexType{ IndexType::None };
     Handle<Buffer_t> indexData;
     Handle<Buffer_t> transformData;
 };
@@ -36,42 +36,46 @@ struct AccelerationStructureGeometryAabbsData {
 };
 
 struct AccelerationStructureGeometryInstance {
-    float transform[3][4] {
+    float transform[3][4]{
         1.0f, 0.0f, 0.0f, 0.0f,
         0.0f, 1.0f, 0.0f, 0.0f,
         0.0f, 0.0f, 1.0f, 0.0f
     };
-    uint32_t instanceCustomIndex:24 = 0;
-    uint32_t mask:8 = 0xFF;
-    uint32_t instanceShaderBindingTableRecordOffset:24 = 0;
+    uint32_t instanceCustomIndex : 24 = 0;
+    uint32_t mask : 8 = 0xFF;
+    uint32_t instanceShaderBindingTableRecordOffset : 24 = 0;
     GeometryInstanceFlags flags = GeometryInstanceFlagBits::None;
     Handle<AccelerationStructure_t> accelerationStructure;
 };
 
 struct AccelerationStructureGeometryInstancesData {
-    std::span<const AccelerationStructureGeometryInstance> data;
+    std::vector<AccelerationStructureGeometryInstance> data;
 };
 
 using AccelerationStructureGeometry = std::variant<AccelerationStructureGeometryTrianglesData, AccelerationStructureGeometryAabbsData, AccelerationStructureGeometryInstancesData>;
 
 struct AccelerationStructureOptions {
-    BuildAccelerationStructureMode mode{ BuildAccelerationStructureMode::Build };
+    std::string_view label;
     AccelerationStructureType type{ AccelerationStructureType::TopLevel };
     std::vector<AccelerationStructureGeometry> geometries;
-    Handle<AccelerationStructure_t> sourceStructure;
-    Handle<AccelerationStructure_t> destinationStructure;
-};
-
-struct AccelerationStructureBuildRangeInfo {
-    uint32_t primitiveCount{ 0 };
-    uint32_t primitiveOffset{ 0 };
-    uint32_t firstVertex{ 0 };
-    uint32_t transformOffset{ 0 };
 };
 
 struct BuildAccelerationStructureOptions {
-    std::vector<AccelerationStructureOptions> buildGeometryInfos;
-    std::vector<AccelerationStructureBuildRangeInfo> buildRangeInfos;
+    struct BuildOptions {
+        BuildAccelerationStructureMode mode{ BuildAccelerationStructureMode::Build };
+        std::vector<AccelerationStructureGeometry> geometries;
+        Handle<AccelerationStructure_t> sourceStructure;
+        Handle<AccelerationStructure_t> destinationStructure;
+    };
+    struct BuildRangeInfo {
+        uint32_t primitiveCount{ 0 };
+        uint32_t primitiveOffset{ 0 };
+        uint32_t firstVertex{ 0 };
+        uint32_t transformOffset{ 0 };
+    };
+
+    std::vector<BuildOptions> buildGeometryInfos;
+    std::vector<BuildRangeInfo> buildRangeInfos;
 };
 
 } // namespace KDGpu

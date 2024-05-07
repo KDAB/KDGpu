@@ -536,10 +536,10 @@ void VulkanCommandRecorder::buildAccelerationStructures(const BuildAccelerationS
     geometriesBacking.reserve(options.buildGeometryInfos.size());
 
     std::vector<VkAccelerationStructureBuildGeometryInfoKHR> infos;
-    for (const auto &geometryInfo : options.buildGeometryInfos) {
+    for (const auto &geometryBuildInfo : options.buildGeometryInfos) {
         std::vector<VkAccelerationStructureGeometryKHR> &geometries = geometriesBacking.emplace_back();
 
-        for (const auto &geometry : geometryInfo.geometries) {
+        for (const auto &geometry : geometryBuildInfo.geometries) {
             VkAccelerationStructureGeometryKHR geometryKhr = { VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR };
 
             std::visit([this, vulkanDevice, &geometryKhr](auto &&arg) {
@@ -635,28 +635,28 @@ void VulkanCommandRecorder::buildAccelerationStructures(const BuildAccelerationS
         }
 
         VkAccelerationStructureBuildGeometryInfoKHR geometryInfoKhr{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR };
-        geometryInfoKhr.mode = accelerationStructureModeToVkStructureMode(geometryInfo.mode);
-        geometryInfoKhr.type = accelerationStructureTypeToVkAccelerationStructureType(geometryInfo.type);
+        geometryInfoKhr.mode = accelerationStructureModeToVkStructureMode(geometryBuildInfo.mode);
         geometryInfoKhr.pGeometries = geometries.data();
         geometryInfoKhr.geometryCount = geometries.size();
 
         // TODO: scratch buffer should maybe be exposed via API?
-        if (geometryInfo.sourceStructure.isValid()) {
-            auto srcAccelerationStructure = vulkanResourceManager->getAccelerationStructure(geometryInfo.destinationStructure);
+        if (geometryBuildInfo.sourceStructure.isValid()) {
+            VulkanAccelerationStructure *srcAccelerationStructure = vulkanResourceManager->getAccelerationStructure(geometryBuildInfo.destinationStructure);
             VulkanBuffer *buffer = vulkanResourceManager->getBuffer(srcAccelerationStructure->scratchBuffer);
             VkBufferDeviceAddressInfo addressInfo = { VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO };
             addressInfo.buffer = buffer->buffer;
 
             geometryInfoKhr.scratchData.deviceAddress = vkGetBufferDeviceAddress(vulkanDevice->device, &addressInfo);
-            geometryInfoKhr.dstAccelerationStructure = srcAccelerationStructure->accelerationStructure;
+            geometryInfoKhr.srcAccelerationStructure = srcAccelerationStructure->accelerationStructure;
         }
 
-        if (geometryInfo.destinationStructure.isValid()) {
-            auto dstAccelerationStructure = vulkanResourceManager->getAccelerationStructure(geometryInfo.destinationStructure);
+        if (geometryBuildInfo.destinationStructure.isValid()) {
+            VulkanAccelerationStructure *dstAccelerationStructure = vulkanResourceManager->getAccelerationStructure(geometryBuildInfo.destinationStructure);
             VulkanBuffer *buffer = vulkanResourceManager->getBuffer(dstAccelerationStructure->scratchBuffer);
             VkBufferDeviceAddressInfo addressInfo = { VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO };
             addressInfo.buffer = buffer->buffer;
 
+            geometryInfoKhr.type = accelerationStructureTypeToVkAccelerationStructureType(dstAccelerationStructure->type);
             geometryInfoKhr.scratchData.deviceAddress = vkGetBufferDeviceAddress(vulkanDevice->device, &addressInfo);
             geometryInfoKhr.dstAccelerationStructure = dstAccelerationStructure->accelerationStructure;
         }
