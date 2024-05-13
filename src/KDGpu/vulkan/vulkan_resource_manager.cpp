@@ -446,11 +446,21 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     accelerationStructureFeaturesKhr.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
     accelerationStructureFeaturesKhr.accelerationStructure = options.requestedFeatures.accelerationStructures;
 
+    // Eanble raytracing pipelines
+    VkPhysicalDeviceRayTracingPipelineFeaturesKHR raytracingFeaturesKhr{};
+    raytracingFeaturesKhr.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
+    raytracingFeaturesKhr.rayTracingPipeline = options.requestedFeatures.rayTracingPipeline;
+    raytracingFeaturesKhr.rayTracingPipelineShaderGroupHandleCaptureReplay = options.requestedFeatures.rayTracingPipelineShaderGroupHandleCaptureReplay;
+    raytracingFeaturesKhr.rayTracingPipelineShaderGroupHandleCaptureReplayMixed = options.requestedFeatures.rayTracingPipelineShaderGroupHandleCaptureReplayMixed;
+    raytracingFeaturesKhr.rayTracingPipelineTraceRaysIndirect = options.requestedFeatures.rayTracingPipelineTraceRaysIndirect;
+    raytracingFeaturesKhr.rayTraversalPrimitiveCulling = options.requestedFeatures.rayTraversalPrimitiveCulling;
+
     physicalDeviceFeatures2.pNext = &multiViewFeatures;
     multiViewFeatures.pNext = &descriptorIndexingFeatures;
     descriptorIndexingFeatures.pNext = &deviceGroupInfo;
     deviceGroupInfo.pNext = &bufferDeviceFeature;
     bufferDeviceFeature.pNext = &accelerationStructureFeaturesKhr;
+    accelerationStructureFeaturesKhr.pNext = &raytracingFeaturesKhr;
 
     std::vector<VkPhysicalDevice> devicesInGroup;
     const size_t adapterCount = options.adapterGroup.adapters.size();
@@ -475,7 +485,7 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     sync2Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES_KHR;
     sync2Features.synchronization2 = vulkanAdapter->supportsSynchronization2;
 
-    accelerationStructureFeaturesKhr.pNext = &sync2Features;
+    raytracingFeaturesKhr.pNext = &sync2Features;
 #endif
 
     VkDeviceCreateInfo createInfo = {};
