@@ -67,8 +67,8 @@ struct Extension {
 };
 
 struct Extent2D {
-    uint32_t width;
-    uint32_t height;
+    uint32_t width{ 0 };
+    uint32_t height{ 0 };
 
     friend bool operator==(const Extent2D &, const Extent2D &) = default;
 };
@@ -81,9 +81,9 @@ struct Extent2Df {
 };
 
 struct Extent3D {
-    uint32_t width;
-    uint32_t height;
-    uint32_t depth;
+    uint32_t width{ 0 };
+    uint32_t height{ 0 };
+    uint32_t depth{ 0 };
 
     friend bool operator==(const Extent3D &, const Extent3D &) = default;
 };
