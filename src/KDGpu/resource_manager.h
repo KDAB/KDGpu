@@ -15,6 +15,7 @@
 #include <KDGpu/device_options.h>
 #include <KDGpu/swapchain_options.h>
 #include <KDGpu/compute_pass_command_recorder.h>
+#include <KDGpu/raytracing_pass_command_recorder.h>
 #include <KDGpu/queue_description.h>
 #include <KDGpu/bind_group_options.h>
 #include <KDGpu/command_recorder.h>
@@ -40,6 +41,7 @@ struct ApiQueue;
 struct ApiRayTracingPipeline;
 struct ApiRenderPass;
 struct ApiRenderPassCommandRecorder;
+struct ApiRayTracingPassCommandRecorder;
 struct ApiSampler;
 struct ApiShaderModule;
 struct ApiSwapchain;
@@ -83,6 +85,7 @@ struct Instance_t;
 struct PipelineLayout_t;
 struct Queue_t;
 struct RayTracingPipeline_t;
+struct RayTracingPassCommandRecorder_t;
 struct RenderPass_t;
 struct RenderPassCommandRecorder_t;
 struct Sampler_t;
@@ -186,6 +189,13 @@ public:
                                                                                   const ComputePassCommandRecorderOptions &options) = 0;
     virtual void deleteComputePassCommandRecorder(const Handle<ComputePassCommandRecorder_t> &handle) = 0;
     virtual ApiComputePassCommandRecorder *getComputePassCommandRecorder(const Handle<ComputePassCommandRecorder_t> &handle) const = 0;
+
+    virtual void deleteRayTracingPassCommandRecorder(const Handle<RayTracingPassCommandRecorder_t> &handle) = 0;
+    virtual ApiRayTracingPassCommandRecorder *getRayTracingPassCommandRecorder(const Handle<RayTracingPassCommandRecorder_t> &handle) const = 0;
+
+    virtual Handle<RayTracingPassCommandRecorder_t> createRayTracingPassCommandRecorder(const Handle<Device_t> &deviceHandle,
+                                                                                        const Handle<CommandRecorder_t> &commandRecorderHandle,
+                                                                                        const RayTracingPassCommandRecorderOptions &options) = 0;
 
     virtual Handle<TimestampQueryRecorder_t> createTimestampQueryRecorder(const Handle<Device_t> &deviceHandle,
                                                                           const Handle<CommandRecorder_t> &commandRecorderHandle,

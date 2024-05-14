@@ -128,6 +128,10 @@ VulkanDevice::VulkanDevice(VkDevice _device,
                 PFN_vkCreateRayTracingPipelinesKHR vkCreateRayTracingPipelinesKHR = PFN_vkCreateRayTracingPipelinesKHR(
                         vkGetDeviceProcAddr(device, "vkCreateRayTracingPipelinesKHR"));
                 this->vkCreateRayTracingPipelinesKHR = vkCreateRayTracingPipelinesKHR;
+
+                PFN_vkCmdTraceRaysKHR vkCmdTraceRaysKHR = PFN_vkCmdTraceRaysKHR(
+                        vkGetDeviceProcAddr(device, "vkCmdTraceRaysKHR"));
+                this->vkCmdTraceRaysKHR = vkCmdTraceRaysKHR;
             }
         }
     }

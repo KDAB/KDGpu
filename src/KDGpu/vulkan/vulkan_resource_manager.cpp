@@ -2053,6 +2053,36 @@ VulkanComputePassCommandRecorder *VulkanResourceManager::getComputePassCommandRe
     return m_computePassCommandRecorders.get(handle);
 }
 
+void VulkanResourceManager::deleteRayTracingPassCommandRecorder(const Handle<RayTracingPassCommandRecorder_t> &handle)
+{
+    VulkanRayTracingPassCommandRecorder *vulkanCommandPassRecorder = m_rayTracingPassCommandRecorders.get(handle);
+
+    m_rayTracingPassCommandRecorders.remove(handle);
+}
+
+VulkanRayTracingPassCommandRecorder *VulkanResourceManager::getRayTracingPassCommandRecorder(const Handle<RayTracingPassCommandRecorder_t> &handle) const
+{
+    return m_rayTracingPassCommandRecorders.get(handle);
+}
+
+Handle<RayTracingPassCommandRecorder_t> VulkanResourceManager::createRayTracingPassCommandRecorder(const Handle<Device_t> &deviceHandle,
+                                                                                                   const Handle<CommandRecorder_t> &commandRecorderHandle,
+                                                                                                   const RayTracingPassCommandRecorderOptions &options)
+{
+    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
+
+    VulkanCommandRecorder *vulkanCommandRecorder = m_commandRecorders.get(commandRecorderHandle);
+    if (!vulkanCommandRecorder) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Could not find a valid command recorder");
+        return {};
+    }
+    VkCommandBuffer vkCommandBuffer = vulkanCommandRecorder->commandBuffer;
+
+    const auto vulkanRayTracingPassCommandRecorderHandle = m_rayTracingPassCommandRecorders.emplace(
+            VulkanRayTracingPassCommandRecorder(vkCommandBuffer, this, deviceHandle));
+    return vulkanRayTracingPassCommandRecorderHandle;
+}
+
 void VulkanResourceManager::fillColorAttachmnents(std::vector<VkAttachmentReference2> &colorAttachmentRefs,
                                                   std::vector<VkAttachmentReference2> &colorResolveAttachmentRefs,
                                                   std::vector<VkAttachmentDescription2> &attachments,

@@ -41,6 +41,7 @@
 #include <KDGpu/vulkan/vulkan_timestamp_query_recorder.h>
 #include <KDGpu/vulkan/vulkan_acceleration_structure.h>
 #include <KDGpu/vulkan/vulkan_raytracing_pipeline.h>
+#include <KDGpu/vulkan/vulkan_raytracing_pass_command_recorder.h>
 
 #include <KDGpu/kdgpu_export.h>
 
@@ -147,6 +148,13 @@ public:
                                                                           const ComputePassCommandRecorderOptions &options) final;
     void deleteComputePassCommandRecorder(const Handle<ComputePassCommandRecorder_t> &handle) final;
     VulkanComputePassCommandRecorder *getComputePassCommandRecorder(const Handle<ComputePassCommandRecorder_t> &handle) const final;
+
+    void deleteRayTracingPassCommandRecorder(const Handle<RayTracingPassCommandRecorder_t> &handle) final;
+    VulkanRayTracingPassCommandRecorder *getRayTracingPassCommandRecorder(const Handle<RayTracingPassCommandRecorder_t> &handle) const final;
+
+    Handle<RayTracingPassCommandRecorder_t> createRayTracingPassCommandRecorder(const Handle<Device_t> &deviceHandle,
+                                                                                const Handle<CommandRecorder_t> &commandRecorderHandle,
+                                                                                const RayTracingPassCommandRecorderOptions &options) final;
 
     Handle<TimestampQueryRecorder_t> createTimestampQueryRecorder(const Handle<Device_t> &deviceHandle,
                                                                   const Handle<CommandRecorder_t> &commandRecorderHandle,
@@ -257,6 +265,7 @@ private:
     Pool<VulkanCommandRecorder, CommandRecorder_t> m_commandRecorders{ 32 };
     Pool<VulkanRenderPassCommandRecorder, RenderPassCommandRecorder_t> m_renderPassCommandRecorders{ 32 };
     Pool<VulkanComputePassCommandRecorder, ComputePassCommandRecorder_t> m_computePassCommandRecorders{ 32 };
+    Pool<VulkanRayTracingPassCommandRecorder, RayTracingPassCommandRecorder_t> m_rayTracingPassCommandRecorders{ 32 };
     Pool<VulkanCommandBuffer, CommandBuffer_t> m_commandBuffers{ 128 };
     Pool<VulkanRenderPass, RenderPass_t> m_renderPasses{ 16 };
     Pool<VulkanFramebuffer, Framebuffer_t> m_framebuffers{ 16 };
