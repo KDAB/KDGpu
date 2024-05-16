@@ -69,10 +69,12 @@ TEST_SUITE("AccelerationStructure")
             // WHEN
             const AccelerationStructureOptions accelerationStructureOptions = {
                 .type = AccelerationStructureType::BottomLevel,
-                .geometries = {
-                        AccelerationStructureGeometryAabbsData{
-                                .data = {}, // actual data is not needed for the creation
-                                .stride = sizeof(VkAabbPositionsKHR),
+                .geometryTypesAndCount = {
+                        {
+                                .geometry = AccelerationStructureGeometryAabbsData{
+                                        .data = {}, // actual data is not needed for the creation
+                                        .stride = sizeof(VkAabbPositionsKHR),
+                                },
                         },
                 },
             };
@@ -88,12 +90,15 @@ TEST_SUITE("AccelerationStructure")
             // WHEN
             const AccelerationStructureOptions accelerationStructureOptions = {
                 .type = AccelerationStructureType::BottomLevel,
-                .geometries = {
-                        AccelerationStructureGeometryTrianglesData{
-                                .vertexFormat = Format::R32G32B32_SFLOAT,
-                                .vertexData = {}, // actual data is not needed for the creation
-                                .vertexStride = sizeof(Vertex),
-                                .maxVertex = 5,
+                .geometryTypesAndCount = {
+                        {
+                                .geometry = AccelerationStructureGeometryTrianglesData{
+                                        .vertexFormat = Format::R32G32B32_SFLOAT,
+                                        .vertexData = {}, // actual data is not needed for the creation
+                                        .vertexStride = sizeof(Vertex),
+                                        .maxVertex = 5,
+                                },
+                                .maxGeometryCount = 1,
                         },
                 },
             };
@@ -109,10 +114,12 @@ TEST_SUITE("AccelerationStructure")
     {
         const AccelerationStructureOptions accelerationStructureOptions = {
             .type = AccelerationStructureType::BottomLevel,
-            .geometries = {
-                    AccelerationStructureGeometryAabbsData{
-                            .data = {}, // actual data is not needed for the creation
-                            .stride = sizeof(VkAabbPositionsKHR),
+            .geometryTypesAndCount = {
+                    {
+                            .geometry = AccelerationStructureGeometryAabbsData{
+                                    .data = {}, // actual data is not needed for the creation
+                                    .stride = sizeof(VkAabbPositionsKHR),
+                            },
                     },
             },
         };
@@ -175,7 +182,11 @@ TEST_SUITE("AccelerationStructure")
 
             AccelerationStructure accelerationStructure = device.createAccelerationStructure(AccelerationStructureOptions{
                     .type = AccelerationStructureType::BottomLevel,
-                    .geometries = { aabbGeometry },
+                    .geometryTypesAndCount = {
+                            {
+                                    .geometry = aabbGeometry,
+                            },
+                    },
             });
 
             // WHEN
@@ -239,7 +250,11 @@ TEST_SUITE("AccelerationStructure")
 
             AccelerationStructure accelerationStructure = device.createAccelerationStructure(AccelerationStructureOptions{
                     .type = AccelerationStructureType::BottomLevel,
-                    .geometries = { triangleDataGeometry },
+                    .geometryTypesAndCount = {
+                            {
+                                    .geometry = triangleDataGeometry,
+                            },
+                    },
             });
 
             // WHEN
@@ -300,7 +315,11 @@ TEST_SUITE("AccelerationStructure")
             AccelerationStructure bottomLevelAs = device.createAccelerationStructure(AccelerationStructureOptions{
                     .label = "BottomLevelAS",
                     .type = AccelerationStructureType::BottomLevel,
-                    .geometries = { aabbGeometry },
+                    .geometryTypesAndCount = {
+                            {
+                                    .geometry = aabbGeometry,
+                            },
+                    },
             });
 
             const AccelerationStructureGeometryInstancesData geometryInstance{
@@ -312,7 +331,11 @@ TEST_SUITE("AccelerationStructure")
             AccelerationStructure topLevelAs = device.createAccelerationStructure(AccelerationStructureOptions{
                     .label = "TopLevelAS",
                     .type = AccelerationStructureType::TopLevel,
-                    .geometries = { geometryInstance },
+                    .geometryTypesAndCount = {
+                            {
+                                    .geometry = geometryInstance,
+                            },
+                    },
             });
 
             // WHEN

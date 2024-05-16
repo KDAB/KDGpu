@@ -2840,9 +2840,12 @@ Handle<AccelerationStructure_t> VulkanResourceManager::createAccelerationStructu
     VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
 
     std::vector<VkAccelerationStructureGeometryKHR> geometries;
-    geometries.reserve(options.geometries.size());
+    std::vector<uint32_t> maxGeometriesCount;
 
-    for (const auto &geometry : options.geometries) {
+    geometries.reserve(options.geometryTypesAndCount.size());
+    maxGeometriesCount.reserve(options.geometryTypesAndCount.size());
+
+    for (const AccelerationStructureOptions::GeometryTypeAndCount &geometryTypeAndCount : options.geometryTypesAndCount) {
         VkAccelerationStructureGeometryKHR geometryKhr = { VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR };
 
         std::visit([&geometryKhr](auto &&arg) {
@@ -2873,9 +2876,10 @@ Handle<AccelerationStructure_t> VulkanResourceManager::createAccelerationStructu
                 static_assert(false, "non-exhaustive visitor!");
             }
         },
-                   geometry);
+                   geometryTypeAndCount.geometry);
 
         geometries.push_back(geometryKhr);
+        maxGeometriesCount.push_back(geometryTypeAndCount.maxGeometryCount);
     }
 
     const auto createAccelerationBuffer = [&](const VkDeviceSize size) -> Handle<Buffer_t> {
@@ -2894,10 +2898,7 @@ Handle<AccelerationStructure_t> VulkanResourceManager::createAccelerationStructu
     geometryInfoKhr.geometryCount = geometries.size();
 
     VkAccelerationStructureBuildSizesInfoKHR buildSizesInfoKhr{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR };
-
-    // TODO: this needs to be dynamically set
-    std::vector<uint32_t> maxGeometries = { 1 };
-    vulkanDevice->vkGetAccelerationStructureBuildSizesKHR(vulkanDevice->device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_HOST_KHR, &geometryInfoKhr, maxGeometries.data(), &buildSizesInfoKhr);
+    vulkanDevice->vkGetAccelerationStructureBuildSizesKHR(vulkanDevice->device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_HOST_KHR, &geometryInfoKhr, maxGeometriesCount.data(), &buildSizesInfoKhr);
 
     Handle<Buffer_t> scratchBufferH = createAccelerationBuffer(buildSizesInfoKhr.buildScratchSize);
     Handle<Buffer_t> backingBufferH = createAccelerationBuffer(buildSizesInfoKhr.accelerationStructureSize);
