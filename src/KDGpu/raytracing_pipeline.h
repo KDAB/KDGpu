@@ -42,6 +42,8 @@ public:
 
     operator Handle<RayTracingPipeline_t>() const noexcept { return m_rayTracingPipeline; }
 
+    std::vector<uint8_t> shaderGroupHandles(uint32_t firstGroup, uint32_t groupCount = 1) const;
+
 private:
     explicit RayTracingPipeline(GraphicsApi *api,
                                 const Handle<Device_t> &device,

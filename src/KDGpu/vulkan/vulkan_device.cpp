@@ -132,6 +132,10 @@ VulkanDevice::VulkanDevice(VkDevice _device,
                 PFN_vkCmdTraceRaysKHR vkCmdTraceRaysKHR = PFN_vkCmdTraceRaysKHR(
                         vkGetDeviceProcAddr(device, "vkCmdTraceRaysKHR"));
                 this->vkCmdTraceRaysKHR = vkCmdTraceRaysKHR;
+
+                PFN_vkGetRayTracingShaderGroupHandlesKHR vkGetRayTracingShaderGroupHandlesKHR = PFN_vkGetRayTracingShaderGroupHandlesKHR(
+                        vkGetDeviceProcAddr(device, "vkGetRayTracingShaderGroupHandlesKHR"));
+                this->vkGetRayTracingShaderGroupHandlesKHR = vkGetRayTracingShaderGroupHandlesKHR;
             }
         }
     }

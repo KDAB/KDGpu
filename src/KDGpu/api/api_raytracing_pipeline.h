@@ -10,6 +10,9 @@
 
 #pragma once
 
+#include <vector>
+#include <cstdint>
+
 namespace KDGpu {
 
 /**
@@ -18,6 +21,7 @@ namespace KDGpu {
  *
  */
 struct ApiRayTracingPipeline {
+    virtual std::vector<uint8_t> shaderGroupHandles(uint32_t firstGroup, uint32_t groupCount) const = 0;
 };
 
 } // namespace KDGpu

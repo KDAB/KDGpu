@@ -34,6 +34,8 @@ struct KDGPU_EXPORT VulkanRayTracingPipeline : public ApiRayTracingPipeline {
                                       const Handle<Device_t> &_deviceHandle,
                                       const Handle<PipelineLayout_t> &_pipelineLayoutHandle);
 
+    std::vector<uint8_t> shaderGroupHandles(uint32_t firstGroup, uint32_t groupCount) const final;
+
     VkPipeline pipeline{ VK_NULL_HANDLE };
 
     VulkanResourceManager *vulkanResourceManager;

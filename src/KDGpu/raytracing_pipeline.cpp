@@ -11,6 +11,7 @@
 #include "raytracing_pipeline.h"
 #include <KDGpu/graphics_api.h>
 #include <KDGpu/raytracing_pipeline_options.h>
+#include <KDGpu/api/api_raytracing_pipeline.h>
 
 namespace KDGpu {
 
@@ -49,6 +50,12 @@ RayTracingPipeline &RayTracingPipeline::operator=(RayTracingPipeline &&other)
         m_rayTracingPipeline = std::exchange(other.m_rayTracingPipeline, {});
     }
     return *this;
+}
+
+std::vector<uint8_t> RayTracingPipeline::shaderGroupHandles(uint32_t firstGroup, uint32_t groupCount) const
+{
+    auto *apiRtPipeline = m_api->resourceManager()->getRayTracingPipeline(m_rayTracingPipeline);
+    return apiRtPipeline->shaderGroupHandles(firstGroup, groupCount);
 }
 
 bool operator==(const RayTracingPipeline &a, const RayTracingPipeline &b)
