@@ -26,9 +26,9 @@ struct RayTracingShaderGroupOptions {
     // clang-format off
     // indices into the RayTracingPipelineOptions::shaderStages vector
     std::optional<uint32_t> generalShaderIndex;      // Only set if type == General
-    std::optional<uint32_t> closestHitShaderIndex;   // Only set if type == Procedural
+    std::optional<uint32_t> closestHitShaderIndex;   // Optional set if type == Procedural || Triangle
     std::optional<uint32_t> anyHitShaderIndex;       // Optional set if type == Procedural || Triangle
-    std::optional<uint32_t> intersectionShaderIndex; // Optional set if type == Procedural || Triangle
+    std::optional<uint32_t> intersectionShaderIndex; // Optional set if type == Procedural
     // clang-format on
 };
 
