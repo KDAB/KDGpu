@@ -15,6 +15,7 @@
 
 #include <KDGpu/device.h>
 #include <KDGpu/gpu_semaphore.h>
+#include <KDGpu/gpu_core.h>
 #include <KDGpu/instance.h>
 #include <KDGpu/queue.h>
 #include <KDGpu/surface.h>
@@ -96,6 +97,7 @@ protected:
 
     Extent2D m_swapchainExtent;
     KDBindings::Property<SampleCountFlagBits> m_samples{ SampleCountFlagBits::Samples1Bit };
+    TextureUsageFlags m_swapchainUsageFlags{ TextureUsageFlagBits::ColorAttachmentBit };
     std::vector<SampleCountFlagBits> m_supportedSampleCounts;
     Instance m_instance;
     Surface m_surface;
