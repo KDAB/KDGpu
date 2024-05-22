@@ -53,21 +53,28 @@ std::vector<Extension> VulkanAdapter::extensions() const
 
 AdapterProperties VulkanAdapter::queryAdapterProperties()
 {
+    VkBaseOutStructure *chainCurrent{ nullptr };
+    auto addToChain = [&chainCurrent](auto *next) {
+        auto n = reinterpret_cast<VkBaseOutStructure *>(next);
+        chainCurrent->pNext = n;
+        chainCurrent = n;
+    };
+
     VkPhysicalDeviceProperties2 deviceProperties2{};
     deviceProperties2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+    chainCurrent = reinterpret_cast<VkBaseOutStructure *>(&deviceProperties2);
 
     VkPhysicalDeviceMultiviewProperties multiViewProperties{};
     multiViewProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTIVIEW_PROPERTIES;
+    addToChain(&multiViewProperties);
 
     VkPhysicalDeviceDepthStencilResolveProperties depthResolveProps{};
     depthResolveProps.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEPTH_STENCIL_RESOLVE_PROPERTIES;
-    multiViewProperties.pNext = &depthResolveProps;
+    addToChain(&depthResolveProps);
 
     VkPhysicalDeviceDescriptorIndexingProperties descriptorIndexingProperties{};
     descriptorIndexingProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_PROPERTIES;
-    depthResolveProps.pNext = &descriptorIndexingProperties;
-
-    deviceProperties2.pNext = &multiViewProperties;
+    addToChain(&descriptorIndexingProperties);
 
     vkGetPhysicalDeviceProperties2(physicalDevice, &deviceProperties2);
 
@@ -279,26 +286,33 @@ AdapterProperties VulkanAdapter::queryAdapterProperties()
 
 AdapterFeatures VulkanAdapter::queryAdapterFeatures()
 {
+    VkBaseOutStructure *chainCurrent{ nullptr };
+    auto addToChain = [&chainCurrent](auto *next) {
+        auto n = reinterpret_cast<VkBaseOutStructure *>(next);
+        chainCurrent->pNext = n;
+        chainCurrent = n;
+    };
+
     VkPhysicalDeviceFeatures2 deviceFeatures2 {};
     deviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+    chainCurrent = reinterpret_cast<VkBaseOutStructure *>(&deviceFeatures2);
 
     VkPhysicalDeviceMultiviewFeatures multiViewFeatures {};
     multiViewFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTIVIEW_FEATURES;
-    deviceFeatures2.pNext = &multiViewFeatures; // So that it gets filled by the vkGetPhysicalDeviceFeatures2 call
+    addToChain(&multiViewFeatures);
 
     VkPhysicalDeviceUniformBufferStandardLayoutFeatures stdLayoutFeatures {};
     stdLayoutFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_UNIFORM_BUFFER_STANDARD_LAYOUT_FEATURES;
-    multiViewFeatures.pNext = &stdLayoutFeatures; // So that it gets filled by the vkGetPhysicalDeviceFeatures2 call
+    addToChain(&stdLayoutFeatures);
 
     VkPhysicalDeviceDescriptorIndexingFeatures deviceDescriptorIndexingFeatures {};
     deviceDescriptorIndexingFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES;
-    stdLayoutFeatures.pNext = &deviceDescriptorIndexingFeatures; // So that it gets filled by the vkGetPhysicalDeviceFeatures2 call
+    addToChain(&deviceDescriptorIndexingFeatures);
 
 #if defined(VK_KHR_synchronization2)
     VkPhysicalDeviceSynchronization2Features synchronization2Features{};
     synchronization2Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES;
-
-    deviceDescriptorIndexingFeatures.pNext = &synchronization2Features;
+    addToChain(&synchronization2Features);
 #endif
 
     vkGetPhysicalDeviceFeatures2(physicalDevice, &deviceFeatures2);
