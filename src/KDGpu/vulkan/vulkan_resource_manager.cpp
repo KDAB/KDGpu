@@ -306,6 +306,15 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
 {
     VulkanAdapter *vulkanAdapter = getAdapter(adapterHandle);
 
+    // This makes it easier to chain pNext pointers in the device createInfo struct especially when we
+    // have a lot of them and some of them are optional.
+    VkBaseOutStructure *chainCurrent{ nullptr };
+    auto addToChain = [&chainCurrent](auto *next) {
+        auto n = reinterpret_cast<VkBaseOutStructure *>(next);
+        chainCurrent->pNext = n;
+        chainCurrent = n;
+    };
+
     queueRequests = options.queues;
     if (queueRequests.empty()) {
         QueueRequest queueRequest = {
@@ -396,10 +405,14 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     physicalDeviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
     physicalDeviceFeatures2.features = deviceFeatures;
 
+    // Start the chain
+    chainCurrent = reinterpret_cast<VkBaseOutStructure *>(&physicalDeviceFeatures2);
+
     // Allows to use std430 for uniform buffers which gives much nicer packing of data
     VkPhysicalDeviceUniformBufferStandardLayoutFeatures stdLayoutFeatures = {};
     stdLayoutFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_UNIFORM_BUFFER_STANDARD_LAYOUT_FEATURES;
     stdLayoutFeatures.uniformBufferStandardLayout = options.requestedFeatures.uniformBufferStandardLayout;
+    addToChain(&stdLayoutFeatures);
 
     // Enable multiview rendering if requested
     VkPhysicalDeviceMultiviewFeatures multiViewFeatures{};
@@ -407,6 +420,7 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     multiViewFeatures.multiview = options.requestedFeatures.multiView;
     multiViewFeatures.multiviewGeometryShader = options.requestedFeatures.multiViewGeometryShader;
     multiViewFeatures.multiviewTessellationShader = options.requestedFeatures.multiViewTessellationShader;
+    addToChain(&multiViewFeatures);
 
     // Enable Descriptor Indexing if requested
     VkPhysicalDeviceDescriptorIndexingFeatures descriptorIndexingFeatures{};
@@ -431,15 +445,13 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     descriptorIndexingFeatures.descriptorBindingPartiallyBound = options.requestedFeatures.bindGroupBindingPartiallyBound;
     descriptorIndexingFeatures.descriptorBindingVariableDescriptorCount = options.requestedFeatures.bindGroupBindingVariableDescriptorCount;
     descriptorIndexingFeatures.runtimeDescriptorArray = options.requestedFeatures.runtimeBindGroupArray;
+    addToChain(&descriptorIndexingFeatures);
 
-    // Create a Device that targets several physical devices if a group was specified
+    // Create a Device that targets several physical devices if a group was specified.
+    // We only add the device group info if we have more than one adapter.
     VkDeviceGroupDeviceCreateInfo deviceGroupInfo = {};
     deviceGroupInfo.sType = VK_STRUCTURE_TYPE_DEVICE_GROUP_DEVICE_CREATE_INFO_KHR;
     deviceGroupInfo.physicalDeviceCount = 0;
-
-    physicalDeviceFeatures2.pNext = &multiViewFeatures;
-    multiViewFeatures.pNext = &descriptorIndexingFeatures;
-    descriptorIndexingFeatures.pNext = &deviceGroupInfo;
 
     std::vector<VkPhysicalDevice> devicesInGroup;
     const size_t adapterCount = options.adapterGroup.adapters.size();
@@ -456,6 +468,8 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
 
         deviceGroupInfo.physicalDeviceCount = options.adapterGroup.adapters.size();
         deviceGroupInfo.pPhysicalDevices = devicesInGroup.data();
+
+        addToChain(&deviceGroupInfo);
     }
 
 #if defined(VK_KHR_synchronization2)
@@ -463,8 +477,7 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     VkPhysicalDeviceSynchronization2FeaturesKHR sync2Features = {};
     sync2Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES_KHR;
     sync2Features.synchronization2 = vulkanAdapter->supportsSynchronization2;
-
-    deviceGroupInfo.pNext = &sync2Features;
+    addToChain(&sync2Features);
 #endif
 
     VkDeviceCreateInfo createInfo = {};
