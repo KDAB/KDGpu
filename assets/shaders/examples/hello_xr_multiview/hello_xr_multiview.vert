@@ -1,5 +1,6 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
+#extension GL_EXT_multiview : enable
 
 layout(location = 0) in vec3 vertexPosition;
 layout(location = 1) in vec3 vertexColor;
@@ -13,7 +14,7 @@ struct CameraData {
 
 layout(set = 0, binding = 0) uniform Camera
 {
-    CameraData data;
+    CameraData data[2];
 }
 camera;
 
@@ -26,5 +27,5 @@ entity;
 void main()
 {
     color = vertexColor;
-    gl_Position = camera.data.projection * camera.data.view * entity.modelMatrix * vec4(vertexPosition, 1.0);
+    gl_Position = camera.data[gl_ViewIndex].projection * camera.data[gl_ViewIndex].view * entity.modelMatrix * vec4(vertexPosition, 1.0);
 }

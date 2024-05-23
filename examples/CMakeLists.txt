@@ -78,5 +78,6 @@ if(TARGET KDGpu::KDGpuExample)
 
     if(KDGPU_OPENXR_SUPPORT)
         add_subdirectory(hello_xr)
+        add_subdirectory(hello_xr_multiview)
     endif()
 endif()

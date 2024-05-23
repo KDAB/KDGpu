@@ -1,14 +1,14 @@
 /*
   This file is part of KDGpu.
 
-  SPDX-FileCopyrightText: 2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+  SPDX-FileCopyrightText: 2024 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
 
   SPDX-License-Identifier: MIT
 
   Contact KDAB at <info@kdab.com> for commercial licensing options.
 */
 
-#include "hello_xr.h"
+#include "hello_xr_multiview.h"
 #include "projection_layer.h"
 
 #include <KDGpuExample/engine.h>
@@ -17,7 +17,7 @@
 
 #include <KDXr/session.h>
 
-void HelloXr::onAttached()
+void HelloXrMultiview::onAttached()
 {
     XrExampleEngineLayer::onAttached();
     if (!m_isInitialized)
@@ -30,8 +30,7 @@ void HelloXr::onAttached()
         .session = &m_session,
         .colorSwapchainFormat = m_colorSwapchainFormat,
         .depthSwapchainFormat = m_depthSwapchainFormat,
-        .samples = m_samples.get(),
-        .requestMultiview = false
+        .samples = m_samples.get()
     };
     m_projectionLayer = createCompositorLayer<ProjectionLayer>(projectionLayerOptions);
     m_projectionLayer->setReferenceSpace(m_referenceSpace);
@@ -117,7 +116,7 @@ void HelloXr::onAttached()
     }
 }
 
-void HelloXr::onDetached()
+void HelloXrMultiview::onDetached()
 {
     m_palmPoseActionSpaces[0] = {};
     m_palmPoseActionSpaces[1] = {};
@@ -135,7 +134,7 @@ void HelloXr::onDetached()
     XrExampleEngineLayer::onDetached();
 }
 
-void HelloXr::onInteractionProfileChanged()
+void HelloXrMultiview::onInteractionProfileChanged()
 {
     if (!m_session.isValid())
         return;
@@ -156,7 +155,7 @@ void HelloXr::onInteractionProfileChanged()
     }
 }
 
-void HelloXr::pollActions(KDXr::Time predictedDisplayTime)
+void HelloXrMultiview::pollActions(KDXr::Time predictedDisplayTime)
 {
     // Sync the action set
     const auto syncActionOptions = KDXr::SyncActionsOptions{ .actionSets = { { m_actionSet } } };
@@ -174,7 +173,7 @@ void HelloXr::pollActions(KDXr::Time predictedDisplayTime)
     processHapticAction();
 }
 
-void HelloXr::processToggleAnimationAction()
+void HelloXrMultiview::processToggleAnimationAction()
 {
     bool toggleAnimation{ false };
     for (uint32_t i = 0; i < 2; ++i) {
@@ -203,7 +202,7 @@ void HelloXr::processToggleAnimationAction()
     }
 }
 
-void HelloXr::processScaleAction()
+void HelloXrMultiview::processScaleAction()
 {
     // Query the scale action from the left trigger value
     float scale = 1.0f;
@@ -217,7 +216,7 @@ void HelloXr::processScaleAction()
     }
 }
 
-void HelloXr::processTranslateAction()
+void HelloXrMultiview::processTranslateAction()
 {
     // Query the translate action from the left thumbstick
     const float dt = engine()->deltaTimeSeconds();
@@ -235,7 +234,7 @@ void HelloXr::processTranslateAction()
     }
 }
 
-void HelloXr::processPalmPoseAction(KDXr::Time predictedDisplayTime)
+void HelloXrMultiview::processPalmPoseAction(KDXr::Time predictedDisplayTime)
 {
     for (uint32_t i = 0; i < 2; ++i) {
         // Query the palm pose action
@@ -262,7 +261,7 @@ void HelloXr::processPalmPoseAction(KDXr::Time predictedDisplayTime)
     }
 }
 
-void HelloXr::processHapticAction()
+void HelloXrMultiview::processHapticAction()
 {
     // Apply any haptic feedback
     for (uint32_t i = 0; i < 2; ++i) {
