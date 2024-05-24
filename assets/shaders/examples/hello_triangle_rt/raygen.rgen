@@ -1,0 +1,36 @@
+#version 460 core
+#extension GL_EXT_ray_tracing : enable
+
+layout(location = 0) rayPayloadEXT vec4 payload;
+
+layout(set = 0, binding = 0) uniform accelerationStructureEXT topLevelAS;
+layout(set = 0, binding = 1, rgba32f) uniform image2D img;
+
+void main()
+{
+    const vec2 pixelCenter = vec2(gl_LaunchIDEXT.xy) + vec2(0.5);
+    const vec2 inUV = pixelCenter / vec2(gl_LaunchSizeEXT.xy);
+    vec2 d = inUV * 2.0 - 1.0;
+
+    vec3 origin = vec3(d.x, d.y, -1.0f);
+    vec3 direction = vec3(0.0, 0.0, 1.0);
+
+    uint rayFlags = gl_RayFlagsNoneEXT;
+    float tMin = 0.001;
+    float tMax = 1000.0;
+
+    traceRayEXT(topLevelAS, // acceleration structure
+                rayFlags, // rayFlags
+                0xFF, // cullMask
+                0, // sbtRecordOffset
+                0, // sbtRecordStride
+                0, // missIndex
+                origin, // ray origin
+                tMin, // ray min range
+                direction, // ray direction
+                tMax, // ray max range
+                0 // payload (location = 0)
+    );
+
+    imageStore(img, ivec2(gl_LaunchIDEXT.xy), payload);
+}
