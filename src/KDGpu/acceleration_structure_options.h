@@ -57,6 +57,7 @@ using AccelerationStructureGeometry = std::variant<AccelerationStructureGeometry
 struct AccelerationStructureOptions {
     std::string_view label;
     AccelerationStructureType type{ AccelerationStructureType::TopLevel };
+    AccelerationStructureFlags flags{ AccelerationStructureFlagBits::None };
     struct GeometryTypeAndCount {
         AccelerationStructureGeometry geometry;
         uint32_t maxGeometryCount{ 1 };

@@ -20,7 +20,8 @@ VulkanAccelerationStructure::VulkanAccelerationStructure(Handle<Device_t> _devic
                                                          VkAccelerationStructureKHR _accelerationStructure,
                                                          Handle<Buffer_t> _backingBuffer,
                                                          AccelerationStructureType _type,
-                                                         VkAccelerationStructureBuildSizesInfoKHR _buildSizes)
+                                                         VkAccelerationStructureBuildSizesInfoKHR _buildSizes,
+                                                         VkBuildAccelerationStructureFlagsKHR _buildFlags)
     : ApiAccelerationStructure()
     , deviceHandle(_deviceHandle)
     , vulkanResourceManager(_vulkanResourceManager)
@@ -28,6 +29,7 @@ VulkanAccelerationStructure::VulkanAccelerationStructure(Handle<Device_t> _devic
     , backingBuffer(_backingBuffer)
     , type(_type)
     , buildSizes(_buildSizes)
+    , buildFlags(_buildFlags)
 {
 }
 

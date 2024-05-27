@@ -1190,6 +1190,16 @@ enum class RayTracingShaderGroupType {
     ProceduralHit = 2,
 };
 
+enum class AccelerationStructureFlagBits {
+    None = 0,
+    AllowUpdate = 0x00000001,
+    AllowCompaction = 0x00000002,
+    PreferFastTrace = 0x00000004,
+    PreferFastBuild = 0x00000008,
+    LowMemory = 0x00000010,
+};
+using AccelerationStructureFlags = KDGpu::Flags<AccelerationStructureFlagBits>;
+
 /*! @} */
 
 } // namespace KDGpu
@@ -1209,3 +1219,4 @@ OPERATORS_FOR_FLAGS(KDGpu::ExternalMemoryHandleTypeFlags)
 OPERATORS_FOR_FLAGS(KDGpu::ResolveModeFlags)
 OPERATORS_FOR_FLAGS(KDGpu::StencilFaceFlags)
 OPERATORS_FOR_FLAGS(KDGpu::GeometryInstanceFlags)
+OPERATORS_FOR_FLAGS(KDGpu::AccelerationStructureFlags)

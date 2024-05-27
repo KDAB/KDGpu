@@ -271,6 +271,7 @@ void HelloSphereRt::createAccelerationStructures()
     m_bottomLevelAs = m_device.createAccelerationStructure(AccelerationStructureOptions{
             .label = "BottomLevelAS",
             .type = AccelerationStructureType::BottomLevel,
+            .flags = AccelerationStructureFlagBits::PreferFastTrace,
             .geometryTypesAndCount = {
                     {
                             .geometry = aabbGeometry,
@@ -292,6 +293,7 @@ void HelloSphereRt::createAccelerationStructures()
     m_topLevelAs = m_device.createAccelerationStructure(AccelerationStructureOptions{
             .label = "TopLevelAS",
             .type = AccelerationStructureType::TopLevel,
+            .flags = AccelerationStructureFlagBits::PreferFastTrace,
             .geometryTypesAndCount = {
                     {
                             .geometry = aabbGeometryInstance,

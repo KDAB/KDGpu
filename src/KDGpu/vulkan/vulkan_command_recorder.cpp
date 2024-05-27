@@ -667,6 +667,7 @@ void VulkanCommandRecorder::buildAccelerationStructures(const BuildAccelerationS
             geometryInfoKhr.type = accelerationStructureTypeToVkAccelerationStructureType(dstAccelerationStructure->type);
             geometryInfoKhr.scratchData.deviceAddress = vkGetBufferDeviceAddress(vulkanDevice->device, &addressInfo);
             geometryInfoKhr.dstAccelerationStructure = dstAccelerationStructure->accelerationStructure;
+            geometryInfoKhr.flags = dstAccelerationStructure->buildFlags;
 
             storeTemporaryBuffer(scratchBufferH);
         }

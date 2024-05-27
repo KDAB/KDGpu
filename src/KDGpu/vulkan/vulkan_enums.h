@@ -138,4 +138,6 @@ VkGeometryInstanceFlagsKHR geometryInstanceFlagsToVkGeometryInstanceFlags(Geomet
 
 VkRayTracingShaderGroupTypeKHR rayTracingShaderGroupTypeToVkRayTracingShaderGroupType(RayTracingShaderGroupType type);
 
+VkBuildAccelerationStructureFlagsKHR accelerationStructureFlagsToVkBuildAccelerationStructureFlags(AccelerationStructureFlags flags);
+
 } // namespace KDGpu

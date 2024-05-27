@@ -425,4 +425,9 @@ VkRayTracingShaderGroupTypeKHR rayTracingShaderGroupTypeToVkRayTracingShaderGrou
     return static_cast<VkRayTracingShaderGroupTypeKHR>(type);
 }
 
+VkBuildAccelerationStructureFlagsKHR accelerationStructureFlagsToVkBuildAccelerationStructureFlags(AccelerationStructureFlags flags)
+{
+    return static_cast<VkBuildAccelerationStructureFlagsKHR>(flags.toInt());
+}
+
 } // namespace KDGpu

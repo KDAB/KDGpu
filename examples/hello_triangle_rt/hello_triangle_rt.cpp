@@ -179,6 +179,7 @@ void HelloTriangleRt::createAccelerationStructures()
     m_bottomLevelAs = m_device.createAccelerationStructure(AccelerationStructureOptions{
             .label = "BottomLevelAS",
             .type = AccelerationStructureType::BottomLevel,
+            .flags = AccelerationStructureFlagBits::PreferFastTrace,
             .geometryTypesAndCount = {
                     {
                             .geometry = triangleDataGeometry,
@@ -208,6 +209,7 @@ void HelloTriangleRt::createAccelerationStructures()
     m_topLevelAs = m_device.createAccelerationStructure(AccelerationStructureOptions{
             .label = "TopLevelAS",
             .type = AccelerationStructureType::TopLevel,
+            .flags = AccelerationStructureFlagBits::PreferFastTrace,
             .geometryTypesAndCount = {
                     {
                             .geometry = triGeometryInstance,
