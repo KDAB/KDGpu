@@ -2895,15 +2895,6 @@ Handle<AccelerationStructure_t> VulkanResourceManager::createAccelerationStructu
         maxGeometriesCount.push_back(geometryTypeAndCount.maxGeometryCount);
     }
 
-    const auto createAccelerationBuffer = [&](const VkDeviceSize size) -> Handle<Buffer_t> {
-        return createBuffer(deviceHandle, BufferOptions{
-                                                  .size = size,
-                                                  .usage = BufferUsageFlagBits::StorageBufferBit | BufferUsageFlagBits::AccelerationStructureStorageBit | BufferUsageFlagBits::ShaderDeviceAddressBit,
-                                                  .memoryUsage = MemoryUsage::GpuOnly,
-                                          },
-                            nullptr);
-    };
-
     VkAccelerationStructureBuildGeometryInfoKHR geometryInfoKhr{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR };
     geometryInfoKhr.mode = VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR;
     geometryInfoKhr.type = accelerationStructureTypeToVkAccelerationStructureType(options.type);
@@ -2913,8 +2904,7 @@ Handle<AccelerationStructure_t> VulkanResourceManager::createAccelerationStructu
     VkAccelerationStructureBuildSizesInfoKHR buildSizesInfoKhr{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR };
     vulkanDevice->vkGetAccelerationStructureBuildSizesKHR(vulkanDevice->device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_HOST_KHR, &geometryInfoKhr, maxGeometriesCount.data(), &buildSizesInfoKhr);
 
-    Handle<Buffer_t> scratchBufferH = createAccelerationBuffer(buildSizesInfoKhr.buildScratchSize);
-    Handle<Buffer_t> backingBufferH = createAccelerationBuffer(buildSizesInfoKhr.accelerationStructureSize);
+    Handle<Buffer_t> backingBufferH = VulkanAccelerationStructure::createAccelerationBuffer(deviceHandle, this, buildSizesInfoKhr.accelerationStructureSize);
 
     VulkanBuffer *backingBuffer = getBuffer(backingBufferH);
 
@@ -2926,7 +2916,7 @@ Handle<AccelerationStructure_t> VulkanResourceManager::createAccelerationStructu
     VkAccelerationStructureKHR accelerationStructureKhr = VK_NULL_HANDLE;
     vulkanDevice->vkCreateAccelerationStructureKHR(vulkanDevice->device, &createInfoKhr, nullptr, &accelerationStructureKhr);
 
-    auto accelerationStructureHandle = m_accelerationStructures.emplace(VulkanAccelerationStructure(deviceHandle, this, accelerationStructureKhr, backingBufferH, scratchBufferH, options.type));
+    auto accelerationStructureHandle = m_accelerationStructures.emplace(VulkanAccelerationStructure(deviceHandle, this, accelerationStructureKhr, backingBufferH, options.type, buildSizesInfoKhr));
 
     setObjectName(vulkanDevice, VK_OBJECT_TYPE_ACCELERATION_STRUCTURE_KHR, reinterpret_cast<uint64_t>(accelerationStructureKhr), options.label);
 
@@ -2940,7 +2930,6 @@ void VulkanResourceManager::deleteAccelerationStructure(const Handle<Acceleratio
 
     vulkanDevice->vkDestroyAccelerationStructureKHR(vulkanDevice->device, accelerationStructure->accelerationStructure, nullptr);
 
-    deleteBuffer(accelerationStructure->scratchBuffer);
     deleteBuffer(accelerationStructure->backingBuffer);
 
     m_accelerationStructures.remove(handle);

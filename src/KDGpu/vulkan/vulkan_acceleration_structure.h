@@ -36,15 +36,17 @@ struct KDGPU_EXPORT VulkanAccelerationStructure : public ApiAccelerationStructur
                                          VulkanResourceManager *_vulkanResourceManager,
                                          VkAccelerationStructureKHR _accelerationStructure,
                                          Handle<Buffer_t> _backingBuffer,
-                                         Handle<Buffer_t> _scratchBuffer,
-                                         AccelerationStructureType _type);
+                                         AccelerationStructureType _type,
+                                         VkAccelerationStructureBuildSizesInfoKHR _buildSizes);
 
     Handle<Device_t> deviceHandle;
     VulkanResourceManager *vulkanResourceManager{ nullptr };
     VkAccelerationStructureKHR accelerationStructure{ VK_NULL_HANDLE };
     Handle<Buffer_t> backingBuffer;
-    Handle<Buffer_t> scratchBuffer;
     AccelerationStructureType type;
+    VkAccelerationStructureBuildSizesInfoKHR buildSizes;
+
+    static Handle<Buffer_t> createAccelerationBuffer(Handle<Device_t> deviceHandle, VulkanResourceManager *_vulkanResourceManager, VkDeviceSize size);
 };
 
 } // namespace KDGpu
