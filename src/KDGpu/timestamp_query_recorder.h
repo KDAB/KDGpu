@@ -30,6 +30,7 @@ class GraphicsApi;
 class KDGPU_EXPORT TimestampQueryRecorder
 {
 public:
+    TimestampQueryRecorder();
     ~TimestampQueryRecorder();
 
     TimestampQueryRecorder(TimestampQueryRecorder &&);

@@ -14,6 +14,8 @@
 
 namespace KDGpu {
 
+TimestampQueryRecorder::TimestampQueryRecorder() = default;
+
 TimestampQueryRecorder::TimestampQueryRecorder(GraphicsApi *api,
                                                const Handle<Device_t> &device,
                                                const Handle<TimestampQueryRecorder_t> &timestampQueryRecorder)
