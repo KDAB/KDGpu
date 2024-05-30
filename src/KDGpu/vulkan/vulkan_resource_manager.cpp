@@ -2061,14 +2061,23 @@ Handle<TimestampQueryRecorder_t> VulkanResourceManager::createTimestampQueryReco
 
     // Find suitable starting index to accommodate requested number of queries
     uint32_t startQueryIndex = 0;
-    for (const TimestampQueryBucket &b : m_timestampQueryBuckets) {
+    bool addBucketToEnd = true;
+
+    // Find where to insert new bucket (Buckets are always sorted by starting index)
+    for (size_t i = 0, m = m_timestampQueryBuckets.size(); i < m; ++i) {
+        const TimestampQueryBucket &b = m_timestampQueryBuckets[i];
+        if (startQueryIndex + options.queryCount <= b.start) {
+            m_timestampQueryBuckets.insert(m_timestampQueryBuckets.begin() + i, { startQueryIndex, options.queryCount });
+            addBucketToEnd = false;
+            break;
+        }
         startQueryIndex = std::max(startQueryIndex, b.start + b.count);
     };
+    if (addBucketToEnd)
+        m_timestampQueryBuckets.push_back({ startQueryIndex, options.queryCount });
 
     const auto vulkanTimestampQueryRecorderHandle = m_timestampQueryRecorders.emplace(
             VulkanTimestampQueryRecorder(vkCommandBuffer, this, deviceHandle, startQueryIndex, options.queryCount));
-
-    m_timestampQueryBuckets.push_back({ startQueryIndex, options.queryCount });
 
     return vulkanTimestampQueryRecorderHandle;
 }
@@ -2083,6 +2092,11 @@ void VulkanResourceManager::deleteTimestampQueryRecorder(const Handle<TimestampQ
                            });
     assert(it != m_timestampQueryBuckets.end());
     m_timestampQueryBuckets.erase(it);
+
+    // Keep buckets sorted by starting index
+    std::sort(m_timestampQueryBuckets.begin(), m_timestampQueryBuckets.end(), [](const TimestampQueryBucket &a, const TimestampQueryBucket &b) {
+        return a.start < b.start;
+    });
 
     m_timestampQueryRecorders.remove(handle);
 }

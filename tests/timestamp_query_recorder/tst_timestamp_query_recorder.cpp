@@ -43,10 +43,10 @@ TEST_SUITE("TimestampQueryRecorder")
         // THEN
         REQUIRE(device.isValid());
 
-        SUBCASE("Can't be default constructed")
+        SUBCASE("Can be default constructed")
         {
             // EXPECT
-            REQUIRE(!std::is_default_constructible<TimestampQueryRecorder>::value);
+            REQUIRE(std::is_default_constructible<TimestampQueryRecorder>::value);
             REQUIRE(!std::is_trivially_default_constructible<TimestampQueryRecorder>::value);
         }
 
@@ -71,16 +71,19 @@ TEST_SUITE("TimestampQueryRecorder")
 
             // GIVEN
             const BufferOptions cpuGpuBufferOptions = {
+                .label = "cpuGpu",
                 .size = 4 * sizeof(float),
                 .usage = BufferUsageFlagBits::TransferSrcBit,
                 .memoryUsage = MemoryUsage::CpuToGpu
             };
             const BufferOptions gpuGpuBufferOptions = {
+                .label = "gpuGpu",
                 .size = 1024 * 1024 * sizeof(float),
                 .usage = BufferUsageFlagBits::TransferSrcBit | BufferUsageFlagBits::TransferDstBit,
                 .memoryUsage = MemoryUsage::GpuOnly
             };
             const BufferOptions gpuCpuBufferOptions = {
+                .label = "gpuCpu",
                 .size = 4 * sizeof(float),
                 .usage = BufferUsageFlagBits::TransferSrcBit | BufferUsageFlagBits::TransferDstBit,
                 .memoryUsage = MemoryUsage::GpuToCpu
@@ -130,6 +133,14 @@ TEST_SUITE("TimestampQueryRecorder")
             TimestampIndex t3 = timestampQueryRecorder.writeTimestamp(PipelineStageFlagBit::BottomOfPipeBit);
 
             TimestampIndex t4 = timestampQueryRecorder.writeTimestamp(PipelineStageFlagBit::TopOfPipeBit);
+            commandRecorder.bufferMemoryBarrier(BufferMemoryBarrierOptions{
+                    .srcStages = PipelineStageFlagBit::CopyBit | PipelineStageFlagBit::TransferBit,
+                    .srcMask = AccessFlagBit::MemoryWriteBit,
+                    .dstStages = PipelineStageFlagBit::ClearBit,
+                    .dstMask = AccessFlagBit::MemoryWriteBit,
+                    .buffer = gpuToGpu,
+            });
+
             // Clear gpuGpu
             commandRecorder.clearBuffer(BufferClear{
                     .dstBuffer = gpuToGpu,
@@ -217,6 +228,63 @@ TEST_SUITE("TimestampQueryRecorder")
 
             // THEN
             CHECK(api->resourceManager()->getTimestampQueryRecorder(recorderHandle) == nullptr);
+        }
+
+        SUBCASE("Check doesn't run out of queries")
+        {
+            // GIVEN
+            CommandRecorder commandRecorder = device.createCommandRecorder();
+
+            // Note: we can allocate up to 1024 queries, that's a hard coded limit (see VulkanResourceManager::createTimestampQueryRecorder)
+
+            // WHEN
+            {
+                TimestampQueryRecorder t1 = commandRecorder.beginTimestampRecording(TimestampQueryRecorderOptions{
+                        .queryCount = 256,
+                });
+                TimestampQueryRecorder t2 = commandRecorder.beginTimestampRecording(TimestampQueryRecorderOptions{
+                        .queryCount = 256,
+                });
+                TimestampQueryRecorder t3 = commandRecorder.beginTimestampRecording(TimestampQueryRecorderOptions{
+                        .queryCount = 256,
+                });
+                TimestampQueryRecorder t4 = commandRecorder.beginTimestampRecording(TimestampQueryRecorderOptions{
+                        .queryCount = 256,
+                });
+            }
+
+            // THEN -> No Validation error
+
+            // WHEN
+            {
+                TimestampQueryRecorder t1 = commandRecorder.beginTimestampRecording(TimestampQueryRecorderOptions{
+                        .queryCount = 256,
+                });
+                TimestampQueryRecorder t2 = commandRecorder.beginTimestampRecording(TimestampQueryRecorderOptions{
+                        .queryCount = 256,
+                });
+                TimestampQueryRecorder t3 = commandRecorder.beginTimestampRecording(TimestampQueryRecorderOptions{
+                        .queryCount = 256,
+                });
+                TimestampQueryRecorder t4 = commandRecorder.beginTimestampRecording(TimestampQueryRecorderOptions{
+                        .queryCount = 256,
+                });
+
+                t1 = {};
+
+                TimestampQueryRecorder t5 = commandRecorder.beginTimestampRecording(TimestampQueryRecorderOptions{
+                        .queryCount = 256,
+                });
+
+                t4 = {};
+                t3 = {};
+
+                TimestampQueryRecorder t6 = commandRecorder.beginTimestampRecording(TimestampQueryRecorderOptions{
+                        .queryCount = 512,
+                });
+            }
+
+            // THEN -> No Validation error
         }
     }
 }
