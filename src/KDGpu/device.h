@@ -26,6 +26,9 @@
 #include <KDGpu/sampler_options.h>
 #include <KDGpu/shader_module.h>
 #include <KDGpu/swapchain.h>
+#include <KDGpu/acceleration_structure.h>
+#include <KDGpu/acceleration_structure_options.h>
+#include <KDGpu/raytracing_pipeline.h>
 
 #include <KDGpu/kdgpu_export.h>
 
@@ -49,6 +52,7 @@ struct BindGroupOptions;
 struct BindGroupLayoutOptions;
 struct BindGroupEntry;
 struct ComputePipelineOptions;
+struct RayTracingPipelineOptions;
 
 class KDGPU_EXPORT Device
 {
@@ -90,6 +94,8 @@ public:
 
     ComputePipeline createComputePipeline(const ComputePipelineOptions &options);
 
+    RayTracingPipeline createRayTracingPipeline(const RayTracingPipelineOptions &options);
+
     CommandRecorder createCommandRecorder(const CommandRecorderOptions &options = CommandRecorderOptions());
 
     GpuSemaphore createGpuSemaphore(const GpuSemaphoreOptions &options = GpuSemaphoreOptions());
@@ -101,6 +107,8 @@ public:
     Sampler createSampler(const SamplerOptions &options = SamplerOptions());
 
     Fence createFence(const FenceOptions &options = FenceOptions());
+
+    AccelerationStructure createAccelerationStructure(const AccelerationStructureOptions &options = AccelerationStructureOptions());
 
     GraphicsApi *graphicsApi() const;
 

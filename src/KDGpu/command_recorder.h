@@ -14,11 +14,13 @@
 #include <KDGpu/handle.h>
 #include <KDGpu/compute_pass_command_recorder.h>
 #include <KDGpu/render_pass_command_recorder.h>
+#include <KDGpu/raytracing_pass_command_recorder.h>
 #include <KDGpu/timestamp_query_recorder.h>
 #include <KDGpu/timestamp_query_recorder_options.h>
 #include <KDGpu/render_pass_command_recorder_options.h>
 #include <KDGpu/kdgpu_export.h>
 #include <KDGpu/memory_barrier.h>
+#include <KDGpu/acceleration_structure_options.h>
 
 namespace KDGpu {
 
@@ -159,6 +161,7 @@ public:
 
     RenderPassCommandRecorder beginRenderPass(const RenderPassCommandRecorderOptions &options);
     ComputePassCommandRecorder beginComputePass(const ComputePassCommandRecorderOptions &options = {});
+    RayTracingPassCommandRecorder beginRayTracingPass(const RayTracingPassCommandRecorderOptions &options = {});
     TimestampQueryRecorder beginTimestampRecording(const TimestampQueryRecorderOptions &options = {});
     void blitTexture(const TextureBlitOptions &options);
     void clearBuffer(const BufferClear &clear);
@@ -174,6 +177,7 @@ public:
     void textureMemoryBarrier(const TextureMemoryBarrierOptions &options);
     void executeSecondaryCommandBuffer(const Handle<CommandBuffer_t> &secondaryCommandBuffer);
     void resolveTexture(const TextureResolveOptions &options);
+    void buildAccelerationStructures(const BuildAccelerationStructureOptions &options);
 
     CommandBuffer finish();
 

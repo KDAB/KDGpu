@@ -76,6 +76,10 @@ AdapterProperties VulkanAdapter::queryAdapterProperties()
     descriptorIndexingProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_PROPERTIES;
     addToChain(&descriptorIndexingProperties);
 
+    VkPhysicalDeviceRayTracingPipelinePropertiesKHR rayTracingProperties{};
+    rayTracingProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_PROPERTIES_KHR;
+    addToChain(&rayTracingProperties);
+
     vkGetPhysicalDeviceProperties2(physicalDevice, &deviceProperties2);
 
     const VkPhysicalDeviceProperties &deviceProperties = deviceProperties2.properties;
@@ -83,7 +87,6 @@ AdapterProperties VulkanAdapter::queryAdapterProperties()
     const auto &limits = deviceProperties.limits;
     const auto &sparseProperties = deviceProperties.sparseProperties;
 
-    // clang-format off
     AdapterProperties properties = {
         .apiVersion = deviceProperties.apiVersion,
         .driverVersion = deviceProperties.driverVersion,
@@ -92,195 +95,204 @@ AdapterProperties VulkanAdapter::queryAdapterProperties()
         .deviceType = vkPhysicalDeviceTypeToAdapterDeviceType(deviceProperties.deviceType),
         .deviceName = deviceProperties.deviceName,
         .pipelineCacheUUID = {
-            deviceProperties.pipelineCacheUUID[0],
-            deviceProperties.pipelineCacheUUID[1],
-            deviceProperties.pipelineCacheUUID[2],
-            deviceProperties.pipelineCacheUUID[3],
-            deviceProperties.pipelineCacheUUID[4],
-            deviceProperties.pipelineCacheUUID[5],
-            deviceProperties.pipelineCacheUUID[6],
-            deviceProperties.pipelineCacheUUID[7],
-            deviceProperties.pipelineCacheUUID[8],
-            deviceProperties.pipelineCacheUUID[9],
-            deviceProperties.pipelineCacheUUID[10],
-            deviceProperties.pipelineCacheUUID[11],
-            deviceProperties.pipelineCacheUUID[12],
-            deviceProperties.pipelineCacheUUID[13],
-            deviceProperties.pipelineCacheUUID[14],
-            deviceProperties.pipelineCacheUUID[15]
+                deviceProperties.pipelineCacheUUID[0],
+                deviceProperties.pipelineCacheUUID[1],
+                deviceProperties.pipelineCacheUUID[2],
+                deviceProperties.pipelineCacheUUID[3],
+                deviceProperties.pipelineCacheUUID[4],
+                deviceProperties.pipelineCacheUUID[5],
+                deviceProperties.pipelineCacheUUID[6],
+                deviceProperties.pipelineCacheUUID[7],
+                deviceProperties.pipelineCacheUUID[8],
+                deviceProperties.pipelineCacheUUID[9],
+                deviceProperties.pipelineCacheUUID[10],
+                deviceProperties.pipelineCacheUUID[11],
+                deviceProperties.pipelineCacheUUID[12],
+                deviceProperties.pipelineCacheUUID[13],
+                deviceProperties.pipelineCacheUUID[14],
+                deviceProperties.pipelineCacheUUID[15],
         },
         .limits = {
-            .maxImageDimension1D = limits.maxImageDimension1D,
-            .maxImageDimension2D = limits.maxImageDimension2D,
-            .maxImageDimension3D = limits.maxImageDimension3D,
-            .maxImageDimensionCube = limits.maxImageDimensionCube,
-            .maxImageArrayLayers = limits.maxImageArrayLayers,
-            .maxTexelBufferElements = limits.maxTexelBufferElements,
-            .maxUniformBufferRange = limits.maxUniformBufferRange,
-            .maxStorageBufferRange = limits.maxStorageBufferRange,
-            .maxPushConstantsSize = limits.maxPushConstantsSize,
-            .maxMemoryAllocationCount = limits.maxMemoryAllocationCount,
-            .maxSamplerAllocationCount = limits.maxSamplerAllocationCount,
-            .bufferImageGranularity = limits.bufferImageGranularity,
-            .sparseAddressSpaceSize = limits.sparseAddressSpaceSize,
-            .maxBoundDescriptorSets = limits.maxBoundDescriptorSets,
-            .maxPerStageDescriptorSamplers = limits.maxPerStageDescriptorSamplers,
-            .maxPerStageDescriptorUniformBuffers = limits.maxPerStageDescriptorUniformBuffers,
-            .maxPerStageDescriptorStorageBuffers = limits.maxPerStageDescriptorStorageBuffers,
-            .maxPerStageDescriptorSampledImages = limits.maxPerStageDescriptorSampledImages,
-            .maxPerStageDescriptorStorageImages = limits.maxPerStageDescriptorStorageImages,
-            .maxPerStageDescriptorInputAttachments = limits.maxPerStageDescriptorInputAttachments,
-            .maxPerStageResources = limits.maxPerStageResources,
-            .maxDescriptorSetSamplers = limits.maxDescriptorSetSamplers,
-            .maxDescriptorSetUniformBuffers = limits.maxDescriptorSetUniformBuffers,
-            .maxDescriptorSetUniformBuffersDynamic = limits.maxDescriptorSetUniformBuffersDynamic,
-            .maxDescriptorSetStorageBuffers = limits.maxDescriptorSetStorageBuffers,
-            .maxDescriptorSetStorageBuffersDynamic = limits.maxDescriptorSetStorageBuffersDynamic,
-            .maxDescriptorSetSampledImages = limits.maxDescriptorSetSampledImages,
-            .maxDescriptorSetStorageImages = limits.maxDescriptorSetStorageImages,
-            .maxDescriptorSetInputAttachments = limits.maxDescriptorSetInputAttachments,
-            .maxVertexInputAttributes = limits.maxVertexInputAttributes,
-            .maxVertexInputBindings = limits.maxVertexInputBindings,
-            .maxVertexInputAttributeOffset = limits.maxVertexInputAttributeOffset,
-            .maxVertexInputBindingStride = limits.maxVertexInputBindingStride,
-            .maxVertexOutputComponents = limits.maxVertexOutputComponents,
-            .maxTessellationGenerationLevel = limits.maxTessellationGenerationLevel,
-            .maxTessellationPatchSize = limits.maxTessellationPatchSize,
-            .maxTessellationControlPerVertexInputComponents = limits.maxTessellationControlPerVertexInputComponents,
-            .maxTessellationControlPerVertexOutputComponents = limits.maxTessellationControlPerVertexOutputComponents,
-            .maxTessellationControlPerPatchOutputComponents = limits.maxTessellationControlPerPatchOutputComponents,
-            .maxTessellationControlTotalOutputComponents = limits.maxTessellationControlTotalOutputComponents,
-            .maxTessellationEvaluationInputComponents = limits.maxTessellationEvaluationInputComponents,
-            .maxTessellationEvaluationOutputComponents = limits.maxTessellationEvaluationOutputComponents,
-            .maxGeometryShaderInvocations = limits.maxGeometryShaderInvocations,
-            .maxGeometryInputComponents = limits.maxGeometryInputComponents,
-            .maxGeometryOutputComponents = limits.maxGeometryOutputComponents,
-            .maxGeometryOutputVertices = limits.maxGeometryOutputVertices,
-            .maxGeometryTotalOutputComponents = limits.maxGeometryTotalOutputComponents,
-            .maxFragmentInputComponents = limits.maxFragmentInputComponents,
-            .maxFragmentOutputAttachments = limits.maxFragmentOutputAttachments,
-            .maxFragmentDualSrcAttachments = limits.maxFragmentDualSrcAttachments,
-            .maxFragmentCombinedOutputResources = limits.maxFragmentCombinedOutputResources,
-            .maxComputeSharedMemorySize = limits.maxComputeSharedMemorySize,
-            .maxComputeWorkGroupCount = {
-                limits.maxComputeWorkGroupCount[0],
-                limits.maxComputeWorkGroupCount[1],
-                limits.maxComputeWorkGroupCount[2]
-            },
-            .maxComputeWorkGroupInvocations = limits.maxComputeWorkGroupInvocations,
-            .maxComputeWorkGroupSize = {
-                limits.maxComputeWorkGroupSize[0],
-                limits.maxComputeWorkGroupSize[1],
-                limits.maxComputeWorkGroupSize[2]
-            },
-            .subPixelPrecisionBits = limits.subPixelPrecisionBits,
-            .subTexelPrecisionBits = limits.subTexelPrecisionBits,
-            .mipmapPrecisionBits = limits.mipmapPrecisionBits,
-            .maxDrawIndexedIndexValue = limits.maxDrawIndexedIndexValue,
-            .maxDrawIndirectCount = limits.maxDrawIndirectCount,
-            .maxSamplerLodBias = limits.maxSamplerLodBias,
-            .maxSamplerAnisotropy = limits.maxSamplerAnisotropy,
-            .maxViewports = limits.maxViewports,
-            .maxViewportDimensions = {
-                limits.maxViewportDimensions[0],
-                limits.maxViewportDimensions[1]
-            },
-            .viewportBoundsRange = {
-                limits.viewportBoundsRange[0],
-                limits.viewportBoundsRange[1]
-            },
-            .viewportSubPixelBits = limits.viewportSubPixelBits,
-            .minMemoryMapAlignment = limits.minMemoryMapAlignment,
-            .minTexelBufferOffsetAlignment = limits.minTexelBufferOffsetAlignment,
-            .minUniformBufferOffsetAlignment = limits.minUniformBufferOffsetAlignment,
-            .minStorageBufferOffsetAlignment = limits.minStorageBufferOffsetAlignment,
-            .minTexelOffset = limits.minTexelOffset,
-            .maxTexelOffset = limits.maxTexelOffset,
-            .minTexelGatherOffset = limits.minTexelGatherOffset,
-            .maxTexelGatherOffset = limits.maxTexelGatherOffset,
-            .minInterpolationOffset = limits.minInterpolationOffset,
-            .maxInterpolationOffset = limits.maxInterpolationOffset,
-            .subPixelInterpolationOffsetBits = limits.subPixelInterpolationOffsetBits,
-            .maxFramebufferWidth = limits.maxFramebufferWidth,
-            .maxFramebufferHeight = limits.maxFramebufferHeight,
-            .maxFramebufferLayers = limits.maxFramebufferLayers,
-            .framebufferColorSampleCounts = SampleCountFlags::fromInt(limits.framebufferColorSampleCounts),
-            .framebufferDepthSampleCounts = SampleCountFlags::fromInt(limits.framebufferDepthSampleCounts),
-            .framebufferStencilSampleCounts = SampleCountFlags::fromInt(limits.framebufferStencilSampleCounts),
-            .framebufferNoAttachmentsSampleCounts = SampleCountFlags::fromInt(limits.framebufferNoAttachmentsSampleCounts),
-            .maxColorAttachments = limits.maxColorAttachments,
-            .sampledImageColorSampleCounts = SampleCountFlags::fromInt(limits.sampledImageColorSampleCounts),
-            .sampledImageIntegerSampleCounts = SampleCountFlags::fromInt(limits.sampledImageIntegerSampleCounts),
-            .sampledImageDepthSampleCounts = SampleCountFlags::fromInt(limits.sampledImageDepthSampleCounts),
-            .sampledImageStencilSampleCounts = SampleCountFlags::fromInt(limits.sampledImageStencilSampleCounts),
-            .storageImageSampleCounts = SampleCountFlags::fromInt(limits.storageImageSampleCounts),
-            .maxSampleMaskWords = limits.maxSampleMaskWords,
-            .timestampComputeAndGraphics = static_cast<bool>(limits.timestampComputeAndGraphics),
-            .timestampPeriod = limits.timestampPeriod,
-            .maxClipDistances = limits.maxClipDistances,
-            .maxCullDistances = limits.maxCullDistances,
-            .maxCombinedClipAndCullDistances = limits.maxCombinedClipAndCullDistances,
-            .discreteQueuePriorities = limits.discreteQueuePriorities,
-            .pointSizeRange = {
-                limits.pointSizeRange[0],
-                limits.pointSizeRange[1]
-            },
-            .lineWidthRange = {
-                limits.lineWidthRange[0],
-                limits.lineWidthRange[1]
-            },
-            .pointSizeGranularity = limits.pointSizeGranularity,
-            .lineWidthGranularity = limits.lineWidthGranularity,
-            .strictLines = static_cast<bool>(limits.strictLines),
-            .standardSampleLocations = static_cast<bool>(limits.standardSampleLocations),
-            .optimalBufferCopyOffsetAlignment = limits.optimalBufferCopyOffsetAlignment,
-            .optimalBufferCopyRowPitchAlignment = limits.optimalBufferCopyRowPitchAlignment,
-            .nonCoherentAtomSize = limits.nonCoherentAtomSize
+                .maxImageDimension1D = limits.maxImageDimension1D,
+                .maxImageDimension2D = limits.maxImageDimension2D,
+                .maxImageDimension3D = limits.maxImageDimension3D,
+                .maxImageDimensionCube = limits.maxImageDimensionCube,
+                .maxImageArrayLayers = limits.maxImageArrayLayers,
+                .maxTexelBufferElements = limits.maxTexelBufferElements,
+                .maxUniformBufferRange = limits.maxUniformBufferRange,
+                .maxStorageBufferRange = limits.maxStorageBufferRange,
+                .maxPushConstantsSize = limits.maxPushConstantsSize,
+                .maxMemoryAllocationCount = limits.maxMemoryAllocationCount,
+                .maxSamplerAllocationCount = limits.maxSamplerAllocationCount,
+                .bufferImageGranularity = limits.bufferImageGranularity,
+                .sparseAddressSpaceSize = limits.sparseAddressSpaceSize,
+                .maxBoundDescriptorSets = limits.maxBoundDescriptorSets,
+                .maxPerStageDescriptorSamplers = limits.maxPerStageDescriptorSamplers,
+                .maxPerStageDescriptorUniformBuffers = limits.maxPerStageDescriptorUniformBuffers,
+                .maxPerStageDescriptorStorageBuffers = limits.maxPerStageDescriptorStorageBuffers,
+                .maxPerStageDescriptorSampledImages = limits.maxPerStageDescriptorSampledImages,
+                .maxPerStageDescriptorStorageImages = limits.maxPerStageDescriptorStorageImages,
+                .maxPerStageDescriptorInputAttachments = limits.maxPerStageDescriptorInputAttachments,
+                .maxPerStageResources = limits.maxPerStageResources,
+                .maxDescriptorSetSamplers = limits.maxDescriptorSetSamplers,
+                .maxDescriptorSetUniformBuffers = limits.maxDescriptorSetUniformBuffers,
+                .maxDescriptorSetUniformBuffersDynamic = limits.maxDescriptorSetUniformBuffersDynamic,
+                .maxDescriptorSetStorageBuffers = limits.maxDescriptorSetStorageBuffers,
+                .maxDescriptorSetStorageBuffersDynamic = limits.maxDescriptorSetStorageBuffersDynamic,
+                .maxDescriptorSetSampledImages = limits.maxDescriptorSetSampledImages,
+                .maxDescriptorSetStorageImages = limits.maxDescriptorSetStorageImages,
+                .maxDescriptorSetInputAttachments = limits.maxDescriptorSetInputAttachments,
+                .maxVertexInputAttributes = limits.maxVertexInputAttributes,
+                .maxVertexInputBindings = limits.maxVertexInputBindings,
+                .maxVertexInputAttributeOffset = limits.maxVertexInputAttributeOffset,
+                .maxVertexInputBindingStride = limits.maxVertexInputBindingStride,
+                .maxVertexOutputComponents = limits.maxVertexOutputComponents,
+                .maxTessellationGenerationLevel = limits.maxTessellationGenerationLevel,
+                .maxTessellationPatchSize = limits.maxTessellationPatchSize,
+                .maxTessellationControlPerVertexInputComponents = limits.maxTessellationControlPerVertexInputComponents,
+                .maxTessellationControlPerVertexOutputComponents = limits.maxTessellationControlPerVertexOutputComponents,
+                .maxTessellationControlPerPatchOutputComponents = limits.maxTessellationControlPerPatchOutputComponents,
+                .maxTessellationControlTotalOutputComponents = limits.maxTessellationControlTotalOutputComponents,
+                .maxTessellationEvaluationInputComponents = limits.maxTessellationEvaluationInputComponents,
+                .maxTessellationEvaluationOutputComponents = limits.maxTessellationEvaluationOutputComponents,
+                .maxGeometryShaderInvocations = limits.maxGeometryShaderInvocations,
+                .maxGeometryInputComponents = limits.maxGeometryInputComponents,
+                .maxGeometryOutputComponents = limits.maxGeometryOutputComponents,
+                .maxGeometryOutputVertices = limits.maxGeometryOutputVertices,
+                .maxGeometryTotalOutputComponents = limits.maxGeometryTotalOutputComponents,
+                .maxFragmentInputComponents = limits.maxFragmentInputComponents,
+                .maxFragmentOutputAttachments = limits.maxFragmentOutputAttachments,
+                .maxFragmentDualSrcAttachments = limits.maxFragmentDualSrcAttachments,
+                .maxFragmentCombinedOutputResources = limits.maxFragmentCombinedOutputResources,
+                .maxComputeSharedMemorySize = limits.maxComputeSharedMemorySize,
+                .maxComputeWorkGroupCount = {
+                        limits.maxComputeWorkGroupCount[0],
+                        limits.maxComputeWorkGroupCount[1],
+                        limits.maxComputeWorkGroupCount[2],
+                },
+                .maxComputeWorkGroupInvocations = limits.maxComputeWorkGroupInvocations,
+                .maxComputeWorkGroupSize = {
+                        limits.maxComputeWorkGroupSize[0],
+                        limits.maxComputeWorkGroupSize[1],
+                        limits.maxComputeWorkGroupSize[2],
+                },
+                .subPixelPrecisionBits = limits.subPixelPrecisionBits,
+                .subTexelPrecisionBits = limits.subTexelPrecisionBits,
+                .mipmapPrecisionBits = limits.mipmapPrecisionBits,
+                .maxDrawIndexedIndexValue = limits.maxDrawIndexedIndexValue,
+                .maxDrawIndirectCount = limits.maxDrawIndirectCount,
+                .maxSamplerLodBias = limits.maxSamplerLodBias,
+                .maxSamplerAnisotropy = limits.maxSamplerAnisotropy,
+                .maxViewports = limits.maxViewports,
+                .maxViewportDimensions = {
+                        limits.maxViewportDimensions[0],
+                        limits.maxViewportDimensions[1],
+                },
+                .viewportBoundsRange = {
+                        limits.viewportBoundsRange[0],
+                        limits.viewportBoundsRange[1],
+                },
+                .viewportSubPixelBits = limits.viewportSubPixelBits,
+                .minMemoryMapAlignment = limits.minMemoryMapAlignment,
+                .minTexelBufferOffsetAlignment = limits.minTexelBufferOffsetAlignment,
+                .minUniformBufferOffsetAlignment = limits.minUniformBufferOffsetAlignment,
+                .minStorageBufferOffsetAlignment = limits.minStorageBufferOffsetAlignment,
+                .minTexelOffset = limits.minTexelOffset,
+                .maxTexelOffset = limits.maxTexelOffset,
+                .minTexelGatherOffset = limits.minTexelGatherOffset,
+                .maxTexelGatherOffset = limits.maxTexelGatherOffset,
+                .minInterpolationOffset = limits.minInterpolationOffset,
+                .maxInterpolationOffset = limits.maxInterpolationOffset,
+                .subPixelInterpolationOffsetBits = limits.subPixelInterpolationOffsetBits,
+                .maxFramebufferWidth = limits.maxFramebufferWidth,
+                .maxFramebufferHeight = limits.maxFramebufferHeight,
+                .maxFramebufferLayers = limits.maxFramebufferLayers,
+                .framebufferColorSampleCounts = SampleCountFlags::fromInt(limits.framebufferColorSampleCounts),
+                .framebufferDepthSampleCounts = SampleCountFlags::fromInt(limits.framebufferDepthSampleCounts),
+                .framebufferStencilSampleCounts = SampleCountFlags::fromInt(limits.framebufferStencilSampleCounts),
+                .framebufferNoAttachmentsSampleCounts = SampleCountFlags::fromInt(limits.framebufferNoAttachmentsSampleCounts),
+                .maxColorAttachments = limits.maxColorAttachments,
+                .sampledImageColorSampleCounts = SampleCountFlags::fromInt(limits.sampledImageColorSampleCounts),
+                .sampledImageIntegerSampleCounts = SampleCountFlags::fromInt(limits.sampledImageIntegerSampleCounts),
+                .sampledImageDepthSampleCounts = SampleCountFlags::fromInt(limits.sampledImageDepthSampleCounts),
+                .sampledImageStencilSampleCounts = SampleCountFlags::fromInt(limits.sampledImageStencilSampleCounts),
+                .storageImageSampleCounts = SampleCountFlags::fromInt(limits.storageImageSampleCounts),
+                .maxSampleMaskWords = limits.maxSampleMaskWords,
+                .timestampComputeAndGraphics = static_cast<bool>(limits.timestampComputeAndGraphics),
+                .timestampPeriod = limits.timestampPeriod,
+                .maxClipDistances = limits.maxClipDistances,
+                .maxCullDistances = limits.maxCullDistances,
+                .maxCombinedClipAndCullDistances = limits.maxCombinedClipAndCullDistances,
+                .discreteQueuePriorities = limits.discreteQueuePriorities,
+                .pointSizeRange = {
+                        limits.pointSizeRange[0],
+                        limits.pointSizeRange[1],
+                },
+                .lineWidthRange = {
+                        limits.lineWidthRange[0],
+                        limits.lineWidthRange[1],
+                },
+                .pointSizeGranularity = limits.pointSizeGranularity,
+                .lineWidthGranularity = limits.lineWidthGranularity,
+                .strictLines = static_cast<bool>(limits.strictLines),
+                .standardSampleLocations = static_cast<bool>(limits.standardSampleLocations),
+                .optimalBufferCopyOffsetAlignment = limits.optimalBufferCopyOffsetAlignment,
+                .optimalBufferCopyRowPitchAlignment = limits.optimalBufferCopyRowPitchAlignment,
+                .nonCoherentAtomSize = limits.nonCoherentAtomSize,
         },
         .sparseProperties = {
-            .residencyStandard2DBlockShape = static_cast<bool>(sparseProperties.residencyStandard2DBlockShape),
-            .residencyStandard2DMultisampleBlockShape = static_cast<bool>(sparseProperties.residencyStandard2DMultisampleBlockShape),
-            .residencyStandard3DBlockShape = static_cast<bool>(sparseProperties.residencyStandard3DBlockShape),
-            .residencyAlignedMipSize = static_cast<bool>(sparseProperties.residencyAlignedMipSize),
-            .residencyNonResidentStrict = static_cast<bool>(sparseProperties.residencyNonResidentStrict)
+                .residencyStandard2DBlockShape = static_cast<bool>(sparseProperties.residencyStandard2DBlockShape),
+                .residencyStandard2DMultisampleBlockShape = static_cast<bool>(sparseProperties.residencyStandard2DMultisampleBlockShape),
+                .residencyStandard3DBlockShape = static_cast<bool>(sparseProperties.residencyStandard3DBlockShape),
+                .residencyAlignedMipSize = static_cast<bool>(sparseProperties.residencyAlignedMipSize),
+                .residencyNonResidentStrict = static_cast<bool>(sparseProperties.residencyNonResidentStrict),
         },
         .multiViewProperties = {
-            .maxMultiViewCount = multiViewProperties.maxMultiviewViewCount,
-            .maxMultiviewInstanceIndex = multiViewProperties.maxMultiviewInstanceIndex,
+                .maxMultiViewCount = multiViewProperties.maxMultiviewViewCount,
+                .maxMultiviewInstanceIndex = multiViewProperties.maxMultiviewInstanceIndex,
         },
         .depthResolveProperties = {
-            .supportedDepthResolveModes = vkResolveModesToResolveModes(depthResolveProps.supportedDepthResolveModes),
-            .supportedStencilResolveModes = vkResolveModesToResolveModes(depthResolveProps.supportedStencilResolveModes),
-            .independentResolveNone = static_cast<bool>(depthResolveProps.independentResolveNone),
-            .independentResolve = static_cast<bool>(depthResolveProps.independentResolve),
+                .supportedDepthResolveModes = vkResolveModesToResolveModes(depthResolveProps.supportedDepthResolveModes),
+                .supportedStencilResolveModes = vkResolveModesToResolveModes(depthResolveProps.supportedStencilResolveModes),
+                .independentResolveNone = static_cast<bool>(depthResolveProps.independentResolveNone),
+                .independentResolve = static_cast<bool>(depthResolveProps.independentResolve),
         },
         .bindGroupIndexingProperties = {
-            .maxUpdateAfterBindBindGroups = descriptorIndexingProperties.maxUpdateAfterBindDescriptorsInAllPools,
-            .shaderUniformBufferArrayNonUniformIndexingNative  = static_cast<bool>(descriptorIndexingProperties.shaderUniformBufferArrayNonUniformIndexingNative),
-            .shaderSampledImageArrayNonUniformIndexingNative = static_cast<bool>(descriptorIndexingProperties.shaderSampledImageArrayNonUniformIndexingNative),
-            .shaderStorageBufferArrayNonUniformIndexingNative = static_cast<bool>(descriptorIndexingProperties.shaderStorageBufferArrayNonUniformIndexingNative),
-            .shaderStorageImageArrayNonUniformIndexingNative = static_cast<bool>(descriptorIndexingProperties.shaderStorageImageArrayNonUniformIndexingNative),
-            .shaderInputAttachmentArrayNonUniformIndexingNative = static_cast<bool>(descriptorIndexingProperties.shaderInputAttachmentArrayNonUniformIndexingNative),
-            .robustBufferAccessUpdateAfterBind = static_cast<bool>(descriptorIndexingProperties.robustBufferAccessUpdateAfterBind),
-            .quadDivergentImplicitLod = static_cast<bool>(descriptorIndexingProperties.quadDivergentImplicitLod),
-            .maxPerStageBindGroupEntriesUpdateAfterBindSamplers  = descriptorIndexingProperties.maxPerStageDescriptorUpdateAfterBindSamplers,
-            .maxPerStageBindGroupEntriesUpdateAfterBindUniformBuffers  = descriptorIndexingProperties.maxPerStageDescriptorUpdateAfterBindUniformBuffers,
-            .maxPerStageBindGroupEntriesUpdateAfterBindStorageBuffers  = descriptorIndexingProperties.maxPerStageDescriptorUpdateAfterBindStorageBuffers,
-            .maxPerStageBindGroupEntriesUpdateAfterBindSampledImages  = descriptorIndexingProperties.maxPerStageDescriptorUpdateAfterBindSampledImages,
-            .maxPerStageBindGroupEntriesUpdateAfterBindStorageImages = descriptorIndexingProperties.maxPerStageDescriptorUpdateAfterBindStorageImages,
-            .maxPerStageBindGroupEntriesUpdateAfterBindInputAttachments = descriptorIndexingProperties.maxPerStageDescriptorUpdateAfterBindInputAttachments,
-            .maxPerStageUpdateAfterBindResources = descriptorIndexingProperties.maxPerStageUpdateAfterBindResources,
-            .maxBindGroupUpdateAfterBindSamplers = descriptorIndexingProperties.maxDescriptorSetUpdateAfterBindSamplers,
-            .maxBindGroupUpdateAfterBindUniformBuffers = descriptorIndexingProperties.maxDescriptorSetUpdateAfterBindUniformBuffers,
-            .maxBindGroupUpdateAfterBindUniformBuffersDynamic = descriptorIndexingProperties.maxDescriptorSetUpdateAfterBindUniformBuffersDynamic,
-            .maxBindGroupUpdateAfterBindStorageBuffers = descriptorIndexingProperties.maxDescriptorSetUpdateAfterBindStorageBuffers,
-            .maxBindGroupUpdateAfterBindStorageBuffersDynamic = descriptorIndexingProperties.maxDescriptorSetUpdateAfterBindStorageBuffersDynamic,
-            .maxBindGroupUpdateAfterBindSampledImages = descriptorIndexingProperties.maxDescriptorSetUpdateAfterBindSampledImages,
-            .maxBindGroupUpdateAfterBindStorageImages = descriptorIndexingProperties.maxDescriptorSetUpdateAfterBindStorageImages,
-            .maxBindGroupUpdateAfterBindInputAttachments = descriptorIndexingProperties.maxDescriptorSetUpdateAfterBindInputAttachments,
-        }
+                .maxUpdateAfterBindBindGroups = descriptorIndexingProperties.maxUpdateAfterBindDescriptorsInAllPools,
+                .shaderUniformBufferArrayNonUniformIndexingNative = static_cast<bool>(descriptorIndexingProperties.shaderUniformBufferArrayNonUniformIndexingNative),
+                .shaderSampledImageArrayNonUniformIndexingNative = static_cast<bool>(descriptorIndexingProperties.shaderSampledImageArrayNonUniformIndexingNative),
+                .shaderStorageBufferArrayNonUniformIndexingNative = static_cast<bool>(descriptorIndexingProperties.shaderStorageBufferArrayNonUniformIndexingNative),
+                .shaderStorageImageArrayNonUniformIndexingNative = static_cast<bool>(descriptorIndexingProperties.shaderStorageImageArrayNonUniformIndexingNative),
+                .shaderInputAttachmentArrayNonUniformIndexingNative = static_cast<bool>(descriptorIndexingProperties.shaderInputAttachmentArrayNonUniformIndexingNative),
+                .robustBufferAccessUpdateAfterBind = static_cast<bool>(descriptorIndexingProperties.robustBufferAccessUpdateAfterBind),
+                .quadDivergentImplicitLod = static_cast<bool>(descriptorIndexingProperties.quadDivergentImplicitLod),
+                .maxPerStageBindGroupEntriesUpdateAfterBindSamplers = descriptorIndexingProperties.maxPerStageDescriptorUpdateAfterBindSamplers,
+                .maxPerStageBindGroupEntriesUpdateAfterBindUniformBuffers = descriptorIndexingProperties.maxPerStageDescriptorUpdateAfterBindUniformBuffers,
+                .maxPerStageBindGroupEntriesUpdateAfterBindStorageBuffers = descriptorIndexingProperties.maxPerStageDescriptorUpdateAfterBindStorageBuffers,
+                .maxPerStageBindGroupEntriesUpdateAfterBindSampledImages = descriptorIndexingProperties.maxPerStageDescriptorUpdateAfterBindSampledImages,
+                .maxPerStageBindGroupEntriesUpdateAfterBindStorageImages = descriptorIndexingProperties.maxPerStageDescriptorUpdateAfterBindStorageImages,
+                .maxPerStageBindGroupEntriesUpdateAfterBindInputAttachments = descriptorIndexingProperties.maxPerStageDescriptorUpdateAfterBindInputAttachments,
+                .maxPerStageUpdateAfterBindResources = descriptorIndexingProperties.maxPerStageUpdateAfterBindResources,
+                .maxBindGroupUpdateAfterBindSamplers = descriptorIndexingProperties.maxDescriptorSetUpdateAfterBindSamplers,
+                .maxBindGroupUpdateAfterBindUniformBuffers = descriptorIndexingProperties.maxDescriptorSetUpdateAfterBindUniformBuffers,
+                .maxBindGroupUpdateAfterBindUniformBuffersDynamic = descriptorIndexingProperties.maxDescriptorSetUpdateAfterBindUniformBuffersDynamic,
+                .maxBindGroupUpdateAfterBindStorageBuffers = descriptorIndexingProperties.maxDescriptorSetUpdateAfterBindStorageBuffers,
+                .maxBindGroupUpdateAfterBindStorageBuffersDynamic = descriptorIndexingProperties.maxDescriptorSetUpdateAfterBindStorageBuffersDynamic,
+                .maxBindGroupUpdateAfterBindSampledImages = descriptorIndexingProperties.maxDescriptorSetUpdateAfterBindSampledImages,
+                .maxBindGroupUpdateAfterBindStorageImages = descriptorIndexingProperties.maxDescriptorSetUpdateAfterBindStorageImages,
+                .maxBindGroupUpdateAfterBindInputAttachments = descriptorIndexingProperties.maxDescriptorSetUpdateAfterBindInputAttachments,
+        },
+        .rayTracingProperties = {
+                .shaderGroupHandleSize = rayTracingProperties.shaderGroupHandleSize,
+                .maxRayRecursionDepth = rayTracingProperties.maxRayRecursionDepth,
+                .maxShaderGroupStride = rayTracingProperties.maxShaderGroupStride,
+                .shaderGroupBaseAlignment = rayTracingProperties.shaderGroupBaseAlignment,
+                .shaderGroupHandleCaptureReplaySize = rayTracingProperties.shaderGroupHandleCaptureReplaySize,
+                .maxRayDispatchInvocationCount = rayTracingProperties.maxRayDispatchInvocationCount,
+                .shaderGroupHandleAlignment = rayTracingProperties.shaderGroupHandleAlignment,
+                .maxRayHitAttributeSize = rayTracingProperties.maxRayHitAttributeSize,
+        },
     };
-    // clang-format-on
     return properties;
 }
 
@@ -293,21 +305,33 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
         chainCurrent = n;
     };
 
-    VkPhysicalDeviceFeatures2 deviceFeatures2 {};
+    VkPhysicalDeviceFeatures2 deviceFeatures2{};
     deviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
     chainCurrent = reinterpret_cast<VkBaseOutStructure *>(&deviceFeatures2);
 
-    VkPhysicalDeviceMultiviewFeatures multiViewFeatures {};
+    VkPhysicalDeviceMultiviewFeatures multiViewFeatures{};
     multiViewFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTIVIEW_FEATURES;
     addToChain(&multiViewFeatures);
 
-    VkPhysicalDeviceUniformBufferStandardLayoutFeatures stdLayoutFeatures {};
+    VkPhysicalDeviceUniformBufferStandardLayoutFeatures stdLayoutFeatures{};
     stdLayoutFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_UNIFORM_BUFFER_STANDARD_LAYOUT_FEATURES;
     addToChain(&stdLayoutFeatures);
 
-    VkPhysicalDeviceDescriptorIndexingFeatures deviceDescriptorIndexingFeatures {};
+    VkPhysicalDeviceDescriptorIndexingFeatures deviceDescriptorIndexingFeatures{};
     deviceDescriptorIndexingFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES;
     addToChain(&deviceDescriptorIndexingFeatures);
+
+    VkPhysicalDeviceVulkan12Features physicalDeviceFeatures12{};
+    physicalDeviceFeatures12.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+    addToChain(&physicalDeviceFeatures12);
+
+    VkPhysicalDeviceAccelerationStructureFeaturesKHR accelerationStructureFeaturesKhr{};
+    accelerationStructureFeaturesKhr.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
+    addToChain(&accelerationStructureFeaturesKhr);
+
+    VkPhysicalDeviceRayTracingPipelineFeaturesKHR rayTracingPipelineFeaturesKhr{};
+    rayTracingPipelineFeaturesKhr.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
+    addToChain(&rayTracingPipelineFeaturesKhr);
 
 #if defined(VK_KHR_synchronization2)
     VkPhysicalDeviceSynchronization2Features synchronization2Features{};
@@ -379,7 +403,7 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
         .multiViewGeometryShader = static_cast<bool>(multiViewFeatures.multiviewGeometryShader),
         .multiViewTessellationShader = static_cast<bool>(multiViewFeatures.multiviewTessellationShader),
         .shaderInputAttachmentArrayDynamicIndexing = static_cast<bool>(deviceDescriptorIndexingFeatures.shaderInputAttachmentArrayDynamicIndexing),
-        .shaderUniformTexelBufferArrayDynamicIndexing  = static_cast<bool>(deviceDescriptorIndexingFeatures.shaderUniformTexelBufferArrayDynamicIndexing),
+        .shaderUniformTexelBufferArrayDynamicIndexing = static_cast<bool>(deviceDescriptorIndexingFeatures.shaderUniformTexelBufferArrayDynamicIndexing),
         .shaderStorageTexelBufferArrayDynamicIndexing = static_cast<bool>(deviceDescriptorIndexingFeatures.shaderStorageTexelBufferArrayDynamicIndexing),
         .shaderUniformBufferArrayNonUniformIndexing = static_cast<bool>(deviceDescriptorIndexingFeatures.shaderUniformBufferArrayNonUniformIndexing),
         .shaderSampledImageArrayNonUniformIndexing = static_cast<bool>(deviceDescriptorIndexingFeatures.shaderSampledImageArrayNonUniformIndexing),
@@ -398,6 +422,13 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
         .bindGroupBindingPartiallyBound = static_cast<bool>(deviceDescriptorIndexingFeatures.descriptorBindingPartiallyBound),
         .bindGroupBindingVariableDescriptorCount = static_cast<bool>(deviceDescriptorIndexingFeatures.descriptorBindingVariableDescriptorCount),
         .runtimeBindGroupArray = static_cast<bool>(deviceDescriptorIndexingFeatures.runtimeDescriptorArray),
+        .bufferDeviceAddress = static_cast<bool>(physicalDeviceFeatures12.bufferDeviceAddress),
+        .accelerationStructures = static_cast<bool>(accelerationStructureFeaturesKhr.accelerationStructure),
+        .rayTracingPipeline = static_cast<bool>(rayTracingPipelineFeaturesKhr.rayTracingPipeline),
+        .rayTracingPipelineShaderGroupHandleCaptureReplay = static_cast<bool>(rayTracingPipelineFeaturesKhr.rayTracingPipelineShaderGroupHandleCaptureReplay),
+        .rayTracingPipelineShaderGroupHandleCaptureReplayMixed = static_cast<bool>(rayTracingPipelineFeaturesKhr.rayTracingPipelineShaderGroupHandleCaptureReplayMixed),
+        .rayTracingPipelineTraceRaysIndirect = static_cast<bool>(rayTracingPipelineFeaturesKhr.rayTracingPipelineTraceRaysIndirect),
+        .rayTraversalPrimitiveCulling = static_cast<bool>(rayTracingPipelineFeaturesKhr.rayTraversalPrimitiveCulling),
     };
 
 #if defined(VK_KHR_synchronization2)
@@ -441,10 +472,9 @@ AdapterSwapchainProperties VulkanAdapter::querySwapchainProperties(const Handle<
     std::vector<SurfaceFormat> formats;
     formats.reserve(formatCount);
     for (uint32_t i = 0; i < formatCount; ++i) {
-        formats.emplace_back(SurfaceFormat {
-            vkFormatToFormat(vkFormats[i].format),
-            vkColorSpaceKHRToColorSpace(vkFormats[i].colorSpace)
-        });
+        formats.emplace_back(SurfaceFormat{
+                vkFormatToFormat(vkFormats[i].format),
+                vkColorSpaceKHRToColorSpace(vkFormats[i].colorSpace) });
     }
     properties.formats = std::move(formats);
 
@@ -478,17 +508,14 @@ std::vector<AdapterQueueType> VulkanAdapter::queryQueueTypes()
     for (uint32_t i = 0; i < queueFamilyCount; ++i) {
         const auto &queueFamily = queueFamilies[i];
         queueTypes.emplace_back(
-            AdapterQueueType {
-                .flags = QueueFlags::fromInt(queueFamily.queueFlags),
-                .availableQueues = queueFamily.queueCount,
-                .timestampValidBits = queueFamily.timestampValidBits,
-                .minImageTransferGranularity = {
-                    .width = queueFamily.minImageTransferGranularity.width,
-                    .height = queueFamily.minImageTransferGranularity.height,
-                    .depth = queueFamily.minImageTransferGranularity.depth
-                }
-            }
-        );
+                AdapterQueueType{
+                        .flags = QueueFlags::fromInt(queueFamily.queueFlags),
+                        .availableQueues = queueFamily.queueCount,
+                        .timestampValidBits = queueFamily.timestampValidBits,
+                        .minImageTransferGranularity = {
+                                .width = queueFamily.minImageTransferGranularity.width,
+                                .height = queueFamily.minImageTransferGranularity.height,
+                                .depth = queueFamily.minImageTransferGranularity.depth } });
     }
 
     return queueTypes;
@@ -508,7 +535,7 @@ FormatProperties VulkanAdapter::formatProperties(Format format) const
     props.sType = VK_STRUCTURE_TYPE_FORMAT_PROPERTIES_2;
     vkGetPhysicalDeviceFormatProperties2(physicalDevice, static_cast<VkFormat>(format), &props);
 
-    return FormatProperties {
+    return FormatProperties{
         .linearTilingFeatures = FormatFeatureFlags::fromInt(props.formatProperties.linearTilingFeatures),
         .optimalTilingFeatures = FormatFeatureFlags::fromInt(props.formatProperties.optimalTilingFeatures),
         .bufferFeatures = FormatFeatureFlags::fromInt(props.formatProperties.bufferFeatures)
