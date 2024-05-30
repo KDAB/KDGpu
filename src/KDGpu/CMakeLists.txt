@@ -31,6 +31,7 @@ set(SOURCES
     queue.cpp
     raytracing_pass_command_recorder.cpp
     raytracing_pipeline.cpp
+    raytracing_shader_binding_table.cpp
     render_pass_command_recorder.cpp
     resource_manager.cpp
     sampler.cpp
@@ -116,6 +117,7 @@ set(HEADERS
     raytracing_pass_command_recorder.h
     raytracing_pipeline.h
     raytracing_pipeline_options.h
+    raytracing_shader_binding_table.h
     render_pass_command_recorder.h
     render_pass_command_recorder_options.h
     resource_manager.h
