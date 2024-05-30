@@ -15,12 +15,14 @@
 #include <KDGpu/device_options.h>
 #include <KDGpu/swapchain_options.h>
 #include <KDGpu/compute_pass_command_recorder.h>
+#include <KDGpu/raytracing_pass_command_recorder.h>
 #include <KDGpu/queue_description.h>
 #include <KDGpu/bind_group_options.h>
 #include <KDGpu/command_recorder.h>
 
 namespace KDGpu {
 
+struct ApiAccelerationStructure;
 struct ApiAdapter;
 struct ApiBindGroup;
 struct ApiBindGroupLayout;
@@ -36,8 +38,10 @@ struct ApiGraphicsPipeline;
 struct ApiInstance;
 struct ApiPipelineLayout;
 struct ApiQueue;
+struct ApiRayTracingPipeline;
 struct ApiRenderPass;
 struct ApiRenderPassCommandRecorder;
+struct ApiRayTracingPassCommandRecorder;
 struct ApiSampler;
 struct ApiShaderModule;
 struct ApiSwapchain;
@@ -46,6 +50,7 @@ struct ApiTexture;
 struct ApiTextureView;
 struct ApiTimestampQueryRecorder;
 
+struct AccelerationStructureOptions;
 struct BindGroupOptions;
 struct BufferOptions;
 struct CommandRecorderOptions;
@@ -56,36 +61,40 @@ struct GpuSemaphoreOptions;
 struct GraphicsPipelineOptions;
 struct InstanceOptions;
 struct PipelineLayoutOptions;
+struct RayTracingPipelineOptions;
 struct RenderPassCommandRecorderOptions;
 struct SamplerOptions;
 struct TextureOptions;
 struct TextureViewOptions;
 struct TimestampQueryRecorderOptions;
 
+struct AccelerationStructure_t;
+struct Adapter_t;
 struct BindGroup_t;
+struct BindGroupLayout_t;
+struct Buffer_t;
+struct CommandBuffer_t;
 struct CommandRecorder_t;
+struct ComputePassCommandRecorder_t;
 struct ComputePipeline_t;
+struct Device_t;
 struct Fence_t;
+struct GpuSemaphore_t;
 struct GraphicsPipeline_t;
+struct Instance_t;
 struct PipelineLayout_t;
+struct Queue_t;
+struct RayTracingPipeline_t;
+struct RayTracingPassCommandRecorder_t;
 struct RenderPass_t;
+struct RenderPassCommandRecorder_t;
 struct Sampler_t;
 struct ShaderModule_t;
-struct Adapter_t;
-struct Instance_t;
 struct Surface_t;
-struct Device_t;
-struct Queue_t;
 struct Swapchain_t;
 struct Texture_t;
 struct TextureView_t;
-struct Buffer_t;
-struct GpuSemaphore_t;
-struct RenderPassCommandRecorder_t;
-struct ComputePassCommandRecorder_t;
 struct TimestampQueryRecorder_t;
-struct CommandBuffer_t;
-struct BindGroupLayout_t;
 
 // TODO: Should this class have create/destroy functions or should we put those onto the
 // parent resource type structs? For example VulkanDevice could have a createTexture()
@@ -157,6 +166,10 @@ public:
     virtual void deleteComputePipeline(const Handle<ComputePipeline_t> &handle) = 0;
     virtual ApiComputePipeline *getComputePipeline(const Handle<ComputePipeline_t> &handle) const = 0;
 
+    virtual Handle<RayTracingPipeline_t> createRayTracingPipeline(const Handle<Device_t> &deviceHandle, const RayTracingPipelineOptions &options) = 0;
+    virtual void deleteRayTracingPipeline(const Handle<RayTracingPipeline_t> &handle) = 0;
+    virtual ApiRayTracingPipeline *getRayTracingPipeline(const Handle<RayTracingPipeline_t> &handle) const = 0;
+
     virtual Handle<GpuSemaphore_t> createGpuSemaphore(const Handle<Device_t> &deviceHandle, const GpuSemaphoreOptions &options) = 0;
     virtual void deleteGpuSemaphore(const Handle<GpuSemaphore_t> &handle) = 0;
     virtual ApiGpuSemaphore *getGpuSemaphore(const Handle<GpuSemaphore_t> &handle) const = 0;
@@ -176,6 +189,13 @@ public:
                                                                                   const ComputePassCommandRecorderOptions &options) = 0;
     virtual void deleteComputePassCommandRecorder(const Handle<ComputePassCommandRecorder_t> &handle) = 0;
     virtual ApiComputePassCommandRecorder *getComputePassCommandRecorder(const Handle<ComputePassCommandRecorder_t> &handle) const = 0;
+
+    virtual void deleteRayTracingPassCommandRecorder(const Handle<RayTracingPassCommandRecorder_t> &handle) = 0;
+    virtual ApiRayTracingPassCommandRecorder *getRayTracingPassCommandRecorder(const Handle<RayTracingPassCommandRecorder_t> &handle) const = 0;
+
+    virtual Handle<RayTracingPassCommandRecorder_t> createRayTracingPassCommandRecorder(const Handle<Device_t> &deviceHandle,
+                                                                                        const Handle<CommandRecorder_t> &commandRecorderHandle,
+                                                                                        const RayTracingPassCommandRecorderOptions &options) = 0;
 
     virtual Handle<TimestampQueryRecorder_t> createTimestampQueryRecorder(const Handle<Device_t> &deviceHandle,
                                                                           const Handle<CommandRecorder_t> &commandRecorderHandle,
@@ -205,6 +225,10 @@ public:
     virtual Handle<Fence_t> createFence(const Handle<Device_t> &deviceHandle, const FenceOptions &options) = 0;
     virtual void deleteFence(const Handle<Fence_t> &handle) = 0;
     virtual ApiFence *getFence(const Handle<Fence_t> &handle) const = 0;
+
+    virtual Handle<AccelerationStructure_t> createAccelerationStructure(const Handle<Device_t> &deviceHandle, const AccelerationStructureOptions &options) = 0;
+    virtual void deleteAccelerationStructure(const Handle<AccelerationStructure_t> &handle) = 0;
+    virtual ApiAccelerationStructure *getAccelerationStructure(const Handle<AccelerationStructure_t> &handle) const = 0;
 
 protected:
     ResourceManager();

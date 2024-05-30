@@ -18,13 +18,15 @@
 
 using HANDLE = void *;
 
+// clang-format off
 #define KDGPU_MAKE_API_VERSION(variant, major, minor, patch) \
     ((((uint32_t)(variant)) << 29) | (((uint32_t)(major)) << 22) | (((uint32_t)(minor)) << 12) | ((uint32_t)(patch)))
 
 #define KDGPU_API_VERSION_VARIANT(version) ((uint32_t)(version) >> 29U)
 #define KDGPU_API_VERSION_MAJOR(version) (((uint32_t)(version) >> 22U) & 0x7FU)
 #define KDGPU_API_VERSION_MINOR(version) (((uint32_t)(version) >> 12U) & 0x3FFU)
-#define KDGPU_API_VERSION_PATCH(version) ((uint32_t)(version)&0xFFFU)
+#define KDGPU_API_VERSION_PATCH(version) ((uint32_t)(version) & 0xFFFU)
+// clang-format on
 
 namespace KDGpu {
 
@@ -67,8 +69,8 @@ struct Extension {
 };
 
 struct Extent2D {
-    uint32_t width;
-    uint32_t height;
+    uint32_t width{ 0 };
+    uint32_t height{ 0 };
 
     friend bool operator==(const Extent2D &, const Extent2D &) = default;
 };
@@ -81,9 +83,9 @@ struct Extent2Df {
 };
 
 struct Extent3D {
-    uint32_t width;
-    uint32_t height;
-    uint32_t depth;
+    uint32_t width{ 0 };
+    uint32_t height{ 0 };
+    uint32_t depth{ 0 };
 
     friend bool operator==(const Extent3D &, const Extent3D &) = default;
 };
@@ -710,6 +712,8 @@ enum class VertexRate {
 enum class IndexType {
     Uint16 = 0,
     Uint32 = 1,
+    None = 1000165000,
+    Uint8 = 1000265000,
     MaxEnum = 0x7fffffff
 };
 
@@ -757,6 +761,7 @@ enum class ResourceBindingType {
     DynamicUniformBuffer = 8,
     DynamicStorageBuffer = 9,
     InputAttachment = 10,
+    AccelerationStructure = 1000150000,
     MaxEnum = 0x7fffffff
 };
 
@@ -1161,6 +1166,42 @@ enum class DynamicState {
     StencilReference = 8,
 };
 
+enum class BuildAccelerationStructureMode {
+    Build = 0,
+    Update = 1
+};
+
+enum class AccelerationStructureType {
+    TopLevel = 0,
+    BottomLevel = 1,
+    Generic = 2
+};
+
+enum class GeometryInstanceFlagBits {
+    None = 0,
+    TriangleFacingCullDisable = 0x00000001,
+    TriangleFlipFacing = 0x00000002,
+    ForceOpaque = 0x00000004,
+    ForceNoOpaque = 0x00000008
+};
+using GeometryInstanceFlags = KDGpu::Flags<GeometryInstanceFlagBits>;
+
+enum class RayTracingShaderGroupType {
+    General = 0,
+    TrianglesHit = 1,
+    ProceduralHit = 2,
+};
+
+enum class AccelerationStructureFlagBits {
+    None = 0,
+    AllowUpdate = 0x00000001,
+    AllowCompaction = 0x00000002,
+    PreferFastTrace = 0x00000004,
+    PreferFastBuild = 0x00000008,
+    LowMemory = 0x00000010,
+};
+using AccelerationStructureFlags = KDGpu::Flags<AccelerationStructureFlagBits>;
+
 /*! @} */
 
 } // namespace KDGpu
@@ -1179,3 +1220,5 @@ OPERATORS_FOR_FLAGS(KDGpu::ExternalSemaphoreHandleTypeFlags)
 OPERATORS_FOR_FLAGS(KDGpu::ExternalMemoryHandleTypeFlags)
 OPERATORS_FOR_FLAGS(KDGpu::ResolveModeFlags)
 OPERATORS_FOR_FLAGS(KDGpu::StencilFaceFlags)
+OPERATORS_FOR_FLAGS(KDGpu::GeometryInstanceFlags)
+OPERATORS_FOR_FLAGS(KDGpu::AccelerationStructureFlags)

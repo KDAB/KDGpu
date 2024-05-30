@@ -12,6 +12,7 @@ if(NOT TARGET Vulkan::Vulkan)
 endif()
 
 set(SOURCES
+    acceleration_structure.cpp
     adapter.cpp
     buffer.cpp
     bind_group.cpp
@@ -28,6 +29,9 @@ set(SOURCES
     instance.cpp
     pipeline_layout.cpp
     queue.cpp
+    raytracing_pass_command_recorder.cpp
+    raytracing_pipeline.cpp
+    raytracing_shader_binding_table.cpp
     render_pass_command_recorder.cpp
     resource_manager.cpp
     sampler.cpp
@@ -38,6 +42,7 @@ set(SOURCES
     texture_view.cpp
     timestamp_query_recorder.cpp
     utils/logging.cpp
+    vulkan/vulkan_acceleration_structure.cpp
     vulkan/vulkan_adapter.cpp
     vulkan/vulkan_bind_group.cpp
     vulkan/vulkan_bind_group_layout.cpp
@@ -57,6 +62,8 @@ set(SOURCES
     vulkan/vulkan_instance.cpp
     vulkan/vulkan_pipeline_layout.cpp
     vulkan/vulkan_queue.cpp
+    vulkan/vulkan_raytracing_pass_command_recorder.cpp
+    vulkan/vulkan_raytracing_pipeline.cpp
     vulkan/vulkan_render_pass.cpp
     vulkan/vulkan_render_pass_command_recorder.cpp
     vulkan/vulkan_resource_manager.cpp
@@ -71,6 +78,8 @@ set(SOURCES
 )
 
 set(HEADERS
+    acceleration_structure_options.h
+    acceleration_structure.h
     adapter_features.h
     adapter_group.h
     adapter_properties.h
@@ -105,6 +114,10 @@ set(HEADERS
     pool.h
     queue.h
     queue_description.h
+    raytracing_pass_command_recorder.h
+    raytracing_pipeline.h
+    raytracing_pipeline_options.h
+    raytracing_shader_binding_table.h
     render_pass_command_recorder.h
     render_pass_command_recorder_options.h
     resource_manager.h
@@ -137,6 +150,8 @@ set(HEADERS
     api/api_instance.h
     api/api_pipeline_layout.h
     api/api_queue.h
+    api/api_raytracing_pass_command_recorder.h
+    api/api_raytracing_pipeline.h
     api/api_render_pass.h
     api/api_render_pass_command_recorder.h
     api/api_sampler.h
@@ -150,6 +165,7 @@ set(HEADERS
     utils/formatters.h
     utils/hash_utils.h
     utils/logging.h
+    vulkan/vulkan_acceleration_structure.h
     vulkan/vulkan_adapter.h
     vulkan/vulkan_bind_group.h
     vulkan/vulkan_bind_group_layout.h
@@ -170,6 +186,8 @@ set(HEADERS
     vulkan/vulkan_instance.h
     vulkan/vulkan_pipeline_layout.h
     vulkan/vulkan_queue.h
+    vulkan/vulkan_raytracing_pass_command_recorder.h
+    vulkan/vulkan_raytracing_pipeline.h
     vulkan/vulkan_render_pass.h
     vulkan/vulkan_render_pass_command_recorder.h
     vulkan/vulkan_resource_manager.h

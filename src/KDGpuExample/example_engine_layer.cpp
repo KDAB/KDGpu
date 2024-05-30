@@ -60,6 +60,7 @@ void ExampleEngineLayer::recreateSwapChain()
         .format = m_swapchainFormat,
         .minImageCount = getSuitableImageCount(surfaceCapabilities),
         .imageExtent = m_swapchainExtent,
+        .imageUsageFlags = m_swapchainUsageFlags,
         .compositeAlpha = m_compositeAlpha,
         .presentMode = m_presentMode,
         .oldSwapchain = m_swapchain,

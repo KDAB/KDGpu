@@ -39,6 +39,9 @@
 #include <KDGpu/vulkan/vulkan_texture.h>
 #include <KDGpu/vulkan/vulkan_texture_view.h>
 #include <KDGpu/vulkan/vulkan_timestamp_query_recorder.h>
+#include <KDGpu/vulkan/vulkan_acceleration_structure.h>
+#include <KDGpu/vulkan/vulkan_raytracing_pipeline.h>
+#include <KDGpu/vulkan/vulkan_raytracing_pass_command_recorder.h>
 
 #include <KDGpu/kdgpu_export.h>
 
@@ -54,6 +57,7 @@ namespace KDGpu {
 
 struct RenderTargetOptions;
 struct DepthStencilOptions;
+struct ShaderStage;
 
 class KDGPU_EXPORT VulkanResourceManager final : public ResourceManager
 {
@@ -121,6 +125,10 @@ public:
     void deleteComputePipeline(const Handle<ComputePipeline_t> &handle) final;
     VulkanComputePipeline *getComputePipeline(const Handle<ComputePipeline_t> &handle) const final;
 
+    Handle<RayTracingPipeline_t> createRayTracingPipeline(const Handle<Device_t> &deviceHandle, const RayTracingPipelineOptions &options) final;
+    void deleteRayTracingPipeline(const Handle<RayTracingPipeline_t> &handle) final;
+    VulkanRayTracingPipeline *getRayTracingPipeline(const Handle<RayTracingPipeline_t> &handle) const final;
+
     Handle<GpuSemaphore_t> createGpuSemaphore(const Handle<Device_t> &deviceHandle, const GpuSemaphoreOptions &options) final;
     void deleteGpuSemaphore(const Handle<GpuSemaphore_t> &handle) final;
     VulkanGpuSemaphore *getGpuSemaphore(const Handle<GpuSemaphore_t> &handle) const final;
@@ -140,6 +148,13 @@ public:
                                                                           const ComputePassCommandRecorderOptions &options) final;
     void deleteComputePassCommandRecorder(const Handle<ComputePassCommandRecorder_t> &handle) final;
     VulkanComputePassCommandRecorder *getComputePassCommandRecorder(const Handle<ComputePassCommandRecorder_t> &handle) const final;
+
+    void deleteRayTracingPassCommandRecorder(const Handle<RayTracingPassCommandRecorder_t> &handle) final;
+    VulkanRayTracingPassCommandRecorder *getRayTracingPassCommandRecorder(const Handle<RayTracingPassCommandRecorder_t> &handle) const final;
+
+    Handle<RayTracingPassCommandRecorder_t> createRayTracingPassCommandRecorder(const Handle<Device_t> &deviceHandle,
+                                                                                const Handle<CommandRecorder_t> &commandRecorderHandle,
+                                                                                const RayTracingPassCommandRecorderOptions &options) final;
 
     Handle<TimestampQueryRecorder_t> createTimestampQueryRecorder(const Handle<Device_t> &deviceHandle,
                                                                   const Handle<CommandRecorder_t> &commandRecorderHandle,
@@ -173,6 +188,10 @@ public:
     void deleteFence(const Handle<Fence_t> &handle) final;
     VulkanFence *getFence(const Handle<Fence_t> &handle) const final;
 
+    Handle<AccelerationStructure_t> createAccelerationStructure(const Handle<Device_t> &deviceHandle, const AccelerationStructureOptions &options) final;
+    void deleteAccelerationStructure(const Handle<AccelerationStructure_t> &handle) final;
+    VulkanAccelerationStructure *getAccelerationStructure(const Handle<AccelerationStructure_t> &handle) const final;
+
     std::string getMemoryStats(const Handle<Device_t> &device) const;
 
     KDGpu::Format formatFromTextureView(const Handle<TextureView_t> &viewHandle) const;
@@ -204,6 +223,16 @@ private:
                                                const DepthStencilOptions &depthStencilAttachment,
                                                SampleCountFlagBits samples);
 
+    struct ShaderStagesInfo {
+        std::vector<VkPipelineShaderStageCreateInfo> shaderInfos;
+        std::vector<VkSpecializationInfo> shaderSpecializationInfos;
+        std::vector<std::vector<VkSpecializationMapEntry>> shaderSpecializationMapEntries;
+        std::vector<std::vector<uint8_t>> shaderSpecializationRawData;
+    };
+
+    bool fillShaderStageInfos(const std::vector<ShaderStage> &stages,
+                              ShaderStagesInfo &shaderStagesInfo);
+
     template<typename ColorAtt, typename DepthAtt>
     Handle<RenderPass_t> createRenderPass(const Handle<Device_t> &deviceHandle,
                                           const std::vector<ColorAtt> &colorAttachments,
@@ -231,16 +260,19 @@ private:
     Pool<VulkanBindGroup, BindGroup_t> m_bindGroups{ 128 };
     Pool<VulkanGraphicsPipeline, GraphicsPipeline_t> m_graphicsPipelines{ 64 };
     Pool<VulkanComputePipeline, ComputePipeline_t> m_computePipelines{ 64 };
+    Pool<VulkanRayTracingPipeline, RayTracingPipeline_t> m_rayTracingPipelines{ 64 };
     Pool<VulkanGpuSemaphore, GpuSemaphore_t> m_gpuSemaphores{ 32 };
     Pool<VulkanCommandRecorder, CommandRecorder_t> m_commandRecorders{ 32 };
     Pool<VulkanRenderPassCommandRecorder, RenderPassCommandRecorder_t> m_renderPassCommandRecorders{ 32 };
     Pool<VulkanComputePassCommandRecorder, ComputePassCommandRecorder_t> m_computePassCommandRecorders{ 32 };
+    Pool<VulkanRayTracingPassCommandRecorder, RayTracingPassCommandRecorder_t> m_rayTracingPassCommandRecorders{ 32 };
     Pool<VulkanCommandBuffer, CommandBuffer_t> m_commandBuffers{ 128 };
     Pool<VulkanRenderPass, RenderPass_t> m_renderPasses{ 16 };
     Pool<VulkanFramebuffer, Framebuffer_t> m_framebuffers{ 16 };
     Pool<VulkanSampler, Sampler_t> m_samplers{ 16 };
     Pool<VulkanFence, Fence_t> m_fences{ 16 };
     Pool<VulkanTimestampQueryRecorder, TimestampQueryRecorder_t> m_timestampQueryRecorders{ 4 };
+    Pool<VulkanAccelerationStructure, AccelerationStructure_t> m_accelerationStructures{ 32 };
 
     struct TimestampQueryBucket {
         uint32_t start;

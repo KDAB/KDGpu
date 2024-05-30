@@ -405,4 +405,29 @@ VkDescriptorBindingFlags resourceBindingFlagsToVkDescriptorBindingFlags(Resource
     return static_cast<VkDescriptorBindingFlags>(flags.toInt());
 }
 
+VkBuildAccelerationStructureModeKHR accelerationStructureModeToVkStructureMode(BuildAccelerationStructureMode mode)
+{
+    return static_cast<VkBuildAccelerationStructureModeKHR>(mode);
+}
+
+VkAccelerationStructureTypeKHR accelerationStructureTypeToVkAccelerationStructureType(AccelerationStructureType type)
+{
+    return static_cast<VkAccelerationStructureTypeKHR>(type);
+}
+
+VkGeometryInstanceFlagsKHR geometryInstanceFlagsToVkGeometryInstanceFlags(GeometryInstanceFlags flags)
+{
+    return static_cast<VkGeometryInstanceFlagsKHR>(flags.toInt());
+}
+
+VkRayTracingShaderGroupTypeKHR rayTracingShaderGroupTypeToVkRayTracingShaderGroupType(RayTracingShaderGroupType type)
+{
+    return static_cast<VkRayTracingShaderGroupTypeKHR>(type);
+}
+
+VkBuildAccelerationStructureFlagsKHR accelerationStructureFlagsToVkBuildAccelerationStructureFlags(AccelerationStructureFlags flags)
+{
+    return static_cast<VkBuildAccelerationStructureFlagsKHR>(flags.toInt());
+}
+
 } // namespace KDGpu

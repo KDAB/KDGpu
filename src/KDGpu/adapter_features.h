@@ -100,6 +100,13 @@ struct AdapterFeatures {
     bool bindGroupBindingPartiallyBound;
     bool bindGroupBindingVariableDescriptorCount;
     bool runtimeBindGroupArray;
+    bool bufferDeviceAddress;
+    bool accelerationStructures;
+    bool rayTracingPipeline;
+    bool rayTracingPipelineShaderGroupHandleCaptureReplay;
+    bool rayTracingPipelineShaderGroupHandleCaptureReplayMixed;
+    bool rayTracingPipelineTraceRaysIndirect;
+    bool rayTraversalPrimitiveCulling;
 };
 
 /*! @} */

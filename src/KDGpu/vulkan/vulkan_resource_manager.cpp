@@ -16,6 +16,7 @@
 #include <vulkan/vulkan_win32.h>
 #endif
 
+#include <KDGpu/acceleration_structure_options.h>
 #include <KDGpu/bind_group_options.h>
 #include <KDGpu/bind_group_layout_options.h>
 #include <KDGpu/buffer_options.h>
@@ -25,6 +26,7 @@
 #include <KDGpu/sampler_options.h>
 #include <KDGpu/swapchain_options.h>
 #include <KDGpu/texture_options.h>
+#include <KDGpu/raytracing_pipeline_options.h>
 #include <KDGpu/vulkan/vulkan_config.h>
 #include <KDGpu/vulkan/vulkan_enums.h>
 #include <KDGpu/vulkan/vulkan_formatters.h>
@@ -106,6 +108,9 @@ SpecializationConstantData getByteOffsetSizeAndRawValueForSpecializationConstant
         .byteValues = std::move(rawValues),
     };
 }
+
+template<class>
+inline constexpr bool always_false = false;
 
 } // namespace
 namespace KDGpu {
@@ -453,6 +458,27 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     deviceGroupInfo.sType = VK_STRUCTURE_TYPE_DEVICE_GROUP_DEVICE_CREATE_INFO_KHR;
     deviceGroupInfo.physicalDeviceCount = 0;
 
+    VkPhysicalDeviceBufferDeviceAddressFeatures bufferDeviceFeature{};
+    bufferDeviceFeature.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
+    bufferDeviceFeature.bufferDeviceAddress = options.requestedFeatures.bufferDeviceAddress;
+    addToChain(&bufferDeviceFeature);
+
+    // Enable raytracing acceleration structure
+    VkPhysicalDeviceAccelerationStructureFeaturesKHR accelerationStructureFeaturesKhr{};
+    accelerationStructureFeaturesKhr.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
+    accelerationStructureFeaturesKhr.accelerationStructure = options.requestedFeatures.accelerationStructures;
+    addToChain(&accelerationStructureFeaturesKhr);
+
+    // Enable raytracing pipelines
+    VkPhysicalDeviceRayTracingPipelineFeaturesKHR raytracingFeaturesKhr{};
+    raytracingFeaturesKhr.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
+    raytracingFeaturesKhr.rayTracingPipeline = options.requestedFeatures.rayTracingPipeline;
+    raytracingFeaturesKhr.rayTracingPipelineShaderGroupHandleCaptureReplay = options.requestedFeatures.rayTracingPipelineShaderGroupHandleCaptureReplay;
+    raytracingFeaturesKhr.rayTracingPipelineShaderGroupHandleCaptureReplayMixed = options.requestedFeatures.rayTracingPipelineShaderGroupHandleCaptureReplayMixed;
+    raytracingFeaturesKhr.rayTracingPipelineTraceRaysIndirect = options.requestedFeatures.rayTracingPipelineTraceRaysIndirect;
+    raytracingFeaturesKhr.rayTraversalPrimitiveCulling = options.requestedFeatures.rayTraversalPrimitiveCulling;
+    addToChain(&raytracingFeaturesKhr);
+
     std::vector<VkPhysicalDevice> devicesInGroup;
     const size_t adapterCount = options.adapterGroup.adapters.size();
     const bool useDeviceGroup = adapterCount > 1;
@@ -575,14 +601,16 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     if (result != VK_SUCCESS)
         throw std::runtime_error(std::string{ "Failed to create a logical device: " } + getResultAsString(result));
 
-    const auto deviceHandle = m_devices.emplace(vkDevice, apiVersion, this, adapterHandle);
+    const auto deviceHandle = m_devices.emplace(vkDevice, apiVersion, this, adapterHandle, options.requestedFeatures);
 
     return deviceHandle;
 }
 
 Handle<Device_t> VulkanResourceManager::createDeviceFromExistingVkDevice(const Handle<Adapter_t> &adapterHandle, VkDevice vkDevice)
 {
-    const auto deviceHandle = m_devices.emplace(vkDevice, VK_API_VERSION_1_2, this, adapterHandle, false);
+    VulkanAdapter *adapter = getAdapter(adapterHandle);
+    assert(adapter != nullptr);
+    const auto deviceHandle = m_devices.emplace(vkDevice, VK_API_VERSION_1_2, this, adapterHandle, adapter->queryAdapterFeatures(), false);
 
     return deviceHandle;
 }
@@ -1157,65 +1185,18 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
 {
     VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
 
+    // Fetch the specified pipeline layout
+    VulkanPipelineLayout *vulkanPipelineLayout = getPipelineLayout(options.layout);
+    if (!vulkanPipelineLayout) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Invalid pipeline layout requested");
+        return {};
+    }
+
     // Shader stages
-    std::vector<VkPipelineShaderStageCreateInfo> shaderInfos;
-    const uint32_t shaderCount = static_cast<uint32_t>(options.shaderStages.size());
-    shaderInfos.reserve(shaderCount);
-
-    std::vector<VkSpecializationInfo> shaderSpecializationInfos(shaderCount);
-    std::vector<std::vector<VkSpecializationMapEntry>> shaderSpecializationMapEntries(shaderCount);
-    std::vector<std::vector<uint8_t>> shaderSpecializationRawData(shaderCount);
-
-    for (uint32_t i = 0; i < shaderCount; ++i) {
-        const auto &shaderStage = options.shaderStages.at(i);
-
-        VkPipelineShaderStageCreateInfo shaderInfo = {};
-        shaderInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        shaderInfo.stage = shaderStageFlagBitsToVkShaderStageFlagBits(shaderStage.stage);
-
-        // Lookup the shader module
-        const auto vulkanShaderModule = getShaderModule(shaderStage.shaderModule);
-        if (!vulkanShaderModule)
-            return {};
-        shaderInfo.module = vulkanShaderModule->shaderModule;
-        shaderInfo.pName = shaderStage.entryPoint.data();
-
-        // Specialization Constants
-        if (!shaderStage.specializationConstants.empty()) {
-            std::vector<VkSpecializationMapEntry> &specializationConstantEntries = shaderSpecializationMapEntries[i];
-            std::vector<uint8_t> &specializationRawData = shaderSpecializationRawData[i];
-            uint32_t byteOffset = 0;
-
-            const size_t specializationConstantsCount = shaderStage.specializationConstants.size();
-            specializationConstantEntries.reserve(specializationConstantsCount);
-
-            for (size_t sCI = 0; sCI < specializationConstantsCount; ++sCI) {
-                const SpecializationConstant &specializationConstant = shaderStage.specializationConstants[sCI];
-                const SpecializationConstantData &specializationConstantData = getByteOffsetSizeAndRawValueForSpecializationConstant(specializationConstant);
-
-                specializationConstantEntries.emplace_back(VkSpecializationMapEntry{
-                        .constantID = specializationConstant.constantId,
-                        .offset = byteOffset,
-                        .size = specializationConstantData.byteSize,
-                });
-
-                // Append Raw Byte Values
-                const std::vector<uint8_t> &rawData = specializationConstantData.byteValues;
-                specializationRawData.insert(specializationRawData.end(), rawData.begin(), rawData.end());
-
-                // Increase offset
-                byteOffset += specializationConstantData.byteSize;
-            }
-
-            VkSpecializationInfo &specializationInfo = shaderSpecializationInfos[i];
-            specializationInfo.mapEntryCount = specializationConstantsCount;
-            specializationInfo.pMapEntries = specializationConstantEntries.data();
-            specializationInfo.dataSize = specializationRawData.size();
-            specializationInfo.pData = specializationRawData.data();
-            shaderInfo.pSpecializationInfo = &specializationInfo;
-        }
-
-        shaderInfos.emplace_back(shaderInfo);
+    ShaderStagesInfo shaderStagesInfo;
+    if (!fillShaderStageInfos(options.shaderStages, shaderStagesInfo)) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Failed to build shader stages info for Pipeline");
+        return {};
     }
 
     // Vertex input
@@ -1370,13 +1351,6 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     viewportState.scissorCount = 1;
     viewportState.pScissors = nullptr; // Provided by dynamic state
 
-    // Fetch the specified pipeline layout
-    VulkanPipelineLayout *vulkanPipelineLayout = getPipelineLayout(options.layout);
-    if (!vulkanPipelineLayout) {
-        SPDLOG_LOGGER_ERROR(Logger::logger(), "Invalid pipeline layout requested");
-        return {};
-    }
-
     // TODO: Investigate using VK_KHR_dynamic_rendering (core in Vulkan 1.3).
     //       Do the other graphics APIs have an equivalent or perhaps they default
     //       to that sort of model? We also need this to be supported across all
@@ -1415,8 +1389,8 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
     pipelineInfo.basePipelineIndex = -1;
-    pipelineInfo.stageCount = static_cast<uint32_t>(shaderInfos.size());
-    pipelineInfo.pStages = shaderInfos.data();
+    pipelineInfo.stageCount = static_cast<uint32_t>(shaderStagesInfo.shaderInfos.size());
+    pipelineInfo.pStages = shaderStagesInfo.shaderInfos.data();
     pipelineInfo.pVertexInputState = &vertexInputState;
     pipelineInfo.pInputAssemblyState = &inputAssembly;
     pipelineInfo.pTessellationState = &tessellationStateInfo;
@@ -1566,6 +1540,122 @@ void VulkanResourceManager::deleteComputePipeline(const Handle<ComputePipeline_t
 VulkanComputePipeline *VulkanResourceManager::getComputePipeline(const Handle<ComputePipeline_t> &handle) const
 {
     return m_computePipelines.get(handle);
+}
+
+Handle<RayTracingPipeline_t> VulkanResourceManager::createRayTracingPipeline(const Handle<Device_t> &deviceHandle,
+                                                                             const RayTracingPipelineOptions &options)
+{
+    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
+
+    // Fetch the specified pipeline layout
+    VulkanPipelineLayout *vulkanPipelineLayout = getPipelineLayout(options.layout);
+    if (!vulkanPipelineLayout) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Invalid pipeline layout requested");
+        return {};
+    }
+
+    // Shader stages
+    ShaderStagesInfo shaderStagesInfo;
+    if (!fillShaderStageInfos(options.shaderStages, shaderStagesInfo)) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Failed to build shader stages info for Pipeline");
+        return {};
+    }
+
+    // Shader groups
+    std::vector<VkRayTracingShaderGroupCreateInfoKHR> shaderGroupsInfo;
+    shaderGroupsInfo.reserve(options.shaderGroups.size());
+
+    for (const RayTracingShaderGroupOptions &group : options.shaderGroups) {
+        VkRayTracingShaderGroupCreateInfoKHR groupInfo{};
+        groupInfo.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR;
+        groupInfo.type = rayTracingShaderGroupTypeToVkRayTracingShaderGroupType(group.type);
+        groupInfo.generalShader = VK_SHADER_UNUSED_KHR;
+        groupInfo.closestHitShader = VK_SHADER_UNUSED_KHR;
+        groupInfo.anyHitShader = VK_SHADER_UNUSED_KHR;
+        groupInfo.intersectionShader = VK_SHADER_UNUSED_KHR;
+
+        switch (group.type) {
+        case RayTracingShaderGroupType::General: {
+            groupInfo.generalShader = group.generalShaderIndex.value();
+            break;
+        };
+        case RayTracingShaderGroupType::ProceduralHit: {
+            groupInfo.intersectionShader = group.intersectionShaderIndex.value();
+            groupInfo.anyHitShader = group.anyHitShaderIndex.has_value() ? group.anyHitShaderIndex.value() : VK_SHADER_UNUSED_KHR;
+            groupInfo.closestHitShader = group.closestHitShaderIndex.has_value() ? group.closestHitShaderIndex.value() : VK_SHADER_UNUSED_KHR;
+            break;
+        };
+        case RayTracingShaderGroupType::TrianglesHit: {
+            groupInfo.anyHitShader = group.anyHitShaderIndex.has_value() ? group.anyHitShaderIndex.value() : VK_SHADER_UNUSED_KHR;
+            groupInfo.closestHitShader = group.closestHitShaderIndex.has_value() ? group.closestHitShaderIndex.value() : VK_SHADER_UNUSED_KHR;
+            break;
+        };
+        }
+
+        shaderGroupsInfo.emplace_back(groupInfo);
+    };
+
+    // Dynamic pipeline state.
+    std::vector<VkDynamicState> dynamicStates = {
+        // VK_DYNAMIC_STATE_RAY_TRACING_PIPELINE_STACK_SIZE_KHR
+    };
+
+    VkPipelineDynamicStateCreateInfo dynamicStateInfo{};
+    dynamicStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+    dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
+    dynamicStateInfo.pDynamicStates = dynamicStates.data();
+    dynamicStateInfo.flags = 0;
+
+    // MaxRecursionDepth
+    uint32_t maxRecursionDepth = options.maxRecursionDepth;
+    if (maxRecursionDepth == 0) {
+        VulkanAdapter *vulkanAdapter = getAdapter(vulkanDevice->adapterHandle);
+        maxRecursionDepth = vulkanAdapter->queryAdapterProperties().rayTracingProperties.maxRayRecursionDepth;
+    }
+
+    VkRayTracingPipelineCreateInfoKHR pipelineInfo = {};
+    pipelineInfo.sType = VK_STRUCTURE_TYPE_RAY_TRACING_PIPELINE_CREATE_INFO_KHR;
+    pipelineInfo.stageCount = static_cast<uint32_t>(shaderStagesInfo.shaderInfos.size());
+    pipelineInfo.pStages = shaderStagesInfo.shaderInfos.data();
+    pipelineInfo.groupCount = static_cast<uint32_t>(shaderGroupsInfo.size());
+    pipelineInfo.pGroups = shaderGroupsInfo.data();
+    pipelineInfo.maxPipelineRayRecursionDepth = maxRecursionDepth;
+    pipelineInfo.pDynamicState = &dynamicStateInfo;
+    pipelineInfo.layout = vulkanPipelineLayout->pipelineLayout;
+
+    VkPipeline vkPipeline{ VK_NULL_HANDLE };
+
+    assert(vulkanDevice->vkCreateRayTracingPipelinesKHR != nullptr);
+    if (auto result = vulkanDevice->vkCreateRayTracingPipelinesKHR(vulkanDevice->device, VK_NULL_HANDLE, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &vkPipeline); result != VK_SUCCESS) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating raytracing pipeline: {}", result);
+        return {};
+    }
+
+    setObjectName(vulkanDevice, VK_OBJECT_TYPE_PIPELINE, reinterpret_cast<uint64_t>(vkPipeline), options.label);
+
+    // Create VulkanPipeline object and return handle
+    const auto vulkanRayTracingPipelineHandle = m_rayTracingPipelines.emplace(VulkanRayTracingPipeline(
+            vkPipeline,
+            this,
+            deviceHandle,
+            options.layout));
+
+    return vulkanRayTracingPipelineHandle;
+}
+
+void VulkanResourceManager::deleteRayTracingPipeline(const Handle<RayTracingPipeline_t> &handle)
+{
+    VulkanRayTracingPipeline *vulkanPipeline = m_rayTracingPipelines.get(handle);
+    VulkanDevice *vulkanDevice = m_devices.get(vulkanPipeline->deviceHandle);
+
+    vkDestroyPipeline(vulkanDevice->device, vulkanPipeline->pipeline, nullptr);
+
+    m_rayTracingPipelines.remove(handle);
+}
+
+VulkanRayTracingPipeline *VulkanResourceManager::getRayTracingPipeline(const Handle<RayTracingPipeline_t> &handle) const
+{
+    return m_rayTracingPipelines.get(handle);
 }
 
 Handle<GpuSemaphore_t> VulkanResourceManager::createGpuSemaphore(const Handle<Device_t> &deviceHandle, const GpuSemaphoreOptions &options)
@@ -1754,6 +1844,9 @@ void VulkanResourceManager::deleteCommandBuffer(const Handle<CommandBuffer_t> &h
 {
     VulkanCommandBuffer *commandBuffer = m_commandBuffers.get(handle);
     VulkanDevice *vulkanDevice = m_devices.get(commandBuffer->deviceHandle);
+
+    for (const Handle<Buffer_t> buf : commandBuffer->temporaryBuffersToRelease)
+        deleteBuffer(buf);
 
     vkFreeCommandBuffers(vulkanDevice->device, commandBuffer->commandPool, 1, &commandBuffer->commandBuffer);
 
@@ -1974,6 +2067,36 @@ void VulkanResourceManager::deleteComputePassCommandRecorder(const Handle<Comput
 VulkanComputePassCommandRecorder *VulkanResourceManager::getComputePassCommandRecorder(const Handle<ComputePassCommandRecorder_t> &handle) const
 {
     return m_computePassCommandRecorders.get(handle);
+}
+
+void VulkanResourceManager::deleteRayTracingPassCommandRecorder(const Handle<RayTracingPassCommandRecorder_t> &handle)
+{
+    VulkanRayTracingPassCommandRecorder *vulkanCommandPassRecorder = m_rayTracingPassCommandRecorders.get(handle);
+
+    m_rayTracingPassCommandRecorders.remove(handle);
+}
+
+VulkanRayTracingPassCommandRecorder *VulkanResourceManager::getRayTracingPassCommandRecorder(const Handle<RayTracingPassCommandRecorder_t> &handle) const
+{
+    return m_rayTracingPassCommandRecorders.get(handle);
+}
+
+Handle<RayTracingPassCommandRecorder_t> VulkanResourceManager::createRayTracingPassCommandRecorder(const Handle<Device_t> &deviceHandle,
+                                                                                                   const Handle<CommandRecorder_t> &commandRecorderHandle,
+                                                                                                   const RayTracingPassCommandRecorderOptions &options)
+{
+    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
+
+    VulkanCommandRecorder *vulkanCommandRecorder = m_commandRecorders.get(commandRecorderHandle);
+    if (!vulkanCommandRecorder) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Could not find a valid command recorder");
+        return {};
+    }
+    VkCommandBuffer vkCommandBuffer = vulkanCommandRecorder->commandBuffer;
+
+    const auto vulkanRayTracingPassCommandRecorderHandle = m_rayTracingPassCommandRecorders.emplace(
+            VulkanRayTracingPassCommandRecorder(vkCommandBuffer, this, deviceHandle));
+    return vulkanRayTracingPassCommandRecorderHandle;
 }
 
 void VulkanResourceManager::fillColorAttachmnents(std::vector<VkAttachmentReference2> &colorAttachmentRefs,
@@ -2742,6 +2865,99 @@ void VulkanResourceManager::setObjectName(VulkanDevice *device, const VkObjectTy
     device->vkSetDebugUtilsObjectNameEXT(device->device, &nameInfo);
 }
 
+Handle<AccelerationStructure_t> VulkanResourceManager::createAccelerationStructure(const Handle<Device_t> &deviceHandle, const AccelerationStructureOptions &options)
+{
+    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
+
+    std::vector<VkAccelerationStructureGeometryKHR> geometries;
+    std::vector<uint32_t> maxGeometriesCount;
+
+    geometries.reserve(options.geometryTypesAndCount.size());
+    maxGeometriesCount.reserve(options.geometryTypesAndCount.size());
+
+    for (const AccelerationStructureOptions::GeometryTypeAndCount &geometryTypeAndCount : options.geometryTypesAndCount) {
+        VkAccelerationStructureGeometryKHR geometryKhr = { VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR };
+
+        std::visit([&geometryKhr](auto &&arg) {
+            using T = std::decay_t<decltype(arg)>;
+            if constexpr (std::is_same_v<T, AccelerationStructureGeometryTrianglesData>) {
+                VkAccelerationStructureGeometryTrianglesDataKHR trianglesDataKhr{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR };
+                trianglesDataKhr.vertexFormat = formatToVkFormat(arg.vertexFormat);
+                trianglesDataKhr.vertexStride = arg.vertexStride;
+                trianglesDataKhr.maxVertex = arg.maxVertex;
+                trianglesDataKhr.indexType = indexTypeToVkIndexType(arg.indexType);
+
+                // TODO: transformData deviceAddress should be set, spec says it needs to be checked if not NULL
+
+                geometryKhr.geometryType = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
+                geometryKhr.geometry.triangles = trianglesDataKhr;
+            } else if constexpr (std::is_same_v<T, AccelerationStructureGeometryInstancesData>) {
+                VkAccelerationStructureGeometryInstancesDataKHR instancesDataKhr{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_INSTANCES_DATA_KHR };
+
+                geometryKhr.geometryType = VK_GEOMETRY_TYPE_INSTANCES_KHR;
+                geometryKhr.geometry.instances = instancesDataKhr;
+            } else if constexpr (std::is_same_v<T, AccelerationStructureGeometryAabbsData>) {
+                VkAccelerationStructureGeometryAabbsDataKHR aabbsDataKhr{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_AABBS_DATA_KHR };
+                aabbsDataKhr.stride = arg.stride;
+
+                geometryKhr.geometryType = VK_GEOMETRY_TYPE_AABBS_KHR;
+                geometryKhr.geometry.aabbs = aabbsDataKhr;
+            } else {
+                static_assert(always_false<T>, "non-exhaustive visitor!");
+            }
+        },
+                   geometryTypeAndCount.geometry);
+
+        geometries.push_back(geometryKhr);
+        maxGeometriesCount.push_back(geometryTypeAndCount.maxGeometryCount);
+    }
+
+    VkAccelerationStructureBuildGeometryInfoKHR geometryInfoKhr{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR };
+    geometryInfoKhr.mode = VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR;
+    geometryInfoKhr.type = accelerationStructureTypeToVkAccelerationStructureType(options.type);
+    geometryInfoKhr.pGeometries = geometries.data();
+    geometryInfoKhr.geometryCount = geometries.size();
+    geometryInfoKhr.flags = accelerationStructureFlagsToVkBuildAccelerationStructureFlags(options.flags);
+
+    VkAccelerationStructureBuildSizesInfoKHR buildSizesInfoKhr{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR };
+    vulkanDevice->vkGetAccelerationStructureBuildSizesKHR(vulkanDevice->device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_HOST_KHR, &geometryInfoKhr, maxGeometriesCount.data(), &buildSizesInfoKhr);
+
+    Handle<Buffer_t> backingBufferH = VulkanAccelerationStructure::createAccelerationBuffer(deviceHandle, this, buildSizesInfoKhr.accelerationStructureSize);
+
+    VulkanBuffer *backingBuffer = getBuffer(backingBufferH);
+
+    VkAccelerationStructureCreateInfoKHR createInfoKhr = { VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR };
+    createInfoKhr.size = buildSizesInfoKhr.accelerationStructureSize;
+    createInfoKhr.buffer = backingBuffer->buffer;
+    createInfoKhr.type = accelerationStructureTypeToVkAccelerationStructureType(options.type);
+
+    VkAccelerationStructureKHR accelerationStructureKhr = VK_NULL_HANDLE;
+    vulkanDevice->vkCreateAccelerationStructureKHR(vulkanDevice->device, &createInfoKhr, nullptr, &accelerationStructureKhr);
+
+    auto accelerationStructureHandle = m_accelerationStructures.emplace(VulkanAccelerationStructure(deviceHandle, this, accelerationStructureKhr, backingBufferH, options.type, buildSizesInfoKhr, geometryInfoKhr.flags));
+
+    setObjectName(vulkanDevice, VK_OBJECT_TYPE_ACCELERATION_STRUCTURE_KHR, reinterpret_cast<uint64_t>(accelerationStructureKhr), options.label);
+
+    return accelerationStructureHandle;
+}
+
+void VulkanResourceManager::deleteAccelerationStructure(const Handle<AccelerationStructure_t> &handle)
+{
+    VulkanAccelerationStructure *accelerationStructure = m_accelerationStructures.get(handle);
+    VulkanDevice *vulkanDevice = m_devices.get(accelerationStructure->deviceHandle);
+
+    vulkanDevice->vkDestroyAccelerationStructureKHR(vulkanDevice->device, accelerationStructure->accelerationStructure, nullptr);
+
+    deleteBuffer(accelerationStructure->backingBuffer);
+
+    m_accelerationStructures.remove(handle);
+}
+
+VulkanAccelerationStructure *VulkanResourceManager::getAccelerationStructure(const Handle<AccelerationStructure_t> &handle) const
+{
+    return m_accelerationStructures.get(handle);
+}
+
 std::string VulkanResourceManager::getMemoryStats(const Handle<Device_t> &device) const
 {
     VulkanDevice *vulkanDevice = m_devices.get(device);
@@ -2772,6 +2988,69 @@ KDGpu::Format VulkanResourceManager::formatFromTextureView(const Handle<KDGpu::T
     }
 
     return texture->format;
+}
+
+bool VulkanResourceManager::fillShaderStageInfos(const std::vector<ShaderStage> &stages,
+                                                 ShaderStagesInfo &shaderStagesInfo)
+{
+    const uint32_t shaderCount = static_cast<uint32_t>(stages.size());
+    shaderStagesInfo.shaderInfos.reserve(shaderCount);
+    shaderStagesInfo.shaderSpecializationInfos.resize(shaderCount);
+    shaderStagesInfo.shaderSpecializationMapEntries.resize(shaderCount);
+    shaderStagesInfo.shaderSpecializationRawData.resize(shaderCount);
+
+    for (uint32_t i = 0; i < shaderCount; ++i) {
+        const auto &shaderStage = stages.at(i);
+
+        VkPipelineShaderStageCreateInfo shaderInfo = {};
+        shaderInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        shaderInfo.stage = shaderStageFlagBitsToVkShaderStageFlagBits(shaderStage.stage);
+
+        // Lookup the shader module
+        const auto vulkanShaderModule = getShaderModule(shaderStage.shaderModule);
+        if (!vulkanShaderModule)
+            return false;
+        shaderInfo.module = vulkanShaderModule->shaderModule;
+        shaderInfo.pName = shaderStage.entryPoint.data();
+
+        // Specialization Constants
+        if (!shaderStage.specializationConstants.empty()) {
+            std::vector<VkSpecializationMapEntry> &specializationConstantEntries = shaderStagesInfo.shaderSpecializationMapEntries[i];
+            std::vector<uint8_t> &specializationRawData = shaderStagesInfo.shaderSpecializationRawData[i];
+            uint32_t byteOffset = 0;
+
+            const size_t specializationConstantsCount = shaderStage.specializationConstants.size();
+            specializationConstantEntries.reserve(specializationConstantsCount);
+
+            for (size_t sCI = 0; sCI < specializationConstantsCount; ++sCI) {
+                const SpecializationConstant &specializationConstant = shaderStage.specializationConstants[sCI];
+                const SpecializationConstantData &specializationConstantData = getByteOffsetSizeAndRawValueForSpecializationConstant(specializationConstant);
+
+                specializationConstantEntries.emplace_back(VkSpecializationMapEntry{
+                        .constantID = specializationConstant.constantId,
+                        .offset = byteOffset,
+                        .size = specializationConstantData.byteSize,
+                });
+
+                // Append Raw Byte Values
+                const std::vector<uint8_t> &rawData = specializationConstantData.byteValues;
+                specializationRawData.insert(specializationRawData.end(), rawData.begin(), rawData.end());
+
+                // Increase offset
+                byteOffset += specializationConstantData.byteSize;
+            }
+
+            VkSpecializationInfo &specializationInfo = shaderStagesInfo.shaderSpecializationInfos[i];
+            specializationInfo.mapEntryCount = specializationConstantsCount;
+            specializationInfo.pMapEntries = specializationConstantEntries.data();
+            specializationInfo.dataSize = specializationRawData.size();
+            specializationInfo.pData = specializationRawData.data();
+            shaderInfo.pSpecializationInfo = &specializationInfo;
+        }
+
+        shaderStagesInfo.shaderInfos.emplace_back(shaderInfo);
+    }
+    return true;
 }
 
 std::vector<std::string> VulkanResourceManager::getAvailableLayers() const

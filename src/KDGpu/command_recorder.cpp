@@ -63,6 +63,11 @@ ComputePassCommandRecorder CommandRecorder::beginComputePass(const ComputePassCo
     return ComputePassCommandRecorder(m_api, m_device, m_api->resourceManager()->createComputePassCommandRecorder(m_device, m_commandRecorder, options));
 }
 
+RayTracingPassCommandRecorder CommandRecorder::beginRayTracingPass(const RayTracingPassCommandRecorderOptions &options)
+{
+    return RayTracingPassCommandRecorder(m_api, m_device, m_api->resourceManager()->createRayTracingPassCommandRecorder(m_device, m_commandRecorder, options));
+}
+
 TimestampQueryRecorder CommandRecorder::beginTimestampRecording(const TimestampQueryRecorderOptions &options)
 {
     return TimestampQueryRecorder(m_api, m_device, m_api->resourceManager()->createTimestampQueryRecorder(m_device, m_commandRecorder, options));
@@ -157,6 +162,12 @@ void CommandRecorder::resolveTexture(const TextureResolveOptions &options)
 {
     auto apiCommandRecorder = m_api->resourceManager()->getCommandRecorder(m_commandRecorder);
     apiCommandRecorder->resolveTexture(options);
+}
+
+void CommandRecorder::buildAccelerationStructures(const BuildAccelerationStructureOptions &options)
+{
+    auto apiCommandRecorder = m_api->resourceManager()->getCommandRecorder(m_commandRecorder);
+    apiCommandRecorder->buildAccelerationStructures(options);
 }
 
 } // namespace KDGpu
