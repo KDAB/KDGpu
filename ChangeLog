@@ -1,3 +1,8 @@
+- v0.6.0
+  - Add support for RayTracing VK_KHR_ray_tracing_pipeline
+  - Android support
+  - Update spdlog (1.14.1) and glm (1.0.1) dependencies
+  - Add RayTracing and Order Independent examples
 - v0.5.0
   - Introduce initial support for OpenXR via the KDXr library
   - Fix crash when trying to use with RenderDoc
