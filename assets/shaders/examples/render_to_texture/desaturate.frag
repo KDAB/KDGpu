@@ -29,6 +29,6 @@ void main()
     } else if (texCoord.s < pushConstants.filterPosition - lineWidth) {
         fragColor = vec4(color, 1.0);
     } else {
-        fragColor = vec4( 1.0, 0.0, 0.0, 1.0 );
+        fragColor = vec4( 0.0, 0.0, 1.0, 1.0 );
     }
 }
