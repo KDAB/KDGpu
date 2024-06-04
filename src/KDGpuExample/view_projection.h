@@ -15,8 +15,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-#include <openxr/openxr.h>
-
 namespace KDGpuExample {
 
 KDGPUEXAMPLE_EXPORT glm::mat4 postViewCorrection();
