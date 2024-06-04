@@ -23,5 +23,4 @@ add_kdgpu_example(
     projection_layer.cpp
     LIBS
     KDGpu::KDGpuExample
-    glm::glm
 )

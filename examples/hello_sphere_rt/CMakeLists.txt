@@ -20,7 +20,6 @@ add_kdgpu_example(
     hello_sphere_rt.cpp
     LIBS
     KDGpu::KDGpuExample
-    glm::glm
 )
 
 add_dependencies(

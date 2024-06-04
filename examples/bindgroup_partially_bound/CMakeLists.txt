@@ -20,6 +20,5 @@ add_kdgpu_example(
     bindgroup_partially_bound.cpp
     LIBS
     KDGpu::KDGpuExample
-    glm::glm
     stb::stb
 )

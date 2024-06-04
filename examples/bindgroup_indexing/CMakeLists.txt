@@ -20,5 +20,4 @@ add_kdgpu_example(
     bindgroup_indexing.cpp
     LIBS
     KDGpu::KDGpuExample
-    glm::glm
 )

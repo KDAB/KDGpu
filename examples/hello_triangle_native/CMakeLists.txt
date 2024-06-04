@@ -20,7 +20,6 @@ add_kdgpu_example(
     LIBS
     KDGpu::KDGpu
     KDGpu::KDGpuExample
-    glm::glm
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")

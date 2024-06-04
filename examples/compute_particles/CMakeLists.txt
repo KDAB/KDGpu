@@ -20,5 +20,4 @@ add_kdgpu_example(
     compute_particles.cpp
     LIBS
     KDGpu::KDGpuExample
-    glm::glm
 )

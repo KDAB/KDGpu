@@ -20,5 +20,4 @@ add_kdgpu_example(
     render_to_texture.cpp
     LIBS
     KDGpu::KDGpuExample
-    glm::glm
 )

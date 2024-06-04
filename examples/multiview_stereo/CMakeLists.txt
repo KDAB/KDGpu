@@ -20,5 +20,4 @@ add_kdgpu_example(
     multiview_stereo.cpp
     LIBS
     KDGpu::KDGpuExample
-    glm::glm
 )

@@ -22,5 +22,4 @@ add_kdgpu_example(
     hello_triangle_hlsl.cpp
     LIBS
     KDGpu::KDGpuExample
-    glm::glm
 )

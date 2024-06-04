@@ -20,5 +20,4 @@ add_kdgpu_example(
     compute_oit_transparency.cpp
     LIBS
     KDGpu::KDGpuExample
-    glm::glm
 )

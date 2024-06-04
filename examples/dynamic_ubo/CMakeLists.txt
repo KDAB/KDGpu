@@ -20,5 +20,4 @@ add_kdgpu_example(
     dynamic_ubo_triangles.cpp
     LIBS
     KDGpu::KDGpuExample
-    glm::glm
 )

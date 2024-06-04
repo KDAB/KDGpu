@@ -20,6 +20,5 @@ add_kdgpu_example(
     offscreen.cpp
     LIBS
     KDGpu::KDGpuExample
-    glm::glm
     stb::stb
 )

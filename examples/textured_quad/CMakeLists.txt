@@ -20,6 +20,5 @@ add_kdgpu_example(
     textured_quad.cpp
     LIBS
     KDGpu::KDGpuExample
-    glm::glm
     stb::stb
 )

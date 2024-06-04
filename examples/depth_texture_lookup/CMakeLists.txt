@@ -20,5 +20,4 @@ add_kdgpu_example(
     depth_texture_lookup.cpp
     LIBS
     KDGpu::KDGpuExample
-    glm::glm
 )

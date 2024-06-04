@@ -20,5 +20,4 @@ add_kdgpu_example(
     multiview.cpp
     LIBS
     KDGpu::KDGpuExample
-    glm::glm
 )

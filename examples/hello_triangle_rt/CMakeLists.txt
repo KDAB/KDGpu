@@ -20,7 +20,6 @@ add_kdgpu_example(
     hello_triangle_rt.cpp
     LIBS
     KDGpu::KDGpuExample
-    glm::glm
 )
 
 add_dependencies(${PROJECT_NAME} KDGpu_HelloTriangleRtGen KDGpu_HelloTriangleRtMiss KDGpu_HelloTriangleRtClosest)
