@@ -210,7 +210,7 @@ void HelloXr::processScaleAction()
     const auto scaleResult = m_session.getFloatState({ .action = m_scaleAction, .subactionPath = m_handPaths[0] }, m_scaleActionState);
     if (scaleResult == KDXr::GetActionStateResult::Success) {
         if (m_scaleActionState.active)
-            scale = 1.0 + m_scaleActionState.currentState;
+            scale = 1.0 + powf(m_scaleActionState.currentState, 2.0f);
         m_projectionLayer->scale = scale;
     } else {
         SPDLOG_LOGGER_ERROR(m_logger, "Failed to get scale action state.");
