@@ -565,14 +565,15 @@ void VulkanCommandRecorder::buildAccelerationStructures(const BuildAccelerationS
                         VulkanBuffer *vertexBuffer = vulkanResourceManager->getBuffer(arg.vertexData);
                         VkBufferDeviceAddressInfo addressInfo = { VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO };
                         addressInfo.buffer = vertexBuffer->buffer;
-                        trianglesDataKhr.vertexData.deviceAddress = vkGetBufferDeviceAddress(vulkanDevice->device, &addressInfo);
+                        trianglesDataKhr.vertexData.deviceAddress = vkGetBufferDeviceAddress(vulkanDevice->device, &addressInfo) + arg.vertexDataOffset;
                     }
 
                     if (arg.indexData.isValid()) {
                         VulkanBuffer *indexBuffer = vulkanResourceManager->getBuffer(arg.indexData);
                         VkBufferDeviceAddressInfo addressInfo = { VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO };
                         addressInfo.buffer = indexBuffer->buffer;
-                        trianglesDataKhr.indexData.deviceAddress = vkGetBufferDeviceAddress(vulkanDevice->device, &addressInfo);
+                        trianglesDataKhr.indexData.deviceAddress = vkGetBufferDeviceAddress(vulkanDevice->device, &addressInfo) + arg.indexDataOffset;
+                        ;
                     }
 
                     geometryKhr.geometryType = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
@@ -630,7 +631,7 @@ void VulkanCommandRecorder::buildAccelerationStructures(const BuildAccelerationS
                         auto buffer = vulkanResourceManager->getBuffer(arg.data);
                         VkBufferDeviceAddressInfo addressInfo = { VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO };
                         addressInfo.buffer = buffer->buffer;
-                        aabbsDataKhr.data.deviceAddress = vkGetBufferDeviceAddress(vulkanDevice->device, &addressInfo);
+                        aabbsDataKhr.data.deviceAddress = vkGetBufferDeviceAddress(vulkanDevice->device, &addressInfo) + arg.dataOffset;
                     }
 
                     geometryKhr.geometryType = VK_GEOMETRY_TYPE_AABBS_KHR;

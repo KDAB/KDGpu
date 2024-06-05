@@ -23,16 +23,19 @@ struct Buffer_t;
 struct AccelerationStructureGeometryTrianglesData {
     Format vertexFormat{ Format::UNDEFINED };
     Handle<Buffer_t> vertexData;
-    size_t vertexStride{ 0 };
-    uint32_t maxVertex{ 0 };
+    size_t vertexStride{ 0 }; // in bytes
+    size_t vertexDataOffset{ 0 }; // in bytes
+    uint32_t maxVertex{ 0 }; // This is a value, not a count
     IndexType indexType{ IndexType::None };
     Handle<Buffer_t> indexData;
+    size_t indexDataOffset{ 0 }; // in bytes
     Handle<Buffer_t> transformData;
 };
 
 struct AccelerationStructureGeometryAabbsData {
     Handle<Buffer_t> data;
     size_t stride{ 0 };
+    size_t dataOffset{ 0 }; // in bytes
 };
 
 struct AccelerationStructureGeometryInstance {
