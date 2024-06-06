@@ -66,10 +66,14 @@ void HelloXr::onAttached()
 
     // Create an action set and actions
     m_actionSet = m_xrInstance.createActionSet({ .name = "default", .localizedName = "Default" });
-    m_toggleAnimationAction = m_actionSet.createAction({ .name = "toggle_animation",
-                                                         .localizedName = "Toggle Animation",
-                                                         .type = KDXr::ActionType::BooleanInput,
-                                                         .subactionPaths = m_handPaths });
+    m_toggleRotateYAction = m_actionSet.createAction({ .name = "rotatey",
+                                                       .localizedName = "RotateY",
+                                                       .type = KDXr::ActionType::BooleanInput,
+                                                       .subactionPaths = m_handPaths });
+    m_toggleRotateZAction = m_actionSet.createAction({ .name = "toggle_animation",
+                                                       .localizedName = "Toggle Animation",
+                                                       .type = KDXr::ActionType::BooleanInput,
+                                                       .subactionPaths = m_handPaths });
     m_scaleAction = m_actionSet.createAction({ .name = "scale",
                                                .localizedName = "Scale",
                                                .type = KDXr::ActionType::FloatInput,
@@ -97,14 +101,17 @@ void HelloXr::onAttached()
     const auto bindingOptions = KDXr::SuggestActionBindingsOptions{
         .interactionProfile = "/interaction_profiles/oculus/touch_controller",
         .suggestedBindings = {
-                { .action = m_toggleAnimationAction, .binding = "/user/hand/left/input/x/click" },
-                { .action = m_toggleAnimationAction, .binding = "/user/hand/right/input/a/click" },
+                { .action = m_toggleRotateYAction, .binding = "/user/hand/right/input/b/click" },
+                { .action = m_toggleRotateYAction, .binding = "/user/hand/left/input/y/click" },
+                { .action = m_toggleRotateZAction, .binding = "/user/hand/left/input/x/click" },
+                { .action = m_toggleRotateZAction, .binding = "/user/hand/right/input/a/click" },
                 { .action = m_scaleAction, .binding = "/user/hand/left/input/trigger/value" },
                 { .action = m_translateAction, .binding = "/user/hand/left/input/thumbstick" },
                 { .action = m_palmPoseAction, .binding = "/user/hand/left/input/grip/pose" },
                 { .action = m_palmPoseAction, .binding = "/user/hand/right/input/grip/pose" },
                 { .action = m_buzzAction, .binding = "/user/hand/left/output/haptic" },
-                { .action = m_buzzAction, .binding = "/user/hand/right/output/haptic" } }
+                { .action = m_buzzAction, .binding = "/user/hand/right/output/haptic" },
+        }
     };
     if (m_xrInstance.suggestActionBindings(bindingOptions) != KDXr::SuggestActionBindingsResult::Success) {
         SPDLOG_LOGGER_ERROR(m_logger, "Failed to suggest action bindings.");
@@ -126,7 +133,8 @@ void HelloXr::onDetached()
     m_palmPoseAction = {};
     m_translateAction = {};
     m_scaleAction = {};
-    m_toggleAnimationAction = {};
+    m_toggleRotateYAction = {};
+    m_toggleRotateZAction = {};
     m_actionSet = {};
 
     clearCompositorLayers();
@@ -167,20 +175,21 @@ void HelloXr::pollActions(KDXr::Time predictedDisplayTime)
     }
 
     // Poll the actions and do something with the results
-    processToggleAnimationAction();
+    processToggleRotateZAction();
+    processToggleRotateYAction();
     processScaleAction();
     processTranslateAction();
     processPalmPoseAction(predictedDisplayTime);
     processHapticAction();
 }
 
-void HelloXr::processToggleAnimationAction()
+void HelloXr::processToggleRotateZAction()
 {
     bool toggleAnimation{ false };
     for (uint32_t i = 0; i < 2; ++i) {
         // Query the toggle animation action
         const auto toggleAnimationResult = m_session.getBooleanState(
-                { .action = m_toggleAnimationAction, .subactionPath = m_handPaths[i] },
+                { .action = m_toggleRotateZAction, .subactionPath = m_handPaths[i] },
                 m_toggleAnimationActionStates[i]);
         if (toggleAnimationResult == KDXr::GetActionStateResult::Success) {
             if (m_toggleAnimationActionStates[i].currentState &&
@@ -197,9 +206,38 @@ void HelloXr::processToggleAnimationAction()
 
     // If the toggle animation action was pressed, toggle the animation and buzz the controller
     if (toggleAnimation) {
-        m_projectionLayer->animate = !m_projectionLayer->animate();
+        m_projectionLayer->rotateZ = !m_projectionLayer->rotateZ();
         m_buzzAmplitudes[m_buzzHand] = 1.0f;
-        SPDLOG_LOGGER_INFO(m_logger, "Animation enabled = {}", m_projectionLayer->animate());
+        SPDLOG_LOGGER_INFO(m_logger, "Animation enabled = {}", m_projectionLayer->rotateZ());
+    }
+}
+
+void HelloXr::processToggleRotateYAction()
+{
+    bool toggleAnimation{ false };
+    for (uint32_t i = 0; i < 2; ++i) {
+        // Query the toggle animation action
+        const auto toggleAnimationResult = m_session.getBooleanState(
+                { .action = m_toggleRotateYAction, .subactionPath = m_handPaths[i] },
+                m_toggleAnimationActionStates[i]);
+        if (toggleAnimationResult == KDXr::GetActionStateResult::Success) {
+            if (m_toggleAnimationActionStates[i].currentState &&
+                m_toggleAnimationActionStates[i].changedSinceLastSync &&
+                m_toggleAnimationActionStates[i].active) {
+                toggleAnimation = true;
+                m_buzzHand = i;
+                break;
+            }
+        } else {
+            SPDLOG_LOGGER_ERROR(m_logger, "Failed to get toggle animation action state.");
+        }
+    }
+
+    // If the toggle animation action was pressed, toggle the animation and rotate the triangle
+    if (toggleAnimation) {
+        m_projectionLayer->rotateY = !m_projectionLayer->rotateY();
+        m_buzzAmplitudes[m_buzzHand] = 1.0f;
+        SPDLOG_LOGGER_INFO(m_logger, "Animation enabled = {}", m_projectionLayer->rotateY());
     }
 }
 
