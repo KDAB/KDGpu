@@ -480,17 +480,26 @@ void ProjectionLayer::updateScene()
 
     // If we are animating, each frame we want to rotate the triangle a little
     static float angle = 0.0f;
-    if (!animate()) {
+    if (rotateZ()) {
         const float angularSpeed = 10.0f; // degrees per second
         const float dt = engine()->deltaTimeSeconds();
         angle += angularSpeed * dt;
         if (angle > 360.0f)
             angle -= 360.0f;
     }
+    static float rotateYAngle = 0.0f;
+    if (rotateY()) {
+        const float angularSpeed = 10.0f; // degrees per second
+        const float dt = engine()->deltaTimeSeconds();
+        rotateYAngle += angularSpeed * dt;
+        if (rotateYAngle > 360.0f)
+            rotateYAngle -= 360.0f;
+    }
 
     m_transform = glm::mat4(1.0f);
     m_transform = glm::translate(m_transform, translation());
     m_transform = glm::rotate(m_transform, glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
+    m_transform = glm::rotate(m_transform, glm::radians(rotateYAngle), glm::vec3(0.0f, 1.0f, 0.0f));
     m_transform = glm::scale(m_transform, glm::vec3(s, s, s));
 
     // Update the transformation matrix for the left hand from the pose

@@ -43,7 +43,8 @@ protected:
     void pollActions(KDXr::Time predictedDisplayTime) override;
 
 private:
-    void processToggleAnimationAction();
+    void processToggleRotateZAction();
+    void processToggleRotateYAction();
     void processScaleAction();
     void processTranslateAction();
     void processPalmPoseAction(KDXr::Time predictedDisplayTime);
@@ -55,7 +56,8 @@ private:
 
     // Input/output actions
     KDXr::ActionSet m_actionSet;
-    KDXr::Action m_toggleAnimationAction;
+    KDXr::Action m_toggleRotateYAction;
+    KDXr::Action m_toggleRotateZAction;
     KDXr::Action m_scaleAction;
     KDXr::Action m_translateAction;
     KDXr::Action m_palmPoseAction;

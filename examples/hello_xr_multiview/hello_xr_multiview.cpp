@@ -65,10 +65,14 @@ void HelloXrMultiview::onAttached()
 
     // Create an action set and actions
     m_actionSet = m_xrInstance.createActionSet({ .name = "default", .localizedName = "Default" });
-    m_toggleAnimationAction = m_actionSet.createAction({ .name = "toggle_animation",
-                                                         .localizedName = "Toggle Animation",
-                                                         .type = KDXr::ActionType::BooleanInput,
-                                                         .subactionPaths = m_handPaths });
+    m_toggleRotateYAction = m_actionSet.createAction({ .name = "rotatey",
+                                                       .localizedName = "RotateY",
+                                                       .type = KDXr::ActionType::BooleanInput,
+                                                       .subactionPaths = m_handPaths });
+    m_toggleRotateZAction = m_actionSet.createAction({ .name = "rotatez",
+                                                       .localizedName = "RotateZ",
+                                                       .type = KDXr::ActionType::BooleanInput,
+                                                       .subactionPaths = m_handPaths });
     m_scaleAction = m_actionSet.createAction({ .name = "scale",
                                                .localizedName = "Scale",
                                                .type = KDXr::ActionType::FloatInput,
@@ -96,8 +100,10 @@ void HelloXrMultiview::onAttached()
     const auto bindingOptions = KDXr::SuggestActionBindingsOptions{
         .interactionProfile = "/interaction_profiles/oculus/touch_controller",
         .suggestedBindings = {
-                { .action = m_toggleAnimationAction, .binding = "/user/hand/left/input/x/click" },
-                { .action = m_toggleAnimationAction, .binding = "/user/hand/right/input/a/click" },
+                { .action = m_toggleRotateYAction, .binding = "/user/hand/right/input/b/click" },
+                { .action = m_toggleRotateYAction, .binding = "/user/hand/left/input/y/click" },
+                { .action = m_toggleRotateZAction, .binding = "/user/hand/left/input/x/click" },
+                { .action = m_toggleRotateZAction, .binding = "/user/hand/right/input/a/click" },
                 { .action = m_scaleAction, .binding = "/user/hand/left/input/trigger/value" },
                 { .action = m_translateAction, .binding = "/user/hand/left/input/thumbstick" },
                 { .action = m_palmPoseAction, .binding = "/user/hand/left/input/grip/pose" },
@@ -125,7 +131,8 @@ void HelloXrMultiview::onDetached()
     m_palmPoseAction = {};
     m_translateAction = {};
     m_scaleAction = {};
-    m_toggleAnimationAction = {};
+    m_toggleRotateZAction = {};
+    m_toggleRotateYAction = {};
     m_actionSet = {};
 
     clearCompositorLayers();
@@ -166,20 +173,21 @@ void HelloXrMultiview::pollActions(KDXr::Time predictedDisplayTime)
     }
 
     // Poll the actions and do something with the results
-    processToggleAnimationAction();
+    processToggleRotateZAction();
+    processToggleRotateYAction();
     processScaleAction();
     processTranslateAction();
     processPalmPoseAction(predictedDisplayTime);
     processHapticAction();
 }
 
-void HelloXrMultiview::processToggleAnimationAction()
+void HelloXrMultiview::processToggleRotateZAction()
 {
     bool toggleAnimation{ false };
     for (uint32_t i = 0; i < 2; ++i) {
         // Query the toggle animation action
         const auto toggleAnimationResult = m_session.getBooleanState(
-                { .action = m_toggleAnimationAction, .subactionPath = m_handPaths[i] },
+                { .action = m_toggleRotateZAction, .subactionPath = m_handPaths[i] },
                 m_toggleAnimationActionStates[i]);
         if (toggleAnimationResult == KDXr::GetActionStateResult::Success) {
             if (m_toggleAnimationActionStates[i].currentState &&
@@ -196,9 +204,37 @@ void HelloXrMultiview::processToggleAnimationAction()
 
     // If the toggle animation action was pressed, toggle the animation and buzz the controller
     if (toggleAnimation) {
-        m_projectionLayer->animate = !m_projectionLayer->animate();
+        m_projectionLayer->rotateZ = !m_projectionLayer->rotateZ();
         m_buzzAmplitudes[m_buzzHand] = 1.0f;
-        SPDLOG_LOGGER_INFO(m_logger, "Animation enabled = {}", m_projectionLayer->animate());
+        SPDLOG_LOGGER_INFO(m_logger, "Animation enabled = {}", m_projectionLayer->rotateZ());
+    }
+}
+void HelloXrMultiview::processToggleRotateYAction()
+{
+    bool toggleAnimation{ false };
+    for (uint32_t i = 0; i < 2; ++i) {
+        // Query the toggle animation action
+        const auto toggleAnimationResult = m_session.getBooleanState(
+                { .action = m_toggleRotateYAction, .subactionPath = m_handPaths[i] },
+                m_toggleAnimationActionStates[i]);
+        if (toggleAnimationResult == KDXr::GetActionStateResult::Success) {
+            if (m_toggleAnimationActionStates[i].currentState &&
+                m_toggleAnimationActionStates[i].changedSinceLastSync &&
+                m_toggleAnimationActionStates[i].active) {
+                toggleAnimation = true;
+                m_buzzHand = i;
+                break;
+            }
+        } else {
+            SPDLOG_LOGGER_ERROR(m_logger, "Failed to get toggle animation action state.");
+        }
+    }
+
+    // If the toggle animation action was pressed, toggle the animation and rotate the triangle
+    if (toggleAnimation) {
+        m_projectionLayer->rotateY = !m_projectionLayer->rotateY();
+        m_buzzAmplitudes[m_buzzHand] = 1.0f;
+        SPDLOG_LOGGER_INFO(m_logger, "Animation enabled = {}", m_projectionLayer->rotateY());
     }
 }
 
@@ -209,7 +245,7 @@ void HelloXrMultiview::processScaleAction()
     const auto scaleResult = m_session.getFloatState({ .action = m_scaleAction, .subactionPath = m_handPaths[0] }, m_scaleActionState);
     if (scaleResult == KDXr::GetActionStateResult::Success) {
         if (m_scaleActionState.active)
-            scale = 1.0 + m_scaleActionState.currentState;
+            scale = 1.0 + powf(m_scaleActionState.currentState, 2.0f);
         m_projectionLayer->scale = scale;
     } else {
         SPDLOG_LOGGER_ERROR(m_logger, "Failed to get scale action state.");
