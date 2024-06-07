@@ -70,6 +70,7 @@ bool XrProjectionLayer::update(const KDXr::FrameState &frameState)
 
     // Render the projection layer
     m_projectionLayerViews.resize(viewCount());
+    m_depthInfos.resize(viewCount());
     const auto &viewConfigurationViews = engineLayer()->viewConfigurationViews();
 
     // Set up the per-view data for the compositor
@@ -92,6 +93,28 @@ bool XrProjectionLayer::update(const KDXr::FrameState &frameState)
                 },
                 .arrayIndex = m_enableMultiview ? i : 0
             }
+        };
+        // clang-format on
+
+        KDXr::SwapchainInfo &depthSwapchainInfo = m_depthSwapchains[m_enableMultiview ? 0 : i];
+
+        // clang-format off
+        m_depthInfos[i] = {
+            .depthSwapchainSubTexture = {
+                .swapchain = depthSwapchainInfo.swapchain,
+                .rect = {
+                    .offset = { .x = 0, .y = 0 },
+                    .extent = {
+                        .width = viewConfigurationViews[i].recommendedTextureWidth,
+                        .height = viewConfigurationViews[i].recommendedTextureHeight
+                    }
+                },
+                .arrayIndex = m_enableMultiview ? i : 0
+            },
+            .minDepth = 0.0f,
+            .maxDepth = 1.0f,
+            .nearZ = m_nearPlane,
+            .farZ = m_farPlane
         };
         // clang-format on
     }
@@ -123,8 +146,9 @@ bool XrProjectionLayer::update(const KDXr::FrameState &frameState)
     m_projectionLayer = {
         .type = KDXr::CompositionLayerType::Projection,
         .referenceSpace = m_referenceSpace,
-        .flags = KDXr::CompositionLayerFlagBits::BlendTextureSourceAlphaBit | KDXr::CompositionLayerFlagBits::CorrectChromaticAberrationBit,
-        .views = m_projectionLayerViews
+        .flags = KDXr::CompositionLayerFlagBits::BlendTextureSourceAlphaBit | KDXr::CompositionLayerFlagBits::UnpremultiplyAlphaBit | KDXr::CompositionLayerFlagBits::CorrectChromaticAberrationBit,
+        .views = m_projectionLayerViews,
+        .depthInfos = m_depthInfos
     };
 
     return true;

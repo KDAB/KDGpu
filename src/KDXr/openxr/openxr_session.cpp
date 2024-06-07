@@ -163,13 +163,21 @@ EndFrameResult OpenXrSession::endFrame(const EndFrameOptions &options)
     // maintain a high-water mark of the number of layers of each type.
     xrLayerProjections.clear();
     xrLayerProjectionViews.clear();
+    xrLayerDepthInfos.clear();
+    xrLayerCylinders.clear();
     xrLayerQuads.clear();
+    xrLayerCubes.clear();
 
     for (size_t layerIndex = 0; layerIndex < layerCount; ++layerIndex) {
         switch (options.layers[layerIndex]->type) {
         case CompositionLayerType::Projection: {
             auto &projectionLayer = reinterpret_cast<ProjectionLayer &>(*options.layers[layerIndex]);
             const auto viewCount = projectionLayer.views.size();
+
+            // Reserve space for the views and depth infos. We do this up front so that we do not invalidate the pointers
+            // to the views and depth infos when we add the next pointers to the views.
+            xrLayerProjectionViews.reserve(viewCount);
+            xrLayerDepthInfos.reserve(viewCount);
 
             for (size_t viewIndex = 0; viewIndex < viewCount; ++viewIndex) {
                 auto openxrSwapchain = openxrResourceManager->getSwapchain(projectionLayer.views[viewIndex].swapchainSubTexture.swapchain);
@@ -182,6 +190,21 @@ EndFrameResult OpenXrSession::endFrame(const EndFrameOptions &options)
                 projectionView.subImage.swapchain = openxrSwapchain->swapchain;
                 projectionView.subImage.imageRect = rect2DToXrRecti(projectionLayer.views[viewIndex].swapchainSubTexture.rect);
                 projectionView.subImage.imageArrayIndex = projectionLayer.views[viewIndex].swapchainSubTexture.arrayIndex;
+
+                auto openxrDepthSwapchain = openxrResourceManager->getSwapchain(projectionLayer.depthInfos[viewIndex].depthSwapchainSubTexture.swapchain);
+                assert(openxrDepthSwapchain);
+
+                xrLayerDepthInfos.push_back({ XR_TYPE_COMPOSITION_LAYER_DEPTH_INFO_KHR });
+                auto &depthInfo = xrLayerDepthInfos.back();
+                depthInfo.subImage.swapchain = openxrDepthSwapchain->swapchain;
+                depthInfo.subImage.imageRect = rect2DToXrRecti(projectionLayer.depthInfos[viewIndex].depthSwapchainSubTexture.rect);
+                depthInfo.subImage.imageArrayIndex = projectionLayer.depthInfos[viewIndex].depthSwapchainSubTexture.arrayIndex;
+                depthInfo.minDepth = projectionLayer.depthInfos[viewIndex].minDepth;
+                depthInfo.maxDepth = projectionLayer.depthInfos[viewIndex].maxDepth;
+                depthInfo.nearZ = projectionLayer.depthInfos[viewIndex].nearZ;
+                depthInfo.farZ = projectionLayer.depthInfos[viewIndex].farZ;
+
+                projectionView.next = reinterpret_cast<XrCompositionLayerBaseHeader *>(&depthInfo);
             }
 
             auto openxrReferenceSpace = openxrResourceManager->getReferenceSpace(projectionLayer.referenceSpace);

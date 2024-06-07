@@ -70,6 +70,9 @@ protected:
     KDGpu::SampleCountFlagBits m_samples{ KDGpu::SampleCountFlagBits::Samples1Bit };
     bool m_enableMultiview{ true };
 
+    float m_nearPlane{ 0.05f };
+    float m_farPlane{ 100.0f };
+
     std::vector<KDXr::SwapchainInfo> m_colorSwapchains;
     std::vector<KDXr::SwapchainInfo> m_depthSwapchains;
 
@@ -82,6 +85,7 @@ protected:
 
     KDXr::ProjectionLayer m_projectionLayer;
     std::vector<KDXr::ProjectionLayerView> m_projectionLayerViews{ 2 }; // Projection layer views. One per view for each projection layer
+    std::vector<KDXr::DepthInfo> m_depthInfos{ 2 }; // Depth info. One per view for each projection layer
 };
 
 } // namespace KDGpuExample

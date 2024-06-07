@@ -423,7 +423,7 @@ KDGpu::Handle<Swapchain_t> OpenXrResourceManager::createSwapchain(const KDGpu::H
 
     XrSwapchain xrSwapchain{ XR_NULL_HANDLE };
     if (xrCreateSwapchain(openXrSession->session, &swapchainCreateInfo, &xrSwapchain) != XR_SUCCESS) {
-        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to create OpenXR Color Swapchain.");
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to create OpenXR Swapchain.");
         return {};
     }
 

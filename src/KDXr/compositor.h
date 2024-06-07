@@ -52,11 +52,20 @@ struct ProjectionLayerView {
     SwapchainSubTexture swapchainSubTexture{};
 };
 
+struct DepthInfo {
+    SwapchainSubTexture depthSwapchainSubTexture{};
+    float minDepth{ 0.0f };
+    float maxDepth{ 1.0f };
+    float nearZ{ 0.0f };
+    float farZ{ 1.0f };
+};
+
 struct ProjectionLayer {
     CompositionLayerType type;
     KDGpu::Handle<ReferenceSpace_t> referenceSpace;
     CompositionLayerFlags flags{ CompositionLayerFlagBits::MaxEnum };
     std::span<ProjectionLayerView> views;
+    std::span<DepthInfo> depthInfos;
 };
 
 struct QuadLayer {

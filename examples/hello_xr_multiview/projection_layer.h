@@ -71,8 +71,6 @@ private:
     };
 
     std::vector<CameraData> m_cameraData{ 2 }; // Default to 2 views
-    float m_nearPlane{ 0.05f };
-    float m_farPlane{ 100.0f };
     Buffer m_cameraBuffer;
     BindGroup m_cameraBindGroup;
 

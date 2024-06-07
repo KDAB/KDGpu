@@ -87,6 +87,7 @@ struct KDXR_EXPORT OpenXrSession : public ApiSession {
     std::vector<XrCompositionLayerBaseHeader *> xrLayers;
     std::vector<XrCompositionLayerProjection> xrLayerProjections;
     std::vector<XrCompositionLayerProjectionView> xrLayerProjectionViews;
+    std::vector<XrCompositionLayerDepthInfoKHR> xrLayerDepthInfos;
     std::vector<XrCompositionLayerQuad> xrLayerQuads;
     std::vector<XrCompositionLayerCylinderKHR> xrLayerCylinders;
     std::vector<XrCompositionLayerCubeKHR> xrLayerCubes;

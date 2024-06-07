@@ -49,6 +49,7 @@ void XrExampleEngineLayer::onAttached()
         .applicationVersion = KDGPU_MAKE_API_VERSION(0, 1, 0, 0),
         .layers = {}, // No api layers requested
         .extensions = { XR_EXT_DEBUG_UTILS_EXTENSION_NAME,
+                        XR_KHR_COMPOSITION_LAYER_DEPTH_EXTENSION_NAME,
                         XR_KHR_VULKAN_ENABLE_EXTENSION_NAME,
                         XR_KHR_COMPOSITION_LAYER_CYLINDER_EXTENSION_NAME }
     };
