@@ -44,7 +44,7 @@ void XrCylinderImGuiLayer::initialize()
         .colorAttachments = {
             {
                 .view = {}, // Not setting the swapchain texture view just yet
-                .clearValue = { 0.05f, 0.0f, 0.05f, 0.7f },
+                .clearValue = { 0.05f, 0.0f, 0.05f, 1.0f },
                 .finalLayout = TextureLayout::ColorAttachmentOptimal
             }
         },
