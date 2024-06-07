@@ -64,7 +64,7 @@ bool XrQuadLayer::update(const KDXr::FrameState &)
     m_quadLayer = {
         .type = KDXr::CompositionLayerType::Quad,
         .referenceSpace = m_referenceSpace,
-        .flags = KDXr::CompositionLayerFlagBits::BlendTextureSourceAlphaBit | KDXr::CompositionLayerFlagBits::CorrectChromaticAberrationBit,
+        .flags = KDXr::CompositionLayerFlagBits::BlendTextureSourceAlphaBit | KDXr::CompositionLayerFlagBits::UnpremultiplyAlphaBit | KDXr::CompositionLayerFlagBits::CorrectChromaticAberrationBit,
         .eyeVisibility = KDXr::EyeVisibility::Both,
         .swapchainSubTexture = {
             .swapchain = m_colorSwapchain.swapchain,
