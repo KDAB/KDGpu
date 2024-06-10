@@ -127,7 +127,7 @@ void XrExampleEngineLayer::onAttached()
     m_session.state.valueAboutToChange().connect(&XrExampleEngineLayer::onSessionStateChanged, this);
 
     // Create a reference space - default to local space
-    m_referenceSpace = m_session.createReferenceSpace();
+    m_referenceSpace = m_session.createReferenceSpace(m_referenceSpaceOptions);
 
     // Query the set of supported swapchain formats and select the color and depth formats to use
     m_colorSwapchainFormat = m_session.selectSwapchainFormat(m_applicationColorSwapchainFormats);

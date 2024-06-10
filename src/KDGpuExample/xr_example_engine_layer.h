@@ -154,6 +154,10 @@ protected:
     KDXr::Instance m_xrInstance;
     KDXr::System *m_system{ nullptr };
     KDXr::Session m_session;
+
+    KDXr::ReferenceSpaceOptions m_referenceSpaceOptions = {
+        .type = KDXr::ReferenceSpaceType::Local
+    };
     KDXr::ReferenceSpace m_referenceSpace;
 
     const std::vector<KDXr::ViewConfigurationType> m_applicationViewConfigurations{
