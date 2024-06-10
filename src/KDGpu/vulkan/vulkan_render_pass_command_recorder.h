@@ -57,6 +57,7 @@ struct KDGPU_EXPORT VulkanRenderPassCommandRecorder : public ApiRenderPassComman
     VulkanResourceManager *vulkanResourceManager{ nullptr };
     Handle<Device_t> deviceHandle;
     Handle<GraphicsPipeline_t> pipeline;
+    bool firstPipelineWasSet{ false };
 };
 
 } // namespace KDGpu

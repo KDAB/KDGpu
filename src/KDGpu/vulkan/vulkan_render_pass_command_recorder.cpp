@@ -28,17 +28,6 @@ VulkanRenderPassCommandRecorder::VulkanRenderPassCommandRecorder(VkCommandBuffer
     , vulkanResourceManager(_vulkanResourceManager)
     , deviceHandle(_deviceHandle)
 {
-    // Set the initial viewport and scissor rect to the full extent of the render area
-    VkViewport vkViewport = {
-        .x = static_cast<float>(renderArea.offset.x),
-        .y = static_cast<float>(renderArea.offset.y),
-        .width = static_cast<float>(renderArea.extent.width),
-        .height = static_cast<float>(renderArea.extent.height),
-        .minDepth = 0.0f,
-        .maxDepth = 1.0f
-    };
-    vkCmdSetViewport(commandBuffer, 0, 1, &vkViewport);
-    vkCmdSetScissor(commandBuffer, 0, 1, &renderArea);
 }
 
 void VulkanRenderPassCommandRecorder::setPipeline(const Handle<GraphicsPipeline_t> &_pipeline)
@@ -46,6 +35,22 @@ void VulkanRenderPassCommandRecorder::setPipeline(const Handle<GraphicsPipeline_
     pipeline = _pipeline;
     VulkanGraphicsPipeline *vulkanGraphicsPipeline = vulkanResourceManager->getGraphicsPipeline(pipeline);
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanGraphicsPipeline->pipeline);
+
+    if (!firstPipelineWasSet) {
+        // Set the initial viewport and scissor rect to the full extent of the render area
+        VkViewport vkViewport = {
+            .x = static_cast<float>(renderArea.offset.x),
+            .y = static_cast<float>(renderArea.offset.y),
+            .width = static_cast<float>(renderArea.extent.width),
+            .height = static_cast<float>(renderArea.extent.height),
+            .minDepth = 0.0f,
+            .maxDepth = 1.0f
+        };
+        vkCmdSetViewport(commandBuffer, 0, 1, &vkViewport);
+        vkCmdSetScissor(commandBuffer, 0, 1, &renderArea);
+
+        firstPipelineWasSet = true;
+    }
 }
 
 void VulkanRenderPassCommandRecorder::setVertexBuffer(uint32_t index, const Handle<Buffer_t> &buffer, DeviceSize offset)
