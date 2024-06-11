@@ -134,6 +134,7 @@ set(HEADERS
     texture_view_options.h
     timestamp_query_recorder.h
     timestamp_query_recorder_options.h
+    api/api_acceleration_structure.h
     api/api_adapter.h
     api/api_bind_group.h
     api/api_bind_group_layout.h
