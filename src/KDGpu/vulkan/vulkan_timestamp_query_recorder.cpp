@@ -44,13 +44,13 @@ TimestampIndex VulkanTimestampQueryRecorder::writeTimestamp(PipelineStageFlags f
     }
 
     VulkanDevice *vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
+    const TimestampIndex queryIndex = startQuery + std::min(queryCount, maxQueryCount - 1);
     vkCmdWriteTimestamp(commandBuffer,
                         pipelineStageFlagsToVkPipelineStageFlagBits(flags),
                         vulkanDevice->timestampQueryPool,
-                        startQuery + queryCount);
-
+                        queryIndex);
     queryCount = std::min(queryCount + 1, maxQueryCount);
-    return queryCount;
+    return queryIndex;
 }
 
 std::vector<uint64_t> VulkanTimestampQueryRecorder::queryResults()
@@ -99,6 +99,7 @@ void VulkanTimestampQueryRecorder::reset()
     VulkanDevice *vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
 
     vkCmdResetQueryPool(commandBuffer, vulkanDevice->timestampQueryPool, startQuery, maxQueryCount);
+    queryCount = 0;
 
     // Requires hostQueryReset feature enabled on the device
     // vkResetQueryPool(vulkanDevice->device, vulkanDevice->timestampQueryPool, startQuery, maxQueryCount);
