@@ -15,7 +15,6 @@
 #include <KDGpu/pipeline_layout_options.h>
 
 #include <cstring>
-#include <span>
 
 namespace KDGpu {
 
