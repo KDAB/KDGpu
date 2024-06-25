@@ -1256,8 +1256,8 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     // Rasterizer
     VkPipelineRasterizationStateCreateInfo rasterizer = {};
     rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-    rasterizer.depthClampEnable = VK_FALSE;
-    rasterizer.rasterizerDiscardEnable = VK_FALSE;
+    rasterizer.depthClampEnable = options.depthStencil.depthClampEnabled;
+    rasterizer.rasterizerDiscardEnable = options.primitive.rasterizerDiscardEnabled;
     rasterizer.polygonMode = polygonModeToVkPolygonMode(options.primitive.polygonMode);
     rasterizer.lineWidth = options.primitive.lineWidth;
     rasterizer.cullMode = options.primitive.cullMode.toInt();

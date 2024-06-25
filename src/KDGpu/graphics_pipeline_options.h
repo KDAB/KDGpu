@@ -98,6 +98,7 @@ struct DepthStencilOptions {
     StencilOperationOptions stencilFront;
     StencilOperationOptions stencilBack;
     bool resolveDepthStencil{ false };
+    bool depthClampEnabled{ false };
 
     friend bool operator==(const DepthStencilOptions &, const DepthStencilOptions &) = default;
 };
@@ -120,6 +121,7 @@ struct PrimitiveOptions {
     uint32_t patchControlPoints{ 0 };
     DepthBiasOptions depthBias{};
     float lineWidth{ 1.0f };
+    bool rasterizerDiscardEnabled{ false };
 
     friend bool operator==(const PrimitiveOptions &, const PrimitiveOptions &) = default;
 };
