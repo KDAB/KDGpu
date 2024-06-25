@@ -70,6 +70,7 @@ if(TARGET KDGpu::KDGpuExample)
     add_subdirectory(bindgroup_partially_bound)
     add_subdirectory(compute_oit_transparency)
     add_subdirectory(depth_bias)
+    add_subdirectory(buffer_reference)
 
     if(KDGPU_HLSL_SUPPORT)
         add_subdirectory(hello_triangle_hlsl)
