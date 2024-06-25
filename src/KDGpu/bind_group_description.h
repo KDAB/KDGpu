@@ -26,10 +26,17 @@ struct AccelerationStructure_t;
 struct TextureViewSamplerBinding {
     Handle<TextureView_t> textureView{};
     Handle<Sampler_t> sampler{};
+    TextureLayout layout{ TextureLayout::ShaderReadOnlyOptimal };
 };
 
 struct TextureViewBinding {
     Handle<TextureView_t> textureView{};
+    TextureLayout layout{ TextureLayout::ShaderReadOnlyOptimal };
+};
+
+struct InputAttachmentBinding {
+    Handle<TextureView_t> textureView{};
+    TextureLayout layout{ TextureLayout::ShaderReadOnlyOptimal };
 };
 
 struct SamplerBinding {
@@ -38,6 +45,7 @@ struct SamplerBinding {
 
 struct ImageBinding {
     Handle<TextureView_t> textureView{};
+    TextureLayout layout{ TextureLayout::General };
 };
 
 struct UniformBufferBinding {
@@ -118,6 +126,12 @@ public:
         m_resource.accelerationStructure = buffer;
     }
 
+    BindingResource(const InputAttachmentBinding &inputAttachment)
+        : m_type(ResourceBindingType::InputAttachment)
+    {
+        m_resource.inputAttachment = inputAttachment;
+    }
+
     ResourceBindingType type() const { return m_type; }
     const UniformBufferBinding &uniformBufferBinding() const { return m_resource.uniformBuffer; }
     const StorageBufferBinding &storageBufferBinding() const { return m_resource.storageBuffer; }
@@ -127,6 +141,7 @@ public:
     const TextureViewSamplerBinding &textureViewSamplerBinding() const { return m_resource.combineTextureViewSampler; }
     const DynamicUniformBufferBinding &dynamicUniformBufferBinding() const { return m_resource.dynamicUniformBuffer; }
     const AccelerationStructureBinding &accelerationStructure() const { return m_resource.accelerationStructure; }
+    const InputAttachmentBinding &inputAttachmentBinding() const { return m_resource.inputAttachment; }
 
 private:
     union Resource {
@@ -140,6 +155,7 @@ private:
         StorageBufferBinding storageBuffer;
         DynamicUniformBufferBinding dynamicUniformBuffer;
         AccelerationStructureBinding accelerationStructure;
+        InputAttachmentBinding inputAttachment;
     } m_resource;
     ResourceBindingType m_type;
 };

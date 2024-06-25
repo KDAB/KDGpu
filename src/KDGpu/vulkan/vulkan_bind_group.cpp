@@ -10,6 +10,7 @@
 
 #include "vulkan_bind_group.h"
 #include <KDGpu/bind_group_options.h>
+#include <KDGpu/vulkan/vulkan_enums.h>
 #include <KDGpu/vulkan/vulkan_device.h>
 #include <KDGpu/vulkan/vulkan_resource_manager.h>
 
@@ -57,6 +58,7 @@ void VulkanBindGroup::update(const BindGroupEntry &entry)
         assert(sampler != nullptr);
         imageInfo.imageView = textView->imageView;
         imageInfo.sampler = sampler->sampler;
+        imageInfo.imageLayout = textureLayoutToVkImageLayout(textureViewBinding.layout);
 
         descriptorWrite.descriptorCount = 1;
         descriptorWrite.pImageInfo = &imageInfo;
@@ -68,6 +70,7 @@ void VulkanBindGroup::update(const BindGroupEntry &entry)
         VulkanTextureView *textView = vulkanResourceManager->getTextureView(textureViewBinding.textureView);
         assert(textView != nullptr);
         imageInfo.imageView = textView->imageView;
+        imageInfo.imageLayout = textureLayoutToVkImageLayout(textureViewBinding.layout);
 
         descriptorWrite.descriptorCount = 1;
         descriptorWrite.pImageInfo = &imageInfo;
@@ -90,7 +93,7 @@ void VulkanBindGroup::update(const BindGroupEntry &entry)
         VulkanTextureView *textView = vulkanResourceManager->getTextureView(imageBinding.textureView);
         assert(textView != nullptr);
         imageInfo.imageView = textView->imageView;
-        imageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL; // Since we can read or write to these types of resources
+        imageInfo.imageLayout = textureLayoutToVkImageLayout(imageBinding.layout);
 
         descriptorWrite.descriptorCount = 1;
         descriptorWrite.pImageInfo = &imageInfo;
@@ -147,6 +150,18 @@ void VulkanBindGroup::update(const BindGroupEntry &entry)
         descriptorWrite.descriptorCount = 1;
         descriptorWrite.pNext = &accelerationStructureKhr;
         descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
+        break;
+    }
+    case ResourceBindingType::InputAttachment: {
+        const InputAttachmentBinding &inputAttachmentBinding = entry.resource.inputAttachmentBinding();
+        VulkanTextureView *textView = vulkanResourceManager->getTextureView(inputAttachmentBinding.textureView);
+        assert(textView != nullptr);
+        imageInfo.imageView = textView->imageView;
+        imageInfo.imageLayout = textureLayoutToVkImageLayout(inputAttachmentBinding.layout);
+
+        descriptorWrite.descriptorCount = 1;
+        descriptorWrite.pImageInfo = &imageInfo;
+        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
         break;
     }
     default:

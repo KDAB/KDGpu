@@ -2586,7 +2586,8 @@ Handle<BindGroup_t> VulkanResourceManager::createBindGroup(const Handle<Device_t
             { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 128 },
             { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 128 },
             { VK_DESCRIPTOR_TYPE_SAMPLER, 8 },
-            { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 8 }
+            { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 8 },
+            { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 8 },
         };
 
         VkDescriptorPool pool{ VK_NULL_HANDLE };
