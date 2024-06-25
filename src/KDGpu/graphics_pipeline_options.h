@@ -150,6 +150,7 @@ struct GraphicsPipelineOptions {
     MultisampleOptions multisample;
     uint32_t viewCount{ 1 };
     DynamicStateOptions dynamicState;
+    uint32_t subpassIndex{ 0 };
 };
 
 } // namespace KDGpu

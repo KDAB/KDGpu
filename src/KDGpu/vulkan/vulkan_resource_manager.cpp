@@ -1423,7 +1423,7 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     pipelineInfo.pDynamicState = &dynamicStateInfo;
     pipelineInfo.layout = vulkanPipelineLayout->pipelineLayout;
     pipelineInfo.renderPass = vkRenderPass;
-    pipelineInfo.subpass = 0;
+    pipelineInfo.subpass = options.subpassIndex;
 
     VkPipeline vkPipeline{ VK_NULL_HANDLE };
     if (auto result = vkCreateGraphicsPipelines(vulkanDevice->device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &vkPipeline); result != VK_SUCCESS) {
