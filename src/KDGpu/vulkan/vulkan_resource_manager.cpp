@@ -1045,9 +1045,18 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
 #endif
     }
 
+    BufferDeviceAddress bufferDeviceAddress{ 0 };
+    if (options.usage.testFlag(BufferUsageFlagBits::ShaderDeviceAddressBit)) {
+        const VkBufferDeviceAddressInfo addressInfo = {
+            .sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO,
+            .buffer = vkBuffer,
+        };
+        bufferDeviceAddress = vkGetBufferDeviceAddress(vulkanDevice->device, &addressInfo);
+    }
+
     setObjectName(vulkanDevice, VK_OBJECT_TYPE_BUFFER, reinterpret_cast<uint64_t>(vkBuffer), options.label);
 
-    const auto vulkanBufferHandle = m_buffers.emplace(VulkanBuffer(vkBuffer, vmaAllocation, allocator, this, deviceHandle, memoryHandle));
+    const auto vulkanBufferHandle = m_buffers.emplace(VulkanBuffer(vkBuffer, vmaAllocation, allocator, this, deviceHandle, memoryHandle, bufferDeviceAddress));
 
     if (initialData) {
         VulkanBuffer *vulkanBuffer = m_buffers.get(vulkanBufferHandle);

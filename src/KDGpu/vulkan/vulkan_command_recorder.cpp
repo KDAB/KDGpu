@@ -563,17 +563,12 @@ void VulkanCommandRecorder::buildAccelerationStructures(const BuildAccelerationS
 
                     if (arg.vertexData.isValid()) {
                         VulkanBuffer *vertexBuffer = vulkanResourceManager->getBuffer(arg.vertexData);
-                        VkBufferDeviceAddressInfo addressInfo = { VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO };
-                        addressInfo.buffer = vertexBuffer->buffer;
-                        trianglesDataKhr.vertexData.deviceAddress = vkGetBufferDeviceAddress(vulkanDevice->device, &addressInfo) + arg.vertexDataOffset;
+                        trianglesDataKhr.vertexData.deviceAddress = vertexBuffer->bufferDeviceAddress() + arg.vertexDataOffset;
                     }
 
                     if (arg.indexData.isValid()) {
                         VulkanBuffer *indexBuffer = vulkanResourceManager->getBuffer(arg.indexData);
-                        VkBufferDeviceAddressInfo addressInfo = { VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO };
-                        addressInfo.buffer = indexBuffer->buffer;
-                        trianglesDataKhr.indexData.deviceAddress = vkGetBufferDeviceAddress(vulkanDevice->device, &addressInfo) + arg.indexDataOffset;
-                        ;
+                        trianglesDataKhr.indexData.deviceAddress = indexBuffer->bufferDeviceAddress() + arg.indexDataOffset;
                     }
 
                     geometryKhr.geometryType = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
@@ -610,13 +605,11 @@ void VulkanCommandRecorder::buildAccelerationStructures(const BuildAccelerationS
                                                                                                array.data());
 
                     VulkanBuffer *instanceDataBuffer = vulkanResourceManager->getBuffer(instanceDataBufferH);
-                    VkBufferDeviceAddressInfo addressInfo = { VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO };
-                    addressInfo.buffer = instanceDataBuffer->buffer;
 
                     VkAccelerationStructureGeometryInstancesDataKHR instancesDataKhr;
                     instancesDataKhr.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_INSTANCES_DATA_KHR;
                     instancesDataKhr.arrayOfPointers = false;
-                    instancesDataKhr.data.deviceAddress = vkGetBufferDeviceAddress(vulkanDevice->device, &addressInfo);
+                    instancesDataKhr.data.deviceAddress = instanceDataBuffer->bufferDeviceAddress();
 
                     geometryKhr.geometryType = VK_GEOMETRY_TYPE_INSTANCES_KHR;
                     geometryKhr.geometry.instances = instancesDataKhr;
@@ -628,10 +621,8 @@ void VulkanCommandRecorder::buildAccelerationStructures(const BuildAccelerationS
                     aabbsDataKhr.stride = arg.stride;
 
                     if (arg.data.isValid()) {
-                        auto buffer = vulkanResourceManager->getBuffer(arg.data);
-                        VkBufferDeviceAddressInfo addressInfo = { VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO };
-                        addressInfo.buffer = buffer->buffer;
-                        aabbsDataKhr.data.deviceAddress = vkGetBufferDeviceAddress(vulkanDevice->device, &addressInfo) + arg.dataOffset;
+                        VulkanBuffer *buffer = vulkanResourceManager->getBuffer(arg.data);
+                        aabbsDataKhr.data.deviceAddress = buffer->bufferDeviceAddress() + arg.dataOffset;
                     }
 
                     geometryKhr.geometryType = VK_GEOMETRY_TYPE_AABBS_KHR;
@@ -665,11 +656,8 @@ void VulkanCommandRecorder::buildAccelerationStructures(const BuildAccelerationS
             Handle<Buffer_t> scratchBufferH = VulkanAccelerationStructure::createAccelerationBuffer(deviceHandle, vulkanResourceManager, scratchBufferSize);
             VulkanBuffer *scratchBuffer = vulkanResourceManager->getBuffer(scratchBufferH);
 
-            VkBufferDeviceAddressInfo addressInfo = { VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO };
-            addressInfo.buffer = scratchBuffer->buffer;
-
             geometryInfoKhr.type = accelerationStructureTypeToVkAccelerationStructureType(dstAccelerationStructure->type);
-            geometryInfoKhr.scratchData.deviceAddress = vkGetBufferDeviceAddress(vulkanDevice->device, &addressInfo);
+            geometryInfoKhr.scratchData.deviceAddress = scratchBuffer->bufferDeviceAddress();
             geometryInfoKhr.dstAccelerationStructure = dstAccelerationStructure->accelerationStructure;
             geometryInfoKhr.flags = dstAccelerationStructure->buildFlags;
 

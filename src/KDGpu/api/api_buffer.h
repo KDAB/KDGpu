@@ -25,6 +25,7 @@ struct ApiBuffer {
     virtual void invalidate() = 0;
     virtual void flush() = 0;
     virtual MemoryHandle externalMemoryHandle() const = 0;
+    virtual BufferDeviceAddress bufferDeviceAddress() const = 0;
 };
 
 } // namespace KDGpu

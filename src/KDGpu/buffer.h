@@ -49,6 +49,7 @@ public:
     void flush();
 
     MemoryHandle externalMemoryHandle() const;
+    BufferDeviceAddress bufferDeviceAddress() const;
 
 private:
     explicit Buffer(GraphicsApi *api, const Handle<Device_t> &device, const BufferOptions &options, const void *initialData);

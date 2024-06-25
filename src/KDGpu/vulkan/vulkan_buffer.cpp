@@ -20,13 +20,15 @@ VulkanBuffer::VulkanBuffer(VkBuffer _buffer,
                            VmaAllocator _allocator,
                            VulkanResourceManager *_vulkanResourceManager,
                            const Handle<Device_t> &_deviceHandle,
-                           const MemoryHandle &_externalMemoryHandle)
+                           const MemoryHandle &_externalMemoryHandle,
+                           const BufferDeviceAddress &_deviceAddress)
     : buffer(_buffer)
     , allocation(_allocation)
     , allocator(_allocator)
     , vulkanResourceManager(_vulkanResourceManager)
     , deviceHandle(_deviceHandle)
     , m_externalMemoryHandle(_externalMemoryHandle)
+    , m_bufferAddress(_deviceAddress)
 {
 }
 
@@ -63,6 +65,11 @@ void VulkanBuffer::flush()
 MemoryHandle VulkanBuffer::externalMemoryHandle() const
 {
     return m_externalMemoryHandle;
+}
+
+BufferDeviceAddress VulkanBuffer::bufferDeviceAddress() const
+{
+    return m_bufferAddress;
 }
 
 } // namespace KDGpu

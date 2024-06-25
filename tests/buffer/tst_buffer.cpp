@@ -30,8 +30,11 @@ TEST_SUITE("Buffer")
             .applicationVersion = KDGPU_MAKE_API_VERSION(0, 1, 0, 0) });
     Adapter *discreteGPUAdapter = instance.selectAdapter(AdapterDeviceType::Default);
     // CHECK(discreteGPUAdapter.isValid());
-    Device device = discreteGPUAdapter->createDevice();
+    Device device = discreteGPUAdapter->createDevice(DeviceOptions{
+            .requestedFeatures = discreteGPUAdapter->features(),
+    });
     // CHECK(device.isValid());
+    const bool supportBufferDeviceAddress = discreteGPUAdapter->features().bufferDeviceAddress;
 
     TEST_CASE("Construction")
     {
@@ -57,6 +60,7 @@ TEST_SUITE("Buffer")
 
             // THEN
             CHECK(b.isValid());
+            CHECK(b.bufferDeviceAddress() == 0);
         }
 
         SUBCASE("A constructed Buffer from a Vulkan API with initial data")
@@ -79,6 +83,7 @@ TEST_SUITE("Buffer")
             CHECK(b.isValid());
             const MemoryHandle memoryHandle = b.externalMemoryHandle();
             CHECK(memoryHandle.allocationSize > 0);
+            CHECK(b.bufferDeviceAddress() == 0);
         }
 
 #if defined(KDGPU_PLATFORM_LINUX)
@@ -318,5 +323,21 @@ TEST_SUITE("Buffer")
             // THEN
             CHECK(a != b);
         }
+    }
+
+    TEST_CASE("BufferDeviceAddress" * doctest::skip(!supportBufferDeviceAddress))
+    {
+        // GIVEN
+        const BufferOptions bufferOptions = {
+            .size = 4 * sizeof(float),
+            .usage = BufferUsageFlagBits::ShaderDeviceAddressBit,
+            .memoryUsage = MemoryUsage::GpuOnly
+        };
+
+        // WHEN
+        Buffer b = device.createBuffer(bufferOptions);
+
+        // THEN
+        CHECK(b.bufferDeviceAddress() != 0);
     }
 }

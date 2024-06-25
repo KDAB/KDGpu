@@ -88,6 +88,12 @@ MemoryHandle Buffer::externalMemoryHandle() const
     return apiBuffer->externalMemoryHandle();
 }
 
+BufferDeviceAddress Buffer::bufferDeviceAddress() const
+{
+    auto apiBuffer = m_api->resourceManager()->getBuffer(m_buffer);
+    return apiBuffer->bufferDeviceAddress();
+}
+
 bool operator==(const Buffer &a, const Buffer &b)
 {
     return a.m_api == b.m_api && a.m_device == b.m_device && a.m_buffer == b.m_buffer && a.m_mapped == b.m_mapped;
