@@ -51,6 +51,7 @@ struct VulkanFramebufferKey {
     uint32_t width{ 0 };
     uint32_t height{ 0 };
     uint32_t layers{ 0 };
+    uint32_t viewCount{ 0 };
 
     bool operator==(const VulkanFramebufferKey &other) const noexcept
     {
@@ -59,7 +60,8 @@ struct VulkanFramebufferKey {
             && attachmentsKey == other.attachmentsKey
             && width == other.width
             && height == other.height
-            && layers == other.layers;
+            && layers == other.layers
+            && viewCount == other.viewCount;
         // clang-format on
     }
 
@@ -90,6 +92,7 @@ struct hash<KDGpu::VulkanFramebufferKey> {
         KDGpu::hash_combine(hash, value.width);
         KDGpu::hash_combine(hash, value.height);
         KDGpu::hash_combine(hash, value.layers);
+        KDGpu::hash_combine(hash, value.viewCount);
 
         return hash;
     }

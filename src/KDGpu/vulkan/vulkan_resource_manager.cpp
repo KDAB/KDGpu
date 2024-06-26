@@ -1952,6 +1952,7 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
     framebufferKey.width = fbWidth;
     framebufferKey.height = fbHeight;
     framebufferKey.layers = fbArrayLayers;
+    framebufferKey.viewCount = options.viewCount;
 
     if (options.viewCount > 1)
         framebufferKey.layers = 1;
