@@ -71,6 +71,7 @@ struct RenderPassCommandRecorderOptions {
     uint32_t viewCount{ 1 };
     uint32_t framebufferWidth{ 0 }; // Default to first color attachment width
     uint32_t framebufferHeight{ 0 }; // Default to first color attachment height
+    uint32_t framebufferArrayLayers{ 0 }; // Default to first color attachment arrayLayer
 };
 
 } // namespace KDGpu

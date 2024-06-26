@@ -1921,25 +1921,36 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
 
     uint32_t fbWidth = options.framebufferWidth;
     uint32_t fbHeight = options.framebufferHeight;
-    uint32_t fbArrayLayers = 1;
+    uint32_t fbArrayLayers = options.framebufferArrayLayers;
 
-    if ((fbWidth == 0 || fbHeight == 0) && options.colorAttachments.size() > 0) {
-        // Take the dimensions of the first attachment as the framebuffer dimensions
-        // TODO: Should this be the dimensions of the view rather than the texture itself? i.e. can we
-        // use views to render to a subset of a texture?
-        VulkanTextureView *firstView = getTextureView(options.colorAttachments.at(0).view);
-        if (!firstView) {
-            SPDLOG_LOGGER_ERROR(Logger::logger(), "Invalid texture view when creating render pass");
-            return {};
+    const bool hasColorAttachment = options.colorAttachments.size() > 0;
+    if (hasColorAttachment) {
+        const bool shouldFetchTexture = (fbWidth == 0 || fbHeight == 0) || fbArrayLayers == 0;
+        if (shouldFetchTexture) {
+
+            VulkanTextureView *firstView = getTextureView(options.colorAttachments.at(0).view);
+            if (!firstView) {
+                SPDLOG_LOGGER_ERROR(Logger::logger(), "Invalid texture view when creating render pass");
+                return {};
+            }
+            VulkanTexture *firstTexture = getTexture(firstView->textureHandle);
+            if (!firstTexture) {
+                SPDLOG_LOGGER_ERROR(Logger::logger(), "Invalid texture when creating render pass");
+                return {};
+            }
+
+            if ((fbWidth == 0 || fbHeight == 0)) {
+                // Take the dimensions of the first attachment as the framebuffer dimensions
+                // TODO: Should this be the dimensions of the view rather than the texture itself? i.e. can we
+                // use views to render to a subset of a texture?
+                fbWidth = firstTexture->extent.width;
+                fbHeight = firstTexture->extent.height;
+            }
+
+            if (fbArrayLayers == 0) {
+                fbArrayLayers = firstTexture->arrayLayers;
+            }
         }
-        VulkanTexture *firstTexture = getTexture(firstView->textureHandle);
-        if (!firstTexture) {
-            SPDLOG_LOGGER_ERROR(Logger::logger(), "Invalid texture when creating render pass");
-            return {};
-        }
-        fbWidth = firstTexture->extent.width;
-        fbHeight = firstTexture->extent.height;
-        fbArrayLayers = firstTexture->arrayLayers;
     }
 
     // TODO: Use VK_FRAMEBUFFER_CREATE_IMAGELESS_BIT to create just one framebuffer rather than
