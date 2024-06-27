@@ -179,4 +179,10 @@ void RenderPassCommandRecorder::pushConstant(const PushConstantRange &constantRa
     apiRenderPassCommandRecorder->pushConstant(constantRange, data);
 }
 
+void RenderPassCommandRecorder::nextSubpass()
+{
+    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    apiRenderPassCommandRecorder->nextSubpass();
+}
+
 } // namespace KDGpu

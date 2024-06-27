@@ -55,6 +55,7 @@ struct ApiRenderPassCommandRecorder {
     virtual void drawMeshTasksIndirect(const DrawMeshIndirectCommand &drawCommand) = 0;
     virtual void drawMeshTasksIndirect(const std::vector<DrawMeshIndirectCommand> &drawCommands) = 0;
     virtual void pushConstant(const PushConstantRange &constantRange, const void *data) = 0;
+    virtual void nextSubpass() = 0;
     virtual void end() = 0;
 };
 

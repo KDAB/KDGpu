@@ -54,6 +54,7 @@ struct KDGPU_EXPORT VulkanRenderPassCommandRecorder : public ApiRenderPassComman
     void drawMeshTasksIndirect(const DrawMeshIndirectCommand &drawCommand) final;
     void drawMeshTasksIndirect(const std::vector<DrawMeshIndirectCommand> &drawCommands) final;
     void pushConstant(const PushConstantRange &constantRange, const void *data) final;
+    void nextSubpass() final;
     void end() final;
 
     VkCommandBuffer commandBuffer{ VK_NULL_HANDLE };

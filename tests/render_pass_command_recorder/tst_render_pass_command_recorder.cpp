@@ -567,4 +567,116 @@ TEST_SUITE("RenderPassCommandRecorder")
             CHECK(renderPassRecorder.isValid());
         }
     }
+
+    constexpr bool hasSubpassSupport = false;
+    TEST_CASE("RenderPassCommandRecorder - Subpass" * doctest::skip(!hasSubpassSupport))
+    {
+        Device device = discreteGPUAdapter->createDevice();
+
+        const auto vertexShaderPath = assetPath() + "/shaders/tests/render_pass_command_recorder/triangle.vert.spv";
+        auto vertexShader = device.createShaderModule(readShaderFile(vertexShaderPath));
+
+        const auto fragmentShaderPath = assetPath() + "/shaders/tests/render_pass_command_recorder/triangle.frag.spv";
+        auto fragmentShader = device.createShaderModule(readShaderFile(fragmentShaderPath));
+
+        const Texture colorTexture = device.createTexture(TextureOptions{
+                .type = TextureType::TextureType2D,
+                .format = Format::R8G8B8A8_UNORM,
+                .extent = { 256, 256, 1 },
+                .mipLevels = 1,
+                .samples = SampleCountFlagBits::Samples1Bit,
+                .usage = TextureUsageFlagBits::ColorAttachmentBit,
+                .memoryUsage = MemoryUsage::GpuOnly,
+        });
+        const Texture depthTexture = device.createTexture(TextureOptions {
+            .type = TextureType::TextureType2D,
+#if defined(KD_PLATFORM_MACOS)
+            .format = Format::D32_SFLOAT_S8_UINT,
+#else
+                    .format = Format::D24_UNORM_S8_UINT,
+#endif
+            .extent = { 256, 256, 1 },
+            .mipLevels = 1,
+            .samples = SampleCountFlagBits::Samples1Bit,
+            .usage = TextureUsageFlagBits::DepthStencilAttachmentBit,
+            .memoryUsage = MemoryUsage::GpuOnly,
+        });
+
+        const TextureView colorTextureView = colorTexture.createView();
+        const TextureView depthTextureView = depthTexture.createView();
+
+        const PipelineLayout pipelineLayout = device.createPipelineLayout();
+        const GraphicsPipeline pipelineSubpass0 = device.createGraphicsPipeline(GraphicsPipelineOptions{
+                .shaderStages = {
+                        { .shaderModule = vertexShader.handle(), .stage = ShaderStageFlagBits::VertexBit },
+                        { .shaderModule = fragmentShader.handle(), .stage = ShaderStageFlagBits::FragmentBit },
+                },
+                .layout = pipelineLayout.handle(),
+                .vertex = {
+                        .buffers = {
+                                { .binding = 0, .stride = 2 * 4 * sizeof(float) },
+                        },
+                        .attributes = {
+                                { .location = 0, .binding = 0, .format = Format::R32G32B32A32_SFLOAT }, // Position
+                                { .location = 1, .binding = 0, .format = Format::R32G32B32A32_SFLOAT, .offset = 4 * sizeof(float) }, // Color
+                        },
+                },
+                .renderTargets = {
+                        { .format = Format::R8G8B8A8_UNORM },
+                },
+                .depthStencil = { .format = Format::D24_UNORM_S8_UINT, .depthWritesEnabled = true, .depthCompareOperation = CompareOperation::Less },
+                .subpassIndex = 0,
+        });
+
+        const GraphicsPipeline pipelineSubpass1 = device.createGraphicsPipeline(GraphicsPipelineOptions{
+                .shaderStages = {
+                        { .shaderModule = vertexShader.handle(), .stage = ShaderStageFlagBits::VertexBit },
+                        { .shaderModule = fragmentShader.handle(), .stage = ShaderStageFlagBits::FragmentBit },
+                },
+                .layout = pipelineLayout.handle(),
+                .vertex = {
+                        .buffers = {
+                                { .binding = 0, .stride = 2 * 4 * sizeof(float) },
+                        },
+                        .attributes = {
+                                { .location = 0, .binding = 0, .format = Format::R32G32B32A32_SFLOAT }, // Position
+                                { .location = 1, .binding = 0, .format = Format::R32G32B32A32_SFLOAT, .offset = 4 * sizeof(float) }, // Color
+                        },
+                },
+                .renderTargets = {
+                        { .format = Format::R8G8B8A8_UNORM },
+                },
+                .depthStencil = { .format = Format::D24_UNORM_S8_UINT, .depthWritesEnabled = true, .depthCompareOperation = CompareOperation::Less },
+                .subpassIndex = 1,
+        });
+
+        SUBCASE("Can move to next subpass")
+        {
+            // GIVEN
+            CommandRecorder commandRecorder = device.createCommandRecorder();
+            const RenderPassCommandRecorderOptions renderPassOptions{
+                .colorAttachments = {
+                        { .view = colorTextureView,
+                          .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
+                          .finalLayout = TextureLayout::PresentSrc } },
+                .depthStencilAttachment = {
+                        .view = depthTextureView,
+                }
+            };
+
+            // WHEN
+            RenderPassCommandRecorder renderPassRecorder = commandRecorder.beginRenderPass(renderPassOptions);
+            renderPassRecorder.setPipeline(pipelineSubpass0);
+            renderPassRecorder.nextSubpass();
+            renderPassRecorder.setPipeline(pipelineSubpass1);
+            renderPassRecorder.end();
+
+            CommandBuffer commandBuffer = commandRecorder.finish();
+
+            // THEN
+            CHECK(commandRecorder.isValid());
+            CHECK(renderPassRecorder.isValid());
+            // And has no validation errors in console
+        }
+    }
 }

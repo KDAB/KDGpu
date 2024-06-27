@@ -240,6 +240,12 @@ void VulkanRenderPassCommandRecorder::pushConstant(const PushConstantRange &cons
                        data);
 }
 
+void VulkanRenderPassCommandRecorder::nextSubpass()
+{
+    // For now we assume renderpass/subpass are always recorded inline (primary command buffer)
+    vkCmdNextSubpass(commandBuffer, VK_SUBPASS_CONTENTS_INLINE);
+}
+
 void VulkanRenderPassCommandRecorder::end()
 {
     vkCmdEndRenderPass(commandBuffer);

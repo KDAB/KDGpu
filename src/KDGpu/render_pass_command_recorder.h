@@ -128,6 +128,8 @@ public:
 
     void pushConstant(const PushConstantRange &constantRange, const void *data);
 
+    void nextSubpass();
+
     void end();
 
 private:
