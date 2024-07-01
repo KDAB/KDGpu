@@ -59,6 +59,7 @@ struct DeviceOptions;
 struct FenceOptions;
 struct GpuSemaphoreOptions;
 struct GraphicsPipelineOptions;
+struct RenderPassOptions;
 struct InstanceOptions;
 struct PipelineLayoutOptions;
 struct RayTracingPipelineOptions;
@@ -153,6 +154,10 @@ public:
     virtual Handle<ShaderModule_t> createShaderModule(const Handle<Device_t> &deviceHandle, const std::vector<uint32_t> &code) = 0;
     virtual void deleteShaderModule(const Handle<ShaderModule_t> &handle) = 0;
     virtual ApiShaderModule *getShaderModule(const Handle<ShaderModule_t> &handle) const = 0;
+
+    virtual Handle<RenderPass_t> createRenderPass(const Handle<Device_t> &deviceHandle, const RenderPassOptions &options) = 0;
+    virtual void deleteRenderPass(const Handle<RenderPass_t> &handle) = 0;
+    virtual ApiRenderPass *getRenderPass(const Handle<RenderPass_t> &handle) = 0;
 
     virtual Handle<PipelineLayout_t> createPipelineLayout(const Handle<Device_t> &deviceHandle, const PipelineLayoutOptions &options) = 0;
     virtual void deletePipelineLayout(const Handle<PipelineLayout_t> &handle) = 0;

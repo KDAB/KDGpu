@@ -1128,6 +1128,21 @@ VulkanShaderModule *VulkanResourceManager::getShaderModule(const Handle<ShaderMo
     return m_shaderModules.get(handle);
 }
 
+Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device_t> &deviceHandle, const RenderPassOptions &options)
+{
+    return {};
+}
+
+void VulkanResourceManager::deleteRenderPass(const Handle<RenderPass_t> &handle)
+{
+    ;
+}
+
+VulkanRenderPass *VulkanResourceManager::getRenderPass(const Handle<RenderPass_t> &handle)
+{
+    return nullptr;
+}
+
 Handle<PipelineLayout_t> VulkanResourceManager::createPipelineLayout(const Handle<Device_t> &deviceHandle, const PipelineLayoutOptions &options)
 {
     VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);

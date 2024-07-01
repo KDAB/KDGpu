@@ -113,6 +113,10 @@ public:
     void deleteShaderModule(const Handle<ShaderModule_t> &handle) final;
     VulkanShaderModule *getShaderModule(const Handle<ShaderModule_t> &handle) const final;
 
+    Handle<RenderPass_t> createRenderPass(const Handle<Device_t> &deviceHandle, const RenderPassOptions &options) final;
+    void deleteRenderPass(const Handle<RenderPass_t> &handle) final;
+    VulkanRenderPass *getRenderPass(const Handle<RenderPass_t> &handle) final;
+
     Handle<PipelineLayout_t> createPipelineLayout(const Handle<Device_t> &deviceHandle, const PipelineLayoutOptions &options) final;
     void deletePipelineLayout(const Handle<PipelineLayout_t> &handle) final;
     VulkanPipelineLayout *getPipelineLayout(const Handle<PipelineLayout_t> &handle) const final;
