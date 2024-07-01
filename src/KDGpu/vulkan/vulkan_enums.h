@@ -140,4 +140,6 @@ VkRayTracingShaderGroupTypeKHR rayTracingShaderGroupTypeToVkRayTracingShaderGrou
 
 VkBuildAccelerationStructureFlagsKHR accelerationStructureFlagsToVkBuildAccelerationStructureFlags(AccelerationStructureFlags flags);
 
+VkDependencyFlags dependencyFlagsToVkDependencyFlags(DependencyFlags flags);
+
 } // namespace KDGpu

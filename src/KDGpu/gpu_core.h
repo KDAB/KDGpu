@@ -1203,6 +1203,15 @@ enum class AccelerationStructureFlagBits {
 };
 using AccelerationStructureFlags = KDGpu::Flags<AccelerationStructureFlagBits>;
 
+enum class DependencyFlagBits {
+    ByRegion = 0x00000001,
+    ByDeviceGroup = 0x00000004,
+    ByLocalView = 0x00000002,
+    FeedbackLoop = 0x00000008,
+};
+
+using DependencyFlags = KDGpu::Flags<DependencyFlagBits>;
+
 /*! @} */
 
 } // namespace KDGpu
@@ -1223,3 +1232,4 @@ OPERATORS_FOR_FLAGS(KDGpu::ResolveModeFlags)
 OPERATORS_FOR_FLAGS(KDGpu::StencilFaceFlags)
 OPERATORS_FOR_FLAGS(KDGpu::GeometryInstanceFlags)
 OPERATORS_FOR_FLAGS(KDGpu::AccelerationStructureFlags)
+OPERATORS_FOR_FLAGS(KDGpu::DependencyFlags);

@@ -430,4 +430,9 @@ VkBuildAccelerationStructureFlagsKHR accelerationStructureFlagsToVkBuildAccelera
     return static_cast<VkBuildAccelerationStructureFlagsKHR>(flags.toInt());
 }
 
+VkDependencyFlags dependencyFlagsToVkDependencyFlags(DependencyFlags flags)
+{
+    return static_cast<VkDependencyFlags>(flags.toInt());
+}
+
 } // namespace KDGpu

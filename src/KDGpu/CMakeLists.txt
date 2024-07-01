@@ -33,6 +33,7 @@ set(SOURCES
     raytracing_pipeline.cpp
     raytracing_shader_binding_table.cpp
     render_pass_command_recorder.cpp
+    render_pass.cpp
     resource_manager.cpp
     sampler.cpp
     shader_module.cpp
@@ -120,6 +121,8 @@ set(HEADERS
     raytracing_shader_binding_table.h
     render_pass_command_recorder.h
     render_pass_command_recorder_options.h
+    render_pass.h
+    render_pass_options.h
     resource_manager.h
     sampler.h
     sampler_options.h
