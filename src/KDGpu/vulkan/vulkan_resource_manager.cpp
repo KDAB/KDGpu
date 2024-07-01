@@ -27,6 +27,7 @@
 #include <KDGpu/swapchain_options.h>
 #include <KDGpu/texture_options.h>
 #include <KDGpu/raytracing_pipeline_options.h>
+#include <KDGpu/render_pass_options.h>
 #include <KDGpu/vulkan/vulkan_config.h>
 #include <KDGpu/vulkan/vulkan_enums.h>
 #include <KDGpu/vulkan/vulkan_formatters.h>
@@ -1130,17 +1131,239 @@ VulkanShaderModule *VulkanResourceManager::getShaderModule(const Handle<ShaderMo
 
 Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device_t> &deviceHandle, const RenderPassOptions &options)
 {
-    return {};
+    assert(options.subpassDescriptions.size() != 0); // VUID-VkRenderPassCreateInfo2-subpassCount-arraylength
+
+    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
+
+    VkRenderPassCreateInfo2 renderPassInfo = {};
+    std::vector<VkAttachmentDescription2> vkAttachmentDescriptionsArray;
+    std::vector<VkSubpassDescription2> vkSubpassDescriptionsArray;
+    std::vector<VkSubpassDependency2> vkSubpassDependenciesArray;
+
+    bool isMultiviewEnabled = !options.correlatedViewMasks.empty();
+
+    for (const auto &attachmentDescription : options.attachments) {
+        VkAttachmentDescription2 vkAttachment = {};
+        vkAttachment.sType = VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_2;
+        vkAttachment.pNext = nullptr;
+        vkAttachment.format = formatToVkFormat(attachmentDescription.format);
+        vkAttachment.samples = sampleCountFlagBitsToVkSampleFlagBits(attachmentDescription.samples);
+        vkAttachment.loadOp = attachmentLoadOperationToVkAttachmentLoadOp(attachmentDescription.loadOp);
+        vkAttachment.storeOp = attachmentStoreOperationToVkAttachmentStoreOp(attachmentDescription.storeOp);
+        vkAttachment.stencilLoadOp = attachmentLoadOperationToVkAttachmentLoadOp(attachmentDescription.stencilLoadOp);
+        vkAttachment.stencilStoreOp = attachmentStoreOperationToVkAttachmentStoreOp(attachmentDescription.stencilstoreOp);
+        vkAttachment.initialLayout = textureLayoutToVkImageLayout(attachmentDescription.initialLayout);
+        vkAttachment.finalLayout = textureLayoutToVkImageLayout(attachmentDescription.finalLayout);
+
+        vkAttachmentDescriptionsArray.push_back(vkAttachment);
+    }
+
+    std::vector<std::vector<VkAttachmentReference2>> inputReferenceArray, colorReferenceArray, resolveReferenceArray;
+    std::vector<VkAttachmentReference2> depthReferenceArray;
+
+    inputReferenceArray.reserve(options.subpassDescriptions.size());
+    colorReferenceArray.reserve(options.subpassDescriptions.size());
+    resolveReferenceArray.reserve(options.subpassDescriptions.size());
+    depthReferenceArray.reserve(options.subpassDescriptions.size());
+
+    for (const SubpassDescription &subpassDescription : options.subpassDescriptions) {
+        VkSubpassDescription2 vkSubpass = {};
+        vkSubpass.sType = VK_STRUCTURE_TYPE_SUBPASS_DESCRIPTION_2;
+        vkSubpass.pNext = nullptr;
+        vkSubpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+        vkSubpass.inputAttachmentCount = subpassDescription.inputAttachmentIndex.size();
+        vkSubpass.colorAttachmentCount = subpassDescription.colorAttachmentIndex.size();
+        vkSubpass.preserveAttachmentCount = subpassDescription.preserveAttachmentIndex.size();
+        vkSubpass.pPreserveAttachments = subpassDescription.preserveAttachmentIndex.data();
+
+        if (isMultiviewEnabled) {
+            assert(subpassDescription.viewMask != 0); // VUID-VkRenderPassCreateInfo2-viewMask-03058
+
+            vkSubpass.viewMask = subpassDescription.viewMask;
+        }
+
+        if (subpassDescription.depthAttachmentIndex.has_value()) {
+            VkAttachmentReference2 depthAttachment = {};
+
+            depthAttachment.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
+            depthAttachment.attachment = subpassDescription.depthAttachmentIndex.value();
+            depthAttachment.layout = textureLayoutToVkImageLayout(options.attachments[depthAttachment.attachment].finalLayout);
+
+            depthReferenceArray.push_back(depthAttachment);
+            vkSubpass.pDepthStencilAttachment = &depthReferenceArray.back();
+        }
+
+        if (!subpassDescription.inputAttachmentIndex.empty()) {
+            std::vector<VkAttachmentReference2> inputReference;
+            inputReference.reserve(vkSubpass.inputAttachmentCount);
+
+            for (std::size_t j = 0; j < vkSubpass.inputAttachmentCount; j++) {
+                VkAttachmentReference2 reference = {};
+                reference.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
+                reference.pNext = nullptr;
+                reference.attachment = subpassDescription.inputAttachmentIndex[j];
+
+                /// ensures input attachment layout are changed to read-only, as per vulkan documentation:
+                /// https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkSubpassDescription2.html
+                switch (options.attachments[reference.attachment].finalLayout) {
+                case TextureLayout::ColorAttachmentOptimal: // VUID-VkSubpassDescription2-attachment-06912
+                    reference.layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                    break;
+                case TextureLayout::DepthAttachmentOptimal: // VUID-VkSubpassDescription2-attachment-06918
+                    reference.layout = VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
+                    break;
+                case TextureLayout::StencilAttachmentOptimal: // VUID-VkSubpassDescription2-attachment-06918
+                    reference.layout = VK_IMAGE_LAYOUT_STENCIL_READ_ONLY_OPTIMAL;
+                    break;
+                case TextureLayout::DepthStencilAttachmentOptimal: // VUID-VkSubpassDescription-attachment-06912
+                    reference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+                    break;
+                case TextureLayout::AttachmentOptimal: // VUID-VkSubpassDescription-attachment-06921
+                    reference.layout = VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL;
+                    break;
+                default:
+                    reference.layout = textureLayoutToVkImageLayout(options.attachments[reference.attachment].finalLayout);
+                    break;
+                }
+
+                if (!isMultiviewEnabled) {
+                    if (options.attachments[reference.attachment].aspectEnabled.toInt() != 0x0) {
+                        reference.aspectMask = options.attachments[reference.attachment].aspectEnabled.toInt();
+                    } else {
+                        // aspect inference if not provided
+                        switch (options.attachments[reference.attachment].finalLayout) {
+                        case TextureLayout::ColorAttachmentOptimal:
+                        case TextureLayout::ShaderReadOnlyOptimal:
+                        case TextureLayout::PresentSrc:
+                        case TextureLayout::SharedPresent:
+                            reference.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+                            break;
+                        case TextureLayout::DepthAttachmentOptimal:
+                        case TextureLayout::DepthReadOnlyOptimal:
+                        case TextureLayout::DepthReadOnlyStencilAttachmentOptimal:
+                            reference.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+                            break;
+                        case TextureLayout::StencilAttachmentOptimal:
+                        case TextureLayout::StencilReadOnlyOptimal:
+                        case TextureLayout::DepthAttachmentStencilReadOnlyOptimal:
+                            reference.aspectMask = VK_IMAGE_ASPECT_STENCIL_BIT;
+                            break;
+                        case TextureLayout::DepthStencilAttachmentOptimal:
+                        case TextureLayout::DepthStencilReadOnlyOptimal:
+                            reference.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
+                            break;
+                        default: /* should never happen. This will fail per VUID-VkSubpassDescription2-attachment-02800 */
+                            reference.aspectMask = VK_IMAGE_ASPECT_NONE;
+                            break;
+                        }
+                    }
+                } else {
+                    assert(subpassDescription.inputAttachmentAspects.size() == subpassDescription.inputAttachmentIndex.size());
+
+                    reference.aspectMask = subpassDescription.inputAttachmentAspects[j].toInt();
+                }
+
+                inputReference.push_back(reference);
+            }
+
+            inputReferenceArray.push_back(inputReference);
+            vkSubpass.pInputAttachments = inputReferenceArray.back().data();
+        }
+
+        if (!subpassDescription.colorAttachmentIndex.empty()) {
+            std::vector<VkAttachmentReference2> colorReference;
+            colorReference.reserve(vkSubpass.colorAttachmentCount);
+
+            for (std::size_t j = 0; j < vkSubpass.colorAttachmentCount; j++) {
+                VkAttachmentReference2 reference = {};
+
+                // "aspectMask is ignored when this structure is used to describe anything other than an input attachment reference."
+                reference.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
+                reference.pNext = nullptr;
+                reference.attachment = subpassDescription.colorAttachmentIndex[j];
+                reference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+                colorReference.push_back(reference);
+            }
+
+            colorReferenceArray.push_back(colorReference);
+            vkSubpass.pColorAttachments = colorReferenceArray.back().data();
+        }
+
+        if (!subpassDescription.resolveAttachmentIndex.empty()) {
+            assert(subpassDescription.resolveAttachmentIndex.size() == subpassDescription.colorAttachmentIndex.size());
+
+            std::vector<VkAttachmentReference2> resolveReferences;
+            resolveReferences.reserve(vkSubpass.colorAttachmentCount);
+
+            for (std::size_t j = 0; j < vkSubpass.colorAttachmentCount; j++) {
+                VkAttachmentReference2 reference = {};
+
+                // "aspectMask is ignored when this structure is used to describe anything other than an input attachment reference."
+                reference.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
+                reference.pNext = nullptr;
+                reference.attachment = subpassDescription.resolveAttachmentIndex[j];
+                reference.layout = textureLayoutToVkImageLayout(options.attachments[reference.attachment].finalLayout);
+
+                resolveReferences.push_back(reference);
+            }
+
+            resolveReferenceArray.push_back(resolveReferences);
+            vkSubpass.pResolveAttachments = resolveReferenceArray.back().data();
+        }
+
+        vkSubpassDescriptionsArray.push_back(vkSubpass);
+    }
+
+    for (const auto &subpassDependency : options.subpassDependencies) {
+        VkSubpassDependency2 vkSubpassDependency = {};
+        vkSubpassDependency.sType = VK_STRUCTURE_TYPE_SUBPASS_DEPENDENCY_2;
+        vkSubpassDependency.pNext = nullptr;
+        vkSubpassDependency.srcSubpass = subpassDependency.srcSubpass;
+        vkSubpassDependency.dstSubpass = subpassDependency.dstSubpass;
+        vkSubpassDependency.srcStageMask = pipelineStageFlagsToVkPipelineStageFlagBits(subpassDependency.srcStageMask);
+        vkSubpassDependency.dstStageMask = pipelineStageFlagsToVkPipelineStageFlagBits(subpassDependency.dstStageMask);
+        vkSubpassDependency.srcAccessMask = accessFlagsToVkAccessFlagBits(subpassDependency.srcAccessMask);
+        vkSubpassDependency.dstAccessMask = accessFlagsToVkAccessFlagBits(subpassDependency.dstAccessMask);
+        vkSubpassDependency.dependencyFlags = dependencyFlagsToVkDependencyFlags(subpassDependency.dependencyFlags);
+
+        if (isMultiviewEnabled)
+            vkSubpassDependency.viewOffset = subpassDependency.viewOffsetDependency;
+
+        vkSubpassDependenciesArray.push_back(vkSubpassDependency);
+    }
+
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+    renderPassInfo.attachmentCount = vkAttachmentDescriptionsArray.size();
+    renderPassInfo.pAttachments = (renderPassInfo.attachmentCount != 0) ? vkAttachmentDescriptionsArray.data() : nullptr;
+    renderPassInfo.subpassCount = vkSubpassDescriptionsArray.size();
+    renderPassInfo.pSubpasses = vkSubpassDescriptionsArray.data();
+    renderPassInfo.dependencyCount = vkSubpassDependenciesArray.size();
+    renderPassInfo.pDependencies = (renderPassInfo.dependencyCount != 0) ? vkSubpassDependenciesArray.data() : nullptr;
+
+    VkRenderPass vkRenderPass{ VK_NULL_HANDLE };
+    if (auto result = vkCreateRenderPass2(vulkanDevice->device, &renderPassInfo, nullptr, &vkRenderPass); result != VK_SUCCESS) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating render pass: {}", result);
+        return {};
+    }
+
+    const auto vulkanRenderPassHandle = m_renderPasses.emplace(VulkanRenderPass(vkRenderPass, this, deviceHandle));
+    return vulkanRenderPassHandle;
 }
 
 void VulkanResourceManager::deleteRenderPass(const Handle<RenderPass_t> &handle)
 {
-    ;
+    KDGpu::VulkanRenderPass *vulkanRenderPass = m_renderPasses.get(handle);
+    VulkanDevice *vulkanDevice = m_devices.get(vulkanRenderPass->deviceHandle);
+
+    vkDestroyRenderPass(vulkanDevice->device, vulkanRenderPass->renderPass, nullptr);
+
+    m_renderPasses.remove(handle);
 }
 
 VulkanRenderPass *VulkanResourceManager::getRenderPass(const Handle<RenderPass_t> &handle)
 {
-    return nullptr;
+    return m_renderPasses.get(handle);
 }
 
 Handle<PipelineLayout_t> VulkanResourceManager::createPipelineLayout(const Handle<Device_t> &deviceHandle, const PipelineLayoutOptions &options)
