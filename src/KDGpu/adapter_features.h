@@ -107,6 +107,11 @@ struct AdapterFeatures {
     bool rayTracingPipelineShaderGroupHandleCaptureReplayMixed;
     bool rayTracingPipelineTraceRaysIndirect;
     bool rayTraversalPrimitiveCulling;
+    bool taskShader;
+    bool meshShader;
+    bool multiviewMeshShader;
+    bool primitiveFragmentShadingRateMeshShader;
+    bool meshShaderQueries;
 };
 
 /*! @} */

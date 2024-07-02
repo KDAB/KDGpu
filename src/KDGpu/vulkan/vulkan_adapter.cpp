@@ -80,6 +80,10 @@ AdapterProperties VulkanAdapter::queryAdapterProperties()
     rayTracingProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_PROPERTIES_KHR;
     addToChain(&rayTracingProperties);
 
+    VkPhysicalDeviceMeshShaderPropertiesEXT meshShaderProperties{};
+    meshShaderProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_PROPERTIES_EXT;
+    addToChain(&meshShaderProperties);
+
     vkGetPhysicalDeviceProperties2(physicalDevice, &deviceProperties2);
 
     const VkPhysicalDeviceProperties &deviceProperties = deviceProperties2.properties;
@@ -292,6 +296,52 @@ AdapterProperties VulkanAdapter::queryAdapterProperties()
                 .shaderGroupHandleAlignment = rayTracingProperties.shaderGroupHandleAlignment,
                 .maxRayHitAttributeSize = rayTracingProperties.maxRayHitAttributeSize,
         },
+        .meshShaderProperties = {
+                .maxTaskWorkGroupTotalCount = meshShaderProperties.maxMeshWorkGroupTotalCount,
+                .maxTaskWorkGroupCount = {
+                        meshShaderProperties.maxMeshWorkGroupCount[0],
+                        meshShaderProperties.maxMeshWorkGroupCount[1],
+                        meshShaderProperties.maxMeshWorkGroupCount[2],
+                },
+                .maxTaskWorkGroupInvocations = meshShaderProperties.maxTaskWorkGroupInvocations,
+                .maxTaskWorkGroupSize = {
+                        meshShaderProperties.maxTaskWorkGroupSize[0],
+                        meshShaderProperties.maxTaskWorkGroupSize[1],
+                        meshShaderProperties.maxTaskWorkGroupSize[2],
+                },
+                .maxTaskPayloadSize = meshShaderProperties.maxTaskPayloadSize,
+                .maxTaskSharedMemorySize = meshShaderProperties.maxTaskSharedMemorySize,
+                .maxTaskPayloadAndSharedMemorySize = meshShaderProperties.maxTaskPayloadAndSharedMemorySize,
+                .maxMeshWorkGroupTotalCount = meshShaderProperties.maxMeshWorkGroupTotalCount,
+                .maxMeshWorkGroupCount = {
+                        meshShaderProperties.maxMeshWorkGroupCount[0],
+                        meshShaderProperties.maxMeshWorkGroupCount[1],
+                        meshShaderProperties.maxMeshWorkGroupCount[2],
+                },
+                .maxMeshWorkGroupInvocations = meshShaderProperties.maxMeshWorkGroupInvocations,
+                .maxMeshWorkGroupSize = {
+                        meshShaderProperties.maxMeshWorkGroupSize[0],
+                        meshShaderProperties.maxMeshWorkGroupSize[1],
+                        meshShaderProperties.maxMeshWorkGroupSize[2],
+                },
+                .maxMeshSharedMemorySize = meshShaderProperties.maxMeshSharedMemorySize,
+                .maxMeshPayloadAndSharedMemorySize = meshShaderProperties.maxMeshPayloadAndSharedMemorySize,
+                .maxMeshOutputMemorySize = meshShaderProperties.maxMeshOutputMemorySize,
+                .maxMeshPayloadAndOutputMemorySize = meshShaderProperties.maxMeshPayloadAndOutputMemorySize,
+                .maxMeshOutputComponents = meshShaderProperties.maxMeshOutputComponents,
+                .maxMeshOutputVertices = meshShaderProperties.maxMeshOutputVertices,
+                .maxMeshOutputPrimitives = meshShaderProperties.maxMeshOutputPrimitives,
+                .maxMeshOutputLayers = meshShaderProperties.maxMeshOutputLayers,
+                .maxMeshMultiviewViewCount = meshShaderProperties.maxMeshMultiviewViewCount,
+                .meshOutputPerVertexGranularity = meshShaderProperties.meshOutputPerVertexGranularity,
+                .meshOutputPerPrimitiveGranularity = meshShaderProperties.meshOutputPerPrimitiveGranularity,
+                .maxPreferredTaskWorkGroupInvocations = meshShaderProperties.maxPreferredTaskWorkGroupInvocations,
+                .maxPreferredMeshWorkGroupInvocations = meshShaderProperties.maxPreferredMeshWorkGroupInvocations,
+                .prefersLocalInvocationVertexOutput = static_cast<bool>(meshShaderProperties.prefersLocalInvocationVertexOutput),
+                .prefersLocalInvocationPrimitiveOutput = static_cast<bool>(meshShaderProperties.prefersLocalInvocationPrimitiveOutput),
+                .prefersCompactVertexOutput = static_cast<bool>(meshShaderProperties.prefersCompactVertexOutput),
+                .prefersCompactPrimitiveOutput = static_cast<bool>(meshShaderProperties.prefersCompactPrimitiveOutput),
+        },
     };
     return properties;
 }
@@ -338,6 +388,10 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
     synchronization2Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES;
     addToChain(&synchronization2Features);
 #endif
+
+    VkPhysicalDeviceMeshShaderFeaturesEXT meshShaderFeatures{};
+    meshShaderFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT;
+    addToChain(&meshShaderFeatures);
 
     vkGetPhysicalDeviceFeatures2(physicalDevice, &deviceFeatures2);
     const VkPhysicalDeviceFeatures &deviceFeatures = deviceFeatures2.features;
@@ -429,6 +483,11 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
         .rayTracingPipelineShaderGroupHandleCaptureReplayMixed = static_cast<bool>(rayTracingPipelineFeaturesKhr.rayTracingPipelineShaderGroupHandleCaptureReplayMixed),
         .rayTracingPipelineTraceRaysIndirect = static_cast<bool>(rayTracingPipelineFeaturesKhr.rayTracingPipelineTraceRaysIndirect),
         .rayTraversalPrimitiveCulling = static_cast<bool>(rayTracingPipelineFeaturesKhr.rayTraversalPrimitiveCulling),
+        .taskShader = static_cast<bool>(meshShaderFeatures.taskShader),
+        .meshShader = static_cast<bool>(meshShaderFeatures.meshShader),
+        .multiviewMeshShader = static_cast<bool>(meshShaderFeatures.multiviewMeshShader),
+        .primitiveFragmentShadingRateMeshShader = static_cast<bool>(meshShaderFeatures.primitiveFragmentShadingRateMeshShader),
+        .meshShaderQueries = static_cast<bool>(meshShaderFeatures.meshShaderQueries),
     };
 
 #if defined(VK_KHR_synchronization2)
