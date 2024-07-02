@@ -310,6 +310,11 @@ void HelloSphereRt::createAccelerationStructures()
         auto commandRecorder = m_device.createCommandRecorder();
 
         // Bottom Level AS
+        commandRecorder.beginDebugLabel(DebugLabelOptions{
+                .label = "BottomLevel - AccelerationStructures",
+                .color = { 0.0f, 1.0f, 0.0f, 1.0f },
+        });
+
         commandRecorder.buildAccelerationStructures(BuildAccelerationStructureOptions{
                 .buildGeometryInfos = {
                         {
@@ -339,8 +344,14 @@ void HelloSphereRt::createAccelerationStructures()
                         },
                 },
         });
+        commandRecorder.endDebugLabel();
 
         // Top Level AS
+        commandRecorder.beginDebugLabel(DebugLabelOptions{
+                .label = "TopLevel - AccelerationStructures",
+                .color = { 0.0f, 1.0f, 0.2f, 1.0f },
+        });
+
         commandRecorder.buildAccelerationStructures(BuildAccelerationStructureOptions{
                 .buildGeometryInfos = {
                         {
@@ -357,6 +368,8 @@ void HelloSphereRt::createAccelerationStructures()
                         },
                 },
         });
+
+        commandRecorder.endDebugLabel();
 
         CommandBuffer cmdBuffer = commandRecorder.finish();
         m_queue.submit(SubmitOptions{
@@ -523,6 +536,11 @@ void HelloSphereRt::render()
                 },
         });
 
+        commandRecorder.beginDebugLabel(DebugLabelOptions{
+                .label = "RayTracing Pass",
+                .color = { 1.0f, 0.0f, 0.0f, 1.0f },
+        });
+
         auto rtPass = commandRecorder.beginRayTracingPass();
         rtPass.setPipeline(m_pipeline);
         rtPass.setBindGroup(0, m_rtBindGroup);
@@ -542,6 +560,7 @@ void HelloSphereRt::render()
         });
 
         rtPass.end();
+        commandRecorder.endDebugLabel();
 
         // Transition Image to ColorAttachment Layout
         commandRecorder.textureMemoryBarrier(TextureMemoryBarrierOptions{
@@ -556,6 +575,11 @@ void HelloSphereRt::render()
                         .aspectMask = KDGpu::TextureAspectFlagBits::ColorBit,
                         .levelCount = 1,
                 },
+        });
+
+        commandRecorder.beginDebugLabel(DebugLabelOptions{
+                .label = "Raster Pass",
+                .color = { 0.0f, 0.0f, 1.0f, 1.0f },
         });
 
         // Create a GraphicsRenderPass to draw the imgui overlay
@@ -575,6 +599,7 @@ void HelloSphereRt::render()
         });
         renderImGuiOverlay(&opaquePass);
         opaquePass.end();
+        commandRecorder.endDebugLabel();
 
         // Update layout so that we know what layout we are in on the next frames
         m_swapchainImageLayouts[m_currentSwapchainImageIndex] = KDGpu::TextureLayout::PresentSrc;
