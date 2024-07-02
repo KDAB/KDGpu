@@ -74,7 +74,7 @@ VulkanDevice::VulkanDevice(VkDevice _device,
 
     const auto instanceExtensions = vulkanInstance->extensions();
     for (const auto &extension : instanceExtensions) {
-        if (extension.name == "VK_EXT_debug_utils") {
+        if (extension.name == VK_EXT_DEBUG_UTILS_EXTENSION_NAME) {
             this->vkSetDebugUtilsObjectNameEXT = PFN_vkSetDebugUtilsObjectNameEXT(vkGetDeviceProcAddr(device, "vkSetDebugUtilsObjectNameEXT"));
             this->vkCmdBeginDebugUtilsLabelEXT = PFN_vkCmdBeginDebugUtilsLabelEXT(vkGetDeviceProcAddr(device, "vkCmdBeginDebugUtilsLabelEXT"));
             this->vkCmdEndDebugUtilsLabelEXT = PFN_vkCmdEndDebugUtilsLabelEXT(vkGetDeviceProcAddr(device, "vkCmdEndDebugUtilsLabelEXT"));
@@ -87,7 +87,7 @@ VulkanDevice::VulkanDevice(VkDevice _device,
     if (vulkanAdapter->supportsSynchronization2) {
         const auto adapterExtensions = vulkanAdapter->extensions();
         for (const auto &extension : adapterExtensions) {
-            if (extension.name == "VK_KHR_synchronization2") {
+            if (extension.name == VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME) {
                 PFN_vkCmdPipelineBarrier2KHR vkCmdPipelineBarrier2KHR = PFN_vkCmdPipelineBarrier2KHR(
                         vkGetDeviceProcAddr(device, "vkCmdPipelineBarrier2KHR"));
                 this->vkCmdPipelineBarrier2 = vkCmdPipelineBarrier2KHR;
@@ -119,6 +119,7 @@ VulkanDevice::VulkanDevice(VkDevice _device,
                 PFN_vkGetAccelerationStructureBuildSizesKHR vkGetAccelerationStructureBuildSizesKHR = PFN_vkGetAccelerationStructureBuildSizesKHR(
                         vkGetDeviceProcAddr(device, "vkGetAccelerationStructureBuildSizesKHR"));
                 this->vkGetAccelerationStructureBuildSizesKHR = vkGetAccelerationStructureBuildSizesKHR;
+                break;
             }
         }
     }
@@ -138,6 +139,7 @@ VulkanDevice::VulkanDevice(VkDevice _device,
                 PFN_vkGetRayTracingShaderGroupHandlesKHR vkGetRayTracingShaderGroupHandlesKHR = PFN_vkGetRayTracingShaderGroupHandlesKHR(
                         vkGetDeviceProcAddr(device, "vkGetRayTracingShaderGroupHandlesKHR"));
                 this->vkGetRayTracingShaderGroupHandlesKHR = vkGetRayTracingShaderGroupHandlesKHR;
+                break;
             }
         }
     }
