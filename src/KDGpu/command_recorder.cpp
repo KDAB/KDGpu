@@ -170,4 +170,16 @@ void CommandRecorder::buildAccelerationStructures(const BuildAccelerationStructu
     apiCommandRecorder->buildAccelerationStructures(options);
 }
 
+void CommandRecorder::beginDebugLabel(const DebugLabelOptions &options)
+{
+    auto apiCommandRecorder = m_api->resourceManager()->getCommandRecorder(m_commandRecorder);
+    apiCommandRecorder->beginDebugLabel(options);
+}
+
+void CommandRecorder::endDebugLabel()
+{
+    auto apiCommandRecorder = m_api->resourceManager()->getCommandRecorder(m_commandRecorder);
+    apiCommandRecorder->endDebugLabel();
+}
+
 } // namespace KDGpu

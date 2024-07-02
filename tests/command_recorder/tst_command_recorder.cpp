@@ -970,4 +970,25 @@ TEST_CASE("CommandRecorder")
 
         // THEN -> No Validation Error and Doesn't crash
     }
+
+    SUBCASE("Debug Labels")
+    {
+        // GIVEN
+        CommandRecorder c = device.createCommandRecorder();
+
+        // WHEN
+        c.beginDebugLabel(DebugLabelOptions{
+                .label = "MyDebugLabel",
+                .color = { 1.0f, 1.0f, 1.0f, 1.0 } });
+        c.endDebugLabel();
+
+        auto commandBuffer = c.finish();
+
+        graphicsQueue.submit(SubmitOptions{
+                .commandBuffers = { commandBuffer } });
+
+        device.waitUntilIdle();
+
+        // THEN -> No Validation Error and Doesn't crash
+    }
 }

@@ -74,4 +74,9 @@ struct RenderPassCommandRecorderOptions {
     uint32_t framebufferArrayLayers{ 0 }; // Default to first color attachment arrayLayer
 };
 
+struct DebugLabelOptions {
+    std::string_view label;
+    float color[4];
+};
+
 } // namespace KDGpu

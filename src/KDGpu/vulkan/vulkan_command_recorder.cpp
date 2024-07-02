@@ -698,6 +698,26 @@ void VulkanCommandRecorder::buildAccelerationStructures(const BuildAccelerationS
     }
 }
 
+void VulkanCommandRecorder::beginDebugLabel(const DebugLabelOptions &options)
+{
+    auto vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
+    if (vulkanDevice->vkCmdBeginDebugUtilsLabelEXT != nullptr) {
+        VkDebugUtilsLabelEXT labelsInfo{
+            .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT,
+            .pLabelName = options.label.data(),
+        };
+        std::memcpy(labelsInfo.color, options.color, 4 * sizeof(float));
+        vulkanDevice->vkCmdBeginDebugUtilsLabelEXT(commandBuffer, &labelsInfo);
+    }
+}
+
+void VulkanCommandRecorder::endDebugLabel()
+{
+    auto vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
+    if (vulkanDevice->vkCmdBeginDebugUtilsLabelEXT != nullptr)
+        vulkanDevice->vkCmdEndDebugUtilsLabelEXT(commandBuffer);
+}
+
 Handle<CommandBuffer_t> VulkanCommandRecorder::finish()
 {
     VulkanCommandBuffer *commandBuffer = vulkanResourceManager->getCommandBuffer(commandBufferHandle);

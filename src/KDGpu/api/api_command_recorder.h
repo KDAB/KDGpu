@@ -53,6 +53,8 @@ struct ApiCommandRecorder {
     virtual void executeSecondaryCommandBuffer(const Handle<CommandBuffer_t> &secondaryCommandBuffer) = 0;
     virtual void resolveTexture(const TextureResolveOptions &options) = 0;
     virtual void buildAccelerationStructures(const BuildAccelerationStructureOptions &options) = 0;
+    virtual void beginDebugLabel(const DebugLabelOptions &options) = 0;
+    virtual void endDebugLabel() = 0;
     virtual Handle<CommandBuffer_t> finish() = 0;
 };
 

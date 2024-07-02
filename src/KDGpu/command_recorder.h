@@ -178,6 +178,8 @@ public:
     void executeSecondaryCommandBuffer(const Handle<CommandBuffer_t> &secondaryCommandBuffer);
     void resolveTexture(const TextureResolveOptions &options);
     void buildAccelerationStructures(const BuildAccelerationStructureOptions &options);
+    void beginDebugLabel(const DebugLabelOptions &options);
+    void endDebugLabel();
 
     CommandBuffer finish();
 
