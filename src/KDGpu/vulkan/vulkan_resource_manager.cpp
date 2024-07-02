@@ -479,6 +479,18 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     raytracingFeaturesKhr.rayTraversalPrimitiveCulling = options.requestedFeatures.rayTraversalPrimitiveCulling;
     addToChain(&raytracingFeaturesKhr);
 
+    // Enable Mesh/Task shading
+    VkPhysicalDeviceMeshShaderFeaturesEXT meshShaderFeatures{};
+    meshShaderFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT;
+    meshShaderFeatures.taskShader = options.requestedFeatures.taskShader;
+    meshShaderFeatures.meshShader = options.requestedFeatures.meshShader;
+    meshShaderFeatures.multiviewMeshShader = options.requestedFeatures.multiviewMeshShader;
+    // Would need to enable VkPhysicalDeviceFragmentShadingRateFeaturesKHR
+    // if options.requestedFeatures.primitiveFragmentShadingRateMeshShader is enabled
+    meshShaderFeatures.primitiveFragmentShadingRateMeshShader = false;
+    meshShaderFeatures.meshShaderQueries = options.requestedFeatures.meshShaderQueries;
+    addToChain(&meshShaderFeatures);
+
     std::vector<VkPhysicalDevice> devicesInGroup;
     const size_t adapterCount = options.adapterGroup.adapters.size();
     const bool useDeviceGroup = adapterCount > 1;

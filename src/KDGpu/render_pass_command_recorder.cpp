@@ -149,6 +149,30 @@ void RenderPassCommandRecorder::drawIndexedIndirect(const std::vector<DrawIndexe
     apiRenderPassCommandRecorder->drawIndexedIndirect(drawCommands);
 }
 
+void RenderPassCommandRecorder::drawMeshTasks(const DrawMeshCommand &drawCommand)
+{
+    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    apiRenderPassCommandRecorder->drawMeshTasks(drawCommand);
+}
+
+void RenderPassCommandRecorder::drawMeshTasks(const std::vector<DrawMeshCommand> &drawCommands)
+{
+    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    apiRenderPassCommandRecorder->drawMeshTasks(drawCommands);
+}
+
+void RenderPassCommandRecorder::drawMeshTasksIndirect(const DrawMeshIndirectCommand &drawCommand)
+{
+    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    apiRenderPassCommandRecorder->drawMeshTasksIndirect(drawCommand);
+}
+
+void RenderPassCommandRecorder::drawMeshTasksIndirect(const std::vector<DrawMeshIndirectCommand> &drawCommands)
+{
+    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    apiRenderPassCommandRecorder->drawMeshTasksIndirect(drawCommands);
+}
+
 void RenderPassCommandRecorder::pushConstant(const PushConstantRange &constantRange, const void *data)
 {
     auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);

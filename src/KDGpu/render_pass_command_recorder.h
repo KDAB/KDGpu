@@ -60,6 +60,19 @@ struct DrawIndexedIndirectCommand {
     uint32_t stride{ 0 };
 };
 
+struct DrawMeshCommand {
+    uint32_t workGroupX{ 1 };
+    uint32_t workGroupY{ 1 };
+    uint32_t workGroupZ{ 1 };
+};
+
+struct DrawMeshIndirectCommand {
+    Handle<Buffer_t> buffer;
+    size_t offset{ 0 };
+    uint32_t drawCount{ 0 };
+    uint32_t stride{ 0 };
+};
+
 /**
  * @brief RenderPassCommandRecorder
  * @ingroup public
@@ -106,6 +119,12 @@ public:
 
     void drawIndexedIndirect(const DrawIndexedIndirectCommand &drawCommand);
     void drawIndexedIndirect(const std::vector<DrawIndexedIndirectCommand> &drawCommands);
+
+    void drawMeshTasks(const DrawMeshCommand &drawCommand);
+    void drawMeshTasks(const std::vector<DrawMeshCommand> &drawCommands);
+
+    void drawMeshTasksIndirect(const DrawMeshIndirectCommand &drawCommand);
+    void drawMeshTasksIndirect(const std::vector<DrawMeshIndirectCommand> &drawCommands);
 
     void pushConstant(const PushConstantRange &constantRange, const void *data);
 

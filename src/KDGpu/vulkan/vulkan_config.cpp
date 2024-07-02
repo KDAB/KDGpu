@@ -76,6 +76,7 @@ std::vector<const char *> getDefaultRequestedDeviceExtensions()
     extensions.push_back(VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME);
     extensions.push_back(VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME);
     extensions.push_back(VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME);
+    extensions.push_back(VK_EXT_MESH_SHADER_EXTENSION_NAME);
 #elif defined(KDGPU_PLATFORM_WIN32)
     extensions.push_back(VK_KHR_EXTERNAL_MEMORY_WIN32_EXTENSION_NAME);
     extensions.push_back(VK_KHR_EXTERNAL_SEMAPHORE_WIN32_EXTENSION_NAME);
@@ -83,6 +84,7 @@ std::vector<const char *> getDefaultRequestedDeviceExtensions()
     extensions.push_back(VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME);
     extensions.push_back(VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME);
     extensions.push_back(VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME);
+    extensions.push_back(VK_EXT_MESH_SHADER_EXTENSION_NAME);
 #endif
 #if defined(VK_KHR_synchronization2)
     extensions.push_back(VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME);

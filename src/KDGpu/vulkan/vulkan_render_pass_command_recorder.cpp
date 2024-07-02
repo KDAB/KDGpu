@@ -190,6 +190,42 @@ void VulkanRenderPassCommandRecorder::drawIndexedIndirect(const std::vector<Draw
         drawIndexedIndirect(drawCommand);
 }
 
+void VulkanRenderPassCommandRecorder::drawMeshTasks(const DrawMeshCommand &drawCommand)
+{
+    VulkanDevice *device = vulkanResourceManager->getDevice(deviceHandle);
+    if (device->vkCmdDrawMeshTasksEXT) {
+        device->vkCmdDrawMeshTasksEXT(commandBuffer,
+                                      drawCommand.workGroupX,
+                                      drawCommand.workGroupY,
+                                      drawCommand.workGroupZ);
+    }
+}
+
+void VulkanRenderPassCommandRecorder::drawMeshTasks(const std::vector<DrawMeshCommand> &drawCommands)
+{
+    for (const auto &drawCommand : drawCommands)
+        drawMeshTasks(drawCommand);
+}
+
+void VulkanRenderPassCommandRecorder::drawMeshTasksIndirect(const DrawMeshIndirectCommand &drawCommand)
+{
+    VulkanDevice *device = vulkanResourceManager->getDevice(deviceHandle);
+    if (device->vkCmdDrawMeshTasksIndirectEXT) {
+        VulkanBuffer *vulkanBuffer = vulkanResourceManager->getBuffer(drawCommand.buffer);
+        device->vkCmdDrawMeshTasksIndirectEXT(commandBuffer,
+                                              vulkanBuffer->buffer,
+                                              drawCommand.offset,
+                                              drawCommand.drawCount,
+                                              drawCommand.stride);
+    }
+}
+
+void VulkanRenderPassCommandRecorder::drawMeshTasksIndirect(const std::vector<DrawMeshIndirectCommand> &drawCommands)
+{
+    for (const auto &drawCommand : drawCommands)
+        drawMeshTasksIndirect(drawCommand);
+}
+
 void VulkanRenderPassCommandRecorder::pushConstant(const PushConstantRange &constantRange, const void *data)
 {
     VulkanGraphicsPipeline *vulkanPipeline = vulkanResourceManager->getGraphicsPipeline(pipeline);

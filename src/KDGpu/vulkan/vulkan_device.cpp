@@ -144,6 +144,19 @@ VulkanDevice::VulkanDevice(VkDevice _device,
         }
     }
 
+    if (vulkanAdapter->queryAdapterFeatures().taskShader && vulkanAdapter->queryAdapterFeatures().meshShader) {
+        const auto adapterExtensions = vulkanAdapter->extensions();
+        for (const auto &extension : adapterExtensions) {
+            if (extension.name == VK_EXT_MESH_SHADER_EXTENSION_NAME) {
+                PFN_vkCmdDrawMeshTasksEXT vkCmdDrawMeshTasksEXT = PFN_vkCmdDrawMeshTasksEXT(vkGetDeviceProcAddr(device, "vkCmdDrawMeshTasksEXT"));
+                this->vkCmdDrawMeshTasksEXT = vkCmdDrawMeshTasksEXT;
+                PFN_vkCmdDrawMeshTasksIndirectEXT vkCmdDrawMeshTasksIndirectEXT = PFN_vkCmdDrawMeshTasksIndirectEXT(vkGetDeviceProcAddr(device, "vkCmdDrawMeshTasksIndirectEXT"));
+                this->vkCmdDrawMeshTasksIndirectEXT = vkCmdDrawMeshTasksIndirectEXT;
+                break;
+            }
+        }
+    }
+
 #if defined(KDGPU_PLATFORM_LINUX)
     vkGetSemaphoreFdKHR = (PFN_vkGetSemaphoreFdKHR)vkGetDeviceProcAddr(device, "vkGetSemaphoreFdKHR");
     vkGetFenceFdKHR = (PFN_vkGetFenceFdKHR)vkGetDeviceProcAddr(device, "vkGetFenceFdKHR");

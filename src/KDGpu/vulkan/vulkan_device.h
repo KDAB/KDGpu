@@ -103,6 +103,8 @@ struct KDGPU_EXPORT VulkanDevice : public ApiDevice {
     PFN_vkCreateRayTracingPipelinesKHR vkCreateRayTracingPipelinesKHR{ nullptr };
     PFN_vkCmdTraceRaysKHR vkCmdTraceRaysKHR{ nullptr };
     PFN_vkGetRayTracingShaderGroupHandlesKHR vkGetRayTracingShaderGroupHandlesKHR{ nullptr };
+    PFN_vkCmdDrawMeshTasksEXT vkCmdDrawMeshTasksEXT{ nullptr };
+    PFN_vkCmdDrawMeshTasksIndirectEXT vkCmdDrawMeshTasksIndirectEXT{ nullptr };
 
     bool isOwned{ true };
 };
