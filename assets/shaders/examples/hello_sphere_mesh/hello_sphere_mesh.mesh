@@ -1,0 +1,52 @@
+#version 450
+#extension GL_EXT_mesh_shader : require
+#extension GL_ARB_separate_shader_objects : enable
+
+const uint Rings = 8;
+const uint Slices = 8;
+const float PI = 3.1415;
+const float dPhi = PI / float(Rings - 1);
+const float dTheta = (2 * PI) / float(Slices - 1);
+const uint maxVertexCount = Rings * Slices;
+const uint maxTriangleCount = Rings * Slices * 2;
+
+layout(local_size_x = Rings, local_size_y = Slices, local_size_z = 1) in;
+// Note: limits would typically be around 256 for max_vertices and max_primitives
+layout(triangles, max_vertices = maxVertexCount, max_primitives = maxTriangleCount) out;
+
+layout(location = 0) out vec3 worldNormal[maxVertexCount];
+
+void main()
+{
+    if (gl_LocalInvocationIndex == 0) {
+        // Set Number of Vertices and Triangles
+        SetMeshOutputsEXT(maxVertexCount, maxTriangleCount);
+    }
+
+    // Compute Vertex Position
+    uint ring = gl_LocalInvocationID.x; // vertical index
+    uint slice = gl_LocalInvocationID.y; // horizontal index
+    float phi = (PI * 0.5) - ring * dPhi;
+    float theta = slice * dTheta;
+    float cosTheta = cos(theta);
+    float sinTheta = sin(theta);
+    float cosPhi = cos(phi);
+    float sinPhi = sin(phi);
+    const uint vertexIndex = ring * Slices + slice;
+    vec3 normal = vec3(cosTheta * cosPhi, sinPhi, sinTheta * cosPhi);
+    gl_MeshVerticesEXT[vertexIndex].gl_Position = vec4(normal * 0.5, 1.0);
+    worldNormal[vertexIndex] = normal;
+
+    // Compute Triangle Indices
+    uint nextRing = ((ring + 1) % Rings);
+    uint nextSlice = ((slice + 1) % Slices);
+    uint ringStartIndex = ring * Slices;
+    uint nextRingStartIndex = nextRing * Slices;
+
+    gl_PrimitiveTriangleIndicesEXT[gl_LocalInvocationIndex * 2] = uvec3(ringStartIndex + slice,
+                                                                        ringStartIndex + nextSlice,
+                                                                        nextRingStartIndex + slice);
+    gl_PrimitiveTriangleIndicesEXT[gl_LocalInvocationIndex * 2 + 1] = uvec3(nextRingStartIndex + slice,
+                                                                            ringStartIndex + nextSlice,
+                                                                            nextRingStartIndex + nextSlice);
+}

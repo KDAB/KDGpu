@@ -241,6 +241,7 @@ with section("misc"):
     "CompileShader" : {"command_case" : "unchanged"},
     "CompileShaderSet" : {"command_case" : "unchanged"},
     "CompileRTShader" : {"command_case" : "unchanged"},
+    "CompileMeshTaskShader" : {"command_case" : "unchanged"},
     "FetchContent_Declare" : {"command_case" : "unchanged"},
     "FetchContent_GetProperties" : {"command_case" : "unchanged"},
     "FetchContent_MakeAvailable" : {"command_case" : "unchanged"},
