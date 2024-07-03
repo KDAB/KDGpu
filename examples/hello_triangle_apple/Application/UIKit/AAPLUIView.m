@@ -15,7 +15,7 @@ Customized view for iOS & tvOS
     // Secondary thread containing the render loop
     NSThread *_renderThread;
 
-    // Flag to indcate rendering should cease on the main thread
+    // Flag to indicate rendering should cease on the main thread
     BOOL _continueRunLoop;
 #endif
 }

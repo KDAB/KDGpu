@@ -23,7 +23,7 @@ using HANDLE = void *;
 
 #define KDXR_VERSION_MAJOR(version) (uint16_t)(((uint64_t)(version) >> 48) & 0xffffULL)
 #define KDXR_VERSION_MINOR(version) (uint16_t)(((uint64_t)(version) >> 32) & 0xffffULL)
-#define KDXR_VERSION_PATCH(version) (uint32_t)((uint64_t)(version)&0xffffffffULL)
+#define KDXR_VERSION_PATCH(version) (uint32_t)((uint64_t)(version) & 0xffffffffULL)
 
 namespace KDXr {
 

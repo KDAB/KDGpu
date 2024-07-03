@@ -89,18 +89,18 @@ TEST_SUITE("RenderPassCommandRecorder")
                 .usage = TextureUsageFlagBits::ColorAttachmentBit,
                 .memoryUsage = MemoryUsage::GpuOnly,
         });
-        const Texture depthTexture = device.createTexture(TextureOptions {
-            .type = TextureType::TextureType2D,
+        const Texture depthTexture = device.createTexture(TextureOptions{
+                .type = TextureType::TextureType2D,
 #if defined(KD_PLATFORM_MACOS)
-            .format = Format::D32_SFLOAT_S8_UINT,
+                .format = Format::D32_SFLOAT_S8_UINT,
 #else
-                    .format = Format::D24_UNORM_S8_UINT,
+                .format = Format::D24_UNORM_S8_UINT,
 #endif
-            .extent = { 256, 256, 1 },
-            .mipLevels = 1,
-            .samples = SampleCountFlagBits::Samples1Bit,
-            .usage = TextureUsageFlagBits::DepthStencilAttachmentBit,
-            .memoryUsage = MemoryUsage::GpuOnly,
+                .extent = { 256, 256, 1 },
+                .mipLevels = 1,
+                .samples = SampleCountFlagBits::Samples1Bit,
+                .usage = TextureUsageFlagBits::DepthStencilAttachmentBit,
+                .memoryUsage = MemoryUsage::GpuOnly,
         });
 
         const TextureView colorTextureView = colorTexture.createView();
@@ -309,19 +309,19 @@ TEST_SUITE("RenderPassCommandRecorder")
                 .usage = TextureUsageFlagBits::ColorAttachmentBit,
                 .memoryUsage = MemoryUsage::GpuOnly,
         });
-        const Texture depthTexture = device.createTexture(TextureOptions {
-            .type = TextureType::TextureType2D,
+        const Texture depthTexture = device.createTexture(TextureOptions{
+                .type = TextureType::TextureType2D,
 #if defined(KD_PLATFORM_MACOS)
-            .format = Format::D32_SFLOAT_S8_UINT,
+                .format = Format::D32_SFLOAT_S8_UINT,
 #else
-                    .format = Format::D24_UNORM_S8_UINT,
+                .format = Format::D24_UNORM_S8_UINT,
 #endif
-            .extent = { 256, 256, 1 },
-            .mipLevels = 1,
-            .arrayLayers = 2,
-            .samples = SampleCountFlagBits::Samples1Bit,
-            .usage = TextureUsageFlagBits::DepthStencilAttachmentBit,
-            .memoryUsage = MemoryUsage::GpuOnly,
+                .extent = { 256, 256, 1 },
+                .mipLevels = 1,
+                .arrayLayers = 2,
+                .samples = SampleCountFlagBits::Samples1Bit,
+                .usage = TextureUsageFlagBits::DepthStencilAttachmentBit,
+                .memoryUsage = MemoryUsage::GpuOnly,
         });
 
         const TextureView colorTextureView = colorTexture.createView(TextureViewOptions{
@@ -434,18 +434,18 @@ TEST_SUITE("RenderPassCommandRecorder")
                 .usage = TextureUsageFlagBits::ColorAttachmentBit,
                 .memoryUsage = MemoryUsage::GpuOnly,
         });
-        const Texture depthMSAATexture = device.createTexture(TextureOptions {
-            .type = TextureType::TextureType2D,
+        const Texture depthMSAATexture = device.createTexture(TextureOptions{
+                .type = TextureType::TextureType2D,
 #if defined(KD_PLATFORM_MACOS)
-            .format = Format::D32_SFLOAT_S8_UINT,
+                .format = Format::D32_SFLOAT_S8_UINT,
 #else
-                    .format = Format::D24_UNORM_S8_UINT,
+                .format = Format::D24_UNORM_S8_UINT,
 #endif
-            .extent = { 256, 256, 1 },
-            .mipLevels = 1,
-            .samples = samples,
-            .usage = TextureUsageFlagBits::DepthStencilAttachmentBit,
-            .memoryUsage = MemoryUsage::GpuOnly,
+                .extent = { 256, 256, 1 },
+                .mipLevels = 1,
+                .samples = samples,
+                .usage = TextureUsageFlagBits::DepthStencilAttachmentBit,
+                .memoryUsage = MemoryUsage::GpuOnly,
         });
 
         const Texture colorResolveTexture = device.createTexture(TextureOptions{
@@ -457,18 +457,18 @@ TEST_SUITE("RenderPassCommandRecorder")
                 .usage = TextureUsageFlagBits::ColorAttachmentBit,
                 .memoryUsage = MemoryUsage::GpuOnly,
         });
-        const Texture depthResolveTexture = device.createTexture(TextureOptions {
-            .type = TextureType::TextureType2D,
+        const Texture depthResolveTexture = device.createTexture(TextureOptions{
+                .type = TextureType::TextureType2D,
 #if defined(KD_PLATFORM_MACOS)
-            .format = Format::D32_SFLOAT_S8_UINT,
+                .format = Format::D32_SFLOAT_S8_UINT,
 #else
-                    .format = Format::D24_UNORM_S8_UINT,
+                .format = Format::D24_UNORM_S8_UINT,
 #endif
-            .extent = { 256, 256, 1 },
-            .mipLevels = 1,
-            .samples = SampleCountFlagBits::Samples1Bit,
-            .usage = TextureUsageFlagBits::DepthStencilAttachmentBit,
-            .memoryUsage = MemoryUsage::GpuOnly,
+                .extent = { 256, 256, 1 },
+                .mipLevels = 1,
+                .samples = SampleCountFlagBits::Samples1Bit,
+                .usage = TextureUsageFlagBits::DepthStencilAttachmentBit,
+                .memoryUsage = MemoryUsage::GpuOnly,
         });
 
         const TextureView colorMSAATextureView = colorMSAATexture.createView(TextureViewOptions{
