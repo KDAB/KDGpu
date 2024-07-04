@@ -29,6 +29,7 @@
 #include <KDGpu/acceleration_structure.h>
 #include <KDGpu/acceleration_structure_options.h>
 #include <KDGpu/raytracing_pipeline.h>
+#include <KDGpu/render_pass.h>
 
 #include <KDGpu/kdgpu_export.h>
 
@@ -53,6 +54,7 @@ struct BindGroupLayoutOptions;
 struct BindGroupEntry;
 struct ComputePipelineOptions;
 struct RayTracingPipelineOptions;
+struct RenderPassOptions;
 
 class KDGPU_EXPORT Device
 {
@@ -87,6 +89,8 @@ public:
     Buffer createBuffer(const BufferOptions &options, const void *initialData = nullptr);
 
     ShaderModule createShaderModule(const std::vector<uint32_t> &code);
+
+    RenderPass createRenderPass(const RenderPassOptions &options);
 
     PipelineLayout createPipelineLayout(const PipelineLayoutOptions &options = PipelineLayoutOptions());
 

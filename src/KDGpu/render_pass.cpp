@@ -52,4 +52,37 @@ namespace KDGpu {
     @brief Convenience function to check whether the RenderPass is actually referencing a valid API specific resource
  */
 
+RenderPass::RenderPass(GraphicsApi *api, const Handle<Device_t> &device, const RenderPassOptions &options)
+    : m_api(api)
+    , m_device(device)
+    , m_renderPass(m_api->resourceManager()->createRenderPass(m_device, options))
+{
+}
+
+RenderPass::RenderPass(RenderPass &&other)
+{
+    m_api = std::exchange(other.m_api, nullptr);
+    m_device = std::exchange(other.m_device, {});
+    m_renderPass = std::exchange(other.m_renderPass, {});
+}
+
+RenderPass &RenderPass::operator=(RenderPass &&other)
+{
+    if (this != &other) {
+        if (isValid())
+            m_api->resourceManager()->deleteRenderPass(handle());
+
+        m_api = std::exchange(other.m_api, nullptr);
+        m_device = std::exchange(other.m_device, {});
+        m_renderPass = std::exchange(other.m_renderPass, {});
+    }
+    return *this;
+}
+
+RenderPass::~RenderPass()
+{
+    if (isValid())
+        m_api->resourceManager()->deleteRenderPass(handle());
+}
+
 } // namespace KDGpu

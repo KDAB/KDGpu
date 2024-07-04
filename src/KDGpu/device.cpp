@@ -139,6 +139,11 @@ ShaderModule Device::createShaderModule(const std::vector<uint32_t> &code)
     return ShaderModule(m_api, m_device, code);
 }
 
+RenderPass Device::createRenderPass(const RenderPassOptions &options)
+{
+    return RenderPass(m_api, m_device, options);
+}
+
 PipelineLayout Device::createPipelineLayout(const PipelineLayoutOptions &options)
 {
     return PipelineLayout(m_api, m_device, options);
