@@ -12,6 +12,7 @@
 
 #include <KDGpu/handle.h>
 #include <KDGpu/gpu_core.h>
+#include <KDGpu/handle.h>
 
 #include <vector>
 
@@ -21,6 +22,7 @@ namespace KDGpu {
 
 struct PipelineLayout_t;
 struct ShaderModule_t;
+struct RenderPass_t;
 
 struct ShaderStage {
     Handle<ShaderModule_t> shaderModule;
@@ -150,6 +152,8 @@ struct GraphicsPipelineOptions {
     MultisampleOptions multisample;
     uint32_t viewCount{ 1 };
     DynamicStateOptions dynamicState;
+
+    Handle<RenderPass_t> renderPass;
     uint32_t subpassIndex{ 0 };
 };
 

@@ -1620,7 +1620,7 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     // pipeline at command record time. We only do this if the pipeline outputs to
     // render targets.
     VkRenderPass vkRenderPass = VK_NULL_HANDLE;
-    Handle<RenderPass_t> vulkanRenderPassHandle;
+    Handle<RenderPass_t> vulkanRenderPassHandle = options.renderPass;
 
     // Specify attachment refs for all color and resolve render targets and any
     // depth-stencil target. Concrete render passes that want to use this pipeline
@@ -1632,11 +1632,13 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     // But in short, the concrete render pass must match attachment counts of each
     // type and match the formats and sample counts in each case.
 
-    vulkanRenderPassHandle = createRenderPass(deviceHandle,
-                                              options.renderTargets,
-                                              options.depthStencil,
-                                              options.multisample.samples,
-                                              options.viewCount);
+    if (!vulkanRenderPassHandle.isValid()) {
+        vulkanRenderPassHandle = createRenderPass(deviceHandle,
+                                                  options.renderTargets,
+                                                  options.depthStencil,
+                                                  options.multisample.samples,
+                                                  options.viewCount);
+    }
 
     // Note: at the moment this render pass isn't shared. It might make sense to do so at some point,
     // in which case, the renderPass handle will have to be added to vulkanDevice->renderPasses
@@ -1675,7 +1677,7 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     const auto vulkanGraphicsPipelineHandle = m_graphicsPipelines.emplace(VulkanGraphicsPipeline(
             vkPipeline,
             this,
-            vulkanRenderPassHandle,
+            (options.renderPass.isValid() ? (Handle<KDGpu::RenderPass_t>()) : (vulkanRenderPassHandle)), // pipeline do not own the renderpass if it's passed in
             dynamicStates,
             deviceHandle,
             options.layout));
@@ -1690,12 +1692,12 @@ void VulkanResourceManager::deleteGraphicsPipeline(const Handle<GraphicsPipeline
 
     vkDestroyPipeline(vulkanDevice->device, vulkanPipeline->pipeline, nullptr);
 
-    // Note this renderPass isn't shared since we haven't added it to vulkanDevice->renderPasses
-    // so we're in charge of releasing it
-    VulkanRenderPass *vulkanRenderPass = m_renderPasses.get(vulkanPipeline->renderPassHandle);
-    if (vulkanRenderPass) {
-        vkDestroyRenderPass(vulkanDevice->device, vulkanRenderPass->renderPass, nullptr);
-        m_renderPasses.remove(vulkanPipeline->renderPassHandle);
+    if (vulkanPipeline->renderPassHandle.isValid()) { // If the renderpass is not explicitly created by the user, we're in charge of releasing it
+        VulkanRenderPass *vulkanRenderPass = m_renderPasses.get(vulkanPipeline->renderPassHandle);
+        if (vulkanRenderPass) {
+            vkDestroyRenderPass(vulkanDevice->device, vulkanRenderPass->renderPass, nullptr);
+            m_renderPasses.remove(vulkanPipeline->renderPassHandle);
+        }
     }
 
     m_graphicsPipelines.remove(handle);
