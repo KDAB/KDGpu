@@ -572,6 +572,11 @@ void VulkanCommandRecorder::buildAccelerationStructures(const BuildAccelerationS
                         trianglesDataKhr.indexData.deviceAddress = indexBuffer->bufferDeviceAddress() + arg.indexDataOffset;
                     }
 
+                    if (arg.transformData.isValid()) {
+                        VulkanBuffer *transformBuffer = vulkanResourceManager->getBuffer(arg.transformData);
+                        trianglesDataKhr.transformData.deviceAddress = transformBuffer->bufferDeviceAddress() + arg.transformDataOffset;
+                    }
+
                     geometryKhr.geometryType = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
                     geometryKhr.geometry.triangles = trianglesDataKhr;
                 } else if constexpr (std::is_same_v<T, AccelerationStructureGeometryInstancesData>) {

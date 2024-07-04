@@ -30,6 +30,7 @@ struct AccelerationStructureGeometryTrianglesData {
     Handle<Buffer_t> indexData;
     size_t indexDataOffset{ 0 }; // in bytes
     Handle<Buffer_t> transformData;
+    size_t transformDataOffset{ 0 }; // in bytes
 };
 
 struct AccelerationStructureGeometryAabbsData {
