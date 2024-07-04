@@ -516,6 +516,7 @@ void ComputeOitTransparency::resize()
     // Set FrameBuffer size to use for the Alpha pass which has no color attachment (hence we can't retrieve the framebuffer dimensions from the attachment)
     m_alpha.renderPassOptions.framebufferWidth = m_window->width();
     m_alpha.renderPassOptions.framebufferHeight = m_window->height();
+    m_alpha.renderPassOptions.framebufferArrayLayers = 1;
 
     // Recreated fragmentHeadsPointer texture
     m_alpha.fragmentHeadsPointer = m_device.createTexture(KDGpu::TextureOptions{
