@@ -27,6 +27,7 @@ add_subdirectory(textured_quad)
 add_subdirectory(hello_sphere_rt)
 add_subdirectory(hello_triangle_rt)
 add_subdirectory(hello_sphere_mesh)
+add_subdirectory(hybrid_raster_rt)
 
 if(KDGPU_HLSL_SUPPORT)
     add_subdirectory(hello_triangle_hlsl)

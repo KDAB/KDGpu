@@ -1,0 +1,58 @@
+#version 460 core
+#extension GL_EXT_ray_tracing : enable
+
+layout(location = 0) rayPayloadEXT uint hitCounter;
+
+layout(set = 0, binding = 0) uniform sampler2D gBufferWorldPositions;
+layout(set = 0, binding = 1) uniform sampler2D gBufferWorldNormals;
+layout(set = 0, binding = 2) uniform sampler2D gBufferColors;
+layout(set = 0, binding = 3) uniform sampler2D gBufferDepth;
+
+layout(set = 1, binding = 0, r32f) uniform writeonly image2D shadows;
+
+layout(set = 2, binding = 0) uniform accelerationStructureEXT topLevelAS;
+
+layout(push_constant) uniform PushConstants
+{
+    vec3 lightWorldPos;
+}
+pushConstants;
+
+void main()
+{
+    const vec2 pixelCenter = vec2(gl_LaunchIDEXT.xy) + vec2(0.5);
+    const vec2 uv = pixelCenter / vec2(gl_LaunchSizeEXT.xy);
+
+    // We want to issue a ray that start at each world pos we have recorded for the opaque geometries
+    // and goes back to the light source. Any intersection along the ray means we have shadows
+
+    // Ray
+    vec3 origin = texture(gBufferWorldPositions, uv).xyz;
+    vec3 direction = normalize(pushConstants.lightWorldPos - origin);
+
+    uint rayFlags = gl_RayFlagsNoneEXT;
+    // Note: most of our meshes are spheres.
+    // Given a world position on a sphere could be anywhere even underneath,
+    // we want to avoid finding intersections against that same sphere. To do so, we set tMin at a value that is the largest possible sphere diameter
+    float tMin = 4.0;
+    float tMax = 1000.0;
+
+    hitCounter = 0;
+
+    if (origin != vec3(0.0, 0.0, 0.0)) { // Only bother tracing if we have a valid world pos
+        traceRayEXT(topLevelAS, // acceleration structure
+                    rayFlags, // rayFlags
+                    0xFF, // cullMask
+                    0, // sbtRecordOffset
+                    0, // sbtRecordStride
+                    0, // missIndex
+                    origin, // ray origin
+                    tMin, // ray min range
+                    direction, // ray direction
+                    tMax, // ray max range
+                    0 // hitCounter (location = 0)
+        );
+    }
+
+    imageStore(shadows, ivec2(gl_LaunchIDEXT.xy), vec4(float(hitCounter)));
+}

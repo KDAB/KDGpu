@@ -73,6 +73,7 @@ if(TARGET KDGpu::KDGpuExample)
     add_subdirectory(compute_oit_transparency)
     add_subdirectory(depth_bias)
     add_subdirectory(buffer_reference)
+    add_subdirectory(hybrid_raster_rt)
 
     if(KDGPU_HLSL_SUPPORT)
         add_subdirectory(hello_triangle_hlsl)
