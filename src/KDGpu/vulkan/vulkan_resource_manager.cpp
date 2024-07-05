@@ -2919,10 +2919,10 @@ Handle<AccelerationStructure_t> VulkanResourceManager::createAccelerationStructu
     VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
 
     std::vector<VkAccelerationStructureGeometryKHR> geometries;
-    std::vector<uint32_t> maxGeometriesCount;
+    std::vector<uint32_t> maxPrimitiveCountPerGeometry;
 
     geometries.reserve(options.geometryTypesAndCount.size());
-    maxGeometriesCount.reserve(options.geometryTypesAndCount.size());
+    maxPrimitiveCountPerGeometry.reserve(options.geometryTypesAndCount.size());
 
     for (const AccelerationStructureOptions::GeometryTypeAndCount &geometryTypeAndCount : options.geometryTypesAndCount) {
         VkAccelerationStructureGeometryKHR geometryKhr = { VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR };
@@ -2958,7 +2958,7 @@ Handle<AccelerationStructure_t> VulkanResourceManager::createAccelerationStructu
                    geometryTypeAndCount.geometry);
 
         geometries.push_back(geometryKhr);
-        maxGeometriesCount.push_back(geometryTypeAndCount.maxGeometryCount);
+        maxPrimitiveCountPerGeometry.push_back(geometryTypeAndCount.maxPrimitiveCount);
     }
 
     VkAccelerationStructureBuildGeometryInfoKHR geometryInfoKhr{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR };
@@ -2969,7 +2969,7 @@ Handle<AccelerationStructure_t> VulkanResourceManager::createAccelerationStructu
     geometryInfoKhr.flags = accelerationStructureFlagsToVkBuildAccelerationStructureFlags(options.flags);
 
     VkAccelerationStructureBuildSizesInfoKHR buildSizesInfoKhr{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR };
-    vulkanDevice->vkGetAccelerationStructureBuildSizesKHR(vulkanDevice->device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_HOST_KHR, &geometryInfoKhr, maxGeometriesCount.data(), &buildSizesInfoKhr);
+    vulkanDevice->vkGetAccelerationStructureBuildSizesKHR(vulkanDevice->device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_HOST_KHR, &geometryInfoKhr, maxPrimitiveCountPerGeometry.data(), &buildSizesInfoKhr);
 
     Handle<Buffer_t> backingBufferH = VulkanAccelerationStructure::createAccelerationBuffer(deviceHandle, this, buildSizesInfoKhr.accelerationStructureSize);
 

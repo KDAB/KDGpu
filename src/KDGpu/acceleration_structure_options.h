@@ -64,7 +64,7 @@ struct AccelerationStructureOptions {
     AccelerationStructureFlags flags{ AccelerationStructureFlagBits::None };
     struct GeometryTypeAndCount {
         AccelerationStructureGeometry geometry;
-        uint32_t maxGeometryCount{ 1 };
+        uint32_t maxPrimitiveCount{ 1 };
     };
     std::vector<GeometryTypeAndCount> geometryTypesAndCount;
 };

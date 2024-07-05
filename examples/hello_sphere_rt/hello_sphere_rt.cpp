@@ -275,7 +275,7 @@ void HelloSphereRt::createAccelerationStructures()
             .geometryTypesAndCount = {
                     {
                             .geometry = aabbGeometry,
-                            .maxGeometryCount = SphereCount,
+                            .maxPrimitiveCount = SphereCount,
                     },
             },
     });
@@ -297,7 +297,7 @@ void HelloSphereRt::createAccelerationStructures()
             .geometryTypesAndCount = {
                     {
                             .geometry = aabbGeometryInstance,
-                            .maxGeometryCount = 1,
+                            .maxPrimitiveCount = 1,
                     },
             },
     });

@@ -98,7 +98,7 @@ TEST_SUITE("AccelerationStructure")
                                         .vertexStride = sizeof(Vertex),
                                         .maxVertex = 5,
                                 },
-                                .maxGeometryCount = 1,
+                                .maxPrimitiveCount = 1,
                         },
                 },
             };

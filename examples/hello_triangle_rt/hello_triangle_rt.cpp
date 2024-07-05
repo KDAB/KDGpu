@@ -183,7 +183,7 @@ void HelloTriangleRt::createAccelerationStructures()
             .geometryTypesAndCount = {
                     {
                             .geometry = triangleDataGeometry,
-                            .maxGeometryCount = 1, // We have a single triangles
+                            .maxPrimitiveCount = 1, // We have a single triangles
                     },
             },
     });
@@ -213,7 +213,7 @@ void HelloTriangleRt::createAccelerationStructures()
             .geometryTypesAndCount = {
                     {
                             .geometry = triGeometryInstance,
-                            .maxGeometryCount = 1,
+                            .maxPrimitiveCount = 1,
                     },
             },
     });
