@@ -4,8 +4,7 @@
 layout(location = 0) in vec3 vertexPosition;
 layout(location = 1) in vec2 vertexTexCoord;
 
-layout(location = 0) out vec3 position;
-layout(location = 1) out vec2 texCoord;
+layout(location = 0) out vec2 texCoord;
 
 void main()
 {
