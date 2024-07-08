@@ -12,6 +12,8 @@
 #include <KDGpu/graphics_pipeline_options.h>
 #include <KDGpu/device.h>
 #include <KDGpu/instance.h>
+#include <KDGpu/render_pass.h>
+#include <KDGpu/render_pass_options.h>
 #include <KDGpu/vulkan/vulkan_graphics_api.h>
 
 #include <KDUtils/file.h>
@@ -393,6 +395,94 @@ TEST_SUITE("GraphicsPipeline")
 
             // THEN
             CHECK(g.isValid());
+        }
+    }
+
+    TEST_CASE("Graphical Pipeline with RenderPass")
+    {
+        // GIVEN
+        PipelineLayoutOptions pipelineLayoutOptions{};
+        PipelineLayout pipelineLayout = device.createPipelineLayout(pipelineLayoutOptions);
+        const Format depthFormat = selectDepthFormat(adapter);
+        REQUIRE(depthFormat != Format::UNDEFINED);
+
+        RenderPassOptions renderPassOptions = {
+            .attachments = { AttachmentDescription{
+                                     .format = Format::R8G8B8A8_UNORM,
+                                     .stencilLoadOp = AttachmentLoadOperation::DontCare,
+                                     .stencilstoreOp = AttachmentStoreOperation::DontCare },
+                             AttachmentDescription{
+                                     .format = depthFormat,
+                                     .loadOp = AttachmentLoadOperation::DontCare,
+                                     .storeOp = AttachmentStoreOperation::DontCare,
+                                     .finalLayout = TextureLayout::DepthStencilAttachmentOptimal } },
+            .subpassDescriptions = { SubpassDescription{
+                    .colorAttachmentIndex = { 0 },
+                    .depthAttachmentIndex = { 1 } } },
+            .subpassDependencies = { SubpassDependenciesDescriptions{
+                    .srcSubpass = ExternalSubpass,
+                    .dstSubpass = 0,
+                    .srcStageMask = PipelineStageFlagBit::TopOfPipeBit,
+                    .dstStageMask = PipelineStageFlagBit::ColorAttachmentOutputBit | PipelineStageFlagBit::EarlyFragmentTestBit,
+                    .srcAccessMask = AccessFlagBit::None,
+                    .dstAccessMask = AccessFlagBit::ColorAttachmentWriteBit | AccessFlagBit::DepthStencilAttachmentWriteBit,
+                    .dependencyFlags = DependencyFlagBits::ByRegion } }
+        };
+        RenderPass renderPass = device.createRenderPass(renderPassOptions);
+        REQUIRE(renderPass.isValid());
+
+        GraphicsPipelineOptions pipelineOptions = {
+            .shaderStages = {
+                    { .shaderModule = vertexShader.handle(), .stage = ShaderStageFlagBits::VertexBit },
+                    { .shaderModule = fragmentShader.handle(), .stage = ShaderStageFlagBits::FragmentBit },
+            },
+            .layout = pipelineLayout.handle(),
+            .vertex = {
+                    .buffers = {
+                            { .binding = 0, .stride = 2 * 4 * sizeof(float) },
+                    },
+                    .attributes = {
+                            { .location = 0, .binding = 0, .format = Format::R32G32B32A32_SFLOAT }, // Position
+                            { .location = 1, .binding = 0, .format = Format::R32G32B32A32_SFLOAT, .offset = 4 * sizeof(float) }, // Color
+                    },
+            },
+            .renderTargets = {
+                    { .format = Format::R8G8B8A8_UNORM },
+            },
+            .depthStencil = { .format = depthFormat, .depthWritesEnabled = true, .depthCompareOperation = CompareOperation::Less },
+            .primitive = {
+                    .lineWidth = adapter->features().wideLines ? 20.0f : 1.0f,
+            },
+            .renderPass = renderPass.handle(),
+            .subpassIndex = 0
+        };
+
+        SUBCASE("Construction")
+        {
+            // WHEN
+            GraphicsPipeline g = device.createGraphicsPipeline(pipelineOptions);
+
+            // THEN
+            CHECK(g.isValid());
+        }
+
+        SUBCASE("Destruction")
+        {
+            Handle<GraphicsPipeline_t> pipelineHandle;
+            {
+                // WHEN
+                GraphicsPipeline g = device.createGraphicsPipeline(pipelineOptions);
+                pipelineHandle = g.handle();
+
+                // THEN
+                CHECK(g.isValid());
+                CHECK(pipelineHandle.isValid());
+                CHECK(api->resourceManager()->getGraphicsPipeline(pipelineHandle) != nullptr);
+            }
+
+            // THEN
+            CHECK(api->resourceManager()->getGraphicsPipeline(pipelineHandle) == nullptr);
+            CHECK(api->resourceManager()->getRenderPass(renderPass.handle()) != nullptr);
         }
     }
 }

@@ -52,6 +52,8 @@ namespace KDGpu {
     @brief Convenience function to check whether the RenderPass is actually referencing a valid API specific resource
  */
 
+RenderPass::RenderPass() = default;
+
 RenderPass::RenderPass(GraphicsApi *api, const Handle<Device_t> &device, const RenderPassOptions &options)
     : m_api(api)
     , m_device(device)

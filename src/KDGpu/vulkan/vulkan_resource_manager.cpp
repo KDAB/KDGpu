@@ -1333,7 +1333,7 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
         vkSubpassDependenciesArray.push_back(vkSubpassDependency);
     }
 
-    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO_2;
     renderPassInfo.attachmentCount = vkAttachmentDescriptionsArray.size();
     renderPassInfo.pAttachments = (renderPassInfo.attachmentCount != 0) ? vkAttachmentDescriptionsArray.data() : nullptr;
     renderPassInfo.subpassCount = vkSubpassDescriptionsArray.size();

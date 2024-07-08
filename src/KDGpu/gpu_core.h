@@ -46,6 +46,7 @@ constexpr uint32_t remainingArrayLayers = (~0U);
 constexpr uint32_t remainingMipLevels = (~0U);
 constexpr uint32_t IgnoreQueueType = (~0U);
 constexpr uint64_t WholeSize = (~0ULL);
+constexpr uint32_t ExternalSubpass = ~(0U);
 
 using DeviceSize = uint64_t;
 using SampleMask = uint32_t;
