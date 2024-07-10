@@ -2124,6 +2124,7 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
                                                                                            const RenderPassCommandRecorderOptions &options)
 {
     VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
+    Handle<RenderPass_t> vulkanRenderPassHandle = options.renderPass;
 
     // TODO: Should we make RenderPass and Framebuffer objects explicitly available to the API?
     // Doing so would make our API more Vulkan-like and perhaps give a tiny performance boost. On the downside
@@ -2132,21 +2133,22 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
     // E.g in a WebGPU backend, the render pass backend would just store the options, ready to pass to beginRenderPass().
     // For now we take a similar approach to WebGPU or the Vulkan dynamic rendering extension.
 
-    // Find or create a render pass object that matches the request
+    if (!vulkanRenderPassHandle.isValid()) {
 
-    const VulkanRenderPassKey renderPassKey(options, this);
-    auto itRenderPass = vulkanDevice->renderPasses.find(renderPassKey);
-    Handle<RenderPass_t> vulkanRenderPassHandle;
-    if (itRenderPass == vulkanDevice->renderPasses.end()) {
-        // TODO: Create the render pass and cache the handle for it
-        vulkanRenderPassHandle = createRenderPass(deviceHandle,
-                                                  options.colorAttachments,
-                                                  options.depthStencilAttachment,
-                                                  options.samples,
-                                                  options.viewCount);
-        vulkanDevice->renderPasses.insert({ renderPassKey, vulkanRenderPassHandle });
-    } else {
-        vulkanRenderPassHandle = itRenderPass->second;
+        // Find or create a render pass object that matches the request
+        const VulkanRenderPassKey renderPassKey(options, this);
+        auto itRenderPass = vulkanDevice->renderPasses.find(renderPassKey);
+        if (itRenderPass == vulkanDevice->renderPasses.end()) {
+            // TODO: Create the render pass and cache the handle for it
+            vulkanRenderPassHandle = createRenderPass(deviceHandle,
+                                                      options.colorAttachments,
+                                                      options.depthStencilAttachment,
+                                                      options.samples,
+                                                      options.viewCount);
+            vulkanDevice->renderPasses.insert({ renderPassKey, vulkanRenderPassHandle });
+        } else {
+            vulkanRenderPassHandle = itRenderPass->second;
+        }
     }
 
     VulkanRenderPass *vulkanRenderPass = m_renderPasses.get(vulkanRenderPassHandle);

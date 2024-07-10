@@ -18,6 +18,7 @@
 namespace KDGpu {
 
 struct TextureView_t;
+struct RenderPass_t;
 
 // NB: The image layouts in these structs are listed as:
 // * initialLayout
@@ -72,6 +73,8 @@ struct RenderPassCommandRecorderOptions {
     uint32_t framebufferWidth{ 0 }; // Default to first color attachment width
     uint32_t framebufferHeight{ 0 }; // Default to first color attachment height
     uint32_t framebufferArrayLayers{ 0 }; // Default to first color attachment arrayLayer
+
+    Handle<RenderPass_t> renderPass;
 };
 
 struct DebugLabelOptions {
