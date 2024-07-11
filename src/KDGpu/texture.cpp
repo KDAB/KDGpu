@@ -90,7 +90,7 @@ SubresourceLayout Texture::getSubresourceLayout(const TextureSubresource &subres
     return apiTexture->getSubresourceLayout(subresource);
 }
 
-bool Texture::generateMipMaps(Device &device, Queue &transferQueue, const TextureOptions &options, TextureLayout oldLayout)
+bool Texture::generateMipMaps(Device &device, Queue &transferQueue, const TextureOptions &options, TextureLayout oldLayout, TextureLayout newLayout)
 {
     const Adapter *adapter = device.adapter();
     if (!adapter)
@@ -176,7 +176,41 @@ bool Texture::generateMipMaps(Device &device, Queue &transferQueue, const Textur
                 },
                 .scalingFilter = FilterMode::Linear,
         });
+
+        // Transition miplevel to newLayout
+        if (newLayout != TextureLayout::TransferDstOptimal && newLayout != TextureLayout::Undefined)
+            commandRecorder.textureMemoryBarrier(TextureMemoryBarrierOptions{
+                    .srcStages = PipelineStageFlagBit::TransferBit,
+                    .srcMask = AccessFlagBit::TransferWriteBit,
+                    .dstStages = PipelineStageFlagBit::TransferBit,
+                    .dstMask = AccessFlagBit::TransferReadBit,
+                    .oldLayout = TextureLayout::TransferDstOptimal,
+                    .newLayout = newLayout,
+                    .texture = m_texture,
+                    .range = {
+                            .aspectMask = TextureAspectFlagBits::ColorBit,
+                            .baseMipLevel = mipLevel,
+                            .levelCount = 1,
+                    },
+            });
     }
+
+    // Transition base miplevel to newLayout
+    if (newLayout != TextureLayout::TransferSrcOptimal && newLayout != TextureLayout::Undefined)
+        commandRecorder.textureMemoryBarrier(TextureMemoryBarrierOptions{
+                .srcStages = PipelineStageFlagBit::TransferBit,
+                .srcMask = AccessFlagBit::TransferReadBit,
+                .dstStages = PipelineStageFlagBit::TransferBit,
+                .dstMask = AccessFlagBit::None,
+                .oldLayout = TextureLayout::TransferSrcOptimal,
+                .newLayout = newLayout,
+                .texture = m_texture,
+                .range = {
+                        .aspectMask = TextureAspectFlagBits::ColorBit,
+                        .baseMipLevel = 0,
+                        .levelCount = 1,
+                },
+        });
 
     CommandBuffer commandBuffer = commandRecorder.finish();
 

@@ -66,7 +66,7 @@ public:
 
     SubresourceLayout getSubresourceLayout(const TextureSubresource &subresource = TextureSubresource()) const;
 
-    bool generateMipMaps(Device &device, Queue &transferQueue, const TextureOptions &options, TextureLayout oldLayout);
+    bool generateMipMaps(Device &device, Queue &transferQueue, const TextureOptions &options, TextureLayout oldLayout, TextureLayout newLayout = TextureLayout::Undefined);
 
     MemoryHandle externalMemoryHandle() const;
 
