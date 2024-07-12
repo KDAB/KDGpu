@@ -51,12 +51,12 @@ void ImGuiItem::event(KDFoundation::EventReceiver *target, KDFoundation::Event *
     m_input->event(target, ev);
 }
 
-void ImGuiItem::render(KDGpu::RenderPassCommandRecorder *recorder, const KDGpu::Extent2D &extent, uint32_t inFlightIndex)
+void ImGuiItem::render(KDGpu::RenderPassCommandRecorder *recorder, const KDGpu::Extent2D &extent, uint32_t inFlightIndex, KDGpu::RenderPass *currentRenderPass, int lastSubpassIndex)
 {
     // TODO: Should we split this out and call it as part of the updateScene() phase?
     // Update the geometry buffers
     if (m_renderer->updateGeometryBuffers(inFlightIndex))
-        m_renderer->recordCommands(recorder, extent, inFlightIndex);
+        m_renderer->recordCommands(recorder, extent, inFlightIndex, currentRenderPass, lastSubpassIndex);
 }
 
 } // namespace KDGpuExample

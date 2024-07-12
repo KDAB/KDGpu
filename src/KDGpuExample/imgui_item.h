@@ -25,6 +25,7 @@ class Device;
 struct Extent2D;
 class Queue;
 class RenderPassCommandRecorder;
+class RenderPass;
 } // namespace KDGpu
 
 namespace KDGpuExample {
@@ -58,7 +59,7 @@ public:
 
     void event(KDFoundation::EventReceiver *target, KDFoundation::Event *ev);
 
-    void render(KDGpu::RenderPassCommandRecorder *recorder, const KDGpu::Extent2D &extent, uint32_t inFlightIndex = 0);
+    void render(KDGpu::RenderPassCommandRecorder *recorder, const KDGpu::Extent2D &extent, uint32_t inFlightIndex = 0, KDGpu::RenderPass *currentRenderPass = nullptr, int lastSubpassIndex = 0);
 
 private:
     ImGuiContext *m_context{ nullptr };

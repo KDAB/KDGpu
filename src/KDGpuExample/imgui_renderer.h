@@ -17,6 +17,7 @@
 #include <KDGpu/buffer.h>
 #include <KDGpu/gpu_core.h>
 #include <KDGpu/graphics_pipeline.h>
+#include <KDGpu/graphics_pipeline_options.h>
 #include <KDGpu/pipeline_layout.h>
 #include <KDGpu/sampler.h>
 #include <KDGpu/shader_module.h>
@@ -29,6 +30,7 @@ namespace KDGpu {
 class Device;
 class Queue;
 class RenderPassCommandRecorder;
+class RenderPass;
 } // namespace KDGpu
 
 struct ImGuiContext;
@@ -57,10 +59,8 @@ public:
     void updateScale(float scaleFactor);
     void cleanup();
 
-    void createPipeline(KDGpu::SampleCountFlagBits samples, KDGpu::Format colorFormat, KDGpu::Format depthFormat);
-
     bool updateGeometryBuffers(uint32_t inFlightIndex);
-    void recordCommands(KDGpu::RenderPassCommandRecorder *recorder, KDGpu::Extent2D extent, uint32_t inFlightIndex);
+    void recordCommands(KDGpu::RenderPassCommandRecorder *recorder, KDGpu::Extent2D extent, uint32_t inFlightIndex, KDGpu::RenderPass *currentRenderPass = nullptr, int lastSubpassIndex = 0);
 
 private:
     void initializeFontData(float scaleFactor);
@@ -97,6 +97,7 @@ private:
     KDGpu::ShaderModule m_vertexShader;
     KDGpu::ShaderModule m_fragmentShader;
     KDGpu::GraphicsPipeline m_pipeline;
+    KDGpu::GraphicsPipelineOptions m_pipelineInfo;
     KDGpu::PipelineLayout m_pipelineLayout;
 
     float m_oldScaleFactor = 1.0f;

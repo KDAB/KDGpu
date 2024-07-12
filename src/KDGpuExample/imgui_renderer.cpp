@@ -16,7 +16,7 @@
 #include <KDGpu/bind_group_layout_options.h>
 #include <KDGpu/buffer_options.h>
 #include <KDGpu/device.h>
-#include <KDGpu/graphics_pipeline_options.h>
+#include <KDGpu/render_pass.h>
 #include <KDGpu/texture_options.h>
 #include <KDUtils/color.h>
 
@@ -146,9 +146,46 @@ void ImGuiRenderer::initialize(float scaleFactor, KDGpu::SampleCountFlagBits sam
     };
     m_sampler = m_device->createSampler(samplerOptions);
 
-    updateScale(scaleFactor);
+    m_pipelineInfo = GraphicsPipelineOptions{
+        .shaderStages = {
+                { .shaderModule = m_vertexShader, .stage = ShaderStageFlagBits::VertexBit },
+                { .shaderModule = m_fragmentShader, .stage = ShaderStageFlagBits::FragmentBit },
+        },
+        .layout = m_pipelineLayout,
+        .vertex = {
+                .buffers = { VertexImGui::vertexBufferLayout() },
+                .attributes = VertexImGui::vertexAttributes(),
+        },
+        .renderTargets = {
+                {
+                        .format = colorFormat,
+                        .blending = {
+                                .blendingEnabled = true,
+                                .color = {
+                                        .srcFactor = BlendFactor::SrcAlpha,
+                                        .dstFactor = BlendFactor::OneMinusSrcAlpha,
+                                },
+                                .alpha = {
+                                        .srcFactor = BlendFactor::One,
+                                        .dstFactor = BlendFactor::OneMinusSrcAlpha,
+                                },
+                        },
+                },
+        },
+        .depthStencil = {
+                .format = depthFormat,
+                .depthTestEnabled = false,
+                .depthWritesEnabled = false,
+        },
+        .primitive = {
+                .cullMode = CullModeFlagBits::None,
+        },
+        .multisample = {
+                .samples = static_cast<KDGpu::SampleCountFlagBits>(samples),
+        },
+    };
 
-    createPipeline(samples, colorFormat, depthFormat);
+    updateScale(scaleFactor);
 }
 
 void ImGuiRenderer::updateScale(const float scaleFactor)
@@ -173,50 +210,6 @@ void ImGuiRenderer::cleanup()
     m_texture = {};
     m_vertexShader = {};
     m_fragmentShader = {};
-}
-
-void ImGuiRenderer::createPipeline(KDGpu::SampleCountFlagBits samples, KDGpu::Format colorFormat, KDGpu::Format depthFormat)
-{
-    // clang-format off
-    const auto pipelineOptions = GraphicsPipelineOptions{
-        .shaderStages = {{
-            .shaderModule = m_vertexShader, .stage = ShaderStageFlagBits::VertexBit
-        }, {
-            .shaderModule = m_fragmentShader, .stage = ShaderStageFlagBits::FragmentBit },
-        },
-        .layout = m_pipelineLayout,
-        .vertex = {
-            .buffers = { VertexImGui::vertexBufferLayout() },
-            .attributes = VertexImGui::vertexAttributes(),
-        },
-        .renderTargets = {{
-            .format = colorFormat,
-            .blending = {
-                .blendingEnabled = true,
-                .color = {
-                    .srcFactor = BlendFactor::SrcAlpha,
-                    .dstFactor = BlendFactor::OneMinusSrcAlpha,
-                },
-                .alpha = {
-                    .srcFactor = BlendFactor::One,
-                    .dstFactor = BlendFactor::OneMinusSrcAlpha,
-                }
-            },
-        }},
-        .depthStencil = {
-            .format = depthFormat,
-            .depthTestEnabled = false,
-            .depthWritesEnabled = false,
-        },
-        .primitive = {
-            .cullMode = CullModeFlagBits::None,
-        },
-        .multisample = {
-            .samples = static_cast<KDGpu::SampleCountFlagBits>(samples),
-        },
-    };
-    // clang-format on
-    m_pipeline = m_device->createGraphicsPipeline(pipelineOptions);
 }
 
 bool ImGuiRenderer::updateGeometryBuffers(uint32_t inFlightIndex)
@@ -279,7 +272,7 @@ bool ImGuiRenderer::updateGeometryBuffers(uint32_t inFlightIndex)
     return m_mesh->vertexCount != 0;
 }
 
-void ImGuiRenderer::recordCommands(KDGpu::RenderPassCommandRecorder *recorder, KDGpu::Extent2D extent, uint32_t inFlightIndex)
+void ImGuiRenderer::recordCommands(KDGpu::RenderPassCommandRecorder *recorder, KDGpu::Extent2D extent, uint32_t inFlightIndex, KDGpu::RenderPass *currentRenderPass, int lastSubpassIndex)
 {
     ImDrawData *imDrawData = ImGui::GetDrawData();
 
@@ -291,6 +284,13 @@ void ImGuiRenderer::recordCommands(KDGpu::RenderPassCommandRecorder *recorder, K
     uint32_t indexOffset = 0;
 
     // Bind the pipeline
+    if (currentRenderPass) {
+        m_pipelineInfo.renderPass = currentRenderPass->handle();
+        m_pipelineInfo.subpassIndex = lastSubpassIndex;
+    }
+
+    if (!m_pipeline.isValid())
+        m_pipeline = m_device->createGraphicsPipeline(m_pipelineInfo);
     recorder->setPipeline(m_pipeline);
 
     // Bind the descriptor set
