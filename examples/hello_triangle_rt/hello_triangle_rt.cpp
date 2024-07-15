@@ -231,14 +231,14 @@ void HelloTriangleRt::createAccelerationStructures()
                         {
                                 .geometries = { triangleDataGeometry },
                                 .destinationStructure = m_bottomLevelAs,
-                        },
-                },
-                .buildRangeInfos = {
-                        {
-                                .primitiveCount = 1, // A single triangle
-                                .primitiveOffset = 0,
-                                .firstVertex = 0,
-                                .transformOffset = 0,
+                                .buildRangeInfos = {
+                                        {
+                                                .primitiveCount = 1, // A single triangle
+                                                .primitiveOffset = 0,
+                                                .firstVertex = 0,
+                                                .transformOffset = 0,
+                                        },
+                                },
                         },
                 },
         });
@@ -262,14 +262,14 @@ void HelloTriangleRt::createAccelerationStructures()
                         {
                                 .geometries = { triGeometryInstance },
                                 .destinationStructure = m_topLevelAs,
-                        },
-                },
-                .buildRangeInfos = {
-                        {
-                                .primitiveCount = 1,
-                                .primitiveOffset = 0,
-                                .firstVertex = 0,
-                                .transformOffset = 0,
+                                .buildRangeInfos = {
+                                        {
+                                                .primitiveCount = 1,
+                                                .primitiveOffset = 0,
+                                                .firstVertex = 0,
+                                                .transformOffset = 0,
+                                        },
+                                },
                         },
                 },
         });

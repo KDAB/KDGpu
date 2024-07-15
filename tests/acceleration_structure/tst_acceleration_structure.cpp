@@ -210,14 +210,14 @@ TEST_SUITE("AccelerationStructure")
                                         .geometries = { aabbGeometry },
                                         .sourceStructure = {},
                                         .destinationStructure = accelerationStructure,
-                                },
-                        },
-                        .buildRangeInfos = {
-                                {
-                                        .primitiveCount = 1,
-                                        .primitiveOffset = 0,
-                                        .firstVertex = 0,
-                                        .transformOffset = 0,
+                                        .buildRangeInfos = {
+                                                {
+                                                        .primitiveCount = 1,
+                                                        .primitiveOffset = 0,
+                                                        .firstVertex = 0,
+                                                        .transformOffset = 0,
+                                                },
+                                        },
                                 },
                         },
                 });
@@ -277,14 +277,14 @@ TEST_SUITE("AccelerationStructure")
                                         .geometries = { triangleDataGeometry },
                                         .sourceStructure = {},
                                         .destinationStructure = accelerationStructure,
-                                },
-                        },
-                        .buildRangeInfos = {
-                                {
-                                        .primitiveCount = 1,
-                                        .primitiveOffset = 0,
-                                        .firstVertex = 0,
-                                        .transformOffset = 0,
+                                        .buildRangeInfos = {
+                                                {
+                                                        .primitiveCount = 1,
+                                                        .primitiveOffset = 0,
+                                                        .firstVertex = 0,
+                                                        .transformOffset = 0,
+                                                },
+                                        },
                                 },
                         },
                 });
@@ -359,14 +359,14 @@ TEST_SUITE("AccelerationStructure")
                                         .geometries = { aabbGeometry },
                                         .sourceStructure = {},
                                         .destinationStructure = bottomLevelAs,
-                                },
-                        },
-                        .buildRangeInfos = {
-                                {
-                                        .primitiveCount = 1,
-                                        .primitiveOffset = 0,
-                                        .firstVertex = 0,
-                                        .transformOffset = 0,
+                                        .buildRangeInfos = {
+                                                {
+                                                        .primitiveCount = 1,
+                                                        .primitiveOffset = 0,
+                                                        .firstVertex = 0,
+                                                        .transformOffset = 0,
+                                                },
+                                        },
                                 },
                         },
                 });
@@ -377,14 +377,14 @@ TEST_SUITE("AccelerationStructure")
                                         .geometries = { geometryInstance },
                                         .sourceStructure = bottomLevelAs,
                                         .destinationStructure = topLevelAs,
-                                },
-                        },
-                        .buildRangeInfos = {
-                                {
-                                        .primitiveCount = 1,
-                                        .primitiveOffset = 0,
-                                        .firstVertex = 0,
-                                        .transformOffset = 0,
+                                        .buildRangeInfos = {
+                                                {
+                                                        .primitiveCount = 1,
+                                                        .primitiveOffset = 0,
+                                                        .firstVertex = 0,
+                                                        .transformOffset = 0,
+                                                },
+                                        },
                                 },
                         },
                 });

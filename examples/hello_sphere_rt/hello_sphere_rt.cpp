@@ -320,14 +320,14 @@ void HelloSphereRt::createAccelerationStructures()
                         {
                                 .geometries = { aabbGeometry },
                                 .destinationStructure = m_bottomLevelAs,
-                        },
-                },
-                .buildRangeInfos = {
-                        {
-                                .primitiveCount = static_cast<uint32_t>(aabbs.size()),
-                                .primitiveOffset = 0,
-                                .firstVertex = 0,
-                                .transformOffset = 0,
+                                .buildRangeInfos = {
+                                        {
+                                                .primitiveCount = static_cast<uint32_t>(aabbs.size()),
+                                                .primitiveOffset = 0,
+                                                .firstVertex = 0,
+                                                .transformOffset = 0,
+                                        },
+                                },
                         },
                 },
         });
@@ -357,14 +357,14 @@ void HelloSphereRt::createAccelerationStructures()
                         {
                                 .geometries = { aabbGeometryInstance },
                                 .destinationStructure = m_topLevelAs,
-                        },
-                },
-                .buildRangeInfos = {
-                        {
-                                .primitiveCount = 1,
-                                .primitiveOffset = 0,
-                                .firstVertex = 0,
-                                .transformOffset = 0,
+                                .buildRangeInfos = {
+                                        {
+                                                .primitiveCount = 1, // 1 BLAS
+                                                .primitiveOffset = 0,
+                                                .firstVertex = 0,
+                                                .transformOffset = 0,
+                                        },
+                                },
                         },
                 },
         });

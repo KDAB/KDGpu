@@ -70,21 +70,21 @@ struct AccelerationStructureOptions {
 };
 
 struct BuildAccelerationStructureOptions {
-    struct BuildOptions {
-        BuildAccelerationStructureMode mode{ BuildAccelerationStructureMode::Build };
-        std::vector<AccelerationStructureGeometry> geometries;
-        Handle<AccelerationStructure_t> sourceStructure;
-        Handle<AccelerationStructure_t> destinationStructure;
-    };
     struct BuildRangeInfo {
         uint32_t primitiveCount{ 0 };
         uint32_t primitiveOffset{ 0 };
         uint32_t firstVertex{ 0 };
         uint32_t transformOffset{ 0 };
     };
+    struct BuildOptions {
+        BuildAccelerationStructureMode mode{ BuildAccelerationStructureMode::Build };
+        std::vector<AccelerationStructureGeometry> geometries;
+        Handle<AccelerationStructure_t> sourceStructure;
+        Handle<AccelerationStructure_t> destinationStructure;
+        std::vector<BuildRangeInfo> buildRangeInfos;
+    };
 
     std::vector<BuildOptions> buildGeometryInfos;
-    std::vector<BuildRangeInfo> buildRangeInfos;
 };
 
 } // namespace KDGpu

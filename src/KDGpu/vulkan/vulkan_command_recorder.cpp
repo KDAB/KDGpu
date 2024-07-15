@@ -547,6 +547,8 @@ void VulkanCommandRecorder::buildAccelerationStructures(const BuildAccelerationS
     };
 
     std::vector<VkAccelerationStructureBuildGeometryInfoKHR> infos;
+    std::vector<std::vector<VkAccelerationStructureBuildRangeInfoKHR>> ranges;
+
     for (const auto &geometryBuildInfo : options.buildGeometryInfos) {
         std::vector<VkAccelerationStructureGeometryKHR> &geometries = geometriesBacking.emplace_back();
 
@@ -671,22 +673,22 @@ void VulkanCommandRecorder::buildAccelerationStructures(const BuildAccelerationS
         }
 
         infos.push_back(geometryInfoKhr);
-    }
 
-    std::vector<std::vector<VkAccelerationStructureBuildRangeInfoKHR>> ranges;
-    for (const auto &buildRangeInfo : options.buildRangeInfos) {
+        // Build Range Infos for the geometries
+        assert(geometries.size() == geometryBuildInfo.buildRangeInfos.size());
+
         std::vector<VkAccelerationStructureBuildRangeInfoKHR> innerRanges;
+        for (const auto &buildRangeInfo : geometryBuildInfo.buildRangeInfos) {
+            {
+                VkAccelerationStructureBuildRangeInfoKHR rangeInfoKhr;
+                rangeInfoKhr.primitiveCount = buildRangeInfo.primitiveCount;
+                rangeInfoKhr.primitiveOffset = buildRangeInfo.primitiveOffset;
+                rangeInfoKhr.firstVertex = buildRangeInfo.firstVertex;
+                rangeInfoKhr.transformOffset = buildRangeInfo.transformOffset;
 
-        {
-            VkAccelerationStructureBuildRangeInfoKHR rangeInfoKhr;
-            rangeInfoKhr.primitiveCount = buildRangeInfo.primitiveCount;
-            rangeInfoKhr.primitiveOffset = buildRangeInfo.primitiveOffset;
-            rangeInfoKhr.firstVertex = buildRangeInfo.firstVertex;
-            rangeInfoKhr.transformOffset = buildRangeInfo.transformOffset;
-
-            innerRanges.push_back(rangeInfoKhr);
+                innerRanges.push_back(rangeInfoKhr);
+            }
         }
-
         ranges.push_back(innerRanges);
     }
 

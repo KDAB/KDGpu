@@ -3189,8 +3189,6 @@ Handle<AccelerationStructure_t> VulkanResourceManager::createAccelerationStructu
                 trianglesDataKhr.maxVertex = arg.maxVertex;
                 trianglesDataKhr.indexType = indexTypeToVkIndexType(arg.indexType);
 
-                // TODO: transformData deviceAddress should be set, spec says it needs to be checked if not NULL
-
                 geometryKhr.geometryType = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
                 geometryKhr.geometry.triangles = trianglesDataKhr;
             } else if constexpr (std::is_same_v<T, AccelerationStructureGeometryInstancesData>) {
