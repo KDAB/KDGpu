@@ -134,14 +134,14 @@ TEST_SUITE("RenderPassCommandRecorder")
                 .attachments = {
                         AttachmentDescription{
                                 .format = Format::R8G8B8A8_UNORM,
-                                .stencilLoadOp = AttachmentLoadOperation::DontCare,
-                                .stencilstoreOp = AttachmentStoreOperation::DontCare,
+                                .stencilLoadOperation = AttachmentLoadOperation::DontCare,
+                                .stencilStoreOperation = AttachmentStoreOperation::DontCare,
                                 .finalLayout = TextureLayout::ColorAttachmentOptimal,
                         },
                         AttachmentDescription{
                                 .format = Format::D24_UNORM_S8_UINT,
-                                .stencilLoadOp = AttachmentLoadOperation::DontCare,
-                                .stencilstoreOp = AttachmentStoreOperation::DontCare,
+                                .stencilLoadOperation = AttachmentLoadOperation::DontCare,
+                                .stencilStoreOperation = AttachmentStoreOperation::DontCare,
                                 .finalLayout = TextureLayout::DepthStencilAttachmentOptimal,
                         },
                 },
@@ -698,18 +698,18 @@ TEST_SUITE("RenderPassCommandRecorder")
         RenderPass renderPass = device.createRenderPass(RenderPassOptions{
                 .attachments = {
                         AttachmentDescription{
-                                .stencilLoadOp = AttachmentLoadOperation::DontCare,
-                                .stencilstoreOp = AttachmentStoreOperation::DontCare,
+                                .stencilLoadOperation = AttachmentLoadOperation::DontCare,
+                                .stencilStoreOperation = AttachmentStoreOperation::DontCare,
                         },
                         AttachmentDescription{
                                 .format = depthFormat,
-                                .loadOp = AttachmentLoadOperation::DontCare,
-                                .storeOp = AttachmentStoreOperation::DontCare,
-                                .stencilstoreOp = AttachmentStoreOperation::DontCare,
+                                .loadOperation = AttachmentLoadOperation::DontCare,
+                                .storeOperation = AttachmentStoreOperation::DontCare,
+                                .stencilStoreOperation = AttachmentStoreOperation::DontCare,
                                 .finalLayout = TextureLayout::DepthStencilAttachmentOptimal },
                         AttachmentDescription{
-                                .stencilLoadOp = AttachmentLoadOperation::DontCare,
-                                .stencilstoreOp = AttachmentStoreOperation::DontCare,
+                                .stencilLoadOperation = AttachmentLoadOperation::DontCare,
+                                .stencilStoreOperation = AttachmentStoreOperation::DontCare,
                                 .finalLayout = TextureLayout::PresentSrc },
 
                 },

@@ -1234,10 +1234,10 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
         vkAttachment.pNext = nullptr;
         vkAttachment.format = formatToVkFormat(attachmentDescription.format);
         vkAttachment.samples = sampleCountFlagBitsToVkSampleFlagBits(attachmentDescription.samples);
-        vkAttachment.loadOp = attachmentLoadOperationToVkAttachmentLoadOp(attachmentDescription.loadOp);
-        vkAttachment.storeOp = attachmentStoreOperationToVkAttachmentStoreOp(attachmentDescription.storeOp);
-        vkAttachment.stencilLoadOp = attachmentLoadOperationToVkAttachmentLoadOp(attachmentDescription.stencilLoadOp);
-        vkAttachment.stencilStoreOp = attachmentStoreOperationToVkAttachmentStoreOp(attachmentDescription.stencilstoreOp);
+        vkAttachment.loadOp = attachmentLoadOperationToVkAttachmentLoadOp(attachmentDescription.loadOperation);
+        vkAttachment.storeOp = attachmentStoreOperationToVkAttachmentStoreOp(attachmentDescription.storeOperation);
+        vkAttachment.stencilLoadOp = attachmentLoadOperationToVkAttachmentLoadOp(attachmentDescription.stencilLoadOperation);
+        vkAttachment.stencilStoreOp = attachmentStoreOperationToVkAttachmentStoreOp(attachmentDescription.stencilStoreOperation);
         vkAttachment.initialLayout = textureLayoutToVkImageLayout(attachmentDescription.initialLayout);
         vkAttachment.finalLayout = textureLayoutToVkImageLayout(attachmentDescription.finalLayout);
 
@@ -2394,7 +2394,7 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
     const bool isAnyOfTheAttachmentsToBeCleared = std::ranges::any_of(vulkanRenderPass->attachmentDescriptions.begin(),
                                                                       vulkanRenderPass->attachmentDescriptions.end(),
                                                                       [](const AttachmentDescription &attDescription) {
-                                                                          return attDescription.loadOp == AttachmentLoadOperation::Clear || attDescription.stencilLoadOp == AttachmentLoadOperation::Clear;
+                                                                          return attDescription.loadOperation == AttachmentLoadOperation::Clear || attDescription.stencilLoadOperation == AttachmentLoadOperation::Clear;
                                                                       });
 
     for (const auto &attachment : options.attachments) {
@@ -2530,10 +2530,10 @@ SubpassDescription VulkanResourceManager::fillAttachmentDescriptionAndCreateSubp
         attachmentDescription.format = formatFromTextureView(attachment.view);
         attachmentDescription.samples = samples;
 
-        attachmentDescription.loadOp = attachment.loadOperation;
-        attachmentDescription.storeOp = attachment.storeOperation;
-        attachmentDescription.stencilLoadOp = AttachmentLoadOperation::DontCare;
-        attachmentDescription.stencilstoreOp = AttachmentStoreOperation::DontCare;
+        attachmentDescription.loadOperation = attachment.loadOperation;
+        attachmentDescription.storeOperation = attachment.storeOperation;
+        attachmentDescription.stencilLoadOperation = AttachmentLoadOperation::DontCare;
+        attachmentDescription.stencilStoreOperation = AttachmentStoreOperation::DontCare;
         attachmentDescription.initialLayout = attachment.initialLayout;
         attachmentDescription.finalLayout = attachment.finalLayout;
         subpass.colorAttachmentReference.push_back({ currentAttachmentDescriptionIndex++, attachment.layout });
@@ -2543,10 +2543,10 @@ SubpassDescription VulkanResourceManager::fillAttachmentDescriptionAndCreateSubp
             resolveAttachmentDescription.format = formatFromTextureView(attachment.resolveView);
             resolveAttachmentDescription.samples = SampleCountFlagBits::Samples1Bit;
 
-            resolveAttachmentDescription.loadOp = attachment.loadOperation;
-            resolveAttachmentDescription.storeOp = attachment.storeOperation;
-            resolveAttachmentDescription.stencilLoadOp = AttachmentLoadOperation::DontCare;
-            resolveAttachmentDescription.stencilstoreOp = AttachmentStoreOperation::DontCare;
+            resolveAttachmentDescription.loadOperation = attachment.loadOperation;
+            resolveAttachmentDescription.storeOperation = attachment.storeOperation;
+            resolveAttachmentDescription.stencilLoadOperation = AttachmentLoadOperation::DontCare;
+            resolveAttachmentDescription.stencilStoreOperation = AttachmentStoreOperation::DontCare;
             resolveAttachmentDescription.initialLayout = attachment.initialLayout;
             resolveAttachmentDescription.finalLayout = attachment.finalLayout;
             subpass.resolveAttachmentReference.push_back({ currentAttachmentDescriptionIndex++, attachment.layout });
@@ -2558,10 +2558,10 @@ SubpassDescription VulkanResourceManager::fillAttachmentDescriptionAndCreateSubp
         attachmentDescription.format = formatFromTextureView(depthAttachment.view);
         attachmentDescription.samples = samples;
 
-        attachmentDescription.loadOp = depthAttachment.depthLoadOperation;
-        attachmentDescription.storeOp = depthAttachment.depthStoreOperation;
-        attachmentDescription.stencilLoadOp = depthAttachment.stencilLoadOperation;
-        attachmentDescription.stencilstoreOp = depthAttachment.stencilStoreOperation;
+        attachmentDescription.loadOperation = depthAttachment.depthLoadOperation;
+        attachmentDescription.storeOperation = depthAttachment.depthStoreOperation;
+        attachmentDescription.stencilLoadOperation = depthAttachment.stencilLoadOperation;
+        attachmentDescription.stencilStoreOperation = depthAttachment.stencilStoreOperation;
         attachmentDescription.initialLayout = depthAttachment.initialLayout;
         attachmentDescription.finalLayout = depthAttachment.finalLayout;
         if (subpass.depthAttachmentReference) {
@@ -2574,10 +2574,10 @@ SubpassDescription VulkanResourceManager::fillAttachmentDescriptionAndCreateSubp
             resolveAttachmentDescription.format = formatFromTextureView(depthAttachment.resolveView);
             resolveAttachmentDescription.samples = SampleCountFlagBits::Samples1Bit;
 
-            resolveAttachmentDescription.loadOp = depthAttachment.depthLoadOperation;
-            resolveAttachmentDescription.storeOp = depthAttachment.depthStoreOperation;
-            resolveAttachmentDescription.stencilLoadOp = depthAttachment.stencilLoadOperation;
-            resolveAttachmentDescription.stencilstoreOp = depthAttachment.stencilStoreOperation;
+            resolveAttachmentDescription.loadOperation = depthAttachment.depthLoadOperation;
+            resolveAttachmentDescription.storeOperation = depthAttachment.depthStoreOperation;
+            resolveAttachmentDescription.stencilLoadOperation = depthAttachment.stencilLoadOperation;
+            resolveAttachmentDescription.stencilStoreOperation = depthAttachment.stencilStoreOperation;
             resolveAttachmentDescription.initialLayout = depthAttachment.initialLayout;
             resolveAttachmentDescription.finalLayout = depthAttachment.finalLayout;
             if (subpass.depthResolveAttachmentReference) {
@@ -2604,10 +2604,10 @@ SubpassDescription VulkanResourceManager::fillAttachmentDescriptionAndCreateSubp
         AttachmentDescription &attachmentDescription = attachmentDescriptions.emplace_back(AttachmentDescription{});
         attachmentDescription.format = renderTarget.format;
         attachmentDescription.samples = samples;
-        attachmentDescription.loadOp = AttachmentLoadOperation::Clear;
-        attachmentDescription.storeOp = AttachmentStoreOperation::Store;
-        attachmentDescription.stencilLoadOp = AttachmentLoadOperation::DontCare;
-        attachmentDescription.stencilstoreOp = AttachmentStoreOperation::DontCare;
+        attachmentDescription.loadOperation = AttachmentLoadOperation::Clear;
+        attachmentDescription.storeOperation = AttachmentStoreOperation::Store;
+        attachmentDescription.stencilLoadOperation = AttachmentLoadOperation::DontCare;
+        attachmentDescription.stencilStoreOperation = AttachmentStoreOperation::DontCare;
         attachmentDescription.initialLayout = TextureLayout::Undefined;
         attachmentDescription.finalLayout = useMultiSampling ? TextureLayout::ColorAttachmentOptimal : TextureLayout::PresentSrc;
         subpass.colorAttachmentReference.push_back({ currentAttachmentDescriptionIndex++, TextureLayout::ColorAttachmentOptimal });
@@ -2616,10 +2616,10 @@ SubpassDescription VulkanResourceManager::fillAttachmentDescriptionAndCreateSubp
             AttachmentDescription &resolveAttachmentDescription = attachmentDescriptions.emplace_back(AttachmentDescription{});
             resolveAttachmentDescription.format = renderTarget.format;
             resolveAttachmentDescription.samples = SampleCountFlagBits::Samples1Bit;
-            resolveAttachmentDescription.loadOp = AttachmentLoadOperation::Clear;
-            resolveAttachmentDescription.storeOp = AttachmentStoreOperation::Store;
-            resolveAttachmentDescription.stencilLoadOp = AttachmentLoadOperation::DontCare;
-            resolveAttachmentDescription.stencilstoreOp = AttachmentStoreOperation::DontCare;
+            resolveAttachmentDescription.loadOperation = AttachmentLoadOperation::Clear;
+            resolveAttachmentDescription.storeOperation = AttachmentStoreOperation::Store;
+            resolveAttachmentDescription.stencilLoadOperation = AttachmentLoadOperation::DontCare;
+            resolveAttachmentDescription.stencilStoreOperation = AttachmentStoreOperation::DontCare;
             resolveAttachmentDescription.initialLayout = TextureLayout::Undefined;
             resolveAttachmentDescription.finalLayout = TextureLayout::PresentSrc;
             subpass.resolveAttachmentReference.push_back({ currentAttachmentDescriptionIndex++, TextureLayout::ColorAttachmentOptimal });
@@ -2633,10 +2633,10 @@ SubpassDescription VulkanResourceManager::fillAttachmentDescriptionAndCreateSubp
         AttachmentDescription &attachmentDescription = attachmentDescriptions.emplace_back(AttachmentDescription{});
         attachmentDescription.format = depthStencil.format;
         attachmentDescription.samples = samples;
-        attachmentDescription.loadOp = AttachmentLoadOperation::Clear;
-        attachmentDescription.storeOp = AttachmentStoreOperation::Store;
-        attachmentDescription.stencilLoadOp = AttachmentLoadOperation::DontCare;
-        attachmentDescription.stencilstoreOp = AttachmentStoreOperation::DontCare;
+        attachmentDescription.loadOperation = AttachmentLoadOperation::Clear;
+        attachmentDescription.storeOperation = AttachmentStoreOperation::Store;
+        attachmentDescription.stencilLoadOperation = AttachmentLoadOperation::DontCare;
+        attachmentDescription.stencilStoreOperation = AttachmentStoreOperation::DontCare;
         attachmentDescription.initialLayout = TextureLayout::Undefined;
         attachmentDescription.finalLayout = TextureLayout::DepthStencilAttachmentOptimal;
         subpass.depthAttachmentReference = { currentAttachmentDescriptionIndex++, TextureLayout::DepthStencilAttachmentOptimal };
@@ -2645,10 +2645,10 @@ SubpassDescription VulkanResourceManager::fillAttachmentDescriptionAndCreateSubp
             AttachmentDescription &resolveAttachmentDescription = attachmentDescriptions.emplace_back(AttachmentDescription{});
             resolveAttachmentDescription.format = depthStencil.format;
             resolveAttachmentDescription.samples = SampleCountFlagBits::Samples1Bit;
-            resolveAttachmentDescription.loadOp = AttachmentLoadOperation::Clear;
-            resolveAttachmentDescription.storeOp = AttachmentStoreOperation::Store;
-            resolveAttachmentDescription.stencilLoadOp = AttachmentLoadOperation::DontCare;
-            resolveAttachmentDescription.stencilstoreOp = AttachmentStoreOperation::DontCare;
+            resolveAttachmentDescription.loadOperation = AttachmentLoadOperation::Clear;
+            resolveAttachmentDescription.storeOperation = AttachmentStoreOperation::Store;
+            resolveAttachmentDescription.stencilLoadOperation = AttachmentLoadOperation::DontCare;
+            resolveAttachmentDescription.stencilStoreOperation = AttachmentStoreOperation::DontCare;
             resolveAttachmentDescription.initialLayout = TextureLayout::Undefined;
             resolveAttachmentDescription.finalLayout = TextureLayout::PresentSrc;
             subpass.depthResolveAttachmentReference = { currentAttachmentDescriptionIndex++, TextureLayout::DepthStencilAttachmentOptimal };

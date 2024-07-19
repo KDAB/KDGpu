@@ -88,13 +88,13 @@ void RenderToTextureSubpass::createRenderPass()
     const std::vector<AttachmentDescription> attachmentDescriptions{
         AttachmentDescription{
                 .format = m_colorFormat,
-                .stencilLoadOp = AttachmentLoadOperation::DontCare,
-                .stencilstoreOp = AttachmentStoreOperation::DontCare,
+                .stencilLoadOperation = AttachmentLoadOperation::DontCare,
+                .stencilStoreOperation = AttachmentStoreOperation::DontCare,
         },
         AttachmentDescription{
                 .format = m_swapchainFormat,
-                .stencilLoadOp = AttachmentLoadOperation::DontCare,
-                .stencilstoreOp = AttachmentStoreOperation::DontCare,
+                .stencilLoadOperation = AttachmentLoadOperation::DontCare,
+                .stencilStoreOperation = AttachmentStoreOperation::DontCare,
                 .finalLayout = TextureLayout::PresentSrc }
     };
 

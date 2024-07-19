@@ -409,12 +409,12 @@ TEST_SUITE("GraphicsPipeline")
         RenderPassOptions renderPassOptions = {
             .attachments = { AttachmentDescription{
                                      .format = Format::R8G8B8A8_UNORM,
-                                     .stencilLoadOp = AttachmentLoadOperation::DontCare,
-                                     .stencilstoreOp = AttachmentStoreOperation::DontCare },
+                                     .stencilLoadOperation = AttachmentLoadOperation::DontCare,
+                                     .stencilStoreOperation = AttachmentStoreOperation::DontCare },
                              AttachmentDescription{
                                      .format = depthFormat,
-                                     .loadOp = AttachmentLoadOperation::DontCare,
-                                     .storeOp = AttachmentStoreOperation::DontCare,
+                                     .loadOperation = AttachmentLoadOperation::DontCare,
+                                     .storeOperation = AttachmentStoreOperation::DontCare,
                                      .finalLayout = TextureLayout::DepthStencilAttachmentOptimal } },
             .subpassDescriptions = { SubpassDescription{
                     .colorAttachmentReference = { { 0 } },

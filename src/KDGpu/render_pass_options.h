@@ -50,10 +50,10 @@ struct SubpassDescription {
 struct AttachmentDescription {
     Format format{ Format::R8G8B8A8_UNORM };
     SampleCountFlagBits samples{ SampleCountFlagBits::Samples1Bit };
-    AttachmentLoadOperation loadOp{ AttachmentLoadOperation::Clear };
-    AttachmentStoreOperation storeOp{ AttachmentStoreOperation::Store };
-    AttachmentLoadOperation stencilLoadOp{ AttachmentLoadOperation::Clear };
-    AttachmentStoreOperation stencilstoreOp{ AttachmentStoreOperation::Store };
+    AttachmentLoadOperation loadOperation{ AttachmentLoadOperation::Clear };
+    AttachmentStoreOperation storeOperation{ AttachmentStoreOperation::Store };
+    AttachmentLoadOperation stencilLoadOperation{ AttachmentLoadOperation::Clear };
+    AttachmentStoreOperation stencilStoreOperation{ AttachmentStoreOperation::Store };
     TextureLayout initialLayout{ TextureLayout::Undefined };
     TextureLayout finalLayout{ TextureLayout::ColorAttachmentOptimal };
 };
