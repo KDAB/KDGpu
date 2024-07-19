@@ -16,6 +16,8 @@
 #include <KDGpu/queue.h>
 #include <KDGpu/instance.h>
 #include <KDGpu/texture.h>
+#include <KDGpu/render_pass.h>
+#include <KDGpu/render_pass_options.h>
 #include <KDGpu/texture_options.h>
 #include <KDGpu/texture_view.h>
 #include <KDGpu/device_options.h>
@@ -669,18 +671,83 @@ TEST_SUITE("RenderPassCommandRecorder")
         }
     }
 
-    constexpr bool hasSubpassSupport = false;
+    constexpr bool hasSubpassSupport = true;
     TEST_CASE("RenderPassCommandRecorder - Subpass" * doctest::skip(!hasSubpassSupport))
     {
         Device device = discreteGPUAdapter->createDevice();
 
-        const auto vertexShaderPath = assetPath() + "/shaders/tests/render_pass_command_recorder/triangle.vert.spv";
-        auto vertexShader = device.createShaderModule(readShaderFile(vertexShaderPath));
+        const auto triangleVertexShaderPath = assetPath() + "/shaders/tests/render_pass_command_recorder/triangle.vert.spv";
+        auto triangleVertexShader = device.createShaderModule(readShaderFile(triangleVertexShaderPath));
 
-        const auto fragmentShaderPath = assetPath() + "/shaders/tests/render_pass_command_recorder/triangle.frag.spv";
-        auto fragmentShader = device.createShaderModule(readShaderFile(fragmentShaderPath));
+        const auto triangleFragmentShaderPath = assetPath() + "/shaders/tests/render_pass_command_recorder/triangle.frag.spv";
+        auto triangleFragmentShader = device.createShaderModule(readShaderFile(triangleFragmentShaderPath));
+
+        const auto readVertexShaderPath = assetPath() + "/shaders/tests/render_pass_command_recorder/read-image.vert.spv";
+        auto readVertexShader = device.createShaderModule(readShaderFile(readVertexShaderPath));
+
+        const auto readFragmentShaderPath = assetPath() + "/shaders/tests/render_pass_command_recorder/read-image.frag.spv";
+        auto readFragmentShader = device.createShaderModule(readShaderFile(readFragmentShaderPath));
+
+        Format depthFormat =
+#if defined(KD_PLATFORM_MACOS)
+                Format::D32_SFLOAT_S8_UINT;
+#else
+                Format::D24_UNORM_S8_UINT;
+#endif
+
+        RenderPass renderPass = device.createRenderPass(RenderPassOptions{
+                .attachments = {
+                        AttachmentDescription{
+                                .stencilLoadOp = AttachmentLoadOperation::DontCare,
+                                .stencilstoreOp = AttachmentStoreOperation::DontCare,
+                        },
+                        AttachmentDescription{
+                                .format = depthFormat,
+                                .loadOp = AttachmentLoadOperation::DontCare,
+                                .storeOp = AttachmentStoreOperation::DontCare,
+                                .stencilstoreOp = AttachmentStoreOperation::DontCare,
+                                .finalLayout = TextureLayout::DepthStencilAttachmentOptimal },
+                        AttachmentDescription{
+                                .stencilLoadOp = AttachmentLoadOperation::DontCare,
+                                .stencilstoreOp = AttachmentStoreOperation::DontCare,
+                                .finalLayout = TextureLayout::PresentSrc },
+
+                },
+                .subpassDescriptions = {
+                        SubpassDescription{ .colorAttachmentReference = { { 0 } }, .depthAttachmentReference = { { 1 } } },
+                        SubpassDescription{ .inputAttachmentReference = { { 0 } }, .colorAttachmentReference = { { 2 } } },
+                },
+                .subpassDependencies = {
+                        SubpassDependenciesDescriptions{
+                                .srcSubpass = 0,
+                                .dstSubpass = 1,
+                                .srcStageMask = PipelineStageFlagBit::ColorAttachmentOutputBit | PipelineStageFlagBit::EarlyFragmentTestBit,
+                                .dstStageMask = PipelineStageFlagBit::FragmentShaderBit | PipelineStageFlagBit::ColorAttachmentOutputBit,
+                                .srcAccessMask = AccessFlagBit::ColorAttachmentWriteBit | AccessFlagBit::DepthStencilAttachmentWriteBit,
+                                .dstAccessMask = AccessFlagBit::InputAttachmentReadBit | AccessFlagBit::ColorAttachmentWriteBit,
+                        },
+                },
+        });
 
         const Texture colorTexture = device.createTexture(TextureOptions{
+                .type = TextureType::TextureType2D,
+                .format = Format::R8G8B8A8_UNORM,
+                .extent = { 256, 256, 1 },
+                .mipLevels = 1,
+                .samples = SampleCountFlagBits::Samples1Bit,
+                .usage = TextureUsageFlagBits::ColorAttachmentBit | TextureUsageFlagBits::InputAttachmentBit,
+                .memoryUsage = MemoryUsage::GpuOnly,
+        });
+        const Texture depthTexture = device.createTexture(TextureOptions{
+                .type = TextureType::TextureType2D,
+                .format = depthFormat,
+                .extent = { 256, 256, 1 },
+                .mipLevels = 1,
+                .samples = SampleCountFlagBits::Samples1Bit,
+                .usage = TextureUsageFlagBits::DepthStencilAttachmentBit,
+                .memoryUsage = MemoryUsage::GpuOnly,
+        });
+        const Texture outputTexture = device.createTexture(TextureOptions{
                 .type = TextureType::TextureType2D,
                 .format = Format::R8G8B8A8_UNORM,
                 .extent = { 256, 256, 1 },
@@ -689,30 +756,33 @@ TEST_SUITE("RenderPassCommandRecorder")
                 .usage = TextureUsageFlagBits::ColorAttachmentBit,
                 .memoryUsage = MemoryUsage::GpuOnly,
         });
-        const Texture depthTexture = device.createTexture(TextureOptions{
-                .type = TextureType::TextureType2D,
-#if defined(KD_PLATFORM_MACOS)
-                .format = Format::D32_SFLOAT_S8_UINT,
-#else
-                .format = Format::D24_UNORM_S8_UINT,
-#endif
-                .extent = { 256, 256, 1 },
-                .mipLevels = 1,
-                .samples = SampleCountFlagBits::Samples1Bit,
-                .usage = TextureUsageFlagBits::DepthStencilAttachmentBit,
-                .memoryUsage = MemoryUsage::GpuOnly,
-        });
 
         const TextureView colorTextureView = colorTexture.createView();
         const TextureView depthTextureView = depthTexture.createView();
+        const TextureView outputTextureView = outputTexture.createView();
 
-        const PipelineLayout pipelineLayout = device.createPipelineLayout();
+        const PipelineLayout pipelineLayoutSubpass0 = device.createPipelineLayout();
+
+        const BindGroupLayoutOptions bindGroupLayoutOptions = {
+            .bindings = { { .binding = 0,
+                            .resourceType = ResourceBindingType::InputAttachment,
+                            .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit) } }
+        };
+
+        auto colorBindGroupLayout = device.createBindGroupLayout(bindGroupLayoutOptions);
+
+        const PipelineLayoutOptions pipelineLayoutOptions = {
+            .bindGroupLayouts = { colorBindGroupLayout },
+        };
+
+        const PipelineLayout pipelineLayoutSubpass1 = device.createPipelineLayout(pipelineLayoutOptions);
+
         const GraphicsPipeline pipelineSubpass0 = device.createGraphicsPipeline(GraphicsPipelineOptions{
                 .shaderStages = {
-                        { .shaderModule = vertexShader.handle(), .stage = ShaderStageFlagBits::VertexBit },
-                        { .shaderModule = fragmentShader.handle(), .stage = ShaderStageFlagBits::FragmentBit },
+                        { .shaderModule = triangleVertexShader.handle(), .stage = ShaderStageFlagBits::VertexBit },
+                        { .shaderModule = triangleFragmentShader.handle(), .stage = ShaderStageFlagBits::FragmentBit },
                 },
-                .layout = pipelineLayout.handle(),
+                .layout = pipelineLayoutSubpass0.handle(),
                 .vertex = {
                         .buffers = {
                                 { .binding = 0, .stride = 2 * 4 * sizeof(float) },
@@ -725,44 +795,59 @@ TEST_SUITE("RenderPassCommandRecorder")
                 .renderTargets = {
                         { .format = Format::R8G8B8A8_UNORM },
                 },
-                .depthStencil = { .format = Format::D24_UNORM_S8_UINT, .depthWritesEnabled = true, .depthCompareOperation = CompareOperation::Less },
+                .depthStencil = { .format = depthFormat, .depthWritesEnabled = true, .depthCompareOperation = CompareOperation::Less },
+                .renderPass = renderPass.handle(),
                 .subpassIndex = 0,
         });
 
         const GraphicsPipeline pipelineSubpass1 = device.createGraphicsPipeline(GraphicsPipelineOptions{
                 .shaderStages = {
-                        { .shaderModule = vertexShader.handle(), .stage = ShaderStageFlagBits::VertexBit },
-                        { .shaderModule = fragmentShader.handle(), .stage = ShaderStageFlagBits::FragmentBit },
+                        { .shaderModule = readVertexShader.handle(), .stage = ShaderStageFlagBits::VertexBit },
+                        { .shaderModule = readFragmentShader.handle(), .stage = ShaderStageFlagBits::FragmentBit },
                 },
-                .layout = pipelineLayout.handle(),
-                .vertex = {
-                        .buffers = {
-                                { .binding = 0, .stride = 2 * 4 * sizeof(float) },
-                        },
-                        .attributes = {
-                                { .location = 0, .binding = 0, .format = Format::R32G32B32A32_SFLOAT }, // Position
-                                { .location = 1, .binding = 0, .format = Format::R32G32B32A32_SFLOAT, .offset = 4 * sizeof(float) }, // Color
-                        },
-                },
+                .layout = pipelineLayoutSubpass1.handle(),
                 .renderTargets = {
                         { .format = Format::R8G8B8A8_UNORM },
                 },
-                .depthStencil = { .format = Format::D24_UNORM_S8_UINT, .depthWritesEnabled = true, .depthCompareOperation = CompareOperation::Less },
+                .renderPass = renderPass.handle(),
                 .subpassIndex = 1,
         });
+
+        // THEN
+        REQUIRE(pipelineLayoutSubpass0.isValid());
+        REQUIRE(pipelineLayoutSubpass1.isValid());
+        REQUIRE(pipelineSubpass0.isValid());
+        REQUIRE(pipelineSubpass1.isValid());
+        REQUIRE(outputTextureView.isValid());
+        REQUIRE(depthTextureView.isValid());
+        REQUIRE(colorTextureView.isValid());
+        REQUIRE(renderPass.isValid());
+        REQUIRE(device.isValid());
 
         SUBCASE("Can move to next subpass")
         {
             // GIVEN
             CommandRecorder commandRecorder = device.createCommandRecorder();
-            const RenderPassCommandRecorderOptions renderPassOptions{
-                .colorAttachments = {
-                        { .view = colorTextureView,
-                          .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
-                          .finalLayout = TextureLayout::PresentSrc } },
-                .depthStencilAttachment = {
-                        .view = depthTextureView,
-                }
+            const RenderPassCommandRecorderWithRenderPassOptions renderPassOptions{
+                .renderPass = renderPass.handle(),
+                .attachments = {
+                        {
+                                .view = colorTextureView,
+                                .color = Attachment::ColorOperations{
+                                        .clearValue = ColorClearValue{ 0.3f, 0.3f, 0.3f, 1.0f },
+                                },
+                        },
+                        {
+                                .view = depthTextureView,
+                                .depth = Attachment::DepthStencilOperations{},
+                        },
+                        {
+                                .view = outputTextureView,
+                                .color = Attachment::ColorOperations{
+                                        .clearValue = ColorClearValue{ 0.3f, 0.3f, 0.3f, 1.0f },
+                                },
+                        },
+                },
             };
 
             // WHEN

@@ -6,5 +6,6 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
+CompileShaderSet(KDGpu_RenderPassCommandRecorderSubpass read-image)
 CompileShaderSet(KDGpu_RenderPassCommandRecorder triangle)
 CompileShaderSet(KDGpu_RenderPassCommandRecorderMultiView triangle-multi-view)
