@@ -2738,14 +2738,40 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
     if (hasDepthResolveAttachment)
         subpass.pNext = &depthResolve;
 
+    // Dependencies to prevent write on write issues with color and depth buffers
+    // when rendering without wait idle
+    const std::vector<VkSubpassDependency2> subpassDependencies = {
+        // // Color & Depth Buffer Dependency to prevent clearing before previous renderpass has been completed
+        {
+                .sType = VK_STRUCTURE_TYPE_SUBPASS_DEPENDENCY_2,
+                .srcSubpass = VK_SUBPASS_EXTERNAL,
+                .dstSubpass = 0,
+                .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                .srcAccessMask = VK_ACCESS_NONE,
+                .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+                .dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT,
+        },
+        {
+                .sType = VK_STRUCTURE_TYPE_SUBPASS_DEPENDENCY_2,
+                .srcSubpass = VK_SUBPASS_EXTERNAL,
+                .dstSubpass = 0,
+                .srcStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
+                .dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
+                .srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+                .dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT,
+                .dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT,
+        },
+    };
+
     VkRenderPassCreateInfo2 renderPassInfo = {};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO_2;
     renderPassInfo.attachmentCount = allAttachments.size();
     renderPassInfo.pAttachments = allAttachments.data();
     renderPassInfo.subpassCount = 1;
     renderPassInfo.pSubpasses = &subpass;
-    renderPassInfo.dependencyCount = 0;
-    renderPassInfo.pDependencies = nullptr;
+    renderPassInfo.dependencyCount = subpassDependencies.size();
+    renderPassInfo.pDependencies = subpassDependencies.data();
 
     if (viewCount > 1) {
         // pViewMask is a bitfield of view indices describing which views rendering is broadcast to in this subpass
