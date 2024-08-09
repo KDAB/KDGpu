@@ -533,8 +533,6 @@ void VulkanCommandRecorder::buildAccelerationStructures(const BuildAccelerationS
 {
     auto vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
 
-    assert(options.buildGeometryInfos.size() == options.buildRangeInfos.size());
-
     // So it doesn't go out of scope and destroy itself before the cmd is called
     std::vector<std::vector<VkAccelerationStructureGeometryKHR>> geometriesBacking;
     geometriesBacking.reserve(options.buildGeometryInfos.size());
