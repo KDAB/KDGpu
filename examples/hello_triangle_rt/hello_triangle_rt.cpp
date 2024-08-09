@@ -395,12 +395,12 @@ void HelloTriangleRt::render()
 
         rtPass.end();
 
-        // Transition Image to PresentSrc Layout
+        // Transition Image to ColorAttachmentOptimal Layout
         commandRecorder.textureMemoryBarrier(TextureMemoryBarrierOptions{
                 .srcStages = KDGpu::PipelineStageFlags(KDGpu::PipelineStageFlagBit::RayTracingShaderBit),
                 .srcMask = KDGpu::AccessFlagBit::ShaderReadBit | KDGpu::AccessFlagBit::ShaderWriteBit,
-                .dstStages = KDGpu::PipelineStageFlags(KDGpu::PipelineStageFlagBit::TopOfPipeBit),
-                .dstMask = KDGpu::AccessFlagBit::None,
+                .dstStages = KDGpu::PipelineStageFlags(KDGpu::PipelineStageFlagBit::ColorAttachmentOutputBit),
+                .dstMask = KDGpu::AccessFlagBit::ColorAttachmentReadBit,
                 .oldLayout = KDGpu::TextureLayout::General,
                 .newLayout = KDGpu::TextureLayout::ColorAttachmentOptimal,
                 .texture = outputImage,
