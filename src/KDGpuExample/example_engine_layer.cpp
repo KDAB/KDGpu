@@ -35,7 +35,7 @@ ExampleEngineLayer::ExampleEngineLayer()
     if (!m_logger)
         m_logger = spdlog::stdout_color_mt("engine");
 
-    m_samples.valueChanged().connect([this]() { recreateSampleDependentResources(); });
+    m_samples.valueChanged().connect([this]() { recreateSampleDependentResources(); }).release();
 }
 
 ExampleEngineLayer::~ExampleEngineLayer()
@@ -137,8 +137,9 @@ void ExampleEngineLayer::recreateImGuiOverlay()
 {
     m_imguiOverlay = std::make_unique<ImGuiItem>(&m_device, &m_queue);
     m_window->scaleFactor.valueChanged().connect([this](const float scale_factor) {
-        m_imguiOverlay->updateScale(scale_factor);
-    });
+                                            m_imguiOverlay->updateScale(scale_factor);
+                                        })
+            .release();
 
     m_imguiOverlay->initialize(m_window->scaleFactor.get(), m_samples.get(), m_swapchainFormat, m_depthFormat);
 }

@@ -44,11 +44,12 @@ View::View()
     visible = true;
 
     visible.valueChanged().connect([](const bool &visible) {
-        if (visible == false) {
-            auto app = KDFoundation::CoreApplication::instance();
-            app->quit();
-        }
-    });
+                              if (visible == false) {
+                                  auto app = KDFoundation::CoreApplication::instance();
+                                  app->quit();
+                              }
+                          })
+            .release();
 }
 
 View::~View()
