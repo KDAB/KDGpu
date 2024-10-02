@@ -130,9 +130,10 @@ int main()
     window.height = 1080;
     window.visible = true;
     window.visible.valueChanged().connect([&app](bool visible) {
-        if (visible == false)
-            app.quit();
-    });
+                                     if (visible == false)
+                                         app.quit();
+                                 })
+            .release();
     //![0]
 
     SurfaceOptions surfaceOptions{};

@@ -54,8 +54,8 @@ void XrExampleEngineLayer::onAttached()
                         XR_KHR_COMPOSITION_LAYER_CYLINDER_EXTENSION_NAME }
     };
     m_xrInstance = m_xrApi->createInstance(xrInstanceOptions);
-    m_xrInstance.instanceLost.connect(&XrExampleEngineLayer::onInstanceLost, this);
-    m_xrInstance.interactionProfileChanged.connect(&XrExampleEngineLayer::onInteractionProfileChanged, this);
+    m_xrInstance.instanceLost.connect(&XrExampleEngineLayer::onInstanceLost, this).release();
+    m_xrInstance.interactionProfileChanged.connect(&XrExampleEngineLayer::onInteractionProfileChanged, this).release();
     const auto properties = m_xrInstance.properties();
     SPDLOG_LOGGER_INFO(m_logger, "XR Runtime: {}", properties.runtimeName);
     SPDLOG_LOGGER_INFO(m_logger, "XR Runtime Version: {}", KDXr::getVersionAsString(properties.runtimeVersion));
@@ -122,9 +122,10 @@ void XrExampleEngineLayer::onAttached()
     // Create the XR session and track the state changes.
     m_session = m_system->createSession({ .graphicsApi = m_api.get(), .device = m_device });
     m_session.running.valueChanged().connect([this](bool running) {
-        SPDLOG_LOGGER_INFO(m_logger, "Session Running: {}", running);
-    });
-    m_session.state.valueAboutToChange().connect(&XrExampleEngineLayer::onSessionStateChanged, this);
+                                        SPDLOG_LOGGER_INFO(m_logger, "Session Running: {}", running);
+                                    })
+            .release();
+    m_session.state.valueAboutToChange().connect(&XrExampleEngineLayer::onSessionStateChanged, this).release();
 
     // Create a reference space - default to local space
     m_referenceSpace = m_session.createReferenceSpace(m_referenceSpaceOptions);

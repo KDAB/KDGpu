@@ -26,7 +26,7 @@ Engine::Engine()
         SPDLOG_LOGGER_INFO(m_logger, "Hello from the Engine Logger");
     }
 
-    running.valueChanged().connect(&Engine::onRunningChanged, this);
+    running.valueChanged().connect(&Engine::onRunningChanged, this).release();
 
     auto app = KDFoundation::CoreApplication::instance();
     if (app)
