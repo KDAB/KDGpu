@@ -21,14 +21,15 @@ having to be bogged down in the intricacies.
 
 KDGpu is independent of any particular windowing system. You can use it purely with platform
 native APIs or you can checkout the included KDGpuExample library which makes it trivial to
-use KDGpu with KDGui::Window. Check out the handy [KDBindings](https://github.com/KDAB/KDBindings)
-repository too for some more syntactic sugar.
+use KDGpu with KDGui::Window from the [KDUtils](https://github.com/KDAB/KDUtils) library.
+Check out the handy [KDBindings](https://github.com/KDAB/KDBindings) repository too for some
+more syntactic sugar with Signals and Slots, Properties and reactive Property Bindings.
 
 In addition to being an enabler for Vulkan, the KDGpu project now also includes a new library,
 KDXr, which aims to be an enabler for OpenXR. Using the combination of KDGpu and KDXr allows
 application developers to very easily create AR and VR application experiences.
 
-More information can be found in the [documentation](https://docs.kdab.com/toy-renderer/unstable/index.html).
+More information can be found in the [documentation](https://docs.kdab.com/kdgpu/unstable/index.html).
 
 ### What does KDGpu provide?
 
