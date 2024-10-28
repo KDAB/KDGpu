@@ -3253,6 +3253,13 @@ Handle<AccelerationStructure_t> VulkanResourceManager::createAccelerationStructu
     VkAccelerationStructureBuildSizesInfoKHR buildSizesInfoKhr{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR };
     vulkanDevice->vkGetAccelerationStructureBuildSizesKHR(vulkanDevice->device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_HOST_KHR, &geometryInfoKhr, maxPrimitiveCountPerGeometry.data(), &buildSizesInfoKhr);
 
+    // On AMD, updateScratchSize and buildScractchSize return 0
+    // We therefore update these values to  accelerationStructureSize which is the size needed for a build or update
+    if (buildSizesInfoKhr.updateScratchSize == 0)
+        buildSizesInfoKhr.updateScratchSize = buildSizesInfoKhr.accelerationStructureSize;
+    if (buildSizesInfoKhr.buildScratchSize == 0)
+        buildSizesInfoKhr.buildScratchSize = buildSizesInfoKhr.accelerationStructureSize;
+
     Handle<Buffer_t> backingBufferH = VulkanAccelerationStructure::createAccelerationBuffer(deviceHandle, this, buildSizesInfoKhr.accelerationStructureSize);
 
     VulkanBuffer *backingBuffer = getBuffer(backingBufferH);
