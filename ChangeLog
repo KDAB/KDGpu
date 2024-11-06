@@ -1,3 +1,12 @@
+- v0.7.0
+  - Add support for BufferAdress retrieval
+  - Add support for rasterizerDiscard and depthClamping on GraphicsPipeline
+  - Add support for InputAttachments bind groups
+  - Add support for Mesh shaders
+  - Initial support for subpasses
+  - Fixes for stereo/multiview handling:
+    - FramebufferKey: account for viewCount and arrayLayers
+    - Make it possible to specify array layer in RenderPassCommandRecorder
 - v0.6.0
   - Add support for RayTracing VK_KHR_ray_tracing_pipeline
   - Android support
