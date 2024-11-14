@@ -92,6 +92,9 @@ std::vector<const char *> getDefaultRequestedDeviceExtensions()
 #if defined(KDGPU_PLATFORM_MACOS)
     extensions.push_back(VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME);
 #endif
+#if defined(VK_KHR_shader_non_semantic_info)
+    extensions.push_back(VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME);
+#endif
     return extensions;
 }
 
