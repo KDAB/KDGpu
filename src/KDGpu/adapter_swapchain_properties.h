@@ -13,6 +13,7 @@
 #include <KDGpu/gpu_core.h>
 #include <KDGpu/utils/logging.h>
 
+#include <fmt/ranges.h>
 #include <vector>
 
 namespace KDGpu {
