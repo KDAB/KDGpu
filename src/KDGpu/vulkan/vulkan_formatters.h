@@ -39,7 +39,7 @@ inline std::string getResultAsString(VkResult vulkan_result)
 template<>
 struct KDGPU_EXPORT fmt::formatter<VkResult> : fmt::formatter<std::string> {
     template<typename FormatContext>
-    auto format(VkResult const &result, FormatContext &ctx)
+    auto format(VkResult const &result, FormatContext &ctx) const
     {
         return fmt::formatter<std::string>::format(getResultAsString(result), ctx);
     }
