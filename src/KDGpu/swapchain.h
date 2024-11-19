@@ -19,8 +19,6 @@
 
 namespace KDGpu {
 
-class GraphicsApi;
-
 struct GpuSemaphore_t;
 struct Swapchain_t;
 struct SwapchainOptions;

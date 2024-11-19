@@ -39,7 +39,6 @@
 
 namespace KDGpu {
 
-class GraphicsApi;
 class Adapter;
 
 struct Device_t;

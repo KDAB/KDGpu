@@ -1,5 +1,5 @@
 /*
-  This file is part of KDGpu.
+This file is part of KDGpu.
 
   SPDX-FileCopyrightText: 2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
 
@@ -10,14 +10,6 @@
 
 #pragma once
 
-namespace KDGpu {
+// WARNING! Only include this from cpp files so it does not leak to the public API!
 
-/**
- * @brief ApiSampler
- * \ingroup api
- *
- */
-struct ApiSampler {
-};
-
-} // namespace KDGpu
+#include <KDGpu/vulkan/vulkan_graphics_api.h>

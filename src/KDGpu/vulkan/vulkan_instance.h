@@ -10,10 +10,15 @@
 
 #pragma once
 
-#include <KDGpu/api/api_instance.h>
 #include <KDGpu/kdgpu_export.h>
 #include <KDGpu/config.h>
+#include <KDGpu/gpu_core.h>
+#include <KDGpu/adapter.h>
+#include <KDGpu/handle.h>
+#include <KDGpu/surface_options.h>
+
 #include <vulkan/vulkan.h>
+
 #include <map>
 
 #if defined(KDGPU_PLATFORM_WIN32)
@@ -29,13 +34,13 @@ class VulkanResourceManager;
  * \ingroup vulkan
  *
  */
-struct KDGPU_EXPORT VulkanInstance : public ApiInstance {
+struct KDGPU_EXPORT VulkanInstance {
     explicit VulkanInstance(VulkanResourceManager *_vulkanResourceManager, VkInstance _instance, bool _isOwned = true) noexcept;
 
-    std::vector<Extension> extensions() const final;
-    std::vector<Handle<Adapter_t>> queryAdapters(const Handle<Instance_t> &instanceHandle) final;
-    std::vector<AdapterGroup> queryAdapterGroups() final;
-    Handle<Surface_t> createSurface(const SurfaceOptions &options) final;
+    std::vector<Extension> extensions() const;
+    std::vector<Handle<Adapter_t>> queryAdapters(const Handle<Instance_t> &instanceHandle);
+    std::vector<AdapterGroup> queryAdapterGroups();
+    Handle<Surface_t> createSurface(const SurfaceOptions &options);
     Handle<Surface_t> createSurface(VkSurfaceKHR surface);
 
     VulkanResourceManager *vulkanResourceManager{ nullptr };

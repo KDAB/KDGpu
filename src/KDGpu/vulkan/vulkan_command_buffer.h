@@ -10,7 +10,6 @@
 
 #pragma once
 
-#include <KDGpu/api/api_command_buffer.h>
 #include <KDGpu/handle.h>
 #include <KDGpu/kdgpu_export.h>
 
@@ -27,15 +26,15 @@ class VulkanResourceManager;
  * \ingroup vulkan
  *
  */
-struct KDGPU_EXPORT VulkanCommandBuffer : public ApiCommandBuffer {
+struct KDGPU_EXPORT VulkanCommandBuffer {
     explicit VulkanCommandBuffer(VkCommandBuffer _commandBuffer,
                                  VkCommandPool _commandPool,
                                  VkCommandBufferLevel _commandLevel,
                                  VulkanResourceManager *_vulkanResourceManager,
                                  const Handle<Device_t> &_deviceHandle);
 
-    void begin() final;
-    void finish() final;
+    void begin();
+    void finish();
 
     VkCommandBuffer commandBuffer{ VK_NULL_HANDLE };
     VkCommandPool commandPool{ VK_NULL_HANDLE };

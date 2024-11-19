@@ -12,10 +12,10 @@
 
 #include <KDGpu/handle.h>
 #include <KDGpu/kdgpu_export.h>
+#include <KDGpu/graphics_api.h>
 
 namespace KDGpu {
 
-class GraphicsApi;
 struct Device_t;
 struct Sampler_t;
 struct SamplerOptions;

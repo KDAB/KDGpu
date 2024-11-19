@@ -10,8 +10,6 @@
 
 #pragma once
 
-#include <KDGpu/api/api_shader_module.h>
-
 #include <KDGpu/handle.h>
 #include <KDGpu/kdgpu_export.h>
 
@@ -28,7 +26,7 @@ struct Device_t;
  * \ingroup vulkan
  *
  */
-struct KDGPU_EXPORT VulkanShaderModule : public ApiShaderModule {
+struct KDGPU_EXPORT VulkanShaderModule {
     explicit VulkanShaderModule(VkShaderModule _shaderModule,
                                 VulkanResourceManager *_vulkanResourceManager,
                                 const Handle<Device_t> _deviceHandle);

@@ -10,9 +10,7 @@
 
 #include "sampler.h"
 
-#include <KDGpu/graphics_api.h>
-#include <KDGpu/resource_manager.h>
-#include <KDGpu/api/api_sampler.h>
+#include <KDGpu/api/graphics_api_impl.h>
 
 namespace KDGpu {
 

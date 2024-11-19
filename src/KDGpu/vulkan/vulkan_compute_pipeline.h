@@ -10,7 +10,6 @@
 
 #pragma once
 
-#include <KDGpu/api/api_compute_pipeline.h>
 #include <KDGpu/handle.h>
 #include <KDGpu/kdgpu_export.h>
 
@@ -28,7 +27,7 @@ struct PipelineLayout_t;
  * \ingroup vulkan
  *
  */
-struct KDGPU_EXPORT VulkanComputePipeline : public ApiComputePipeline {
+struct KDGPU_EXPORT VulkanComputePipeline {
     explicit VulkanComputePipeline(VkPipeline _pipeline,
                                    VulkanResourceManager *_vulkanResourceManager,
                                    const Handle<Device_t> &_deviceHandle,

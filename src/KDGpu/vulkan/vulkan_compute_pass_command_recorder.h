@@ -10,9 +10,11 @@
 
 #pragma once
 
-#include <KDGpu/api/api_compute_pass_command_recorder.h>
+#include <KDGpu/bind_group.h>
+#include <KDGpu/compute_pass_command_recorder.h>
 #include <KDGpu/handle.h>
 #include <KDGpu/kdgpu_export.h>
+
 #include <vulkan/vulkan.h>
 
 namespace KDGpu {
@@ -27,21 +29,21 @@ struct Device_t;
  * \ingroup vulkan
  *
  */
-struct KDGPU_EXPORT VulkanComputePassCommandRecorder : public ApiComputePassCommandRecorder {
+struct KDGPU_EXPORT VulkanComputePassCommandRecorder {
 
     explicit VulkanComputePassCommandRecorder(VkCommandBuffer _commandBuffer,
                                               VulkanResourceManager *_vulkanResourceManager,
                                               const Handle<Device_t> &_deviceHandle);
 
-    void setPipeline(const Handle<ComputePipeline_t> &pipeline) final;
+    void setPipeline(const Handle<ComputePipeline_t> &pipeline);
     void setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroup,
-                      const Handle<PipelineLayout_t> &pipelineLayout, const std::vector<uint32_t> &dynamicBufferOffsets) final;
-    void dispatchCompute(const ComputeCommand &command) final;
-    void dispatchCompute(const std::vector<ComputeCommand> &commands) final;
-    void dispatchComputeIndirect(const ComputeCommandIndirect &command) final;
-    void dispatchComputeIndirect(const std::vector<ComputeCommandIndirect> &commands) final;
-    void pushConstant(const PushConstantRange &constantRange, const void *data) final;
-    void end() final;
+                      const Handle<PipelineLayout_t> &pipelineLayout, const std::vector<uint32_t> &dynamicBufferOffsets);
+    void dispatchCompute(const ComputeCommand &command);
+    void dispatchCompute(const std::vector<ComputeCommand> &commands);
+    void dispatchComputeIndirect(const ComputeCommandIndirect &command);
+    void dispatchComputeIndirect(const std::vector<ComputeCommandIndirect> &commands);
+    void pushConstant(const PushConstantRange &constantRange, const void *data);
+    void end();
 
     VkCommandBuffer commandBuffer{ VK_NULL_HANDLE };
     VulkanResourceManager *vulkanResourceManager{ nullptr };

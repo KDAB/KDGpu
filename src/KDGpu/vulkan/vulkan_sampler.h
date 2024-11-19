@@ -10,7 +10,6 @@
 
 #pragma once
 
-#include <KDGpu/api/api_sampler.h>
 #include <KDGpu/handle.h>
 #include <KDGpu/kdgpu_export.h>
 #include <vulkan/vulkan.h>
@@ -25,7 +24,7 @@ struct Device_t;
  * \ingroup vulkan
  *
  */
-struct KDGPU_EXPORT VulkanSampler : public ApiSampler {
+struct KDGPU_EXPORT VulkanSampler {
 
     explicit VulkanSampler(VkSampler _sampler, const Handle<Device_t> &_deviceHandle);
 

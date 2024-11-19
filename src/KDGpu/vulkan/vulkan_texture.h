@@ -10,11 +10,10 @@
 
 #pragma once
 
-#include <KDGpu/api/api_texture.h>
-
 #include <KDGpu/gpu_core.h>
 #include <KDGpu/handle.h>
 #include <KDGpu/kdgpu_export.h>
+#include <KDGpu/texture.h>
 
 #include <vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
@@ -30,7 +29,7 @@ struct Device_t;
  * \ingroup vulkan
  *
  */
-struct KDGPU_EXPORT VulkanTexture : public ApiTexture {
+struct KDGPU_EXPORT VulkanTexture {
     explicit VulkanTexture(VkImage _image,
                            VmaAllocation _allocation,
                            VmaAllocator _allocator,
@@ -44,10 +43,10 @@ struct KDGPU_EXPORT VulkanTexture : public ApiTexture {
                            const MemoryHandle &_externalMemoryHandle,
                            bool _ownedBySwapchain = false);
 
-    void *map() final;
-    void unmap() final;
-    SubresourceLayout getSubresourceLayout(const TextureSubresource &subresource) const final;
-    MemoryHandle externalMemoryHandle() const final;
+    void *map();
+    void unmap();
+    SubresourceLayout getSubresourceLayout(const TextureSubresource &subresource) const;
+    MemoryHandle externalMemoryHandle() const;
 
     VkImage image{ VK_NULL_HANDLE };
     VmaAllocation allocation{ VK_NULL_HANDLE };

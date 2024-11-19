@@ -18,8 +18,7 @@ namespace KDGpu {
 VulkanRayTracingPassCommandRecorder::VulkanRayTracingPassCommandRecorder(VkCommandBuffer _commandBuffer,
                                                                          VulkanResourceManager *_vulkanResourceManager,
                                                                          const Handle<Device_t> &_deviceHandle)
-    : ApiRayTracingPassCommandRecorder()
-    , commandBuffer(_commandBuffer)
+    : commandBuffer(_commandBuffer)
     , vulkanResourceManager(_vulkanResourceManager)
     , deviceHandle(_deviceHandle)
 {

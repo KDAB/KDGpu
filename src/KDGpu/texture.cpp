@@ -10,9 +10,7 @@
 
 #include "texture.h"
 
-#include <KDGpu/graphics_api.h>
-#include <KDGpu/resource_manager.h>
-#include <KDGpu/api/api_texture.h>
+#include <KDGpu/api/graphics_api_impl.h>
 #include <KDGpu/texture_options.h>
 #include <KDGpu/command_recorder.h>
 

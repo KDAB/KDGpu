@@ -10,8 +10,6 @@
 
 #pragma once
 
-#include <KDGpu/api/api_framebuffer.h>
-
 #include <KDGpu/handle.h>
 #include <KDGpu/utils/hash_utils.h>
 
@@ -71,7 +69,7 @@ struct VulkanFramebufferKey {
     }
 };
 
-struct VulkanFramebuffer : public ApiFramebuffer {
+struct VulkanFramebuffer {
     explicit VulkanFramebuffer(VkFramebuffer _framebuffer);
 
     VkFramebuffer framebuffer{ VK_NULL_HANDLE };

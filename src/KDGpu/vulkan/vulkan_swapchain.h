@@ -10,11 +10,11 @@
 
 #pragma once
 
-#include <KDGpu/api/api_swapchain.h>
-
 #include <KDGpu/gpu_core.h>
+#include <KDGpu/gpu_semaphore.h>
 #include <KDGpu/handle.h>
 #include <KDGpu/kdgpu_export.h>
+#include <KDGpu/texture.h>
 
 #include <vulkan/vulkan.h>
 
@@ -29,7 +29,7 @@ struct Device_t;
  * \ingroup vulkan
  *
  */
-struct KDGPU_EXPORT VulkanSwapchain : public ApiSwapchain {
+struct KDGPU_EXPORT VulkanSwapchain {
     explicit VulkanSwapchain(VkSwapchainKHR _swapchain,
                              Format _format,
                              Extent3D _extent,
@@ -38,9 +38,9 @@ struct KDGPU_EXPORT VulkanSwapchain : public ApiSwapchain {
                              VulkanResourceManager *_vulkanResourceManager,
                              const Handle<Device_t> &_deviceHandle);
 
-    std::vector<Handle<Texture_t>> getTextures() final;
+    std::vector<Handle<Texture_t>> getTextures();
 
-    AcquireImageResult getNextImageIndex(uint32_t &imageIndex, const Handle<GpuSemaphore_t> &semaphore) final;
+    AcquireImageResult getNextImageIndex(uint32_t &imageIndex, const Handle<GpuSemaphore_t> &semaphore);
 
     VkSwapchainKHR swapchain{ VK_NULL_HANDLE };
     Format format;

@@ -10,7 +10,6 @@
 
 #pragma once
 
-#include <KDGpu/api/api_bind_group_layout.h>
 #include <KDGpu/bind_group_layout_options.h>
 #include <KDGpu/handle.h>
 #include <KDGpu/kdgpu_export.h>
@@ -26,12 +25,12 @@ struct Device_t;
  * \ingroup vulkan
  *
  */
-struct KDGPU_EXPORT VulkanBindGroupLayout : public ApiBindGroupLayout {
+struct KDGPU_EXPORT VulkanBindGroupLayout {
     explicit VulkanBindGroupLayout(VkDescriptorSetLayout _descriptorSetLayout,
                                    const Handle<Device_t> &_deviceHandle,
                                    const std::vector<ResourceBindingLayout> &bindings);
 
-    bool isCompatibleWith(const ApiBindGroupLayout &other) const final;
+    bool isCompatibleWith(const VulkanBindGroupLayout &other) const;
 
     VkDescriptorSetLayout descriptorSetLayout{ VK_NULL_HANDLE };
     Handle<Device_t> deviceHandle;

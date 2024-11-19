@@ -22,8 +22,7 @@ VulkanRenderPassCommandRecorder::VulkanRenderPassCommandRecorder(VkCommandBuffer
                                                                  VkRect2D _renderArea,
                                                                  VulkanResourceManager *_vulkanResourceManager,
                                                                  const Handle<Device_t> &_deviceHandle)
-    : ApiRenderPassCommandRecorder()
-    , commandBuffer(_commandBuffer)
+    : commandBuffer(_commandBuffer)
     , renderArea(_renderArea)
     , vulkanResourceManager(_vulkanResourceManager)
     , deviceHandle(_deviceHandle)

@@ -16,7 +16,7 @@
 #include <KDXr/utils/formatters.h>
 #include <KDXr/utils/logging.h>
 
-#include <KDGpu/graphics_api.h>
+#include <KDGpu/api/graphics_api_impl.h>
 
 namespace {
 
@@ -111,7 +111,7 @@ std::vector<KDGpu::Format> OpenXrSession::supportedSwapchainFormats() const
     // Note: KDGpu formats have the same value as the Vulkan formats. So if we are using the Vulkan backend we can just
     // use the KDGpu formats directly. If we are using the Metal or DX12 backend we need to convert the KDGpu formats to the
     // Metal or DX12 formats.
-    if (graphicsApi->api() == KDGpu::GraphicsApi::Api::Vulkan) {
+    if (graphicsApi->api() == KDGpu::ApiType::Vulkan) {
         std::vector<KDGpu::Format> formats;
         formats.reserve(xrSwapchainFormats.size());
         for (const auto &xrSwapchainFormat : xrSwapchainFormats) {

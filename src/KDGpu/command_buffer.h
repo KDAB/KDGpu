@@ -12,12 +12,12 @@
 
 #include <KDGpu/handle.h>
 #include <KDGpu/kdgpu_export.h>
+#include <KDGpu/graphics_api.h>
 
 namespace KDGpu {
 
 struct CommandBuffer_t;
 struct Device_t;
-class GraphicsApi;
 
 /**
  * @brief CommandBuffer

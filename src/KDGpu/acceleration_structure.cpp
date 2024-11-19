@@ -10,9 +10,7 @@
 
 #include "acceleration_structure.h"
 
-#include <KDGpu/graphics_api.h>
-#include <KDGpu/api/api_buffer.h>
-#include <KDGpu/buffer_options.h>
+#include <KDGpu/api/graphics_api_impl.h>
 
 namespace KDGpu {
 

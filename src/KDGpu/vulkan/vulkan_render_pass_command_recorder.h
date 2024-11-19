@@ -10,9 +10,13 @@
 
 #pragma once
 
-#include <KDGpu/api/api_render_pass_command_recorder.h>
+#include <KDGpu/bind_group.h>
+#include <KDGpu/buffer.h>
+#include <KDGpu/graphics_pipeline.h>
 #include <KDGpu/kdgpu_export.h>
 #include <KDGpu/handle.h>
+#include <KDGpu/pipeline_layout.h>
+#include <KDGpu/render_pass_command_recorder.h>
 
 #include <vulkan/vulkan.h>
 
@@ -27,35 +31,35 @@ struct Device_t;
  * \ingroup vulkan
  *
  */
-struct KDGPU_EXPORT VulkanRenderPassCommandRecorder : public ApiRenderPassCommandRecorder {
+struct KDGPU_EXPORT VulkanRenderPassCommandRecorder {
     explicit VulkanRenderPassCommandRecorder(VkCommandBuffer _commandBuffer,
                                              VkRect2D _renderArea,
                                              VulkanResourceManager *_vulkanResourceManager,
                                              const Handle<Device_t> &_deviceHandle);
 
-    void setPipeline(const Handle<GraphicsPipeline_t> &pipeline) final;
-    void setVertexBuffer(uint32_t index, const Handle<Buffer_t> &buffer, DeviceSize offset) final;
-    void setIndexBuffer(const Handle<Buffer_t> &buffer, DeviceSize offset, IndexType indexType) final;
+    void setPipeline(const Handle<GraphicsPipeline_t> &pipeline);
+    void setVertexBuffer(uint32_t index, const Handle<Buffer_t> &buffer, DeviceSize offset);
+    void setIndexBuffer(const Handle<Buffer_t> &buffer, DeviceSize offset, IndexType indexType);
     void setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroup,
-                      const Handle<PipelineLayout_t> &pipelineLayout, const std::vector<uint32_t> &dynamicBufferOffsets) final;
-    void setViewport(const Viewport &viewport) final;
-    void setScissor(const Rect2D &scissor) final;
-    void setStencilReference(StencilFaceFlags faceMask, int reference) final;
-    void draw(const DrawCommand &drawCommand) final;
-    void draw(const std::vector<DrawCommand> &drawCommands) final;
-    void drawIndexed(const DrawIndexedCommand &drawCommand) final;
-    void drawIndexed(const std::vector<DrawIndexedCommand> &drawCommands) final;
-    void drawIndirect(const DrawIndirectCommand &drawCommand) final;
-    void drawIndirect(const std::vector<DrawIndirectCommand> &drawCommands) final;
-    void drawIndexedIndirect(const DrawIndexedIndirectCommand &drawCommand) final;
-    void drawIndexedIndirect(const std::vector<DrawIndexedIndirectCommand> &drawCommands) final;
-    void drawMeshTasks(const DrawMeshCommand &drawCommand) final;
-    void drawMeshTasks(const std::vector<DrawMeshCommand> &drawCommands) final;
-    void drawMeshTasksIndirect(const DrawMeshIndirectCommand &drawCommand) final;
-    void drawMeshTasksIndirect(const std::vector<DrawMeshIndirectCommand> &drawCommands) final;
-    void pushConstant(const PushConstantRange &constantRange, const void *data) final;
-    void nextSubpass() final;
-    void end() final;
+                      const Handle<PipelineLayout_t> &pipelineLayout, const std::vector<uint32_t> &dynamicBufferOffsets);
+    void setViewport(const Viewport &viewport);
+    void setScissor(const Rect2D &scissor);
+    void setStencilReference(StencilFaceFlags faceMask, int reference);
+    void draw(const DrawCommand &drawCommand);
+    void draw(const std::vector<DrawCommand> &drawCommands);
+    void drawIndexed(const DrawIndexedCommand &drawCommand);
+    void drawIndexed(const std::vector<DrawIndexedCommand> &drawCommands);
+    void drawIndirect(const DrawIndirectCommand &drawCommand);
+    void drawIndirect(const std::vector<DrawIndirectCommand> &drawCommands);
+    void drawIndexedIndirect(const DrawIndexedIndirectCommand &drawCommand);
+    void drawIndexedIndirect(const std::vector<DrawIndexedIndirectCommand> &drawCommands);
+    void drawMeshTasks(const DrawMeshCommand &drawCommand);
+    void drawMeshTasks(const std::vector<DrawMeshCommand> &drawCommands);
+    void drawMeshTasksIndirect(const DrawMeshIndirectCommand &drawCommand);
+    void drawMeshTasksIndirect(const std::vector<DrawMeshIndirectCommand> &drawCommands);
+    void pushConstant(const PushConstantRange &constantRange, const void *data);
+    void nextSubpass();
+    void end();
 
     VkCommandBuffer commandBuffer{ VK_NULL_HANDLE };
     VkRect2D renderArea{};

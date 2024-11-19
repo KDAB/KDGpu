@@ -12,11 +12,9 @@
 
 #include <KDGpu/handle.h>
 #include <KDGpu/kdgpu_export.h>
-#include <string>
+#include <KDGpu/graphics_api.h>
 
 namespace KDGpu {
-
-class GraphicsApi;
 
 struct Device_t;
 struct ShaderModule_t;

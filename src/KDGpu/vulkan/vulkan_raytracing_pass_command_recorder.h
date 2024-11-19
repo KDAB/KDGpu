@@ -10,9 +10,11 @@
 
 #pragma once
 
-#include <KDGpu/api/api_raytracing_pass_command_recorder.h>
+#include <KDGpu/bind_group.h>
 #include <KDGpu/handle.h>
 #include <KDGpu/kdgpu_export.h>
+#include <KDGpu/pipeline_layout.h>
+#include <KDGpu/raytracing_pass_command_recorder.h>
 #include <vulkan/vulkan.h>
 
 namespace KDGpu {
@@ -27,18 +29,18 @@ struct Device_t;
  * \ingroup vulkan
  *
  */
-struct KDGPU_EXPORT VulkanRayTracingPassCommandRecorder : public ApiRayTracingPassCommandRecorder {
+struct KDGPU_EXPORT VulkanRayTracingPassCommandRecorder {
 
     explicit VulkanRayTracingPassCommandRecorder(VkCommandBuffer _commandBuffer,
                                                  VulkanResourceManager *_vulkanResourceManager,
                                                  const Handle<Device_t> &_deviceHandle);
 
-    void setPipeline(const Handle<RayTracingPipeline_t> &pipeline) final;
+    void setPipeline(const Handle<RayTracingPipeline_t> &pipeline);
     void setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroup,
-                      const Handle<PipelineLayout_t> &pipelineLayout, const std::vector<uint32_t> &dynamicBufferOffsets) final;
-    void traceRays(const RayTracingCommand &rayTracingCommand) final;
-    void pushConstant(const PushConstantRange &constantRange, const void *data) final;
-    void end() final;
+                      const Handle<PipelineLayout_t> &pipelineLayout, const std::vector<uint32_t> &dynamicBufferOffsets) ;
+    void traceRays(const RayTracingCommand &rayTracingCommand);
+    void pushConstant(const PushConstantRange &constantRange, const void *data);
+    void end();
 
     VkCommandBuffer commandBuffer{ VK_NULL_HANDLE };
     VulkanResourceManager *vulkanResourceManager{ nullptr };

@@ -10,9 +10,7 @@
 
 #include "swapchain.h"
 
-#include <KDGpu/graphics_api.h>
-#include <KDGpu/resource_manager.h>
-#include <KDGpu/api/api_swapchain.h>
+#include <KDGpu/api/graphics_api_impl.h>
 #include <KDGpu/swapchain_options.h>
 
 namespace KDGpu {

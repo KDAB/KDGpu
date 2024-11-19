@@ -10,15 +10,20 @@
 
 #pragma once
 
-#include <KDGpu/api/api_adapter.h>
+#include <KDGpu/adapter_features.h>
+#include <KDGpu/adapter_properties.h>
+#include <KDGpu/adapter_queue_type.h>
+#include <KDGpu/adapter_swapchain_properties.h>
+#include <KDGpu/gpu_core.h>
 #include <KDGpu/kdgpu_export.h>
 #include <KDGpu/handle.h>
+#include <KDGpu/surface.h>
 
 #include <vulkan/vulkan.h>
 
 namespace KDGpu {
 
-class GraphicsApi;
+class VulkanGraphicsApi;
 class VulkanResourceManager;
 
 struct Instance_t;
@@ -28,18 +33,18 @@ struct Instance_t;
  * \ingroup vulkan
  *
  */
-struct KDGPU_EXPORT VulkanAdapter : public ApiAdapter {
+struct KDGPU_EXPORT VulkanAdapter {
     explicit VulkanAdapter(VkPhysicalDevice _physicalDevice,
                            VulkanResourceManager *_vulkanResourceManager,
                            const Handle<Instance_t> &_instanceHandle);
 
-    std::vector<Extension> extensions() const final;
-    AdapterProperties queryAdapterProperties() final;
-    AdapterFeatures queryAdapterFeatures() final;
-    AdapterSwapchainProperties querySwapchainProperties(const Handle<Surface_t> &surfaceHandle) final;
-    std::vector<AdapterQueueType> queryQueueTypes() final;
-    bool supportsPresentation(const Handle<Surface_t> surfaceHandle, uint32_t queueTypeIndex) final;
-    FormatProperties formatProperties(Format format) const final;
+    std::vector<Extension> extensions() const;
+    AdapterProperties queryAdapterProperties();
+    AdapterFeatures queryAdapterFeatures();
+    AdapterSwapchainProperties querySwapchainProperties(const Handle<Surface_t> &surfaceHandle);
+    std::vector<AdapterQueueType> queryQueueTypes();
+    bool supportsPresentation(const Handle<Surface_t> surfaceHandle, uint32_t queueTypeIndex);
+    FormatProperties formatProperties(Format format) const;
 
     VkPhysicalDevice physicalDevice{ VK_NULL_HANDLE };
     VulkanResourceManager *vulkanResourceManager{ nullptr };

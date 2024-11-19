@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include <KDGpu/api/api_buffer.h>
+#include <KDGpu/gpu_core.h>
 #include <KDGpu/kdgpu_export.h>
 #include <KDGpu/handle.h>
 
@@ -28,7 +28,7 @@ struct Device_t;
  * \ingroup vulkan
  *
  */
-struct KDGPU_EXPORT VulkanBuffer : public ApiBuffer {
+struct KDGPU_EXPORT VulkanBuffer {
     explicit VulkanBuffer(VkBuffer _buffer,
                           VmaAllocation _allocation,
                           VmaAllocator _allocator,
@@ -37,12 +37,12 @@ struct KDGPU_EXPORT VulkanBuffer : public ApiBuffer {
                           const MemoryHandle &_externalMemoryHandle,
                           const BufferDeviceAddress &_deviceAddress);
 
-    void *map() final;
-    void unmap() final;
-    void invalidate() final;
-    void flush() final;
-    MemoryHandle externalMemoryHandle() const final;
-    BufferDeviceAddress bufferDeviceAddress() const final;
+    void *map();
+    void unmap();
+    void invalidate();
+    void flush();
+    MemoryHandle externalMemoryHandle() const;
+    BufferDeviceAddress bufferDeviceAddress() const;
 
     VkBuffer buffer{ VK_NULL_HANDLE };
     VmaAllocation allocation{ VK_NULL_HANDLE };

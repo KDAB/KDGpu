@@ -17,8 +17,7 @@ namespace KDGpu {
 
 VulkanQueue::VulkanQueue(VkQueue _queue,
                          VulkanResourceManager *_vulkanResourceManager)
-    : ApiQueue()
-    , queue(_queue)
+    : queue(_queue)
     , vulkanResourceManager(_vulkanResourceManager)
 {
 }

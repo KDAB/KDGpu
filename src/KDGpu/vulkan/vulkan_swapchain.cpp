@@ -23,8 +23,7 @@ VulkanSwapchain::VulkanSwapchain(VkSwapchainKHR _swapchain,
                                  TextureUsageFlags _imageUsageFlags,
                                  VulkanResourceManager *_vulkanResourceManager,
                                  const Handle<Device_t> &_deviceHandle)
-    : ApiSwapchain()
-    , swapchain(_swapchain)
+    : swapchain(_swapchain)
     , format(_format)
     , extent(_extent)
     , arrayLayers(_arrayLayers)

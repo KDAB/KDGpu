@@ -10,7 +10,6 @@
 
 #pragma once
 
-#include <KDGpu/api/api_pipeline_layout.h>
 #include <KDGpu/kdgpu_export.h>
 #include <KDGpu/handle.h>
 
@@ -29,7 +28,7 @@ struct Device_t;
  * \ingroup vulkan
  *
  */
-struct KDGPU_EXPORT VulkanPipelineLayout : public ApiPipelineLayout {
+struct KDGPU_EXPORT VulkanPipelineLayout {
     explicit VulkanPipelineLayout(VkPipelineLayout _pipelineLayout,
                                   std::vector<VkDescriptorSetLayout> &&_descriptorSetLayouts,
                                   VulkanResourceManager *_vulkanResourceManager,

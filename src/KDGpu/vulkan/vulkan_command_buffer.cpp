@@ -20,8 +20,7 @@ VulkanCommandBuffer::VulkanCommandBuffer(VkCommandBuffer _commandBuffer,
                                          VkCommandBufferLevel _commandLevel,
                                          VulkanResourceManager *_vulkanResourceManager,
                                          const Handle<Device_t> &_deviceHandle)
-    : ApiCommandBuffer()
-    , commandBuffer(_commandBuffer)
+    : commandBuffer(_commandBuffer)
     , commandPool(_commandPool)
     , commandLevel(_commandLevel)
     , vulkanResourceManager(_vulkanResourceManager)

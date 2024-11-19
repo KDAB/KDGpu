@@ -11,13 +11,12 @@
 #pragma once
 
 #include <KDXr/kdxr_core.h>
-#include <KDGpu/handle.h>
+#include <KDGpu/graphics_api.h>
 
 #include <vector>
 
 namespace KDGpu {
 class Adapter;
-class GraphicsApi;
 class Instance;
 } // namespace KDGpu
 

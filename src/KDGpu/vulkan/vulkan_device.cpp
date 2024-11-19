@@ -29,8 +29,7 @@ VulkanDevice::VulkanDevice(VkDevice _device,
                            const Handle<Adapter_t> &_adapterHandle,
                            const AdapterFeatures &requestedFeatures,
                            bool _isOwned) noexcept
-    : ApiDevice()
-    , device(_device)
+    : device(_device)
     , vulkanResourceManager(_vulkanResourceManager)
     , adapterHandle(_adapterHandle)
     , isOwned(_isOwned)

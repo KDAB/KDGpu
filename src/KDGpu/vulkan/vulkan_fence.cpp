@@ -18,8 +18,7 @@ VulkanFence::VulkanFence(VkFence _fence,
                          VulkanResourceManager *_vulkanResourceManager,
                          const Handle<Device_t> &_deviceHandle,
                          const HandleOrFD &_externalFenceHandle)
-    : ApiFence()
-    , fence(_fence)
+    : fence(_fence)
     , vulkanResourceManager(_vulkanResourceManager)
     , deviceHandle(_deviceHandle)
     , m_externalFenceHandle(_externalFenceHandle)

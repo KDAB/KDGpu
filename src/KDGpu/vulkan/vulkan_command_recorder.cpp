@@ -198,8 +198,7 @@ VulkanCommandRecorder::VulkanCommandRecorder(VkCommandPool _commandPool,
                                              const Handle<CommandBuffer_t> _commandBufferHandle,
                                              VulkanResourceManager *_vulkanResourceManager,
                                              const Handle<Device_t> &_deviceHandle)
-    : ApiCommandRecorder()
-    , commandPool(_commandPool)
+    : commandPool(_commandPool)
     , commandBufferHandle(_commandBufferHandle)
     , vulkanResourceManager(_vulkanResourceManager)
     , deviceHandle(_deviceHandle)

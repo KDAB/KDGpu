@@ -12,13 +12,13 @@
 
 #include <KDGpu/handle.h>
 #include <KDGpu/kdgpu_export.h>
+#include <KDGpu/graphics_api.h>
 
 namespace KDGpu {
 
 struct BindGroupLayout_t;
 struct Device_t;
 struct BindGroupLayoutOptions;
-class GraphicsApi;
 
 /**
  * @brief BindGroupLayout

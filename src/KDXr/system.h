@@ -22,7 +22,7 @@
 namespace KDGpu {
 class Adapter;
 class Instance;
-class GraphicsApi;
+class VulkanGraphicsApi;
 } // namespace KDGpu
 
 namespace KDXr {

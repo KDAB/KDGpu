@@ -18,8 +18,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VkPipeline _pipeline,
                                                const std::vector<VkDynamicState> &_enabledDynamicState,
                                                const Handle<Device_t> &_deviceHandle,
                                                const Handle<PipelineLayout_t> &_pipelineLayoutHandle)
-    : ApiGraphicsPipeline()
-    , pipeline(_pipeline)
+    : pipeline(_pipeline)
     , vulkanResourceManager(_vulkanResourceManager)
     , renderPassHandle(_renderPassHandle)
     , enabledDynamicState(_enabledDynamicState)

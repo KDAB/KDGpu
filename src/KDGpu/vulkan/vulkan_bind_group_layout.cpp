@@ -26,10 +26,9 @@ VulkanBindGroupLayout::VulkanBindGroupLayout(VkDescriptorSetLayout _descriptorSe
     });
 }
 
-bool VulkanBindGroupLayout::isCompatibleWith(const ApiBindGroupLayout &other) const
+bool VulkanBindGroupLayout::isCompatibleWith(const VulkanBindGroupLayout &other) const
 {
-    const VulkanBindGroupLayout *otherVkLayout = static_cast<const VulkanBindGroupLayout *>(&other);
-    return bindings == otherVkLayout->bindings;
+    return bindings == other.bindings;
 }
 
 } // namespace KDGpu

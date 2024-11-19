@@ -12,11 +12,8 @@
 
 #include <KDGpu/adapter.h>
 #include <KDGpu/device_options.h>
-#include <KDGpu/graphics_api.h>
+#include <KDGpu/api/graphics_api_impl.h>
 #include <KDGpu/swapchain_options.h>
-#include <KDGpu/api/api_device.h>
-#include <KDGpu/bind_group_options.h>
-#include <KDGpu/bind_group_layout_options.h>
 
 namespace KDGpu {
 

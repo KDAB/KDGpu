@@ -13,6 +13,7 @@
 #include <KDGpu/gpu_core.h>
 #include <KDGpu/handle.h>
 #include <KDGpu/kdgpu_export.h>
+#include <KDGpu/graphics_api.h>
 
 #include <vector>
 
@@ -25,8 +26,6 @@ struct PushConstantRange;
 struct PipelineLayout_t;
 struct RayTracingPipeline_t;
 struct RayTracingPassCommandRecorder_t;
-
-class GraphicsApi;
 
 struct StridedDeviceRegion {
     Handle<Buffer_t> buffer;

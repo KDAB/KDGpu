@@ -10,16 +10,16 @@
 
 #pragma once
 
-#include <KDGpu/api/api_acceleration_structure.h>
 #include <KDGpu/kdgpu_export.h>
 #include <KDGpu/handle.h>
 
 #include <vulkan/vulkan.h>
 #include <vk_mem_alloc.h>
+#include <KDGpu/gpu_core.h>
 
 namespace KDGpu {
 
-class GraphicsApi;
+class VulkanGraphicsApi;
 class VulkanResourceManager;
 
 struct Buffer_t;
@@ -31,7 +31,7 @@ struct AccelerationStructure_t;
  * \ingroup vulkan
  *
  */
-struct KDGPU_EXPORT VulkanAccelerationStructure : public ApiAccelerationStructure {
+struct KDGPU_EXPORT VulkanAccelerationStructure {
     explicit VulkanAccelerationStructure(Handle<Device_t> _deviceHandle,
                                          VulkanResourceManager *_vulkanResourceManager,
                                          VkAccelerationStructureKHR _accelerationStructure,

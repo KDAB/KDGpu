@@ -25,7 +25,6 @@
 
 namespace KDGpu {
 
-class GraphicsApi;
 class Surface;
 struct Instance_t;
 
@@ -85,7 +84,6 @@ private:
     mutable std::vector<Adapter> m_adapters;
     mutable std::vector<AdapterGroup> m_adapterGroups;
 
-    friend class GraphicsApi;
     friend class VulkanGraphicsApi;
 };
 

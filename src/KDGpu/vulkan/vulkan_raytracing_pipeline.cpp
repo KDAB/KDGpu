@@ -20,8 +20,7 @@ VulkanRayTracingPipeline::VulkanRayTracingPipeline(VkPipeline _pipeline,
                                                    VulkanResourceManager *_vulkanResourceManager,
                                                    const Handle<Device_t> &_deviceHandle,
                                                    const Handle<PipelineLayout_t> &_pipelineLayoutHandle)
-    : ApiRayTracingPipeline()
-    , pipeline(_pipeline)
+    : pipeline(_pipeline)
     , vulkanResourceManager(_vulkanResourceManager)
     , deviceHandle(_deviceHandle)
     , pipelineLayoutHandle(_pipelineLayoutHandle)

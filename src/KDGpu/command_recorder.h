@@ -24,7 +24,7 @@
 
 namespace KDGpu {
 
-class GraphicsApi;
+class VulkanGraphicsApi;
 
 struct CommandRecorder_t;
 struct Device_t;

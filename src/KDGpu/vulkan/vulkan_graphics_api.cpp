@@ -19,45 +19,42 @@ namespace KDGpu {
 std::vector<std::string> VulkanGraphicsApi::ms_ignoredErrors = KDGpu::defaultIgnoredErrors;
 
 VulkanGraphicsApi::VulkanGraphicsApi()
-    : GraphicsApi(Api::Vulkan)
-    , m_vulkanResourceManager{ std::make_unique<VulkanResourceManager>() }
 {
-    m_resourceManager = m_vulkanResourceManager.get();
 }
 
 VulkanGraphicsApi::~VulkanGraphicsApi()
 {
 }
 
-const char *VulkanGraphicsApi::apiName() const noexcept
+Instance VulkanGraphicsApi::createInstance(const InstanceOptions &options)
 {
-    return "Vulkan";
+    return Instance(this, options);
 }
 
 Instance VulkanGraphicsApi::createInstanceFromExistingVkInstance(VkInstance vkInstance)
 {
     Instance instance;
     instance.m_api = this;
-    instance.m_instance = m_vulkanResourceManager->createInstanceFromExistingVkInstance(vkInstance);
+    instance.m_instance = m_vulkanResourceManager.createInstanceFromExistingVkInstance(vkInstance);
     return instance;
 }
 
 Surface VulkanGraphicsApi::createSurfaceFromExistingVkSurface(const Handle<Instance_t> &instanceH, VkSurfaceKHR vkSurface)
 {
-    VulkanInstance *instance = m_vulkanResourceManager->getInstance(instanceH);
+    VulkanInstance *instance = m_vulkanResourceManager.getInstance(instanceH);
     return Surface(this, instance->createSurface(vkSurface));
 }
 
 Adapter VulkanGraphicsApi::createAdapterFromExistingVkPhysicalDevice(const Handle<Instance_t> &instanceH, VkPhysicalDevice vkPhysicalDevice)
 {
     return Adapter(this,
-                   m_vulkanResourceManager->insertAdapter(
-                           VulkanAdapter(vkPhysicalDevice, m_vulkanResourceManager.get(), instanceH)));
+                   m_vulkanResourceManager.insertAdapter(
+                           VulkanAdapter(vkPhysicalDevice, &m_vulkanResourceManager, instanceH)));
 }
 
 Queue VulkanGraphicsApi::createQueueFromExistingVkQueue(VkQueue vkQueue, const QueueFlags queueFlags)
 {
-    const Handle<Queue_t> queueHandle = m_vulkanResourceManager->insertQueue(VulkanQueue(vkQueue, m_vulkanResourceManager.get()));
+    const Handle<Queue_t> queueHandle = m_vulkanResourceManager.insertQueue(VulkanQueue(vkQueue, &m_vulkanResourceManager));
     return Queue(this,
                  {},
                  QueueDescription{
@@ -75,7 +72,7 @@ Device VulkanGraphicsApi::createDeviceFromExistingVkDevice(Adapter *adapter,
     Device device;
     device.m_api = this;
     device.m_adapter = adapter;
-    device.m_device = m_vulkanResourceManager->createDeviceFromExistingVkDevice(adapter->handle(), vkDevice);
+    device.m_device = m_vulkanResourceManager.createDeviceFromExistingVkDevice(adapter->handle(), vkDevice);
     device.m_queues = std::move(queues);
 
     // Note: we can't know what queues the VkDevice was create with, we assume createQueueFromExistingVkQueue
@@ -83,7 +80,7 @@ Device VulkanGraphicsApi::createDeviceFromExistingVkDevice(Adapter *adapter,
 
     // Copy the Queue Description into the VulkanDevice as that might be used
     // by the CommandRecorders to resolve which queue to use
-    VulkanDevice *vulkanDevice = m_vulkanResourceManager->getDevice(device.m_device);
+    VulkanDevice *vulkanDevice = m_vulkanResourceManager.getDevice(device.m_device);
     assert(vulkanDevice);
     std::vector<QueueDescription> descriptions;
     descriptions.reserve(device.m_queues.size());
@@ -105,7 +102,7 @@ Device VulkanGraphicsApi::createDeviceFromExistingVkDevice(Adapter *adapter,
 
 VkImage VulkanGraphicsApi::vkImageFromTexture(const Handle<Texture_t> textureH) const
 {
-    VulkanTexture *vulkanTexture = m_vulkanResourceManager->getTexture(textureH);
+    VulkanTexture *vulkanTexture = m_vulkanResourceManager.getTexture(textureH);
     if (vulkanTexture)
         return vulkanTexture->image;
     return VK_NULL_HANDLE;
@@ -113,12 +110,27 @@ VkImage VulkanGraphicsApi::vkImageFromTexture(const Handle<Texture_t> textureH) 
 
 Texture VulkanGraphicsApi::createTextureFromExistingVkImage(const Handle<Device_t> &deviceHandle, const TextureOptions &options, VkImage vkImage)
 {
-    return Texture(this, deviceHandle, m_vulkanResourceManager->insertTexture(VulkanTexture(vkImage, VK_NULL_HANDLE, VK_NULL_HANDLE, options.format, options.extent, options.mipLevels, options.arrayLayers, options.usage, m_vulkanResourceManager.get(), deviceHandle, {})));
+    return Texture(
+            this,
+            deviceHandle,
+            m_vulkanResourceManager.insertTexture(
+                    VulkanTexture(
+                            vkImage,
+                            VK_NULL_HANDLE,
+                            VK_NULL_HANDLE,
+                            options.format,
+                            options.extent,
+                            options.mipLevels,
+                            options.arrayLayers,
+                            options.usage,
+                            &m_vulkanResourceManager,
+                            deviceHandle,
+                            {})));
 }
 
 std::string VulkanGraphicsApi::getMemoryStats(const Handle<Device_t> &device) const
 {
-    return m_vulkanResourceManager->getMemoryStats(device);
+    return m_vulkanResourceManager.getMemoryStats(device);
 }
 
 void VulkanGraphicsApi::addValidationMessageToIgnore(const std::string &messageToIgnore)

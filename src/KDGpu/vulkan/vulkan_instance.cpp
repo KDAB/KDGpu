@@ -32,8 +32,7 @@ extern VkSurfaceKHR createVulkanSurface(VkInstance instance, const KDGpu::Surfac
 namespace KDGpu {
 
 VulkanInstance::VulkanInstance(VulkanResourceManager *_vulkanResourceManager, VkInstance _instance, bool _isOwned) noexcept
-    : ApiInstance()
-    , vulkanResourceManager(_vulkanResourceManager)
+    : vulkanResourceManager(_vulkanResourceManager)
     , instance(_instance)
     , isOwned(_isOwned)
 {

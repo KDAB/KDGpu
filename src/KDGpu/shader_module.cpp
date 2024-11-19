@@ -9,13 +9,8 @@
 */
 
 #include "shader_module.h"
-#include <fstream>
 
-#include <KDGpu/graphics_api.h>
-#include <KDGpu/resource_manager.h>
-#include <KDGpu/api/api_shader_module.h>
-
-#include <KDGpu/utils/logging.h>
+#include <KDGpu/api/graphics_api_impl.h>
 
 namespace KDGpu {
 

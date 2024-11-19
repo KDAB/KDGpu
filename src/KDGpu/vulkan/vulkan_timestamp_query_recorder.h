@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include <KDGpu/api/api_timestamp_query_recorder.h>
+#include <KDGpu/gpu_core.h>
 #include <KDGpu/kdgpu_export.h>
 #include <KDGpu/handle.h>
 
@@ -22,7 +22,7 @@ class VulkanResourceManager;
 
 struct Device_t;
 
-struct KDGPU_EXPORT VulkanTimestampQueryRecorder : public ApiTimestampQueryRecorder {
+struct KDGPU_EXPORT VulkanTimestampQueryRecorder {
 
     explicit VulkanTimestampQueryRecorder(VkCommandBuffer _commandBuffer,
                                           VulkanResourceManager *_vulkanResourceManager,
@@ -30,10 +30,10 @@ struct KDGPU_EXPORT VulkanTimestampQueryRecorder : public ApiTimestampQueryRecor
                                           uint32_t _startQuery,
                                           uint32_t _maxQueryCount);
 
-    TimestampIndex writeTimestamp(PipelineStageFlags flags) final;
-    std::vector<uint64_t> queryResults() final;
-    void reset() final;
-    float timestampPeriod() const final;
+    TimestampIndex writeTimestamp(PipelineStageFlags flags);
+    std::vector<uint64_t> queryResults();
+    void reset();
+    float timestampPeriod() const;
 
     VkCommandBuffer commandBuffer{ VK_NULL_HANDLE };
     VulkanResourceManager *vulkanResourceManager{ nullptr };

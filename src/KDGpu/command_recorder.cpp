@@ -10,8 +10,7 @@
 
 #include "command_recorder.h"
 
-#include <KDGpu/graphics_api.h>
-#include <KDGpu/api/api_command_recorder.h>
+#include <KDGpu/api/graphics_api_impl.h>
 
 namespace KDGpu {
 

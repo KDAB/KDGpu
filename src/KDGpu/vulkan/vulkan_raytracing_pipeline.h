@@ -10,7 +10,6 @@
 
 #pragma once
 
-#include <KDGpu/api/api_raytracing_pipeline.h>
 #include <KDGpu/handle.h>
 #include <KDGpu/kdgpu_export.h>
 
@@ -28,13 +27,13 @@ struct PipelineLayout_t;
  * \ingroup vulkan
  *
  */
-struct KDGPU_EXPORT VulkanRayTracingPipeline : public ApiRayTracingPipeline {
+struct KDGPU_EXPORT VulkanRayTracingPipeline {
     explicit VulkanRayTracingPipeline(VkPipeline _pipeline,
                                       VulkanResourceManager *_vulkanResourceManager,
                                       const Handle<Device_t> &_deviceHandle,
                                       const Handle<PipelineLayout_t> &_pipelineLayoutHandle);
 
-    std::vector<uint8_t> shaderGroupHandles(uint32_t firstGroup, uint32_t groupCount) const final;
+    std::vector<uint8_t> shaderGroupHandles(uint32_t firstGroup, uint32_t groupCount) const;
 
     VkPipeline pipeline{ VK_NULL_HANDLE };
 

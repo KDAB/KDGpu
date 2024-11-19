@@ -10,7 +10,6 @@
 
 #pragma once
 
-#include <KDGpu/api/api_texture_view.h>
 #include <KDGpu/handle.h>
 #include <KDGpu/kdgpu_export.h>
 
@@ -26,7 +25,7 @@ struct Device_t;
  * \ingroup vulkan
  *
  */
-struct KDGPU_EXPORT VulkanTextureView : public ApiTextureView {
+struct KDGPU_EXPORT VulkanTextureView {
     explicit VulkanTextureView(VkImageView _imageView,
                                const Handle<Texture_t> &_textureHandle,
                                const Handle<Device_t> &_deviceHandle);

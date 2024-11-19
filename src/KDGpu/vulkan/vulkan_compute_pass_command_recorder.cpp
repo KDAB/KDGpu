@@ -18,8 +18,7 @@ namespace KDGpu {
 VulkanComputePassCommandRecorder::VulkanComputePassCommandRecorder(VkCommandBuffer _commandBuffer,
                                                                    VulkanResourceManager *_vulkanResourceManager,
                                                                    const Handle<Device_t> &_deviceHandle)
-    : ApiComputePassCommandRecorder()
-    , commandBuffer(_commandBuffer)
+    : commandBuffer(_commandBuffer)
     , vulkanResourceManager(_vulkanResourceManager)
     , deviceHandle(_deviceHandle)
 {

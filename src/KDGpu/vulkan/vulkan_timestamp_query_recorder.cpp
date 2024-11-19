@@ -22,8 +22,7 @@ VulkanTimestampQueryRecorder::VulkanTimestampQueryRecorder(VkCommandBuffer _comm
                                                            const Handle<Device_t> &_deviceHandle,
                                                            uint32_t _startQuery,
                                                            uint32_t _maxQueryCount)
-    : ApiTimestampQueryRecorder()
-    , commandBuffer(_commandBuffer)
+    : commandBuffer(_commandBuffer)
     , vulkanResourceManager(_vulkanResourceManager)
     , deviceHandle(_deviceHandle)
     , startQuery(_startQuery)

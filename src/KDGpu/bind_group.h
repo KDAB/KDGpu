@@ -12,6 +12,7 @@
 
 #include <KDGpu/bind_group_description.h>
 #include <KDGpu/kdgpu_export.h>
+#include <KDGpu/graphics_api.h>
 
 namespace KDGpu {
 
@@ -19,7 +20,6 @@ struct BindGroupEntry;
 struct BindGroup_t;
 struct Device_t;
 struct BindGroupOptions;
-class GraphicsApi;
 
 // A BindGroup is what is known as a descriptor set in Vulkan parlance. Other APIs such
 // as web-gpu call them bind groups which to me helps with the mental model a little more.

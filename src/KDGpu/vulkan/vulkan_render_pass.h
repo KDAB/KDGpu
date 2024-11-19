@@ -10,10 +10,9 @@
 
 #pragma once
 
-#include <KDGpu/api/api_render_pass.h>
+#include <KDGpu/gpu_core.h>
 #include <KDGpu/kdgpu_export.h>
 #include <KDGpu/handle.h>
-#include <KDGpu/utils/hash_utils.h>
 
 #include <vulkan/vulkan.h>
 
@@ -55,7 +54,7 @@ struct KDGPU_EXPORT VulkanRenderPassKey {
     uint64_t hash{ 0 };
 };
 
-struct VulkanRenderPass : public ApiRenderPass {
+struct VulkanRenderPass {
     explicit VulkanRenderPass(VkRenderPass _renderPass,
                               VulkanResourceManager *_vulkanResourceManager,
                               Handle<Device_t> _deviceHandle);

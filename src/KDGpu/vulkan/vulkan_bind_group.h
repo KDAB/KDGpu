@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include <KDGpu/api/api_bind_group.h>
+#include <KDGpu/bind_group_options.h>
 #include <KDGpu/handle.h>
 #include <KDGpu/kdgpu_export.h>
 #include <vulkan/vulkan.h>
@@ -25,13 +25,13 @@ struct Device_t;
  * \ingroup vulkan
  *
  */
-struct KDGPU_EXPORT VulkanBindGroup : public ApiBindGroup {
+struct KDGPU_EXPORT VulkanBindGroup {
     explicit VulkanBindGroup(VkDescriptorSet _descriptorSet,
                              VkDescriptorPool _descriptorPool,
                              VulkanResourceManager *_vulkanResourceManager,
                              const Handle<Device_t> &_deviceHandle);
 
-    void update(const BindGroupEntry &entry) final;
+    void update(const BindGroupEntry &entry);
 
     VkDescriptorSet descriptorSet{ VK_NULL_HANDLE };
     VkDescriptorPool descriptorPool{ VK_NULL_HANDLE };

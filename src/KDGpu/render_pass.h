@@ -10,17 +10,12 @@
 
 #pragma once
 
-#include <KDGpu/gpu_core.h>
 #include <KDGpu/handle.h>
 
 #include <KDGpu/kdgpu_export.h>
-
-#include <stdint.h>
-#include <vector>
+#include <KDGpu/graphics_api.h>
 
 namespace KDGpu {
-
-class GraphicsApi;
 
 struct Device_t;
 struct RenderPass_t;

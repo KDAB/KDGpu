@@ -10,7 +10,6 @@
 
 #pragma once
 
-#include <KDGpu/api/api_surface.h>
 #include <KDGpu/kdgpu_export.h>
 
 #include <vulkan/vulkan.h>
@@ -22,7 +21,7 @@ namespace KDGpu {
  * \ingroup vulkan
  *
  */
-struct KDGPU_EXPORT VulkanSurface : public ApiSurface {
+struct KDGPU_EXPORT VulkanSurface {
     explicit VulkanSurface(VkSurfaceKHR _surface, VkInstance _instance, bool _isOwned = true);
 
     VkSurfaceKHR surface{ VK_NULL_HANDLE };

@@ -10,8 +10,8 @@
 
 #pragma once
 
-#include <KDGpu/api/api_queue.h>
 #include <KDGpu/kdgpu_export.h>
+#include <KDGpu/queue.h>
 #include <vulkan/vulkan.h>
 
 namespace KDGpu {
@@ -23,14 +23,14 @@ class VulkanResourceManager;
  * \ingroup vulkan
  *
  */
-struct KDGPU_EXPORT VulkanQueue : public ApiQueue {
+struct KDGPU_EXPORT VulkanQueue {
     explicit VulkanQueue(VkQueue _queue,
                          VulkanResourceManager *_vulkanResourceManager);
 
-    void waitUntilIdle() final;
-    void submit(const SubmitOptions &options) final;
-    PresentResult present(const PresentOptions &options) final;
-    std::vector<PresentResult> lastPerSwapchainPresentResults() const final;
+    void waitUntilIdle();
+    void submit(const SubmitOptions &options);
+    PresentResult present(const PresentOptions &options);
+    std::vector<PresentResult> lastPerSwapchainPresentResults() const;
 
     VkQueue queue{ VK_NULL_HANDLE };
     VulkanResourceManager *vulkanResourceManager{ nullptr };

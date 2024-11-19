@@ -10,18 +10,15 @@
 
 #pragma once
 
-#include <KDGpu/graphics_api.h>
+#include <KDGpu/api/api_type.h>
 #include <KDGpu/kdgpu_export.h>
 #include <KDGpu/vulkan/vulkan_resource_manager.h>
-
-#include <memory>
 
 namespace KDGpu {
 
 /**
  * @defgroup vulkan Vulkan
  *
- * Holds the Vulkan implementation of the Rendering API Interfaces
  */
 
 /**
@@ -35,13 +32,26 @@ namespace KDGpu {
  * \ingroup public
  *
  */
-class KDGPU_EXPORT VulkanGraphicsApi final : public GraphicsApi
+class KDGPU_EXPORT VulkanGraphicsApi
 {
 public:
     VulkanGraphicsApi();
-    ~VulkanGraphicsApi() final;
+    ~VulkanGraphicsApi();
 
-    const char *apiName() const noexcept final;
+    ApiType api() { return ApiType::Vulkan; }
+
+    std::string apiName() { return "Vulkan"; }
+
+    /**
+     * @brief Create an Instance object given the InstanceOptions @a options
+     */
+    Instance createInstance(const InstanceOptions &options = InstanceOptions());
+
+    /**
+     * @brief Returns the ResourceManager instance for the GraphicsApi
+     */
+    VulkanResourceManager *resourceManager() noexcept { return &m_vulkanResourceManager; }
+    const VulkanResourceManager *resourceManager() const noexcept { return &m_vulkanResourceManager; }
 
     Instance createInstanceFromExistingVkInstance(VkInstance vkInstance);
     Surface createSurfaceFromExistingVkSurface(const Handle<Instance_t> &instanceH, VkSurfaceKHR vkSurface);
@@ -59,7 +69,7 @@ public:
     static const std::vector<std::string> &validationMessagesToIgnore();
 
 private:
-    std::unique_ptr<VulkanResourceManager> m_vulkanResourceManager;
+    VulkanResourceManager m_vulkanResourceManager;
     static std::vector<std::string> ms_ignoredErrors;
 };
 

@@ -13,6 +13,7 @@
 #include <KDGpu/gpu_core.h>
 #include <KDGpu/handle.h>
 #include <KDGpu/kdgpu_export.h>
+#include <KDGpu/graphics_api.h>
 
 #include <vector>
 
@@ -26,7 +27,6 @@ struct ComputePassCommandRecorder_t;
 struct PipelineLayout_t;
 
 struct PushConstantRange;
-class GraphicsApi;
 
 struct ComputeCommand {
     uint32_t workGroupX{ 1 };

@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include <KDGpu/api/api_fence.h>
+#include <KDGpu/gpu_core.h>
 #include <KDGpu/kdgpu_export.h>
 #include <KDGpu/handle.h>
 
@@ -27,7 +27,7 @@ struct Device_t;
  * \ingroup vulkan
  *
  */
-struct KDGPU_EXPORT VulkanFence : public ApiFence {
+struct KDGPU_EXPORT VulkanFence {
     explicit VulkanFence(VkFence _fence,
                          VulkanResourceManager *_vulkanResourceManager,
                          const Handle<Device_t> &_deviceHandle,
@@ -38,10 +38,10 @@ struct KDGPU_EXPORT VulkanFence : public ApiFence {
     Handle<Device_t> deviceHandle;
     HandleOrFD m_externalFenceHandle{};
 
-    void wait() final;
-    void reset() final;
-    FenceStatus status() final;
-    HandleOrFD externalFenceHandle() const final;
+    void wait();
+    void reset();
+    FenceStatus status();
+    HandleOrFD externalFenceHandle() const;
 };
 
 } // namespace KDGpu

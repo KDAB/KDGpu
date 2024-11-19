@@ -9,9 +9,9 @@
 */
 
 #include "raytracing_pipeline.h"
-#include <KDGpu/graphics_api.h>
+
+#include <KDGpu/api/graphics_api_impl.h>
 #include <KDGpu/raytracing_pipeline_options.h>
-#include <KDGpu/api/api_raytracing_pipeline.h>
 
 namespace KDGpu {
 

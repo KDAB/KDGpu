@@ -19,8 +19,7 @@ namespace KDGpu {
 VulkanAdapter::VulkanAdapter(VkPhysicalDevice _physicalDevice,
                              VulkanResourceManager *_vulkanResourceManager,
                              const Handle<Instance_t> &_instanceHandle)
-    : ApiAdapter()
-    , physicalDevice(_physicalDevice)
+    : physicalDevice(_physicalDevice)
     , vulkanResourceManager(_vulkanResourceManager)
     , instanceHandle(_instanceHandle)
 {

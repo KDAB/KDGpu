@@ -28,7 +28,6 @@
 namespace KDGpu {
 struct Device_t;
 struct Queue_t;
-class GraphicsApi;
 } // namespace KDGpu
 
 namespace KDXr {

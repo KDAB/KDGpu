@@ -23,7 +23,6 @@ set(SOURCES
     compute_pass_command_recorder.cpp
     device.cpp
     fence.cpp
-    graphics_api.cpp
     graphics_pipeline.cpp
     gpu_semaphore.cpp
     instance.cpp
@@ -34,7 +33,6 @@ set(SOURCES
     raytracing_shader_binding_table.cpp
     render_pass_command_recorder.cpp
     render_pass.cpp
-    resource_manager.cpp
     sampler.cpp
     shader_module.cpp
     swapchain.cpp
@@ -137,34 +135,7 @@ set(HEADERS
     texture_view_options.h
     timestamp_query_recorder.h
     timestamp_query_recorder_options.h
-    api/api_acceleration_structure.h
-    api/api_adapter.h
-    api/api_bind_group.h
-    api/api_bind_group_layout.h
-    api/api_buffer.h
-    api/api_command_buffer.h
-    api/api_command_recorder.h
-    api/api_compute_pipeline.h
-    api/api_compute_pass_command_recorder.h
-    api/api_device.h
-    api/api_fence.h
-    api/api_framebuffer.h
-    api/api_gpu_semaphore.h
-    api/api_graphics_pipeline.h
-    api/api_instance.h
-    api/api_pipeline_layout.h
-    api/api_queue.h
-    api/api_raytracing_pass_command_recorder.h
-    api/api_raytracing_pipeline.h
-    api/api_render_pass.h
-    api/api_render_pass_command_recorder.h
-    api/api_sampler.h
-    api/api_shader_module.h
-    api/api_swapchain.h
-    api/api_surface.h
-    api/api_texture.h
-    api/api_texture_view.h
-    api/api_timestamp_query_recorder.h
+    api/api_type.h
     utils/flags.h
     utils/formatters.h
     utils/hash_utils.h

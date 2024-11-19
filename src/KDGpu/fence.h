@@ -13,13 +13,12 @@
 #include <KDGpu/gpu_core.h>
 #include <KDGpu/handle.h>
 #include <KDGpu/kdgpu_export.h>
+#include <KDGpu/graphics_api.h>
 
 namespace KDGpu {
 
 struct Device_t;
 struct Fence_t;
-
-class GraphicsApi;
 
 struct FenceOptions {
     std::string_view label;

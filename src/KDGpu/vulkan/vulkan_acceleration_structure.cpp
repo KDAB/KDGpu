@@ -22,8 +22,7 @@ VulkanAccelerationStructure::VulkanAccelerationStructure(Handle<Device_t> _devic
                                                          AccelerationStructureType _type,
                                                          VkAccelerationStructureBuildSizesInfoKHR _buildSizes,
                                                          VkBuildAccelerationStructureFlagsKHR _buildFlags)
-    : ApiAccelerationStructure()
-    , deviceHandle(_deviceHandle)
+    : deviceHandle(_deviceHandle)
     , vulkanResourceManager(_vulkanResourceManager)
     , accelerationStructure(_accelerationStructure)
     , backingBuffer(_backingBuffer)

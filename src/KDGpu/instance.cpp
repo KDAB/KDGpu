@@ -11,11 +11,12 @@
 #include "instance.h"
 
 #include <KDGpu/graphics_api.h>
-#include <KDGpu/resource_manager.h>
-#include <KDGpu/api/api_instance.h>
 
 #include <KDGpu/utils/logging.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
+
+#include <KDGpu/api/graphics_api_impl.h>
+#include <KDGpu/api/resource_manager_impl.h>
 
 namespace KDGpu {
 

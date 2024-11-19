@@ -13,13 +13,12 @@
 #include <KDGpu/handle.h>
 #include <KDGpu/kdgpu_export.h>
 #include <KDGpu/gpu_core.h>
+#include <KDGpu/graphics_api.h>
 
 namespace KDGpu {
 
 struct Device_t;
 struct GpuSemaphore_t;
-
-class GraphicsApi;
 
 struct GpuSemaphoreOptions {
     std::string_view label;

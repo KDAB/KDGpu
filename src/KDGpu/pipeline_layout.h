@@ -13,10 +13,10 @@
 #include <KDGpu/kdgpu_export.h>
 
 #include <KDGpu/handle.h>
+#include <KDGpu/graphics_api.h>
+
 
 namespace KDGpu {
-
-class GraphicsApi;
 
 struct Device_t;
 struct PipelineLayout_t;

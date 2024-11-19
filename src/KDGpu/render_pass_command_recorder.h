@@ -13,6 +13,7 @@
 #include <KDGpu/gpu_core.h>
 #include <KDGpu/handle.h>
 #include <KDGpu/kdgpu_export.h>
+#include <KDGpu/graphics_api.h>
 
 #include <vector>
 
@@ -28,8 +29,6 @@ struct RenderPassCommandRecorder_t;
 struct Rect2D;
 struct Viewport;
 struct PushConstantRange;
-
-class GraphicsApi;
 
 struct DrawCommand {
     uint32_t vertexCount{ 0 };

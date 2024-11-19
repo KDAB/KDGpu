@@ -10,7 +10,6 @@
 
 #pragma once
 
-#include <KDGpu/api/api_graphics_pipeline.h>
 #include <KDGpu/kdgpu_export.h>
 #include <KDGpu/handle.h>
 
@@ -31,7 +30,7 @@ struct RenderPass_t;
  * \ingroup vulkan
  *
  */
-struct KDGPU_EXPORT VulkanGraphicsPipeline : public ApiGraphicsPipeline {
+struct KDGPU_EXPORT VulkanGraphicsPipeline {
     explicit VulkanGraphicsPipeline(VkPipeline _pipeline,
                                     VulkanResourceManager *_vulkanResourceManager,
                                     const Handle<RenderPass_t> &_renderPassHandle,

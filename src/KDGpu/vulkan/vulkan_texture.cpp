@@ -27,8 +27,7 @@ VulkanTexture::VulkanTexture(VkImage _image,
                              const Handle<Device_t> &_deviceHandle,
                              const MemoryHandle &_externalMemoryHandle,
                              bool _ownedBySwapchain)
-    : ApiTexture()
-    , image(_image)
+    : image(_image)
     , allocation(_allocation)
     , allocator(_allocator)
     , format(_format)

@@ -10,7 +10,8 @@
 
 #pragma once
 
-#include <KDGpu/api/api_command_recorder.h>
+#include <KDGpu/command_buffer.h>
+#include <KDGpu/command_recorder.h>
 #include <KDGpu/kdgpu_export.h>
 #include <KDGpu/handle.h>
 
@@ -28,32 +29,32 @@ struct Buffer_t;
  * \ingroup vulkan
  *
  */
-struct KDGPU_EXPORT VulkanCommandRecorder : public ApiCommandRecorder {
+struct KDGPU_EXPORT VulkanCommandRecorder {
     explicit VulkanCommandRecorder(VkCommandPool _commandPool,
                                    const Handle<CommandBuffer_t> _commandBufferHandle,
                                    VulkanResourceManager *_vulkanResourceManager,
                                    const Handle<Device_t> &_deviceHandle);
 
-    void begin() final;
-    void blitTexture(const TextureBlitOptions &options) final;
-    void clearBuffer(const BufferClear &clear) final;
+    void begin();
+    void blitTexture(const TextureBlitOptions &options);
+    void clearBuffer(const BufferClear &clear);
     void clearColorTexture(const ClearColorTexture &clear);
     void clearDepthStencilTexture(const ClearDepthStencilTexture &clear);
-    void copyBuffer(const BufferCopy &copy) final;
-    void copyBufferToTexture(const BufferToTextureCopy &copy) final;
-    void copyTextureToBuffer(const TextureToBufferCopy &copy) final;
-    void copyTextureToTexture(const TextureToTextureCopy &copy) final;
-    void updateBuffer(const BufferUpdate &update) final;
-    void memoryBarrier(const MemoryBarrierOptions &options) final;
-    void bufferMemoryBarrier(const BufferMemoryBarrierOptions &options) final;
-    void textureMemoryBarrier(const TextureMemoryBarrierOptions &options) final;
-    void executeSecondaryCommandBuffer(const Handle<CommandBuffer_t> &secondaryCommandBuffer) final;
-    void resolveTexture(const TextureResolveOptions &options) final;
-    void buildAccelerationStructures(const BuildAccelerationStructureOptions &options) final;
-    void beginDebugLabel(const DebugLabelOptions &options) final;
-    void endDebugLabel() final;
+    void copyBuffer(const BufferCopy &copy);
+    void copyBufferToTexture(const BufferToTextureCopy &copy);
+    void copyTextureToBuffer(const TextureToBufferCopy &copy);
+    void copyTextureToTexture(const TextureToTextureCopy &copy);
+    void updateBuffer(const BufferUpdate &update);
+    void memoryBarrier(const MemoryBarrierOptions &options);
+    void bufferMemoryBarrier(const BufferMemoryBarrierOptions &options);
+    void textureMemoryBarrier(const TextureMemoryBarrierOptions &options);
+    void executeSecondaryCommandBuffer(const Handle<CommandBuffer_t> &secondaryCommandBuffer);
+    void resolveTexture(const TextureResolveOptions &options);
+    void buildAccelerationStructures(const BuildAccelerationStructureOptions &options);
+    void beginDebugLabel(const DebugLabelOptions &options);
+    void endDebugLabel();
 
-    Handle<CommandBuffer_t> finish() final;
+    Handle<CommandBuffer_t> finish();
 
     VkCommandPool commandPool{ VK_NULL_HANDLE };
     VkCommandBuffer commandBuffer{ VK_NULL_HANDLE };

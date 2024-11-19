@@ -9,7 +9,7 @@
 */
 
 #include "compute_pipeline.h"
-#include <KDGpu/graphics_api.h>
+#include <KDGpu/api/graphics_api_impl.h>
 #include <KDGpu/compute_pipeline_options.h>
 
 namespace KDGpu {

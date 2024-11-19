@@ -10,8 +10,6 @@
 
 #pragma once
 
-#include <KDGpu/api/api_gpu_semaphore.h>
-
 #include <KDGpu/gpu_core.h>
 #include <KDGpu/handle.h>
 #include <KDGpu/kdgpu_export.h>
@@ -29,13 +27,13 @@ struct Device_t;
  * \ingroup vulkan
  *
  */
-struct KDGPU_EXPORT VulkanGpuSemaphore : public ApiGpuSemaphore {
+struct KDGPU_EXPORT VulkanGpuSemaphore {
     explicit VulkanGpuSemaphore(VkSemaphore _semaphore,
                                 VulkanResourceManager *_vulkanResourceManager,
                                 const Handle<Device_t> &_deviceHandle,
                                 const HandleOrFD &_externalSemaphoreHandle);
 
-    HandleOrFD externalSemaphoreHandle() const final;
+    HandleOrFD externalSemaphoreHandle() const;
 
     VkSemaphore semaphore{ VK_NULL_HANDLE };
     VulkanResourceManager *vulkanResourceManager{ nullptr };

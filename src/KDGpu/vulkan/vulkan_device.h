@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include <KDGpu/api/api_device.h>
+#include <span>
 #include <KDGpu/vulkan/vulkan_framebuffer.h>
 #include <KDGpu/vulkan/vulkan_render_pass.h>
 
@@ -22,6 +22,10 @@
 #include <vulkan/vulkan.h>
 
 #include <unordered_map>
+#include <KDGpu/adapter_features.h>
+#include <KDGpu/adapter_queue_type.h>
+#include <KDGpu/device_options.h>
+#include <KDGpu/queue_description.h>
 
 #if defined(KDGPU_PLATFORM_WIN32)
 struct VkSemaphoreGetWin32HandleInfoKHR;
@@ -39,7 +43,7 @@ struct Adapter_t;
  * \ingroup vulkan
  *
  */
-struct KDGPU_EXPORT VulkanDevice : public ApiDevice {
+struct KDGPU_EXPORT VulkanDevice {
     explicit VulkanDevice(VkDevice _device,
                           uint32_t _apiVersion,
                           VulkanResourceManager *_vulkanResourceManager,
@@ -55,11 +59,11 @@ struct KDGPU_EXPORT VulkanDevice : public ApiDevice {
     VulkanDevice(VulkanDevice &&) noexcept = default;
     VulkanDevice &operator=(VulkanDevice &&) noexcept = default;
 
-    std::vector<QueueDescription> getQueues(ResourceManager *resourceManager,
+    std::vector<QueueDescription> getQueues(VulkanResourceManager *resourceManager,
                                             const std::vector<QueueRequest> &queueRequests,
-                                            std::span<AdapterQueueType> queueTypes) final;
+                                            std::span<AdapterQueueType> queueTypes);
 
-    void waitUntilIdle() final;
+    void waitUntilIdle();
 
     VkDevice device{ VK_NULL_HANDLE };
 

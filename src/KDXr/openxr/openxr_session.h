@@ -16,13 +16,13 @@
 #include <KDXr/config.h>
 
 #include <KDGpu/handle.h>
+#include <KDGpu/graphics_api.h>
 
 #include <openxr/openxr.h>
 
 #include <vector>
 
 namespace KDGpu {
-class GraphicsApi;
 struct Device_t;
 } // namespace KDGpu
 

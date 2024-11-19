@@ -10,8 +10,8 @@
 
 #include "command_buffer.h"
 #include <KDGpu/graphics_api.h>
-#include <KDGpu/resource_manager.h>
-#include <KDGpu/api/api_command_buffer.h>
+
+#include <KDGpu/vulkan/vulkan_graphics_api.h>
 
 namespace KDGpu {
 

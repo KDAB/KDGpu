@@ -10,14 +10,6 @@
 
 #pragma once
 
-namespace KDGpu {
+// WARNING! Only include this from cpp files so it does not leak to the public API!
 
-/**
- * @brief ApiPipelineLayout
- * \ingroup api
- *
- */
-struct ApiPipelineLayout {
-};
-
-} // namespace KDGpu
+#include <KDGpu/vulkan/vulkan_resource_manager.h>

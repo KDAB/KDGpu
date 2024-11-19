@@ -10,9 +10,7 @@
 
 #include "buffer.h"
 
-#include <KDGpu/graphics_api.h>
-#include <KDGpu/resource_manager.h>
-#include <KDGpu/api/api_buffer.h>
+#include <KDGpu/api/graphics_api_impl.h>
 #include <KDGpu/buffer_options.h>
 
 namespace KDGpu {

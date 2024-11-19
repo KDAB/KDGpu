@@ -22,7 +22,6 @@ struct Texture_t;
 struct TextureOptions;
 class Device;
 class Queue;
-class GraphicsApi;
 
 struct TextureSubresource {
     TextureAspectFlags aspectMask{ TextureAspectFlagBits::ColorBit };

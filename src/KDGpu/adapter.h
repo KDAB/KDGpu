@@ -27,8 +27,6 @@
 
 namespace KDGpu {
 
-class GraphicsApi;
-
 struct Adapter_t;
 struct Instance_t;
 struct Surface_t;

@@ -12,10 +12,9 @@
 
 #include <KDGpu/handle.h>
 #include <KDGpu/kdgpu_export.h>
+#include <KDGpu/graphics_api.h>
 
 namespace KDGpu {
-
-class GraphicsApi;
 
 struct TextureView_t;
 
