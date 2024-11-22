@@ -1,5 +1,5 @@
 [gerrit]
 host=codereview.kdab.com
 port=29418
-project=kdab/toy-renderer
+project=kdab/kdgpu
 defaultbranch=main
