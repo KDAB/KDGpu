@@ -1,0 +1,90 @@
+version = 1
+SPDX-PackageName = "KDGpu"
+SPDX-PackageSupplier = "Sean Harmer <sean.harmer@kdab.com>"
+
+#misc source code
+[[annotations]]
+path = ["CMakePresets.json", "CMakeUserPresets-example.json"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>"
+SPDX-License-Identifier = "MIT"
+
+#misc documentation
+[[annotations]]
+path = ["README.md", "INSTALL.md", "ChangeLog", "docs/api/mkdocs/docs/using-kdgpu/index.md"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>"
+SPDX-License-Identifier = "MIT"
+
+#assets (shaders, textures)
+[[annotations]]
+path = ["assets/shaders/**.frag", "assets/shaders/**.vert", "assets/shaders/**.comp", "assets/shaders/**.hlsl", "assets/shaders/**.rgen", "assets/shaders/**.rchit", "assets/shaders/**.rahit", "assets/shaders/**.rint", "assets/shaders/**.rmiss", "assets/shaders/**.mesh", "assets/shaders/**.task", "assets/textures/\\**.png", "src/KDGpuExample/imgui.vert", "src/KDGpuExample/imgui.frag", "assets/textures/point-simple-large.png", "assets/textures/point-textured-64x64.png", "docs/api/mkdocs/docs/assets/assets_logo_tree.svg", "docs/api/mkdocs/docs/assets/transparentWhiteKDAB.svg", "examples/doc/images/hello_triangle.png", "examples/doc/images/hello_triangle_native.png"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>"
+SPDX-License-Identifier = "MIT"
+
+#assets (shaders, textures)
+[[annotations]]
+path = ["assets/fonts/Roboto-Medium.ttf", "assets/fonts/Roboto-Medium-license.txt", "src/KDGpuExample/fonts/Roboto-Medium.ttf", "src/KDGpuExample/fonts/Roboto-Medium-license.txt"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Christian Robertson"
+SPDX-License-Identifier = "Apache-2.0"
+
+#misc config files
+[[annotations]]
+path = [".krazy", ".clang-format", ".clang-tidy", ".cmake-format.py", ".codespellrc", ".gitignore", ".gitreview", ".mdlrc", ".mdlrc.rb", ".pre-commit-config.yaml", "docs/api/Doxyfile.cmake", "docs/api/doxybook/config.json", "docs/api/mkdocs/docs/stylesheets/kdab.css", "docs/api/mkdocs/requirements.txt", "docs/api/mkdocs/docs/javascripts/config.js", "kdgpu-log-config-example.toml", ".turbine/generate_kdxr_resource/generate_kdxr_resource.rb", ".turbine/turbine.json", "examples/android/hello_triangle/.gitignore", "examples/android/hello_triangle/.gitignore", "examples/android/hello_triangle/app/src/main/assets/.gitignore", "REUSE.toml"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>"
+SPDX-License-Identifier = "BSD-3-Clause"
+
+#android build system files
+[[annotations]]
+path = ["examples/android/hello_triangle/gradle/wrapper/gradle-wrapper.jar", "examples/android/hello_triangle/gradle/wrapper/gradle-wrapper.properties", "examples/android/hello_triangle/gradlew", "examples/android/hello_triangle/gradlew.bat"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Gradle, Inc."
+SPDX-License-Identifier = "Apache-2.0"
+
+#artwork
+[[annotations]]
+path = ["docs/api/mkdocs/docs/assets/\\**.svg", "docs/api/mkdocs/docs/stylesheets/header.jpg", "**.webp", "**.png", "examples/android/hello_triangle/app/src/main/res/drawable/ic_launcher_background.xml", "examples/android/hello_triangle/app/src/main/res/drawable/ic_launcher_foreground.xml", "examples/android/hello_triangle/app/src/main/res/mipmap-anydpi/ic_launcher.xml", "examples/android/hello_triangle/app/src/main/res/mipmap-anydpi/ic_launcher_round.xml"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>"
+SPDX-License-Identifier = "MIT"
+
+#3rdparty
+[[annotations]]
+path = ["cmake/CodeCoverage.cmake", "cmake/CMakeRC.cmake"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Copyright (c) 2012 - 2017, Lars Bilke"
+SPDX-License-Identifier = "BSD-3-Clause"
+
+[[annotations]]
+path = "cmake/CMakeRC.cmake"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Copyright (c) 2022, Vector-of-Bool"
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = ["assets/textures/samuel-ferrara-1527pjeb6jg-unsplash.jpg", "assets/textures/License.txt"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Samuel Ferrara"
+SPDX-License-Identifier = "LicenseRef-Longform"
+
+[[annotations]]
+path = "tests/doctest/doctest.h"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2016-2021 Viktor Kirilov <vik.kirilov@gmail.com>"
+SPDX-License-Identifier = "MIT"
+
+# Apple specific example
+[[annotations]]
+path = ["examples/hello_triangle_apple/Application/**", "examples/hello_triangle_apple/Renderer/AAPLRenderer.**"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "© 2020 Apple Inc."
+SPDX-License-Identifier = "LicenseRef-Apple-Sample-Code"
+
+[[annotations]]
+path = ["examples/hello_triangle_apple/**.frag", "examples/hello_triangle_apple/**.vert", "examples/hello_triangle_apple/Application/AppKit/macOS/Info.plist.in"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>"
+SPDX-License-Identifier = "MIT"
