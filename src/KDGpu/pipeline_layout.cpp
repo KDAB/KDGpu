@@ -25,14 +25,14 @@ PipelineLayout::PipelineLayout(GraphicsApi *api,
 {
 }
 
-PipelineLayout::PipelineLayout(PipelineLayout &&other)
+PipelineLayout::PipelineLayout(PipelineLayout &&other) noexcept
 {
     m_api = std::exchange(other.m_api, nullptr);
     m_device = std::exchange(other.m_device, {});
     m_pipelineLayout = std::exchange(other.m_pipelineLayout, {});
 }
 
-PipelineLayout &PipelineLayout::operator=(PipelineLayout &&other)
+PipelineLayout &PipelineLayout::operator=(PipelineLayout &&other) noexcept
 {
     if (this != &other) {
         if (isValid())

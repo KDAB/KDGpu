@@ -30,8 +30,8 @@ public:
     RayTracingPipeline();
     ~RayTracingPipeline();
 
-    RayTracingPipeline(RayTracingPipeline &&);
-    RayTracingPipeline &operator=(RayTracingPipeline &&);
+    RayTracingPipeline(RayTracingPipeline &&) noexcept;
+    RayTracingPipeline &operator=(RayTracingPipeline &&) noexcept;
 
     RayTracingPipeline(const RayTracingPipeline &) = delete;
     RayTracingPipeline &operator=(const RayTracingPipeline &) = delete;

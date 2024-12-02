@@ -51,8 +51,8 @@ class KDGPU_EXPORT ComputePassCommandRecorder
 public:
     ~ComputePassCommandRecorder();
 
-    ComputePassCommandRecorder(ComputePassCommandRecorder &&);
-    ComputePassCommandRecorder &operator=(ComputePassCommandRecorder &&);
+    ComputePassCommandRecorder(ComputePassCommandRecorder &&) noexcept;
+    ComputePassCommandRecorder &operator=(ComputePassCommandRecorder &&) noexcept;
 
     ComputePassCommandRecorder(const ComputePassCommandRecorder &) = delete;
     ComputePassCommandRecorder &operator=(const ComputePassCommandRecorder &) = delete;

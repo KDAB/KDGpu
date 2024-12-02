@@ -29,14 +29,14 @@ RayTracingPassCommandRecorder::~RayTracingPassCommandRecorder()
         m_api->resourceManager()->deleteRayTracingPassCommandRecorder(handle());
 }
 
-RayTracingPassCommandRecorder::RayTracingPassCommandRecorder(RayTracingPassCommandRecorder &&other)
+RayTracingPassCommandRecorder::RayTracingPassCommandRecorder(RayTracingPassCommandRecorder &&other) noexcept
 {
     m_api = std::exchange(other.m_api, nullptr);
     m_device = std::exchange(other.m_device, {});
     m_rayTracingCommandRecorder = std::exchange(other.m_rayTracingCommandRecorder, {});
 }
 
-RayTracingPassCommandRecorder &RayTracingPassCommandRecorder::operator=(RayTracingPassCommandRecorder &&other)
+RayTracingPassCommandRecorder &RayTracingPassCommandRecorder::operator=(RayTracingPassCommandRecorder &&other) noexcept
 {
     if (this != &other) {
         if (isValid())

@@ -28,8 +28,8 @@ public:
     Surface();
     ~Surface();
 
-    Surface(Surface &&);
-    Surface &operator=(Surface &&);
+    Surface(Surface &&) noexcept;
+    Surface &operator=(Surface &&) noexcept;
 
     Surface(const Surface &) = delete;
     Surface &operator=(const Surface &) = delete;

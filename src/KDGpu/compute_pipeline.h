@@ -30,8 +30,8 @@ public:
     ComputePipeline();
     ~ComputePipeline();
 
-    ComputePipeline(ComputePipeline &&);
-    ComputePipeline &operator=(ComputePipeline &&);
+    ComputePipeline(ComputePipeline &&) noexcept;
+    ComputePipeline &operator=(ComputePipeline &&) noexcept;
 
     ComputePipeline(const ComputePipeline &) = delete;
     ComputePipeline &operator=(const ComputePipeline &) = delete;

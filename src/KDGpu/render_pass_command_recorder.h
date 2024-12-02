@@ -81,8 +81,8 @@ class KDGPU_EXPORT RenderPassCommandRecorder
 public:
     ~RenderPassCommandRecorder();
 
-    RenderPassCommandRecorder(RenderPassCommandRecorder &&);
-    RenderPassCommandRecorder &operator=(RenderPassCommandRecorder &&);
+    RenderPassCommandRecorder(RenderPassCommandRecorder &&) noexcept;
+    RenderPassCommandRecorder &operator=(RenderPassCommandRecorder &&) noexcept;
 
     RenderPassCommandRecorder(const RenderPassCommandRecorder &) = delete;
     RenderPassCommandRecorder &operator=(const RenderPassCommandRecorder &) = delete;

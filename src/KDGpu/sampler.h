@@ -30,8 +30,8 @@ public:
     Sampler();
     ~Sampler();
 
-    Sampler(Sampler &&);
-    Sampler &operator=(Sampler &&);
+    Sampler(Sampler &&) noexcept;
+    Sampler &operator=(Sampler &&) noexcept;
 
     Sampler(const Sampler &) = delete;
     Sampler &operator=(const Sampler &) = delete;

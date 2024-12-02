@@ -28,14 +28,14 @@ Sampler::Sampler(GraphicsApi *api, const Handle<Device_t> &device, const Sampler
 {
 }
 
-Sampler::Sampler(Sampler &&other)
+Sampler::Sampler(Sampler &&other) noexcept
 {
     m_api = std::exchange(other.m_api, nullptr);
     m_device = std::exchange(other.m_device, {});
     m_sampler = std::exchange(other.m_sampler, {});
 }
 
-Sampler &Sampler::operator=(Sampler &&other)
+Sampler &Sampler::operator=(Sampler &&other) noexcept
 {
     if (this != &other) {
         if (isValid())

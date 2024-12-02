@@ -29,14 +29,14 @@ ShaderModule::~ShaderModule()
         m_api->resourceManager()->deleteShaderModule(handle());
 }
 
-ShaderModule::ShaderModule(ShaderModule &&other)
+ShaderModule::ShaderModule(ShaderModule &&other) noexcept
 {
     m_api = std::exchange(other.m_api, nullptr);
     m_device = std::exchange(other.m_device, {});
     m_shaderModule = std::exchange(other.m_shaderModule, {});
 }
 
-ShaderModule &ShaderModule::operator=(ShaderModule &&other)
+ShaderModule &ShaderModule::operator=(ShaderModule &&other) noexcept
 {
     if (this != &other) {
         if (isValid())

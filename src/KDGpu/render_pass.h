@@ -27,8 +27,8 @@ public:
     RenderPass();
     ~RenderPass();
 
-    RenderPass(RenderPass &&);
-    RenderPass &operator=(RenderPass &&);
+    RenderPass(RenderPass &&) noexcept;
+    RenderPass &operator=(RenderPass &&) noexcept;
 
     RenderPass(const RenderPass &) = delete;
     RenderPass &operator=(const RenderPass &) = delete;

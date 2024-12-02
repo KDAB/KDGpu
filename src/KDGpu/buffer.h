@@ -31,8 +31,8 @@ public:
     ~Buffer();
     Buffer();
 
-    Buffer(Buffer &&);
-    Buffer &operator=(Buffer &&);
+    Buffer(Buffer &&) noexcept;
+    Buffer &operator=(Buffer &&) noexcept;
 
     Buffer(const Buffer &) = delete;
     Buffer &operator=(const Buffer &) = delete;

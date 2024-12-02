@@ -53,8 +53,8 @@ public:
     Instance();
     ~Instance();
 
-    Instance(Instance &&);
-    Instance &operator=(Instance &&);
+    Instance(Instance &&) noexcept;
+    Instance &operator=(Instance &&) noexcept;
 
     Instance(const Instance &) = delete;
     Instance &operator=(const Instance &) = delete;

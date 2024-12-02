@@ -31,7 +31,7 @@ TimestampQueryRecorder::~TimestampQueryRecorder()
         m_api->resourceManager()->deleteTimestampQueryRecorder(handle());
 }
 
-TimestampQueryRecorder::TimestampQueryRecorder(TimestampQueryRecorder &&other)
+TimestampQueryRecorder::TimestampQueryRecorder(TimestampQueryRecorder &&other) noexcept
 {
     m_api = std::exchange(other.m_api, nullptr);
     m_device = std::exchange(other.m_device, {});
@@ -39,7 +39,7 @@ TimestampQueryRecorder::TimestampQueryRecorder(TimestampQueryRecorder &&other)
     m_timestampPeriod = std::exchange(other.m_timestampPeriod, {});
 }
 
-TimestampQueryRecorder &TimestampQueryRecorder::operator=(TimestampQueryRecorder &&other)
+TimestampQueryRecorder &TimestampQueryRecorder::operator=(TimestampQueryRecorder &&other) noexcept
 {
     if (this != &other) {
         if (isValid())

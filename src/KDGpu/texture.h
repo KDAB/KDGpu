@@ -47,8 +47,8 @@ public:
     Texture();
     ~Texture();
 
-    Texture(Texture &&);
-    Texture &operator=(Texture &&);
+    Texture(Texture &&) noexcept;
+    Texture &operator=(Texture &&) noexcept;
 
     Texture(const Texture &) = delete;
     Texture &operator=(const Texture &) = delete;

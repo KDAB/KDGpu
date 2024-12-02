@@ -32,8 +32,8 @@ public:
     TimestampQueryRecorder();
     ~TimestampQueryRecorder();
 
-    TimestampQueryRecorder(TimestampQueryRecorder &&);
-    TimestampQueryRecorder &operator=(TimestampQueryRecorder &&);
+    TimestampQueryRecorder(TimestampQueryRecorder &&) noexcept;
+    TimestampQueryRecorder &operator=(TimestampQueryRecorder &&) noexcept;
 
     TimestampQueryRecorder(const TimestampQueryRecorder &) = delete;
     TimestampQueryRecorder &operator=(const TimestampQueryRecorder &) = delete;

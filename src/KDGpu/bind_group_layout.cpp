@@ -30,14 +30,14 @@ BindGroupLayout::BindGroupLayout(GraphicsApi *api,
 {
 }
 
-BindGroupLayout::BindGroupLayout(BindGroupLayout &&other)
+BindGroupLayout::BindGroupLayout(BindGroupLayout &&other) noexcept
 {
     m_api = std::exchange(other.m_api, nullptr);
     m_device = std::exchange(other.m_device, {});
     m_bindGroupLayout = std::exchange(other.m_bindGroupLayout, {});
 }
 
-BindGroupLayout &BindGroupLayout::operator=(BindGroupLayout &&other)
+BindGroupLayout &BindGroupLayout::operator=(BindGroupLayout &&other) noexcept
 {
     if (this != &other) {
         if (isValid())

@@ -31,8 +31,8 @@ public:
     GraphicsPipeline();
     ~GraphicsPipeline();
 
-    GraphicsPipeline(GraphicsPipeline &&);
-    GraphicsPipeline &operator=(GraphicsPipeline &&);
+    GraphicsPipeline(GraphicsPipeline &&) noexcept;
+    GraphicsPipeline &operator=(GraphicsPipeline &&) noexcept;
 
     GraphicsPipeline(const GraphicsPipeline &) = delete;
     GraphicsPipeline &operator=(const GraphicsPipeline &) = delete;

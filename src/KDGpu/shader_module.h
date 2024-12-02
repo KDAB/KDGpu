@@ -29,8 +29,8 @@ public:
     ShaderModule();
     ~ShaderModule();
 
-    ShaderModule(ShaderModule &&);
-    ShaderModule &operator=(ShaderModule &&);
+    ShaderModule(ShaderModule &&) noexcept;
+    ShaderModule &operator=(ShaderModule &&) noexcept;
 
     ShaderModule(const ShaderModule &) = delete;
     ShaderModule &operator=(const ShaderModule &) = delete;

@@ -23,14 +23,14 @@ AccelerationStructure::AccelerationStructure(GraphicsApi *api, const Handle<Devi
 {
 }
 
-AccelerationStructure::AccelerationStructure(AccelerationStructure &&other)
+AccelerationStructure::AccelerationStructure(AccelerationStructure &&other) noexcept
 {
     m_api = std::exchange(other.m_api, nullptr);
     m_device = std::exchange(other.m_device, {});
     m_accelerationStructure = std::exchange(other.m_accelerationStructure, {});
 }
 
-AccelerationStructure &AccelerationStructure::operator=(AccelerationStructure &&other)
+AccelerationStructure &AccelerationStructure::operator=(AccelerationStructure &&other) noexcept
 {
     if (this != &other) {
         if (isValid())

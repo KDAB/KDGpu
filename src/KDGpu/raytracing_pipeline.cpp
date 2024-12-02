@@ -32,14 +32,14 @@ RayTracingPipeline::RayTracingPipeline(GraphicsApi *api,
 {
 }
 
-RayTracingPipeline::RayTracingPipeline(RayTracingPipeline &&other)
+RayTracingPipeline::RayTracingPipeline(RayTracingPipeline &&other) noexcept
 {
     m_api = std::exchange(other.m_api, nullptr);
     m_device = std::exchange(other.m_device, {});
     m_rayTracingPipeline = std::exchange(other.m_rayTracingPipeline, {});
 }
 
-RayTracingPipeline &RayTracingPipeline::operator=(RayTracingPipeline &&other)
+RayTracingPipeline &RayTracingPipeline::operator=(RayTracingPipeline &&other) noexcept
 {
     if (this != &other) {
         if (isValid())

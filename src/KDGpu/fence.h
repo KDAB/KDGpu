@@ -36,8 +36,8 @@ public:
     Fence();
     ~Fence();
 
-    Fence(Fence &&);
-    Fence &operator=(Fence &&);
+    Fence(Fence &&) noexcept;
+    Fence &operator=(Fence &&) noexcept;
 
     Fence(const Fence &) = delete;
     Fence &operator=(const Fence &) = delete;

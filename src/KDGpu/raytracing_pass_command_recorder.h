@@ -54,8 +54,8 @@ class KDGPU_EXPORT RayTracingPassCommandRecorder
 public:
     ~RayTracingPassCommandRecorder();
 
-    RayTracingPassCommandRecorder(RayTracingPassCommandRecorder &&);
-    RayTracingPassCommandRecorder &operator=(RayTracingPassCommandRecorder &&);
+    RayTracingPassCommandRecorder(RayTracingPassCommandRecorder &&) noexcept;
+    RayTracingPassCommandRecorder &operator=(RayTracingPassCommandRecorder &&) noexcept;
 
     RayTracingPassCommandRecorder(const RayTracingPassCommandRecorder &) = delete;
     RayTracingPassCommandRecorder &operator=(const RayTracingPassCommandRecorder &) = delete;

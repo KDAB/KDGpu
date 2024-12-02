@@ -30,7 +30,7 @@ TextureView::~TextureView()
         m_api->resourceManager()->deleteTextureView(handle());
 }
 
-TextureView::TextureView(TextureView &&other)
+TextureView::TextureView(TextureView &&other) noexcept
 {
     m_api = std::exchange(other.m_api, nullptr);
     m_textureView = std::exchange(other.m_textureView, {});

@@ -24,14 +24,14 @@ BindGroup::~BindGroup()
         m_api->resourceManager()->deleteBindGroup(handle());
 }
 
-BindGroup::BindGroup(BindGroup &&other)
+BindGroup::BindGroup(BindGroup &&other) noexcept
 {
     m_api = std::exchange(other.m_api, nullptr);
     m_device = std::exchange(other.m_device, {});
     m_bindGroup = std::exchange(other.m_bindGroup, {});
 }
 
-BindGroup &BindGroup::operator=(BindGroup &&other)
+BindGroup &BindGroup::operator=(BindGroup &&other) noexcept
 {
     if (this != &other) {
         if (isValid())

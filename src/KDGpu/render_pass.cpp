@@ -60,14 +60,14 @@ RenderPass::RenderPass(GraphicsApi *api, const Handle<Device_t> &device, const R
 {
 }
 
-RenderPass::RenderPass(RenderPass &&other)
+RenderPass::RenderPass(RenderPass &&other) noexcept
 {
     m_api = std::exchange(other.m_api, nullptr);
     m_device = std::exchange(other.m_device, {});
     m_renderPass = std::exchange(other.m_renderPass, {});
 }
 
-RenderPass &RenderPass::operator=(RenderPass &&other)
+RenderPass &RenderPass::operator=(RenderPass &&other) noexcept
 {
     if (this != &other) {
         if (isValid())

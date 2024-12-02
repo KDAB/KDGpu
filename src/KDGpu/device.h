@@ -61,8 +61,8 @@ public:
     Device();
     ~Device();
 
-    Device(Device &&);
-    Device &operator=(Device &&);
+    Device(Device &&) noexcept;
+    Device &operator=(Device &&) noexcept;
 
     Device(const Device &) = delete;
     Device &operator=(const Device &) = delete;

@@ -31,14 +31,14 @@ GpuSemaphore::~GpuSemaphore()
         m_api->resourceManager()->deleteGpuSemaphore(handle());
 }
 
-GpuSemaphore::GpuSemaphore(GpuSemaphore &&other)
+GpuSemaphore::GpuSemaphore(GpuSemaphore &&other) noexcept
 {
     m_api = std::exchange(other.m_api, nullptr);
     m_device = std::exchange(other.m_device, {});
     m_gpuSemaphore = std::exchange(other.m_gpuSemaphore, {});
 }
 
-GpuSemaphore &GpuSemaphore::operator=(GpuSemaphore &&other)
+GpuSemaphore &GpuSemaphore::operator=(GpuSemaphore &&other) noexcept
 {
     if (this != &other) {
         if (isValid())

@@ -31,14 +31,14 @@ ComputePipeline::ComputePipeline(GraphicsApi *api,
 {
 }
 
-ComputePipeline::ComputePipeline(ComputePipeline &&other)
+ComputePipeline::ComputePipeline(ComputePipeline &&other) noexcept
 {
     m_api = std::exchange(other.m_api, nullptr);
     m_device = std::exchange(other.m_device, {});
     m_computePipeline = std::exchange(other.m_computePipeline, {});
 }
 
-ComputePipeline &ComputePipeline::operator=(ComputePipeline &&other)
+ComputePipeline &ComputePipeline::operator=(ComputePipeline &&other) noexcept
 {
     if (this != &other) {
         if (isValid())

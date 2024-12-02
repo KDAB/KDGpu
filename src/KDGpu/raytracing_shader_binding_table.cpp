@@ -70,7 +70,7 @@ RayTracingShaderBindingTable::~RayTracingShaderBindingTable()
     m_buffer = {};
 }
 
-RayTracingShaderBindingTable::RayTracingShaderBindingTable(RayTracingShaderBindingTable &&other)
+RayTracingShaderBindingTable::RayTracingShaderBindingTable(RayTracingShaderBindingTable &&other) noexcept
     : RayTracingShaderBindingTable()
 {
     m_options = std::exchange(other.m_options, {});
@@ -91,7 +91,7 @@ RayTracingShaderBindingTable::RayTracingShaderBindingTable(RayTracingShaderBindi
     m_hitShaderRegion = std::exchange(other.m_hitShaderRegion, {});
 }
 
-RayTracingShaderBindingTable &RayTracingShaderBindingTable::operator=(RayTracingShaderBindingTable &&other)
+RayTracingShaderBindingTable &RayTracingShaderBindingTable::operator=(RayTracingShaderBindingTable &&other) noexcept
 {
     if (this != &other) {
         m_options = std::exchange(other.m_options, {});

@@ -148,8 +148,8 @@ class KDGPU_EXPORT CommandRecorder
 public:
     ~CommandRecorder();
 
-    CommandRecorder(CommandRecorder &&);
-    CommandRecorder &operator=(CommandRecorder &&);
+    CommandRecorder(CommandRecorder &&) noexcept;
+    CommandRecorder &operator=(CommandRecorder &&) noexcept;
 
     CommandRecorder(const CommandRecorder &) = delete;
     CommandRecorder &operator=(const CommandRecorder &) = delete;

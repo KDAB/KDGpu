@@ -28,7 +28,7 @@ public:
     TextureView();
     ~TextureView();
 
-    TextureView(TextureView &&);
+    TextureView(TextureView &&) noexcept;
     TextureView &operator=(TextureView &&);
 
     TextureView(const TextureView &) = delete;

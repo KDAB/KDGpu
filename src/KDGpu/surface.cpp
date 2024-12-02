@@ -24,13 +24,13 @@ Surface::Surface(GraphicsApi *api, const Handle<Surface_t> &surface)
 {
 }
 
-Surface::Surface(Surface &&other)
+Surface::Surface(Surface &&other) noexcept
 {
     m_api = std::exchange(other.m_api, nullptr);
     m_surface = std::exchange(other.m_surface, {});
 }
 
-Surface &Surface::operator=(Surface &&other)
+Surface &Surface::operator=(Surface &&other) noexcept
 {
     if (this != &other) {
         if (isValid())

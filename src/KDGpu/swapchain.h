@@ -33,8 +33,8 @@ public:
     Swapchain();
     ~Swapchain();
 
-    Swapchain(Swapchain &&);
-    Swapchain &operator=(Swapchain &&);
+    Swapchain(Swapchain &&) noexcept;
+    Swapchain &operator=(Swapchain &&) noexcept;
 
     Swapchain(const Swapchain &) = delete;
     Swapchain &operator=(const Swapchain &) = delete;

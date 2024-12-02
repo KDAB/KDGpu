@@ -74,7 +74,7 @@ Device::Device(Adapter *adapter, GraphicsApi *api, const DeviceOptions &options)
         m_queues.emplace_back(Queue(m_api, m_device, queueDescriptions[i]));
 }
 
-Device::Device(Device &&other)
+Device::Device(Device &&other) noexcept
 {
     m_api = std::exchange(other.m_api, nullptr);
     m_device = std::exchange(other.m_device, {});
@@ -82,7 +82,7 @@ Device::Device(Device &&other)
     m_adapter = std::exchange(other.m_adapter, {});
 }
 
-Device &Device::operator=(Device &&other)
+Device &Device::operator=(Device &&other) noexcept
 {
     if (this != &other) {
         if (isValid())

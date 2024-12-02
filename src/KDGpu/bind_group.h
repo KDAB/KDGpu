@@ -35,8 +35,8 @@ public:
     BindGroup();
     ~BindGroup();
 
-    BindGroup(BindGroup &&);
-    BindGroup &operator=(BindGroup &&);
+    BindGroup(BindGroup &&) noexcept;
+    BindGroup &operator=(BindGroup &&) noexcept;
 
     BindGroup(const BindGroup &) = delete;
     BindGroup &operator=(const BindGroup &) = delete;

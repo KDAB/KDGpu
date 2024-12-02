@@ -71,14 +71,14 @@ Instance::~Instance()
         m_api->resourceManager()->deleteInstance(handle());
 }
 
-Instance::Instance(Instance &&other)
+Instance::Instance(Instance &&other) noexcept
 {
     m_api = std::exchange(other.m_api, nullptr);
     m_instance = std::exchange(other.m_instance, {});
     m_adapters = std::exchange(other.m_adapters, {});
 }
 
-Instance &Instance::operator=(Instance &&other)
+Instance &Instance::operator=(Instance &&other) noexcept
 {
     if (this != &other) {
         if (isValid())

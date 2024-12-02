@@ -26,14 +26,14 @@ CommandBuffer::CommandBuffer(GraphicsApi *api,
 {
 }
 
-CommandBuffer::CommandBuffer(CommandBuffer &&other)
+CommandBuffer::CommandBuffer(CommandBuffer &&other) noexcept
 {
     m_api = std::exchange(other.m_api, nullptr);
     m_device = std::exchange(other.m_device, {});
     m_commandBuffer = std::exchange(other.m_commandBuffer, {});
 }
 
-CommandBuffer &CommandBuffer::operator=(CommandBuffer &&other)
+CommandBuffer &CommandBuffer::operator=(CommandBuffer &&other) noexcept
 {
     if (this != &other) {
         if (isValid())

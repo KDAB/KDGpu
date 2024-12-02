@@ -31,8 +31,8 @@ public:
     ~AccelerationStructure();
     AccelerationStructure();
 
-    AccelerationStructure(AccelerationStructure &&);
-    AccelerationStructure &operator=(AccelerationStructure &&);
+    AccelerationStructure(AccelerationStructure &&) noexcept;
+    AccelerationStructure &operator=(AccelerationStructure &&) noexcept;
 
     AccelerationStructure(const AccelerationStructure &) = delete;
     AccelerationStructure &operator=(const AccelerationStructure &) = delete;

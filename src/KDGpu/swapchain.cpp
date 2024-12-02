@@ -33,7 +33,7 @@ Swapchain::Swapchain(GraphicsApi *api, const Handle<Device_t> &device, const Swa
         m_textures.emplace_back(Texture(m_api, m_device, textureHandles[i]));
 }
 
-Swapchain::Swapchain(Swapchain &&other)
+Swapchain::Swapchain(Swapchain &&other) noexcept
 {
     m_api = std::exchange(other.m_api, nullptr);
     m_device = std::exchange(other.m_device, {});
@@ -41,7 +41,7 @@ Swapchain::Swapchain(Swapchain &&other)
     m_textures = std::exchange(other.m_textures, {});
 }
 
-Swapchain &Swapchain::operator=(Swapchain &&other)
+Swapchain &Swapchain::operator=(Swapchain &&other) noexcept
 {
     if (this != &other) {
         if (isValid())

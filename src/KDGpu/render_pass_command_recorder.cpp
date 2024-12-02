@@ -29,14 +29,14 @@ RenderPassCommandRecorder::~RenderPassCommandRecorder()
         m_api->resourceManager()->deleteRenderPassCommandRecorder(handle());
 }
 
-RenderPassCommandRecorder::RenderPassCommandRecorder(RenderPassCommandRecorder &&other)
+RenderPassCommandRecorder::RenderPassCommandRecorder(RenderPassCommandRecorder &&other) noexcept
 {
     m_api = std::exchange(other.m_api, nullptr);
     m_device = std::exchange(other.m_device, {});
     m_renderPassCommandRecorder = std::exchange(other.m_renderPassCommandRecorder, {});
 }
 
-RenderPassCommandRecorder &RenderPassCommandRecorder::operator=(RenderPassCommandRecorder &&other)
+RenderPassCommandRecorder &RenderPassCommandRecorder::operator=(RenderPassCommandRecorder &&other) noexcept
 {
     if (this != &other) {
         if (isValid())

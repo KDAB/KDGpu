@@ -32,8 +32,8 @@ public:
     PipelineLayout();
     ~PipelineLayout();
 
-    PipelineLayout(PipelineLayout &&);
-    PipelineLayout &operator=(PipelineLayout &&);
+    PipelineLayout(PipelineLayout &&) noexcept;
+    PipelineLayout &operator=(PipelineLayout &&) noexcept;
 
     PipelineLayout(const PipelineLayout &) = delete;
     PipelineLayout &operator=(const PipelineLayout &) = delete;

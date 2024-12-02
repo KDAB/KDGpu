@@ -29,8 +29,8 @@ public:
     CommandBuffer();
     ~CommandBuffer();
 
-    CommandBuffer(CommandBuffer &&);
-    CommandBuffer &operator=(CommandBuffer &&);
+    CommandBuffer(CommandBuffer &&) noexcept;
+    CommandBuffer &operator=(CommandBuffer &&) noexcept;
 
     CommandBuffer(const CommandBuffer &) = delete;
     CommandBuffer &operator=(const CommandBuffer &) = delete;

@@ -30,8 +30,8 @@ public:
     BindGroupLayout();
     ~BindGroupLayout();
 
-    BindGroupLayout(BindGroupLayout &&);
-    BindGroupLayout &operator=(BindGroupLayout &&);
+    BindGroupLayout(BindGroupLayout &&) noexcept;
+    BindGroupLayout &operator=(BindGroupLayout &&) noexcept;
 
     BindGroupLayout(const BindGroupLayout &) = delete;
     BindGroupLayout &operator=(const BindGroupLayout &) = delete;

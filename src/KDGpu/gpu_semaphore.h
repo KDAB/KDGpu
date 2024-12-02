@@ -35,8 +35,8 @@ public:
     GpuSemaphore();
     ~GpuSemaphore();
 
-    GpuSemaphore(GpuSemaphore &&);
-    GpuSemaphore &operator=(GpuSemaphore &&);
+    GpuSemaphore(GpuSemaphore &&) noexcept;
+    GpuSemaphore &operator=(GpuSemaphore &&) noexcept;
 
     GpuSemaphore(const GpuSemaphore &) = delete;
     GpuSemaphore &operator=(const GpuSemaphore &) = delete;

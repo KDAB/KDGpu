@@ -28,14 +28,14 @@ ComputePassCommandRecorder::~ComputePassCommandRecorder()
         m_api->resourceManager()->deleteComputePassCommandRecorder(handle());
 }
 
-ComputePassCommandRecorder::ComputePassCommandRecorder(ComputePassCommandRecorder &&other)
+ComputePassCommandRecorder::ComputePassCommandRecorder(ComputePassCommandRecorder &&other) noexcept
 {
     m_api = std::exchange(other.m_api, nullptr);
     m_device = std::exchange(other.m_device, {});
     m_computePassCommandRecorder = std::exchange(other.m_computePassCommandRecorder, {});
 }
 
-ComputePassCommandRecorder &ComputePassCommandRecorder::operator=(ComputePassCommandRecorder &&other)
+ComputePassCommandRecorder &ComputePassCommandRecorder::operator=(ComputePassCommandRecorder &&other) noexcept
 {
     if (this != &other) {
         if (isValid())

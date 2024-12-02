@@ -24,14 +24,14 @@ Buffer::Buffer(GraphicsApi *api, const Handle<Device_t> &device, const BufferOpt
 {
 }
 
-Buffer::Buffer(Buffer &&other)
+Buffer::Buffer(Buffer &&other) noexcept
 {
     m_api = std::exchange(other.m_api, nullptr);
     m_device = std::exchange(other.m_device, {});
     m_buffer = std::exchange(other.m_buffer, {});
 }
 
-Buffer &Buffer::operator=(Buffer &&other)
+Buffer &Buffer::operator=(Buffer &&other) noexcept
 {
     if (this != &other) {
         if (isValid())

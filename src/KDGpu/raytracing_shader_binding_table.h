@@ -34,8 +34,8 @@ public:
     explicit RayTracingShaderBindingTable(Device *device, RayTracingShaderBindingTableOptions options);
     ~RayTracingShaderBindingTable();
 
-    RayTracingShaderBindingTable(RayTracingShaderBindingTable &&);
-    RayTracingShaderBindingTable &operator=(RayTracingShaderBindingTable &&);
+    RayTracingShaderBindingTable(RayTracingShaderBindingTable &&) noexcept;
+    RayTracingShaderBindingTable &operator=(RayTracingShaderBindingTable &&) noexcept;
 
     RayTracingShaderBindingTable(const RayTracingShaderBindingTable &) = delete;
     RayTracingShaderBindingTable &operator=(const RayTracingShaderBindingTable &) = delete;

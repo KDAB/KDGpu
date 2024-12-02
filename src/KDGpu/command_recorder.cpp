@@ -30,7 +30,7 @@ CommandRecorder::~CommandRecorder()
         m_api->resourceManager()->deleteCommandRecorder(handle());
 }
 
-CommandRecorder::CommandRecorder(CommandRecorder &&other)
+CommandRecorder::CommandRecorder(CommandRecorder &&other) noexcept
 {
     m_api = std::exchange(other.m_api, nullptr);
     m_device = std::exchange(other.m_device, {});
@@ -38,7 +38,7 @@ CommandRecorder::CommandRecorder(CommandRecorder &&other)
     m_level = std::exchange(other.m_level, CommandBufferLevel::MaxEnum);
 }
 
-CommandRecorder &CommandRecorder::operator=(CommandRecorder &&other)
+CommandRecorder &CommandRecorder::operator=(CommandRecorder &&other) noexcept
 {
     if (this != &other) {
         if (isValid())

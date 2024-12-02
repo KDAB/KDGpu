@@ -16,14 +16,14 @@ namespace KDGpu {
 
 Fence::Fence() = default;
 
-Fence::Fence(Fence &&other)
+Fence::Fence(Fence &&other) noexcept
 {
     m_api = std::exchange(other.m_api, nullptr);
     m_device = std::exchange(other.m_device, {});
     m_fence = std::exchange(other.m_fence, {});
 }
 
-Fence &Fence::operator=(Fence &&other)
+Fence &Fence::operator=(Fence &&other) noexcept
 {
     if (this != &other) {
 

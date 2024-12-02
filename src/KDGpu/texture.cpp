@@ -32,14 +32,14 @@ Texture::Texture(GraphicsApi *api, const Handle<Device_t> &device, const Texture
 {
 }
 
-Texture::Texture(Texture &&other)
+Texture::Texture(Texture &&other) noexcept
 {
     m_api = std::exchange(other.m_api, nullptr);
     m_device = std::exchange(other.m_device, {});
     m_texture = std::exchange(other.m_texture, {});
 }
 
-Texture &Texture::operator=(Texture &&other)
+Texture &Texture::operator=(Texture &&other) noexcept
 {
     if (this != &other) {
         if (isValid())
