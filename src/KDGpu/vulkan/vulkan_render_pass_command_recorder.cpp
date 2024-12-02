@@ -225,14 +225,23 @@ void VulkanRenderPassCommandRecorder::drawMeshTasksIndirect(const std::vector<Dr
         drawMeshTasksIndirect(drawCommand);
 }
 
-void VulkanRenderPassCommandRecorder::pushConstant(const PushConstantRange &constantRange, const void *data)
+void VulkanRenderPassCommandRecorder::pushConstant(const PushConstantRange &constantRange, const void *data, const Handle<PipelineLayout_t> &pipelineLayout)
 {
-    VulkanGraphicsPipeline *vulkanPipeline = vulkanResourceManager->getGraphicsPipeline(pipeline);
-    VulkanPipelineLayout *pLayout = vulkanResourceManager->getPipelineLayout(vulkanPipeline->pipelineLayoutHandle);
+    VkPipelineLayout vkPipelineLayout{ VK_NULL_HANDLE };
 
-    assert(pLayout != nullptr); // The PipelineLayout should outlive the pipelines
+    if (pipelineLayout.isValid()) {
+        VulkanPipelineLayout *vulkanPipelineLayout = vulkanResourceManager->getPipelineLayout(pipelineLayout);
+        if (vulkanPipelineLayout)
+            vkPipelineLayout = vulkanPipelineLayout->pipelineLayout;
+    } else if (pipeline.isValid()) {
+        VulkanGraphicsPipeline *vulkanPipeline = vulkanResourceManager->getGraphicsPipeline(pipeline);
+        VulkanPipelineLayout *vulkanPipelineLayout = vulkanResourceManager->getPipelineLayout(vulkanPipeline->pipelineLayoutHandle);
+        if (vulkanPipelineLayout)
+            vkPipelineLayout = vulkanPipelineLayout->pipelineLayout;
+    }
+
     vkCmdPushConstants(commandBuffer,
-                       pLayout->pipelineLayout,
+                       vkPipelineLayout,
                        constantRange.shaderStages.toInt(),
                        constantRange.offset,
                        constantRange.size,

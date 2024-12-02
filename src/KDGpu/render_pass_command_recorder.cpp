@@ -171,10 +171,10 @@ void RenderPassCommandRecorder::drawMeshTasksIndirect(const std::vector<DrawMesh
     apiRenderPassCommandRecorder->drawMeshTasksIndirect(drawCommands);
 }
 
-void RenderPassCommandRecorder::pushConstant(const PushConstantRange &constantRange, const void *data)
+void RenderPassCommandRecorder::pushConstant(const PushConstantRange &constantRange, const void *data, const Handle<PipelineLayout_t> &pipelineLayout)
 {
     auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
-    apiRenderPassCommandRecorder->pushConstant(constantRange, data);
+    apiRenderPassCommandRecorder->pushConstant(constantRange, data, pipelineLayout);
 }
 
 void RenderPassCommandRecorder::nextSubpass()

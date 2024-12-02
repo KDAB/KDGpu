@@ -125,7 +125,7 @@ public:
     void drawMeshTasksIndirect(const DrawMeshIndirectCommand &drawCommand);
     void drawMeshTasksIndirect(const std::vector<DrawMeshIndirectCommand> &drawCommands);
 
-    void pushConstant(const PushConstantRange &constantRange, const void *data);
+    void pushConstant(const PushConstantRange &constantRange, const void *data, const Handle<PipelineLayout_t> &pipelineLayout = {});
 
     void nextSubpass();
 
