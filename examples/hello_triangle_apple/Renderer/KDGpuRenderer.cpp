@@ -15,6 +15,7 @@
 #include <KDGpu/bind_group_layout_options.h>
 #include <KDGpu/bind_group_options.h>
 #include <KDGpu/graphics_pipeline_options.h>
+#include <KDGpu/swapchain_options.h>
 
 #include <iostream>
 #include <fstream>
