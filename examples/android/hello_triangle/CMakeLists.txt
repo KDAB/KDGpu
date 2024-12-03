@@ -10,13 +10,6 @@ cmake_minimum_required(VERSION 3.18.1)
 
 file(TO_CMAKE_PATH "${ANDROID_NDK}" ANDROID_NDK_PATH)
 
-file(COPY "${CMAKE_SOURCE_DIR}/../../../build/Debug/assets/shaders/examples/hello_triangle/hello_triangle.frag.spv"
-     DESTINATION "${CMAKE_SOURCE_DIR}/app/src/main/assets/shaders/examples/hello_triangle/"
-)
-file(COPY "${CMAKE_SOURCE_DIR}/../../../build/Debug/assets/shaders/examples/hello_triangle/hello_triangle.vert.spv"
-     DESTINATION "${CMAKE_SOURCE_DIR}/app/src/main/assets/shaders/examples/hello_triangle/"
-)
-
 set(APP_GLUE_DIR ${ANDROID_NDK_PATH}/sources/android/native_app_glue)
 include_directories(${APP_GLUE_DIR})
 add_library(
@@ -39,7 +32,7 @@ if(NOT TARGET KDGpu::KDGpu)
     FetchContent_Declare(
         KDGpu
         GIT_REPOSITORY https://github.com/KDAB/KDGpu.git
-        GIT_TAG 6f7885e4962d37b9df8b6da9779f3bdbf7680f44
+        GIT_TAG main
     )
     FetchContent_MakeAvailable(KDGpu)
 endif()
