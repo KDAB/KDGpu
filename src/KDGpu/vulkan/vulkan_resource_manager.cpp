@@ -464,33 +464,37 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     bufferDeviceFeature.bufferDeviceAddress = options.requestedFeatures.bufferDeviceAddress;
     addToChain(&bufferDeviceFeature);
 
-    // Enable raytracing acceleration structure
-    VkPhysicalDeviceAccelerationStructureFeaturesKHR accelerationStructureFeaturesKhr{};
-    accelerationStructureFeaturesKhr.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
-    accelerationStructureFeaturesKhr.accelerationStructure = options.requestedFeatures.accelerationStructures;
-    addToChain(&accelerationStructureFeaturesKhr);
+    if (options.requestedFeatures.accelerationStructures && options.requestedFeatures.rayTracingPipeline) {
+        // Enable raytracing acceleration structure
+        VkPhysicalDeviceAccelerationStructureFeaturesKHR accelerationStructureFeaturesKhr{};
+        accelerationStructureFeaturesKhr.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
+        accelerationStructureFeaturesKhr.accelerationStructure = options.requestedFeatures.accelerationStructures;
+        addToChain(&accelerationStructureFeaturesKhr);
 
-    // Enable raytracing pipelines
-    VkPhysicalDeviceRayTracingPipelineFeaturesKHR raytracingFeaturesKhr{};
-    raytracingFeaturesKhr.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
-    raytracingFeaturesKhr.rayTracingPipeline = options.requestedFeatures.rayTracingPipeline;
-    raytracingFeaturesKhr.rayTracingPipelineShaderGroupHandleCaptureReplay = options.requestedFeatures.rayTracingPipelineShaderGroupHandleCaptureReplay;
-    raytracingFeaturesKhr.rayTracingPipelineShaderGroupHandleCaptureReplayMixed = options.requestedFeatures.rayTracingPipelineShaderGroupHandleCaptureReplayMixed;
-    raytracingFeaturesKhr.rayTracingPipelineTraceRaysIndirect = options.requestedFeatures.rayTracingPipelineTraceRaysIndirect;
-    raytracingFeaturesKhr.rayTraversalPrimitiveCulling = options.requestedFeatures.rayTraversalPrimitiveCulling;
-    addToChain(&raytracingFeaturesKhr);
+        // Enable raytracing pipelines
+        VkPhysicalDeviceRayTracingPipelineFeaturesKHR raytracingFeaturesKhr{};
+        raytracingFeaturesKhr.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
+        raytracingFeaturesKhr.rayTracingPipeline = options.requestedFeatures.rayTracingPipeline;
+        raytracingFeaturesKhr.rayTracingPipelineShaderGroupHandleCaptureReplay = options.requestedFeatures.rayTracingPipelineShaderGroupHandleCaptureReplay;
+        raytracingFeaturesKhr.rayTracingPipelineShaderGroupHandleCaptureReplayMixed = options.requestedFeatures.rayTracingPipelineShaderGroupHandleCaptureReplayMixed;
+        raytracingFeaturesKhr.rayTracingPipelineTraceRaysIndirect = options.requestedFeatures.rayTracingPipelineTraceRaysIndirect;
+        raytracingFeaturesKhr.rayTraversalPrimitiveCulling = options.requestedFeatures.rayTraversalPrimitiveCulling;
+        addToChain(&raytracingFeaturesKhr);
+    }
 
-    // Enable Mesh/Task shading
-    VkPhysicalDeviceMeshShaderFeaturesEXT meshShaderFeatures{};
-    meshShaderFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT;
-    meshShaderFeatures.taskShader = options.requestedFeatures.taskShader;
-    meshShaderFeatures.meshShader = options.requestedFeatures.meshShader;
-    meshShaderFeatures.multiviewMeshShader = options.requestedFeatures.multiviewMeshShader;
-    // Would need to enable VkPhysicalDeviceFragmentShadingRateFeaturesKHR
-    // if options.requestedFeatures.primitiveFragmentShadingRateMeshShader is enabled
-    meshShaderFeatures.primitiveFragmentShadingRateMeshShader = false;
-    meshShaderFeatures.meshShaderQueries = options.requestedFeatures.meshShaderQueries;
-    addToChain(&meshShaderFeatures);
+    if (options.requestedFeatures.meshShader) {
+        // Enable Mesh/Task shading
+        VkPhysicalDeviceMeshShaderFeaturesEXT meshShaderFeatures{};
+        meshShaderFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT;
+        meshShaderFeatures.taskShader = options.requestedFeatures.taskShader;
+        meshShaderFeatures.meshShader = options.requestedFeatures.meshShader;
+        meshShaderFeatures.multiviewMeshShader = options.requestedFeatures.multiviewMeshShader;
+        // Would need to enable VkPhysicalDeviceFragmentShadingRateFeaturesKHR
+        // if options.requestedFeatures.primitiveFragmentShadingRateMeshShader is enabled
+        meshShaderFeatures.primitiveFragmentShadingRateMeshShader = false;
+        meshShaderFeatures.meshShaderQueries = options.requestedFeatures.meshShaderQueries;
+        addToChain(&meshShaderFeatures);
+    }
 
     std::vector<VkPhysicalDevice> devicesInGroup;
     const size_t adapterCount = options.adapterGroup.adapters.size();
@@ -600,7 +604,12 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
 
     if (!hasVulkan12 && hasVulkan11) {
         SPDLOG_LOGGER_INFO(Logger::logger(), "Vulkan 1.2 is unavailable, falling back to Vulkan 1.1...");
-        std::vector<const char *> vulkan11Extensions = { VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME, VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME };
+        std::vector<const char *> vulkan11Extensions = {
+            VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,
+            VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME,
+            VK_KHR_UNIFORM_BUFFER_STANDARD_LAYOUT_EXTENSION_NAME,
+            VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME
+        };
         for (const char *requestedVulkan11Extension : vulkan11Extensions) {
             if (findExtension(availableDeviceExtensions, requestedVulkan11Extension)) {
                 requestedDeviceExtensions.push_back(requestedVulkan11Extension);
