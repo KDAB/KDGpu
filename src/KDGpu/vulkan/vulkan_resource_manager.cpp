@@ -464,15 +464,15 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     bufferDeviceFeature.bufferDeviceAddress = options.requestedFeatures.bufferDeviceAddress;
     addToChain(&bufferDeviceFeature);
 
+    VkPhysicalDeviceAccelerationStructureFeaturesKHR accelerationStructureFeaturesKhr{};
+    VkPhysicalDeviceRayTracingPipelineFeaturesKHR raytracingFeaturesKhr{};
     if (options.requestedFeatures.accelerationStructures && options.requestedFeatures.rayTracingPipeline) {
         // Enable raytracing acceleration structure
-        VkPhysicalDeviceAccelerationStructureFeaturesKHR accelerationStructureFeaturesKhr{};
         accelerationStructureFeaturesKhr.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
         accelerationStructureFeaturesKhr.accelerationStructure = options.requestedFeatures.accelerationStructures;
         addToChain(&accelerationStructureFeaturesKhr);
 
         // Enable raytracing pipelines
-        VkPhysicalDeviceRayTracingPipelineFeaturesKHR raytracingFeaturesKhr{};
         raytracingFeaturesKhr.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
         raytracingFeaturesKhr.rayTracingPipeline = options.requestedFeatures.rayTracingPipeline;
         raytracingFeaturesKhr.rayTracingPipelineShaderGroupHandleCaptureReplay = options.requestedFeatures.rayTracingPipelineShaderGroupHandleCaptureReplay;
@@ -482,9 +482,9 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
         addToChain(&raytracingFeaturesKhr);
     }
 
+    VkPhysicalDeviceMeshShaderFeaturesEXT meshShaderFeatures{};
     if (options.requestedFeatures.meshShader) {
         // Enable Mesh/Task shading
-        VkPhysicalDeviceMeshShaderFeaturesEXT meshShaderFeatures{};
         meshShaderFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT;
         meshShaderFeatures.taskShader = options.requestedFeatures.taskShader;
         meshShaderFeatures.meshShader = options.requestedFeatures.meshShader;
