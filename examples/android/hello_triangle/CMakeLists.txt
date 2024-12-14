@@ -29,6 +29,7 @@ include(FetchContent)
 find_package(KDGpu::KDGpu QUIET)
 if(NOT TARGET KDGpu::KDGpu)
     message(STATUS "KDGpu was not found. Fetching from git")
+    set(FETCHCONTENT_SOURCE_DIR_KDGPU ${CMAKE_CURRENT_SOURCE_DIR}/../../..)
     FetchContent_Declare(
         KDGpu
         GIT_REPOSITORY https://github.com/KDAB/KDGpu.git
