@@ -2909,20 +2909,22 @@ Handle<BindGroup_t> VulkanResourceManager::createBindGroup(const Handle<Device_t
     auto allocateDescriptorSet = [](VkDevice device, VkDescriptorPool descriptorPool,
                                     VulkanBindGroupLayout *bindGroupLayout, VkDescriptorSet &descriptorSet,
                                     uint32_t maxVariableDescriptorCounts) {
-        // For variable length descriptor arrays, this specify the maximum count we expect them to be.
-        // Note that this value will apply to all bindings defined as variable arrays in the BindGroupLayout
-        // used to allocate this BindGroup
-        VkDescriptorSetVariableDescriptorCountAllocateInfo variableLengthInfo{};
-        variableLengthInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO;
-        variableLengthInfo.descriptorSetCount = 1;
-        variableLengthInfo.pDescriptorCounts = &maxVariableDescriptorCounts;
-
         VkDescriptorSetAllocateInfo allocInfo = {};
         allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
         allocInfo.descriptorPool = descriptorPool;
         allocInfo.descriptorSetCount = 1;
         allocInfo.pSetLayouts = &bindGroupLayout->descriptorSetLayout;
-        allocInfo.pNext = &variableLengthInfo;
+
+        // For variable length descriptor arrays, this specify the maximum count we expect them to be.
+        // Note that this value will apply to all bindings defined as variable arrays in the BindGroupLayout
+        // used to allocate this BindGroup
+        VkDescriptorSetVariableDescriptorCountAllocateInfo variableLengthInfo{};
+        if (maxVariableDescriptorCounts > 0) {
+            variableLengthInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO;
+            variableLengthInfo.descriptorSetCount = 1;
+            variableLengthInfo.pDescriptorCounts = &maxVariableDescriptorCounts;
+            allocInfo.pNext = &variableLengthInfo;
+        }
 
         return vkAllocateDescriptorSets(device, &allocInfo, &descriptorSet);
     };
