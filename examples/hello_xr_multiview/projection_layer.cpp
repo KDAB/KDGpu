@@ -543,7 +543,7 @@ void ProjectionLayer::updateTransformUbo()
 void ProjectionLayer::updateViewUbo()
 {
     auto cameraBufferData = static_cast<float *>(m_cameraBuffer.map());
-    std::memcpy(cameraBufferData, m_cameraData.data(), 2 * viewCount() * sizeof(glm::mat4));
+    std::memcpy(cameraBufferData, m_cameraData.data(), viewCount() * sizeof(CameraData));
     m_cameraBuffer.unmap();
 }
 
