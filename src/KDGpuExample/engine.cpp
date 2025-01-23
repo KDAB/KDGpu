@@ -13,6 +13,8 @@
 #include <KDFoundation/core_application.h>
 #include <KDFoundation/postman.h>
 
+#include <KDUtils/logging.h>
+
 namespace KDGpuExample {
 
 using namespace KDBindings;
@@ -20,11 +22,8 @@ using namespace KDBindings;
 Engine::Engine()
     : KDFoundation::Object()
 {
-    m_logger = spdlog::get("engine");
-    if (!m_logger) {
-        m_logger = spdlog::stdout_color_mt("engine");
-        SPDLOG_LOGGER_INFO(m_logger, "Hello from the Engine Logger");
-    }
+    m_logger = KDUtils::Logger::logger("engine", spdlog::level::info);
+    SPDLOG_LOGGER_INFO(m_logger, "Hello from the Engine Logger");
 
     running.valueChanged().connect(&Engine::onRunningChanged, this).release();
 

@@ -29,7 +29,7 @@ XrExampleEngineLayer::XrExampleEngineLayer()
     , m_api(std::make_unique<VulkanGraphicsApi>())
     , m_xrApi(std::make_unique<KDXr::OpenXrApi>())
 {
-    m_logger = KDUtils::Logger::logger("engine", spdlog::level::info);
+    m_logger = KDUtils::Logger::logger("engine-layer-xr", spdlog::level::info);
 
 #if defined(PLATFORM_ANDROID)
     KDXr::OpenXrApi::initializeAndroid(KDGui::AndroidPlatformIntegration::s_androidApp);

@@ -21,6 +21,8 @@
 
 #include <KDGui/gui_application.h>
 
+#include <KDUtils/logging.h>
+
 #include <imgui.h>
 
 #include <algorithm>
@@ -31,10 +33,7 @@ ExampleEngineLayer::ExampleEngineLayer()
     : EngineLayer()
     , m_api(std::make_unique<VulkanGraphicsApi>())
 {
-    m_logger = spdlog::get("engine");
-    if (!m_logger)
-        m_logger = spdlog::stdout_color_mt("engine");
-
+    m_logger = KDUtils::Logger::logger("engine-layer", spdlog::level::info);
     m_samples.valueChanged().connect([this]() { recreateSampleDependentResources(); }).release();
 }
 
