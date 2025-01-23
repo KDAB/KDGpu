@@ -12,11 +12,14 @@
 
 #include <KDXr/session.h>
 #include <KDXr/openxr/openxr_enums.h>
+#include <KDXr/openxr/openxr_instance.h>
 #include <KDXr/openxr/openxr_resource_manager.h>
 #include <KDXr/utils/formatters.h>
 #include <KDXr/utils/logging.h>
 
 #include <KDGpu/api/graphics_api_impl.h>
+
+#include <algorithm>
 
 namespace {
 
@@ -84,6 +87,13 @@ OpenXrSession::OpenXrSession(OpenXrResourceManager *_openxrResourceManager,
     , deviceHandle(_device)
     , queueIndex(queueIndex)
 {
+    // If the instance extensions includes XR_FB_composition_layer_depth_test, mark it as supported
+    // so we can query it efficiently in OpenXRSession::endFrame().
+    OpenXrInstance *openXrInstance = openxrResourceManager->getInstance(instanceHandle);
+    assert(openXrInstance);
+    supportsCompositorLayerDepth = std::any_of(openXrInstance->extensions.begin(), openXrInstance->extensions.end(), [](const Extension &extension) {
+        return extension.name == XR_FB_COMPOSITION_LAYER_DEPTH_TEST_EXTENSION_NAME;
+    });
 }
 
 void OpenXrSession::initialize(Session *_frontendSession)
@@ -157,6 +167,8 @@ EndFrameResult OpenXrSession::endFrame(const EndFrameOptions &options)
     // Create the corresponding OpenXR composition layer structures
     const auto layerCount = options.layers.size();
     xrLayers.resize(layerCount);
+    if (supportsCompositorLayerDepth)
+        xrLayerDepthTests.reserve(layerCount);
 
     // Clear the various types of projection layer containers. The first time we call endFrame(),
     // the vectors will begin to grow to the size of the number of layers. After that, they will
@@ -164,6 +176,7 @@ EndFrameResult OpenXrSession::endFrame(const EndFrameOptions &options)
     xrLayerProjections.clear();
     xrLayerProjectionViews.clear();
     xrLayerDepthInfos.clear();
+    xrLayerDepthTests.clear();
     xrLayerCylinders.clear();
     xrLayerQuads.clear();
     xrLayerCubes.clear();
@@ -217,6 +230,14 @@ EndFrameResult OpenXrSession::endFrame(const EndFrameOptions &options)
             projectionLayerProjection.viewCount = static_cast<uint32_t>(viewCount);
             projectionLayerProjection.views = xrLayerProjectionViews.data() + xrLayerProjectionViews.size() - viewCount;
 
+            if (supportsCompositorLayerDepth) {
+                xrLayerDepthTests.push_back({ XR_TYPE_COMPOSITION_LAYER_DEPTH_TEST_FB });
+                auto &layerDepthTest = xrLayerDepthTests.back();
+                layerDepthTest.depthMask = XR_TRUE;
+                layerDepthTest.compareOp = XR_COMPARE_OP_LESS_FB;
+                projectionLayerProjection.next = &layerDepthTest;
+            }
+
             xrLayers[layerIndex] = reinterpret_cast<XrCompositionLayerBaseHeader *>(&projectionLayerProjection);
 
             break;
@@ -240,6 +261,14 @@ EndFrameResult OpenXrSession::endFrame(const EndFrameOptions &options)
             quadLayerQuad.subImage.imageArrayIndex = quadLayer.swapchainSubTexture.arrayIndex;
             quadLayerQuad.pose = poseToXrPose(quadLayer.pose);
             quadLayerQuad.size = XrExtent2Df{ quadLayer.size.width, quadLayer.size.height };
+
+            if (supportsCompositorLayerDepth) {
+                xrLayerDepthTests.push_back({ XR_TYPE_COMPOSITION_LAYER_DEPTH_TEST_FB });
+                auto &layerDepthTest = xrLayerDepthTests.back();
+                layerDepthTest.depthMask = XR_TRUE;
+                layerDepthTest.compareOp = XR_COMPARE_OP_LESS_FB;
+                quadLayerQuad.next = &layerDepthTest;
+            }
 
             xrLayers[layerIndex] = reinterpret_cast<XrCompositionLayerBaseHeader *>(&quadLayerQuad);
 
@@ -266,6 +295,14 @@ EndFrameResult OpenXrSession::endFrame(const EndFrameOptions &options)
             cylinderLayerCylinder.radius = cylinderLayer.radius;
             cylinderLayerCylinder.centralAngle = cylinderLayer.centralAngle;
             cylinderLayerCylinder.aspectRatio = cylinderLayer.aspectRatio;
+
+            if (supportsCompositorLayerDepth) {
+                xrLayerDepthTests.push_back({ XR_TYPE_COMPOSITION_LAYER_DEPTH_TEST_FB });
+                auto &layerDepthTest = xrLayerDepthTests.back();
+                layerDepthTest.depthMask = XR_TRUE;
+                layerDepthTest.compareOp = XR_COMPARE_OP_LESS_FB;
+                cylinderLayerCylinder.next = &layerDepthTest;
+            }
 
             xrLayers[layerIndex] = reinterpret_cast<XrCompositionLayerBaseHeader *>(&cylinderLayerCylinder);
 
@@ -294,6 +331,14 @@ EndFrameResult OpenXrSession::endFrame(const EndFrameOptions &options)
                 cubeLayer.orientation.w
             };
 
+            if (supportsCompositorLayerDepth) {
+                xrLayerDepthTests.push_back({ XR_TYPE_COMPOSITION_LAYER_DEPTH_TEST_FB });
+                auto &layerDepthTest = xrLayerDepthTests.back();
+                layerDepthTest.depthMask = XR_TRUE;
+                layerDepthTest.compareOp = XR_COMPARE_OP_LESS_FB;
+                cubeLayerCube.next = &layerDepthTest;
+            }
+
             xrLayers[layerIndex] = reinterpret_cast<XrCompositionLayerBaseHeader *>(&cubeLayerCube);
 
             break;
@@ -311,6 +356,7 @@ EndFrameResult OpenXrSession::endFrame(const EndFrameOptions &options)
     frameEndInfo.environmentBlendMode = environmentBlendModeToXrEnvironmentBlendMode(options.environmentBlendMode);
     frameEndInfo.layerCount = static_cast<uint32_t>(layerCount);
     frameEndInfo.layers = xrLayers.data();
+
     const auto result = xrEndFrame(session, &frameEndInfo);
     if (result != XR_SUCCESS) {
         SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to end frame.");

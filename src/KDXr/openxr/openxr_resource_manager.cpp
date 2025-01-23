@@ -152,9 +152,16 @@ KDGpu::Handle<Instance_t> OpenXrResourceManager::createInstance(const InstanceOp
 
     // Query and check instance extensions
     auto instanceExtensions = availableInstanceExtensions();
+
+    // If the runtime supports the XR_FB_composition_layer_depth_test extension, add it to the list of requested extensions.
+    // This allows the OpenXR compositor to correctly depth test the compositor layers.
+    auto requestedInstanceExtensions = options.extensions;
+    if (findExtension(instanceExtensions, XR_FB_COMPOSITION_LAYER_DEPTH_TEST_EXTENSION_NAME))
+        requestedInstanceExtensions.push_back(XR_FB_COMPOSITION_LAYER_DEPTH_TEST_EXTENSION_NAME);
+
     std::vector<const char *> xrActiveInstanceExtensions; // To pass to xrCreateInstance
     std::vector<Extension> openXrActiveExtensions; // To store in OpenXrInstance
-    for (auto &requestedInstanceExtension : options.extensions) {
+    for (auto &requestedInstanceExtension : requestedInstanceExtensions) {
         bool found = false;
         for (auto &extensionProperty : instanceExtensions) {
             if (requestedInstanceExtension != extensionProperty.name) {

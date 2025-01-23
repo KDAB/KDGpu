@@ -69,6 +69,7 @@ struct KDXR_EXPORT OpenXrSession : public ApiSession {
     XrSession session{ XR_NULL_HANDLE };
     KDGpu::Handle<System_t> systemHandle;
     KDGpu::Handle<Instance_t> instanceHandle;
+    bool supportsCompositorLayerDepth{ false };
 
     // Graphics related stuff
     KDGpu::GraphicsApi *graphicsApi{ nullptr };
@@ -88,6 +89,7 @@ struct KDXR_EXPORT OpenXrSession : public ApiSession {
     std::vector<XrCompositionLayerProjection> xrLayerProjections;
     std::vector<XrCompositionLayerProjectionView> xrLayerProjectionViews;
     std::vector<XrCompositionLayerDepthInfoKHR> xrLayerDepthInfos;
+    std::vector<XrCompositionLayerDepthTestFB> xrLayerDepthTests;
     std::vector<XrCompositionLayerQuad> xrLayerQuads;
     std::vector<XrCompositionLayerCylinderKHR> xrLayerCylinders;
     std::vector<XrCompositionLayerCubeKHR> xrLayerCubes;
