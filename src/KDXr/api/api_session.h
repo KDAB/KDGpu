@@ -28,6 +28,7 @@ struct GetInterationProfileOptions;
 struct Session_t;
 struct SyncActionsOptions;
 struct VibrationOutputOptions;
+struct ApiPassthroughLayer;
 
 /**
  * @brief ApiSession

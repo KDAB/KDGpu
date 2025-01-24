@@ -93,6 +93,7 @@ struct KDXR_EXPORT OpenXrSession : public ApiSession {
     std::vector<XrCompositionLayerQuad> xrLayerQuads;
     std::vector<XrCompositionLayerCylinderKHR> xrLayerCylinders;
     std::vector<XrCompositionLayerCubeKHR> xrLayerCubes;
+    std::vector<XrCompositionLayerPassthroughFB> xrLayerPassthrough;
 };
 
 } // namespace KDXr

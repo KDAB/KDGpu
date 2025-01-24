@@ -95,6 +95,11 @@ ReferenceSpace Session::createReferenceSpace(const ReferenceSpaceOptions &option
     return ReferenceSpace(m_session, m_api, options);
 }
 
+PassthroughLayerController Session::createPassthroughLayer(const PassthroughLayerOptions &options)
+{
+    return PassthroughLayerController(m_session, m_api, options);
+}
+
 std::span<const KDGpu::Format> Session::supportedSwapchainFormats() const
 {
     if (m_supportedSwapchainFormats.empty()) {

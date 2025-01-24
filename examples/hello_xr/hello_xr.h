@@ -30,6 +30,7 @@ class ProjectionLayer;
 namespace KDGpuExample {
 class XrQuadImGuiLayer;
 class XrCylinderImGuiLayer;
+class XrPassthroughLayer;
 } // namespace KDGpuExample
 
 using namespace KDGpuExample;
@@ -49,10 +50,12 @@ private:
     void processTranslateAction();
     void processPalmPoseAction(KDXr::Time predictedDisplayTime);
     void processHapticAction();
+    void processTogglePassthroughAction();
 
     ProjectionLayer *m_projectionLayer{ nullptr };
     XrQuadImGuiLayer *m_quadImguiLayer{ nullptr };
     XrCylinderImGuiLayer *m_cylinderImguiLayer{ nullptr };
+    XrPassthroughLayer *m_passthroughLayer{ nullptr };
 
     // Input/output actions
     KDXr::ActionSet m_actionSet;
@@ -62,11 +65,14 @@ private:
     KDXr::Action m_translateAction;
     KDXr::Action m_palmPoseAction;
     KDXr::Action m_buzzAction;
+    KDXr::Action m_togglePassthroughAction;
 
     const std::vector<std::string> m_handPaths{ "/user/hand/left", "/user/hand/right" };
 
     std::array<KDXr::ActionStateBoolean, 2> m_toggleAnimationActionStates;
     std::array<KDXr::ActionStateBoolean, 2> m_toggleRotateActionStates;
+    KDXr::ActionStateBoolean m_togglePassthroughActionState;
+
     KDXr::ActionStateFloat m_scaleActionState;
     float m_linearSpeed{ 1.0f };
     KDXr::ActionStateVector2 m_translateActionState;
@@ -75,4 +81,5 @@ private:
     std::array<KDXr::SpaceState, 2> m_palmPoseActionSpaceStates;
     int32_t m_buzzHand{ -1 };
     std::array<float, 2> m_buzzAmplitudes{ 0.0f, 0.0f };
+    bool m_passthroughEnabled = true;
 };

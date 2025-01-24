@@ -180,6 +180,7 @@ EndFrameResult OpenXrSession::endFrame(const EndFrameOptions &options)
     xrLayerCylinders.clear();
     xrLayerQuads.clear();
     xrLayerCubes.clear();
+    xrLayerPassthrough.clear();
 
     for (size_t layerIndex = 0; layerIndex < layerCount; ++layerIndex) {
         switch (options.layers[layerIndex]->type) {
@@ -340,6 +341,31 @@ EndFrameResult OpenXrSession::endFrame(const EndFrameOptions &options)
             }
 
             xrLayers[layerIndex] = reinterpret_cast<XrCompositionLayerBaseHeader *>(&cubeLayerCube);
+
+            break;
+        }
+
+        case CompositionLayerType::PassThrough: {
+            auto &passthroughLayer = reinterpret_cast<PassthroughCompositionLayer &>(*options.layers[layerIndex]);
+
+            xrLayerPassthrough.push_back({ XR_TYPE_COMPOSITION_LAYER_PASSTHROUGH_FB });
+            auto &passthroughLayerPassthrough = xrLayerPassthrough.back();
+            passthroughLayerPassthrough.flags = XR_COMPOSITION_LAYER_BLEND_TEXTURE_SOURCE_ALPHA_BIT;
+            passthroughLayerPassthrough.space = XR_NULL_HANDLE;
+
+            auto openxrPassthroughLayer = openxrResourceManager->getPassthroughLayer(passthroughLayer.passthroughLayer);
+            assert(openxrPassthroughLayer);
+            passthroughLayerPassthrough.layerHandle = openxrPassthroughLayer->passthroughLayer;
+
+            if (supportsCompositorLayerDepth) {
+                xrLayerDepthTests.push_back({ XR_TYPE_COMPOSITION_LAYER_DEPTH_TEST_FB });
+                auto &layerDepthTest = xrLayerDepthTests.back();
+                layerDepthTest.depthMask = XR_TRUE;
+                layerDepthTest.compareOp = XR_COMPARE_OP_ALWAYS_FB;
+                passthroughLayerPassthrough.next = &layerDepthTest;
+            }
+
+            xrLayers[layerIndex] = reinterpret_cast<XrCompositionLayerBaseHeader *>(&passthroughLayerPassthrough);
 
             break;
         }

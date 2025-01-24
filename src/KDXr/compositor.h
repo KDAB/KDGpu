@@ -21,6 +21,7 @@ namespace KDXr {
 
 struct ReferenceSpace_t;
 struct Swapchain_t;
+struct PassthroughLayer_t;
 
 // Layers for the compositor
 
@@ -98,6 +99,13 @@ struct CubeLayer {
     KDGpu::Handle<Swapchain_t> swapchain;
     uint32_t arrayIndex{ 0 };
     Quaternion orientation{};
+};
+
+struct PassthroughCompositionLayer {
+    CompositionLayerType type;
+    KDGpu::Handle<ReferenceSpace_t> referenceSpace;
+    CompositionLayerFlags flags{ CompositionLayerFlagBits::MaxEnum };
+    KDGpu::Handle<PassthroughLayer_t> passthroughLayer;
 };
 
 struct EndFrameOptions {

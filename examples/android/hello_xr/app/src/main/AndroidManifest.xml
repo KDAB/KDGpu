@@ -13,6 +13,10 @@
     <uses-feature
         android:name="android.hardware.vr.headtracking"
         android:required="false" />
+    <uses-feature
+        android:name="com.oculus.feature.PASSTHROUGH"
+        android:required="true"
+        />
 
     <application
         android:allowBackup="true"

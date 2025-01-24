@@ -18,6 +18,7 @@
 #include <KDXr/openxr/openxr_session.h>
 #include <KDXr/openxr/openxr_swapchain.h>
 #include <KDXr/openxr/openxr_system.h>
+#include <KDXr/openxr/openxr_passthrough_layer.h>
 
 #include <KDXr/kdxr_export.h>
 
@@ -59,6 +60,10 @@ public:
     void deleteReferenceSpace(const KDGpu::Handle<ReferenceSpace_t> &handle) final;
     OpenXrReferenceSpace *getReferenceSpace(const KDGpu::Handle<ReferenceSpace_t> &handle) const final;
 
+    KDGpu::Handle<PassthroughLayer_t> createPassthroughLayer(const KDGpu::Handle<Session_t> &sessionHandle, const PassthroughLayerOptions &options) final;
+    void deletePassthroughLayer(const KDGpu::Handle<PassthroughLayer_t> &handle) final;
+    OpenXrPassthroughLayer *getPassthroughLayer(const KDGpu::Handle<PassthroughLayer_t> &handle) const;
+
     KDGpu::Handle<Swapchain_t> createSwapchain(const KDGpu::Handle<Session_t> &sessionHandle, const SwapchainOptions &options) final;
     void deleteSwapchain(const KDGpu::Handle<Swapchain_t> &handle) final;
     OpenXrSwapchain *getSwapchain(const KDGpu::Handle<Swapchain_t> &handle) const final;
@@ -79,6 +84,9 @@ private:
     KDGpu::Pool<OpenXrSwapchain, Swapchain_t> m_swapchains{ 4 };
     KDGpu::Pool<OpenXrActionSet, ActionSet_t> m_actionSets{ 4 };
     KDGpu::Pool<OpenXrAction, Action_t> m_actions{ 32 };
+    KDGpu::Pool<OpenXrPassthroughLayer, PassthroughLayer_t> m_passthroughLayers{ 1 };
+
+    XrPassthroughFB m_passthrough{ XR_NULL_HANDLE };
 };
 
 } // namespace KDXr

@@ -51,7 +51,8 @@ void XrExampleEngineLayer::onAttached()
         .extensions = { XR_EXT_DEBUG_UTILS_EXTENSION_NAME,
                         XR_KHR_COMPOSITION_LAYER_DEPTH_EXTENSION_NAME,
                         XR_KHR_VULKAN_ENABLE_EXTENSION_NAME,
-                        XR_KHR_COMPOSITION_LAYER_CYLINDER_EXTENSION_NAME }
+                        XR_KHR_COMPOSITION_LAYER_CYLINDER_EXTENSION_NAME,
+                        XR_FB_PASSTHROUGH_EXTENSION_NAME }
     };
     m_xrInstance = m_xrApi->createInstance(xrInstanceOptions);
     m_xrInstance.instanceLost.connect(&XrExampleEngineLayer::onInstanceLost, this).release();

@@ -14,6 +14,7 @@
 #include <KDGpuExample/engine.h>
 #include <KDGpuExample/xr_compositor/xr_cylinder_imgui_layer.h>
 #include <KDGpuExample/xr_compositor/xr_quad_imgui_layer.h>
+#include <KDGpuExample/xr_compositor/xr_passthrough_layer.h>
 
 #include <KDXr/session.h>
 
@@ -22,6 +23,13 @@ void HelloXr::onAttached()
     XrExampleEngineLayer::onAttached();
     if (!m_isInitialized)
         return;
+
+    const XrPassthroughLayerOptions passthroughLayerOptions = {
+        .device = &m_device,
+        .queue = &m_queue,
+        .session = &m_session
+    };
+    m_passthroughLayer = createCompositorLayer<XrPassthroughLayer>(passthroughLayerOptions);
 
     // Create a projection layer to render the 3D scene
     const XrProjectionLayerOptions projectionLayerOptions = {
@@ -90,6 +98,10 @@ void HelloXr::onAttached()
                                               .localizedName = "Buzz",
                                               .type = KDXr::ActionType::VibrationOutput,
                                               .subactionPaths = m_handPaths });
+    m_togglePassthroughAction = m_actionSet.createAction({ .name = "passthrough",
+                                                           .localizedName = "Toggle Passthrough",
+                                                           .type = KDXr::ActionType::BooleanInput,
+                                                           .subactionPaths = { m_handPaths[1] } });
 
     // Create action spaces for the palm poses. Default is no offset from the palm pose. If you wish to
     // apply an offset, you can do so by setting the poseInActionSpace member of the ActionSpaceOptions.
@@ -111,6 +123,7 @@ void HelloXr::onAttached()
                 { .action = m_palmPoseAction, .binding = "/user/hand/right/input/grip/pose" },
                 { .action = m_buzzAction, .binding = "/user/hand/left/output/haptic" },
                 { .action = m_buzzAction, .binding = "/user/hand/right/output/haptic" },
+                { .action = m_togglePassthroughAction, .binding = "/user/hand/right/input/thumbstick/click" },
         }
     };
     if (m_xrInstance.suggestActionBindings(bindingOptions) != KDXr::SuggestActionBindingsResult::Success) {
@@ -135,6 +148,7 @@ void HelloXr::onDetached()
     m_scaleAction = {};
     m_toggleRotateYAction = {};
     m_toggleRotateZAction = {};
+    m_togglePassthroughAction = {};
     m_actionSet = {};
 
     clearCompositorLayers();
@@ -181,6 +195,7 @@ void HelloXr::pollActions(KDXr::Time predictedDisplayTime)
     processTranslateAction();
     processPalmPoseAction(predictedDisplayTime);
     processHapticAction();
+    processTogglePassthroughAction();
 }
 
 void HelloXr::processToggleRotateZAction()
@@ -317,5 +332,34 @@ void HelloXr::processHapticAction()
             if (m_buzzAmplitudes[i] < 0.01f)
                 m_buzzAmplitudes[i] = 0.0f;
         }
+    }
+}
+
+void HelloXr::processTogglePassthroughAction()
+{
+    bool togglePassthrough{ false };
+    // Query the toggle passthrough action
+    const auto togglePassthroughResult = m_session.getBooleanState(
+            { .action = m_togglePassthroughAction, .subactionPath = m_handPaths[1] },
+            m_togglePassthroughActionState);
+    if (togglePassthroughResult == KDXr::GetActionStateResult::Success) {
+        if (m_togglePassthroughActionState.currentState &&
+            m_togglePassthroughActionState.changedSinceLastSync &&
+            m_togglePassthroughActionState.active) {
+            togglePassthrough = true;
+            m_buzzHand = 1;
+        }
+    } else {
+        SPDLOG_LOGGER_ERROR(m_logger, "Failed to get toggle passthrough action state.");
+    }
+
+    // If the toggle animation action was pressed, toggle the animation and rotate the triangle
+    if (togglePassthrough) {
+        m_passthroughEnabled = !m_passthroughEnabled;
+
+        if (m_passthroughLayer)
+            m_passthroughLayer->setRunning(m_passthroughEnabled);
+
+        SPDLOG_LOGGER_INFO(m_logger, "Passthrough enabled = {}", m_passthroughEnabled);
     }
 }

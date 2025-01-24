@@ -14,6 +14,7 @@
 #include <KDXr/kdxr_core.h>
 #include <KDXr/kdxr_export.h>
 #include <KDXr/locate_views_options.h>
+#include <KDXr/passthrough_layer_controller.h>
 #include <KDXr/reference_space.h>
 #include <KDXr/swapchain.h>
 
@@ -104,7 +105,11 @@ public:
 
     ReferenceSpace createReferenceSpace(const ReferenceSpaceOptions &options = ReferenceSpaceOptions());
 
-    std::span<const KDGpu::Format> supportedSwapchainFormats() const;
+    PassthroughLayerController createPassthroughLayer(const PassthroughLayerOptions &options = PassthroughLayerOptions());
+    void setPassthroughRunning(KDGpu::Handle<System_t>, bool running);
+
+    std::span<const KDGpu::Format>
+    supportedSwapchainFormats() const;
     KDGpu::Format selectSwapchainFormat(std::span<const KDGpu::Format> preferredFormats) const;
 
     Swapchain createSwapchain(const SwapchainOptions &options);

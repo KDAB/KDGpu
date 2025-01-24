@@ -413,6 +413,95 @@ OpenXrReferenceSpace *OpenXrResourceManager::getReferenceSpace(const KDGpu::Hand
     return m_referenceSpaces.get(handle);
 }
 
+KDGpu::Handle<PassthroughLayer_t> OpenXrResourceManager::createPassthroughLayer(const KDGpu::Handle<Session_t> &sessionHandle, const PassthroughLayerOptions &options)
+{
+    OpenXrSession *openXrSession = m_sessions.get(sessionHandle);
+    assert(openXrSession);
+    OpenXrInstance *openXrInstance = m_instances.get(openXrSession->instanceHandle);
+    assert(openXrInstance);
+
+    if (m_passthrough == XR_NULL_HANDLE) {
+        // Create a singleton passthrough object, if we do not already have one
+        XrPassthroughCreateInfoFB passthroughCreateInfo = { XR_TYPE_PASSTHROUGH_CREATE_INFO_FB };
+        passthroughCreateInfo.flags = XR_PASSTHROUGH_IS_RUNNING_AT_CREATION_BIT_FB;
+
+        PFN_xrCreatePassthroughFB xrCreatePassthroughFB;
+        if (xrGetInstanceProcAddr(openXrInstance->instance, "xrCreatePassthroughFB", (PFN_xrVoidFunction *)&xrCreatePassthroughFB) != XR_SUCCESS) {
+            SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to get InstanceProcAddr.");
+            return {};
+        }
+
+        if (xrCreatePassthroughFB(openXrSession->session, &passthroughCreateInfo, &m_passthrough) != XR_SUCCESS) {
+            SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to create OpenXR Passthrough.");
+            return {};
+        }
+    }
+
+    PFN_xrCreatePassthroughLayerFB xrCreatePassthroughLayerFB;
+    if (xrGetInstanceProcAddr(openXrInstance->instance, "xrCreatePassthroughLayerFB", (PFN_xrVoidFunction *)&xrCreatePassthroughLayerFB) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to get InstanceProcAddr.");
+    }
+
+    XrPassthroughLayerCreateInfoFB passthroughLayerCreateInfo = { XR_TYPE_PASSTHROUGH_LAYER_CREATE_INFO_FB };
+    passthroughLayerCreateInfo.passthrough = m_passthrough;
+    passthroughLayerCreateInfo.purpose = XR_PASSTHROUGH_LAYER_PURPOSE_RECONSTRUCTION_FB;
+    passthroughLayerCreateInfo.flags = XR_PASSTHROUGH_IS_RUNNING_AT_CREATION_BIT_FB;
+
+    XrPassthroughLayerFB xrPassthroughLayer{ XR_NULL_HANDLE };
+    if ((xrCreatePassthroughLayerFB(openXrSession->session, &passthroughLayerCreateInfo, &xrPassthroughLayer)) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to create OpenXR Passthrough Layer.");
+        return {};
+    }
+
+    auto h = m_passthroughLayers.emplace(OpenXrPassthroughLayer{
+            this,
+            xrPassthroughLayer,
+            sessionHandle,
+            options });
+    return h;
+}
+
+void OpenXrResourceManager::deletePassthroughLayer(const KDGpu::Handle<PassthroughLayer_t> &handle)
+{
+    OpenXrPassthroughLayer *openXrPassthroughLayer = m_passthroughLayers.get(handle);
+    assert(openXrPassthroughLayer);
+
+    OpenXrSession *openXrSession = m_sessions.get(openXrPassthroughLayer->sessionHandle);
+    assert(openXrSession);
+    OpenXrInstance *openXrInstance = m_instances.get(openXrSession->instanceHandle);
+    assert(openXrInstance);
+
+    PFN_xrDestroyPassthroughLayerFB xrDestroyPassthroughLayerFB;
+    if (xrGetInstanceProcAddr(openXrInstance->instance, "xrDestroyPassthroughLayerFB", (PFN_xrVoidFunction *)&xrDestroyPassthroughLayerFB) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to get InstanceProcAddr.");
+    }
+
+    if (xrDestroyPassthroughLayerFB(openXrPassthroughLayer->passthroughLayer) != XR_SUCCESS) {
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to destroy OpenXR Passthrough Layer.");
+    }
+    m_passthroughLayers.remove(handle);
+
+    if (m_passthroughLayers.size() == 0 && m_passthrough != XR_NULL_HANDLE) {
+        // If all the layers are gone, we no longer need the passthrough object
+
+        PFN_xrDestroyPassthroughFB xrDestroyPassthroughFB;
+        if (xrGetInstanceProcAddr(openXrInstance->instance, "xrDestroyPassthroughFB", (PFN_xrVoidFunction *)&xrDestroyPassthroughFB) != XR_SUCCESS) {
+            SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to get InstanceProcAddr.");
+        }
+
+        if (xrDestroyPassthroughFB(m_passthrough) != XR_SUCCESS) {
+            SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to destroy OpenXR Passthrough.");
+        }
+
+        m_passthrough = XR_NULL_HANDLE;
+    }
+}
+
+OpenXrPassthroughLayer *OpenXrResourceManager::getPassthroughLayer(const KDGpu::Handle<PassthroughLayer_t> &handle) const
+{
+    return m_passthroughLayers.get(handle);
+}
+
 KDGpu::Handle<Swapchain_t> OpenXrResourceManager::createSwapchain(const KDGpu::Handle<Session_t> &sessionHandle, const SwapchainOptions &options)
 {
     OpenXrSession *openXrSession = m_sessions.get(sessionHandle);
