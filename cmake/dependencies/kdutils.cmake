@@ -9,19 +9,20 @@
 # KDUtils library
 if(EXISTS "${CMAKE_SOURCE_DIR}/src/dependencies/kdutils")
     set(KDUTILS_BUILD_TESTS OFF)
+    set(KDUTILS_BUILD_EXAMPLES OFF)
     add_subdirectory(${CMAKE_SOURCE_DIR}/src/dependencies/kdutils/)
 elseif(NOT TARGET KDUtils)
     find_package(KDUtils CONFIG)
 
     if(NOT KDUtils_FOUND)
+        set(KDUTILS_BUILD_TESTS OFF)
+        set(KDUTILS_BUILD_EXAMPLES OFF)
         FetchContent_Declare(
             KDUtils
             GIT_REPOSITORY https://github.com/KDAB/KDUtils.git
             GIT_TAG main
             USES_TERMINAL_DOWNLOAD YES USES_TERMINAL_UPDATE YES
         )
-
-        option(KDUTILS_BUILD_TESTS "Build the tests" OFF)
 
         FetchContent_MakeAvailable(KDUtils)
     endif()
