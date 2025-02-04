@@ -11,6 +11,7 @@
 #include "vulkan_device.h"
 
 #include <KDGpu/resource_manager.h>
+#include <KDGpu/vulkan/vulkan_enums.h>
 #include <KDGpu/vulkan/vulkan_queue.h>
 #include <KDGpu/vulkan/vulkan_resource_manager.h>
 
@@ -27,42 +28,20 @@ VulkanDevice::VulkanDevice(VkDevice _device,
                            uint32_t _apiVersion,
                            VulkanResourceManager *_vulkanResourceManager,
                            const Handle<Adapter_t> &_adapterHandle,
-                           const AdapterFeatures &requestedFeatures,
+                           const AdapterFeatures &_requestedFeatures,
                            bool _isOwned) noexcept
     : device(_device)
+    , apiVersion(_apiVersion)
+    , requestedFeatures(_requestedFeatures)
     , vulkanResourceManager(_vulkanResourceManager)
     , adapterHandle(_adapterHandle)
     , isOwned(_isOwned)
 {
-    // Create an allocator for the device
     VulkanAdapter *vulkanAdapter = vulkanResourceManager->getAdapter(adapterHandle);
     VulkanInstance *vulkanInstance = vulkanResourceManager->getInstance(vulkanAdapter->instanceHandle);
 
-    VmaAllocatorCreateInfo allocatorInfo = {};
-    allocatorInfo.vulkanApiVersion = _apiVersion;
-    allocatorInfo.instance = vulkanInstance->instance;
-    allocatorInfo.physicalDevice = vulkanAdapter->physicalDevice;
-    allocatorInfo.device = device;
-    if (requestedFeatures.bufferDeviceAddress)
-        allocatorInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
-
-    if (vmaCreateAllocator(&allocatorInfo, &allocator) != VK_SUCCESS)
-        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to create Vulkan memory allocator!");
-
-    VkPhysicalDeviceMemoryProperties memoryProperties{};
-    vkGetPhysicalDeviceMemoryProperties(vulkanAdapter->physicalDevice, &memoryProperties);
-
-    std::vector<VkExternalMemoryHandleTypeFlags> externalMemoryHandleTypes;
-#if defined(KDGPU_PLATFORM_LINUX)
-    externalMemoryHandleTypes.resize(memoryProperties.memoryTypeCount, VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT);
-    allocatorInfo.pTypeExternalMemoryHandleTypes = externalMemoryHandleTypes.data();
-#elif defined(KDGPU_PLATFORM_WIN32)
-    externalMemoryHandleTypes.resize(memoryProperties.memoryTypeCount, VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT);
-    allocatorInfo.pTypeExternalMemoryHandleTypes = externalMemoryHandleTypes.data();
-#endif
-
-    if (vmaCreateAllocator(&allocatorInfo, &externalAllocator) != VK_SUCCESS)
-        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to create Vulkan external memory allocator!");
+    // Create an allocator for the device
+    allocator = createMemoryAllocator();
 
     // Resize the vector of command pools to have one for each queue family
     const auto queueTypes = vulkanAdapter->queryQueueTypes();
@@ -221,6 +200,49 @@ std::vector<QueueDescription> VulkanDevice::getQueues(ResourceManager *resourceM
 void VulkanDevice::waitUntilIdle()
 {
     vkDeviceWaitIdle(device);
+}
+
+VmaAllocator VulkanDevice::getOrCreateExternalMemoryAllocator(ExternalMemoryHandleTypeFlags externalMemoryHandleType)
+{
+    VmaAllocator allocator = VK_NULL_HANDLE;
+    auto it = std::find_if(externalAllocators.begin(), externalAllocators.end(), [externalMemoryHandleType](const auto &typeAndAllocator) {
+        return (typeAndAllocator.externalMemoryHandleType & externalMemoryHandleType) == externalMemoryHandleType;
+    });
+    if (it == externalAllocators.end()) {
+        allocator = createMemoryAllocator(externalMemoryHandleType);
+        externalAllocators.emplace_back(externalMemoryHandleType, allocator);
+    } else {
+        allocator = it->allocator;
+    }
+    return allocator;
+}
+
+VmaAllocator VulkanDevice::createMemoryAllocator(ExternalMemoryHandleTypeFlags externalMemoryHandleType) const
+{
+    VulkanAdapter *vulkanAdapter = vulkanResourceManager->getAdapter(adapterHandle);
+    VulkanInstance *vulkanInstance = vulkanResourceManager->getInstance(vulkanAdapter->instanceHandle);
+
+    VmaAllocatorCreateInfo allocatorInfo = {};
+    allocatorInfo.vulkanApiVersion = apiVersion;
+    allocatorInfo.instance = vulkanInstance->instance;
+    allocatorInfo.physicalDevice = vulkanAdapter->physicalDevice;
+    allocatorInfo.device = device;
+    if (requestedFeatures.bufferDeviceAddress)
+        allocatorInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
+
+    std::vector<VkExternalMemoryHandleTypeFlags> externalMemoryHandleTypes;
+    if (externalMemoryHandleType != ExternalMemoryHandleTypeFlagBits::None) {
+        VkPhysicalDeviceMemoryProperties memoryProperties{};
+        vkGetPhysicalDeviceMemoryProperties(vulkanAdapter->physicalDevice, &memoryProperties);
+        externalMemoryHandleTypes.resize(memoryProperties.memoryTypeCount, externalMemoryHandleTypeToVkExternalMemoryHandleType(externalMemoryHandleType));
+        allocatorInfo.pTypeExternalMemoryHandleTypes = externalMemoryHandleTypes.data();
+    }
+
+    VmaAllocator allocator = VK_NULL_HANDLE;
+    if (vmaCreateAllocator(&allocatorInfo, &allocator) != VK_SUCCESS)
+        SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to create Vulkan external memory allocator!");
+
+    return allocator;
 }
 
 } // namespace KDGpu

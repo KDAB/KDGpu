@@ -65,12 +65,21 @@ struct KDGPU_EXPORT VulkanDevice {
 
     void waitUntilIdle();
 
+    VmaAllocator getOrCreateExternalMemoryAllocator(ExternalMemoryHandleTypeFlags externalMemoryHandleType);
+    VmaAllocator createMemoryAllocator(ExternalMemoryHandleTypeFlags externalMemoryHandleType = ExternalMemoryHandleTypeFlagBits::None) const;
+
     VkDevice device{ VK_NULL_HANDLE };
+    uint32_t apiVersion{};
+    AdapterFeatures requestedFeatures{};
 
     VulkanResourceManager *vulkanResourceManager{ nullptr };
     Handle<Adapter_t> adapterHandle;
     VmaAllocator allocator{ VK_NULL_HANDLE };
-    VmaAllocator externalAllocator{ VK_NULL_HANDLE };
+    struct MemoryHandleTypeAndAllocator {
+        ExternalMemoryHandleTypeFlags externalMemoryHandleType;
+        VmaAllocator allocator;
+    };
+    std::vector<MemoryHandleTypeAndAllocator> externalAllocators;
     std::vector<QueueDescription> queueDescriptions;
     std::vector<VkCommandPool> commandPools; // Indexed by queue type (family)
     std::vector<VkDescriptorPool> descriptorSetPools;

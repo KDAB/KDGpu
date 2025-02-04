@@ -680,8 +680,8 @@ void VulkanResourceManager::deleteDevice(const Handle<Device_t> &handle)
 
     // Destroy Memory Allocators
     vmaDestroyAllocator(vulkanDevice->allocator);
-    if (vulkanDevice->externalAllocator != VK_NULL_HANDLE)
-        vmaDestroyAllocator(vulkanDevice->externalAllocator);
+    for (auto [memoryHandleType, externalAllocator] : vulkanDevice->externalAllocators)
+        vmaDestroyAllocator(externalAllocator);
 
     // At last, destroy device if we allocated it
     if (vulkanDevice->isOwned)
@@ -842,7 +842,7 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
         createInfo.pNext = &vkExternalMemImageCreateInfo;
 
         // We have to use a dedicated allocator for external handles that has been created with VkExportMemoryAllocateInfo
-        allocator = vulkanDevice->externalAllocator;
+        allocator = vulkanDevice->getOrCreateExternalMemoryAllocator(options.externalMemoryHandleType);
 
         allocInfo.flags = VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
     }
@@ -873,7 +873,7 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
                 .sType = VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR,
                 .pNext = nullptr,
                 .memory = allocationInfo.deviceMemory,
-                .handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT_KHR
+                .handleType = externalMemoryHandleTypeToVkExternalMemoryHandleType(options.externalMemoryHandleType)
             };
             int fd{};
             instance->vkGetMemoryFdKHR(vulkanDevice->device, &vkMemoryGetFdInfoKHR, &fd);
@@ -887,7 +887,7 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
                 .sType = VK_STRUCTURE_TYPE_MEMORY_GET_WIN32_HANDLE_INFO_KHR,
                 .pNext = nullptr,
                 .memory = allocationInfo.deviceMemory,
-                .handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT
+                .handleType = externalMemoryHandleTypeToVkExternalMemoryHandleType(options.externalMemoryHandleType)
             };
             HANDLE winHandle{};
             instance->vkGetMemoryWin32HandleKHR(vulkanDevice->device, &vkGetWin32HandleInfoKHR, &winHandle);
@@ -1023,7 +1023,7 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
         createInfo.pNext = &vkExternalMemBufferCreateInfo;
 
         // We have to use a dedicated allocator for external handles that has been created with VkExportMemoryAllocateInfo
-        allocator = vulkanDevice->externalAllocator;
+        allocator = vulkanDevice->getOrCreateExternalMemoryAllocator(options.externalMemoryHandleType);
 
         allocInfo.flags = VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
     }
@@ -1054,7 +1054,7 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
                 .sType = VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR,
                 .pNext = nullptr,
                 .memory = allocationInfo.deviceMemory,
-                .handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT_KHR
+                .handleType = externalMemoryHandleTypeToVkExternalMemoryHandleType(options.externalMemoryHandleType)
             };
             int fd{};
             instance->vkGetMemoryFdKHR(vulkanDevice->device, &vkMemoryGetFdInfoKHR, &fd);
@@ -1068,7 +1068,7 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
                 .sType = VK_STRUCTURE_TYPE_MEMORY_GET_WIN32_HANDLE_INFO_KHR,
                 .pNext = nullptr,
                 .memory = allocationInfo.deviceMemory,
-                .handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT_KHR
+                .handleType = externalMemoryHandleTypeToVkExternalMemoryHandleType(options.externalMemoryHandleType)
             };
             HANDLE winHandle{};
             VkResult res = instance->vkGetMemoryWin32HandleKHR(vulkanDevice->device, &vkGetWin32HandleInfoKHR, &winHandle);
@@ -3291,17 +3291,32 @@ std::string VulkanResourceManager::getMemoryStats(const Handle<Device_t> &device
 {
     VulkanDevice *vulkanDevice = m_devices.get(device);
 
-    char *statsAllocator = nullptr;
-    char *statsExternalAllocator = nullptr;
-
-    if (vulkanDevice->allocator)
-        vmaBuildStatsString(vulkanDevice->allocator, &statsAllocator, true);
-    if (vulkanDevice->externalAllocator)
-        vmaBuildStatsString(vulkanDevice->allocator, &statsExternalAllocator, true);
-
     std::string stats;
-    stats.append(statsAllocator);
-    stats.append(statsExternalAllocator);
+
+    if (vulkanDevice->allocator) {
+        char *statsAllocator = nullptr;
+        vmaBuildStatsString(vulkanDevice->allocator, &statsAllocator, true);
+        stats.append(statsAllocator);
+        vmaFreeStatsString(vulkanDevice->allocator, statsAllocator);
+    }
+
+    for (const auto &[memoryHandleType, externalAllocator] : vulkanDevice->externalAllocators) {
+        // Check if we have allocations in any of the heaps, otherwise don't build statistics
+        const auto hasAllocations = [externalAllocator] {
+            std::array<VmaBudget, VK_MAX_MEMORY_HEAPS> budgets;
+            vmaGetHeapBudgets(externalAllocator, budgets.data());
+            return std::any_of(budgets.begin(), budgets.end(), [](const VmaBudget &budget) {
+                return budget.statistics.allocationCount > 0;
+            });
+        }();
+        if (hasAllocations) {
+            char *statsAllocator = nullptr;
+            vmaBuildStatsString(externalAllocator, &statsAllocator, true);
+            stats.append(statsAllocator);
+            vmaFreeStatsString(externalAllocator, statsAllocator);
+        }
+    }
+
     return stats;
 }
 
