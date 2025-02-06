@@ -2765,23 +2765,31 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
                 .sType = VK_STRUCTURE_TYPE_SUBPASS_DEPENDENCY_2,
                 .srcSubpass = VK_SUBPASS_EXTERNAL,
                 .dstSubpass = 0,
-                .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-                .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                .srcStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+                .dstStageMask = VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT,
                 .srcAccessMask = VK_ACCESS_NONE,
-                .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+                .dstAccessMask = VK_ACCESS_INPUT_ATTACHMENT_READ_BIT |
+                        VK_ACCESS_COLOR_ATTACHMENT_READ_BIT |
+                        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
+                        VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT |
+                        VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
                 .dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT,
         },
         {
                 .sType = VK_STRUCTURE_TYPE_SUBPASS_DEPENDENCY_2,
                 .srcSubpass = VK_SUBPASS_EXTERNAL,
                 .dstSubpass = 0,
-                .srcStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
-                .dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
-                .srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
-                .dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT,
+                .srcStageMask = VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT,
+                .dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+                .srcAccessMask = VK_ACCESS_INPUT_ATTACHMENT_READ_BIT |
+                        VK_ACCESS_COLOR_ATTACHMENT_READ_BIT |
+                        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
+                        VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT |
+                        VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+                .dstAccessMask = VK_ACCESS_NONE,
                 .dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT,
         },
-    };
+    }; // namespace KDGpu
 
     VkRenderPassCreateInfo2 renderPassInfo = {};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO_2;
