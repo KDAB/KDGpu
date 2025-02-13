@@ -1,5 +1,5 @@
 /*
-  This file is part of KDXr.
+  This file is part of KDGpu.
 
   SPDX-FileCopyrightText: 2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
 
@@ -10,10 +10,6 @@
 
 #pragma once
 
-namespace KDXr {
+// WARNING! Only include this from cpp files so it does not leak to the public API!
 
-class OpenXrResourceManager;
-
-using ResourceManager = OpenXrResourceManager;
-
-} // namespace KDXr
+#include <KDXr/openxr/openxr_resource_manager.h>

@@ -10,9 +10,9 @@
 
 #pragma once
 
-#include <KDXr/api/api_instance.h>
 #include <KDXr/kdxr_export.h>
 #include <KDXr/config.h>
+#include <KDXr/kdxr_core.h>
 
 #include <KDGpu/handle.h>
 
@@ -24,27 +24,32 @@ namespace KDXr {
 
 struct Session_t;
 class OpenXrResourceManager;
+struct Instance_t;
+struct System_t;
+struct SuggestActionBindingsOptions;
+struct SystemOptions;
+class Instance;
 
 /**
  * @brief OpenXrInstance
  * \ingroup openxr
  *
  */
-struct KDXR_EXPORT OpenXrInstance : public ApiInstance {
+struct KDXR_EXPORT OpenXrInstance {
     explicit OpenXrInstance(OpenXrResourceManager *_openxrResourceManager,
                             XrInstance _instance,
                             std::vector<ApiLayer> &_apiLayers,
                             std::vector<Extension> &_extensions,
                             bool _isOwned = true) noexcept;
 
-    void initialize(Instance *_frontendInstance) final;
-    InstanceProperties properties() const final;
-    std::vector<ApiLayer> enabledApiLayers() const final;
-    std::vector<Extension> enabledExtensions() const final;
-    KDGpu::Handle<System_t> querySystem(const SystemOptions &options, const KDGpu::Handle<Instance_t> &instanceHandle) final;
-    virtual ProcessEventsResult processEvents() final;
+    void initialize(Instance *_frontendInstance);
+    InstanceProperties properties() const;
+    std::vector<ApiLayer> enabledApiLayers() const;
+    std::vector<Extension> enabledExtensions() const;
+    KDGpu::Handle<System_t> querySystem(const SystemOptions &options, const KDGpu::Handle<Instance_t> &instanceHandle);
+    virtual ProcessEventsResult processEvents();
     void processSessionStateChangedEvent(const XrEventDataSessionStateChanged *eventData);
-    SuggestActionBindingsResult suggestActionBindings(const SuggestActionBindingsOptions &options) final;
+    SuggestActionBindingsResult suggestActionBindings(const SuggestActionBindingsOptions &options);
 
     XrPath createXrPath(const std::string &path) const;
     std::string pathToString(XrPath path) const;

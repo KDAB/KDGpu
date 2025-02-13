@@ -25,8 +25,7 @@ namespace KDXr {
 OpenXrSystem::OpenXrSystem(OpenXrResourceManager *_openxrResourceManager,
                            XrSystemId _system,
                            const KDGpu::Handle<Instance_t> &instanceHandle) noexcept
-    : ApiSystem()
-    , openxrResourceManager(_openxrResourceManager)
+    : openxrResourceManager(_openxrResourceManager)
     , system(_system)
     , instanceHandle(instanceHandle)
 {

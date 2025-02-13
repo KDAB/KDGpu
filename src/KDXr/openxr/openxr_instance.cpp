@@ -25,8 +25,7 @@ OpenXrInstance::OpenXrInstance(OpenXrResourceManager *_openxrResourceManager,
                                std::vector<ApiLayer> &_apiLayers,
                                std::vector<Extension> &_extensions,
                                bool _isOwned) noexcept
-    : ApiInstance()
-    , openxrResourceManager(_openxrResourceManager)
+    : openxrResourceManager(_openxrResourceManager)
     , instance(_instance)
     , isOwned(_isOwned)
     , apiLayers(_apiLayers)

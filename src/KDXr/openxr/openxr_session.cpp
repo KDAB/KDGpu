@@ -78,8 +78,7 @@ OpenXrSession::OpenXrSession(OpenXrResourceManager *_openxrResourceManager,
                              KDGpu::GraphicsApi *_graphicsApi,
                              KDGpu::Handle<KDGpu::Device_t> _device,
                              uint32_t queueIndex) noexcept
-    : ApiSession()
-    , openxrResourceManager(_openxrResourceManager)
+    : openxrResourceManager(_openxrResourceManager)
     , session(_session)
     , systemHandle(_systemHandle)
     , instanceHandle(_instanceHandle)

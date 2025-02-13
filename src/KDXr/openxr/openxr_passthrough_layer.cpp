@@ -21,8 +21,7 @@ OpenXrPassthroughLayer::OpenXrPassthroughLayer(OpenXrResourceManager *_openxrRes
                                                XrPassthroughLayerFB _passthroughLayer,
                                                const KDGpu::Handle<Session_t> _sessionHandle,
                                                const PassthroughLayerOptions _options) noexcept
-    : ApiPassthroughLayer()
-    , openxrResourceManager(_openxrResourceManager)
+    : openxrResourceManager(_openxrResourceManager)
     , passthroughLayer(_passthroughLayer)
     , sessionHandle(_sessionHandle)
     , options(_options)

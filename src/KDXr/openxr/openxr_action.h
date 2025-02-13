@@ -10,7 +10,6 @@
 
 #pragma once
 
-#include <KDXr/api/api_action.h>
 #include <KDXr/kdxr_export.h>
 #include <KDXr/config.h>
 
@@ -28,7 +27,7 @@ class OpenXrResourceManager;
  * \ingroup openxr
  *
  */
-struct KDXR_EXPORT OpenXrAction : public ApiAction {
+struct KDXR_EXPORT OpenXrAction {
     explicit OpenXrAction(OpenXrResourceManager *_openxrResourceManager,
                           XrAction _action,
                           const KDGpu::Handle<ActionSet_t> &_actionSetHandle) noexcept;

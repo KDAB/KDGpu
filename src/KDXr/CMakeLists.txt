@@ -23,7 +23,6 @@ set(SOURCES
     openxr/openxr_system.cpp
     passthrough_layer_controller.cpp
     reference_space.cpp
-    resource_manager.cpp
     session.cpp
     swapchain.cpp
     system.cpp
@@ -34,14 +33,7 @@ set(SOURCES
 set(HEADERS
     action.h
     action_set.h
-    api/api_action.h
-    api/api_action_set.h
-    api/api_instance.h
-    api/api_passthrough_layer.h
-    api/api_reference_space.h
-    api/api_session.h
-    api/api_swapchain.h
-    api/api_system.h
+    api/resource_manager_impl.h
     compositor.h
     instance.h
     locate_views_options.h

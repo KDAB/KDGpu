@@ -10,7 +10,6 @@
 
 #pragma once
 
-#include <KDXr/api/api_swapchain.h>
 #include <KDXr/kdxr_export.h>
 #include <KDXr/config.h>
 #include <KDXr/swapchain.h>
@@ -22,22 +21,23 @@
 namespace KDXr {
 
 class OpenXrResourceManager;
+struct Swapchain_t;
 
 /**
  * @brief OpenXrSwapchain
  * \ingroup openxr
  *
  */
-struct KDXR_EXPORT OpenXrSwapchain : public ApiSwapchain {
+struct KDXR_EXPORT OpenXrSwapchain {
     explicit OpenXrSwapchain(OpenXrResourceManager *_openxrResourceManager,
                              XrSwapchain _swapchain,
                              const KDGpu::Handle<Session_t> &_sessionHandle,
                              const SwapchainOptions &_options) noexcept;
 
-    std::vector<KDGpu::Texture> getTextures() final;
-    AcquireSwapchainTextureResult getNextTextureIndex(uint32_t &textureIndex) final;
-    WaitSwapchainTextureResult waitForTexture(Duration timeout = InfiniteDuration) const final;
-    ReleaseTextureResult releaseTexture() final;
+    std::vector<KDGpu::Texture> getTextures();
+    AcquireSwapchainTextureResult getNextTextureIndex(uint32_t &textureIndex);
+    WaitSwapchainTextureResult waitForTexture(Duration timeout = InfiniteDuration) const;
+    ReleaseTextureResult releaseTexture();
 
     OpenXrResourceManager *openxrResourceManager{ nullptr };
     XrSwapchain swapchain{ XR_NULL_HANDLE };

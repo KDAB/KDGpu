@@ -10,6 +10,8 @@
 
 #include "xr_api.h"
 
+#include <KDXr/api/resource_manager_impl.h>
+
 namespace KDXr {
 
 XrApi::XrApi()

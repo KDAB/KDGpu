@@ -23,8 +23,7 @@ OpenXrReferenceSpace::OpenXrReferenceSpace(OpenXrResourceManager *_openxrResourc
                                            const KDGpu::Handle<Session_t> _sessionHandle,
                                            ReferenceSpaceType _type,
                                            Pose _pose) noexcept
-    : ApiReferenceSpace()
-    , openxrResourceManager(_openxrResourceManager)
+    : openxrResourceManager(_openxrResourceManager)
     , referenceSpace(_referenceSpace)
     , sessionHandle(_sessionHandle)
     , type(_type)
@@ -37,8 +36,7 @@ OpenXrReferenceSpace::OpenXrReferenceSpace(OpenXrResourceManager *_openxrResourc
                                            const KDGpu::Handle<Session_t> _sessionHandle,
                                            const KDGpu::Handle<Action_t> _actionHandle,
                                            Pose _pose) noexcept
-    : ApiReferenceSpace()
-    , openxrResourceManager(_openxrResourceManager)
+    : openxrResourceManager(_openxrResourceManager)
     , referenceSpace(_referenceSpace)
     , sessionHandle(_sessionHandle)
     , actionHandle(_actionHandle)

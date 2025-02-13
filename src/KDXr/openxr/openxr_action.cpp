@@ -19,8 +19,7 @@ namespace KDXr {
 OpenXrAction::OpenXrAction(OpenXrResourceManager *_openxrResourceManager,
                            XrAction _action,
                            const KDGpu::Handle<ActionSet_t> &_actionSetHandle) noexcept
-    : ApiAction()
-    , openxrResourceManager(_openxrResourceManager)
+    : openxrResourceManager(_openxrResourceManager)
     , actionSetHandle(_actionSetHandle)
     , action(_action)
 {

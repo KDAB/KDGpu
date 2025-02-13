@@ -25,8 +25,7 @@ OpenXrSwapchain::OpenXrSwapchain(OpenXrResourceManager *_openxrResourceManager,
                                  XrSwapchain _swapchain,
                                  const KDGpu::Handle<Session_t> &_sessionHandle,
                                  const SwapchainOptions &_options) noexcept
-    : ApiSwapchain()
-    , openxrResourceManager(_openxrResourceManager)
+    : openxrResourceManager(_openxrResourceManager)
     , swapchain(_swapchain)
     , sessionHandle(_sessionHandle)
     , options(_options)

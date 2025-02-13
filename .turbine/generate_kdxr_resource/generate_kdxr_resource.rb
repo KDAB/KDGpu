@@ -18,7 +18,6 @@ module Turbine
     end
 
     def create_backend_classes
-      template('templates/backend/api_class.h.erb', "src/KDXr/api/api_#{file_name}.h")
       template('templates/backend/class.h.erb', "src/KDXr/openxr/openxr_#{file_name}.h")
       template('templates/backend/class.cpp.erb', "src/KDXr/openxr/openxr_#{file_name}.cpp")
     end
@@ -26,7 +25,6 @@ module Turbine
     def add_to_cmakelists
       if ::File.exist?("src/KDXr/CMakeLists.txt")
         inject_into_file("src/KDXr/CMakeLists.txt", "    openxr/openxr_#{file_name}.h\n", after: "set(HEADERS\n")
-        inject_into_file("src/KDXr/CMakeLists.txt", "    api/api_#{file_name}.h\n", after: "set(HEADERS\n")
         inject_into_file("src/KDXr/CMakeLists.txt", "    #{file_name}.h\n", after: "set(HEADERS\n")
 
         inject_into_file("src/KDXr/CMakeLists.txt", "    openxr/openxr_#{file_name}.cpp\n", after: "set(SOURCES\n")

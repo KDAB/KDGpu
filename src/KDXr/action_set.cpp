@@ -11,10 +11,8 @@
 #include "action_set.h"
 
 #include <KDXr/xr_api.h>
-#include <KDXr/resource_manager.h>
-#include <KDXr/api/api_action_set.h>
 
-#include <KDXr/utils/logging.h>
+#include <KDXr/api/resource_manager_impl.h>
 
 namespace KDXr {
 

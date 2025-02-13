@@ -11,9 +11,7 @@
 #include "passthrough_layer_controller.h"
 
 #include <KDXr/xr_api.h>
-#include <KDXr/resource_manager.h>
-#include <KDXr/api/api_passthrough_layer.h>
-#include <KDXr/api/api_session.h>
+#include <KDXr/api/resource_manager_impl.h>
 
 #include <KDXr/utils/logging.h>
 

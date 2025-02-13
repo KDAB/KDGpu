@@ -10,13 +10,15 @@
 
 #pragma once
 
-#include <KDXr/api/api_session.h>
 #include <KDXr/kdxr_core.h>
 #include <KDXr/kdxr_export.h>
 #include <KDXr/config.h>
+#include <KDXr/compositor.h>
+#include <KDXr/locate_views_options.h>
 
 #include <KDGpu/handle.h>
 #include <KDGpu/graphics_api.h>
+#include <KDGpu/gpu_core.h>
 
 #include <openxr/openxr.h>
 
@@ -28,16 +30,23 @@ struct Device_t;
 
 namespace KDXr {
 
+class Session;
 class OpenXrResourceManager;
 struct Instance_t;
 struct System_t;
+struct AttachActionSetsOptions;
+struct GetActionStateOptions;
+struct GetInterationProfileOptions;
+struct Session_t;
+struct SyncActionsOptions;
+struct VibrationOutputOptions;
 
 /**
  * @brief OpenXrSession
  * \ingroup openxr
  *
  */
-struct KDXR_EXPORT OpenXrSession : public ApiSession {
+struct KDXR_EXPORT OpenXrSession {
     explicit OpenXrSession(OpenXrResourceManager *_openxrResourceManager,
                            XrSession _session,
                            const KDGpu::Handle<System_t> _systemHandle,
@@ -46,24 +55,24 @@ struct KDXR_EXPORT OpenXrSession : public ApiSession {
                            KDGpu::Handle<KDGpu::Device_t> _device,
                            uint32_t queueIndex) noexcept;
 
-    void initialize(Session *_frontendSession) final;
-    std::vector<KDGpu::Format> supportedSwapchainFormats() const final;
-    FrameState waitForFrame() final;
-    BeginFrameResult beginFrame() final;
-    EndFrameResult endFrame(const EndFrameOptions &options) final;
+    void initialize(Session *_frontendSession);
+    std::vector<KDGpu::Format> supportedSwapchainFormats() const;
+    FrameState waitForFrame();
+    BeginFrameResult beginFrame();
+    EndFrameResult endFrame(const EndFrameOptions &options);
 
-    LocateViewsResult locateViews(const LocateViewsOptions &options, ViewConfigurationType viewConfigurationType, ViewState &viewState) final;
+    LocateViewsResult locateViews(const LocateViewsOptions &options, ViewConfigurationType viewConfigurationType, ViewState &viewState);
 
     void setSessionState(SessionState state);
 
-    AttachActionSetsResult attachActionSets(const AttachActionSetsOptions &options) final;
-    InteractionProfileState getInteractionProfile(const GetInterationProfileOptions &options) const final;
-    SyncActionsResult syncActions(const SyncActionsOptions &options) final;
-    GetActionStateResult getBooleanState(const GetActionStateOptions &options, ActionStateBoolean &state) const final;
-    GetActionStateResult getFloatState(const GetActionStateOptions &options, ActionStateFloat &state) const final;
-    GetActionStateResult getVector2State(const GetActionStateOptions &options, ActionStateVector2 &state) const final;
-    GetActionStateResult getPoseState(const GetActionStateOptions &options, ActionStatePose &state) const final;
-    VibrateOutputResult vibrateOutput(const VibrationOutputOptions &options) final;
+    AttachActionSetsResult attachActionSets(const AttachActionSetsOptions &options);
+    InteractionProfileState getInteractionProfile(const GetInterationProfileOptions &options) const;
+    SyncActionsResult syncActions(const SyncActionsOptions &options);
+    GetActionStateResult getBooleanState(const GetActionStateOptions &options, ActionStateBoolean &state) const;
+    GetActionStateResult getFloatState(const GetActionStateOptions &options, ActionStateFloat &state) const;
+    GetActionStateResult getVector2State(const GetActionStateOptions &options, ActionStateVector2 &state) const;
+    GetActionStateResult getPoseState(const GetActionStateOptions &options, ActionStatePose &state) const;
+    VibrateOutputResult vibrateOutput(const VibrationOutputOptions &options);
 
     OpenXrResourceManager *openxrResourceManager{ nullptr };
     XrSession session{ XR_NULL_HANDLE };

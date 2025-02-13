@@ -10,7 +10,6 @@
 
 #pragma once
 
-#include <KDXr/api/api_<%= file_name %>.h>
 #include <KDXr/kdxr_export.h>
 #include <KDXr/config.h>
 
@@ -25,7 +24,7 @@ class OpenXrResourceManager;
  * \ingroup openxr
  *
  */
-struct KDXR_EXPORT OpenXr<%= class_name %> : public Api<%= class_name %> {
+struct KDXR_EXPORT OpenXr<%= class_name %> {
     explicit OpenXr<%= class_name %>(OpenXrResourceManager *_openxrResourceManager, Xr<%= class_name %> _<%= variable_name %>) noexcept;
 
     OpenXrResourceManager *openxrResourceManager{ nullptr };
