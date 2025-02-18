@@ -10,6 +10,7 @@
 if(EXISTS "${CMAKE_SOURCE_DIR}/src/dependencies/kdutils")
     set(KDUTILS_BUILD_TESTS OFF)
     set(KDUTILS_BUILD_EXAMPLES OFF)
+    set(KDUTILS_BUILD_MQTT_SUPPORT OFF)
     add_subdirectory(${CMAKE_SOURCE_DIR}/src/dependencies/kdutils/)
 elseif(NOT TARGET KDUtils)
     find_package(KDUtils CONFIG)
@@ -17,6 +18,7 @@ elseif(NOT TARGET KDUtils)
     if(NOT KDUtils_FOUND)
         set(KDUTILS_BUILD_TESTS OFF)
         set(KDUTILS_BUILD_EXAMPLES OFF)
+        set(KDUTILS_BUILD_MQTT_SUPPORT OFF)
         FetchContent_Declare(
             KDUtils
             GIT_REPOSITORY https://github.com/KDAB/KDUtils.git
