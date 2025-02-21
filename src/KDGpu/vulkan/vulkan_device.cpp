@@ -122,6 +122,7 @@ VulkanDevice::VulkanDevice(VkDevice _device,
         }
     }
 
+#if !defined(KDGPU_PLATFORM_MACOS)
     if (vulkanAdapter->queryAdapterFeatures().taskShader && vulkanAdapter->queryAdapterFeatures().meshShader) {
         const auto adapterExtensions = vulkanAdapter->extensions();
         for (const auto &extension : adapterExtensions) {
@@ -134,6 +135,7 @@ VulkanDevice::VulkanDevice(VkDevice _device,
             }
         }
     }
+#endif
 
 #if defined(KDGPU_PLATFORM_LINUX)
     vkGetSemaphoreFdKHR = (PFN_vkGetSemaphoreFdKHR)vkGetDeviceProcAddr(device, "vkGetSemaphoreFdKHR");

@@ -116,8 +116,11 @@ struct KDGPU_EXPORT VulkanDevice {
     PFN_vkCreateRayTracingPipelinesKHR vkCreateRayTracingPipelinesKHR{ nullptr };
     PFN_vkCmdTraceRaysKHR vkCmdTraceRaysKHR{ nullptr };
     PFN_vkGetRayTracingShaderGroupHandlesKHR vkGetRayTracingShaderGroupHandlesKHR{ nullptr };
+
+#if !defined(KDGPU_PLATFORM_MACOS)
     PFN_vkCmdDrawMeshTasksEXT vkCmdDrawMeshTasksEXT{ nullptr };
     PFN_vkCmdDrawMeshTasksIndirectEXT vkCmdDrawMeshTasksIndirectEXT{ nullptr };
+#endif
 
     bool isOwned{ true };
 };
