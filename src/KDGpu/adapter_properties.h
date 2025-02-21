@@ -262,6 +262,15 @@ struct FormatProperties {
     FormatFeatureFlags bufferFeatures;
 };
 
+/**
+    @headerfile adapter_properties.h <KDGpu/adapter_properties.h>
+ */
+struct DrmFormatModifierProperties {
+    uint64_t formatModifier;
+    uint32_t planeCount;
+    FormatFeatureFlags featureFlags;
+};
+
 /*! @} */
 
 } // namespace KDGpu

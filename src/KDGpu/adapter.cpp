@@ -190,4 +190,10 @@ bool Adapter::supportsBlitting(Format format, TextureTiling tiling) const
     return bool(formatFeatureFlags & (FormatFeatureFlagBit::BlitSrcBit | FormatFeatureFlagBit::BlitDstBit));
 }
 
+std::vector<DrmFormatModifierProperties> Adapter::drmFormatModifierProperties(Format format) const
+{
+    auto apiAdapter = m_api->resourceManager()->getAdapter(m_adapter);
+    return apiAdapter->drmFormatModifierProperties(format);
+}
+
 } // namespace KDGpu

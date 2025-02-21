@@ -600,4 +600,39 @@ FormatProperties VulkanAdapter::formatProperties(Format format) const
     };
 }
 
+std::vector<DrmFormatModifierProperties> VulkanAdapter::drmFormatModifierProperties(Format format) const
+{
+    std::vector<DrmFormatModifierProperties> modifierProperties;
+
+#if defined(KDGPU_PLATFORM_LINUX)
+    VkDrmFormatModifierPropertiesListEXT vkModifierPropertiesList{};
+    vkModifierPropertiesList.sType = VK_STRUCTURE_TYPE_DRM_FORMAT_MODIFIER_PROPERTIES_LIST_EXT;
+
+    VkFormatProperties2 vkProperties{};
+    vkProperties.sType = VK_STRUCTURE_TYPE_FORMAT_PROPERTIES_2;
+    vkProperties.pNext = &vkModifierPropertiesList;
+
+    vkGetPhysicalDeviceFormatProperties2(physicalDevice, static_cast<VkFormat>(format), &vkProperties);
+
+    const auto count = vkModifierPropertiesList.drmFormatModifierCount;
+    if (count > 0) {
+        std::vector<VkDrmFormatModifierPropertiesEXT> vkModifierProperties(count);
+        vkModifierPropertiesList.pDrmFormatModifierProperties = vkModifierProperties.data();
+        vkGetPhysicalDeviceFormatProperties2(physicalDevice, static_cast<VkFormat>(format), &vkProperties);
+        std::ranges::transform(vkModifierProperties, std::back_inserter(modifierProperties),
+                               [](const VkDrmFormatModifierPropertiesEXT &props) {
+                                   return DrmFormatModifierProperties{
+                                       props.drmFormatModifier,
+                                       props.drmFormatModifierPlaneCount,
+                                       FormatFeatureFlags::fromInt(props.drmFormatModifierTilingFeatures)
+                                   };
+                               });
+    }
+#else
+    (void)format;
+#endif
+
+    return modifierProperties;
+}
+
 } // namespace KDGpu
