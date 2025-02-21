@@ -55,6 +55,7 @@ struct KDGPU_EXPORT VulkanInstance {
 
 #if defined(KDGPU_PLATFORM_LINUX)
     PFN_vkGetMemoryFdKHR vkGetMemoryFdKHR{ nullptr };
+    PFN_vkGetImageDrmFormatModifierPropertiesEXT vkGetImageDrmFormatModifierPropertiesEXT{ nullptr };
 #endif
 
     std::map<VkPhysicalDevice, Handle<Adapter_t>> m_physicalDeviceToHandle;

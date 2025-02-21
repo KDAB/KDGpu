@@ -69,6 +69,8 @@ public:
 
     MemoryHandle externalMemoryHandle() const;
 
+    uint64_t drmFormatModifier() const;
+
 private:
     explicit Texture(GraphicsApi *api, const Handle<Device_t> &device, const TextureOptions &options);
     explicit Texture(GraphicsApi *api, const Handle<Device_t> &device, const Handle<Texture_t> &handle); // From Swapchain

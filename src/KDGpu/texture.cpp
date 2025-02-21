@@ -226,6 +226,12 @@ MemoryHandle Texture::externalMemoryHandle() const
     return apiTexture->externalMemoryHandle();
 }
 
+uint64_t Texture::drmFormatModifier() const
+{
+    auto apiTexture = m_api->resourceManager()->getTexture(m_texture);
+    return apiTexture->drmFormatModifier();
+}
+
 bool operator==(const Texture &a, const Texture &b)
 {
     return a.m_api == b.m_api && a.m_device == b.m_device && a.m_texture == b.m_texture;

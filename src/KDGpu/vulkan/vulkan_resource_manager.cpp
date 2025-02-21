@@ -838,14 +838,24 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
     MemoryHandle memoryHandle{};
     if (options.externalMemoryHandleType != ExternalMemoryHandleTypeFlagBits::None) {
         vkExternalMemImageCreateInfo.sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO,
+        vkExternalMemImageCreateInfo.pNext = std::exchange(createInfo.pNext, &vkExternalMemImageCreateInfo);
         vkExternalMemImageCreateInfo.handleTypes = externalMemoryHandleTypeToVkExternalMemoryHandleType(options.externalMemoryHandleType);
-        createInfo.pNext = &vkExternalMemImageCreateInfo;
 
         // We have to use a dedicated allocator for external handles that has been created with VkExportMemoryAllocateInfo
         allocator = vulkanDevice->getOrCreateExternalMemoryAllocator(options.externalMemoryHandleType);
 
         allocInfo.flags = VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
     }
+
+#if defined(KDGPU_PLATFORM_LINUX)
+    VkImageDrmFormatModifierListCreateInfoEXT vkImageDrmFormatModifierListCreateInfo = {};
+    if (options.tiling == TextureTiling::DrmFormatModifier) {
+        vkImageDrmFormatModifierListCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_DRM_FORMAT_MODIFIER_LIST_CREATE_INFO_EXT;
+        vkImageDrmFormatModifierListCreateInfo.pNext = std::exchange(createInfo.pNext, &vkImageDrmFormatModifierListCreateInfo);
+        vkImageDrmFormatModifierListCreateInfo.drmFormatModifierCount = options.drmFormatModifiers.size();
+        vkImageDrmFormatModifierListCreateInfo.pDrmFormatModifiers = options.drmFormatModifiers.data();
+    }
+#endif
 
     VkImage vkImage;
     VmaAllocation vmaAllocation;
@@ -896,6 +906,16 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
 #endif
     }
 
+    uint64_t drmFormatModifier = 0;
+#if defined(KDGPU_PLATFORM_LINUX)
+    if (options.tiling == TextureTiling::DrmFormatModifier) {
+        VkImageDrmFormatModifierPropertiesEXT modifierProps = {};
+        modifierProps.sType = VK_STRUCTURE_TYPE_IMAGE_DRM_FORMAT_MODIFIER_PROPERTIES_EXT;
+        instance->vkGetImageDrmFormatModifierPropertiesEXT(vulkanDevice->device, vkImage, &modifierProps);
+        drmFormatModifier = modifierProps.drmFormatModifier;
+    }
+#endif
+
     setObjectName(vulkanDevice, VK_OBJECT_TYPE_IMAGE, reinterpret_cast<uint64_t>(vkImage), options.label);
 
     const auto vulkanTextureHandle = m_textures.emplace(VulkanTexture(
@@ -909,7 +929,8 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
             options.usage,
             this,
             deviceHandle,
-            memoryHandle));
+            memoryHandle,
+            drmFormatModifier));
     return vulkanTextureHandle;
 }
 

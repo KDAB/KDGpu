@@ -125,6 +125,7 @@ Texture VulkanGraphicsApi::createTextureFromExistingVkImage(const Handle<Device_
                             options.usage,
                             &m_vulkanResourceManager,
                             deviceHandle,
+                            {},
                             {})));
 }
 

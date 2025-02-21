@@ -26,6 +26,7 @@ VulkanTexture::VulkanTexture(VkImage _image,
                              VulkanResourceManager *_vulkanResourceManager,
                              const Handle<Device_t> &_deviceHandle,
                              const MemoryHandle &_externalMemoryHandle,
+                             uint64_t _drmFormatModifier,
                              bool _ownedBySwapchain)
     : image(_image)
     , allocation(_allocation)
@@ -39,6 +40,7 @@ VulkanTexture::VulkanTexture(VkImage _image,
     , vulkanResourceManager(_vulkanResourceManager)
     , deviceHandle(_deviceHandle)
     , m_externalMemoryHandle(_externalMemoryHandle)
+    , m_drmFormatModifier(_drmFormatModifier)
 {
 }
 
@@ -81,6 +83,11 @@ SubresourceLayout VulkanTexture::getSubresourceLayout(const TextureSubresource &
 MemoryHandle VulkanTexture::externalMemoryHandle() const
 {
     return m_externalMemoryHandle;
+}
+
+uint64_t VulkanTexture::drmFormatModifier() const
+{
+    return m_drmFormatModifier;
 }
 
 } // namespace KDGpu

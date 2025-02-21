@@ -38,6 +38,7 @@ VulkanInstance::VulkanInstance(VulkanResourceManager *_vulkanResourceManager, Vk
 {
 #if defined(KDGPU_PLATFORM_LINUX)
     vkGetMemoryFdKHR = (PFN_vkGetMemoryFdKHR)vkGetInstanceProcAddr(instance, "vkGetMemoryFdKHR");
+    vkGetImageDrmFormatModifierPropertiesEXT = (PFN_vkGetImageDrmFormatModifierPropertiesEXT)vkGetInstanceProcAddr(instance, "vkGetImageDrmFormatModifierPropertiesEXT");
 #endif
 
 #if defined(KDGPU_PLATFORM_WIN32)
