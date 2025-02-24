@@ -1329,8 +1329,9 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
                     reference.layout = referenceLayoutFromInputLayout(options.attachments[reference.attachment].finalLayout);
 
                 if (!isMultiviewEnabled) {
-                    if (options.attachments[reference.attachment].aspectEnabled.toInt() != 0x0) {
-                        reference.aspectMask = options.attachments[reference.attachment].aspectEnabled.toInt();
+                    const AttachmentReference &attachmentReference = subpassDescription.inputAttachmentReference[j];
+                    if (attachmentReference.aspectEnabled.toInt() != 0x0) {
+                        reference.aspectMask = attachmentReference.aspectEnabled.toInt();
                     } else {
                         // aspect inference if not provided
                         reference.aspectMask = imageAspectFromInputLayout(reference.layout);
