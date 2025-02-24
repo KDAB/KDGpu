@@ -17,6 +17,11 @@
 
 namespace KDGpu {
 
+struct AttachmentReference {
+    uint32_t index;
+    TextureLayout layout{ TextureLayout::MaxEnum };
+};
+
 struct SubpassDependenciesDescriptions { /* assume dependencyFlag is ignored for now */
     uint32_t srcSubpass{ ExternalSubpass };
     uint32_t dstSubpass{ ExternalSubpass };
@@ -30,11 +35,12 @@ struct SubpassDependenciesDescriptions { /* assume dependencyFlag is ignored for
 };
 
 struct SubpassDescription {
-    std::vector<uint32_t> inputAttachmentIndex;
-    std::vector<uint32_t> colorAttachmentIndex;
-    std::vector<uint32_t> resolveAttachmentIndex; /* this should be the same length as color if nonempty */
+    std::vector<AttachmentReference> inputAttachmentReference;
+    std::vector<AttachmentReference> colorAttachmentReference;
+    std::vector<AttachmentReference> resolveAttachmentReference; /* this should be the same length as color if nonempty */
     std::vector<uint32_t> preserveAttachmentIndex;
-    std::optional<uint32_t> depthAttachmentIndex;
+    std::optional<AttachmentReference> depthAttachmentReference;
+    std::optional<AttachmentReference> depthResolveAttachmentReference;
 
     uint32_t viewMask = 0; /* ignored if Multiview is not enabled */
     std::vector<TextureAspectFlags> inputAttachmentAspects; /* must be filled out for multiview, override aspectEnabled in AttachmentDescription */

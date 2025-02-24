@@ -21,10 +21,12 @@ namespace KDGpu {
 
 VulkanRenderPass::VulkanRenderPass(VkRenderPass _renderPass,
                                    VulkanResourceManager *_vulkanResourceManager,
-                                   Handle<Device_t> _deviceHandle)
+                                   Handle<Device_t> _deviceHandle,
+                                   const std::vector<AttachmentDescription> &_attachmentDescriptions)
     : renderPass(_renderPass)
     , vulkanResourceManager(_vulkanResourceManager)
     , deviceHandle(_deviceHandle)
+    , attachmentDescriptions(_attachmentDescriptions)
 {
 }
 

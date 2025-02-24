@@ -145,8 +145,8 @@ TEST_SUITE("RenderPassCommandRecorder")
                 },
                 .subpassDescriptions = {
                         SubpassDescription{
-                                .colorAttachmentIndex = { 0 },
-                                .depthAttachmentIndex = { 1 },
+                                .colorAttachmentReference = { { 0 } },
+                                .depthAttachmentReference = { { 1 } },
                         },
                 },
                 .subpassDependencies = {

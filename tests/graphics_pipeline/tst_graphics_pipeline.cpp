@@ -417,8 +417,8 @@ TEST_SUITE("GraphicsPipeline")
                                      .storeOp = AttachmentStoreOperation::DontCare,
                                      .finalLayout = TextureLayout::DepthStencilAttachmentOptimal } },
             .subpassDescriptions = { SubpassDescription{
-                    .colorAttachmentIndex = { 0 },
-                    .depthAttachmentIndex = { 1 } } },
+                    .colorAttachmentReference = { { 0 } },
+                    .depthAttachmentReference = { { 1 } } } },
             .subpassDependencies = { SubpassDependenciesDescriptions{
                     .srcSubpass = ExternalSubpass,
                     .dstSubpass = 0,

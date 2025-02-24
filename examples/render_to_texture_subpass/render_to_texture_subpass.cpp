@@ -100,11 +100,12 @@ void RenderToTextureSubpass::createRenderPass()
 
     const std::vector<SubpassDescription> subpassDescriptions{
         SubpassDescription{
-                .colorAttachmentIndex = { 0 },
+                .colorAttachmentReference = { { 0 } },
         },
         SubpassDescription{
-                .inputAttachmentIndex = { 0 },
-                .colorAttachmentIndex = { 1 } }
+                .inputAttachmentReference = { { 0 } },
+                .colorAttachmentReference = { { 1 } },
+        }
     };
 
     // First dependency ensure that the previous renderpass must finish before it can write output to attachment 0

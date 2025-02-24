@@ -15,6 +15,7 @@
 #include <KDGpu/handle.h>
 
 #include <vulkan/vulkan.h>
+#include <KDGpu/render_pass_options.h>
 
 namespace KDGpu {
 
@@ -57,11 +58,13 @@ struct KDGPU_EXPORT VulkanRenderPassKey {
 struct VulkanRenderPass {
     explicit VulkanRenderPass(VkRenderPass _renderPass,
                               VulkanResourceManager *_vulkanResourceManager,
-                              Handle<Device_t> _deviceHandle);
+                              Handle<Device_t> _deviceHandle,
+                              const std::vector<AttachmentDescription> &_attachmentDescriptions);
 
     VkRenderPass renderPass{ VK_NULL_HANDLE };
     VulkanResourceManager *vulkanResourceManager{ nullptr };
     Handle<Device_t> deviceHandle;
+    std::vector<AttachmentDescription> attachmentDescriptions;
 };
 
 } // namespace KDGpu

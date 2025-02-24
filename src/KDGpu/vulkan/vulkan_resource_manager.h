@@ -202,32 +202,15 @@ public:
     KDGpu::Format formatFromTextureView(const Handle<TextureView_t> &viewHandle) const;
 
 private:
-    void fillColorAttachmnents(std::vector<VkAttachmentReference2> &colorAttachmentRefs,
-                               std::vector<VkAttachmentReference2> &colorResolveAttachmentRefs,
-                               std::vector<VkAttachmentDescription2> &attachments,
-                               const std::vector<ColorAttachment> &colorAttachments,
-                               SampleCountFlagBits samples);
+    SubpassDescription fillAttachmentDescriptionAndCreateSubpassDescription(std::vector<AttachmentDescription> &attachmentDescriptions,
+                                                                            const std::vector<ColorAttachment> &colorAttachments,
+                                                                            const DepthStencilAttachment &depthAttachment,
+                                                                            SampleCountFlagBits samples);
 
-    void fillColorAttachmnents(std::vector<VkAttachmentReference2> &colorAttachmentRefs,
-                               std::vector<VkAttachmentReference2> &colorResolveAttachmentRefs,
-                               std::vector<VkAttachmentDescription2> &attachments,
-                               const std::vector<RenderTargetOptions> &colorAttachments,
-                               SampleCountFlagBits samples);
-
-    std::pair<bool, bool> fillDepthAttachments(VkAttachmentReference2 &depthStencilAttachmentRef,
-                                               VkAttachmentReference2 &depthStencilResolveAttachmentRef,
-                                               std::vector<VkAttachmentDescription2> &attachments,
-                                               VkSubpassDescriptionDepthStencilResolve &depthResolve,
-                                               const DepthStencilAttachment &depthStencilAttachment,
-                                               SampleCountFlagBits samples);
-
-    std::pair<bool, bool> fillDepthAttachments(VkAttachmentReference2 &depthStencilAttachmentRef,
-                                               VkAttachmentReference2 &depthStencilResolveAttachmentRef,
-                                               std::vector<VkAttachmentDescription2> &attachments,
-                                               VkSubpassDescriptionDepthStencilResolve &depthResolve,
-                                               const DepthStencilOptions &depthStencilAttachment,
-                                               SampleCountFlagBits samples);
-
+    SubpassDescription fillAttachmentDescriptionAndCreateSubpassDescription(std::vector<AttachmentDescription> &attachmentDescriptions,
+                                                                            const std::vector<RenderTargetOptions> &colorAttachments,
+                                                                            const DepthStencilOptions &depthStencilAttachment,
+                                                                            SampleCountFlagBits samples);
     struct ShaderStagesInfo {
         std::vector<VkPipelineShaderStageCreateInfo> shaderInfos;
         std::vector<VkSpecializationInfo> shaderSpecializationInfos;
@@ -238,13 +221,23 @@ private:
     bool fillShaderStageInfos(const std::vector<ShaderStage> &stages,
                               ShaderStagesInfo &shaderStagesInfo);
 
-    template<typename ColorAtt, typename DepthAtt>
-    Handle<RenderPass_t> createRenderPass(const Handle<Device_t> &deviceHandle,
-                                          const std::vector<ColorAtt> &colorAttachments,
-                                          const DepthAtt &depthAttachment,
-                                          SampleCountFlagBits samples,
-                                          uint32_t viewCount);
-    Handle<Framebuffer_t> createFramebuffer(const Handle<Device_t> &deviceHandle, const RenderPassCommandRecorderWithRenderPassOptions &options, const VulkanFramebufferKey &frameBufferKey);
+    // For RenderPassCommandRecorder implicit RenderPass creation
+    Handle<RenderPass_t> createImplicitRenderPass(const Handle<Device_t> &deviceHandle,
+                                                  const std::vector<ColorAttachment> &colorAttachments,
+                                                  const DepthStencilAttachment &depthAttachment,
+                                                  SampleCountFlagBits samples,
+                                                  uint32_t viewCount);
+
+    // For GraphicsPipeline implicit RenderPass creation
+    Handle<RenderPass_t> createImplicitRenderPass(const Handle<Device_t> &deviceHandle,
+                                                  const std::vector<RenderTargetOptions> &colorAttachments,
+                                                  const DepthStencilOptions &depthAttachment,
+                                                  SampleCountFlagBits samples,
+                                                  uint32_t viewCount);
+
+    Handle<Framebuffer_t> createFramebuffer(const Handle<Device_t> &deviceHandle,
+                                            const RenderPassCommandRecorderWithRenderPassOptions &options,
+                                            const VulkanFramebufferKey &frameBufferKey);
 
     void setObjectName(VulkanDevice *device, const VkObjectType type, const uint64_t handle, const std::string_view name);
 

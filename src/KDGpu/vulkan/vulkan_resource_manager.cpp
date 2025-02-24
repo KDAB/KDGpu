@@ -1170,6 +1170,51 @@ VulkanShaderModule *VulkanResourceManager::getShaderModule(const Handle<ShaderMo
     return m_shaderModules.get(handle);
 }
 
+namespace {
+
+VkImageLayout referenceLayoutFromInputLayout(TextureLayout inputLayout)
+{
+    /// ensures input attachment layout are changed to read-only, as per vulkan documentation:
+    /// https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkSubpassDescription2.html
+    switch (inputLayout) {
+    case TextureLayout::ColorAttachmentOptimal: // VUID-VkSubpassDescription2-attachment-06912
+        return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    case TextureLayout::DepthAttachmentOptimal: // VUID-VkSubpassDescription2-attachment-06918
+        return VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
+    case TextureLayout::StencilAttachmentOptimal: // VUID-VkSubpassDescription2-attachment-06918
+        return VK_IMAGE_LAYOUT_STENCIL_READ_ONLY_OPTIMAL;
+    case TextureLayout::DepthStencilAttachmentOptimal: // VUID-VkSubpassDescription-attachment-06912
+        return VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+    case TextureLayout::AttachmentOptimal: // VUID-VkSubpassDescription-attachment-06921
+        return VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL;
+    default:
+        return textureLayoutToVkImageLayout(inputLayout);
+    }
+}
+
+VkImageAspectFlags imageAspectFromInputLayout(VkImageLayout layout)
+{
+    // aspect inference if not provided
+    switch (layout) {
+    case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
+    case VK_IMAGE_LAYOUT_PRESENT_SRC_KHR:
+    case VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR:
+        return VK_IMAGE_ASPECT_COLOR_BIT;
+    case VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL:
+        return VK_IMAGE_ASPECT_DEPTH_BIT;
+    case VK_IMAGE_LAYOUT_STENCIL_READ_ONLY_OPTIMAL:
+        return VK_IMAGE_ASPECT_STENCIL_BIT;
+    case VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL:
+    case VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL:
+    case VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL:
+        return VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
+    default: /* should never happen. This will fail per VUID-VkSubpassDescription2-attachment-02800 */
+        return VK_IMAGE_ASPECT_NONE;
+    }
+};
+
+} // namespace
+
 Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device_t> &deviceHandle, const RenderPassOptions &options)
 {
     assert(options.subpassDescriptions.size() != 0); // VUID-VkRenderPassCreateInfo2-subpassCount-arraylength
@@ -1199,21 +1244,27 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
         vkAttachmentDescriptionsArray.push_back(vkAttachment);
     }
 
-    std::vector<std::vector<VkAttachmentReference2>> inputReferenceArray, colorReferenceArray, resolveReferenceArray;
+    std::vector<std::vector<VkAttachmentReference2>> inputReferenceArray;
+    std::vector<std::vector<VkAttachmentReference2>> colorReferenceArray;
+    std::vector<std::vector<VkAttachmentReference2>> resolveReferenceArray;
     std::vector<VkAttachmentReference2> depthReferenceArray;
+    std::vector<VkAttachmentReference2> depthResolveReferenceArray;
+    std::vector<VkSubpassDescriptionDepthStencilResolve> depthResolveArray;
 
     inputReferenceArray.reserve(options.subpassDescriptions.size());
     colorReferenceArray.reserve(options.subpassDescriptions.size());
     resolveReferenceArray.reserve(options.subpassDescriptions.size());
     depthReferenceArray.reserve(options.subpassDescriptions.size());
+    depthResolveReferenceArray.reserve(options.subpassDescriptions.size());
+    depthResolveArray.reserve(options.subpassDescriptions.size());
 
     for (const SubpassDescription &subpassDescription : options.subpassDescriptions) {
         VkSubpassDescription2 vkSubpass = {};
         vkSubpass.sType = VK_STRUCTURE_TYPE_SUBPASS_DESCRIPTION_2;
         vkSubpass.pNext = nullptr;
         vkSubpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-        vkSubpass.inputAttachmentCount = subpassDescription.inputAttachmentIndex.size();
-        vkSubpass.colorAttachmentCount = subpassDescription.colorAttachmentIndex.size();
+        vkSubpass.inputAttachmentCount = subpassDescription.inputAttachmentReference.size();
+        vkSubpass.colorAttachmentCount = subpassDescription.colorAttachmentReference.size();
         vkSubpass.preserveAttachmentCount = subpassDescription.preserveAttachmentIndex.size();
         vkSubpass.pPreserveAttachments = subpassDescription.preserveAttachmentIndex.data();
 
@@ -1223,18 +1274,46 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
             vkSubpass.viewMask = subpassDescription.viewMask;
         }
 
-        if (subpassDescription.depthAttachmentIndex.has_value()) {
+        if (subpassDescription.depthAttachmentReference) {
             VkAttachmentReference2 depthAttachment = {};
 
             depthAttachment.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
-            depthAttachment.attachment = subpassDescription.depthAttachmentIndex.value();
-            depthAttachment.layout = textureLayoutToVkImageLayout(options.attachments[depthAttachment.attachment].finalLayout);
+            depthAttachment.attachment = subpassDescription.depthAttachmentReference->index;
+            if (subpassDescription.depthAttachmentReference->layout != TextureLayout::MaxEnum)
+                depthAttachment.layout = textureLayoutToVkImageLayout(subpassDescription.depthAttachmentReference->layout);
+            else
+                depthAttachment.layout = textureLayoutToVkImageLayout(options.attachments[depthAttachment.attachment].finalLayout);
 
             depthReferenceArray.push_back(depthAttachment);
             vkSubpass.pDepthStencilAttachment = &depthReferenceArray.back();
+
+            if (subpassDescription.depthResolveAttachmentReference) {
+                VkAttachmentReference2 depthResolveAttachment = {};
+
+                depthResolveAttachment.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
+                depthResolveAttachment.attachment = subpassDescription.depthResolveAttachmentReference->index;
+                if (subpassDescription.depthAttachmentReference->layout != TextureLayout::MaxEnum)
+                    depthResolveAttachment.layout = textureLayoutToVkImageLayout(subpassDescription.depthResolveAttachmentReference->layout);
+                else
+                    depthResolveAttachment.layout = textureLayoutToVkImageLayout(options.attachments[depthResolveAttachment.attachment].finalLayout);
+
+                depthResolveReferenceArray.push_back(depthResolveAttachment);
+
+                VkSubpassDescriptionDepthStencilResolve depthResolve;
+                depthResolve.sType = VK_STRUCTURE_TYPE_SUBPASS_DESCRIPTION_DEPTH_STENCIL_RESOLVE;
+                depthResolve.pNext = nullptr;
+
+                // maybe expose these options later?
+                depthResolve.depthResolveMode = VK_RESOLVE_MODE_AVERAGE_BIT;
+                depthResolve.stencilResolveMode = VK_RESOLVE_MODE_NONE;
+                depthResolve.pDepthStencilResolveAttachment = &depthResolveReferenceArray.back();
+
+                depthResolveArray.push_back(depthResolve);
+                vkSubpass.pNext = &depthResolveArray.back();
+            }
         }
 
-        if (!subpassDescription.inputAttachmentIndex.empty()) {
+        if (!subpassDescription.inputAttachmentReference.empty()) {
             std::vector<VkAttachmentReference2> inputReference;
             inputReference.reserve(vkSubpass.inputAttachmentCount);
 
@@ -1242,64 +1321,22 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
                 VkAttachmentReference2 reference = {};
                 reference.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
                 reference.pNext = nullptr;
-                reference.attachment = subpassDescription.inputAttachmentIndex[j];
+                reference.attachment = subpassDescription.inputAttachmentReference[j].index;
 
-                /// ensures input attachment layout are changed to read-only, as per vulkan documentation:
-                /// https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkSubpassDescription2.html
-                switch (options.attachments[reference.attachment].finalLayout) {
-                case TextureLayout::ColorAttachmentOptimal: // VUID-VkSubpassDescription2-attachment-06912
-                    reference.layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-                    break;
-                case TextureLayout::DepthAttachmentOptimal: // VUID-VkSubpassDescription2-attachment-06918
-                    reference.layout = VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
-                    break;
-                case TextureLayout::StencilAttachmentOptimal: // VUID-VkSubpassDescription2-attachment-06918
-                    reference.layout = VK_IMAGE_LAYOUT_STENCIL_READ_ONLY_OPTIMAL;
-                    break;
-                case TextureLayout::DepthStencilAttachmentOptimal: // VUID-VkSubpassDescription-attachment-06912
-                    reference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-                    break;
-                case TextureLayout::AttachmentOptimal: // VUID-VkSubpassDescription-attachment-06921
-                    reference.layout = VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL;
-                    break;
-                default:
-                    reference.layout = textureLayoutToVkImageLayout(options.attachments[reference.attachment].finalLayout);
-                    break;
-                }
+                if (subpassDescription.inputAttachmentReference[j].layout != TextureLayout::MaxEnum)
+                    reference.layout = referenceLayoutFromInputLayout(subpassDescription.inputAttachmentReference[j].layout);
+                else
+                    reference.layout = referenceLayoutFromInputLayout(options.attachments[reference.attachment].finalLayout);
 
                 if (!isMultiviewEnabled) {
                     if (options.attachments[reference.attachment].aspectEnabled.toInt() != 0x0) {
                         reference.aspectMask = options.attachments[reference.attachment].aspectEnabled.toInt();
                     } else {
                         // aspect inference if not provided
-                        switch (options.attachments[reference.attachment].finalLayout) {
-                        case TextureLayout::ColorAttachmentOptimal:
-                        case TextureLayout::ShaderReadOnlyOptimal:
-                        case TextureLayout::PresentSrc:
-                        case TextureLayout::SharedPresent:
-                            reference.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-                            break;
-                        case TextureLayout::DepthAttachmentOptimal:
-                        case TextureLayout::DepthReadOnlyOptimal:
-                        case TextureLayout::DepthReadOnlyStencilAttachmentOptimal:
-                            reference.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-                            break;
-                        case TextureLayout::StencilAttachmentOptimal:
-                        case TextureLayout::StencilReadOnlyOptimal:
-                        case TextureLayout::DepthAttachmentStencilReadOnlyOptimal:
-                            reference.aspectMask = VK_IMAGE_ASPECT_STENCIL_BIT;
-                            break;
-                        case TextureLayout::DepthStencilAttachmentOptimal:
-                        case TextureLayout::DepthStencilReadOnlyOptimal:
-                            reference.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
-                            break;
-                        default: /* should never happen. This will fail per VUID-VkSubpassDescription2-attachment-02800 */
-                            reference.aspectMask = VK_IMAGE_ASPECT_NONE;
-                            break;
-                        }
+                        reference.aspectMask = imageAspectFromInputLayout(reference.layout);
                     }
                 } else {
-                    assert(subpassDescription.inputAttachmentAspects.size() == subpassDescription.inputAttachmentIndex.size());
+                    assert(subpassDescription.inputAttachmentAspects.size() == subpassDescription.inputAttachmentReference.size());
 
                     reference.aspectMask = subpassDescription.inputAttachmentAspects[j].toInt();
                 }
@@ -1311,7 +1348,7 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
             vkSubpass.pInputAttachments = inputReferenceArray.back().data();
         }
 
-        if (!subpassDescription.colorAttachmentIndex.empty()) {
+        if (!subpassDescription.colorAttachmentReference.empty()) {
             std::vector<VkAttachmentReference2> colorReference;
             colorReference.reserve(vkSubpass.colorAttachmentCount);
 
@@ -1321,8 +1358,11 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
                 // "aspectMask is ignored when this structure is used to describe anything other than an input attachment reference."
                 reference.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
                 reference.pNext = nullptr;
-                reference.attachment = subpassDescription.colorAttachmentIndex[j];
-                reference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+                reference.attachment = subpassDescription.colorAttachmentReference[j].index;
+                if (subpassDescription.colorAttachmentReference[j].layout != TextureLayout::MaxEnum)
+                    reference.layout = textureLayoutToVkImageLayout(subpassDescription.colorAttachmentReference[j].layout);
+                else
+                    reference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
                 colorReference.push_back(reference);
             }
@@ -1331,8 +1371,8 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
             vkSubpass.pColorAttachments = colorReferenceArray.back().data();
         }
 
-        if (!subpassDescription.resolveAttachmentIndex.empty()) {
-            assert(subpassDescription.resolveAttachmentIndex.size() == subpassDescription.colorAttachmentIndex.size());
+        if (!subpassDescription.resolveAttachmentReference.empty()) {
+            assert(subpassDescription.resolveAttachmentReference.size() == subpassDescription.colorAttachmentReference.size());
 
             std::vector<VkAttachmentReference2> resolveReferences;
             resolveReferences.reserve(vkSubpass.colorAttachmentCount);
@@ -1343,8 +1383,11 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
                 // "aspectMask is ignored when this structure is used to describe anything other than an input attachment reference."
                 reference.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
                 reference.pNext = nullptr;
-                reference.attachment = subpassDescription.resolveAttachmentIndex[j];
-                reference.layout = textureLayoutToVkImageLayout(options.attachments[reference.attachment].finalLayout);
+                reference.attachment = subpassDescription.resolveAttachmentReference[j].index;
+                if (subpassDescription.resolveAttachmentReference[j].layout != TextureLayout::MaxEnum)
+                    reference.layout = textureLayoutToVkImageLayout(subpassDescription.resolveAttachmentReference[j].layout);
+                else
+                    reference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
                 resolveReferences.push_back(reference);
             }
@@ -1382,13 +1425,18 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
     renderPassInfo.dependencyCount = vkSubpassDependenciesArray.size();
     renderPassInfo.pDependencies = (renderPassInfo.dependencyCount != 0) ? vkSubpassDependenciesArray.data() : nullptr;
 
+    if (isMultiviewEnabled) {
+        renderPassInfo.correlatedViewMaskCount = options.correlatedViewMasks.size();
+        renderPassInfo.pCorrelatedViewMasks = options.correlatedViewMasks.data();
+    }
+
     VkRenderPass vkRenderPass{ VK_NULL_HANDLE };
     if (auto result = vkCreateRenderPass2(vulkanDevice->device, &renderPassInfo, nullptr, &vkRenderPass); result != VK_SUCCESS) {
         SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating render pass: {}", result);
         return {};
     }
 
-    const auto vulkanRenderPassHandle = m_renderPasses.emplace(VulkanRenderPass(vkRenderPass, this, deviceHandle));
+    const auto vulkanRenderPassHandle = m_renderPasses.emplace(VulkanRenderPass(vkRenderPass, this, deviceHandle, options.attachments));
     return vulkanRenderPassHandle;
 }
 
@@ -1674,11 +1722,11 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     // type and match the formats and sample counts in each case.
 
     if (!vulkanRenderPassHandle.isValid()) {
-        vulkanRenderPassHandle = createRenderPass(deviceHandle,
-                                                  options.renderTargets,
-                                                  options.depthStencil,
-                                                  options.multisample.samples,
-                                                  options.viewCount);
+        vulkanRenderPassHandle = createImplicitRenderPass(deviceHandle,
+                                                          options.renderTargets,
+                                                          options.depthStencil,
+                                                          options.multisample.samples,
+                                                          options.viewCount);
     }
 
     // Note: at the moment this render pass isn't shared. It might make sense to do so at some point,
@@ -2173,11 +2221,11 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
 
     if (itRenderPass == vulkanDevice->renderPasses.end()) {
         // Create the render pass and cache the handle for it
-        vulkanRenderPassHandle = createRenderPass(deviceHandle,
-                                                  options.colorAttachments,
-                                                  options.depthStencilAttachment,
-                                                  options.samples,
-                                                  options.viewCount);
+        vulkanRenderPassHandle = createImplicitRenderPass(deviceHandle,
+                                                          options.colorAttachments,
+                                                          options.depthStencilAttachment,
+                                                          options.samples,
+                                                          options.viewCount);
         vulkanDevice->renderPasses.insert({ renderPassKey, vulkanRenderPassHandle });
     } else {
         vulkanRenderPassHandle = itRenderPass->second;
@@ -2337,13 +2385,20 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
     assert(2 * options.attachments.size() + 1 <= MaxAttachmentCount);
     std::array<VkClearValue, MaxAttachmentCount> vkClearValues;
     size_t clearIdx = 0;
-    // TODO: Restore correct behavior
-    bool isAnyOfTheAttachmentsToBeCleared = true;
+
+    if (options.attachments.size() != vulkanRenderPass->attachmentDescriptions.size()) {
+        SPDLOG_LOGGER_WARN(Logger::logger(), "Mismatch between RenderPass expected attachments {} and provided attachments {}", vulkanRenderPass->attachmentDescriptions.size(), options.attachments.size());
+    }
+
+    const bool isAnyOfTheAttachmentsToBeCleared = std::ranges::any_of(vulkanRenderPass->attachmentDescriptions.begin(),
+                                                                      vulkanRenderPass->attachmentDescriptions.end(),
+                                                                      [](const AttachmentDescription &attDescription) {
+                                                                          return attDescription.loadOp == AttachmentLoadOperation::Clear || attDescription.stencilLoadOp == AttachmentLoadOperation::Clear;
+                                                                      });
 
     for (const auto &attachment : options.attachments) {
         if (attachment.color.has_value()) {
             auto arg = attachment.color.value();
-            // isAnyOfTheAttachmentsToBeCleared |= (arg.loadOperation == AttachmentLoadOperation::Clear);
             VkClearValue vkClearValue = {};
             vkClearValue.color.uint32[0] = arg.clearValue.uint32[0];
             vkClearValue.color.uint32[1] = arg.clearValue.uint32[1];
@@ -2356,8 +2411,6 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
                 vkClearValues[clearIdx++] = vkClearValue;
         } else if (attachment.depth.has_value()) {
             auto arg = attachment.depth.value();
-            // isAnyOfTheAttachmentsToBeCleared |= (arg.loadOperation == AttachmentLoadOperation::Clear ||
-            //                                      arg.stencilLoadOperation == AttachmentLoadOperation::Clear);
             VkClearValue vkClearValue = {};
             vkClearValue.depthStencil.depth = arg.clearValue.depthClearValue;
             vkClearValue.depthStencil.stencil = arg.clearValue.stencilClearValue;
@@ -2460,66 +2513,148 @@ Handle<RayTracingPassCommandRecorder_t> VulkanResourceManager::createRayTracingP
     return vulkanRayTracingPassCommandRecorderHandle;
 }
 
-void VulkanResourceManager::fillColorAttachmnents(std::vector<VkAttachmentReference2> &colorAttachmentRefs,
-                                                  std::vector<VkAttachmentReference2> &colorResolveAttachmentRefs,
-                                                  std::vector<VkAttachmentDescription2> &attachments,
-                                                  const std::vector<ColorAttachment> &colorAttachments,
-                                                  SampleCountFlagBits samples)
+// TODO: Add support for multi-subpass
+SubpassDescription VulkanResourceManager::fillAttachmentDescriptionAndCreateSubpassDescription(std::vector<AttachmentDescription> &attachmentDescriptions,
+                                                                                               const std::vector<ColorAttachment> &colorAttachments,
+                                                                                               const DepthStencilAttachment &depthAttachment,
+                                                                                               SampleCountFlagBits samples)
 {
-    // Color and resolve attachments
-    const bool usingMultisampling = samples > SampleCountFlagBits::Samples1Bit;
-    const uint32_t colorTargetsCount = colorAttachments.size();
-    {
-        for (uint32_t i = 0; i < colorTargetsCount; ++i) {
-            const ColorAttachment &renderTarget = colorAttachments.at(i);
-            const KDGpu::Format colorFormat = formatFromTextureView(renderTarget.view);
+    const bool useMultiSampling = samples > SampleCountFlagBits::Samples1Bit;
 
-            // NB: We don't care about load/store operations and initial/final layouts here
-            // so we just set some random values;
-            VkAttachmentDescription2 colorAttachment = {};
-            colorAttachment.sType = VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_2;
-            colorAttachment.format = formatToVkFormat(colorFormat);
-            colorAttachment.samples = sampleCountFlagBitsToVkSampleFlagBits(samples);
-            colorAttachment.loadOp = attachmentLoadOperationToVkAttachmentLoadOp(renderTarget.loadOperation);
-            colorAttachment.storeOp = attachmentStoreOperationToVkAttachmentStoreOp(renderTarget.storeOperation);
-            colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-            colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-            colorAttachment.initialLayout = textureLayoutToVkImageLayout(renderTarget.initialLayout);
-            colorAttachment.finalLayout = textureLayoutToVkImageLayout(renderTarget.finalLayout);
+    SubpassDescription subpass;
+    uint32_t currentAttachmentDescriptionIndex = 0;
 
-            VkAttachmentReference2 colorAttachmentRef = {};
-            colorAttachmentRef.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
-            colorAttachmentRef.attachment = attachments.size();
-            colorAttachmentRef.layout = textureLayoutToVkImageLayout(renderTarget.layout);
+    for (const ColorAttachment &attachment : colorAttachments) {
+        AttachmentDescription &attachmentDescription = attachmentDescriptions.emplace_back(AttachmentDescription{});
+        attachmentDescription.format = formatFromTextureView(attachment.view);
+        attachmentDescription.samples = samples;
 
-            colorAttachmentRefs.emplace_back(colorAttachmentRef);
-            attachments.emplace_back(colorAttachment);
+        attachmentDescription.loadOp = attachment.loadOperation;
+        attachmentDescription.storeOp = attachment.storeOperation;
+        attachmentDescription.stencilLoadOp = AttachmentLoadOperation::DontCare;
+        attachmentDescription.stencilstoreOp = AttachmentStoreOperation::DontCare;
+        attachmentDescription.initialLayout = attachment.initialLayout;
+        attachmentDescription.finalLayout = attachment.finalLayout;
+        subpass.colorAttachmentReference.push_back({ currentAttachmentDescriptionIndex++, attachment.layout });
 
-            // If using multisampling, then for each color attachment we need a resolve attachment
-            if (usingMultisampling) {
-                const KDGpu::Format resolveColorFormat = formatFromTextureView(renderTarget.resolveView);
+        if (useMultiSampling && attachment.resolveView.isValid()) {
+            AttachmentDescription &resolveAttachmentDescription = attachmentDescriptions.emplace_back(AttachmentDescription{});
+            resolveAttachmentDescription.format = formatFromTextureView(attachment.resolveView);
+            resolveAttachmentDescription.samples = SampleCountFlagBits::Samples1Bit;
 
-                VkAttachmentDescription2 resolveAttachment = {};
-                resolveAttachment.sType = VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_2;
-                resolveAttachment.format = formatToVkFormat(resolveColorFormat);
-                resolveAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-                resolveAttachment.loadOp = attachmentLoadOperationToVkAttachmentLoadOp(renderTarget.loadOperation);
-                resolveAttachment.storeOp = attachmentStoreOperationToVkAttachmentStoreOp(renderTarget.storeOperation);
-                resolveAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-                resolveAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-                resolveAttachment.initialLayout = textureLayoutToVkImageLayout(renderTarget.initialLayout);
-                resolveAttachment.finalLayout = textureLayoutToVkImageLayout(renderTarget.finalLayout);
-
-                VkAttachmentReference2 resolveAttachmentRef = {};
-                resolveAttachmentRef.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
-                resolveAttachmentRef.attachment = attachments.size();
-                resolveAttachmentRef.layout = textureLayoutToVkImageLayout(renderTarget.layout);
-
-                colorResolveAttachmentRefs.emplace_back(resolveAttachmentRef);
-                attachments.emplace_back(resolveAttachment);
-            }
+            resolveAttachmentDescription.loadOp = attachment.loadOperation;
+            resolveAttachmentDescription.storeOp = attachment.storeOperation;
+            resolveAttachmentDescription.stencilLoadOp = AttachmentLoadOperation::DontCare;
+            resolveAttachmentDescription.stencilstoreOp = AttachmentStoreOperation::DontCare;
+            resolveAttachmentDescription.initialLayout = attachment.initialLayout;
+            resolveAttachmentDescription.finalLayout = attachment.finalLayout;
+            subpass.resolveAttachmentReference.push_back({ currentAttachmentDescriptionIndex++, attachment.layout });
         }
     }
+
+    if (depthAttachment.view.isValid()) {
+        AttachmentDescription &attachmentDescription = attachmentDescriptions.emplace_back(AttachmentDescription{});
+        attachmentDescription.format = formatFromTextureView(depthAttachment.view);
+        attachmentDescription.samples = samples;
+
+        attachmentDescription.loadOp = depthAttachment.depthLoadOperation;
+        attachmentDescription.storeOp = depthAttachment.depthStoreOperation;
+        attachmentDescription.stencilLoadOp = depthAttachment.stencilLoadOperation;
+        attachmentDescription.stencilstoreOp = depthAttachment.stencilStoreOperation;
+        attachmentDescription.initialLayout = depthAttachment.initialLayout;
+        attachmentDescription.finalLayout = depthAttachment.finalLayout;
+        if (subpass.depthAttachmentReference) {
+            SPDLOG_LOGGER_ERROR(Logger::logger(), "More than 1 Depth Attachment in this subpass!");
+        }
+        subpass.depthAttachmentReference = { currentAttachmentDescriptionIndex++, depthAttachment.layout };
+
+        if (useMultiSampling && depthAttachment.resolveView.isValid()) {
+            AttachmentDescription &resolveAttachmentDescription = attachmentDescriptions.emplace_back(AttachmentDescription{});
+            resolveAttachmentDescription.format = formatFromTextureView(depthAttachment.resolveView);
+            resolveAttachmentDescription.samples = SampleCountFlagBits::Samples1Bit;
+
+            resolveAttachmentDescription.loadOp = depthAttachment.depthLoadOperation;
+            resolveAttachmentDescription.storeOp = depthAttachment.depthStoreOperation;
+            resolveAttachmentDescription.stencilLoadOp = depthAttachment.stencilLoadOperation;
+            resolveAttachmentDescription.stencilstoreOp = depthAttachment.stencilStoreOperation;
+            resolveAttachmentDescription.initialLayout = depthAttachment.initialLayout;
+            resolveAttachmentDescription.finalLayout = depthAttachment.finalLayout;
+            if (subpass.depthResolveAttachmentReference) {
+                SPDLOG_LOGGER_ERROR(Logger::logger(), "More than 1 Depth Resolve Attachment in this subpass!");
+            }
+            subpass.depthResolveAttachmentReference = { currentAttachmentDescriptionIndex++, depthAttachment.layout };
+        }
+    }
+
+    return subpass;
+}
+
+SubpassDescription VulkanResourceManager::fillAttachmentDescriptionAndCreateSubpassDescription(std::vector<AttachmentDescription> &attachmentDescriptions,
+                                                                                               const std::vector<RenderTargetOptions> &colorAttachments,
+                                                                                               const DepthStencilOptions &depthStencil,
+                                                                                               SampleCountFlagBits samples)
+{
+    const bool useMultiSampling = samples > SampleCountFlagBits::Samples1Bit;
+
+    SubpassDescription subpass;
+    uint32_t currentAttachmentDescriptionIndex = 0;
+
+    for (const RenderTargetOptions &renderTarget : colorAttachments) {
+        AttachmentDescription &attachmentDescription = attachmentDescriptions.emplace_back(AttachmentDescription{});
+        attachmentDescription.format = renderTarget.format;
+        attachmentDescription.samples = samples;
+        attachmentDescription.loadOp = AttachmentLoadOperation::Clear;
+        attachmentDescription.storeOp = AttachmentStoreOperation::Store;
+        attachmentDescription.stencilLoadOp = AttachmentLoadOperation::DontCare;
+        attachmentDescription.stencilstoreOp = AttachmentStoreOperation::DontCare;
+        attachmentDescription.initialLayout = TextureLayout::Undefined;
+        attachmentDescription.finalLayout = useMultiSampling ? TextureLayout::ColorAttachmentOptimal : TextureLayout::PresentSrc;
+        subpass.colorAttachmentReference.push_back({ currentAttachmentDescriptionIndex++, TextureLayout::ColorAttachmentOptimal });
+
+        if (useMultiSampling) {
+            AttachmentDescription &resolveAttachmentDescription = attachmentDescriptions.emplace_back(AttachmentDescription{});
+            resolveAttachmentDescription.format = renderTarget.format;
+            resolveAttachmentDescription.samples = SampleCountFlagBits::Samples1Bit;
+            resolveAttachmentDescription.loadOp = AttachmentLoadOperation::Clear;
+            resolveAttachmentDescription.storeOp = AttachmentStoreOperation::Store;
+            resolveAttachmentDescription.stencilLoadOp = AttachmentLoadOperation::DontCare;
+            resolveAttachmentDescription.stencilstoreOp = AttachmentStoreOperation::DontCare;
+            resolveAttachmentDescription.initialLayout = TextureLayout::Undefined;
+            resolveAttachmentDescription.finalLayout = TextureLayout::PresentSrc;
+            subpass.resolveAttachmentReference.push_back({ currentAttachmentDescriptionIndex++, TextureLayout::ColorAttachmentOptimal });
+        }
+    }
+
+    const bool hasDepthAttachment = depthStencil.format != Format::UNDEFINED;
+    const bool hasDepthResolveAttachment = hasDepthAttachment && useMultiSampling && depthStencil.resolveDepthStencil;
+
+    if (hasDepthAttachment) {
+        AttachmentDescription &attachmentDescription = attachmentDescriptions.emplace_back(AttachmentDescription{});
+        attachmentDescription.format = depthStencil.format;
+        attachmentDescription.samples = samples;
+        attachmentDescription.loadOp = AttachmentLoadOperation::Clear;
+        attachmentDescription.storeOp = AttachmentStoreOperation::Store;
+        attachmentDescription.stencilLoadOp = AttachmentLoadOperation::DontCare;
+        attachmentDescription.stencilstoreOp = AttachmentStoreOperation::DontCare;
+        attachmentDescription.initialLayout = TextureLayout::Undefined;
+        attachmentDescription.finalLayout = TextureLayout::DepthStencilAttachmentOptimal;
+        subpass.depthAttachmentReference = { currentAttachmentDescriptionIndex++, TextureLayout::DepthStencilAttachmentOptimal };
+
+        if (hasDepthResolveAttachment) {
+            AttachmentDescription &resolveAttachmentDescription = attachmentDescriptions.emplace_back(AttachmentDescription{});
+            resolveAttachmentDescription.format = depthStencil.format;
+            resolveAttachmentDescription.samples = SampleCountFlagBits::Samples1Bit;
+            resolveAttachmentDescription.loadOp = AttachmentLoadOperation::Clear;
+            resolveAttachmentDescription.storeOp = AttachmentStoreOperation::Store;
+            resolveAttachmentDescription.stencilLoadOp = AttachmentLoadOperation::DontCare;
+            resolveAttachmentDescription.stencilstoreOp = AttachmentStoreOperation::DontCare;
+            resolveAttachmentDescription.initialLayout = TextureLayout::Undefined;
+            resolveAttachmentDescription.finalLayout = TextureLayout::PresentSrc;
+            subpass.depthResolveAttachmentReference = { currentAttachmentDescriptionIndex++, TextureLayout::DepthStencilAttachmentOptimal };
+        }
+    }
+
+    return subpass;
 }
 
 Handle<TimestampQueryRecorder_t> VulkanResourceManager::createTimestampQueryRecorder(const Handle<Device_t> &deviceHandle,
@@ -2590,314 +2725,82 @@ VulkanTimestampQueryRecorder *VulkanResourceManager::getTimestampQueryRecorder(c
     return m_timestampQueryRecorders.get(handle);
 }
 
-void VulkanResourceManager::fillColorAttachmnents(std::vector<VkAttachmentReference2> &colorAttachmentRefs,
-                                                  std::vector<VkAttachmentReference2> &colorResolveAttachmentRefs,
-                                                  std::vector<VkAttachmentDescription2> &attachments,
-                                                  const std::vector<RenderTargetOptions> &colorAttachments,
-                                                  SampleCountFlagBits samples)
+namespace {
+const std::vector<SubpassDependenciesDescriptions> defaultImplicitSubpassDependencies = {
+    // Color & Depth Buffer Dependency to prevent clearing before previous renderpass has been completed
+    {
+            .srcSubpass = ExternalSubpass,
+            .dstSubpass = 0,
+            .srcStageMask = PipelineStageFlagBit::TopOfPipeBit,
+            .dstStageMask = PipelineStageFlagBit::AllGraphicsBit,
+            .srcAccessMask = AccessFlagBit::None,
+            .dstAccessMask = AccessFlagBit::ColorAttachmentWriteBit | AccessFlagBit::ColorAttachmentReadBit | AccessFlagBit::DepthStencilAttachmentWriteBit | AccessFlagBit::DepthStencilAttachmentReadBit | AccessFlagBit::InputAttachmentReadBit,
+    },
+    {
+            .srcSubpass = ExternalSubpass,
+            .dstSubpass = 0,
+            .srcStageMask = PipelineStageFlagBit::AllGraphicsBit,
+            .dstStageMask = PipelineStageFlagBit::BottomOfPipeBit,
+            .srcAccessMask = AccessFlagBit::ColorAttachmentWriteBit | AccessFlagBit::ColorAttachmentReadBit | AccessFlagBit::DepthStencilAttachmentWriteBit | AccessFlagBit::DepthStencilAttachmentReadBit | AccessFlagBit::InputAttachmentReadBit,
+            .dstAccessMask = AccessFlagBit::None,
+    },
+};
+
+} // namespace
+
+// Created from ColorAttachments & DepthStencilAttachment (RenderPassRecorder)
+Handle<RenderPass_t> VulkanResourceManager::createImplicitRenderPass(const Handle<Device_t> &deviceHandle,
+                                                                     const std::vector<ColorAttachment> &colorAttachments,
+                                                                     const DepthStencilAttachment &depthStencilAttachment,
+                                                                     SampleCountFlagBits samples, uint32_t viewCount)
 {
-    const bool usingMultisampling = samples > SampleCountFlagBits::Samples1Bit;
-    const uint32_t colorTargetsCount = colorAttachments.size();
-    for (uint32_t i = 0; i < colorTargetsCount; ++i) {
-        const auto &renderTarget = colorAttachments.at(i);
-
-        // NB: We don't care about load/store operations and initial/final layouts here
-        // so we just set some random values;
-        VkAttachmentDescription2 colorAttachment = {};
-        colorAttachment.sType = VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_2;
-        colorAttachment.format = formatToVkFormat(renderTarget.format);
-        colorAttachment.samples = sampleCountFlagBitsToVkSampleFlagBits(samples);
-        colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-        colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        colorAttachment.finalLayout = usingMultisampling ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-        VkAttachmentReference2 colorAttachmentRef = {};
-        colorAttachmentRef.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
-        colorAttachmentRef.attachment = attachments.size();
-        colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-        colorAttachmentRefs.emplace_back(colorAttachmentRef);
-        attachments.emplace_back(colorAttachment);
-
-        // If using multisampling, then for each color attachment we need a resolve attachment
-        if (usingMultisampling) {
-            VkAttachmentDescription2 resolveAttachment = {};
-            resolveAttachment.sType = VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_2;
-            resolveAttachment.format = formatToVkFormat(renderTarget.format);
-            resolveAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-            resolveAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-            resolveAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-            resolveAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-            resolveAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-            resolveAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-            resolveAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-            VkAttachmentReference2 resolveAttachmentRef = {};
-            resolveAttachmentRef.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
-            resolveAttachmentRef.attachment = attachments.size();
-            resolveAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-            colorResolveAttachmentRefs.emplace_back(resolveAttachmentRef);
-            attachments.emplace_back(resolveAttachment);
-        }
-    }
-}
-
-std::pair<bool, bool> VulkanResourceManager::fillDepthAttachments(VkAttachmentReference2 &depthStencilAttachmentRef,
-                                                                  VkAttachmentReference2 &depthStencilResolveAttachmentRef,
-                                                                  std::vector<VkAttachmentDescription2> &attachments,
-                                                                  VkSubpassDescriptionDepthStencilResolve &depthResolve,
-                                                                  const DepthStencilAttachment &depthStencil,
-                                                                  SampleCountFlagBits samples)
-{
-    const bool hasDepthAttachment = depthStencil.view.isValid();
-    const bool usingMultisampling = samples > SampleCountFlagBits::Samples1Bit;
-    const bool hasDepthResolveAttachment = hasDepthAttachment && usingMultisampling && depthStencil.resolveView.isValid();
-
-    if (hasDepthAttachment) {
-        const DepthStencilAttachment &renderTarget = depthStencil;
-        const KDGpu::Format depthFormat = formatFromTextureView(depthStencil.view);
-
-        VkAttachmentDescription2 depthStencilAttachment = {};
-        depthStencilAttachment.sType = VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_2;
-        depthStencilAttachment.format = formatToVkFormat(depthFormat);
-        depthStencilAttachment.samples = sampleCountFlagBitsToVkSampleFlagBits(samples);
-        depthStencilAttachment.loadOp = attachmentLoadOperationToVkAttachmentLoadOp(renderTarget.depthLoadOperation);
-        depthStencilAttachment.storeOp = attachmentStoreOperationToVkAttachmentStoreOp(renderTarget.depthStoreOperation);
-        depthStencilAttachment.stencilLoadOp = attachmentLoadOperationToVkAttachmentLoadOp(renderTarget.stencilLoadOperation);
-        depthStencilAttachment.stencilStoreOp = attachmentStoreOperationToVkAttachmentStoreOp(renderTarget.stencilStoreOperation);
-        depthStencilAttachment.initialLayout = textureLayoutToVkImageLayout(renderTarget.initialLayout);
-        depthStencilAttachment.finalLayout = textureLayoutToVkImageLayout(renderTarget.finalLayout);
-
-        depthStencilAttachmentRef.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
-        depthStencilAttachmentRef.attachment = attachments.size();
-        depthStencilAttachmentRef.layout = textureLayoutToVkImageLayout(renderTarget.layout);
-
-        attachments.emplace_back(depthStencilAttachment);
-
-        // If using multisampling, then we might need to resolve the depth attachment
-        if (hasDepthResolveAttachment) {
-            const KDGpu::Format depthResolveFormat = formatFromTextureView(depthStencil.resolveView);
-
-            VkAttachmentDescription2 resolveAttachment = {};
-            resolveAttachment.sType = VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_2;
-            resolveAttachment.format = formatToVkFormat(depthResolveFormat);
-            resolveAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-            resolveAttachment.loadOp = attachmentLoadOperationToVkAttachmentLoadOp(renderTarget.depthLoadOperation);
-            resolveAttachment.storeOp = attachmentStoreOperationToVkAttachmentStoreOp(renderTarget.depthStoreOperation);
-            resolveAttachment.stencilLoadOp = attachmentLoadOperationToVkAttachmentLoadOp(renderTarget.stencilLoadOperation);
-            resolveAttachment.stencilStoreOp = attachmentStoreOperationToVkAttachmentStoreOp(renderTarget.stencilStoreOperation);
-            resolveAttachment.initialLayout = textureLayoutToVkImageLayout(renderTarget.initialLayout);
-            resolveAttachment.finalLayout = textureLayoutToVkImageLayout(renderTarget.finalLayout);
-
-            depthStencilResolveAttachmentRef.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
-            depthStencilResolveAttachmentRef.attachment = attachments.size();
-            depthStencilResolveAttachmentRef.layout = textureLayoutToVkImageLayout(renderTarget.layout);
-
-            attachments.emplace_back(resolveAttachment);
-
-            depthResolve.sType = VK_STRUCTURE_TYPE_SUBPASS_DESCRIPTION_DEPTH_STENCIL_RESOLVE;
-            depthResolve.depthResolveMode = resolveModeToVkResolveMode(renderTarget.depthResolveMode);
-            depthResolve.stencilResolveMode = resolveModeToVkResolveMode(renderTarget.stencilResolveMode);
-            depthResolve.pDepthStencilResolveAttachment = &depthStencilResolveAttachmentRef;
-
-            // set a ptr to a VkSubpassDescriptionDepthStencilResolve on the VkSubpassDescription2::pNext
-            // to allow resolving of a msaaDepthBuffer
-        }
-    }
-
-    return { hasDepthAttachment, hasDepthResolveAttachment };
-}
-
-std::pair<bool, bool> VulkanResourceManager::fillDepthAttachments(VkAttachmentReference2 &depthStencilAttachmentRef,
-                                                                  VkAttachmentReference2 &depthStencilResolveAttachmentRef,
-                                                                  std::vector<VkAttachmentDescription2> &attachments,
-                                                                  VkSubpassDescriptionDepthStencilResolve &depthResolve,
-                                                                  const DepthStencilOptions &depthStencil,
-                                                                  SampleCountFlagBits samples)
-{
-    const bool hasDepthAttachment = depthStencil.format != Format::UNDEFINED;
-    const bool usingMultisampling = samples > SampleCountFlagBits::Samples1Bit;
-    const bool hasDepthResolveAttachment = hasDepthAttachment && usingMultisampling && depthStencil.resolveDepthStencil;
-
-    if (hasDepthAttachment) {
-        VkAttachmentDescription2 depthStencilAttachment = {};
-        depthStencilAttachment.sType = VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_2;
-        depthStencilAttachment.format = formatToVkFormat(depthStencil.format);
-        depthStencilAttachment.samples = sampleCountFlagBitsToVkSampleFlagBits(samples);
-        depthStencilAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        depthStencilAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-        depthStencilAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        depthStencilAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        depthStencilAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        depthStencilAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-        depthStencilAttachmentRef.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
-        depthStencilAttachmentRef.attachment = attachments.size();
-        depthStencilAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-        attachments.emplace_back(depthStencilAttachment);
-
-        if (usingMultisampling && depthStencil.resolveDepthStencil) {
-            VkAttachmentDescription2 resolveAttachment = {};
-            resolveAttachment.sType = VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_2;
-            resolveAttachment.format = formatToVkFormat(depthStencil.format);
-            resolveAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-            resolveAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-            resolveAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-            resolveAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-            resolveAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-            resolveAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-            resolveAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-            depthStencilResolveAttachmentRef.sType = VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_2;
-            depthStencilResolveAttachmentRef.attachment = attachments.size();
-            depthStencilResolveAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-            attachments.emplace_back(resolveAttachment);
-
-            depthResolve.sType = VK_STRUCTURE_TYPE_SUBPASS_DESCRIPTION_DEPTH_STENCIL_RESOLVE;
-            depthResolve.depthResolveMode = VK_RESOLVE_MODE_AVERAGE_BIT;
-            depthResolve.stencilResolveMode = VK_RESOLVE_MODE_NONE;
-            depthResolve.pDepthStencilResolveAttachment = &depthStencilResolveAttachmentRef;
-        }
-    }
-
-    return { hasDepthAttachment, hasDepthResolveAttachment };
-}
-
-template<typename ColorAtt, typename DepthAtt>
-Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device_t> &deviceHandle,
-                                                             const std::vector<ColorAtt> &colorAttachments,
-                                                             const DepthAtt &depthAttachment,
-                                                             SampleCountFlagBits samples,
-                                                             uint32_t viewCount)
-{
-    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
-
-    // The subpass description will then index into the above vector of attachment
-    // descriptions to specify which subpasses use which of the available attachments.
-    constexpr size_t MaxAttachmentCount = 8;
-    std::vector<VkAttachmentReference2> colorAttachmentRefs{};
-    std::vector<VkAttachmentReference2> colorResolveAttachmentRefs{};
-    std::vector<VkAttachmentDescription2> allAttachments{};
-    VkAttachmentReference2 depthStencilAttachmentRef = {};
-    VkAttachmentReference2 depthStencilResolveAttachmentRef = {};
-
-    colorAttachmentRefs.reserve(MaxAttachmentCount);
-    colorResolveAttachmentRefs.reserve(MaxAttachmentCount);
-    allAttachments.reserve(MaxAttachmentCount * 2);
-
-    // Color and resolve attachments
-    fillColorAttachmnents(colorAttachmentRefs,
-                          colorResolveAttachmentRefs,
-                          allAttachments,
-                          colorAttachments,
-                          samples);
-
-    // Depth-stencil attachment
-    VkSubpassDescriptionDepthStencilResolve depthResolve{};
-    bool hasDepthAttachment, hasDepthResolveAttachment;
-    std::tie(hasDepthAttachment, hasDepthResolveAttachment) = fillDepthAttachments(depthStencilAttachmentRef,
-                                                                                   depthStencilResolveAttachmentRef,
-                                                                                   allAttachments,
-                                                                                   depthResolve,
-                                                                                   depthAttachment,
-                                                                                   samples);
-
-    assert(viewCount > 0);
+    // default case, one subpass renderpass, assume one depth attachment for now
     const uint32_t multiViewMaskMask = uint32_t(1 << viewCount) - 1;
 
-    // Just create a single subpass. We do not support multiple subpasses at this
-    // stage as other graphics APIs do not have an equivalent to subpasses.
-    VkSubpassDescription2 subpass = {};
-    subpass.sType = VK_STRUCTURE_TYPE_SUBPASS_DESCRIPTION_2;
-    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-    subpass.colorAttachmentCount = colorAttachmentRefs.size();
-    subpass.pColorAttachments = colorAttachmentRefs.data();
-    subpass.pResolveAttachments = colorResolveAttachmentRefs.size() > 0 ? colorResolveAttachmentRefs.data() : nullptr;
-    subpass.pDepthStencilAttachment = hasDepthAttachment ? &depthStencilAttachmentRef : nullptr;
-    // Depth MSAA Resolve
-    if (hasDepthResolveAttachment)
-        subpass.pNext = &depthResolve;
+    std::vector<AttachmentDescription> attachmentDescriptions;
+    SubpassDescription subpassDescription = fillAttachmentDescriptionAndCreateSubpassDescription(attachmentDescriptions, colorAttachments, depthStencilAttachment, samples);
 
-    // Dependencies to prevent write on write issues with color and depth buffers
-    // when rendering without wait idle
-    const std::vector<VkSubpassDependency2> subpassDependencies = {
-        // // Color & Depth Buffer Dependency to prevent clearing before previous renderpass has been completed
-        {
-                .sType = VK_STRUCTURE_TYPE_SUBPASS_DEPENDENCY_2,
-                .srcSubpass = VK_SUBPASS_EXTERNAL,
-                .dstSubpass = 0,
-                .srcStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-                .dstStageMask = VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT,
-                .srcAccessMask = VK_ACCESS_NONE,
-                .dstAccessMask = VK_ACCESS_INPUT_ATTACHMENT_READ_BIT |
-                        VK_ACCESS_COLOR_ATTACHMENT_READ_BIT |
-                        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
-                        VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT |
-                        VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
-                .dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT,
-        },
-        {
-                .sType = VK_STRUCTURE_TYPE_SUBPASS_DEPENDENCY_2,
-                .srcSubpass = VK_SUBPASS_EXTERNAL,
-                .dstSubpass = 0,
-                .srcStageMask = VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT,
-                .dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
-                .srcAccessMask = VK_ACCESS_INPUT_ATTACHMENT_READ_BIT |
-                        VK_ACCESS_COLOR_ATTACHMENT_READ_BIT |
-                        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
-                        VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT |
-                        VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
-                .dstAccessMask = VK_ACCESS_NONE,
-                .dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT,
-        },
-    }; // namespace KDGpu
-
-    VkRenderPassCreateInfo2 renderPassInfo = {};
-    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO_2;
-    renderPassInfo.attachmentCount = allAttachments.size();
-    renderPassInfo.pAttachments = allAttachments.data();
-    renderPassInfo.subpassCount = 1;
-    renderPassInfo.pSubpasses = &subpass;
-    renderPassInfo.dependencyCount = subpassDependencies.size();
-    renderPassInfo.pDependencies = subpassDependencies.data();
-
+    std::vector<uint32_t> viewMasks;
     if (viewCount > 1) {
-        // pViewMask is a bitfield of view indices describing which views rendering is broadcast to in this subpass
-        subpass.viewMask = multiViewMaskMask;
-        // CorrelationMasks sets the number of views to be rendered concurrently from a mask
-        // For now, we expect all of them to be rendered concurrently as we don't want to
-        // mess with subpass and view dependencies.
-        renderPassInfo.correlatedViewMaskCount = 1;
-        renderPassInfo.pCorrelatedViewMasks = &multiViewMaskMask;
+        subpassDescription.viewMask = multiViewMaskMask;
+        viewMasks = std::vector{ multiViewMaskMask };
     }
 
-    VkRenderPass vkRenderPass{ VK_NULL_HANDLE };
-    if (auto result = vulkanDevice->vkCreateRenderPass2(vulkanDevice->device, &renderPassInfo, nullptr, &vkRenderPass); result != VK_SUCCESS) {
-        SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating render pass: {}", result);
-        return {};
-    }
-
-    const auto vulkanRenderPassHandle = m_renderPasses.emplace(VulkanRenderPass(vkRenderPass, this, deviceHandle));
-    return vulkanRenderPassHandle;
+    return createRenderPass(deviceHandle, RenderPassOptions{
+                                                  .attachments = attachmentDescriptions,
+                                                  .subpassDescriptions = std::vector{ subpassDescription },
+                                                  .subpassDependencies = defaultImplicitSubpassDependencies,
+                                                  .correlatedViewMasks = viewMasks,
+                                          });
 }
 
-// explicitly instantiate the template specializations so that their definitions are known at compile time (since we haven't implemented it in the header)
-template Handle<RenderPass_t> VulkanResourceManager::createRenderPass<RenderTargetOptions, DepthStencilOptions>(const Handle<Device_t> &,
-                                                                                                                const std::vector<RenderTargetOptions> &,
-                                                                                                                const DepthStencilOptions &,
-                                                                                                                SampleCountFlagBits,
-                                                                                                                uint32_t);
-template Handle<RenderPass_t> VulkanResourceManager::createRenderPass<ColorAttachment, DepthStencilAttachment>(const Handle<Device_t> &,
-                                                                                                               const std::vector<ColorAttachment> &,
-                                                                                                               const DepthStencilAttachment &,
-                                                                                                               SampleCountFlagBits,
-                                                                                                               uint32_t);
+// Created from RenderTarget descriptions (GraphicsPipeline)
+Handle<RenderPass_t> VulkanResourceManager::createImplicitRenderPass(const Handle<Device_t> &deviceHandle,
+                                                                     const std::vector<RenderTargetOptions> &colorAttachments,
+                                                                     const DepthStencilOptions &depthAttachment,
+                                                                     SampleCountFlagBits samples,
+                                                                     uint32_t viewCount)
+{
+
+    // default case, one subpass renderpass, assume one depth attachment for now
+    const uint32_t multiViewMaskMask = uint32_t(1 << viewCount) - 1;
+
+    std::vector<AttachmentDescription> attachmentDescriptions;
+    SubpassDescription subpassDescription = fillAttachmentDescriptionAndCreateSubpassDescription(attachmentDescriptions, colorAttachments, depthAttachment, samples);
+
+    std::vector<uint32_t> viewMasks;
+    if (viewCount > 1) {
+        subpassDescription.viewMask = multiViewMaskMask;
+        viewMasks = std::vector{ multiViewMaskMask };
+    }
+
+    return createRenderPass(deviceHandle, RenderPassOptions{
+                                                  .attachments = attachmentDescriptions,
+                                                  .subpassDescriptions = std::vector{ subpassDescription },
+                                                  .subpassDependencies = defaultImplicitSubpassDependencies,
+                                                  .correlatedViewMasks = viewMasks,
+                                          });
+}
 
 Handle<Framebuffer_t> VulkanResourceManager::createFramebuffer(const Handle<Device_t> &deviceHandle,
                                                                const RenderPassCommandRecorderWithRenderPassOptions &options,
