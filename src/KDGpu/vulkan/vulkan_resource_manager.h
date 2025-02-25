@@ -142,6 +142,9 @@ public:
     Handle<RenderPassCommandRecorder_t> createRenderPassCommandRecorder(const Handle<Device_t> &deviceHandle,
                                                                         const Handle<CommandRecorder_t> &commandRecorderHandle,
                                                                         const RenderPassCommandRecorderOptions &options);
+    Handle<RenderPassCommandRecorder_t> createRenderPassCommandRecorder(const Handle<Device_t> &deviceHandle,
+                                                                        const Handle<CommandRecorder_t> &commandRecorderHandle,
+                                                                        const RenderPassCommandRecorderWithRenderPassOptions &options);
     void deleteRenderPassCommandRecorder(const Handle<RenderPassCommandRecorder_t> &handle);
     VulkanRenderPassCommandRecorder *getRenderPassCommandRecorder(const Handle<RenderPassCommandRecorder_t> &handle) const;
 
@@ -241,7 +244,7 @@ private:
                                           const DepthAtt &depthAttachment,
                                           SampleCountFlagBits samples,
                                           uint32_t viewCount);
-    Handle<Framebuffer_t> createFramebuffer(const Handle<Device_t> &deviceHandle, const RenderPassCommandRecorderOptions &options, const VulkanFramebufferKey &frameBufferKey);
+    Handle<Framebuffer_t> createFramebuffer(const Handle<Device_t> &deviceHandle, const RenderPassCommandRecorderWithRenderPassOptions &options, const VulkanFramebufferKey &frameBufferKey);
 
     void setObjectName(VulkanDevice *device, const VkObjectType type, const uint64_t handle, const std::string_view name);
 

@@ -35,6 +35,7 @@
 
 #include <cassert>
 #include <stdexcept>
+#include <variant>
 #include <algorithm>
 
 namespace {
@@ -2164,36 +2165,74 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
                                                                                            const RenderPassCommandRecorderOptions &options)
 {
     VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
-    Handle<RenderPass_t> vulkanRenderPassHandle = options.renderPass;
 
-    // TODO: Should we make RenderPass and Framebuffer objects explicitly available to the API?
-    // Doing so would make our API more Vulkan-like and perhaps give a tiny performance boost. On the downside
-    // it's more API surface area (like Vulkan) and other backends would need to store the render pass and
-    // framebuffer requirements to look them up later when using whatever wrapper they have around render passes.
-    // E.g in a WebGPU backend, the render pass backend would just store the options, ready to pass to beginRenderPass().
-    // For now we take a similar approach to WebGPU or the Vulkan dynamic rendering extension.
+    // Find or create a render pass object that matches the request
+    const VulkanRenderPassKey renderPassKey(options, this);
+    auto itRenderPass = vulkanDevice->renderPasses.find(renderPassKey);
+    Handle<RenderPass_t> vulkanRenderPassHandle{};
 
-    if (!vulkanRenderPassHandle.isValid()) {
-
-        // Find or create a render pass object that matches the request
-        const VulkanRenderPassKey renderPassKey(options, this);
-        auto itRenderPass = vulkanDevice->renderPasses.find(renderPassKey);
-        if (itRenderPass == vulkanDevice->renderPasses.end()) {
-            // TODO: Create the render pass and cache the handle for it
-            vulkanRenderPassHandle = createRenderPass(deviceHandle,
-                                                      options.colorAttachments,
-                                                      options.depthStencilAttachment,
-                                                      options.samples,
-                                                      options.viewCount);
-            vulkanDevice->renderPasses.insert({ renderPassKey, vulkanRenderPassHandle });
-        } else {
-            vulkanRenderPassHandle = itRenderPass->second;
-        }
+    if (itRenderPass == vulkanDevice->renderPasses.end()) {
+        // Create the render pass and cache the handle for it
+        vulkanRenderPassHandle = createRenderPass(deviceHandle,
+                                                  options.colorAttachments,
+                                                  options.depthStencilAttachment,
+                                                  options.samples,
+                                                  options.viewCount);
+        vulkanDevice->renderPasses.insert({ renderPassKey, vulkanRenderPassHandle });
+    } else {
+        vulkanRenderPassHandle = itRenderPass->second;
     }
 
+    // Create Attachments from the ColorAttachments and DepthAttachment
+    std::vector<Attachment> attachments;
+    attachments.reserve(options.colorAttachments.size() + 1);
+
+    for (const ColorAttachment &colorAttachment : options.colorAttachments) {
+        attachments.emplace_back(Attachment{
+                .view = colorAttachment.view,
+                .resolveView = colorAttachment.resolveView,
+                .color = Attachment::ColorOperations{
+                        .clearValue = colorAttachment.clearValue,
+                        .layout = colorAttachment.layout,
+                },
+        });
+    }
+
+    if (options.depthStencilAttachment.view.isValid()) {
+        attachments.emplace_back(Attachment{
+                .view = options.depthStencilAttachment.view,
+                .resolveView = options.depthStencilAttachment.resolveView,
+                .depth = Attachment::DepthStencilOperations{
+                        .clearValue = DepthStencilClearValue{
+                                .depthClearValue = options.depthStencilAttachment.depthClearValue,
+                                .stencilClearValue = options.depthStencilAttachment.stencilClearValue },
+                        .layout = options.depthStencilAttachment.layout,
+                },
+        });
+    }
+
+    return createRenderPassCommandRecorder(deviceHandle, commandRecorderHandle, RenderPassCommandRecorderWithRenderPassOptions{
+                                                                                        .renderPass = vulkanRenderPassHandle,
+                                                                                        .attachments = std::move(attachments),
+                                                                                        .samples = options.samples,
+                                                                                        .viewCount = options.viewCount,
+                                                                                        .framebufferWidth = options.framebufferWidth,
+                                                                                        .framebufferHeight = options.framebufferHeight,
+                                                                                        .framebufferArrayLayers = options.framebufferArrayLayers,
+                                                                                });
+}
+
+Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassCommandRecorder(const Handle<Device_t> &deviceHandle,
+                                                                                           const Handle<CommandRecorder_t> &commandRecorderHandle,
+                                                                                           const RenderPassCommandRecorderWithRenderPassOptions &options)
+{
+    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
+    Handle<RenderPass_t> vulkanRenderPassHandle = options.renderPass;
+
+    assert(vulkanRenderPassHandle.isValid());
     VulkanRenderPass *vulkanRenderPass = m_renderPasses.get(vulkanRenderPassHandle);
     if (!vulkanRenderPass) {
-        SPDLOG_LOGGER_ERROR(Logger::logger(), "Unable to find or create a render pass");
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Unable to find render pass");
         return {};
     }
     VkRenderPass vkRenderPass = vulkanRenderPass->renderPass;
@@ -2201,38 +2240,40 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
     // Find or create a framebuffer as per the render pass above
     const bool usingMsaa = options.samples > SampleCountFlagBits::Samples1Bit;
     VulkanAttachmentKey attachmentKey;
-    for (const auto &colorAttachment : options.colorAttachments) {
-        attachmentKey.addAttachmentView(colorAttachment.view);
+    for (const auto &attachment : options.attachments) {
+        // verify that only color or depth is defined
+        if (attachment.color.has_value() == attachment.depth.has_value()) {
+            SPDLOG_LOGGER_ERROR(Logger::logger(), "Both or none of the color and depth operations are defined!"
+                                                  "color has value is {} while depth has value is {}",
+                                attachment.color.has_value(), attachment.depth.has_value());
+            return {};
+        }
+        attachmentKey.addAttachmentView(attachment.view);
         // Include resolve attachments if using MSAA.
-        if (usingMsaa)
-            attachmentKey.addAttachmentView(colorAttachment.resolveView);
-    }
-    if (options.depthStencilAttachment.view.isValid()) {
-        attachmentKey.addAttachmentView(options.depthStencilAttachment.view);
-        if (options.depthStencilAttachment.resolveView.isValid())
-            attachmentKey.addAttachmentView(options.depthStencilAttachment.resolveView);
+        if (attachment.resolveView.isValid())
+            attachmentKey.addAttachmentView(attachment.resolveView);
     }
 
     uint32_t fbWidth = options.framebufferWidth;
     uint32_t fbHeight = options.framebufferHeight;
     uint32_t fbArrayLayers = options.framebufferArrayLayers;
 
-    const bool hasColorAttachment = options.colorAttachments.size() > 0;
-    if (hasColorAttachment) {
+    const auto attachmentFirstColorAttachment = std::find_if(options.attachments.begin(), options.attachments.end(),
+                                                             [](const Attachment &x) { return x.color.has_value(); });
+    if (attachmentFirstColorAttachment != options.attachments.end()) {
         const bool shouldFetchTexture = (fbWidth == 0 || fbHeight == 0) || fbArrayLayers == 0;
         if (shouldFetchTexture) {
-
-            VulkanTextureView *firstView = getTextureView(options.colorAttachments.at(0).view);
+            VulkanTextureView *firstView = getTextureView(attachmentFirstColorAttachment->view);
             if (!firstView) {
                 SPDLOG_LOGGER_ERROR(Logger::logger(), "Invalid texture view when creating render pass");
                 return {};
             }
+
             VulkanTexture *firstTexture = getTexture(firstView->textureHandle);
             if (!firstTexture) {
                 SPDLOG_LOGGER_ERROR(Logger::logger(), "Invalid texture when creating render pass");
                 return {};
             }
-
             if ((fbWidth == 0 || fbHeight == 0)) {
                 // Take the dimensions of the first attachment as the framebuffer dimensions
                 // TODO: Should this be the dimensions of the view rather than the texture itself? i.e. can we
@@ -2291,37 +2332,42 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
     };
 
     // Clear values - at most 2 x color attachments + depth
+    // Maybe update in the future since a complex renderpass with subpass could exceed that? maybe 50?
     constexpr size_t MaxAttachmentCount = 20;
-    assert(2 * options.colorAttachments.size() + 1 <= MaxAttachmentCount);
+    assert(2 * options.attachments.size() + 1 <= MaxAttachmentCount);
     std::array<VkClearValue, MaxAttachmentCount> vkClearValues;
     size_t clearIdx = 0;
-    bool isAnyOfTheAttachmentsToBeCleared = false;
-    for (const auto &colorAttachment : options.colorAttachments) {
-        isAnyOfTheAttachmentsToBeCleared |= (colorAttachment.loadOperation == AttachmentLoadOperation::Clear);
-        VkClearValue vkClearValue = {};
-        vkClearValue.color.uint32[0] = colorAttachment.clearValue.uint32[0];
-        vkClearValue.color.uint32[1] = colorAttachment.clearValue.uint32[1];
-        vkClearValue.color.uint32[2] = colorAttachment.clearValue.uint32[2];
-        vkClearValue.color.uint32[3] = colorAttachment.clearValue.uint32[3];
-        vkClearValues[clearIdx++] = vkClearValue;
+    // TODO: Restore correct behavior
+    bool isAnyOfTheAttachmentsToBeCleared = true;
 
-        // Include resolve clear color again if using MSAA. Must match number of attachments.
-        if (usingMsaa)
+    for (const auto &attachment : options.attachments) {
+        if (attachment.color.has_value()) {
+            auto arg = attachment.color.value();
+            // isAnyOfTheAttachmentsToBeCleared |= (arg.loadOperation == AttachmentLoadOperation::Clear);
+            VkClearValue vkClearValue = {};
+            vkClearValue.color.uint32[0] = arg.clearValue.uint32[0];
+            vkClearValue.color.uint32[1] = arg.clearValue.uint32[1];
+            vkClearValue.color.uint32[2] = arg.clearValue.uint32[2];
+            vkClearValue.color.uint32[3] = arg.clearValue.uint32[3];
             vkClearValues[clearIdx++] = vkClearValue;
-    }
 
-    if (options.depthStencilAttachment.view.isValid()) {
-        isAnyOfTheAttachmentsToBeCleared |= (options.depthStencilAttachment.depthLoadOperation == AttachmentLoadOperation::Clear ||
-                                             options.depthStencilAttachment.stencilLoadOperation == AttachmentLoadOperation::Clear);
-        VkClearValue vkClearValue = {};
-        vkClearValue.depthStencil.depth = options.depthStencilAttachment.depthClearValue;
-        vkClearValue.depthStencil.stencil = options.depthStencilAttachment.stencilClearValue;
-        vkClearValues[clearIdx++] = vkClearValue;
-
-        // Include resolve clear if using MSAA and Depth Resolve. Must match number of attachments.
-        if (options.depthStencilAttachment.resolveView.isValid()) {
+            // Include resolve clear color again if using MSAA. Must match number of attachments.
+            if (usingMsaa)
+                vkClearValues[clearIdx++] = vkClearValue;
+        } else if (attachment.depth.has_value()) {
+            auto arg = attachment.depth.value();
+            // isAnyOfTheAttachmentsToBeCleared |= (arg.loadOperation == AttachmentLoadOperation::Clear ||
+            //                                      arg.stencilLoadOperation == AttachmentLoadOperation::Clear);
+            VkClearValue vkClearValue = {};
+            vkClearValue.depthStencil.depth = arg.clearValue.depthClearValue;
+            vkClearValue.depthStencil.stencil = arg.clearValue.stencilClearValue;
             vkClearValues[clearIdx++] = vkClearValue;
-            attachmentKey.addAttachmentView(options.depthStencilAttachment.resolveView);
+
+            // Include resolve clear if using MSAA and Depth Resolve. Must match number of attachments.
+            if (attachment.resolveView.isValid()) {
+                vkClearValues[clearIdx++] = vkClearValue;
+                attachmentKey.addAttachmentView(attachment.resolveView);
+            }
         }
     }
 
@@ -2854,7 +2900,7 @@ template Handle<RenderPass_t> VulkanResourceManager::createRenderPass<ColorAttac
                                                                                                                uint32_t);
 
 Handle<Framebuffer_t> VulkanResourceManager::createFramebuffer(const Handle<Device_t> &deviceHandle,
-                                                               const RenderPassCommandRecorderOptions &options,
+                                                               const RenderPassCommandRecorderWithRenderPassOptions &options,
                                                                const VulkanFramebufferKey &frameBufferKey)
 {
     VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
@@ -2863,18 +2909,12 @@ Handle<Framebuffer_t> VulkanResourceManager::createFramebuffer(const Handle<Devi
 
     const bool usingMsaa = options.samples > SampleCountFlagBits::Samples1Bit;
     std::vector<Handle<TextureView_t>> attachments;
-    attachments.reserve(2 * options.colorAttachments.size() + 2); // (Color + Resolve) + (DepthStencil + Resolve)
 
-    for (const auto &colorAttachment : options.colorAttachments) {
-        attachments.push_back(colorAttachment.view);
+    for (const auto &attachment : options.attachments) {
+        attachments.push_back(attachment.view);
         // Include resolve attachments if using MSAA.
-        if (usingMsaa)
-            attachments.push_back(colorAttachment.resolveView);
-    }
-    if (options.depthStencilAttachment.view.isValid()) {
-        attachments.push_back(options.depthStencilAttachment.view);
-        if (options.depthStencilAttachment.resolveView.isValid())
-            attachments.push_back(options.depthStencilAttachment.resolveView);
+        if (usingMsaa && attachment.resolveView.isValid())
+            attachments.push_back(attachment.resolveView);
     }
 
     const uint32_t attachmentCount = static_cast<uint32_t>(attachments.size());

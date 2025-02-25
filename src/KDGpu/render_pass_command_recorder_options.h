@@ -12,7 +12,9 @@
 
 #include <KDGpu/handle.h>
 #include <KDGpu/gpu_core.h>
+#include <KDGpu/render_pass_options.h>
 
+#include <optional>
 #include <vector>
 
 namespace KDGpu {
@@ -37,6 +39,7 @@ struct RenderPass_t;
 // If you need to preserve the contents of an image on the way in to the render pass then
 // you must explicitly specify the initialLayout of the image correctly so that the driver
 // can properly transition the image non-destructively.
+
 struct ColorAttachment {
     Handle<TextureView_t> view;
     Handle<TextureView_t> resolveView;
@@ -64,17 +67,44 @@ struct DepthStencilAttachment {
     TextureLayout finalLayout{ TextureLayout::DepthStencilAttachmentOptimal };
 };
 
-// TODO: Make the depthStencilAttachment optional with std::optional?
 struct RenderPassCommandRecorderOptions {
     std::vector<ColorAttachment> colorAttachments;
     DepthStencilAttachment depthStencilAttachment;
+
     SampleCountFlagBits samples{ SampleCountFlagBits::Samples1Bit };
     uint32_t viewCount{ 1 };
     uint32_t framebufferWidth{ 0 }; // Default to first color attachment width
     uint32_t framebufferHeight{ 0 }; // Default to first color attachment height
     uint32_t framebufferArrayLayers{ 0 }; // Default to first color attachment arrayLayer
+};
+struct Attachment {
+    Handle<TextureView_t> view;
+    Handle<TextureView_t> resolveView;
 
+    // only set for color
+    struct ColorOperations {
+        ColorClearValue clearValue;
+        TextureLayout layout{ TextureLayout::ColorAttachmentOptimal };
+    };
+
+    // only set for depth/stencil
+    struct DepthStencilOperations {
+        DepthStencilClearValue clearValue;
+        TextureLayout layout{ TextureLayout::DepthStencilAttachmentOptimal };
+    };
+
+    // set only one of the two
+    std::optional<ColorOperations> color;
+    std::optional<DepthStencilOperations> depth;
+};
+struct RenderPassCommandRecorderWithRenderPassOptions {
     Handle<RenderPass_t> renderPass;
+    std::vector<Attachment> attachments;
+    SampleCountFlagBits samples{ SampleCountFlagBits::Samples1Bit };
+    uint32_t viewCount{ 1 };
+    uint32_t framebufferWidth{ 0 }; // Default to first attachment width
+    uint32_t framebufferHeight{ 0 }; // Default to first attachment height
+    uint32_t framebufferArrayLayers{ 0 }; // Default to first attachment arrayLayer
 };
 
 struct DebugLabelOptions {

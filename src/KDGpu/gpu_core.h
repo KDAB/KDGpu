@@ -130,6 +130,11 @@ inline bool operator==(const ColorClearValue &lhs, const ColorClearValue &rhs)
             && lhs.uint32[3] == rhs.uint32[3];
 }
 
+struct DepthStencilClearValue {
+    float depthClearValue{ 1.0f };
+    uint32_t stencilClearValue{ 0 };
+};
+
 struct Viewport {
     float x{ 0.0f };
     float y{ 0.0f };

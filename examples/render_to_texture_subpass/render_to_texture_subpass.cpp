@@ -59,18 +59,22 @@ void RenderToTextureSubpass::initializeScene()
 
     // clang-format off
     m_renderPassOptions = {
-        .colorAttachments = {
-            {
+        .renderPass = m_renderPass.handle(),
+        .attachments = {
+             {
                 .view = m_colorOutputView, // We always render to the color texture
-                .clearValue = { 0.0f, 0.0f, 0.0f, 1.0f },
+                .color = Attachment::ColorOperations {
+                    .clearValue = ColorClearValue{ 0.0f, 0.0f, 0.0f, 1.0f },
+                },
             },
             {
                 .view = {}, // Not setting the swapchain texture view just yet
-                .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
-                .finalLayout = TextureLayout::PresentSrc
+                .color = Attachment::ColorOperations {
+                    .clearValue = ColorClearValue{ 0.3f, 0.3f, 0.3f, 1.0f },
+                    .layout = TextureLayout::ColorAttachmentOptimal,
+                },
             }
         },
-        .renderPass = m_renderPass.handle()
     };
     // clang-format on
 
@@ -426,7 +430,7 @@ void RenderToTextureSubpass::resize()
     createOffscreenTexture();
 
     // Update OpaquePassOptions to reference new views
-    m_renderPassOptions.colorAttachments[0].view = m_colorOutputView;
+    m_renderPassOptions.attachments[0].view = m_colorOutputView;
 
     // We need to update the ColorBindGroup so that it also references the new colorOutputView
     updateColorBindGroup();
@@ -437,7 +441,7 @@ void RenderToTextureSubpass::render()
     auto commandRecorder = m_device.createCommandRecorder();
 
     // Pass 1: Color pass
-    m_renderPassOptions.colorAttachments[1].view = m_swapchainViews.at(m_currentSwapchainImageIndex);
+    m_renderPassOptions.attachments[1].view = m_swapchainViews.at(m_currentSwapchainImageIndex);
 
     auto opaquePass = commandRecorder.beginRenderPass(m_renderPassOptions);
     opaquePass.setPipeline(m_pipeline);

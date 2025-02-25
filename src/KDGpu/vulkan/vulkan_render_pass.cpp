@@ -12,6 +12,11 @@
 #include <KDGpu/render_pass_command_recorder_options.h>
 #include "vulkan_render_pass.h"
 
+namespace {
+template<class>
+inline constexpr bool always_false = false;
+}
+
 namespace KDGpu {
 
 VulkanRenderPass::VulkanRenderPass(VkRenderPass _renderPass,

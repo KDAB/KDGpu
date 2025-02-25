@@ -57,6 +57,11 @@ RenderPassCommandRecorder CommandRecorder::beginRenderPass(const RenderPassComma
     return RenderPassCommandRecorder(m_api, m_device, m_api->resourceManager()->createRenderPassCommandRecorder(m_device, m_commandRecorder, options));
 }
 
+RenderPassCommandRecorder CommandRecorder::beginRenderPass(const RenderPassCommandRecorderWithRenderPassOptions &options)
+{
+    return RenderPassCommandRecorder(m_api, m_device, m_api->resourceManager()->createRenderPassCommandRecorder(m_device, m_commandRecorder, options));
+}
+
 ComputePassCommandRecorder CommandRecorder::beginComputePass(const ComputePassCommandRecorderOptions &options)
 {
     return ComputePassCommandRecorder(m_api, m_device, m_api->resourceManager()->createComputePassCommandRecorder(m_device, m_commandRecorder, options));

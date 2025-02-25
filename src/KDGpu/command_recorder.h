@@ -160,6 +160,7 @@ public:
     operator Handle<CommandRecorder_t>() const noexcept { return m_commandRecorder; }
 
     RenderPassCommandRecorder beginRenderPass(const RenderPassCommandRecorderOptions &options);
+    RenderPassCommandRecorder beginRenderPass(const RenderPassCommandRecorderWithRenderPassOptions &options);
     ComputePassCommandRecorder beginComputePass(const ComputePassCommandRecorderOptions &options = {});
     RayTracingPassCommandRecorder beginRayTracingPass(const RayTracingPassCommandRecorderOptions &options = {});
     TimestampQueryRecorder beginTimestampRecording(const TimestampQueryRecorderOptions &options = {});

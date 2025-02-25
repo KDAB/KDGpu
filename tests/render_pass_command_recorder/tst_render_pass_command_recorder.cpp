@@ -128,18 +128,119 @@ TEST_SUITE("RenderPassCommandRecorder")
                 .depthStencil = { .format = Format::D24_UNORM_S8_UINT, .depthWritesEnabled = true, .depthCompareOperation = CompareOperation::Less },
         });
 
+        class RenderPass defaultRenderPass = device.createRenderPass(RenderPassOptions{
+                .attachments = {
+                        AttachmentDescription{
+                                .format = Format::R8G8B8A8_UNORM,
+                                .stencilLoadOp = AttachmentLoadOperation::DontCare,
+                                .stencilstoreOp = AttachmentStoreOperation::DontCare,
+                                .finalLayout = TextureLayout::ColorAttachmentOptimal,
+                        },
+                        AttachmentDescription{
+                                .format = Format::D24_UNORM_S8_UINT,
+                                .stencilLoadOp = AttachmentLoadOperation::DontCare,
+                                .stencilstoreOp = AttachmentStoreOperation::DontCare,
+                                .finalLayout = TextureLayout::DepthStencilAttachmentOptimal,
+                        },
+                },
+                .subpassDescriptions = {
+                        SubpassDescription{
+                                .colorAttachmentIndex = { 0 },
+                                .depthAttachmentIndex = { 1 },
+                        },
+                },
+                .subpassDependencies = {
+                        SubpassDependenciesDescriptions{
+                                .srcSubpass = ExternalSubpass,
+                                .dstSubpass = 0,
+                                .srcStageMask = PipelineStageFlagBit::TopOfPipeBit,
+                                .dstStageMask = PipelineStageFlagBit::AllGraphicsBit,
+                                .srcAccessMask = AccessFlagBit::None,
+                                .dstAccessMask = AccessFlagBit::ColorAttachmentWriteBit | AccessFlagBit::ColorAttachmentReadBit | AccessFlagBit::DepthStencilAttachmentWriteBit | AccessFlagBit::DepthStencilAttachmentReadBit | AccessFlagBit::InputAttachmentReadBit,
+                        },
+                        SubpassDependenciesDescriptions{
+                                .srcSubpass = ExternalSubpass,
+                                .dstSubpass = 0,
+                                .srcStageMask = PipelineStageFlagBit::AllGraphicsBit,
+                                .dstStageMask = PipelineStageFlagBit::BottomOfPipeBit,
+                                .srcAccessMask = AccessFlagBit::ColorAttachmentWriteBit | AccessFlagBit::ColorAttachmentReadBit | AccessFlagBit::DepthStencilAttachmentWriteBit | AccessFlagBit::DepthStencilAttachmentReadBit | AccessFlagBit::InputAttachmentReadBit,
+                                .dstAccessMask = AccessFlagBit::None,
+                        },
+                },
+        });
+
         // THEN
         REQUIRE(pipelineLayout.isValid());
         REQUIRE(pipeline.isValid());
         REQUIRE(colorTextureView.isValid());
         REQUIRE(depthTextureView.isValid());
         REQUIRE(device.isValid());
+        REQUIRE(defaultRenderPass.isValid());
 
         SUBCASE("Can't be default constructed")
         {
             // EXPECT
             REQUIRE(!std::is_default_constructible<RenderPassCommandRecorder>::value);
             REQUIRE(!std::is_trivially_default_constructible<RenderPassCommandRecorder>::value);
+        }
+
+        SUBCASE("RenderPassCommandRecorderOptions has sensible default values")
+        {
+            // GIVEN
+            CommandRecorder commandRecorder = device.createCommandRecorder();
+            const RenderPassCommandRecorderOptions renderPassOptions{
+                .colorAttachments = {
+                        { .view = colorTextureView,
+                          .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
+                          .finalLayout = TextureLayout::PresentSrc } },
+                .depthStencilAttachment = {
+                        .view = depthTextureView,
+                }
+            };
+
+            // WHEN
+            RenderPassCommandRecorder renderPassRecorder = commandRecorder.beginRenderPass(renderPassOptions);
+            renderPassRecorder.setPipeline(pipeline);
+            renderPassRecorder.end();
+
+            CommandBuffer commandBuffer = commandRecorder.finish();
+
+            // THEN
+            CHECK(commandRecorder.isValid());
+            CHECK(renderPassRecorder.isValid());
+        }
+
+        SUBCASE("RenderPassCommandRecorderWithRenderPassOptions has sensible default values")
+        {
+            // GIVEN
+            CommandRecorder commandRecorder = device.createCommandRecorder();
+
+            const RenderPassCommandRecorderWithRenderPassOptions renderPassOptions{
+                .renderPass = defaultRenderPass,
+                .attachments = {
+                        {
+                                .view = colorTextureView,
+                                .color = Attachment::ColorOperations{},
+                        },
+                        {
+                                .view = depthTextureView,
+                                .depth = Attachment::DepthStencilOperations{},
+                        },
+                },
+            };
+
+            // WHEN
+            RenderPassCommandRecorder renderPassRecorder = commandRecorder.beginRenderPass(renderPassOptions);
+            renderPassRecorder.setPipeline(pipeline);
+            renderPassRecorder.end();
+
+            CommandBuffer commandBuffer = commandRecorder.finish();
+
+            // THEN
+            CHECK(commandRecorder.isValid());
+            CHECK(renderPassRecorder.isValid());
+            CHECK_EQ(renderPassOptions.attachments[1].depth->clearValue.depthClearValue, 1.0);
+            CHECK_EQ(renderPassOptions.attachments[1].depth->clearValue.stencilClearValue, 0);
         }
 
         SUBCASE("A constructed RenderPassCommandRecorder from a Vulkan API")
@@ -168,7 +269,7 @@ TEST_SUITE("RenderPassCommandRecorder")
             CHECK(renderPassRecorder.isValid());
         }
 
-        SUBCASE("Uses different RenderPasses if depth attachment is not used")
+        SUBCASE("Uses different implicit RenderPasses if depth attachment is not used")
         {
             // GIVEN
             CommandRecorder commandRecorder = device.createCommandRecorder();
