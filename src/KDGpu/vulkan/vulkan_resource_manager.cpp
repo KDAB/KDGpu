@@ -1303,9 +1303,8 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
                 depthResolve.sType = VK_STRUCTURE_TYPE_SUBPASS_DESCRIPTION_DEPTH_STENCIL_RESOLVE;
                 depthResolve.pNext = nullptr;
 
-                // maybe expose these options later?
-                depthResolve.depthResolveMode = VK_RESOLVE_MODE_AVERAGE_BIT;
-                depthResolve.stencilResolveMode = VK_RESOLVE_MODE_NONE;
+                depthResolve.depthResolveMode = resolveModeToVkResolveMode(subpassDescription.depthResolveMode);
+                depthResolve.stencilResolveMode = resolveModeToVkResolveMode(subpassDescription.stencilResolveMode);
                 depthResolve.pDepthStencilResolveAttachment = &depthResolveReferenceArray.back();
 
                 depthResolveArray.push_back(depthResolve);
@@ -2585,6 +2584,9 @@ SubpassDescription VulkanResourceManager::fillAttachmentDescriptionAndCreateSubp
             }
             subpass.depthResolveAttachmentReference = { currentAttachmentDescriptionIndex++, depthAttachment.layout };
         }
+
+        subpass.depthResolveMode = depthAttachment.depthResolveMode;
+        subpass.stencilResolveMode = depthAttachment.stencilResolveMode;
     }
 
     return subpass;

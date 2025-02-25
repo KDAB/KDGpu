@@ -42,6 +42,8 @@ struct SubpassDescription {
     std::vector<uint32_t> preserveAttachmentIndex;
     std::optional<AttachmentReference> depthAttachmentReference;
     std::optional<AttachmentReference> depthResolveAttachmentReference;
+    ResolveModeFlagBits depthResolveMode{ ResolveModeFlagBits::Average };
+    ResolveModeFlagBits stencilResolveMode{ ResolveModeFlagBits::None };
 
     uint32_t viewMask = 0; /* ignored if Multiview is not enabled */
     std::vector<TextureAspectFlags> inputAttachmentAspects; /* must be filled out for multiview, override aspectEnabled in AttachmentReference */
