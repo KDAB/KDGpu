@@ -142,4 +142,6 @@ VkBuildAccelerationStructureFlagsKHR accelerationStructureFlagsToVkBuildAccelera
 
 VkDependencyFlags dependencyFlagsToVkDependencyFlags(DependencyFlags flags);
 
+VkImageAspectFlags textureAspectFlagsToVkImageAspectFlags(TextureAspectFlags flags);
+
 } // namespace KDGpu

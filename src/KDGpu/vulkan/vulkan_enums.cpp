@@ -435,4 +435,9 @@ VkDependencyFlags dependencyFlagsToVkDependencyFlags(DependencyFlags flags)
     return static_cast<VkDependencyFlags>(flags.toInt());
 }
 
+VkImageAspectFlags textureAspectFlagsToVkImageAspectFlags(TextureAspectFlags flags)
+{
+    return static_cast<VkImageAspectFlags>(flags.toInt());
+}
+
 } // namespace KDGpu

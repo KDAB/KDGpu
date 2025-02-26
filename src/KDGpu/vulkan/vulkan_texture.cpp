@@ -12,7 +12,7 @@
 
 #include <KDGpu/vulkan/vulkan_device.h>
 #include <KDGpu/vulkan/vulkan_resource_manager.h>
-
+#include <KDGpu/vulkan/vulkan_enums.h>
 namespace KDGpu {
 
 VulkanTexture::VulkanTexture(VkImage _image,
@@ -62,7 +62,7 @@ SubresourceLayout VulkanTexture::getSubresourceLayout(const TextureSubresource &
 {
     auto vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
     VkImageSubresource vkSubresource = {
-        .aspectMask = subresource.aspectMask.toInt(),
+        .aspectMask = textureAspectFlagsToVkImageAspectFlags(subresource.aspectMask),
         .mipLevel = subresource.mipLevel,
         .arrayLayer = subresource.arrayLayer
     };

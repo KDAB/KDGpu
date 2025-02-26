@@ -34,7 +34,7 @@ std::vector<VkBufferImageCopy> buildRegions(const std::vector<KDGpu::BufferTextu
             .bufferRowLength = region.bufferRowLength,
             .bufferImageHeight = region.bufferTextureHeight,
             .imageSubresource = {
-                    .aspectMask = region.textureSubResource.aspectMask.toInt(),
+                    .aspectMask = textureAspectFlagsToVkImageAspectFlags(region.textureSubResource.aspectMask),
                     .mipLevel = region.textureSubResource.mipLevel,
                     .baseArrayLayer = region.textureSubResource.baseArrayLayer,
                     .layerCount = region.textureSubResource.layerCount },
@@ -56,13 +56,13 @@ std::vector<VkImageCopy> buildRegions(const std::vector<KDGpu::TextureCopyRegion
         // clang-format off
         const VkImageCopy vkRegion = {
             .srcSubresource = {
-                .aspectMask = region.srcSubresource.aspectMask.toInt(),
+                .aspectMask = textureAspectFlagsToVkImageAspectFlags(region.srcSubresource.aspectMask),
                 .mipLevel = region.srcSubresource.mipLevel,
                 .baseArrayLayer = region.srcSubresource.baseArrayLayer,
                 .layerCount = region.srcSubresource.layerCount },
             .srcOffset = { .x = region.srcOffset.x, .y = region.srcOffset.y, .z = region.srcOffset.z },
             .dstSubresource = {
-                .aspectMask = region.dstSubresource.aspectMask.toInt(),
+                .aspectMask = textureAspectFlagsToVkImageAspectFlags(region.dstSubresource.aspectMask),
                 .mipLevel = region.dstSubresource.mipLevel,
                 .baseArrayLayer = region.srcSubresource.baseArrayLayer,
                 .layerCount = region.dstSubresource.layerCount },
@@ -84,7 +84,7 @@ std::vector<VkImageBlit> buildRegions(const std::vector<KDGpu::TextureBlitRegion
         const auto &region = regions.at(i);
         const VkImageBlit vkRegion = {
             .srcSubresource = {
-                    .aspectMask = region.srcSubresource.aspectMask.toInt(),
+                    .aspectMask = textureAspectFlagsToVkImageAspectFlags(region.srcSubresource.aspectMask),
                     .mipLevel = region.srcSubresource.mipLevel,
                     .baseArrayLayer = region.srcSubresource.baseArrayLayer,
                     .layerCount = region.srcSubresource.layerCount,
@@ -102,7 +102,7 @@ std::vector<VkImageBlit> buildRegions(const std::vector<KDGpu::TextureBlitRegion
                     },
             },
             .dstSubresource = {
-                    .aspectMask = region.dstSubresource.aspectMask.toInt(),
+                    .aspectMask = textureAspectFlagsToVkImageAspectFlags(region.dstSubresource.aspectMask),
                     .mipLevel = region.dstSubresource.mipLevel,
                     .baseArrayLayer = region.srcSubresource.baseArrayLayer,
                     .layerCount = region.dstSubresource.layerCount,
@@ -134,7 +134,7 @@ std::vector<VkImageResolve> buildResolveRegions(const std::vector<KDGpu::Texture
         const auto &region = regions.at(i);
         const VkImageResolve vkRegion = {
             .srcSubresource = {
-                    .aspectMask = region.srcSubresource.aspectMask.toInt(),
+                    .aspectMask = textureAspectFlagsToVkImageAspectFlags(region.srcSubresource.aspectMask),
                     .mipLevel = region.srcSubresource.mipLevel,
                     .baseArrayLayer = region.srcSubresource.baseArrayLayer,
                     .layerCount = region.srcSubresource.layerCount,
@@ -145,7 +145,7 @@ std::vector<VkImageResolve> buildResolveRegions(const std::vector<KDGpu::Texture
                     .z = region.srcOffset.z,
             },
             .dstSubresource = {
-                    .aspectMask = region.dstSubresource.aspectMask.toInt(),
+                    .aspectMask = textureAspectFlagsToVkImageAspectFlags(region.dstSubresource.aspectMask),
                     .mipLevel = region.dstSubresource.mipLevel,
                     .baseArrayLayer = region.srcSubresource.baseArrayLayer,
                     .layerCount = region.dstSubresource.layerCount,
@@ -174,7 +174,7 @@ std::vector<VkImageSubresourceRange> buildImageSubresourceRanges(const std::vect
 
     for (const KDGpu::TextureSubresourceRange &range : ranges) {
         VkImageSubresourceRange vkRange{
-            .aspectMask = range.aspectMask.toInt(),
+            .aspectMask = textureAspectFlagsToVkImageAspectFlags(range.aspectMask),
             .baseMipLevel = range.baseMipLevel,
             .levelCount = range.levelCount,
             .baseArrayLayer = range.baseArrayLayer,
@@ -459,7 +459,7 @@ void VulkanCommandRecorder::textureMemoryBarrier(const TextureMemoryBarrierOptio
         const auto vulkanTexture = vulkanResourceManager->getTexture(options.texture);
         vkImageBarrier.image = vulkanTexture->image;
         vkImageBarrier.subresourceRange = {
-            .aspectMask = options.range.aspectMask.toInt(),
+            .aspectMask = textureAspectFlagsToVkImageAspectFlags(options.range.aspectMask),
             .baseMipLevel = options.range.baseMipLevel,
             .levelCount = options.range.levelCount,
             .baseArrayLayer = options.range.baseArrayLayer,
@@ -487,7 +487,7 @@ void VulkanCommandRecorder::textureMemoryBarrier(const TextureMemoryBarrierOptio
         const auto vulkanTexture = vulkanResourceManager->getTexture(options.texture);
         vkImageBarrier.image = vulkanTexture->image;
         vkImageBarrier.subresourceRange = {
-            .aspectMask = options.range.aspectMask.toInt(),
+            .aspectMask = textureAspectFlagsToVkImageAspectFlags(options.range.aspectMask),
             .baseMipLevel = options.range.baseMipLevel,
             .levelCount = options.range.levelCount,
             .baseArrayLayer = options.range.baseArrayLayer,
