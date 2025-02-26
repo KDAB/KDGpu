@@ -581,6 +581,7 @@ enum class TextureUsageFlagBits {
     VideoEncodeSrcBit = 0x00004000,
     VideoEncodeDpbBit = 0x00008000,
     InvocationMaskBit = 0x00040000,
+    HostTransferBit = 0x00400000,
     MaxEnum = 0x7fffffff
 };
 using TextureUsageFlags = KDGpu::Flags<TextureUsageFlagBits>;
@@ -1218,6 +1219,12 @@ enum class DependencyFlagBits {
 
 using DependencyFlags = KDGpu::Flags<DependencyFlagBits>;
 
+enum class HostImageCopyFlagBits {
+    None = 0,
+    HostImageMemcpy = 0x00000001,
+};
+using HostImageCopyFlags = KDGpu::Flags<HostImageCopyFlagBits>;
+
 /*! @} */
 
 } // namespace KDGpu
@@ -1239,3 +1246,4 @@ OPERATORS_FOR_FLAGS(KDGpu::StencilFaceFlags)
 OPERATORS_FOR_FLAGS(KDGpu::GeometryInstanceFlags)
 OPERATORS_FOR_FLAGS(KDGpu::AccelerationStructureFlags)
 OPERATORS_FOR_FLAGS(KDGpu::DependencyFlags);
+OPERATORS_FOR_FLAGS(KDGpu::HostImageCopyFlags);

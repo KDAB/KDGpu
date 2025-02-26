@@ -112,6 +112,7 @@ struct AdapterFeatures {
     bool multiviewMeshShader;
     bool primitiveFragmentShadingRateMeshShader;
     bool meshShaderQueries;
+    bool hostImageCopy;
 };
 
 /*! @} */

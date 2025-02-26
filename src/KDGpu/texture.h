@@ -37,6 +37,59 @@ struct SubresourceLayout {
     DeviceSize depthPitch{ 0 };
 };
 
+struct HostMemoryToTextureCopyRegion {
+    void *srcHostMemoryPointer{ nullptr };
+    DeviceSize srcMemoryRowLength{ 0 };
+    DeviceSize srcMemoryImageHeight{ 0 };
+    TextureSubresourceLayers dstSubresource{ .aspectMask = TextureAspectFlagBits::ColorBit };
+    Offset3D dstOffset{};
+    Extent3D dstExtent{};
+};
+
+struct TextureToHostMemoryCopyRegion {
+    TextureSubresourceLayers srcSubresource{ .aspectMask = TextureAspectFlagBits::ColorBit };
+    Offset3D srcOffset{};
+    Extent3D srcExtent{};
+    void *dstHostMemoryPointer{ nullptr };
+    DeviceSize dstMemoryRowLength{ 0 };
+    DeviceSize dstMemoryImageHeight{ 0 };
+};
+
+struct TextureToTextureHostCopyRegion {
+    TextureSubresourceLayers srcSubresource{ .aspectMask = TextureAspectFlagBits::ColorBit };
+    Offset3D srcOffset{};
+    TextureSubresourceLayers dstSubresource{ .aspectMask = TextureAspectFlagBits::ColorBit };
+    Offset3D dstOffset{};
+    Extent3D extent{};
+};
+
+struct HostMemoryToTextureCopy {
+    Handle<Texture_t> dstTexture;
+    TextureLayout dstTextureLayout;
+    std::vector<HostMemoryToTextureCopyRegion> regions;
+    HostImageCopyFlags flags{ HostImageCopyFlagBits::None };
+};
+
+struct TextureToHostMemoryCopy {
+    TextureLayout textureLayout;
+    std::vector<TextureToHostMemoryCopyRegion> regions;
+    HostImageCopyFlags flags{ HostImageCopyFlagBits::None };
+};
+
+struct TextureToTextureCopyHost {
+    TextureLayout textureLayout;
+    Handle<Texture_t> dstTexture;
+    TextureLayout dstTextureLayout;
+    std::vector<TextureToTextureHostCopyRegion> regions;
+    HostImageCopyFlags flags{ HostImageCopyFlagBits::None };
+};
+
+struct HostLayoutTransition {
+    TextureLayout oldLayout{ TextureLayout::Undefined };
+    TextureLayout newLayout{ TextureLayout::Undefined };
+    TextureSubresourceRange range{};
+};
+
 /**
  * @brief Texture
  * @ingroup public
@@ -62,6 +115,11 @@ public:
 
     void *map();
     void unmap();
+
+    void hostLayoutTransition(const HostLayoutTransition &transition);
+    void copyHostMemoryToTexture(const HostMemoryToTextureCopy &copy);
+    void copyTextureToHostMemory(const TextureToHostMemoryCopy &copy);
+    void copyTextureToTextureHost(const TextureToTextureCopyHost &copy);
 
     SubresourceLayout getSubresourceLayout(const TextureSubresource &subresource = TextureSubresource()) const;
 

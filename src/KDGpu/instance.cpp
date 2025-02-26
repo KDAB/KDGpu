@@ -156,6 +156,9 @@ AdapterAndDevice Instance::createDefaultDevice(const Surface &surface,
     SPDLOG_LOGGER_INFO(Logger::logger(), "Supports meshShader: {}", supportsMeshShader);
     SPDLOG_LOGGER_INFO(Logger::logger(), "Supports taskShader: {}", supportsTaskShader);
 
+    const bool supportsHostToImageCopy = selectedAdapter->features().hostImageCopy;
+    SPDLOG_LOGGER_INFO(Logger::logger(), "Supports host to image copy: {}", supportsHostToImageCopy);
+
     // Now we can create a device from the selected adapter that we can then use to interact with the GPU.
     auto device = selectedAdapter->createDevice(DeviceOptions{
             .requestedFeatures = selectedAdapter->features() });

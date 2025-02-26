@@ -222,13 +222,37 @@ bool Texture::generateMipMaps(Device &device, Queue &transferQueue, const Textur
 
 MemoryHandle Texture::externalMemoryHandle() const
 {
-    auto apiTexture = m_api->resourceManager()->getTexture(m_texture);
+    auto *apiTexture = m_api->resourceManager()->getTexture(m_texture);
     return apiTexture->externalMemoryHandle();
+}
+
+void Texture::hostLayoutTransition(const HostLayoutTransition &transition)
+{
+    auto *apiTexture = m_api->resourceManager()->getTexture(m_texture);
+    apiTexture->hostLayoutTransition(transition);
+}
+
+void Texture::copyHostMemoryToTexture(const HostMemoryToTextureCopy &copy)
+{
+    auto *apiTexture = m_api->resourceManager()->getTexture(m_texture);
+    apiTexture->copyHostMemoryToTexture(copy);
+}
+
+void Texture::copyTextureToHostMemory(const TextureToHostMemoryCopy &copy)
+{
+    auto *apiTexture = m_api->resourceManager()->getTexture(m_texture);
+    apiTexture->copyTextureToHostMemory(copy);
+}
+
+void Texture::copyTextureToTextureHost(const TextureToTextureCopyHost &copy)
+{
+    auto *apiTexture = m_api->resourceManager()->getTexture(m_texture);
+    apiTexture->copyTextureToTextureHost(copy);
 }
 
 uint64_t Texture::drmFormatModifier() const
 {
-    auto apiTexture = m_api->resourceManager()->getTexture(m_texture);
+    auto *apiTexture = m_api->resourceManager()->getTexture(m_texture);
     return apiTexture->drmFormatModifier();
 }
 

@@ -497,6 +497,16 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
         addToChain(&meshShaderFeatures);
     }
 
+#if defined(VK_EXT_host_image_copy)
+    VkPhysicalDeviceHostImageCopyFeaturesEXT hostImageCopyFeatures{};
+    if (options.requestedFeatures.hostImageCopy) {
+        // Enable HostImage copy
+        hostImageCopyFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_HOST_IMAGE_COPY_FEATURES_EXT;
+        hostImageCopyFeatures.hostImageCopy = options.requestedFeatures.hostImageCopy;
+        addToChain(&hostImageCopyFeatures);
+    }
+#endif
+
     std::vector<VkPhysicalDevice> devicesInGroup;
     const size_t adapterCount = options.adapterGroup.adapters.size();
     const bool useDeviceGroup = adapterCount > 1;

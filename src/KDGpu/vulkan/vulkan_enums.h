@@ -142,6 +142,10 @@ VkBuildAccelerationStructureFlagsKHR accelerationStructureFlagsToVkBuildAccelera
 
 VkDependencyFlags dependencyFlagsToVkDependencyFlags(DependencyFlags flags);
 
+#if defined(VK_EXT_host_image_copy)
+VkHostImageCopyFlagsEXT hostImageCopyFlagsToVkHostImageCopyFlags(HostImageCopyFlags flags);
+#endif
+
 VkImageAspectFlags textureAspectFlagsToVkImageAspectFlags(TextureAspectFlags flags);
 
 } // namespace KDGpu

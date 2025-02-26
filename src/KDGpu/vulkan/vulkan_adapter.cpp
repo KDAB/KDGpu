@@ -16,6 +16,29 @@
 
 namespace KDGpu {
 
+namespace {
+
+std::vector<TextureLayout> toTextureLayouts(size_t count, VkImageLayout *layouts)
+{
+    // Somehow it appear we can get a VkPhysicalDeviceHostImageCopyPropertiesEXT
+    // with a null layout ptr and yet with a count > 0
+    // The specs don't really mention that case but that at least General should be supported
+    // https://registry.khronos.org/vulkan/specs/latest/man/html/VkPhysicalDeviceHostImageCopyProperties.html
+    if (layouts == nullptr) {
+        return { TextureLayout::General };
+    }
+
+    std::vector<TextureLayout> out;
+    out.reserve(count);
+
+    for (size_t i = 0; i < count; ++i) {
+        out.emplace_back(vkImageLayoutToTextureLayout(layouts[i]));
+    }
+    return out;
+}
+
+} // namespace
+
 VulkanAdapter::VulkanAdapter(VkPhysicalDevice _physicalDevice,
                              VulkanResourceManager *_vulkanResourceManager,
                              const Handle<Instance_t> &_instanceHandle)
@@ -82,6 +105,12 @@ AdapterProperties VulkanAdapter::queryAdapterProperties()
     VkPhysicalDeviceMeshShaderPropertiesEXT meshShaderProperties{};
     meshShaderProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_PROPERTIES_EXT;
     addToChain(&meshShaderProperties);
+
+#if defined(VK_EXT_host_image_copy)
+    VkPhysicalDeviceHostImageCopyPropertiesEXT hostImageCopyProperties{};
+    hostImageCopyProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_HOST_IMAGE_COPY_PROPERTIES_EXT;
+    addToChain(&hostImageCopyProperties);
+#endif
 
     vkGetPhysicalDeviceProperties2(physicalDevice, &deviceProperties2);
 
@@ -341,6 +370,12 @@ AdapterProperties VulkanAdapter::queryAdapterProperties()
                 .prefersCompactVertexOutput = static_cast<bool>(meshShaderProperties.prefersCompactVertexOutput),
                 .prefersCompactPrimitiveOutput = static_cast<bool>(meshShaderProperties.prefersCompactPrimitiveOutput),
         },
+        .hostImageCopyProperties = {
+#if defined(VK_EXT_host_image_copy)
+                .srcCopyLayouts = toTextureLayouts(hostImageCopyProperties.copySrcLayoutCount, hostImageCopyProperties.pCopySrcLayouts),
+                .dstCopyLayouts = toTextureLayouts(hostImageCopyProperties.copyDstLayoutCount, hostImageCopyProperties.pCopyDstLayouts),
+#endif
+        }
     };
     return properties;
 }
@@ -391,6 +426,12 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
     VkPhysicalDeviceMeshShaderFeaturesEXT meshShaderFeatures{};
     meshShaderFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT;
     addToChain(&meshShaderFeatures);
+
+#if defined(VK_EXT_host_image_copy)
+    VkPhysicalDeviceHostImageCopyFeaturesEXT hostImageCopyFeatures{};
+    hostImageCopyFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_HOST_IMAGE_COPY_FEATURES_EXT;
+    addToChain(&hostImageCopyFeatures);
+#endif
 
     vkGetPhysicalDeviceFeatures2(physicalDevice, &deviceFeatures2);
     const VkPhysicalDeviceFeatures &deviceFeatures = deviceFeatures2.features;
@@ -487,10 +528,15 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
         .multiviewMeshShader = static_cast<bool>(meshShaderFeatures.multiviewMeshShader),
         .primitiveFragmentShadingRateMeshShader = static_cast<bool>(meshShaderFeatures.primitiveFragmentShadingRateMeshShader),
         .meshShaderQueries = static_cast<bool>(meshShaderFeatures.meshShaderQueries),
+        .hostImageCopy = false,
     };
 
 #if defined(VK_KHR_synchronization2)
     supportsSynchronization2 = synchronization2Features.synchronization2;
+#endif
+
+#if defined(VK_EXT_host_image_copy)
+    features.hostImageCopy = static_cast<bool>(hostImageCopyFeatures.hostImageCopy);
 #endif
 
     return features;

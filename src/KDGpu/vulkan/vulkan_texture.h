@@ -46,6 +46,12 @@ struct KDGPU_EXPORT VulkanTexture {
 
     void *map();
     void unmap();
+
+    void hostLayoutTransition(const HostLayoutTransition &transition);
+    void copyHostMemoryToTexture(const HostMemoryToTextureCopy &copy);
+    void copyTextureToHostMemory(const TextureToHostMemoryCopy &copy);
+    void copyTextureToTextureHost(const TextureToTextureCopyHost &copy);
+
     SubresourceLayout getSubresourceLayout(const TextureSubresource &subresource) const;
     MemoryHandle externalMemoryHandle() const;
     uint64_t drmFormatModifier() const;

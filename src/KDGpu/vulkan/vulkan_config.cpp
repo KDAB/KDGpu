@@ -69,6 +69,11 @@ std::vector<const char *> getDefaultRequestedDeviceExtensions()
 {
     std::vector<const char *> extensions;
     extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+#if defined(VK_EXT_host_image_copy)
+    extensions.push_back(VK_KHR_COPY_COMMANDS_2_EXTENSION_NAME); // Needed by VK_EXT_HOST_IMAGE_COPY_EXTENSION_NAME
+    extensions.push_back(VK_KHR_FORMAT_FEATURE_FLAGS_2_EXTENSION_NAME); // Needed by VK_EXT_HOST_IMAGE_COPY_EXTENSION_NAME
+    extensions.push_back(VK_EXT_HOST_IMAGE_COPY_EXTENSION_NAME);
+#endif
 #if defined(KDGPU_PLATFORM_LINUX)
     extensions.push_back(VK_KHR_EXTERNAL_MEMORY_FD_EXTENSION_NAME);
     extensions.push_back(VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME);

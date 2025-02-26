@@ -233,6 +233,11 @@ struct MeshShaderProperties {
     bool prefersCompactPrimitiveOutput;
 };
 
+struct HostImageCopyProperties {
+    std::vector<TextureLayout> srcCopyLayouts;
+    std::vector<TextureLayout> dstCopyLayouts;
+};
+
 /**
     @headerfile adapter_properties.h <KDGpu/adapter_properties.h>
  */
@@ -251,6 +256,7 @@ struct AdapterProperties {
     BindGroupIndexingProperties bindGroupIndexingProperties;
     RayTracingProperties rayTracingProperties;
     MeshShaderProperties meshShaderProperties;
+    HostImageCopyProperties hostImageCopyProperties;
 };
 
 /**

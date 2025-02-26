@@ -150,7 +150,7 @@ VulkanDevice::VulkanDevice(VkDevice _device,
     // If we request the extension version of renderpass2, then use that. Otherwise fall back to the core 1.2 version.
     const auto adapterExtensions = vulkanAdapter->extensions();
     for (const auto &extension : adapterExtensions) {
-        if (extension.name == "VK_KHR_create_renderpass2") {
+        if (extension.name == VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME) {
             this->vkCreateRenderPass2 = (PFN_vkCreateRenderPass2)vkGetDeviceProcAddr(device, "vkCreateRenderPass2KHR");
             break;
         }
@@ -159,6 +159,20 @@ VulkanDevice::VulkanDevice(VkDevice _device,
     if (this->vkCreateRenderPass2 == nullptr) {
         this->vkCreateRenderPass2 = ::vkCreateRenderPass2;
     }
+
+#if defined(VK_EXT_host_image_copy)
+    if (vulkanAdapter->queryAdapterFeatures().hostImageCopy) {
+        const auto adapterExtensions = vulkanAdapter->extensions();
+        for (const auto &extension : adapterExtensions) {
+            if (extension.name == VK_EXT_HOST_IMAGE_COPY_EXTENSION_NAME) {
+                this->vkTransitionImageLayout = (PFN_vkTransitionImageLayoutEXT)vkGetDeviceProcAddr(device, "vkTransitionImageLayoutEXT");
+                this->vkCopyImageToMemory = (PFN_vkCopyImageToMemoryEXT)vkGetDeviceProcAddr(device, "vkCopyImageToMemoryEXT");
+                this->vkCopyMemoryToImage = (PFN_vkCopyMemoryToImageEXT)vkGetDeviceProcAddr(device, "vkCopyMemoryToImageEXT");
+                this->vkCopyImageToImage = (PFN_vkCopyImageToImageEXT)vkGetDeviceProcAddr(device, "vkCopyImageToImageEXT");
+            }
+        }
+    }
+#endif
 }
 
 std::vector<QueueDescription> VulkanDevice::getQueues(ResourceManager *resourceManager,

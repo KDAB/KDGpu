@@ -435,6 +435,13 @@ VkDependencyFlags dependencyFlagsToVkDependencyFlags(DependencyFlags flags)
     return static_cast<VkDependencyFlags>(flags.toInt());
 }
 
+#if defined(VK_EXT_host_image_copy)
+VkHostImageCopyFlagsEXT hostImageCopyFlagsToVkHostImageCopyFlags(HostImageCopyFlags flags)
+{
+    return static_cast<VkHostImageCopyFlagsEXT>(flags.toInt());
+}
+#endif
+
 VkImageAspectFlags textureAspectFlagsToVkImageAspectFlags(TextureAspectFlags flags)
 {
     return static_cast<VkImageAspectFlags>(flags.toInt());
