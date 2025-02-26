@@ -2304,11 +2304,11 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
     uint32_t fbHeight = options.framebufferHeight;
     uint32_t fbArrayLayers = options.framebufferArrayLayers;
 
-    const auto attachmentFirstColorAttachment = std::find_if(options.attachments.begin(), options.attachments.end(),
-                                                             [](const Attachment &x) { return x.color.has_value(); });
-    if (attachmentFirstColorAttachment != options.attachments.end()) {
-        const bool shouldFetchTexture = (fbWidth == 0 || fbHeight == 0) || fbArrayLayers == 0;
-        if (shouldFetchTexture) {
+    const bool shouldFetchTexture = (fbWidth == 0 || fbHeight == 0) || fbArrayLayers == 0;
+    if (shouldFetchTexture) {
+        const auto attachmentFirstColorAttachment = std::find_if(options.attachments.begin(), options.attachments.end(),
+                                                                 [](const Attachment &x) { return x.color.has_value(); });
+        if (attachmentFirstColorAttachment != options.attachments.end()) {
             VulkanTextureView *firstView = getTextureView(attachmentFirstColorAttachment->view);
             if (!firstView) {
                 SPDLOG_LOGGER_ERROR(Logger::logger(), "Invalid texture view when creating render pass");
