@@ -535,7 +535,7 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     createInfo.enabledExtensionCount = 0;
     createInfo.ppEnabledExtensionNames = nullptr;
 
-    // TODO: Merge requested device extensions and layers with our defaults
+    // Merge requested device extensions and layers with our defaults
     const auto availableDeviceExtensions = vulkanAdapter->extensions();
     std::vector<const char *> requestedDeviceExtensions;
     auto defaultRequestedDeviceExtensions = getDefaultRequestedDeviceExtensions();
@@ -1459,8 +1459,7 @@ Handle<PipelineLayout_t> VulkanResourceManager::createPipelineLayout(const Handl
 {
     VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
 
-    // TODO: Extract the VkDescriptorSetLayout creation into a Device::createBindGroupLayout as we will need
-    // to use the VkDescriptorSetLayout when creating the PipelineLayout as well as when creating the BindGroup
+    // Retrieve VkDescriptorSetLayout from the referenced options.bindGroupLayouts array
     assert(options.bindGroupLayouts.size() <= std::numeric_limits<uint32_t>::max());
     const uint32_t bindGroupLayoutCount = static_cast<uint32_t>(options.bindGroupLayouts.size());
     std::vector<VkDescriptorSetLayout> vkDescriptorSetLayouts;
@@ -2168,7 +2167,6 @@ Handle<CommandBuffer_t> VulkanResourceManager::createCommandBuffer(const Handle<
     VkCommandPool vkCommandPool = vulkanDevice->commandPools[queueDescription.queueTypeIndex];
 
     // Allocate a command buffer object from the pool
-    // TODO: Support secondary command buffers? Is that a thing outside of Vulkan? Do we care?
     VkCommandBufferAllocateInfo allocInfo = {};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     allocInfo.commandPool = vkCommandPool;
@@ -2324,8 +2322,6 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
             }
             if ((fbWidth == 0 || fbHeight == 0)) {
                 // Take the dimensions of the first attachment as the framebuffer dimensions
-                // TODO: Should this be the dimensions of the view rather than the texture itself? i.e. can we
-                // use views to render to a subset of a texture?
                 fbWidth = firstTexture->extent.width;
                 fbHeight = firstTexture->extent.height;
             }
@@ -2513,7 +2509,7 @@ Handle<RayTracingPassCommandRecorder_t> VulkanResourceManager::createRayTracingP
     return vulkanRayTracingPassCommandRecorderHandle;
 }
 
-// TODO: Add support for multi-subpass
+// Called to create implicit RenderPass for RenderPassCommandRecorder
 SubpassDescription VulkanResourceManager::fillAttachmentDescriptionAndCreateSubpassDescription(std::vector<AttachmentDescription> &attachmentDescriptions,
                                                                                                const std::vector<ColorAttachment> &colorAttachments,
                                                                                                const DepthStencilAttachment &depthAttachment,
@@ -2592,6 +2588,7 @@ SubpassDescription VulkanResourceManager::fillAttachmentDescriptionAndCreateSubp
     return subpass;
 }
 
+// Called to create implicit RenderPass for GraphicsPipeline
 SubpassDescription VulkanResourceManager::fillAttachmentDescriptionAndCreateSubpassDescription(std::vector<AttachmentDescription> &attachmentDescriptions,
                                                                                                const std::vector<RenderTargetOptions> &colorAttachments,
                                                                                                const DepthStencilOptions &depthStencil,
