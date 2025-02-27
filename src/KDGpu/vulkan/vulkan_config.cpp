@@ -43,22 +43,30 @@ namespace KDGpu {
 
 std::vector<const char *> getDefaultRequestedInstanceExtensions()
 {
-    std::vector<const char *> extensions;
-    extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
-#if defined(KDGPU_PLATFORM_LINUX)
-    extensions.push_back(VK_KHR_XCB_SURFACE_EXTENSION_NAME);
-    extensions.push_back(VK_KHR_WAYLAND_SURFACE_EXTENSION_NAME);
-#elif defined(KDGPU_PLATFORM_WIN32)
-    extensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
-#elif defined(KDGPU_PLATFORM_APPLE)
-    extensions.push_back(VK_EXT_METAL_SURFACE_EXTENSION_NAME);
-    extensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
-    extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
-#elif defined(KDGPU_PLATFORM_ANDROID)
-    extensions.push_back(VK_KHR_ANDROID_SURFACE_EXTENSION_NAME);
+    std::vector<const char *> extensions{
+        VK_KHR_SURFACE_EXTENSION_NAME,
+#if defined(VK_KHR_xcb_surface)
+        VK_KHR_XCB_SURFACE_EXTENSION_NAME,
 #endif
+#if defined(VK_KHR_wayland_surface)
+        VK_KHR_WAYLAND_SURFACE_EXTENSION_NAME,
+#endif
+#if defined(VK_KHR_win32_surface)
+        VK_KHR_WIN32_SURFACE_EXTENSION_NAME,
+#endif
+#if defined(KDGPU_PLATFORM_APPLE)
+        VK_EXT_METAL_SURFACE_EXTENSION_NAME,
+        VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME,
+        VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME,
+#elif defined(KDGPU_PLATFORM_ANDROID)
+        VK_KHR_ANDROID_SURFACE_EXTENSION_NAME,
+#endif
+    };
+
+#if defined(VK_EXT_debug_utils)
     if (enableValidationLayers)
         extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+#endif
     return extensions;
 }
 
@@ -67,40 +75,57 @@ std::vector<const char *> getDefaultRequestedInstanceExtensions()
 //
 std::vector<const char *> getDefaultRequestedDeviceExtensions()
 {
-    std::vector<const char *> extensions;
-    extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+    std::vector<const char *> extensions{
+        VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 #if defined(VK_EXT_host_image_copy)
-    extensions.push_back(VK_KHR_COPY_COMMANDS_2_EXTENSION_NAME); // Needed by VK_EXT_HOST_IMAGE_COPY_EXTENSION_NAME
-    extensions.push_back(VK_KHR_FORMAT_FEATURE_FLAGS_2_EXTENSION_NAME); // Needed by VK_EXT_HOST_IMAGE_COPY_EXTENSION_NAME
-    extensions.push_back(VK_EXT_HOST_IMAGE_COPY_EXTENSION_NAME);
+        VK_KHR_COPY_COMMANDS_2_EXTENSION_NAME, // Needed by VK_EXT_HOST_IMAGE_COPY_EXTENSION_NAME
+        VK_KHR_FORMAT_FEATURE_FLAGS_2_EXTENSION_NAME, // Needed by VK_EXT_HOST_IMAGE_COPY_EXTENSION_NAME
+        VK_EXT_HOST_IMAGE_COPY_EXTENSION_NAME,
 #endif
-#if defined(KDGPU_PLATFORM_LINUX)
-    extensions.push_back(VK_KHR_EXTERNAL_MEMORY_FD_EXTENSION_NAME);
-    extensions.push_back(VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME);
-    extensions.push_back(VK_KHR_EXTERNAL_FENCE_FD_EXTENSION_NAME);
-    extensions.push_back(VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME);
-    extensions.push_back(VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME);
-    extensions.push_back(VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME);
-    extensions.push_back(VK_EXT_MESH_SHADER_EXTENSION_NAME);
-    extensions.push_back(VK_EXT_IMAGE_DRM_FORMAT_MODIFIER_EXTENSION_NAME);
-#elif defined(KDGPU_PLATFORM_WIN32)
-    extensions.push_back(VK_KHR_EXTERNAL_MEMORY_WIN32_EXTENSION_NAME);
-    extensions.push_back(VK_KHR_EXTERNAL_SEMAPHORE_WIN32_EXTENSION_NAME);
-    extensions.push_back(VK_KHR_EXTERNAL_FENCE_WIN32_EXTENSION_NAME);
-    extensions.push_back(VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME);
-    extensions.push_back(VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME);
-    extensions.push_back(VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME);
-    extensions.push_back(VK_EXT_MESH_SHADER_EXTENSION_NAME);
+#if defined(VK_KHR_external_semaphore_fd)
+        VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME,
+#endif
+#if defined(VK_KHR_external_semaphore_win32)
+        VK_KHR_EXTERNAL_SEMAPHORE_WIN32_EXTENSION_NAME,
+#endif
+#if defined(VK_KHR_external_fence_fd)
+        VK_KHR_EXTERNAL_FENCE_FD_EXTENSION_NAME,
+#endif
+#if defined(VK_KHR_external_fence_win32)
+        VK_KHR_EXTERNAL_FENCE_WIN32_EXTENSION_NAME,
+#endif
+#if defined(VK_KHR_external_memory_fd)
+        VK_KHR_EXTERNAL_MEMORY_FD_EXTENSION_NAME,
+#endif
+#if defined(VK_KHR_external_memory_win32)
+        VK_KHR_EXTERNAL_MEMORY_WIN32_EXTENSION_NAME,
+#endif
+#if defined(VK_KHR_deferred_host_operations)
+        VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
+#endif
+#if defined(VK_KHR_ray_tracing_pipeline)
+        VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME,
+#endif
+#if defined(VK_KHR_acceleration_structure)
+        VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,
+#endif
+#if defined(VK_EXT_mesh_shader)
+        VK_EXT_MESH_SHADER_EXTENSION_NAME,
+#endif
+#if defined(VK_EXT_image_drm_format_modifier)
+        VK_EXT_IMAGE_DRM_FORMAT_MODIFIER_EXTENSION_NAME,
 #endif
 #if defined(VK_KHR_synchronization2)
-    extensions.push_back(VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME);
+        VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME,
 #endif
 #if defined(KDGPU_PLATFORM_MACOS)
-    extensions.push_back(VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME);
+        VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME,
 #endif
 #if defined(VK_KHR_shader_non_semantic_info)
-    extensions.push_back(VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME);
+        VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME,
 #endif
+    };
+
     return extensions;
 }
 

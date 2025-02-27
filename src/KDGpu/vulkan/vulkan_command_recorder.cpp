@@ -530,6 +530,7 @@ void VulkanCommandRecorder::resolveTexture(const TextureResolveOptions &options)
 
 void VulkanCommandRecorder::buildAccelerationStructures(const BuildAccelerationStructureOptions &options)
 {
+#if defined(VK_KHR_acceleration_structure)
     auto vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
 
     // So it doesn't go out of scope and destroy itself before the cmd is called
@@ -700,10 +701,14 @@ void VulkanCommandRecorder::buildAccelerationStructures(const BuildAccelerationS
                                                           infos.data(),
                                                           rangePtrs.data());
     }
+#else
+    assert(false);
+#endif
 }
 
 void VulkanCommandRecorder::beginDebugLabel(const DebugLabelOptions &options)
 {
+#if defined(VK_EXT_debug_utils)
     auto vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
     if (vulkanDevice->vkCmdBeginDebugUtilsLabelEXT != nullptr) {
         VkDebugUtilsLabelEXT labelsInfo{
@@ -713,13 +718,18 @@ void VulkanCommandRecorder::beginDebugLabel(const DebugLabelOptions &options)
         std::memcpy(labelsInfo.color, options.color, 4 * sizeof(float));
         vulkanDevice->vkCmdBeginDebugUtilsLabelEXT(commandBuffer, &labelsInfo);
     }
+#else
+    assert(false);
+#endif
 }
 
 void VulkanCommandRecorder::endDebugLabel()
 {
+#if defined(VK_EXT_debug_utils)
     auto vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
     if (vulkanDevice->vkCmdBeginDebugUtilsLabelEXT != nullptr)
         vulkanDevice->vkCmdEndDebugUtilsLabelEXT(commandBuffer);
+#endif
 }
 
 Handle<CommandBuffer_t> VulkanCommandRecorder::finish()

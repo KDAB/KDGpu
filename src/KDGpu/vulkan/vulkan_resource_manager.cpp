@@ -13,6 +13,9 @@
 
 #if defined(KDGPU_PLATFORM_WIN32)
 // Avoid having to define VK_USE_PLATFORM_WIN32_KHR which would result in windows.h being included when vulkan.h is included
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 #include <vulkan/vulkan_win32.h>
 #endif
 
@@ -858,7 +861,7 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
         allocInfo.flags = VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
     }
 
-#if defined(KDGPU_PLATFORM_LINUX)
+#if defined(VK_EXT_image_drm_format_modifier)
     VkImageDrmFormatModifierListCreateInfoEXT vkImageDrmFormatModifierListCreateInfo = {};
     if (options.tiling == TextureTiling::DrmFormatModifier) {
         vkImageDrmFormatModifierListCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_DRM_FORMAT_MODIFIER_LIST_CREATE_INFO_EXT;
@@ -886,9 +889,8 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
     memoryHandle.allocationSize = allocationInfo.size;
 
     // Retrieve Shared Memory FD/Handle
-    if (options.externalMemoryHandleType != ExternalMemoryHandleTypeFlagBits::None) {
-
-#if defined(KDGPU_PLATFORM_LINUX)
+    if (options.externalMemoryHandleType == ExternalMemoryHandleTypeFlagBits::OpaqueFD) {
+#if defined(VK_KHR_external_memory_fd)
         if (instance->vkGetMemoryFdKHR) {
             VkMemoryGetFdInfoKHR vkMemoryGetFdInfoKHR = {
                 .sType = VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR,
@@ -900,9 +902,11 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
             instance->vkGetMemoryFdKHR(vulkanDevice->device, &vkMemoryGetFdInfoKHR, &fd);
             memoryHandle.handle = fd;
         }
+#else
+        assert(false);
 #endif
-
-#if defined(KDGPU_PLATFORM_WIN32)
+    } else if (options.externalMemoryHandleType == ExternalMemoryHandleTypeFlagBits::OpaqueWin32) {
+#if defined(VK_KHR_external_memory_win32)
         if (instance->vkGetMemoryWin32HandleKHR) {
             VkMemoryGetWin32HandleInfoKHR vkGetWin32HandleInfoKHR = {
                 .sType = VK_STRUCTURE_TYPE_MEMORY_GET_WIN32_HANDLE_INFO_KHR,
@@ -914,11 +918,13 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
             instance->vkGetMemoryWin32HandleKHR(vulkanDevice->device, &vkGetWin32HandleInfoKHR, &winHandle);
             memoryHandle.handle = winHandle;
         }
+#else
+        assert(false);
 #endif
     }
 
     uint64_t drmFormatModifier = 0;
-#if defined(KDGPU_PLATFORM_LINUX)
+#if defined(VK_EXT_image_drm_format_modifier)
     if (options.tiling == TextureTiling::DrmFormatModifier) {
         VkImageDrmFormatModifierPropertiesEXT modifierProps = {};
         modifierProps.sType = VK_STRUCTURE_TYPE_IMAGE_DRM_FORMAT_MODIFIER_PROPERTIES_EXT;
@@ -1078,9 +1084,8 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
     memoryHandle.allocationSize = allocationInfo.size;
 
     // Retrieve Shared Memory FD/Handle
-    if (options.externalMemoryHandleType != ExternalMemoryHandleTypeFlagBits::None) {
-
-#if defined(KDGPU_PLATFORM_LINUX)
+    if (options.externalMemoryHandleType == ExternalMemoryHandleTypeFlagBits::OpaqueFD) {
+#if defined(VK_KHR_external_memory_fd)
         if (instance->vkGetMemoryFdKHR) {
             VkMemoryGetFdInfoKHR vkMemoryGetFdInfoKHR = {
                 .sType = VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR,
@@ -1092,9 +1097,11 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
             instance->vkGetMemoryFdKHR(vulkanDevice->device, &vkMemoryGetFdInfoKHR, &fd);
             memoryHandle.handle = fd;
         }
+#else
+        assert(false);
 #endif
-
-#if defined(KDGPU_PLATFORM_WIN32)
+    } else if (options.externalMemoryHandleType == ExternalMemoryHandleTypeFlagBits::OpaqueWin32) {
+#if defined(VK_KHR_external_memory_win32)
         if (instance->vkGetMemoryWin32HandleKHR) {
             VkMemoryGetWin32HandleInfoKHR vkGetWin32HandleInfoKHR = {
                 .sType = VK_STRUCTURE_TYPE_MEMORY_GET_WIN32_HANDLE_INFO_KHR,
@@ -1106,6 +1113,8 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
             VkResult res = instance->vkGetMemoryWin32HandleKHR(vulkanDevice->device, &vkGetWin32HandleInfoKHR, &winHandle);
             memoryHandle.handle = winHandle;
         }
+#else
+        assert(false);
 #endif
     }
 
@@ -1904,6 +1913,7 @@ VulkanComputePipeline *VulkanResourceManager::getComputePipeline(const Handle<Co
 Handle<RayTracingPipeline_t> VulkanResourceManager::createRayTracingPipeline(const Handle<Device_t> &deviceHandle,
                                                                              const RayTracingPipelineOptions &options)
 {
+#if defined(VK_KHR_ray_tracing_pipeline)
     VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
 
     // Fetch the specified pipeline layout
@@ -2000,6 +2010,10 @@ Handle<RayTracingPipeline_t> VulkanResourceManager::createRayTracingPipeline(con
             options.layout));
 
     return vulkanRayTracingPipelineHandle;
+#else
+    assert(false);
+    return {};
+#endif
 }
 
 void VulkanResourceManager::deleteRayTracingPipeline(const Handle<RayTracingPipeline_t> &handle)
@@ -2038,8 +2052,8 @@ Handle<GpuSemaphore_t> VulkanResourceManager::createGpuSemaphore(const Handle<De
     }
 
     HandleOrFD externalSemaphoreHandle{};
-    if (options.externalSemaphoreHandleType != ExternalSemaphoreHandleTypeFlagBits::None) {
-#if defined(KDGPU_PLATFORM_LINUX)
+    if (options.externalSemaphoreHandleType == ExternalSemaphoreHandleTypeFlagBits::OpaqueFD) {
+#if defined(VK_KHR_external_semaphore_fd)
         if (vulkanDevice->vkGetSemaphoreFdKHR) {
             VkSemaphoreGetFdInfoKHR vulkanSemaphoreGetFdInfoKHR = {
                 .sType = VK_STRUCTURE_TYPE_SEMAPHORE_GET_FD_INFO_KHR,
@@ -2051,9 +2065,11 @@ Handle<GpuSemaphore_t> VulkanResourceManager::createGpuSemaphore(const Handle<De
             vulkanDevice->vkGetSemaphoreFdKHR(vulkanDevice->device, &vulkanSemaphoreGetFdInfoKHR, &fd);
             externalSemaphoreHandle = fd;
         }
+#else
+        assert(false);
 #endif
-
-#if defined(KDGPU_PLATFORM_WIN32)
+    } else if (options.externalSemaphoreHandleType == ExternalSemaphoreHandleTypeFlagBits::OpaqueWin32) {
+#if defined(VK_KHR_external_fence_win32)
         if (vulkanDevice->vkGetSemaphoreWin32HandleKHR) {
             VkSemaphoreGetWin32HandleInfoKHR vulkanSemaphoreGetHandleInfoKHR = {
                 .sType = VK_STRUCTURE_TYPE_SEMAPHORE_GET_WIN32_HANDLE_INFO_KHR,
@@ -2065,6 +2081,8 @@ Handle<GpuSemaphore_t> VulkanResourceManager::createGpuSemaphore(const Handle<De
             vulkanDevice->vkGetSemaphoreWin32HandleKHR(vulkanDevice->device, &vulkanSemaphoreGetHandleInfoKHR, &winHandle);
             externalSemaphoreHandle = winHandle;
         }
+#else
+        assert(false);
 #endif
     }
 
@@ -3105,8 +3123,8 @@ Handle<Fence_t> VulkanResourceManager::createFence(const Handle<Device_t> &devic
     }
 
     HandleOrFD externalFenceHandle{};
-    if (options.externalFenceHandleType != ExternalFenceHandleTypeFlagBits::None) {
-#if defined(KDGPU_PLATFORM_LINUX)
+    if (options.externalFenceHandleType == ExternalFenceHandleTypeFlagBits::OpaqueFD) {
+#if defined(VK_KHR_external_fence_fd)
         if (vulkanDevice->vkGetFenceFdKHR) {
             VkFenceGetFdInfoKHR vulkanFenceGetFdInfoKHR = {
                 .sType = VK_STRUCTURE_TYPE_FENCE_GET_FD_INFO_KHR,
@@ -3118,9 +3136,11 @@ Handle<Fence_t> VulkanResourceManager::createFence(const Handle<Device_t> &devic
             vulkanDevice->vkGetFenceFdKHR(vulkanDevice->device, &vulkanFenceGetFdInfoKHR, &fd);
             externalFenceHandle = fd;
         }
+#else
+        assert(false);
 #endif
-
-#if defined(KDGPU_PLATFORM_WIN32)
+    } else if (options.externalFenceHandleType == ExternalFenceHandleTypeFlagBits::OpaqueWin32) {
+#if defined(VK_KHR_external_fence_win32)
         if (vulkanDevice->vkGetFenceWin32HandleKHR) {
             VkFenceGetWin32HandleInfoKHR vulkanFenceGetHandleInfoKHR = {
                 .sType = VK_STRUCTURE_TYPE_FENCE_GET_WIN32_HANDLE_INFO_KHR,
@@ -3132,6 +3152,8 @@ Handle<Fence_t> VulkanResourceManager::createFence(const Handle<Device_t> &devic
             vulkanDevice->vkGetFenceWin32HandleKHR(vulkanDevice->device, &vulkanFenceGetHandleInfoKHR, &winHandle);
             externalFenceHandle = winHandle;
         }
+#else
+        assert(false);
 #endif
     }
 
@@ -3158,6 +3180,7 @@ VulkanFence *VulkanResourceManager::getFence(const Handle<Fence_t> &handle) cons
 
 void VulkanResourceManager::setObjectName(VulkanDevice *device, const VkObjectType type, const uint64_t handle, const std::string_view name)
 {
+#if defined(VK_EXT_debug_utils)
     if (device == nullptr || device->vkSetDebugUtilsObjectNameEXT == nullptr || name.empty()) {
         return;
     }
@@ -3168,10 +3191,12 @@ void VulkanResourceManager::setObjectName(VulkanDevice *device, const VkObjectTy
         .pObjectName = name.data()
     };
     device->vkSetDebugUtilsObjectNameEXT(device->device, &nameInfo);
+#endif
 }
 
 Handle<AccelerationStructure_t> VulkanResourceManager::createAccelerationStructure(const Handle<Device_t> &deviceHandle, const AccelerationStructureOptions &options)
 {
+#if defined(VK_KHR_acceleration_structure)
     VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
 
     std::vector<VkAccelerationStructureGeometryKHR> geometries;
@@ -3242,10 +3267,15 @@ Handle<AccelerationStructure_t> VulkanResourceManager::createAccelerationStructu
     setObjectName(vulkanDevice, VK_OBJECT_TYPE_ACCELERATION_STRUCTURE_KHR, reinterpret_cast<uint64_t>(accelerationStructureKhr), options.label);
 
     return accelerationStructureHandle;
+#else
+    assert(false);
+    return {};
+#endif
 }
 
 void VulkanResourceManager::deleteAccelerationStructure(const Handle<AccelerationStructure_t> &handle)
 {
+#if defined(VK_KHR_acceleration_structure)
     VulkanAccelerationStructure *accelerationStructure = m_accelerationStructures.get(handle);
     VulkanDevice *vulkanDevice = m_devices.get(accelerationStructure->deviceHandle);
 
@@ -3254,6 +3284,7 @@ void VulkanResourceManager::deleteAccelerationStructure(const Handle<Acceleratio
     deleteBuffer(accelerationStructure->backingBuffer);
 
     m_accelerationStructures.remove(handle);
+#endif
 }
 
 VulkanAccelerationStructure *VulkanResourceManager::getAccelerationStructure(const Handle<AccelerationStructure_t> &handle) const

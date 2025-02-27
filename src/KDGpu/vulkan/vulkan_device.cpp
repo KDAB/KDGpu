@@ -19,6 +19,9 @@
 
 #if defined(KDGPU_PLATFORM_WIN32)
 // Avoid having to define VK_USE_PLATFORM_WIN32_KHR which would result in windows.h being included when vulkan.h is included
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 #include <vulkan/vulkan_win32.h>
 #endif
 
@@ -50,6 +53,7 @@ VulkanDevice::VulkanDevice(VkDevice _device,
     for (uint32_t i = 0; i < queueTypeCount; ++i)
         commandPools[i] = VK_NULL_HANDLE;
 
+#if defined(VK_EXT_debug_utils)
     const auto instanceExtensions = vulkanInstance->extensions();
     for (const auto &extension : instanceExtensions) {
         if (extension.name == VK_EXT_DEBUG_UTILS_EXTENSION_NAME) {
@@ -59,6 +63,7 @@ VulkanDevice::VulkanDevice(VkDevice _device,
             break;
         }
     }
+#endif
 
 #if defined(VK_KHR_synchronization2)
     // Check to see if we have the VK_KHR_synchronization2 extension or not
@@ -75,6 +80,7 @@ VulkanDevice::VulkanDevice(VkDevice _device,
     }
 #endif
 
+#if defined(VK_KHR_acceleration_structure)
     if (vulkanAdapter->queryAdapterFeatures().accelerationStructures) {
         const auto adapterExtensions = vulkanAdapter->extensions();
         for (const auto &extension : adapterExtensions) {
@@ -101,7 +107,9 @@ VulkanDevice::VulkanDevice(VkDevice _device,
             }
         }
     }
+#endif
 
+#if defined(VK_KHR_ray_tracing_pipeline)
     if (vulkanAdapter->queryAdapterFeatures().rayTracingPipeline) {
         const auto adapterExtensions = vulkanAdapter->extensions();
         for (const auto &extension : adapterExtensions) {
@@ -121,8 +129,9 @@ VulkanDevice::VulkanDevice(VkDevice _device,
             }
         }
     }
+#endif
 
-#if !defined(KDGPU_PLATFORM_MACOS)
+#if defined(VK_EXT_mesh_shader)
     if (vulkanAdapter->queryAdapterFeatures().taskShader && vulkanAdapter->queryAdapterFeatures().meshShader) {
         const auto adapterExtensions = vulkanAdapter->extensions();
         for (const auto &extension : adapterExtensions) {
@@ -137,13 +146,19 @@ VulkanDevice::VulkanDevice(VkDevice _device,
     }
 #endif
 
-#if defined(KDGPU_PLATFORM_LINUX)
+#if defined(VK_KHR_external_semaphore_fd)
     vkGetSemaphoreFdKHR = (PFN_vkGetSemaphoreFdKHR)vkGetDeviceProcAddr(device, "vkGetSemaphoreFdKHR");
+#endif
+
+#if defined(VK_KHR_external_fence_fd)
     vkGetFenceFdKHR = (PFN_vkGetFenceFdKHR)vkGetDeviceProcAddr(device, "vkGetFenceFdKHR");
 #endif
 
-#if defined(KDGPU_PLATFORM_WIN32)
+#if defined(VK_KHR_external_semaphore_win32)
     vkGetSemaphoreWin32HandleKHR = (PFN_vkGetSemaphoreWin32HandleKHR)vkGetDeviceProcAddr(device, "vkGetSemaphoreWin32HandleKHR");
+#endif
+
+#if defined(VK_KHR_external_fence_win32)
     vkGetFenceWin32HandleKHR = (PFN_vkGetFenceWin32HandleKHR)vkGetDeviceProcAddr(device, "vkGetFenceWin32HandleKHR");
 #endif
 

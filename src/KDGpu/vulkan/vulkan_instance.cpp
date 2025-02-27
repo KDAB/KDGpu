@@ -17,6 +17,9 @@
 
 #if defined(KDGPU_PLATFORM_WIN32)
 // Avoid having to define VK_USE_PLATFORM_WIN32_KHR which would result in windows.h being included when vulkan.h is included
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 #include <vulkan/vulkan_win32.h>
 #endif
 
@@ -36,12 +39,15 @@ VulkanInstance::VulkanInstance(VulkanResourceManager *_vulkanResourceManager, Vk
     , instance(_instance)
     , isOwned(_isOwned)
 {
-#if defined(KDGPU_PLATFORM_LINUX)
+#if defined(VK_KHR_external_memory_fd)
     vkGetMemoryFdKHR = (PFN_vkGetMemoryFdKHR)vkGetInstanceProcAddr(instance, "vkGetMemoryFdKHR");
+#endif
+
+#if defined(VK_EXT_image_drm_format_modifier)
     vkGetImageDrmFormatModifierPropertiesEXT = (PFN_vkGetImageDrmFormatModifierPropertiesEXT)vkGetInstanceProcAddr(instance, "vkGetImageDrmFormatModifierPropertiesEXT");
 #endif
 
-#if defined(KDGPU_PLATFORM_WIN32)
+#if defined(VK_KHR_external_memory_win32)
     vkGetMemoryWin32HandleKHR = (PFN_vkGetMemoryWin32HandleKHR)vkGetInstanceProcAddr(instance, "vkGetMemoryWin32HandleKHR");
 #endif
 }
@@ -109,6 +115,7 @@ Handle<Surface_t> VulkanInstance::createSurface(const SurfaceOptions &options)
 {
     VkSurfaceKHR vkSurface{ VK_NULL_HANDLE };
 #if defined(KDGPU_PLATFORM_WIN32)
+#if defined(VK_KHR_win32_surface)
     PFN_vkCreateWin32SurfaceKHR vkCreateWin32SurfaceKHR{ nullptr };
     vkCreateWin32SurfaceKHR = reinterpret_cast<PFN_vkCreateWin32SurfaceKHR>(vkGetInstanceProcAddr(instance, "vkCreateWin32SurfaceKHR"));
     if (!vkCreateWin32SurfaceKHR)
@@ -120,11 +127,13 @@ Handle<Surface_t> VulkanInstance::createSurface(const SurfaceOptions &options)
     createInfo.hwnd = options.hWnd;
 
     if (vkCreateWin32SurfaceKHR(instance, &createInfo, nullptr, &vkSurface) != VK_SUCCESS)
+#endif
         return {};
 #endif
 
 #if defined(KDGPU_PLATFORM_LINUX)
     if (options.connection != nullptr) {
+#if defined(VK_KHR_xcb_surface)
         PFN_vkCreateXcbSurfaceKHR vkCreateXcbSurfaceKHR{ nullptr };
         vkCreateXcbSurfaceKHR = (PFN_vkCreateXcbSurfaceKHR)vkGetInstanceProcAddr(instance, "vkCreateXcbSurfaceKHR");
         if (!vkCreateXcbSurfaceKHR)
@@ -136,8 +145,10 @@ Handle<Surface_t> VulkanInstance::createSurface(const SurfaceOptions &options)
         createInfo.window = options.window;
 
         if (vkCreateXcbSurfaceKHR(instance, &createInfo, nullptr, &vkSurface) != VK_SUCCESS)
+#endif
             return {};
     } else if (options.display != nullptr) {
+#if defined(VK_KHR_wayland_surface)
         PFN_vkCreateWaylandSurfaceKHR vkCreateWaylandSurfaceKHR{ nullptr };
         vkCreateWaylandSurfaceKHR = (PFN_vkCreateWaylandSurfaceKHR)vkGetInstanceProcAddr(instance, "vkCreateWaylandSurfaceKHR");
         if (!vkCreateWaylandSurfaceKHR)
@@ -149,6 +160,7 @@ Handle<Surface_t> VulkanInstance::createSurface(const SurfaceOptions &options)
         createInfo.surface = options.surface;
 
         if (vkCreateWaylandSurfaceKHR(instance, &createInfo, nullptr, &vkSurface) != VK_SUCCESS)
+#endif
             return {};
     }
 #endif

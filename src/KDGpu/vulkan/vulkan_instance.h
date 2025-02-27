@@ -49,12 +49,18 @@ struct KDGPU_EXPORT VulkanInstance {
     bool isOwned{ true };
 
 #if defined(KDGPU_PLATFORM_WIN32)
+    // We can't check for VK_KHR_external_memory_win32 here
+    // Because we can't include vulkan_win32.h here since it needs windows.h which
+    // we need to include with WIN32_LEAN_AND_MEAN and NOMINMAX (see vulkanconfig.cpp)
     using PFN_vkGetMemoryWin32HandleKHR = VkResult(VKAPI_PTR *)(VkDevice, const VkMemoryGetWin32HandleInfoKHR *, HANDLE *);
     PFN_vkGetMemoryWin32HandleKHR vkGetMemoryWin32HandleKHR{ nullptr };
 #endif
 
-#if defined(KDGPU_PLATFORM_LINUX)
+#if defined(VK_KHR_external_memory_fd)
     PFN_vkGetMemoryFdKHR vkGetMemoryFdKHR{ nullptr };
+#endif
+
+#if defined(VK_EXT_image_drm_format_modifier)
     PFN_vkGetImageDrmFormatModifierPropertiesEXT vkGetImageDrmFormatModifierPropertiesEXT{ nullptr };
 #endif
 

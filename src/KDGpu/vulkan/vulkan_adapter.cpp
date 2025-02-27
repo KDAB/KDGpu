@@ -98,13 +98,17 @@ AdapterProperties VulkanAdapter::queryAdapterProperties()
     descriptorIndexingProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_PROPERTIES;
     addToChain(&descriptorIndexingProperties);
 
+#if defined(VK_KHR_ray_tracing_pipeline)
     VkPhysicalDeviceRayTracingPipelinePropertiesKHR rayTracingProperties{};
     rayTracingProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_PROPERTIES_KHR;
     addToChain(&rayTracingProperties);
+#endif
 
+#if defined(VK_EXT_mesh_shader)
     VkPhysicalDeviceMeshShaderPropertiesEXT meshShaderProperties{};
     meshShaderProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_PROPERTIES_EXT;
     addToChain(&meshShaderProperties);
+#endif
 
 #if defined(VK_EXT_host_image_copy)
     VkPhysicalDeviceHostImageCopyPropertiesEXT hostImageCopyProperties{};
@@ -315,6 +319,7 @@ AdapterProperties VulkanAdapter::queryAdapterProperties()
                 .maxBindGroupUpdateAfterBindInputAttachments = descriptorIndexingProperties.maxDescriptorSetUpdateAfterBindInputAttachments,
         },
         .rayTracingProperties = {
+#if defined(VK_KHR_ray_tracing_pipeline)
                 .shaderGroupHandleSize = rayTracingProperties.shaderGroupHandleSize,
                 .maxRayRecursionDepth = rayTracingProperties.maxRayRecursionDepth,
                 .maxShaderGroupStride = rayTracingProperties.maxShaderGroupStride,
@@ -323,8 +328,10 @@ AdapterProperties VulkanAdapter::queryAdapterProperties()
                 .maxRayDispatchInvocationCount = rayTracingProperties.maxRayDispatchInvocationCount,
                 .shaderGroupHandleAlignment = rayTracingProperties.shaderGroupHandleAlignment,
                 .maxRayHitAttributeSize = rayTracingProperties.maxRayHitAttributeSize,
+#endif
         },
         .meshShaderProperties = {
+#if defined(VK_EXT_mesh_shader)
                 .maxTaskWorkGroupTotalCount = meshShaderProperties.maxMeshWorkGroupTotalCount,
                 .maxTaskWorkGroupCount = {
                         meshShaderProperties.maxMeshWorkGroupCount[0],
@@ -369,6 +376,7 @@ AdapterProperties VulkanAdapter::queryAdapterProperties()
                 .prefersLocalInvocationPrimitiveOutput = static_cast<bool>(meshShaderProperties.prefersLocalInvocationPrimitiveOutput),
                 .prefersCompactVertexOutput = static_cast<bool>(meshShaderProperties.prefersCompactVertexOutput),
                 .prefersCompactPrimitiveOutput = static_cast<bool>(meshShaderProperties.prefersCompactPrimitiveOutput),
+#endif
         },
         .hostImageCopyProperties = {
 #if defined(VK_EXT_host_image_copy)
@@ -409,13 +417,17 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
     physicalDeviceFeatures12.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
     addToChain(&physicalDeviceFeatures12);
 
+#if defined(VK_KHR_acceleration_structure)
     VkPhysicalDeviceAccelerationStructureFeaturesKHR accelerationStructureFeaturesKhr{};
     accelerationStructureFeaturesKhr.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
     addToChain(&accelerationStructureFeaturesKhr);
+#endif
 
+#if defined(VK_KHR_ray_tracing_pipeline)
     VkPhysicalDeviceRayTracingPipelineFeaturesKHR rayTracingPipelineFeaturesKhr{};
     rayTracingPipelineFeaturesKhr.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
     addToChain(&rayTracingPipelineFeaturesKhr);
+#endif
 
 #if defined(VK_KHR_synchronization2)
     VkPhysicalDeviceSynchronization2Features synchronization2Features{};
@@ -423,9 +435,11 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
     addToChain(&synchronization2Features);
 #endif
 
+#if defined(VK_EXT_mesh_shader)
     VkPhysicalDeviceMeshShaderFeaturesEXT meshShaderFeatures{};
     meshShaderFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT;
     addToChain(&meshShaderFeatures);
+#endif
 
 #if defined(VK_EXT_host_image_copy)
     VkPhysicalDeviceHostImageCopyFeaturesEXT hostImageCopyFeatures{};
@@ -517,19 +531,38 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
         .bindGroupBindingVariableDescriptorCount = static_cast<bool>(deviceDescriptorIndexingFeatures.descriptorBindingVariableDescriptorCount),
         .runtimeBindGroupArray = static_cast<bool>(deviceDescriptorIndexingFeatures.runtimeDescriptorArray),
         .bufferDeviceAddress = static_cast<bool>(physicalDeviceFeatures12.bufferDeviceAddress),
-        .accelerationStructures = static_cast<bool>(accelerationStructureFeaturesKhr.accelerationStructure),
-        .rayTracingPipeline = static_cast<bool>(rayTracingPipelineFeaturesKhr.rayTracingPipeline),
-        .rayTracingPipelineShaderGroupHandleCaptureReplay = static_cast<bool>(rayTracingPipelineFeaturesKhr.rayTracingPipelineShaderGroupHandleCaptureReplay),
-        .rayTracingPipelineShaderGroupHandleCaptureReplayMixed = static_cast<bool>(rayTracingPipelineFeaturesKhr.rayTracingPipelineShaderGroupHandleCaptureReplayMixed),
-        .rayTracingPipelineTraceRaysIndirect = static_cast<bool>(rayTracingPipelineFeaturesKhr.rayTracingPipelineTraceRaysIndirect),
-        .rayTraversalPrimitiveCulling = static_cast<bool>(rayTracingPipelineFeaturesKhr.rayTraversalPrimitiveCulling),
-        .taskShader = static_cast<bool>(meshShaderFeatures.taskShader),
-        .meshShader = static_cast<bool>(meshShaderFeatures.meshShader),
+        .accelerationStructures = false,
+        .rayTracingPipeline = false,
+        .rayTracingPipelineShaderGroupHandleCaptureReplay = false,
+        .rayTracingPipelineShaderGroupHandleCaptureReplayMixed = false,
+        .rayTracingPipelineTraceRaysIndirect = false,
+        .rayTraversalPrimitiveCulling = false,
+        .taskShader = false,
+        .meshShader = false,
         .multiviewMeshShader = static_cast<bool>(meshShaderFeatures.multiviewMeshShader),
         .primitiveFragmentShadingRateMeshShader = static_cast<bool>(meshShaderFeatures.primitiveFragmentShadingRateMeshShader),
-        .meshShaderQueries = static_cast<bool>(meshShaderFeatures.meshShaderQueries),
+        .meshShaderQueries = false,
         .hostImageCopy = false,
     };
+
+#if defined(VK_KHR_acceleration_structure)
+    features.accelerationStructures = static_cast<bool>(accelerationStructureFeaturesKhr.accelerationStructure);
+#endif
+
+#if defined(VK_KHR_ray_tracing_pipeline)
+    features.rayTracingPipeline = static_cast<bool>(rayTracingPipelineFeaturesKhr.rayTracingPipeline);
+    features.rayTracingPipelineShaderGroupHandleCaptureReplay = static_cast<bool>(rayTracingPipelineFeaturesKhr.rayTracingPipelineShaderGroupHandleCaptureReplay);
+    features.rayTracingPipelineShaderGroupHandleCaptureReplayMixed = static_cast<bool>(rayTracingPipelineFeaturesKhr.rayTracingPipelineShaderGroupHandleCaptureReplayMixed);
+    features.rayTracingPipelineTraceRaysIndirect = static_cast<bool>(rayTracingPipelineFeaturesKhr.rayTracingPipelineTraceRaysIndirect);
+    features.rayTraversalPrimitiveCulling = static_cast<bool>(rayTracingPipelineFeaturesKhr.rayTraversalPrimitiveCulling);
+#endif
+
+#if defined(VK_EXT_mesh_shader)
+    features.taskShader = static_cast<bool>(meshShaderFeatures.taskShader);
+    features.meshShader = static_cast<bool>(meshShaderFeatures.meshShader);
+    features.multiviewMeshShader = static_cast<bool>(meshShaderFeatures.multiviewMeshShader);
+    features.meshShaderQueries = static_cast<bool>(meshShaderFeatures.meshShaderQueries);
+#endif
 
 #if defined(VK_KHR_synchronization2)
     supportsSynchronization2 = synchronization2Features.synchronization2;
@@ -547,9 +580,10 @@ AdapterSwapchainProperties VulkanAdapter::querySwapchainProperties(const Handle<
     AdapterSwapchainProperties properties = {};
 
     // Get the capabilities
-    VulkanSurface surface = *vulkanResourceManager->getSurface(surfaceHandle);
+    VulkanSurface *surface = vulkanResourceManager->getSurface(surfaceHandle);
+    assert(surface != nullptr && surface->surface != VK_NULL_HANDLE);
     VkSurfaceCapabilitiesKHR capabilities;
-    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface.surface, &capabilities);
+    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface->surface, &capabilities);
 
     properties.capabilities = {
         .minImageCount = capabilities.minImageCount,
@@ -567,10 +601,10 @@ AdapterSwapchainProperties VulkanAdapter::querySwapchainProperties(const Handle<
     // Get the supported formats and colorspaces
     uint32_t formatCount = 0;
     std::vector<VkSurfaceFormatKHR> vkFormats;
-    vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface.surface, &formatCount, nullptr);
+    vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface->surface, &formatCount, nullptr);
     if (formatCount != 0) {
         vkFormats.resize(formatCount);
-        vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface.surface, &formatCount, vkFormats.data());
+        vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface->surface, &formatCount, vkFormats.data());
     }
 
     std::vector<SurfaceFormat> formats;
@@ -585,10 +619,10 @@ AdapterSwapchainProperties VulkanAdapter::querySwapchainProperties(const Handle<
     // Get the supported present modes
     uint32_t presentModeCount = 0;
     std::vector<VkPresentModeKHR> vkPresentModes;
-    vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface.surface, &presentModeCount, nullptr);
+    vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface->surface, &presentModeCount, nullptr);
     if (presentModeCount != 0) {
         vkPresentModes.resize(presentModeCount);
-        vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface.surface, &presentModeCount, vkPresentModes.data());
+        vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface->surface, &presentModeCount, vkPresentModes.data());
     }
 
     std::vector<PresentMode> presentModes;
@@ -650,7 +684,7 @@ std::vector<DrmFormatModifierProperties> VulkanAdapter::drmFormatModifierPropert
 {
     std::vector<DrmFormatModifierProperties> modifierProperties;
 
-#if defined(KDGPU_PLATFORM_LINUX)
+#if defined(VK_EXT_image_drm_format_modifier)
     VkDrmFormatModifierPropertiesListEXT vkModifierPropertiesList{};
     vkModifierPropertiesList.sType = VK_STRUCTURE_TYPE_DRM_FORMAT_MODIFIER_PROPERTIES_LIST_EXT;
 

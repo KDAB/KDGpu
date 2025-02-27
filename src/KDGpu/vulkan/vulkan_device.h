@@ -87,35 +87,48 @@ struct KDGPU_EXPORT VulkanDevice {
     std::unordered_map<VulkanFramebufferKey, Handle<Framebuffer_t>> framebuffers;
     VkQueryPool timestampQueryPool{ VK_NULL_HANDLE };
 
+#if defined(VK_EXT_debug_utils)
     PFN_vkSetDebugUtilsObjectNameEXT vkSetDebugUtilsObjectNameEXT{ nullptr };
     PFN_vkCmdBeginDebugUtilsLabelEXT vkCmdBeginDebugUtilsLabelEXT{ nullptr };
     PFN_vkCmdEndDebugUtilsLabelEXT vkCmdEndDebugUtilsLabelEXT{ nullptr };
+#endif
+
 #if defined(VK_KHR_synchronization2)
     PFN_vkCmdPipelineBarrier2KHR vkCmdPipelineBarrier2{ nullptr };
 #endif
 
 #if defined(KDGPU_PLATFORM_WIN32)
+    // We can't check for VK_KHR_external_semaphore_win32 or VK_KHR_external_fence_win32 here
+    // Because we can't include vulkan_win32.h here since it needs windows.h which
+    // we need to include with WIN32_LEAN_AND_MEAN and NOMINMAX (see vulkanconfig.cpp)
     using PFN_vkGetSemaphoreWin32HandleKHR = VkResult(VKAPI_PTR *)(VkDevice, const VkSemaphoreGetWin32HandleInfoKHR *, HANDLE *);
     PFN_vkGetSemaphoreWin32HandleKHR vkGetSemaphoreWin32HandleKHR{ nullptr };
-
     using PFN_vkGetFenceWin32HandleKHR = VkResult(VKAPI_PTR *)(VkDevice, const VkFenceGetWin32HandleInfoKHR *, HANDLE *);
     PFN_vkGetFenceWin32HandleKHR vkGetFenceWin32HandleKHR{ nullptr };
 #endif
 
-#if defined(KDGPU_PLATFORM_LINUX)
+#if defined(VK_KHR_external_semaphore_fd)
     PFN_vkGetSemaphoreFdKHR vkGetSemaphoreFdKHR{ nullptr };
+#endif
+#if defined(VK_KHR_external_fence_fd)
     PFN_vkGetFenceFdKHR vkGetFenceFdKHR{ nullptr };
 #endif
 
     PFN_vkCreateRenderPass2 vkCreateRenderPass2{ nullptr };
+
+#if defined(VK_KHR_acceleration_structure)
     PFN_vkCmdBuildAccelerationStructuresKHR vkCmdBuildAccelerationStructuresKHR{ nullptr };
     PFN_vkGetAccelerationStructureDeviceAddressKHR vkGetAccelerationStructureDeviceAddressKHR{ nullptr };
     PFN_vkCreateAccelerationStructureKHR vkCreateAccelerationStructureKHR{ nullptr };
     PFN_vkDestroyAccelerationStructureKHR vkDestroyAccelerationStructureKHR{ nullptr };
     PFN_vkGetAccelerationStructureBuildSizesKHR vkGetAccelerationStructureBuildSizesKHR{ nullptr };
+#endif
+
+#if defined(VK_KHR_ray_tracing_pipeline)
     PFN_vkCreateRayTracingPipelinesKHR vkCreateRayTracingPipelinesKHR{ nullptr };
     PFN_vkCmdTraceRaysKHR vkCmdTraceRaysKHR{ nullptr };
     PFN_vkGetRayTracingShaderGroupHandlesKHR vkGetRayTracingShaderGroupHandlesKHR{ nullptr };
+#endif
 
 #if defined(VK_EXT_host_image_copy)
     PFN_vkTransitionImageLayoutEXT vkTransitionImageLayout{ nullptr };
@@ -124,7 +137,7 @@ struct KDGPU_EXPORT VulkanDevice {
     PFN_vkCopyImageToImageEXT vkCopyImageToImage{ nullptr };
 #endif
 
-#if !defined(KDGPU_PLATFORM_MACOS)
+#if defined(VK_EXT_mesh_shader)
     PFN_vkCmdDrawMeshTasksEXT vkCmdDrawMeshTasksEXT{ nullptr };
     PFN_vkCmdDrawMeshTasksIndirectEXT vkCmdDrawMeshTasksIndirectEXT{ nullptr };
 #endif

@@ -88,6 +88,7 @@ VkStridedDeviceAddressRegionKHR buildVkStridedDeviceAddressRegion(
 
 void VulkanRayTracingPassCommandRecorder::traceRays(const RayTracingCommand &rayTracingCommand)
 {
+#if defined(VK_KHR_ray_tracing_pipeline)
     VulkanDevice *device = vulkanResourceManager->getDevice(deviceHandle);
     if (device->vkCmdTraceRaysKHR) {
 
@@ -105,6 +106,9 @@ void VulkanRayTracingPassCommandRecorder::traceRays(const RayTracingCommand &ray
                                   rayTracingCommand.extent.height,
                                   rayTracingCommand.extent.depth);
     }
+#else
+    assert(false);
+#endif
 }
 
 void VulkanRayTracingPassCommandRecorder::pushConstant(const PushConstantRange &constantRange, const void *data)

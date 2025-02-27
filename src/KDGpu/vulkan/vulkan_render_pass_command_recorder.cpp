@@ -191,14 +191,16 @@ void VulkanRenderPassCommandRecorder::drawIndexedIndirect(const std::vector<Draw
 
 void VulkanRenderPassCommandRecorder::drawMeshTasks(const DrawMeshCommand &drawCommand)
 {
+#if defined(VK_EXT_mesh_shader)
     VulkanDevice *device = vulkanResourceManager->getDevice(deviceHandle);
-#if !defined(KDGPU_PLATFORM_MACOS)
     if (device->vkCmdDrawMeshTasksEXT) {
         device->vkCmdDrawMeshTasksEXT(commandBuffer,
                                       drawCommand.workGroupX,
                                       drawCommand.workGroupY,
                                       drawCommand.workGroupZ);
     }
+#else
+    assert(false);
 #endif
 }
 
@@ -210,8 +212,8 @@ void VulkanRenderPassCommandRecorder::drawMeshTasks(const std::vector<DrawMeshCo
 
 void VulkanRenderPassCommandRecorder::drawMeshTasksIndirect(const DrawMeshIndirectCommand &drawCommand)
 {
+#if defined(VK_EXT_mesh_shader)
     VulkanDevice *device = vulkanResourceManager->getDevice(deviceHandle);
-#if !defined(KDGPU_PLATFORM_MACOS)
     if (device->vkCmdDrawMeshTasksIndirectEXT) {
         VulkanBuffer *vulkanBuffer = vulkanResourceManager->getBuffer(drawCommand.buffer);
         device->vkCmdDrawMeshTasksIndirectEXT(commandBuffer,
@@ -220,6 +222,8 @@ void VulkanRenderPassCommandRecorder::drawMeshTasksIndirect(const DrawMeshIndire
                                               drawCommand.drawCount,
                                               drawCommand.stride);
     }
+#else
+    assert(false);
 #endif
 }
 
