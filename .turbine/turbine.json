@@ -6,6 +6,14 @@
             "path": "./generate_kdxr_resource/generate_kdxr_resource.rb",
             "usage": "generate_kdxr_resource name",
             "description": "Generates frontend and backend classes for a new KDXr resource"
+        },
+        {
+            "name": "generate_android_example",
+            "class": "Turbine::GenerateAndroidExample",
+            "path": "./generate_android_example/generate_android_example.rb",
+            "usage": "generate_android_example name \"Display Name\"",
+            "description": "Generates the skeleton of an Android project for an existing example"
         }
+
     ]
 }
