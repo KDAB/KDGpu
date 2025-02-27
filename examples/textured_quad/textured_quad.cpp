@@ -19,6 +19,9 @@
 #include <KDGpu/graphics_pipeline_options.h>
 #include <KDGpu/texture_options.h>
 
+#include <KDUtils/file.h>
+#include <KDUtils/dir.h>
+
 #include <glm/gtx/transform.hpp>
 
 //![1]
@@ -62,7 +65,25 @@ ImageData loadImage(const std::string &path)
     if (texturePath.rfind("/", 0) == 0)
         texturePath = texturePath.substr(1);
 #endif
+
+#ifdef PLATFORM_ANDROID
+    // Android filesystem requires our file wrapper to load the data
+    KDUtils::File file(KDUtils::File::exists(path) ? path : KDUtils::Dir::applicationDir().absoluteFilePath(path));
+
+    if (!file.open(std::ios::in | std::ios::binary)) {
+        SPDLOG_LOGGER_CRITICAL(KDGpu::Logger::logger(), "Failed to open file {}", path);
+        throw std::runtime_error("Failed to open file");
+    }
+
+    const KDUtils::ByteArray fileContent = file.readAll();
+    std::vector<uint32_t> buffer(fileContent.size() / 4);
+
+    auto _data = stbi_load_from_memory(
+            fileContent.data(), fileContent.size(), &_width, &_height, &texChannels, STBI_rgb_alpha);
+#else
     auto _data = stbi_load(texturePath.c_str(), &_width, &_height, &texChannels, STBI_rgb_alpha);
+#endif
+
     if (_data == nullptr) {
         SPDLOG_WARN("Failed to load texture {} {}", path, stbi_failure_reason());
         return {};
