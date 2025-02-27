@@ -233,4 +233,35 @@ TEST_SUITE("Instance")
             CHECK(api->resourceManager()->getInstance(handle) == nullptr);
         }
     }
+
+    TEST_CASE("Move")
+    {
+        // GIVEN
+        std::unique_ptr<GraphicsApi> api = std::make_unique<VulkanGraphicsApi>();
+
+        const InstanceOptions options{
+            .applicationName = "instance",
+            .applicationVersion = KDGPU_MAKE_API_VERSION(0, 1, 0, 0)
+        };
+
+        SUBCASE("Adapter Pointers remain valid on Move")
+        {
+            // GIVEN
+            Instance instance = api->createInstance(options);
+            Handle<Instance_t> handle = instance.handle();
+
+            const std::vector<Adapter *> adapterPtrs = instance.adapters();
+
+            // WHEN
+            Instance instance2 = std::move(instance);
+            Handle<Instance_t> handle2 = instance2.handle();
+
+            // THEN
+            CHECK(!instance.isValid());
+            const std::vector<Adapter *> adapterPtrsFromMoved = instance2.adapters();
+
+            CHECK(adapterPtrs == adapterPtrsFromMoved);
+            CHECK(handle == handle2);
+        }
+    }
 }
