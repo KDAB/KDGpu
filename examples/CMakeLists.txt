@@ -24,6 +24,9 @@ function(add_kdgpu_example)
         target_link_options(${KD_ARGS_NAME} PRIVATE "/SUBSYSTEM:windows" "/ENTRY:mainCRTStartup")
     endif()
 
+    # Add dependency to the shader assets
+    add_dependencies(${KD_ARGS_NAME} kdgpu_assets)
+
     target_link_libraries(${KD_ARGS_NAME} PRIVATE ${KD_ARGS_LIBS})
 
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
