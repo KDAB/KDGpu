@@ -551,7 +551,8 @@ void VulkanCommandRecorder::buildAccelerationStructures(const BuildAccelerationS
         std::vector<VkAccelerationStructureGeometryKHR> &geometries = geometriesBacking.emplace_back();
 
         for (const auto &geometry : geometryBuildInfo.geometries) {
-            VkAccelerationStructureGeometryKHR geometryKhr = { VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR };
+            VkAccelerationStructureGeometryKHR geometryKhr = {};
+            geometryKhr.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
 
             std::visit([this, vulkanDevice, &geometryKhr, &storeTemporaryBuffer](auto &&arg) {
                 using T = std::decay_t<decltype(arg)>;
@@ -586,7 +587,8 @@ void VulkanCommandRecorder::buildAccelerationStructures(const BuildAccelerationS
                     for (const auto &element : arg.data) {
                         auto structure = vulkanResourceManager->getAccelerationStructure(element.accelerationStructure);
 
-                        VkAccelerationStructureDeviceAddressInfoKHR deviceAddressInfoKhr = { VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR };
+                        VkAccelerationStructureDeviceAddressInfoKHR deviceAddressInfoKhr = {};
+                        deviceAddressInfoKhr.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR;
                         deviceAddressInfoKhr.accelerationStructure = structure->accelerationStructure;
 
                         VkAccelerationStructureInstanceKHR instanceKhr{
@@ -612,7 +614,7 @@ void VulkanCommandRecorder::buildAccelerationStructures(const BuildAccelerationS
 
                     VulkanBuffer *instanceDataBuffer = vulkanResourceManager->getBuffer(instanceDataBufferH);
 
-                    VkAccelerationStructureGeometryInstancesDataKHR instancesDataKhr;
+                    VkAccelerationStructureGeometryInstancesDataKHR instancesDataKhr{};
                     instancesDataKhr.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_INSTANCES_DATA_KHR;
                     instancesDataKhr.arrayOfPointers = false;
                     instancesDataKhr.data.deviceAddress = instanceDataBuffer->bufferDeviceAddress();
@@ -623,7 +625,8 @@ void VulkanCommandRecorder::buildAccelerationStructures(const BuildAccelerationS
                     storeTemporaryBuffer(instanceDataBufferH);
 
                 } else if constexpr (std::is_same_v<T, AccelerationStructureGeometryAabbsData>) {
-                    VkAccelerationStructureGeometryAabbsDataKHR aabbsDataKhr{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_AABBS_DATA_KHR };
+                    VkAccelerationStructureGeometryAabbsDataKHR aabbsDataKhr{};
+                    aabbsDataKhr.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_AABBS_DATA_KHR;
                     aabbsDataKhr.stride = arg.stride;
 
                     if (arg.data.isValid()) {
@@ -642,7 +645,8 @@ void VulkanCommandRecorder::buildAccelerationStructures(const BuildAccelerationS
             geometries.push_back(geometryKhr);
         }
 
-        VkAccelerationStructureBuildGeometryInfoKHR geometryInfoKhr{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR };
+        VkAccelerationStructureBuildGeometryInfoKHR geometryInfoKhr{};
+        geometryInfoKhr.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR;
         geometryInfoKhr.mode = accelerationStructureModeToVkStructureMode(geometryBuildInfo.mode);
         geometryInfoKhr.pGeometries = geometries.data();
         geometryInfoKhr.geometryCount = geometries.size();
