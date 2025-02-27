@@ -1,0 +1,76 @@
+/*
+  This file is part of KDGpu.
+
+  SPDX-FileCopyrightText: 2025 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+
+  SPDX-License-Identifier: MIT
+
+  Contact KDAB at <info@kdab.com> for commercial licensing options.
+*/
+
+/**
+    @page host_image_copy_texture Host Image Copy Texture
+    @ingroup kdgpu-examples
+
+    @brief This example shows how to load a texture, transfer data to it using host copies and sample from it.
+
+    This example uses the STB image library to load static image data from the disk.
+
+    First, we include the STB image header, which will provide us with the necessary inputs to the KDGpu API:
+    @snippet host_image_copy_texture/host_image_copy.cpp 1
+
+    We organize all of the STB-image-supplied values into one struct, using an RGBA KDGpu::Format.
+    @snippet host_image_copy_texture/host_image_copy.cpp 2
+
+    And we have a function to populate the struct, with some per-platform implementation details. This function includes all of the STB image calls in this example.
+    @snippet host_image_copy_texture/host_image_copy.cpp 3
+
+    \section host_image_copy_texture Texture Initialization and Upload
+
+    At scene initialization, we load and upload the texture, and create and upload the vertex buffer for a fullscreen quad on which to render our texture onto.
+    Some things to note:
+    - We have no need to access the buffer after loading, so the memory usage is GPU-only.
+    - We perform the texture upload with only one copy region which covers the whole texture. This is just boilerplate for us but a larger texture could make use of multiple copy regions.
+    - The ``oldLayout`` and ``newLayout`` options offer a way to optimize the texture for different usecases. Check out KDGpu::TextureLayout to see the available layouts.
+
+    We begin by loading the raw image data by calling our loadImage function.
+    @snippet host_image_copy_texture/host_image_copy.cpp 4
+
+    Next we need to create out texture and specify that it will be used with host copies.
+    @snippet host_image_copy_texture/host_image_copy.cpp 5
+
+    In order to initiate a copy from the host to the texture, the texture first need to be transitioned to a suitable texture layout.
+    @snippet host_image_copy_texture/host_image_copy.cpp 6
+
+    Then we can proceed with the actual transfer of data between our host side data and the texture.
+    The big advantage of host copies is we don't have to mess with creating intermediate staging buffers followed by copy commands in a CommandBuffer
+    to upload data to our texture (and that even if our texture is set to use GPU-only memory).
+    Also host copies writes become immediately visible to the GPU.
+    @snippet host_image_copy_texture/host_image_copy.cpp 7
+
+    Next we can just transition the texture to a layout suitable for shaders to sample from it.
+    @snippet host_image_copy_texture/host_image_copy.cpp 8
+
+    Finally we can create a TextureView and a Sampler which is what our shader will be using to sample data from the Texture.
+    @snippet host_image_copy_texture/host_image_copy.cpp 9
+
+    \section host_image_copy_texture Geometry and Graphics Pipeline Initialization
+
+    The quad vertex buffer creation is unsurprising. The geometry is uploaded in NDC coordinates so that we don't need to perform any transformation in the vertex shader.
+    @snippet host_image_copy_texture/host_image_copy.cpp 10
+
+    We then proceed with creating a simple rendering pipeline that expects 2 attributes (position and texture coordinates) and a bindgroup.
+    @snippet host_image_copy_texture/host_image_copy.cpp 11
+
+    Next the BindGroup is allocated, it holds the TextureView and Sampler to use for sampling from our texture in the fragment shader.
+    @snippet host_image_copy_texture/host_image_copy.cpp 12
+
+    \section host_image_copy_texture Rendering
+
+    Now that we have initialized everything properly, the render function is one of the simplest so far.
+    We set the pipeline and buffer as usual, and set the bindgroup we just created.
+    @snippet host_image_copy_texture/host_image_copy.cpp 13
+
+    Also, be sure to actually sample from the texture in the shader:
+    @snippet host_image_copy_texture/doc/shadersnippet.frag 1
+*/

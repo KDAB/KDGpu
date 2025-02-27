@@ -101,6 +101,7 @@ protected:
     std::vector<SampleCountFlagBits> m_supportedSampleCounts;
     Instance m_instance;
     Surface m_surface;
+    Adapter *m_adapter;
     Device m_device;
     Queue m_queue;
     PresentMode m_presentMode;

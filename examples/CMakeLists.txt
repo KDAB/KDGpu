@@ -77,6 +77,7 @@ if(TARGET KDGpu::KDGpuExample)
     add_subdirectory(depth_bias)
     add_subdirectory(buffer_reference)
     add_subdirectory(hybrid_raster_rt)
+    add_subdirectory(host_image_copy_texture)
 
     if(KDGPU_HLSL_SUPPORT)
         add_subdirectory(hello_triangle_hlsl)
