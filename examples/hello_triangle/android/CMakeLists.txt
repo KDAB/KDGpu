@@ -20,10 +20,6 @@ add_library(
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Declares and names the project.
-#include(CMakeFindDependencyMacro)
-#find_package(KDGpu REQUIRED)
-
 include(FetchContent)
 
 find_package(KDGpu::KDGpu QUIET)
@@ -38,31 +34,26 @@ if(NOT TARGET KDGpu::KDGpu)
     FetchContent_MakeAvailable(KDGpu)
 endif()
 
-project("HelloTriangle")
+project("hello_triangle")
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 set(CMAKE_FIND_DEBUG_MODE TRUE)
 
-# Creates and names a library, sets it as either STATIC or SHARED, and provides
-# the relative paths to its source code. You can define multiple libraries, and
-# CMake builds them for you. Gradle automatically packages shared libraries with
-# your APK.
-
 add_library(
     # Sets the name of the library.
-    hellotriangle
+    hello_triangle
     # Sets the library as a shared library.
     SHARED
     # Provides a relative path to your source file(s).
-    # SerenityNativeAndroid.cpp SerenityNativeAndroid.h
-    hello_triangle.cpp main.cpp
+    ../hello_triangle.cpp ../main.cpp
 )
 
-# Include glm, from KDGpu dependencies
 target_include_directories(
-    hellotriangle
-    PRIVATE "${CMAKE_BINARY_DIR}/_deps/glm-src"
+    hello_triangle
+    PRIVATE "../" "${CMAKE_BINARY_DIR}/_deps/glm-src" "${CMAKE_BINARY_DIR}/_deps/stb-src"
 )
+
+target_compile_definitions(hello_triangle PRIVATE PLATFORM_ANDROID)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -DVK_USE_PLATFORM_ANDROID_KHR")
 
@@ -70,7 +61,7 @@ set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -u ANativeActivity_o
 
 target_link_libraries(
     # Specifies the target library.
-    hellotriangle
+    hello_triangle
     vulkan
     nativewindow
     app-glue
@@ -85,5 +76,6 @@ target_link_libraries(
     KDGpuExample
     KDGpuExampleResources
     KDGpuExampleShaderResources
+    KDXr
     spdlog
 )

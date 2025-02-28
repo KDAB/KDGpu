@@ -12,14 +12,14 @@ plugins {
 }
 
 android {
-    namespace = "com.kdab.hellotriangle"
+    namespace = "com.kdab.hello_triangle"
     compileSdk = 34
 
     defaultConfig {
         ndk {
-            abiFilters += mutableSetOf("arm64-v8a", "x86_64")
+            abiFilters += mutableSetOf("arm64-v8a")
         }
-        applicationId = "com.kdab.hellotriangle"
+        applicationId = "com.kdab.hello_triangle"
         minSdk = 32
         targetSdk = 32
         versionCode = 1
@@ -58,4 +58,28 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+}
+
+
+// Task to copy files from outer project to android shader compilation folder
+tasks.register<Copy>("copyShaders") {
+    from("../../../../assets/shaders/examples/hello_triangle")
+    into("src/main/shaders/examples/hello_triangle")
+}
+
+// Task to copy font files
+tasks.register<Copy>("copyFonts") {
+    from("../../../../assets/fonts")
+    into("src/main/assets/fonts")
+}
+
+// Task to copy texture files
+tasks.register<Copy>("copyTextures") {
+    from("../../../../assets/textures")
+    into("src/main/assets/textures")
+}
+
+// Ensure the copyShaders task runs before the build task
+tasks.named("preBuild") {
+    dependsOn("copyShaders", "copyFonts", "copyTextures")
 }

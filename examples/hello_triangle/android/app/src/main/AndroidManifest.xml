@@ -31,7 +31,7 @@
 
             <meta-data
                 android:name="android.app.lib_name"
-                android:value="hellotriangle" />
+                android:value="hello_triangle" />
         </activity>
     </application>
 
