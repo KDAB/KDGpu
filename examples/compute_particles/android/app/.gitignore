@@ -1,0 +1,10 @@
+# This file is part of KDGpu.
+#
+# SPDX-FileCopyrightText: Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+#
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# Contact KDAB at <info@kdab.com> for commercial licensing options.
+#
+/build
+/.cxx
