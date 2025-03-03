@@ -1454,7 +1454,7 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
     }
 
     VkRenderPass vkRenderPass{ VK_NULL_HANDLE };
-    if (auto result = vkCreateRenderPass2(vulkanDevice->device, &renderPassInfo, nullptr, &vkRenderPass); result != VK_SUCCESS) {
+    if (auto result = vulkanDevice->vkCreateRenderPass2(vulkanDevice->device, &renderPassInfo, nullptr, &vkRenderPass); result != VK_SUCCESS) {
         SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating render pass: {}", result);
         return {};
     }
