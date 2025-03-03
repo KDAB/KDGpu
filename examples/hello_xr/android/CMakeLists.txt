@@ -34,24 +34,26 @@ if(NOT TARGET KDGpu::KDGpu)
     FetchContent_MakeAvailable(KDGpu)
 endif()
 
-project("HelloXR")
+project("hello_xr")
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 set(CMAKE_FIND_DEBUG_MODE TRUE)
 
 add_library(
     # Sets the name of the library.
-    helloxr
+    hello_xr
     # Sets the library as a shared library.
     SHARED
     # Provides a relative path to your source file(s).
-    ../../hello_xr/hello_xr.cpp ../../hello_xr/main.cpp ../../hello_xr/projection_layer.cpp
+    ../hello_xr.cpp ../main.cpp ../projection_layer.cpp
 )
 
 target_include_directories(
-    helloxr
-    PRIVATE "../../hello_xr" "${CMAKE_BINARY_DIR}/_deps/glm-src"
+    hello_xr
+    PRIVATE "../" "${CMAKE_BINARY_DIR}/_deps/glm-src" "${CMAKE_BINARY_DIR}/_deps/stb-src"
 )
+
+target_compile_definitions(hello_xr PRIVATE PLATFORM_ANDROID)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -DVK_USE_PLATFORM_ANDROID_KHR")
 
@@ -59,7 +61,7 @@ set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -u ANativeActivity_o
 
 target_link_libraries(
     # Specifies the target library.
-    helloxr
+    hello_xr
     vulkan
     nativewindow
     app-glue

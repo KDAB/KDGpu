@@ -49,7 +49,7 @@
 
             <meta-data
                 android:name="android.app.lib_name"
-                android:value="helloxr" />
+                android:value="hello_xr" />
         </activity>
     </application>
 

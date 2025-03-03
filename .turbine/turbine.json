@@ -13,7 +13,13 @@
             "path": "./generate_android_example/generate_android_example.rb",
             "usage": "generate_android_example name \"Display Name\"",
             "description": "Generates the skeleton of an Android project for an existing example"
+        },
+        {
+            "name": "android_openxr_manifest",
+            "class": "Turbine::AndroidOpenXRManifest",
+            "path": "./android_openxr_manifest/android_openxr_manifest.rb",
+            "usage": "android_openxr_manifest name",
+            "description": "Generates the manifest for an Android OpenXR project"
         }
-
     ]
 }

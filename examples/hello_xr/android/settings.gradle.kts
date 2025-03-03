@@ -22,5 +22,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "helloxr"
+rootProject.name = "hello_xr"
 include(":app")
