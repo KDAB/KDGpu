@@ -64,7 +64,6 @@ struct TextureToTextureHostCopyRegion {
 };
 
 struct HostMemoryToTextureCopy {
-    Handle<Texture_t> dstTexture;
     TextureLayout dstTextureLayout;
     std::vector<HostMemoryToTextureCopyRegion> regions;
     HostImageCopyFlags flags{ HostImageCopyFlagBits::None };
