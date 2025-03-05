@@ -32,6 +32,11 @@ XrQuadLayer::~XrQuadLayer()
 void XrQuadLayer::initialize()
 {
     recreateSwapchains();
+
+    // Whenever resolution changes, we will need to initialize again,
+    // but make sure we only set up this connection once.
+    if (!m_reinitializeConnection.belongsTo(resolution.valueChanged()))
+        m_reinitializeConnection = resolution.valueChanged().connect([this]() { initialize(); });
 }
 
 void XrQuadLayer::cleanup()
@@ -83,6 +88,9 @@ bool XrQuadLayer::update(const KDXr::FrameState &)
 
 void XrQuadLayer::recreateSwapchains()
 {
+    m_colorSwapchain = {};
+    m_depthSwapchain = {};
+
     // Create quad color and depth swapchains
     m_colorSwapchain.swapchain = m_session->createSwapchain({ .format = m_colorSwapchainFormat,
                                                               .usage = KDXr::SwapchainUsageFlagBits::SampledBit | KDXr::SwapchainUsageFlagBits::ColorAttachmentBit,

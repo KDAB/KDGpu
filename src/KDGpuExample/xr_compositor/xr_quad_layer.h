@@ -81,6 +81,8 @@ protected:
     uint32_t m_currentColorImageIndex{ 0 };
     uint32_t m_currentDepthImageIndex{ 0 };
 
+    KDBindings::ConnectionHandle m_reinitializeConnection;
+
     KDXr::QuadLayer m_quadLayer;
 };
 
