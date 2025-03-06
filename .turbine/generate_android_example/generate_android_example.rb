@@ -27,7 +27,12 @@ module Turbine
         relative_path = file.sub("#{templates_dir}/", '')
         destination_path = "examples/#{name}/android/#{relative_path}"
 
+        # Remove template extension, if we have one
+        destination_path = destination_path.sub(/\.erb$/, '')
+
+        # Apply the template function
         template(file, destination_path)
+
       end
     end
 
