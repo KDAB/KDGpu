@@ -115,13 +115,13 @@ void ProjectionLayer::initializeScene()
     {
         const std::array<Vertex, 3> vertexData = {
             Vertex{ // Back-left, red
-                    .position = { -0.05f, 0.0f, 0.0f },
+                    .position = { -0.05f, 0.0f, 0.1f },
                     .color = { 1.0f, 0.0f, 0.0f } },
             Vertex{ // Back-right, red
-                    .position = { 0.05f, 0.0f, 0.0f },
+                    .position = { 0.05f, 0.0f, 0.1f },
                     .color = { 1.0f, 0.0f, 0.0f } },
             Vertex{ // Front-center, red
-                    .position = { 0.0f, 0.0f, -0.2f },
+                    .position = { 0.0f, 0.0f, -0.1f },
                     .color = { 1.0f, 0.0f, 0.0f } }
         };
 
@@ -147,13 +147,13 @@ void ProjectionLayer::initializeScene()
     {
         const std::array<Vertex, 3> vertexData = {
             Vertex{ // Back-left, blue
-                    .position = { -0.05f, 0.0f, 0.0f },
+                    .position = { -0.05f, 0.0f, 0.1f },
                     .color = { 0.0f, 0.0f, 1.0f } },
             Vertex{ // Back-right, blue
-                    .position = { 0.05f, 0.0f, 0.0f },
+                    .position = { 0.05f, 0.0f, 0.1 },
                     .color = { 0.0f, 0.0f, 1.0f } },
             Vertex{ // Front-center, blue
-                    .position = { 0.0f, 0.0f, -0.2f },
+                    .position = { 0.0f, 0.0f, -0.1f },
                     .color = { 0.0f, 0.0f, 1.0f } }
         };
 

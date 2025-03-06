@@ -15,8 +15,11 @@
 #include <KDGpuExample/xr_compositor/xr_cylinder_imgui_layer.h>
 #include <KDGpuExample/xr_compositor/xr_quad_imgui_layer.h>
 #include <KDGpuExample/xr_compositor/xr_passthrough_layer.h>
+#include <KDGpuExample/imgui_item.h>
 
 #include <KDXr/session.h>
+
+#include <KDGui/gui_events.h>
 
 void HelloXr::onAttached()
 {
@@ -102,6 +105,10 @@ void HelloXr::onAttached()
                                                            .localizedName = "Toggle Passthrough",
                                                            .type = KDXr::ActionType::BooleanInput,
                                                            .subactionPaths = { m_handPaths[1] } });
+    m_mouseButtonAction = m_actionSet.createAction({ .name = "mousebutton",
+                                                     .localizedName = "Mouse Button",
+                                                     .type = KDXr::ActionType::BooleanInput,
+                                                     .subactionPaths = { m_handPaths[1] } });
 
     // Create action spaces for the palm poses. Default is no offset from the palm pose. If you wish to
     // apply an offset, you can do so by setting the poseInActionSpace member of the ActionSpaceOptions.
@@ -119,11 +126,12 @@ void HelloXr::onAttached()
                 { .action = m_toggleRotateZAction, .binding = "/user/hand/right/input/a/click" },
                 { .action = m_scaleAction, .binding = "/user/hand/left/input/trigger/value" },
                 { .action = m_translateAction, .binding = "/user/hand/left/input/thumbstick" },
-                { .action = m_palmPoseAction, .binding = "/user/hand/left/input/grip/pose" },
-                { .action = m_palmPoseAction, .binding = "/user/hand/right/input/grip/pose" },
+                { .action = m_palmPoseAction, .binding = "/user/hand/left/input/aim/pose" },
+                { .action = m_palmPoseAction, .binding = "/user/hand/right/input/aim/pose" },
                 { .action = m_buzzAction, .binding = "/user/hand/left/output/haptic" },
                 { .action = m_buzzAction, .binding = "/user/hand/right/output/haptic" },
                 { .action = m_togglePassthroughAction, .binding = "/user/hand/right/input/thumbstick/click" },
+                { .action = m_mouseButtonAction, .binding = "/user/hand/right/input/trigger/value" },
         }
     };
     if (m_xrInstance.suggestActionBindings(bindingOptions) != KDXr::SuggestActionBindingsResult::Success) {
@@ -196,6 +204,7 @@ void HelloXr::pollActions(KDXr::Time predictedDisplayTime)
     processPalmPoseAction(predictedDisplayTime);
     processHapticAction();
     processTogglePassthroughAction();
+    processUiInteraction();
 }
 
 void HelloXr::processToggleRotateZAction()
@@ -361,5 +370,55 @@ void HelloXr::processTogglePassthroughAction()
             m_passthroughLayer->setRunning(m_passthroughEnabled);
 
         SPDLOG_LOGGER_INFO(m_logger, "Passthrough enabled = {}", m_passthroughEnabled);
+    }
+}
+
+void HelloXr::processUiInteraction()
+{
+    // Use right hand for virtual mouse pose
+    auto mousePose = m_palmPoseActionSpaceStates[1].pose;
+
+    // Query the button state action from the right trigger value
+    bool mouseButtonChanged = false;
+    bool mouseButtonPressed = false;
+
+    const auto mouseButtonResult = m_session.getBooleanState({ .action = m_mouseButtonAction, .subactionPath = m_handPaths[1] }, m_mouseButtonState);
+    if (mouseButtonResult == KDXr::GetActionStateResult::Success) {
+        if (m_mouseButtonState.active) {
+            mouseButtonChanged = m_mouseButtonState.changedSinceLastSync;
+            mouseButtonPressed = m_mouseButtonState.currentState;
+        }
+    } else {
+        SPDLOG_LOGGER_ERROR(m_logger, "Failed to get mouse button action state.");
+    }
+
+    {
+        // Process first m_uiStatus for Quad Layer
+        auto intersectionTest = m_quadImguiLayer->rayIntersection(mousePose);
+        if (intersectionTest.has_value()) {
+            auto &intersection = intersectionTest.value();
+            m_uiStatus[0].x = intersection.x;
+            m_uiStatus[0].y = intersection.y;
+            m_uiStatus[0].mouseOver = intersection.withinBounds;
+
+            const auto currentButton = m_uiStatus[0].mouseButtonPressed ? KDGui::MouseButton::LeftButton : KDGui::MouseButton::NoButton;
+            KDGui::MouseMoveEvent ev{ 0, currentButton, m_uiStatus[0].x, m_uiStatus[0].y };
+            m_quadImguiLayer->overlay().event(nullptr, &ev);
+        }
+
+        if (mouseButtonChanged) {
+            // Only register button presses if the cursor is in bounds
+            if (mouseButtonPressed && m_uiStatus[0].mouseOver) {
+                m_uiStatus[0].mouseButtonPressed = true;
+                KDGui::MousePressEvent ev{ 0, KDGui::MouseButton::LeftButton, KDGui::MouseButton::LeftButton, static_cast<int16_t>(m_uiStatus[0].x), static_cast<int16_t>(m_uiStatus[0].y) };
+                m_quadImguiLayer->overlay().event(nullptr, &ev);
+            }
+            // Register all releases, if the button is pressed, regardless of whether the cursor is in bounds
+            else if (!mouseButtonPressed && m_uiStatus[0].mouseButtonPressed) {
+                m_uiStatus[0].mouseButtonPressed = false;
+                KDGui::MouseReleaseEvent ev{ 0, KDGui::MouseButton::LeftButton, KDGui::MouseButton::NoButton, static_cast<int16_t>(m_uiStatus[0].x), static_cast<int16_t>(m_uiStatus[0].y) };
+                m_quadImguiLayer->overlay().event(nullptr, &ev);
+            }
+        }
     }
 }

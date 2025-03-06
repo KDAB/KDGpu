@@ -51,6 +51,7 @@ private:
     void processPalmPoseAction(KDXr::Time predictedDisplayTime);
     void processHapticAction();
     void processTogglePassthroughAction();
+    void processUiInteraction();
 
     ProjectionLayer *m_projectionLayer{ nullptr };
     XrQuadImGuiLayer *m_quadImguiLayer{ nullptr };
@@ -66,6 +67,7 @@ private:
     KDXr::Action m_palmPoseAction;
     KDXr::Action m_buzzAction;
     KDXr::Action m_togglePassthroughAction;
+    KDXr::Action m_mouseButtonAction;
 
     const std::vector<std::string> m_handPaths{ "/user/hand/left", "/user/hand/right" };
 
@@ -82,4 +84,15 @@ private:
     int32_t m_buzzHand{ -1 };
     std::array<float, 2> m_buzzAmplitudes{ 0.0f, 0.0f };
     bool m_passthroughEnabled = true;
+    KDXr::ActionStateBoolean m_mouseButtonState;
+
+    struct UiInteractionStatus {
+        int64_t x = 0;
+        int64_t y = 0;
+        bool mouseOver = false;
+        bool mouseButtonPressed = false;
+    };
+
+    // One for each ImGui Layer
+    std::array<UiInteractionStatus, 2> m_uiStatus;
 };
