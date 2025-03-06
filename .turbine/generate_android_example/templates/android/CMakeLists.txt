@@ -1,6 +1,6 @@
 # This file is part of KDGpu.
 #
-# SPDX-FileCopyrightText: 2024 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+# SPDX-FileCopyrightText: <%= current_year %> Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
 #
 # SPDX-License-Identifier: MIT
 #
@@ -41,25 +41,27 @@ set(CMAKE_FIND_DEBUG_MODE TRUE)
 
 add_library(
     # Sets the name of the library.
-    <%= name %>
+    <%=
+    %>
     # Sets the library as a shared library.
+    %>.cpp
+    ../<%=
+    ../main.cpp
+    name
+    name
     SHARED
     # Provides a relative path to your source file(s).
-    ../<%= name %>.cpp ../main.cpp
 )
 
 target_include_directories(
     <%= name %>
-    PRIVATE
-    "../"
-    "${CMAKE_BINARY_DIR}/_deps/glm-src"
-    "${CMAKE_BINARY_DIR}/_deps/stb-src"
+    PRIVATE "../" "${CMAKE_BINARY_DIR}/_deps/glm-src" "${CMAKE_BINARY_DIR}/_deps/stb-src"
 )
 
 target_compile_definitions(
-    <%= name %>
-    PRIVATE
-    PLATFORM_ANDROID
+    <%=
+    name %>
+    PRIVATE PLATFORM_ANDROID
 )
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -DVK_USE_PLATFORM_ANDROID_KHR")
@@ -68,7 +70,9 @@ set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -u ANativeActivity_o
 
 target_link_libraries(
     # Specifies the target library.
-    <%= name %>
+    <%=
+    name
+    %>
     vulkan
     nativewindow
     app-glue

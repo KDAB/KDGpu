@@ -24,5 +24,9 @@ module Turbine
 
     private
 
+    def current_year
+      @current_year = Time.now.year
+    end
+
   end
 end
