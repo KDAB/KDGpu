@@ -29,6 +29,32 @@ namespace KDGpuExample {
 XrQuadImGuiLayer::XrQuadImGuiLayer(const XrQuadLayerOptions &options)
     : XrQuadLayer(options)
 {
+    // Add some interesting UI by default
+    // can be removed with clearImGuiOverlayDrawFunctions
+    registerImGuiOverlayDrawFunction([this](ImGuiContext *ctx) {
+        ImGui::SetNextWindowPos(ImVec2(10, 20));
+        ImGui::SetNextWindowSize(ImVec2(0, 0), ImGuiCond_FirstUseEver);
+        ImGui::Begin(
+                "Basic Info",
+                nullptr,
+                ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize);
+
+        ImGui::Text("App: %s", KDGui::GuiApplication::instance()->applicationName().data());
+        ImGui::Text("GPU: %s", m_device->adapter()->properties().deviceName.c_str());
+        const auto fps = m_engineLayer->engine()->fps();
+        ImGui::Text("%.2f ms/frame (%.1f fps)", (1000.0f / fps), fps);
+
+        ImColor bgEdit = { backgroundColor().float32[0], backgroundColor().float32[1], backgroundColor().float32[2], backgroundColor().float32[3] };
+        if (ImGui::ColorEdit4("Background Color", (float *)&bgEdit, ImGuiColorEditFlags_NoInputs)) {
+            backgroundColor = { bgEdit.Value.x, bgEdit.Value.y, bgEdit.Value.z, bgEdit.Value.w };
+        }
+
+        ImGui::End();
+    });
+
+    registerImGuiOverlayDrawFunction(drawMouseCursor);
+
+    (void)backgroundColor.valueChanged().connect([this]() { setupRenderPassOptions(); });
 }
 
 XrQuadImGuiLayer::~XrQuadImGuiLayer()
@@ -39,20 +65,7 @@ void XrQuadImGuiLayer::initialize()
 {
     XrQuadLayer::initialize();
 
-    // clang-format off
-    m_imguiPassOptions = {
-        .colorAttachments = {
-            {
-                .view = {}, // Not setting the swapchain texture view just yet
-                .clearValue = { 0.0f, 0.0f, 0.0f, 1.0f },
-                .finalLayout = TextureLayout::ColorAttachmentOptimal
-            }
-        },
-        .depthStencilAttachment = {
-            .view = {} // Not setting the depth texture view just yet
-        }
-    };
-    // clang-format on
+    setupRenderPassOptions();
 
     // Use a fence to stop us trampling on frames in flight
     m_fence = m_device->createFence({ .label = "ImGui Fence" });
@@ -95,18 +108,6 @@ void XrQuadImGuiLayer::renderQuad()
 void XrQuadImGuiLayer::drawImGuiOverlay(ImGuiContext *ctx)
 {
     ImGui::SetCurrentContext(ctx);
-    ImGui::SetNextWindowPos(ImVec2(10, 20));
-    ImGui::SetNextWindowSize(ImVec2(0, 0), ImGuiCond_FirstUseEver);
-    ImGui::Begin(
-            "Basic Info",
-            nullptr,
-            ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize);
-
-    ImGui::Text("App: %s", KDGui::GuiApplication::instance()->applicationName().data());
-    ImGui::Text("GPU: %s", m_device->adapter()->properties().deviceName.c_str());
-    const auto fps = m_engineLayer->engine()->fps();
-    ImGui::Text("%.2f ms/frame (%.1f fps)", (1000.0f / fps), fps);
-    ImGui::End();
 
     for (const auto &func : m_imGuiOverlayDrawFunctions)
         func(ctx);
@@ -152,6 +153,71 @@ void XrQuadImGuiLayer::updateImGuiOverlay()
     // Process the ImGui drawing functions to generate geometry and commands. The actual buffers will be updated
     // and commands translated by the ImGuiRenderer later in the frame.
     ImGui::Render();
+}
+
+ImGuiItem &XrQuadImGuiLayer::overlay()
+{
+    assert(m_imguiOverlay);
+    return *m_imguiOverlay;
+}
+
+void XrQuadImGuiLayer::setupRenderPassOptions()
+{
+    // clang-format off
+    m_imguiPassOptions = {
+        .colorAttachments = {
+            {
+                .view = {}, // Not setting the swapchain texture view just yet
+                .clearValue = backgroundColor(),
+                .finalLayout = TextureLayout::ColorAttachmentOptimal
+            }
+        },
+        .depthStencilAttachment = {
+            .view = {} // Not setting the depth texture view just yet
+        }
+    };
+    // clang-format on
+}
+
+void XrQuadImGuiLayer::drawMouseCursor(ImGuiContext *ctx)
+{
+    ImGui::Begin(
+            "Mouse Cursor",
+            nullptr,
+            ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground);
+
+    // Get the current mouse position
+    const auto mousePos = ImGui::GetMousePos();
+
+    // Define the custom cursor size
+    const auto cursorHeight = ImGui::GetFrameHeight();
+    const auto cursorWidth = cursorHeight / 1.5f;
+
+    // Calculate the vertices for the rotated triangle pointing top-left
+    const auto p1 = ImVec2(mousePos.x, mousePos.y); // Tip of the triangle
+    auto dir2 = ImVec2(cursorWidth, cursorHeight);
+    const auto dir2Mag = sqrtf(dir2.x * dir2.x + dir2.y * dir2.y);
+    dir2.x = dir2.x * cursorHeight / dir2Mag;
+    dir2.y = dir2.y * cursorHeight / dir2Mag;
+
+    const auto p2 = ImVec2(p1.x + dir2.x, p1.y + dir2.y);
+    const auto p3 = ImVec2(mousePos.x, mousePos.y + cursorHeight); // Bottom-left corner
+
+    // Draw the black outline of the cursor
+    auto *drawList = ImGui::GetForegroundDrawList();
+    drawList->AddTriangle(
+            p1, p2, p3,
+            ImGui::GetColorU32(ImVec4(0.0f, 0.0f, 0.0f, 1.0f)), // Black color
+            2.0f // Thickness of the outline
+    );
+
+    // Draw the white filled triangle for the cursor
+    drawList->AddTriangleFilled(
+            p1, p2, p3,
+            ImGui::GetColorU32(ImVec4(1.0f, 1.0f, 1.0f, 1.0f)) // White color
+    );
+
+    ImGui::End();
 }
 
 } // namespace KDGpuExample

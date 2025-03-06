@@ -61,6 +61,18 @@ public:
     XrQuadLayer(XrQuadLayer &&) = default;
     XrQuadLayer &operator=(XrQuadLayer &&) = default;
 
+    struct Intersection {
+        KDXr::Vector3 worldSpace = { 0.0f, 0.0f, 0.0f };
+        float x = 0.0f;
+        float y = 0.0f;
+        bool withinBounds = false;
+    };
+
+    // Cast a ray down negative Z from the given pose to find an intersection point
+    // with this quad, in world and local image coordinate space, or nullopt if no
+    // intersection occurs
+    std::optional<Intersection> rayIntersection(KDXr::Pose rayCasterPose);
+
 protected:
     void initialize() override;
     void cleanup() override;

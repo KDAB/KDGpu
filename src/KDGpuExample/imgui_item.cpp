@@ -48,6 +48,8 @@ void ImGuiItem::cleanup()
 
 void ImGuiItem::event(KDFoundation::EventReceiver *target, KDFoundation::Event *ev)
 {
+    ImGui::SetCurrentContext(m_context);
+
     m_input->event(target, ev);
 }
 

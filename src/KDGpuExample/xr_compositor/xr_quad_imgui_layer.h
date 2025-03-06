@@ -31,6 +31,8 @@ class ImGuiItem;
 class KDGPUEXAMPLE_EXPORT XrQuadImGuiLayer : public XrQuadLayer
 {
 public:
+    KDBindings::Property<KDGpu::ColorClearValue> backgroundColor{ KDGpu::ColorClearValue{ 0.0f, 0.0f, 0.0f, 1.0f } };
+
     explicit XrQuadImGuiLayer(const XrQuadLayerOptions &options);
     ~XrQuadImGuiLayer() override;
 
@@ -45,6 +47,12 @@ public:
     void registerImGuiOverlayDrawFunction(const std::function<void(ImGuiContext *)> &func);
     void clearImGuiOverlayDrawFunctions();
 
+    // Access the ImGuiItem directly
+    ImGuiItem &overlay();
+
+    // Callback function to draw a mouse cursor in Imgui
+    static void drawMouseCursor(ImGuiContext *ctx);
+
 protected:
     void initialize() override;
     void cleanup() override;
@@ -57,6 +65,7 @@ protected:
 
     void recreateImGuiOverlay();
     void updateImGuiOverlay();
+    void setupRenderPassOptions();
 
     std::unique_ptr<ImGuiItem> m_imguiOverlay;
     std::vector<std::function<void(ImGuiContext *)>> m_imGuiOverlayDrawFunctions;
