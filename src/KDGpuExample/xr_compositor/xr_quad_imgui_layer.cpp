@@ -181,6 +181,7 @@ void XrQuadImGuiLayer::setupRenderPassOptions()
 
 void XrQuadImGuiLayer::drawMouseCursor(ImGuiContext *ctx)
 {
+    ImGui::SetCurrentContext(ctx);
     ImGui::Begin(
             "Mouse Cursor",
             nullptr,

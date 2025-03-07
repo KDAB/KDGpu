@@ -63,6 +63,18 @@ public:
     XrCylinderLayer(XrCylinderLayer &&) = default;
     XrCylinderLayer &operator=(XrCylinderLayer &&) = default;
 
+    struct Intersection {
+        KDXr::Vector3 worldSpace = { 0.0f, 0.0f, 0.0f };
+        float x = 0.0f;
+        float y = 0.0f;
+        bool withinBounds = false;
+    };
+
+    // Cast a ray down negative Z from the given pose to find an intersection point
+    // with this cylinder, in world and local image coordinate space, or nullopt if no
+    // intersection occurs
+    std::optional<Intersection> rayIntersection(const KDXr::Pose &) const;
+
 protected:
     void initialize() override;
     void cleanup() override;
