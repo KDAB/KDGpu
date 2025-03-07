@@ -53,6 +53,8 @@ private:
     void processTogglePassthroughAction();
     void processUiInteraction();
 
+    void drawEditCylinderUi();
+
     ProjectionLayer *m_projectionLayer{ nullptr };
     XrQuadImGuiLayer *m_quadImguiLayer{ nullptr };
     XrCylinderImGuiLayer *m_cylinderImguiLayer{ nullptr };

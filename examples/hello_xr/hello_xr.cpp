@@ -21,6 +21,8 @@
 
 #include <KDGui/gui_events.h>
 
+#include <imgui.h>
+
 void HelloXr::onAttached()
 {
     XrExampleEngineLayer::onAttached();
@@ -71,9 +73,14 @@ void HelloXr::onAttached()
     };
     m_cylinderImguiLayer = createCompositorLayer<XrCylinderImGuiLayer>(cylinderLayerOptions);
     m_cylinderImguiLayer->setReferenceSpace(m_referenceSpace);
-    m_cylinderImguiLayer->position = { 1.0f, 0.2f, 0.0f };
     m_cylinderImguiLayer->radius = 2.0f;
+    m_cylinderImguiLayer->position = { m_cylinderImguiLayer->radius() / 2.0f, 0.2f, 0.0f };
     m_cylinderImguiLayer->centralAngle = 1.0f; // 1 radians = 57.3 degrees
+
+    m_cylinderImguiLayer->registerImGuiOverlayDrawFunction([this](ImGuiContext *ctx) {
+        ImGui::SetCurrentContext(ctx);
+        drawEditCylinderUi();
+    });
 
     // Create an action set and actions
     m_actionSet = m_xrInstance.createActionSet({ .name = "default", .localizedName = "Default" });
@@ -421,4 +428,86 @@ void HelloXr::processUiInteraction()
             }
         }
     }
+    {
+        // Process second m_uiStatus for Cylinder Layer
+        auto intersectionTest = m_cylinderImguiLayer->rayIntersection(mousePose);
+        if (intersectionTest.has_value()) {
+            auto &intersection = intersectionTest.value();
+            m_uiStatus[1].x = intersection.x;
+            m_uiStatus[1].y = intersection.y;
+            m_uiStatus[1].mouseOver = intersection.withinBounds;
+            const auto currentButton = m_uiStatus[1].mouseButtonPressed ? KDGui::MouseButton::LeftButton : KDGui::MouseButton::NoButton;
+            KDGui::MouseMoveEvent ev{ 0, currentButton, m_uiStatus[1].x, m_uiStatus[1].y };
+            m_cylinderImguiLayer->overlay().event(nullptr, &ev);
+        }
+
+        if (mouseButtonChanged) {
+            // Only register button presses if the cursor is in bounds
+            if (mouseButtonPressed && m_uiStatus[1].mouseOver) {
+                m_uiStatus[1].mouseButtonPressed = true;
+                KDGui::MousePressEvent ev{ 0, KDGui::MouseButton::LeftButton, KDGui::MouseButton::LeftButton, static_cast<int16_t>(m_uiStatus[1].x), static_cast<int16_t>(m_uiStatus[1].y) };
+                m_cylinderImguiLayer->overlay().event(nullptr, &ev);
+            }
+            // Register all releases, if the button is pressed, regardless of whether the cursor is in bounds
+            else if (!mouseButtonPressed && m_uiStatus[1].mouseButtonPressed) {
+                m_uiStatus[1].mouseButtonPressed = false;
+                KDGui::MouseReleaseEvent ev{ 0, KDGui::MouseButton::LeftButton, KDGui::MouseButton::NoButton, static_cast<int16_t>(m_uiStatus[1].x), static_cast<int16_t>(m_uiStatus[1].y) };
+                m_cylinderImguiLayer->overlay().event(nullptr, &ev);
+            }
+        }
+    }
+}
+
+void HelloXr::drawEditCylinderUi()
+{
+    ImGui::SetNextWindowPos(ImVec2(10, 180));
+    ImGui::SetNextWindowSize(ImVec2(0, 0), ImGuiCond_FirstUseEver);
+    ImGui::Begin("Edit Cylinder",
+                 nullptr,
+                 ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize);
+
+    // Edit the radius of the cylinder
+    auto radiusEdit = m_cylinderImguiLayer->radius.get();
+    ImGui::PushItemWidth(80.0f); // Set consistent width for buttons and text
+    if (ImGui::Button("Narrower##Radius")) {
+        radiusEdit -= 0.25f;
+        if (radiusEdit < 0.25f)
+            radiusEdit = 0.25f;
+        m_cylinderImguiLayer->radius = radiusEdit;
+        m_cylinderImguiLayer->position = { m_cylinderImguiLayer->radius() / 2.0f, 0.2f, 0.0f };
+    }
+    ImGui::SameLine();
+    ImGui::Text("%.2f", radiusEdit);
+    ImGui::SameLine();
+    if (ImGui::Button("Wider##Radius")) {
+        radiusEdit += 0.25f;
+        if (radiusEdit > 5.0f)
+            radiusEdit = 5.0f;
+        m_cylinderImguiLayer->radius = radiusEdit;
+    }
+    ImGui::SameLine();
+    ImGui::Text("Radius");
+
+    // Edit the central angle of the cylinder (in degrees)
+    auto centralAngleEdit = m_cylinderImguiLayer->centralAngle.get() * 180.0f / glm::pi<float>();
+    if (ImGui::Button("Narrower##CentralAngle")) {
+        centralAngleEdit -= 5.0f;
+        if (centralAngleEdit < 15.0f)
+            centralAngleEdit = 15.0f;
+        m_cylinderImguiLayer->centralAngle = centralAngleEdit * glm::pi<float>() / 180.0f;
+    }
+    ImGui::SameLine();
+    ImGui::Text("%.1f", centralAngleEdit);
+    ImGui::SameLine();
+    if (ImGui::Button("Wider##CentralAngle")) {
+        centralAngleEdit += 5.0f;
+        if (centralAngleEdit > 360.0f)
+            centralAngleEdit = 360.0f;
+        m_cylinderImguiLayer->centralAngle = centralAngleEdit * glm::pi<float>() / 180.0f;
+    }
+    ImGui::SameLine();
+    ImGui::Text("Central Angle");
+    ImGui::PopItemWidth();
+
+    ImGui::End();
 }
