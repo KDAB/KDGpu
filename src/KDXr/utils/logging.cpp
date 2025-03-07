@@ -9,9 +9,9 @@
 */
 
 #include "logging.h"
-#if defined(ANDROID)
 #include <spdlog/sinks/android_sink.h>
-#endif
+#include <spdlog/sinks/msvc_sink.h>
+
 namespace KDXr {
 
 std::shared_ptr<spdlog::logger> Logger::ms_logger = {};
@@ -40,6 +40,12 @@ std::shared_ptr<spdlog::logger> Logger::createLogger()
         if (!logger) {
 #if defined(ANDROID)
             logger = spdlog::android_logger_mt("KDXr", "KDXr");
+#elif defined(_WIN32)
+            // Create both msvc_sink and stdout_color_sink
+            auto msvc_sink = std::make_shared<spdlog::sinks::msvc_sink_mt>();
+            auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+            std::vector<spdlog::sink_ptr> sinks{ msvc_sink, console_sink };
+            logger = std::make_shared<spdlog::logger>("KDXr", sinks.begin(), sinks.end());
 #else
             logger = spdlog::stdout_color_mt("KDXr");
 #endif
