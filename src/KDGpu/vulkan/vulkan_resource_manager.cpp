@@ -893,7 +893,7 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
     memoryHandle.allocationSize = allocationInfo.size;
 
     // Retrieve Shared Memory FD/Handle
-    if (options.externalMemoryHandleType == ExternalMemoryHandleTypeFlagBits::OpaqueFD) {
+    if (options.externalMemoryHandleType != ExternalMemoryHandleTypeFlagBits::None) {
 #if defined(VK_KHR_external_memory_fd)
         if (instance->vkGetMemoryFdKHR) {
             VkMemoryGetFdInfoKHR vkMemoryGetFdInfoKHR = {
@@ -906,11 +906,7 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
             instance->vkGetMemoryFdKHR(vulkanDevice->device, &vkMemoryGetFdInfoKHR, &fd);
             memoryHandle.handle = fd;
         }
-#else
-        assert(false);
-#endif
-    } else if (options.externalMemoryHandleType == ExternalMemoryHandleTypeFlagBits::OpaqueWin32) {
-#if defined(VK_KHR_external_memory_win32)
+#elif defined(VK_KHR_external_memory_win32)
         if (instance->vkGetMemoryWin32HandleKHR) {
             VkMemoryGetWin32HandleInfoKHR vkGetWin32HandleInfoKHR = {
                 .sType = VK_STRUCTURE_TYPE_MEMORY_GET_WIN32_HANDLE_INFO_KHR,
@@ -1088,7 +1084,7 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
     memoryHandle.allocationSize = allocationInfo.size;
 
     // Retrieve Shared Memory FD/Handle
-    if (options.externalMemoryHandleType == ExternalMemoryHandleTypeFlagBits::OpaqueFD) {
+    if (options.externalMemoryHandleType != ExternalMemoryHandleTypeFlagBits::None) {
 #if defined(VK_KHR_external_memory_fd)
         if (instance->vkGetMemoryFdKHR) {
             VkMemoryGetFdInfoKHR vkMemoryGetFdInfoKHR = {
@@ -1101,11 +1097,7 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
             instance->vkGetMemoryFdKHR(vulkanDevice->device, &vkMemoryGetFdInfoKHR, &fd);
             memoryHandle.handle = fd;
         }
-#else
-        assert(false);
-#endif
-    } else if (options.externalMemoryHandleType == ExternalMemoryHandleTypeFlagBits::OpaqueWin32) {
-#if defined(VK_KHR_external_memory_win32)
+#elif defined(VK_KHR_external_memory_win32)
         if (instance->vkGetMemoryWin32HandleKHR) {
             VkMemoryGetWin32HandleInfoKHR vkGetWin32HandleInfoKHR = {
                 .sType = VK_STRUCTURE_TYPE_MEMORY_GET_WIN32_HANDLE_INFO_KHR,
