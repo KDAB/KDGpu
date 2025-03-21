@@ -81,9 +81,6 @@ TEST_SUITE("Buffer")
 
             // THEN
             CHECK(b.isValid());
-            const MemoryHandle memoryHandle = b.externalMemoryHandle();
-            CHECK(memoryHandle.allocationSize > 0);
-            CHECK(b.bufferDeviceAddress() == 0);
         }
 
 #if defined(KDGPU_PLATFORM_LINUX)

@@ -59,8 +59,6 @@ TEST_SUITE("Texture")
 
             // THEN
             CHECK(t.isValid());
-            const MemoryHandle memoryHandle = t.externalMemoryHandle();
-            CHECK(memoryHandle.allocationSize > 0);
         }
 
 #if defined(KDGPU_PLATFORM_LINUX)

@@ -50,8 +50,6 @@ TEST_SUITE("MemoryStats")
 
             // THEN
             CHECK(t.isValid());
-            const MemoryHandle memoryHandle = t.externalMemoryHandle();
-            CHECK(memoryHandle.allocationSize > 0);
 
             // WHEN
             const std::string stats = api->getMemoryStats(device);

@@ -117,6 +117,16 @@ SpecializationConstantData getByteOffsetSizeAndRawValueForSpecializationConstant
 template<class>
 inline constexpr bool always_false = false;
 
+template<typename F>
+bool testIfContainsAnyFlags(const KDGpu::Flags<F> &flags, const std::vector<F> &flagsToTest)
+{
+    for (const auto f : flagsToTest) {
+        if (flags.testFlag(f))
+            return true;
+    }
+    return false;
+}
+
 } // namespace
 namespace KDGpu {
 
@@ -853,7 +863,6 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
 
     VmaAllocator allocator = vulkanDevice->allocator;
     VkExternalMemoryImageCreateInfo vkExternalMemImageCreateInfo = {};
-    MemoryHandle memoryHandle{};
     if (options.externalMemoryHandleType != ExternalMemoryHandleTypeFlagBits::None) {
         vkExternalMemImageCreateInfo.sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO,
         vkExternalMemImageCreateInfo.pNext = std::exchange(createInfo.pNext, &vkExternalMemImageCreateInfo);
@@ -889,39 +898,10 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
     VmaAllocationInfo allocationInfo;
     vmaGetAllocationInfo(allocator, vmaAllocation, &allocationInfo);
 
-    memoryHandle.allocationOffset = allocationInfo.offset;
-    memoryHandle.allocationSize = allocationInfo.size;
-
     // Retrieve Shared Memory FD/Handle
-    if (options.externalMemoryHandleType != ExternalMemoryHandleTypeFlagBits::None) {
-#if defined(VK_KHR_external_memory_fd)
-        if (instance->vkGetMemoryFdKHR) {
-            VkMemoryGetFdInfoKHR vkMemoryGetFdInfoKHR = {
-                .sType = VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR,
-                .pNext = nullptr,
-                .memory = allocationInfo.deviceMemory,
-                .handleType = externalMemoryHandleTypeToVkExternalMemoryHandleType(options.externalMemoryHandleType)
-            };
-            int fd{};
-            instance->vkGetMemoryFdKHR(vulkanDevice->device, &vkMemoryGetFdInfoKHR, &fd);
-            memoryHandle.handle = fd;
-        }
-#elif defined(VK_KHR_external_memory_win32)
-        if (instance->vkGetMemoryWin32HandleKHR) {
-            VkMemoryGetWin32HandleInfoKHR vkGetWin32HandleInfoKHR = {
-                .sType = VK_STRUCTURE_TYPE_MEMORY_GET_WIN32_HANDLE_INFO_KHR,
-                .pNext = nullptr,
-                .memory = allocationInfo.deviceMemory,
-                .handleType = externalMemoryHandleTypeToVkExternalMemoryHandleType(options.externalMemoryHandleType)
-            };
-            HANDLE winHandle{};
-            instance->vkGetMemoryWin32HandleKHR(vulkanDevice->device, &vkGetWin32HandleInfoKHR, &winHandle);
-            memoryHandle.handle = winHandle;
-        }
-#else
-        assert(false);
-#endif
-    }
+    const MemoryHandle memoryHandle = (options.externalMemoryHandleType != ExternalMemoryHandleTypeFlagBits::None)
+            ? retrieveExternalMemoryHandle(instance, vulkanDevice, allocationInfo, options.externalMemoryHandleType)
+            : MemoryHandle{};
 
     uint64_t drmFormatModifier = 0;
 #if defined(VK_EXT_image_drm_format_modifier)
@@ -1053,7 +1033,6 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
 
     VmaAllocator allocator = vulkanDevice->allocator;
     VkExternalMemoryBufferCreateInfo vkExternalMemBufferCreateInfo = {};
-    MemoryHandle memoryHandle{};
 
     if (options.externalMemoryHandleType != ExternalMemoryHandleTypeFlagBits::None) {
         vkExternalMemBufferCreateInfo.sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_BUFFER_CREATE_INFO;
@@ -1080,39 +1059,10 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
     VmaAllocationInfo allocationInfo;
     vmaGetAllocationInfo(allocator, vmaAllocation, &allocationInfo);
 
-    memoryHandle.allocationOffset = allocationInfo.offset;
-    memoryHandle.allocationSize = allocationInfo.size;
-
     // Retrieve Shared Memory FD/Handle
-    if (options.externalMemoryHandleType != ExternalMemoryHandleTypeFlagBits::None) {
-#if defined(VK_KHR_external_memory_fd)
-        if (instance->vkGetMemoryFdKHR) {
-            VkMemoryGetFdInfoKHR vkMemoryGetFdInfoKHR = {
-                .sType = VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR,
-                .pNext = nullptr,
-                .memory = allocationInfo.deviceMemory,
-                .handleType = externalMemoryHandleTypeToVkExternalMemoryHandleType(options.externalMemoryHandleType)
-            };
-            int fd{};
-            instance->vkGetMemoryFdKHR(vulkanDevice->device, &vkMemoryGetFdInfoKHR, &fd);
-            memoryHandle.handle = fd;
-        }
-#elif defined(VK_KHR_external_memory_win32)
-        if (instance->vkGetMemoryWin32HandleKHR) {
-            VkMemoryGetWin32HandleInfoKHR vkGetWin32HandleInfoKHR = {
-                .sType = VK_STRUCTURE_TYPE_MEMORY_GET_WIN32_HANDLE_INFO_KHR,
-                .pNext = nullptr,
-                .memory = allocationInfo.deviceMemory,
-                .handleType = externalMemoryHandleTypeToVkExternalMemoryHandleType(options.externalMemoryHandleType)
-            };
-            HANDLE winHandle{};
-            VkResult res = instance->vkGetMemoryWin32HandleKHR(vulkanDevice->device, &vkGetWin32HandleInfoKHR, &winHandle);
-            memoryHandle.handle = winHandle;
-        }
-#else
-        assert(false);
-#endif
-    }
+    const MemoryHandle memoryHandle = (options.externalMemoryHandleType != ExternalMemoryHandleTypeFlagBits::None)
+            ? retrieveExternalMemoryHandle(instance, vulkanDevice, allocationInfo, options.externalMemoryHandleType)
+            : MemoryHandle{};
 
     BufferDeviceAddress bufferDeviceAddress{ 0 };
     if (options.usage.testFlag(BufferUsageFlagBits::ShaderDeviceAddressBit)) {
@@ -3432,6 +3382,75 @@ std::vector<std::string> VulkanResourceManager::getAvailableLayers() const
     }
 
     return layers;
+}
+
+MemoryHandle VulkanResourceManager::retrieveExternalMemoryHandle(VulkanInstance *instance,
+                                                                 VulkanDevice *vulkanDevice,
+                                                                 const VmaAllocationInfo &allocationInfo,
+                                                                 ExternalMemoryHandleTypeFlags handleType) const
+{
+    MemoryHandle memoryHandle{
+        .allocationSize = allocationInfo.size,
+        .allocationOffset = allocationInfo.offset,
+    };
+#if !defined(KDGPU_PLATFORM_WIN32)
+    if (testIfContainsAnyFlags(handleType,
+                               {
+                                       ExternalMemoryHandleTypeFlagBits::OpaqueFD,
+                                       ExternalMemoryHandleTypeFlagBits::DmaBuf,
+                               })) {
+#if defined(VK_KHR_external_memory_fd)
+        if (instance->vkGetMemoryFdKHR) {
+            VkMemoryGetFdInfoKHR vkMemoryGetFdInfoKHR = {
+                .sType = VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR,
+                .pNext = nullptr,
+                .memory = allocationInfo.deviceMemory,
+                .handleType = externalMemoryHandleTypeToVkExternalMemoryHandleType(handleType)
+            };
+            int fd{};
+            instance->vkGetMemoryFdKHR(vulkanDevice->device, &vkMemoryGetFdInfoKHR, &fd);
+            memoryHandle.handle = fd;
+        }
+#else
+        assert(false);
+#endif // VK_KHR_external_memory_fd
+    }
+
+#else // KDGPU_PLATFORM_WIN32
+
+    if (testIfContainsAnyFlags(handleType,
+                               {
+                                       ExternalMemoryHandleTypeFlagBits::OpaqueWin32,
+                                       ExternalMemoryHandleTypeFlagBits::OpaqueWin32Kmt,
+                                       ExternalMemoryHandleTypeFlagBits::D3D11Texture,
+                                       ExternalMemoryHandleTypeFlagBits::D3D11TextureKmt,
+                                       ExternalMemoryHandleTypeFlagBits::D3D12Heap,
+                                       ExternalMemoryHandleTypeFlagBits::D3D12Resource,
+                               })) {
+#if defined(VK_KHR_external_memory_win32)
+        if (instance->vkGetMemoryWin32HandleKHR) {
+            VkMemoryGetWin32HandleInfoKHR vkGetWin32HandleInfoKHR = {
+                .sType = VK_STRUCTURE_TYPE_MEMORY_GET_WIN32_HANDLE_INFO_KHR,
+                .pNext = nullptr,
+                .memory = allocationInfo.deviceMemory,
+                .handleType = externalMemoryHandleTypeToVkExternalMemoryHandleType(handleType)
+            };
+            HANDLE winHandle{};
+            instance->vkGetMemoryWin32HandleKHR(vulkanDevice->device, &vkGetWin32HandleInfoKHR, &winHandle);
+            memoryHandle.handle = winHandle;
+        }
+#else
+        assert(false);
+#endif // VK_KHR_external_memory_win32
+    }
+
+#endif // KDGPU_PLATFORM_WIN32
+
+    else {
+        assert(false); // Unsupported Handle Type
+    }
+
+    return memoryHandle;
 }
 
 } // namespace KDGpu
