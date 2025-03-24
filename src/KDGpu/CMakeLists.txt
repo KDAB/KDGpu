@@ -40,6 +40,7 @@ set(SOURCES
     texture.cpp
     texture_view.cpp
     timestamp_query_recorder.cpp
+    ycbcr_conversion.cpp
     utils/logging.cpp
     vulkan/vulkan_acceleration_structure.cpp
     vulkan/vulkan_adapter.cpp
@@ -73,6 +74,7 @@ set(SOURCES
     vulkan/vulkan_texture.cpp
     vulkan/vulkan_texture_view.cpp
     vulkan/vulkan_timestamp_query_recorder.cpp
+    vulkan/vulkan_ycbcr_conversion.cpp
     vulkan/vk_mem_alloc.cpp
 )
 
@@ -135,6 +137,8 @@ set(HEADERS
     texture_view_options.h
     timestamp_query_recorder.h
     timestamp_query_recorder_options.h
+    ycbcr_conversion.h
+    ycbcr_conversion_options.h
     api/api_type.h
     utils/flags.h
     utils/formatters.h
@@ -173,6 +177,7 @@ set(HEADERS
     vulkan/vulkan_texture.h
     vulkan/vulkan_texture_view.h
     vulkan/vulkan_timestamp_query_recorder.h
+    vulkan/vulkan_ycbcr_conversion.h
 )
 
 add_library(

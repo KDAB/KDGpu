@@ -151,6 +151,12 @@ struct SpecializationConstant {
     std::variant<bool, int32_t, uint32_t, float, double> value;
 };
 
+struct MemoryRequirement {
+    DeviceSize size;
+    DeviceSize alignment;
+    int memoryTypeBits;
+};
+
 enum class SampleCountFlagBits {
     Samples1Bit = 0x00000001,
     Samples2Bit = 0x00000002,
@@ -1224,6 +1230,41 @@ enum class HostImageCopyFlagBits {
     HostImageMemcpy = 0x00000001,
 };
 using HostImageCopyFlags = KDGpu::Flags<HostImageCopyFlagBits>;
+
+enum class SamplerYCbCrModelConversion {
+    RgbIdentity = 0,
+    YCbCrIdentity = 1,
+    YCbCr709 = 2,
+    YCbCr601 = 3,
+    YCbCr2020 = 4,
+};
+
+enum class SamplerYCbCrRange {
+    ItuFull = 0,
+    ItuNarrow = 1,
+};
+
+enum class ChromaLocation {
+    CositedEven = 0,
+    MidPoint = 1,
+};
+
+enum class ComponentSwizzle {
+    Identity = 0,
+    Zero = 1,
+    One = 2,
+    R = 3,
+    G = 4,
+    B = 5,
+    A = 6,
+};
+
+struct ComponentMapping {
+    ComponentSwizzle r;
+    ComponentSwizzle g;
+    ComponentSwizzle b;
+    ComponentSwizzle a;
+};
 
 /*! @} */
 

@@ -142,6 +142,11 @@ struct KDGPU_EXPORT VulkanDevice {
     PFN_vkCmdDrawMeshTasksIndirectEXT vkCmdDrawMeshTasksIndirectEXT{ nullptr };
 #endif
 
+#if defined(VK_KHR_sampler_ycbcr_conversion)
+    PFN_vkCreateSamplerYcbcrConversionKHR vkCreateSamplerYcbcrConversionKHR{ nullptr };
+    PFN_vkDestroySamplerYcbcrConversionKHR vkDestroySamplerYcbcrConversionKHR{ nullptr };
+#endif
+
     bool isOwned{ true };
 };
 

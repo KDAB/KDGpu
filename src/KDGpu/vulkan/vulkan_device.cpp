@@ -188,6 +188,18 @@ VulkanDevice::VulkanDevice(VkDevice _device,
         }
     }
 #endif
+
+#if defined(VK_KHR_sampler_ycbcr_conversion)
+    if (vulkanAdapter->queryAdapterFeatures().samplerYCbCrConversion) {
+        const auto adapterExtensions = vulkanAdapter->extensions();
+        for (const auto &extension : adapterExtensions) {
+            if (extension.name == VK_KHR_SAMPLER_YCBCR_CONVERSION_EXTENSION_NAME) {
+                this->vkCreateSamplerYcbcrConversionKHR = (PFN_vkCreateSamplerYcbcrConversionKHR)vkGetDeviceProcAddr(device, "vkCreateSamplerYcbcrConversionKHR");
+                this->vkDestroySamplerYcbcrConversionKHR = (PFN_vkDestroySamplerYcbcrConversionKHR)vkGetDeviceProcAddr(device, "vkDestroySamplerYcbcrConversionKHR");
+            }
+        }
+    }
+#endif
 }
 
 std::vector<QueueDescription> VulkanDevice::getQueues(ResourceManager *resourceManager,

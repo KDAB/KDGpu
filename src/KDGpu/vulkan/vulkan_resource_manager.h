@@ -38,6 +38,7 @@
 #include <KDGpu/vulkan/vulkan_acceleration_structure.h>
 #include <KDGpu/vulkan/vulkan_raytracing_pipeline.h>
 #include <KDGpu/vulkan/vulkan_raytracing_pass_command_recorder.h>
+#include <KDGpu/vulkan/vulkan_ycbcr_conversion.h>
 
 #include <KDGpu/instance.h>
 #include <KDGpu/pool.h>
@@ -197,6 +198,10 @@ public:
     void deleteAccelerationStructure(const Handle<AccelerationStructure_t> &handle);
     VulkanAccelerationStructure *getAccelerationStructure(const Handle<AccelerationStructure_t> &handle) const;
 
+    Handle<YCbCrConversion_t> createYCbCrConversion(const Handle<Device_t> &deviceHandle, const YCbCrConversionOptions &options);
+    void deleteYCbCrConversion(const Handle<YCbCrConversion_t> &handle);
+    VulkanYCbCrConversion *getYCbCrConversion(const Handle<YCbCrConversion_t> &handle) const;
+
     std::string getMemoryStats(const Handle<Device_t> &device) const;
 
     KDGpu::Format formatFromTextureView(const Handle<TextureView_t> &viewHandle) const;
@@ -276,7 +281,7 @@ private:
     Pool<VulkanFence, Fence_t> m_fences{ 16 };
     Pool<VulkanTimestampQueryRecorder, TimestampQueryRecorder_t> m_timestampQueryRecorders{ 4 };
     Pool<VulkanAccelerationStructure, AccelerationStructure_t> m_accelerationStructures{ 32 };
-
+    Pool<VulkanYCbCrConversion, YCbCrConversion_t> m_yCbCrConversions{ 16 };
     struct TimestampQueryBucket {
         uint32_t start;
         uint32_t count;

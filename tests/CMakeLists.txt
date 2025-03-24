@@ -66,6 +66,7 @@ add_subdirectory(vulkanrenderpasskey)
 add_subdirectory(acceleration_structure)
 add_subdirectory(raytracing_pipeline)
 add_subdirectory(raytracing_pass_command_recorder)
+add_subdirectory(ycbcrconversions)
 
 find_package(CUDAToolkit QUIET)
 if(${CUDAToolkit_FOUND})

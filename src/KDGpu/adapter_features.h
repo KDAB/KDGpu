@@ -113,6 +113,7 @@ struct AdapterFeatures {
     bool primitiveFragmentShadingRateMeshShader;
     bool meshShaderQueries;
     bool hostImageCopy;
+    bool samplerYCbCrConversion;
 };
 
 /*! @} */

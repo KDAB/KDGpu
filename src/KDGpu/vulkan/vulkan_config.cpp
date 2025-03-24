@@ -124,6 +124,9 @@ std::vector<const char *> getDefaultRequestedDeviceExtensions()
 #if defined(VK_KHR_shader_non_semantic_info)
         VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME,
 #endif
+#if defined(VK_KHR_sampler_ycbcr_conversion)
+        VK_KHR_SAMPLER_YCBCR_CONVERSION_EXTENSION_NAME,
+#endif
     };
 
     return extensions;

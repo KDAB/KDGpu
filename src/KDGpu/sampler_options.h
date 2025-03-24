@@ -11,9 +11,11 @@
 #pragma once
 
 #include <KDGpu/gpu_core.h>
+#include <KDGpu/ycbcr_conversion.h>
 
 namespace KDGpu {
 
+struct YCbCrConversion_t;
 struct SamplerOptions {
     std::string_view label;
     FilterMode magFilter{ FilterMode::Nearest };
@@ -35,6 +37,8 @@ struct SamplerOptions {
     CompareOperation compare{ CompareOperation::Never };
 
     bool normalizedCoordinates{ true };
+
+    Handle<YCbCrConversion_t> yCbCrConversion{};
 };
 
 } // namespace KDGpu

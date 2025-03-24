@@ -113,6 +113,8 @@ public:
 
     AccelerationStructure createAccelerationStructure(const AccelerationStructureOptions &options = AccelerationStructureOptions());
 
+    YCbCrConversion createYCbCrConversion(const YCbCrConversionOptions &options);
+
     GraphicsApi *graphicsApi() const;
 
 private:

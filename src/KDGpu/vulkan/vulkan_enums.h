@@ -148,4 +148,12 @@ VkHostImageCopyFlagsEXT hostImageCopyFlagsToVkHostImageCopyFlags(HostImageCopyFl
 
 VkImageAspectFlags textureAspectFlagsToVkImageAspectFlags(TextureAspectFlags flags);
 
+VkSamplerYcbcrModelConversion samplerYCbCrModelConvertionToVkSamplerYCbCrModelConversion(SamplerYCbCrModelConversion conversion);
+
+VkSamplerYcbcrRange samplerYCbCrRangeToVkSamplerYCbCrRange(SamplerYCbCrRange range);
+
+VkChromaLocation chromaLocationToVkChromaLocation(ChromaLocation location);
+
+VkComponentSwizzle componentSwizzleToVkComponentSwizzle(ComponentSwizzle swizzle);
+
 } // namespace KDGpu

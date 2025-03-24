@@ -447,6 +447,12 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
     addToChain(&hostImageCopyFeatures);
 #endif
 
+#if defined(VK_KHR_sampler_ycbcr_conversion)
+    VkPhysicalDeviceSamplerYcbcrConversionFeaturesKHR ycbcrConversionFeatures{};
+    ycbcrConversionFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SAMPLER_YCBCR_CONVERSION_FEATURES_KHR;
+    addToChain(&ycbcrConversionFeatures);
+#endif
+
     vkGetPhysicalDeviceFeatures2(physicalDevice, &deviceFeatures2);
     const VkPhysicalDeviceFeatures &deviceFeatures = deviceFeatures2.features;
 
@@ -543,6 +549,7 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
         .primitiveFragmentShadingRateMeshShader = static_cast<bool>(meshShaderFeatures.primitiveFragmentShadingRateMeshShader),
         .meshShaderQueries = false,
         .hostImageCopy = false,
+        .samplerYCbCrConversion = false,
     };
 
 #if defined(VK_KHR_acceleration_structure)
@@ -570,6 +577,10 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
 
 #if defined(VK_EXT_host_image_copy)
     features.hostImageCopy = static_cast<bool>(hostImageCopyFeatures.hostImageCopy);
+#endif
+
+#if defined(VK_KHR_sampler_ycbcr_conversion)
+    features.samplerYCbCrConversion = static_cast<bool>(ycbcrConversionFeatures.samplerYcbcrConversion);
 #endif
 
     return features;

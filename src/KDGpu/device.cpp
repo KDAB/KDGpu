@@ -196,6 +196,11 @@ AccelerationStructure Device::createAccelerationStructure(const KDGpu::Accelerat
     return AccelerationStructure(m_api, m_device, options);
 }
 
+YCbCrConversion Device::createYCbCrConversion(const YCbCrConversionOptions &options)
+{
+    return YCbCrConversion(m_api, m_device, options);
+}
+
 GraphicsApi *Device::graphicsApi() const
 {
     return m_api;

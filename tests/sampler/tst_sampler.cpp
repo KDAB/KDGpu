@@ -26,10 +26,11 @@ TEST_SUITE("Sampler")
             .applicationName = "sampler",
             .applicationVersion = KDGPU_MAKE_API_VERSION(0, 1, 0, 0) });
     Adapter *discreteGPUAdapter = instance.selectAdapter(AdapterDeviceType::Default);
-    Device device = discreteGPUAdapter->createDevice();
 
     TEST_CASE("Construction")
     {
+        Device device = discreteGPUAdapter->createDevice();
+
         SUBCASE("A default constructed Sampler is invalid")
         {
             // GIVEN
@@ -53,6 +54,8 @@ TEST_SUITE("Sampler")
 
     TEST_CASE("Destruction")
     {
+        Device device = discreteGPUAdapter->createDevice();
+
         // GIVEN
         const SamplerOptions samplerOptions{};
 
@@ -96,6 +99,8 @@ TEST_SUITE("Sampler")
 
     TEST_CASE("Comparison")
     {
+        Device device = discreteGPUAdapter->createDevice();
+
         SUBCASE("Compare default constructed Samplers")
         {
             // GIVEN
@@ -119,4 +124,38 @@ TEST_SUITE("Sampler")
             CHECK(a != b);
         }
     }
+
+#if defined(VK_KHR_sampler_ycbcr_conversion)
+    TEST_CASE("YUV Sampling" * doctest::skip(!discreteGPUAdapter->features().samplerYCbCrConversion))
+    {
+        REQUIRE(discreteGPUAdapter->features().samplerYCbCrConversion);
+
+        Device device = discreteGPUAdapter->createDevice(DeviceOptions{
+                .requestedFeatures = {
+                        .samplerYCbCrConversion = true,
+                },
+        });
+
+        // GIVEN
+        const YCbCrConversion ycbCrConversion = device.createYCbCrConversion(YCbCrConversionOptions{
+                .format = Format::G8_B8_R8_3PLANE_420_UNORM,
+        });
+
+        const SamplerOptions samplerOptions{
+            .u = AddressMode::ClampToEdge,
+            .v = AddressMode::ClampToEdge,
+            .w = AddressMode::ClampToEdge,
+            .yCbCrConversion = ycbCrConversion,
+        };
+
+        // THEN
+        CHECK(ycbCrConversion.isValid());
+
+        // WHEN
+        Sampler s = device.createSampler(samplerOptions);
+
+        // THEN
+        CHECK(s.isValid()); // And no validation errors
+    }
+#endif
 }

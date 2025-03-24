@@ -524,6 +524,16 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     }
 #endif
 
+#if defined(VK_KHR_sampler_ycbcr_conversion)
+    VkPhysicalDeviceSamplerYcbcrConversionFeaturesKHR ycbcrConversionFeatures{};
+    if (options.requestedFeatures.samplerYCbCrConversion) {
+        // Enable yCbCr sampler conversion
+        ycbcrConversionFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SAMPLER_YCBCR_CONVERSION_FEATURES_KHR;
+        ycbcrConversionFeatures.samplerYcbcrConversion = options.requestedFeatures.samplerYCbCrConversion;
+        addToChain(&ycbcrConversionFeatures);
+    }
+#endif
+
     std::vector<VkPhysicalDevice> devicesInGroup;
     const size_t adapterCount = options.adapterGroup.adapters.size();
     const bool useDeviceGroup = adapterCount > 1;
@@ -987,6 +997,22 @@ Handle<TextureView_t> VulkanResourceManager::createTextureView(const Handle<Devi
             createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         }
     }
+
+#if defined(VK_KHR_sampler_ycbcr_conversion)
+    VkSamplerYcbcrConversionKHR yCbCrConversion{ VK_NULL_HANDLE };
+    VkSamplerYcbcrConversionInfoKHR yCbCrInfo{ .sType = VK_STRUCTURE_TYPE_SAMPLER_YCBCR_CONVERSION_INFO_KHR };
+
+    if (options.yCbCrConversion.isValid()) {
+        VulkanYCbCrConversion *vulkanConversion = m_yCbCrConversions.get(options.yCbCrConversion);
+        assert(vulkanConversion);
+        yCbCrConversion = vulkanConversion->yCbCrConversion;
+        // Set Conversion Object on Sampler
+        yCbCrInfo.conversion = yCbCrConversion;
+        createInfo.pNext = &yCbCrInfo;
+    }
+#else
+    assert(!options.yCbCrConversion.isValid());
+#endif
 
     VkImageView imageView;
     if (auto result = vkCreateImageView(vulkanDevice->device, &createInfo, nullptr, &imageView); result != VK_SUCCESS) {
@@ -3032,6 +3058,22 @@ Handle<Sampler_t> VulkanResourceManager::createSampler(const Handle<Device_t> &d
 
     samplerInfo.unnormalizedCoordinates = !options.normalizedCoordinates;
 
+#if defined(VK_KHR_sampler_ycbcr_conversion)
+    VkSamplerYcbcrConversionKHR yCbCrConversion{ VK_NULL_HANDLE };
+    VkSamplerYcbcrConversionInfoKHR yCbCrInfo{ .sType = VK_STRUCTURE_TYPE_SAMPLER_YCBCR_CONVERSION_INFO_KHR };
+
+    if (options.yCbCrConversion.isValid()) {
+        VulkanYCbCrConversion *vulkanConversion = m_yCbCrConversions.get(options.yCbCrConversion);
+        assert(vulkanConversion);
+        yCbCrConversion = vulkanConversion->yCbCrConversion;
+        // Set Conversion Object on Sampler
+        yCbCrInfo.conversion = yCbCrConversion;
+        samplerInfo.pNext = &yCbCrInfo;
+    }
+#else
+    assert(!options.yCbCrConversion.isValid());
+#endif
+
     VkSampler sampler{ VK_NULL_HANDLE };
     if (auto result = vkCreateSampler(vulkanDevice->device, &samplerInfo, nullptr, &sampler); result != VK_SUCCESS) {
         SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating sampler: {}", result);
@@ -3050,7 +3092,6 @@ void VulkanResourceManager::deleteSampler(const Handle<Sampler_t> &handle)
     VulkanDevice *vulkanDevice = m_devices.get(sampler->deviceHandle);
 
     vkDestroySampler(vulkanDevice->device, sampler->sampler, nullptr);
-
     m_samplers.remove(handle);
 }
 
@@ -3249,6 +3290,64 @@ void VulkanResourceManager::deleteAccelerationStructure(const Handle<Acceleratio
 VulkanAccelerationStructure *VulkanResourceManager::getAccelerationStructure(const Handle<AccelerationStructure_t> &handle) const
 {
     return m_accelerationStructures.get(handle);
+}
+
+Handle<YCbCrConversion_t> VulkanResourceManager::createYCbCrConversion(const Handle<Device_t> &deviceHandle, const YCbCrConversionOptions &options)
+{
+#if defined(VK_KHR_sampler_ycbcr_conversion)
+    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
+
+    assert(vulkanDevice->requestedFeatures.samplerYCbCrConversion);
+
+    VkSamplerYcbcrConversionKHR vkYCbCrConversion{ VK_NULL_HANDLE };
+
+    VkSamplerYcbcrConversionCreateInfoKHR yCbCrConvInfo{};
+    yCbCrConvInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_YCBCR_CONVERSION_CREATE_INFO_KHR;
+    yCbCrConvInfo.format = formatToVkFormat(options.format);
+    yCbCrConvInfo.ycbcrModel = samplerYCbCrModelConvertionToVkSamplerYCbCrModelConversion(options.model);
+    yCbCrConvInfo.ycbcrRange = samplerYCbCrRangeToVkSamplerYCbCrRange(options.range);
+    yCbCrConvInfo.components = VkComponentMapping{
+        .r = componentSwizzleToVkComponentSwizzle(options.components.r),
+        .g = componentSwizzleToVkComponentSwizzle(options.components.g),
+        .b = componentSwizzleToVkComponentSwizzle(options.components.b),
+        .a = componentSwizzleToVkComponentSwizzle(options.components.a),
+    };
+    yCbCrConvInfo.xChromaOffset = chromaLocationToVkChromaLocation(options.xChromaOffset);
+    yCbCrConvInfo.yChromaOffset = chromaLocationToVkChromaLocation(options.yChromaOffset);
+    yCbCrConvInfo.chromaFilter = filterModeToVkFilterMode(options.chromaFilter);
+    yCbCrConvInfo.forceExplicitReconstruction = options.forceExplicitReconstruction;
+
+    // Create Conversion Object
+    if (auto result = vulkanDevice->vkCreateSamplerYcbcrConversionKHR(vulkanDevice->device, &yCbCrConvInfo, nullptr, &vkYCbCrConversion)) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating sampler Ycbcr conversion: {}", result);
+        return {};
+    }
+
+    setObjectName(vulkanDevice, VK_OBJECT_TYPE_SAMPLER_YCBCR_CONVERSION_KHR, reinterpret_cast<uint64_t>(vkYCbCrConversion), options.label);
+
+    auto conversionHandle = m_yCbCrConversions.emplace(VulkanYCbCrConversion(vkYCbCrConversion, deviceHandle));
+    return conversionHandle;
+#else
+    return {};
+#endif
+}
+
+void VulkanResourceManager::deleteYCbCrConversion(const Handle<YCbCrConversion_t> &handle)
+{
+#if defined(VK_KHR_sampler_ycbcr_conversion)
+    VulkanYCbCrConversion *conversion = m_yCbCrConversions.get(handle);
+    VulkanDevice *vulkanDevice = m_devices.get(conversion->deviceHandle);
+    vulkanDevice->vkDestroySamplerYcbcrConversionKHR(vulkanDevice->device, conversion->yCbCrConversion, nullptr);
+    m_yCbCrConversions.remove(handle);
+#endif
+}
+
+VulkanYCbCrConversion *VulkanResourceManager::getYCbCrConversion(const Handle<YCbCrConversion_t> &handle) const
+{
+#if defined(VK_KHR_sampler_ycbcr_conversion)
+    return m_yCbCrConversions.get(handle);
+#endif
+    return nullptr;
 }
 
 std::string VulkanResourceManager::getMemoryStats(const Handle<Device_t> &device) const

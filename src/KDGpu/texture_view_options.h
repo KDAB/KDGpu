@@ -11,16 +11,18 @@
 #pragma once
 
 #include <KDGpu/gpu_core.h>
+#include <KDGpu/ycbcr_conversion.h>
 
 namespace KDGpu {
 
-struct Texture_t;
+struct YCbCrConversion_t;
 
 struct TextureViewOptions {
     std::string_view label;
     ViewType viewType{ ViewType::ViewType2D };
     Format format{ Format::UNDEFINED };
     TextureSubresourceRange range{};
+    Handle<YCbCrConversion_t> yCbCrConversion{};
 };
 
 } // namespace KDGpu

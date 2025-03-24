@@ -447,4 +447,24 @@ VkImageAspectFlags textureAspectFlagsToVkImageAspectFlags(TextureAspectFlags fla
     return static_cast<VkImageAspectFlags>(flags.toInt());
 }
 
+VkSamplerYcbcrModelConversion samplerYCbCrModelConvertionToVkSamplerYCbCrModelConversion(SamplerYCbCrModelConversion conversion)
+{
+    return static_cast<VkSamplerYcbcrModelConversion>(conversion);
+}
+
+VkSamplerYcbcrRange samplerYCbCrRangeToVkSamplerYCbCrRange(SamplerYCbCrRange range)
+{
+    return static_cast<VkSamplerYcbcrRange>(range);
+}
+
+VkChromaLocation chromaLocationToVkChromaLocation(ChromaLocation location)
+{
+    return static_cast<VkChromaLocation>(location);
+}
+
+VkComponentSwizzle componentSwizzleToVkComponentSwizzle(ComponentSwizzle swizzle)
+{
+    return static_cast<VkComponentSwizzle>(swizzle);
+}
+
 } // namespace KDGpu
