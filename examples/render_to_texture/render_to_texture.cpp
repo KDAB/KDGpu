@@ -29,19 +29,6 @@
 #include <fstream>
 #include <string>
 
-namespace KDGpu {
-
-inline std::string assetPath()
-{
-#if defined(KDGPU_ASSET_PATH)
-    return KDGPU_ASSET_PATH;
-#else
-    return "";
-#endif
-}
-
-} // namespace KDGpu
-
 void RenderToTexture::initializeScene()
 {
     using std::placeholders::_1;
@@ -151,10 +138,10 @@ void RenderToTexture::initializeMainScene()
     }
 
     // Create a vertex shader and fragment shader (spir-v only for now)
-    const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/render_to_texture/rotating_triangle.vert.spv";
+    auto vertexShaderPath = KDGpuExample::assetDir().file("shaders/examples/render_to_texture/rotating_triangle.vert.spv");
     auto vertexShader = m_device.createShaderModule(KDGpuExample::readShaderFile(vertexShaderPath));
 
-    const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/render_to_texture/rotating_triangle.frag.spv";
+    auto fragmentShaderPath = KDGpuExample::assetDir().file("shaders/examples/render_to_texture/rotating_triangle.frag.spv");
     auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
 
     // Create bind group layout consisting of a single binding holding a UBO
@@ -250,10 +237,10 @@ void RenderToTexture::initializePostProcess()
 
     // Create a vertex shader and fragment shader (spir-v only for now)
     //![3]
-    const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/render_to_texture/desaturate.vert.spv";
+    auto vertexShaderPath = KDGpuExample::assetDir().file("shaders/examples/render_to_texture/desaturate.vert.spv");
     auto vertexShader = m_device.createShaderModule(KDGpuExample::readShaderFile(vertexShaderPath));
 
-    const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/render_to_texture/desaturate.frag.spv";
+    auto fragmentShaderPath = KDGpuExample::assetDir().file("shaders/examples/render_to_texture/desaturate.frag.spv");
     auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
     //![3]
 

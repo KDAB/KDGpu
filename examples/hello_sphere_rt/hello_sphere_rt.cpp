@@ -35,19 +35,6 @@
 #include <string>
 #include <random>
 
-namespace KDGpu {
-
-inline std::string assetPath()
-{
-#if defined(KDGPU_ASSET_PATH)
-    return KDGPU_ASSET_PATH;
-#else
-    return "";
-#endif
-}
-
-} // namespace KDGpu
-
 namespace {
 
 std::vector<uint8_t> updateCameraData(float width, float height, glm::vec3 position, glm::vec3 center)
@@ -74,10 +61,10 @@ HelloSphereRt::HelloSphereRt()
 void HelloSphereRt::createRayTracingPipeline()
 {
     // Create raytracing shaders
-    const auto rayTracingGenShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_sphere_rt/raygen.spv";
-    const auto rayTracingMissShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_sphere_rt/miss.spv";
-    const auto rayTracingClosestShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_sphere_rt/closest.spv";
-    const auto rayTracingIntersectionShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_sphere_rt/intersection.spv";
+    auto rayTracingGenShaderPath = KDGpuExample::assetDir().file("shaders/examples/hello_sphere_rt/raygen.spv");
+    auto rayTracingMissShaderPath = KDGpuExample::assetDir().file("shaders/examples/hello_sphere_rt/miss.spv");
+    auto rayTracingClosestShaderPath = KDGpuExample::assetDir().file("shaders/examples/hello_sphere_rt/closest.spv");
+    auto rayTracingIntersectionShaderPath = KDGpuExample::assetDir().file("shaders/examples/hello_sphere_rt/intersection.spv");
 
     auto rayTracingGenShader = m_device.createShaderModule(readShaderFile(rayTracingGenShaderPath));
     auto rayTracingMissShader = m_device.createShaderModule(readShaderFile(rayTracingMissShaderPath));

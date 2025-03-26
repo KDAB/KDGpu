@@ -17,26 +17,13 @@
 
 #include <string>
 
-namespace KDGpu {
-
-inline std::string assetPath()
-{
-#if defined(KDGPU_ASSET_PATH)
-    return KDGPU_ASSET_PATH;
-#else
-    return "";
-#endif
-}
-
-} // namespace KDGpu
-
 void HelloSphereMesh::initializeScene()
 {
     // Create a mesh shader and fragment shader
-    const auto meshShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_sphere_mesh/hello_sphere_mesh.mesh.spv";
+    auto meshShaderPath = KDGpuExample::assetDir().file("shaders/examples/hello_sphere_mesh/hello_sphere_mesh.mesh.spv");
     auto meshShader = m_device.createShaderModule(KDGpuExample::readShaderFile(meshShaderPath));
 
-    const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_sphere_mesh/hello_sphere_mesh.frag.spv";
+    auto fragmentShaderPath = KDGpuExample::assetDir().file("shaders/examples/hello_sphere_mesh/hello_sphere_mesh.frag.spv");
     auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
 
     // Create a pipeline layout

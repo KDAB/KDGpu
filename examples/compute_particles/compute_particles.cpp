@@ -25,19 +25,6 @@
 #include <random>
 #include <cassert>
 
-namespace KDGpu {
-
-inline std::string assetPath()
-{
-#if defined(KDGPU_ASSET_PATH)
-    return KDGPU_ASSET_PATH;
-#else
-    return "";
-#endif
-}
-
-} // namespace KDGpu
-
 namespace {
 
 constexpr size_t ParticlesCount = 1024;
@@ -126,7 +113,7 @@ void ComputeParticles::initializeScene()
     auto initializeComputePipeline = [this]() {
         // Create a compute shader (spir-v only for now)
         //![5]
-        const auto computeShaderPath = KDGpu::assetPath() + "/shaders/examples/compute_particles/particles.comp.spv";
+        auto computeShaderPath = KDGpuExample::assetDir().file("shaders/examples/compute_particles/particles.comp.spv");
         auto computeShader = m_device.createShaderModule(KDGpuExample::readShaderFile(computeShaderPath));
         //![5]
 
@@ -184,10 +171,10 @@ void ComputeParticles::initializeScene()
 
     auto initializeGraphicsPipeline = [this]() {
         // Create a vertex shader and fragment shader (spir-v only for now)
-        const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/compute_particles/triangle.vert.spv";
+        auto vertexShaderPath = KDGpuExample::assetDir().file("shaders/examples/compute_particles/triangle.vert.spv");
         auto vertexShader = m_device.createShaderModule(KDGpuExample::readShaderFile(vertexShaderPath));
 
-        const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/compute_particles/triangle.frag.spv";
+        auto fragmentShaderPath = KDGpuExample::assetDir().file("shaders/examples/compute_particles/triangle.frag.spv");
         auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
 
         // Create a pipeline layout (array of bind group layouts)

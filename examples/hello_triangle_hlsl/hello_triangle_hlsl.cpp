@@ -24,19 +24,6 @@
 #include <fstream>
 #include <string>
 
-namespace KDGpu {
-
-inline std::string assetPath()
-{
-#if defined(KDGPU_ASSET_PATH)
-    return KDGPU_ASSET_PATH;
-#else
-    return "";
-#endif
-}
-
-} // namespace KDGpu
-
 void HelloTriangle::initializeScene()
 {
     //![3]
@@ -124,10 +111,10 @@ void HelloTriangle::initializeScene()
 
     // Create a vertex shader and fragment shader
     //![8]
-    const auto vsShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_triangle_hlsl/hello_triangle.vs.spv";
+    auto vsShaderPath = KDGpuExample::assetDir().file("shaders/examples/hello_triangle_hlsl/hello_triangle.vs.spv");
     auto vsShader = m_device.createShaderModule(KDGpuExample::readShaderFile(vsShaderPath));
 
-    const auto psShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_triangle_hlsl/hello_triangle.ps.spv";
+    auto psShaderPath = KDGpuExample::assetDir().file("shaders/examples/hello_triangle_hlsl/hello_triangle.ps.spv");
     auto psShader = m_device.createShaderModule(KDGpuExample::readShaderFile(psShaderPath));
     //![8]
 

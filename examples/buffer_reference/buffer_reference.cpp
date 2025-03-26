@@ -28,19 +28,6 @@
 #include <fstream>
 #include <string>
 
-namespace KDGpu {
-
-inline std::string assetPath()
-{
-#if defined(KDGPU_ASSET_PATH)
-    return KDGPU_ASSET_PATH;
-#else
-    return "";
-#endif
-}
-
-} // namespace KDGpu
-
 namespace {
 const size_t TransformsCount = 16;
 }
@@ -114,10 +101,10 @@ void BufferReference::initializeScene()
     }
 
     // Create a vertex shader and fragment shader
-    const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/buffer_reference/buffer_reference.vert.spv";
+    auto vertexShaderPath = KDGpuExample::assetDir().file("shaders/examples/buffer_reference/buffer_reference.vert.spv");
     auto vertexShader = m_device.createShaderModule(KDGpuExample::readShaderFile(vertexShaderPath));
 
-    const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/buffer_reference/buffer_reference.frag.spv";
+    auto fragmentShaderPath = KDGpuExample::assetDir().file("shaders/examples/buffer_reference/buffer_reference.frag.spv");
     auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
 
     // Create Push Constant that will hold the address of our vertexColorBuffer

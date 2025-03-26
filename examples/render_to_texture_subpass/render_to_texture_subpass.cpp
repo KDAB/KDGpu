@@ -193,10 +193,10 @@ void RenderToTextureSubpass::initializeMainScene()
     }
 
     // Create a vertex shader and fragment shader (spir-v only for now)
-    const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/render_to_texture_subpass/rotating_triangle.vert.spv";
+    auto vertexShaderPath = KDGpuExample::assetDir().file("shaders/examples/render_to_texture_subpass/rotating_triangle.vert.spv");
     auto vertexShader = m_device.createShaderModule(KDGpuExample::readShaderFile(vertexShaderPath));
 
-    const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/render_to_texture_subpass/rotating_triangle.frag.spv";
+    auto fragmentShaderPath = KDGpuExample::assetDir().file("shaders/examples/render_to_texture_subpass/rotating_triangle.frag.spv");
     auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
 
     // Create bind group layout consisting of a single binding holding a UBO
@@ -283,10 +283,10 @@ void RenderToTextureSubpass::initializePostProcess()
     createOffscreenTexture();
 
     // Create a vertex shader and fragment shader (spir-v only for now)
-    const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/render_to_texture_subpass/desaturate.vert.spv";
+    auto vertexShaderPath = KDGpuExample::assetDir().file("shaders/examples/render_to_texture_subpass/desaturate.vert.spv");
     auto vertexShader = m_device.createShaderModule(KDGpuExample::readShaderFile(vertexShaderPath));
 
-    const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/render_to_texture_subpass/desaturate.frag.spv";
+    auto fragmentShaderPath = KDGpuExample::assetDir().file("shaders/examples/render_to_texture_subpass/desaturate.frag.spv");
     auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
 
     // Create bind group layout consisting of a single binding holding the texture the 1st pass rendered to

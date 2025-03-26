@@ -27,19 +27,6 @@
 #include <fstream>
 #include <string>
 
-namespace KDGpu {
-
-inline std::string assetPath()
-{
-#if defined(KDGPU_ASSET_PATH)
-    return KDGPU_ASSET_PATH;
-#else
-    return "";
-#endif
-}
-
-} // namespace KDGpu
-
 namespace {
 const size_t TransformsCount = 16;
 }
@@ -158,10 +145,10 @@ void BindGroupIndexing::initializeScene()
     //![2]
 
     // Create a vertex shader and fragment shader
-    const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/bindgroup_indexing/bindgroup_indexing.vert.spv";
+    auto vertexShaderPath = KDGpuExample::assetDir().file("shaders/examples/bindgroup_indexing/bindgroup_indexing.vert.spv");
     auto vertexShader = m_device.createShaderModule(KDGpuExample::readShaderFile(vertexShaderPath));
 
-    const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/bindgroup_indexing/bindgroup_indexing.frag.spv";
+    auto fragmentShaderPath = KDGpuExample::assetDir().file("shaders/examples/bindgroup_indexing/bindgroup_indexing.frag.spv");
     auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
 
     //![3]

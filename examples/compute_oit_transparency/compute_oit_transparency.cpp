@@ -31,19 +31,6 @@
 #include <random>
 #include <cassert>
 
-namespace KDGpu {
-
-inline std::string assetPath()
-{
-#if defined(KDGPU_ASSET_PATH)
-    return KDGPU_ASSET_PATH;
-#else
-    return "";
-#endif
-}
-
-} // namespace KDGpu
-
 namespace {
 
 constexpr size_t ParticlesCount = 1024;
@@ -240,7 +227,7 @@ void ComputeOitTransparency::initializeParticles()
 
     auto initializeComputePipeline = [this]() -> void {
         // Create a compute shader (spir-v only for now)
-        const auto computeShaderPath = KDGpu::assetPath() + "/shaders/examples/compute_oit_transparency/particles.comp.spv";
+        auto computeShaderPath = KDGpuExample::assetDir().file("shaders/examples/compute_oit_transparency/particles.comp.spv");
         auto computeShader = m_device.createShaderModule(KDGpuExample::readShaderFile(computeShaderPath));
 
         // Create bind group layout consisting of a single binding holding a SSBO
@@ -322,10 +309,10 @@ void ComputeOitTransparency::initializeCompositing()
 {
     auto initializeGraphicsPipeline = [this]() -> void {
         // Create a vertex shader and fragment shader (spir-v only for now)
-        const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/compute_oit_transparency/compositing.vert.spv";
+        auto vertexShaderPath = KDGpuExample::assetDir().file("shaders/examples/compute_oit_transparency/compositing.vert.spv");
         auto vertexShader = m_device.createShaderModule(KDGpuExample::readShaderFile(vertexShaderPath));
 
-        const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/compute_oit_transparency/compositing.frag.spv";
+        auto fragmentShaderPath = KDGpuExample::assetDir().file("shaders/examples/compute_oit_transparency/compositing.frag.spv");
         auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
 
         // Create a pipeline layout (array of bind group layouts)
@@ -397,10 +384,10 @@ void ComputeOitTransparency::initializeMeshes()
 
     auto initializeSphereMeshPipeline = [this]() -> void {
         // Create a vertex shader and fragment shader (spir-v only for now)
-        const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/compute_oit_transparency/sphere_instanced.vert.spv";
+        auto vertexShaderPath = KDGpuExample::assetDir().file("shaders/examples/compute_oit_transparency/sphere_instanced.vert.spv");
         auto vertexShader = m_device.createShaderModule(KDGpuExample::readShaderFile(vertexShaderPath));
 
-        const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/compute_oit_transparency/alpha.frag.spv";
+        auto fragmentShaderPath = KDGpuExample::assetDir().file("shaders/examples/compute_oit_transparency/alpha.frag.spv");
         auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
 
         // Create a pipeline layout (array of bind group layouts)
@@ -442,10 +429,10 @@ void ComputeOitTransparency::initializeMeshes()
 
     auto initializeCubeMeshPipeline = [this]() -> void {
         // Create a vertex shader and fragment shader (spir-v only for now)
-        const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/compute_oit_transparency/cube.vert.spv";
+        auto vertexShaderPath = KDGpuExample::assetDir().file("shaders/examples/compute_oit_transparency/cube.vert.spv");
         auto vertexShader = m_device.createShaderModule(KDGpuExample::readShaderFile(vertexShaderPath));
 
-        const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/compute_oit_transparency/alpha.frag.spv";
+        auto fragmentShaderPath = KDGpuExample::assetDir().file("shaders/examples/compute_oit_transparency/alpha.frag.spv");
         auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
 
         // Create a pipeline layout (array of bind group layouts)

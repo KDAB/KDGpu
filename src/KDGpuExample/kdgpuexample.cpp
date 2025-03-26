@@ -12,8 +12,8 @@
 
 #include <KDGpu/utils/logging.h>
 
+#include <KDFoundation/core_application.h>
 #include <KDUtils/dir.h>
-#include <KDUtils/file.h>
 
 #include <cstdlib>
 
@@ -21,29 +21,47 @@ namespace KDGpuExample {
 
 std::string assetPath()
 {
+    return assetDir().path();
+}
+
+KDUtils::Dir assetDir()
+{
     const char *path = std::getenv("KDGPUEXAMPLE_ASSET_PATH");
     if (path)
-        return path;
+        return KDUtils::Dir(path);
 
-    auto dir = KDUtils::Dir{ KDUtils::Dir::applicationDir().path() + "../share/assets" };
+    auto app = KDFoundation::CoreApplication::instance();
+    auto dir = app->standardDir(KDFoundation::StandardDir::Assets);
     if (dir.exists())
-        return dir.path();
+        return dir;
 
 #if defined(KDGPUEXAMPLE_ASSET_PATH)
-    return KDGPUEXAMPLE_ASSET_PATH;
+    return KDUtils::Dir(KDGPUEXAMPLE_ASSET_PATH);
 #else
-    return "";
+    return {};
 #endif
 }
 
 std::vector<uint32_t> readShaderFile(const std::string &filename)
 {
     using namespace KDUtils;
+    using namespace KDFoundation;
 
-    File file(File::exists(filename) ? filename : Dir::applicationDir().absoluteFilePath(filename));
+    auto file = [filename]() {
+        if (File::exists(filename))
+            return File(filename);
+        return assetDir().file(filename);
+    }();
+
+    return readShaderFile(file);
+}
+
+std::vector<uint32_t> readShaderFile(KDUtils::File &file)
+{
+    using namespace KDUtils;
 
     if (!file.open(std::ios::in | std::ios::binary)) {
-        SPDLOG_LOGGER_CRITICAL(KDGpu::Logger::logger(), "Failed to open file {}", filename);
+        SPDLOG_LOGGER_CRITICAL(KDGpu::Logger::logger(), "Failed to open file {}", file.path());
         throw std::runtime_error("Failed to open file");
     }
 

@@ -19,8 +19,7 @@
 #include <KDGpu/graphics_pipeline_options.h>
 #include <KDGpu/texture_options.h>
 
-#include <KDUtils/file.h>
-#include <KDUtils/dir.h>
+#include <KDFoundation/core_application.h>
 
 #include <glm/gtx/transform.hpp>
 
@@ -45,33 +44,14 @@ struct ImageData {
 
 namespace KDGpu {
 
-inline std::string assetPath()
-{
-#if defined(KDGPU_ASSET_PATH)
-    return KDGPU_ASSET_PATH;
-#else
-    return "";
-#endif
-}
-
 //![3]
-ImageData loadImage(const std::string &path)
+ImageData loadImage(KDUtils::File &file)
 {
     int texChannels;
     int _width = 0, _height = 0;
-    std::string texturePath = path;
-#ifdef PLATFORM_WIN32
-    // STB fails to load if path is /C:/... instead of C:/...
-    if (texturePath.rfind("/", 0) == 0)
-        texturePath = texturePath.substr(1);
-#endif
-
-#ifdef PLATFORM_ANDROID
-    // Android filesystem requires our file wrapper to load the data
-    KDUtils::File file(KDUtils::File::exists(path) ? path : KDUtils::Dir::applicationDir().absoluteFilePath(path));
 
     if (!file.open(std::ios::in | std::ios::binary)) {
-        SPDLOG_LOGGER_CRITICAL(KDGpu::Logger::logger(), "Failed to open file {}", path);
+        SPDLOG_LOGGER_CRITICAL(KDGpu::Logger::logger(), "Failed to open file {}", file.path());
         throw std::runtime_error("Failed to open file");
     }
 
@@ -80,12 +60,9 @@ ImageData loadImage(const std::string &path)
 
     auto _data = stbi_load_from_memory(
             fileContent.data(), fileContent.size(), &_width, &_height, &texChannels, STBI_rgb_alpha);
-#else
-    auto _data = stbi_load(texturePath.c_str(), &_width, &_height, &texChannels, STBI_rgb_alpha);
-#endif
 
     if (_data == nullptr) {
-        SPDLOG_WARN("Failed to load texture {} {}", path, stbi_failure_reason());
+        SPDLOG_WARN("Failed to load texture {} {}", file.path(), stbi_failure_reason());
         return {};
     }
     SPDLOG_DEBUG("Texture dimensions: {} x {}", _width, _height);
@@ -147,7 +124,8 @@ void TexturedQuad::initializeScene()
     //![4]
     {
         // Load the image data and size
-        ImageData image = loadImage(KDGpu::assetPath() + "/textures/samuel-ferrara-1527pjeb6jg-unsplash.jpg");
+        auto imageFile = KDGpuExample::assetDir().file("textures/samuel-ferrara-1527pjeb6jg-unsplash.jpg");
+        ImageData image = loadImage(imageFile);
 
         const TextureOptions textureOptions = {
             .type = TextureType::TextureType2D,
@@ -186,10 +164,10 @@ void TexturedQuad::initializeScene()
     //![4]
 
     // Create a vertex shader and fragment shader (spir-v only for now)
-    const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/textured_quad/textured_quad.vert.spv";
+    auto vertexShaderPath = KDGpuExample::assetDir().file("shaders/examples/textured_quad/textured_quad.vert.spv");
     auto vertexShader = m_device.createShaderModule(KDGpuExample::readShaderFile(vertexShaderPath));
 
-    const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/textured_quad/textured_quad.frag.spv";
+    auto fragmentShaderPath = KDGpuExample::assetDir().file("shaders/examples/textured_quad/textured_quad.frag.spv");
     auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
 
     // Create bind group layout consisting of a single binding holding a UBO

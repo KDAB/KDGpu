@@ -23,19 +23,6 @@
 
 #include <glm/glm.hpp>
 
-namespace KDGpu {
-
-inline std::string assetPath()
-{
-#if defined(KDGPU_ASSET_PATH)
-    return KDGPU_ASSET_PATH;
-#else
-    return "";
-#endif
-}
-
-} // namespace KDGpu
-
 void MultiViewStereo::initializeScene()
 {
     //![1]
@@ -67,10 +54,10 @@ void MultiViewStereo::initializeScene()
 
     //![2]
     // Create a vertex shader and fragment shader (spir-v only for now)
-    const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/multiview/rotating_triangle.vert.spv";
+    auto vertexShaderPath = KDGpuExample::assetDir().file("shaders/examples/multiview/rotating_triangle.vert.spv");
     auto vertexShader = m_device.createShaderModule(KDGpuExample::readShaderFile(vertexShaderPath));
 
-    const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/multiview/rotating_triangle.frag.spv";
+    auto fragmentShaderPath = KDGpuExample::assetDir().file("shaders/examples/multiview/rotating_triangle.frag.spv");
     auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
     //![2]
 

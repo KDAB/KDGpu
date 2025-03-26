@@ -56,19 +56,6 @@
       - Retrieve Shadow information and modifying the color accordingly
  */
 
-namespace KDGpu {
-
-inline std::string assetPath()
-{
-#if defined(KDGPU_ASSET_PATH)
-    return KDGPU_ASSET_PATH;
-#else
-    return "";
-#endif
-}
-
-} // namespace KDGpu
-
 namespace {
 
 constexpr size_t AlphaSpheresCount = 768;
@@ -261,7 +248,7 @@ void HybridRasterRt::initializeParticles()
 
     auto initializeComputePipeline = [this]() -> void {
         // Create a compute shader (spir-v only for now)
-        const auto computeShaderPath = KDGpu::assetPath() + "/shaders/examples/hybrid_raster_rt/particles.comp.spv";
+        auto computeShaderPath = KDGpuExample::assetDir().file("shaders/examples/hybrid_raster_rt/particles.comp.spv");
         auto computeShader = m_device.createShaderModule(KDGpuExample::readShaderFile(computeShaderPath));
 
         // Create bind group layout consisting of a single binding holding a SSBO
@@ -333,10 +320,10 @@ void HybridRasterRt::initializeAlpha()
 void HybridRasterRt::initializeShadows()
 {
     // Create raytracing shaders
-    const auto rayTracingGenShaderPath = KDGpu::assetPath() + "/shaders/examples/hybrid_raster_rt/shadow.rgen.spv";
-    const auto rayTracingMissShaderPath = KDGpu::assetPath() + "/shaders/examples/hybrid_raster_rt/shadow.rmiss.spv";
-    const auto rayTracingAnyHitShaderPath = KDGpu::assetPath() + "/shaders/examples/hybrid_raster_rt/shadow.rahit.spv";
-    const auto rayTracingClosestHitShaderPath = KDGpu::assetPath() + "/shaders/examples/hybrid_raster_rt/shadow.rchit.spv";
+    auto rayTracingGenShaderPath = KDGpuExample::assetDir().file("shaders/examples/hybrid_raster_rt/shadow.rgen.spv");
+    auto rayTracingMissShaderPath = KDGpuExample::assetDir().file("shaders/examples/hybrid_raster_rt/shadow.rmiss.spv");
+    auto rayTracingAnyHitShaderPath = KDGpuExample::assetDir().file("shaders/examples/hybrid_raster_rt/shadow.rahit.spv");
+    auto rayTracingClosestHitShaderPath = KDGpuExample::assetDir().file("shaders/examples/hybrid_raster_rt/shadow.rchit.spv");
 
     auto rayTracingGenShader = m_device.createShaderModule(readShaderFile(rayTracingGenShaderPath));
     auto rayTracingMissShader = m_device.createShaderModule(readShaderFile(rayTracingMissShaderPath));
@@ -406,10 +393,10 @@ void HybridRasterRt::initializeCompositing()
 {
     auto initializeGraphicsPipeline = [this]() -> void {
         // Create a vertex shader and fragment shader (spir-v only for now)
-        const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/hybrid_raster_rt/compositing.vert.spv";
+        auto vertexShaderPath = KDGpuExample::assetDir().file("shaders/examples/hybrid_raster_rt/compositing.vert.spv");
         auto vertexShader = m_device.createShaderModule(KDGpuExample::readShaderFile(vertexShaderPath));
 
-        const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/hybrid_raster_rt/compositing.frag.spv";
+        auto fragmentShaderPath = KDGpuExample::assetDir().file("shaders/examples/hybrid_raster_rt/compositing.frag.spv");
         auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
 
         // Create a pipeline layout (array of bind group layouts)
@@ -463,10 +450,10 @@ void HybridRasterRt::initializeLightDisplay()
 {
     auto initializeGraphicsPipeline = [this]() -> void {
         // Create a vertex shader and fragment shader (spir-v only for now)
-        const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/hybrid_raster_rt/light.vert.spv";
+        auto vertexShaderPath = KDGpuExample::assetDir().file("shaders/examples/hybrid_raster_rt/light.vert.spv");
         auto vertexShader = m_device.createShaderModule(KDGpuExample::readShaderFile(vertexShaderPath));
 
-        const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/hybrid_raster_rt/light.frag.spv";
+        auto fragmentShaderPath = KDGpuExample::assetDir().file("shaders/examples/hybrid_raster_rt/light.frag.spv");
         auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
 
         // Create a pipeline layout (array of bind group layouts)
@@ -548,16 +535,16 @@ void HybridRasterRt::initializeMeshes()
 
     auto initializeSphereMeshPipeline = [this]() -> void {
         // Create a vertex shader and fragment shader (spir-v only for now)
-        const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/hybrid_raster_rt/sphere_instanced.vert.spv";
+        auto vertexShaderPath = KDGpuExample::assetDir().file("shaders/examples/hybrid_raster_rt/sphere_instanced.vert.spv");
         auto vertexShader = m_device.createShaderModule(KDGpuExample::readShaderFile(vertexShaderPath));
 
-        const auto zFillFragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/hybrid_raster_rt/zfill.frag.spv";
+        auto zFillFragmentShaderPath = KDGpuExample::assetDir().file("shaders/examples/hybrid_raster_rt/zfill.frag.spv");
         auto zFillFragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(zFillFragmentShaderPath));
 
-        const auto opaqueFragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/hybrid_raster_rt/opaque.frag.spv";
+        auto opaqueFragmentShaderPath = KDGpuExample::assetDir().file("shaders/examples/hybrid_raster_rt/opaque.frag.spv");
         auto opaqueFragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(opaqueFragmentShaderPath));
 
-        const auto alphaFragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/hybrid_raster_rt/alpha.frag.spv";
+        auto alphaFragmentShaderPath = KDGpuExample::assetDir().file("shaders/examples/hybrid_raster_rt/alpha.frag.spv");
         auto alphaFragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(alphaFragmentShaderPath));
 
         // Create pipeline layouts (array of bind group layouts)
@@ -674,13 +661,13 @@ void HybridRasterRt::initializeMeshes()
 
     auto initializePlaneMeshPipeline = [this]() -> void {
         // Create a vertex shader and fragment shader (spir-v only for now)
-        const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/hybrid_raster_rt/plane.vert.spv";
+        auto vertexShaderPath = KDGpuExample::assetDir().file("shaders/examples/hybrid_raster_rt/plane.vert.spv");
         auto vertexShader = m_device.createShaderModule(KDGpuExample::readShaderFile(vertexShaderPath));
 
-        const auto zFillFragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/hybrid_raster_rt/zfill.frag.spv";
+        auto zFillFragmentShaderPath = KDGpuExample::assetDir().file("shaders/examples/hybrid_raster_rt/zfill.frag.spv");
         auto zFillFragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(zFillFragmentShaderPath));
 
-        const auto opaqueFragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/hybrid_raster_rt/opaque.frag.spv";
+        auto opaqueFragmentShaderPath = KDGpuExample::assetDir().file("shaders/examples/hybrid_raster_rt/opaque.frag.spv");
         auto opaqueFragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(opaqueFragmentShaderPath));
 
         // Create a pipeline layout (array of bind group layouts)

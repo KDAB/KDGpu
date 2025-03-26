@@ -163,10 +163,10 @@ Since we are using KDGui, we can leverage KDGpuKDGui to simplify the Surface cre
 
 ```cpp
     // Create a vertex shader and fragment shader (spir-v only for now)
-    const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/hello_triangle.vert.spv";
+    auto vertexShaderPath = KDGpuExample::assetDir().file("shaders/hello_triangle.vert.spv");
     ShaderModule vertexShader = device.createShaderModule(KDGpuExample::readShaderFile(vertexShaderPath));
 
-    const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/hello_triangle.frag.spv";
+    auto fragmentShaderPath = KDGpuExample::assetDir().file("shaders/hello_triangle.frag.spv");
     ShaderModule fragmentShader = device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
 ```
 

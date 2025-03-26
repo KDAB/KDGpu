@@ -33,19 +33,6 @@
 #include <fstream>
 #include <string>
 
-namespace KDGpu {
-
-inline std::string assetPath()
-{
-#if defined(KDGPU_ASSET_PATH)
-    return KDGPU_ASSET_PATH;
-#else
-    return "";
-#endif
-}
-
-} // namespace KDGpu
-
 namespace {
 
 struct ImageData {
@@ -61,21 +48,13 @@ struct TextureInfoPushConstant {
     VkBool32 useTexture;
 };
 
-ImageData
-loadImage(const std::string &path)
+ImageData loadImage(KDUtils::File &file)
 {
     int texChannels;
     int _width = 0, _height = 0;
-    std::string texturePath = path;
-#ifdef PLATFORM_WIN32
-    // STB fails to load if path is /C:/... instead of C:/...
-    if (texturePath.rfind("/", 0) == 0)
-        texturePath = texturePath.substr(1);
-#endif
-    KDUtils::File file(KDUtils::File::exists(path) ? path : KDUtils::Dir::applicationDir().absoluteFilePath(path));
 
     if (!file.open(std::ios::in | std::ios::binary)) {
-        SPDLOG_LOGGER_CRITICAL(KDGpu::Logger::logger(), "Failed to open file {}", path);
+        SPDLOG_LOGGER_CRITICAL(KDGpu::Logger::logger(), "Failed to open file {}", file.path());
         throw std::runtime_error("Failed to open file");
     }
 
@@ -84,8 +63,9 @@ loadImage(const std::string &path)
 
     auto _data = stbi_load_from_memory(
             fileContent.data(), fileContent.size(), &_width, &_height, &texChannels, STBI_rgb_alpha);
+
     if (_data == nullptr) {
-        SPDLOG_WARN("Failed to load texture {} {}", path, stbi_failure_reason());
+        SPDLOG_WARN("Failed to load texture {} {}", file.path(), stbi_failure_reason());
         return {};
     }
     SPDLOG_DEBUG("Texture dimensions: {} x {}", _width, _height);
@@ -177,7 +157,8 @@ void BindGroupPartiallyBound::initializeScene()
     // Create a texture
     {
         // Load the image data and size
-        ImageData image = loadImage(KDGpu::assetPath() + "/textures/samuel-ferrara-1527pjeb6jg-unsplash.jpg");
+        auto imageFile = KDGpuExample::assetDir().file("textures/samuel-ferrara-1527pjeb6jg-unsplash.jpg");
+        ImageData image = loadImage(imageFile);
 
         const TextureOptions textureOptions = {
             .type = TextureType::TextureType2D,
@@ -217,10 +198,10 @@ void BindGroupPartiallyBound::initializeScene()
 
     ////// PIPELINE //////
     // Create a vertex shader and fragment shader
-    const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/bindgroup_partially_bound/bindgroup_partially_bound.vert.spv";
+    auto vertexShaderPath = KDGpuExample::assetDir().file("shaders/examples/bindgroup_partially_bound/bindgroup_partially_bound.vert.spv");
     auto vertexShader = m_device.createShaderModule(KDGpuExample::readShaderFile(vertexShaderPath));
 
-    const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/bindgroup_partially_bound/bindgroup_partially_bound.frag.spv";
+    auto fragmentShaderPath = KDGpuExample::assetDir().file("shaders/examples/bindgroup_partially_bound/bindgroup_partially_bound.frag.spv");
     auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
 
     //![2]

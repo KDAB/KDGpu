@@ -22,19 +22,6 @@
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-namespace KDGpu {
-
-inline std::string assetPath()
-{
-#if defined(KDGPU_ASSET_PATH)
-    return KDGPU_ASSET_PATH;
-#else
-    return "";
-#endif
-}
-
-} // namespace KDGpu
-
 void HelloTriangle::initializeScene()
 {
     struct Vertex {
@@ -95,10 +82,10 @@ void HelloTriangle::initializeScene()
     }
 
     // Create a vertex shader and fragment shader
-    const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_triangle_overlap/hello_triangle.vert.spv";
+    auto vertexShaderPath = KDGpuExample::assetDir().file("shaders/examples/hello_triangle_overlap/hello_triangle.vert.spv");
     auto vertexShader = m_device.createShaderModule(KDGpuExample::readShaderFile(vertexShaderPath));
 
-    const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_triangle_overlap/hello_triangle.frag.spv";
+    auto fragmentShaderPath = KDGpuExample::assetDir().file("shaders/examples/hello_triangle_overlap/hello_triangle.frag.spv");
     auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
 
     // Create a pipeline layout (array of bind group layouts)

@@ -31,19 +31,6 @@
 #include <string>
 #include <random>
 
-namespace KDGpu {
-
-inline std::string assetPath()
-{
-#if defined(KDGPU_ASSET_PATH)
-    return KDGPU_ASSET_PATH;
-#else
-    return "";
-#endif
-}
-
-} // namespace KDGpu
-
 HelloTriangleRt::HelloTriangleRt()
     : SimpleExampleEngineLayer()
 {
@@ -54,9 +41,9 @@ HelloTriangleRt::HelloTriangleRt()
 void HelloTriangleRt::createRayTracingPipeline()
 {
     // Create raytracing shaders
-    const auto rayTracingGenShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_triangle_rt/raygen.spv";
-    const auto rayTracingMissShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_triangle_rt/miss.spv";
-    const auto rayTracingClosestShaderPath = KDGpu::assetPath() + "/shaders/examples/hello_triangle_rt/closest.spv";
+    auto rayTracingGenShaderPath = KDGpuExample::assetDir().file("shaders/examples/hello_triangle_rt/raygen.spv");
+    auto rayTracingMissShaderPath = KDGpuExample::assetDir().file("shaders/examples/hello_triangle_rt/miss.spv");
+    auto rayTracingClosestShaderPath = KDGpuExample::assetDir().file("shaders/examples/hello_triangle_rt/closest.spv");
 
     auto rayTracingGenShader = m_device.createShaderModule(readShaderFile(rayTracingGenShaderPath));
     auto rayTracingMissShader = m_device.createShaderModule(readShaderFile(rayTracingMissShaderPath));

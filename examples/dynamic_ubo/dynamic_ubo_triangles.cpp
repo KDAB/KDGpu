@@ -23,19 +23,6 @@
 #include <fstream>
 #include <string>
 
-namespace KDGpu {
-
-inline std::string assetPath()
-{
-#if defined(KDGPU_ASSET_PATH)
-    return KDGPU_ASSET_PATH;
-#else
-    return "";
-#endif
-}
-
-} // namespace KDGpu
-
 namespace {
 constexpr uint32_t entityCount = 4;
 }
@@ -97,10 +84,10 @@ void DynamicUBOTriangles::initializeScene()
     }
 
     // Create a vertex shader and fragment shader (spir-v only for now)
-    const auto vertexShaderPath = KDGpu::assetPath() + "/shaders/examples/dynamic_ubo/dynamic_ubo.vert.spv";
+    auto vertexShaderPath = KDGpuExample::assetDir().file("shaders/examples/dynamic_ubo/dynamic_ubo.vert.spv");
     auto vertexShader = m_device.createShaderModule(KDGpuExample::readShaderFile(vertexShaderPath));
 
-    const auto fragmentShaderPath = KDGpu::assetPath() + "/shaders/examples/dynamic_ubo/dynamic_ubo.frag.spv";
+    auto fragmentShaderPath = KDGpuExample::assetDir().file("shaders/examples/dynamic_ubo/dynamic_ubo.frag.spv");
     auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
 
     //![4]
