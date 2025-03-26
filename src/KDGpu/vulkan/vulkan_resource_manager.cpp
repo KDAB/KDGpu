@@ -3496,7 +3496,9 @@ MemoryHandle VulkanResourceManager::retrieveExternalMemoryHandle(VulkanInstance 
     if (testIfContainsAnyFlags(handleType,
                                {
                                        ExternalMemoryHandleTypeFlagBits::OpaqueFD,
+#if defined(VK_EXT_external_memory_dma_buf)
                                        ExternalMemoryHandleTypeFlagBits::DmaBuf,
+#endif
                                })) {
 #if defined(VK_KHR_external_memory_fd)
         if (instance->vkGetMemoryFdKHR) {

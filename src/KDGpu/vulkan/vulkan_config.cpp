@@ -100,6 +100,9 @@ std::vector<const char *> getDefaultRequestedDeviceExtensions()
 #if defined(VK_KHR_external_memory_win32)
         VK_KHR_EXTERNAL_MEMORY_WIN32_EXTENSION_NAME,
 #endif
+#if defined(VK_EXT_external_memory_dma_buf)
+        VK_EXT_EXTERNAL_MEMORY_DMA_BUF_EXTENSION_NAME,
+#endif
 #if defined(VK_KHR_deferred_host_operations)
         VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
 #endif
