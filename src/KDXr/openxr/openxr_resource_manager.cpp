@@ -189,7 +189,14 @@ KDGpu::Handle<Instance_t> OpenXrResourceManager::createInstance(const InstanceOp
 
     XrInstance xrInstance{ XR_NULL_HANDLE };
     if (xrCreateInstance(&instanceCI, &xrInstance) != XR_SUCCESS) {
-        throw std::runtime_error("Failed to create OpenXR Instance.");
+
+        // As a fallback, try to create a version 1.0 instance
+        // This may be required for the SteamVR OpenXR runtime
+        instanceCI.applicationInfo.apiVersion = XR_API_VERSION_1_0;
+
+        if (xrCreateInstance(&instanceCI, &xrInstance) != XR_SUCCESS) {
+            throw std::runtime_error("Failed to create OpenXR Instance.");
+        }
     }
 
     OpenXrInstance openXrInstance(this, xrInstance, openXrActiveApiLayers, openXrActiveExtensions);
