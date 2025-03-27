@@ -2986,6 +2986,8 @@ Handle<BindGroupLayout_t> VulkanResourceManager::createBindGroupLayout(const Han
     vkBindingLayouts.reserve(bindingLayoutCount);
     vkBindingFlags.reserve(bindingLayoutCount);
 
+    std::vector<VkSampler> immutableSamplers;
+
     for (uint32_t j = 0; j < bindingLayoutCount; ++j) {
         const auto &bindingLayout = options.bindings.at(j);
 
@@ -2994,7 +2996,18 @@ Handle<BindGroupLayout_t> VulkanResourceManager::createBindGroupLayout(const Han
         vkBindingLayout.descriptorCount = bindingLayout.count;
         vkBindingLayout.descriptorType = resourceBindingTypeToVkDescriptorType(bindingLayout.resourceType);
         vkBindingLayout.stageFlags = bindingLayout.shaderStages.toInt();
-        vkBindingLayout.pImmutableSamplers = nullptr; // TODO: Expose immutable samplers?
+        vkBindingLayout.pImmutableSamplers = nullptr;
+
+        if (!bindingLayout.immutableSamplers.empty()) {
+            assert(bindingLayout.resourceType == ResourceBindingType::Sampler || bindingLayout.resourceType == ResourceBindingType::CombinedImageSampler);
+            immutableSamplers.reserve(bindingLayout.immutableSamplers.size());
+            const size_t lastImmutableSamplersOffset = immutableSamplers.size();
+            for (Handle<Sampler_t> samplerH : bindingLayout.immutableSamplers) {
+                VulkanSampler *s = m_samplers.get(samplerH);
+                immutableSamplers.push_back(s->sampler);
+            }
+            vkBindingLayout.pImmutableSamplers = immutableSamplers.data() + lastImmutableSamplersOffset;
+        };
 
         vkBindingLayouts.emplace_back(std::move(vkBindingLayout));
 

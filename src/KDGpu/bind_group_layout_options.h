@@ -12,15 +12,16 @@
 
 #include <KDGpu/gpu_core.h>
 #include <KDGpu/bind_group_description.h>
-
 namespace KDGpu {
 
+struct Sampler_t;
 struct ResourceBindingLayout {
     uint32_t binding;
     uint32_t count{ 1 };
     ResourceBindingType resourceType;
     ShaderStageFlags shaderStages;
     ResourceBindingFlags flags{ ResourceBindingFlagBits::None };
+    std::vector<Handle<Sampler_t>> immutableSamplers;
 
     friend bool operator==(const ResourceBindingLayout &, const ResourceBindingLayout &) = default;
 };

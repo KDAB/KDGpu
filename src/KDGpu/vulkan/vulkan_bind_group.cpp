@@ -55,10 +55,12 @@ void VulkanBindGroup::update(const BindGroupEntry &entry)
         VulkanTextureView *textView = vulkanResourceManager->getTextureView(textureViewBinding.textureView);
         VulkanSampler *sampler = vulkanResourceManager->getSampler(textureViewBinding.sampler);
         assert(textView != nullptr);
-        assert(sampler != nullptr);
         imageInfo.imageView = textView->imageView;
-        imageInfo.sampler = sampler->sampler;
         imageInfo.imageLayout = textureLayoutToVkImageLayout(textureViewBinding.layout);
+
+        // Sampler can be null if the pipelineLayout was allocated with an immutableSampler for that binding
+        if (sampler != nullptr)
+            imageInfo.sampler = sampler->sampler;
 
         descriptorWrite.descriptorCount = 1;
         descriptorWrite.pImageInfo = &imageInfo;

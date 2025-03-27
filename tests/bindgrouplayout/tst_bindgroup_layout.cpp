@@ -16,6 +16,7 @@
 #include <KDGpu/buffer_options.h>
 #include <KDGpu/buffer.h>
 #include <KDGpu/device.h>
+#include <KDGpu/sampler.h>
 #include <KDGpu/instance.h>
 #include <KDGpu/vulkan/vulkan_graphics_api.h>
 
@@ -130,6 +131,87 @@ TEST_SUITE("BindGroupLayout")
                                     .resourceType = ResourceBindingType::UniformBuffer,
                                     .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit),
                                     .flags = { ResourceBindingFlagBits::VariableBindGroupEntriesCountBit },
+                            },
+                    },
+            });
+
+            // THEN
+            CHECK(bindGroupLayout.isValid());
+        }
+    }
+
+    TEST_CASE("Immutable Sampler")
+    {
+        SUBCASE("Immutable Sampler on Sampler Binding")
+        {
+            // GIVEN
+            Sampler s = device.createSampler(SamplerOptions{});
+
+            // THEN
+            CHECK(s.isValid());
+
+            // WHEN
+
+            const BindGroupLayout bindGroupLayout = device.createBindGroupLayout(BindGroupLayoutOptions{
+                    .bindings = {
+                            {
+                                    .binding = 0,
+                                    .count = 1,
+                                    .resourceType = ResourceBindingType::Sampler,
+                                    .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit),
+                                    .immutableSamplers = { s.handle() },
+                            },
+                    },
+            });
+
+            // THEN
+            CHECK(bindGroupLayout.isValid());
+        }
+
+        SUBCASE("Multiple Immutable Sampler on Sampler Binding")
+        {
+            // GIVEN
+            Sampler s = device.createSampler(SamplerOptions{});
+
+            // THEN
+            CHECK(s.isValid());
+
+            // WHEN
+
+            const BindGroupLayout bindGroupLayout = device.createBindGroupLayout(BindGroupLayoutOptions{
+                    .bindings = {
+                            {
+                                    .binding = 0,
+                                    .count = 4,
+                                    .resourceType = ResourceBindingType::Sampler,
+                                    .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit),
+                                    .immutableSamplers = { s.handle(), s.handle(), s.handle(), s.handle() },
+                            },
+                    },
+            });
+
+            // THEN
+            CHECK(bindGroupLayout.isValid());
+        }
+
+        SUBCASE("Immutable Sampler on CombinedImageSampler Binding")
+        {
+            // GIVEN
+            Sampler s = device.createSampler(SamplerOptions{});
+
+            // THEN
+            CHECK(s.isValid());
+
+            // WHEN
+
+            const BindGroupLayout bindGroupLayout = device.createBindGroupLayout(BindGroupLayoutOptions{
+                    .bindings = {
+                            {
+                                    .binding = 0,
+                                    .count = 1,
+                                    .resourceType = ResourceBindingType::CombinedImageSampler,
+                                    .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit),
+                                    .immutableSamplers = { s.handle() },
                             },
                     },
             });

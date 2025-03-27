@@ -222,6 +222,70 @@ TEST_SUITE("BindGroup")
             b.update(BindGroupEntry{ .binding = 0, .resource = TextureViewSamplerBinding{ .textureView = tv, .sampler = s } });
         }
 
+        SUBCASE("TextureViewSampler Immutable Sampler")
+        {
+            // GIVEN
+            const TextureOptions textureOptions = {
+                .type = TextureType::TextureType2D,
+                .format = Format::R8G8B8A8_SNORM,
+                .extent = { 512, 512, 1 },
+                .mipLevels = 1,
+                .usage = TextureUsageFlagBits::SampledBit | TextureUsageFlagBits::ColorAttachmentBit,
+                .memoryUsage = MemoryUsage::GpuOnly
+            };
+
+            const SamplerOptions samplerOptions = {};
+
+            const TextureViewOptions tvOptions = {
+                .viewType = ViewType::ViewType2D,
+                .format = Format::R8G8B8A8_SNORM,
+                .range = {
+                        .aspectMask = TextureAspectFlagBits::ColorBit,
+                },
+            };
+
+            // WHEN
+            Texture t = device.createTexture(textureOptions);
+            TextureView tv = t.createView(tvOptions);
+            Sampler s = device.createSampler(samplerOptions);
+
+            // THEN
+            CHECK(t.isValid());
+            CHECK(tv.isValid());
+            CHECK(s.isValid());
+
+            const BindGroupLayoutOptions bindGroupLayoutOptions = {
+                .bindings = {
+                        {
+                                .binding = 0,
+                                .count = 1,
+                                .resourceType = ResourceBindingType::CombinedImageSampler,
+                                .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit),
+                                .immutableSamplers = { s.handle() },
+                        },
+                },
+            };
+
+            const BindGroupLayout bindGroupLayout = device.createBindGroupLayout(bindGroupLayoutOptions);
+
+            const BindGroupOptions bindGroupOptions = {
+                .layout = bindGroupLayout,
+                .resources = {
+                        { .binding = 0,
+                          .resource = TextureViewSamplerBinding{ .textureView = tv } }, // No Sampler since we've set an immutable sampler on the BindGroupLayout
+                }
+            };
+
+            // WHEN
+            BindGroup b = device.createBindGroup(bindGroupOptions);
+
+            // THEN
+            CHECK(b.isValid());
+
+            // WHEN
+            b.update(BindGroupEntry{ .binding = 0, .resource = TextureViewSamplerBinding{ .textureView = tv } });
+        }
+
         SUBCASE("TextureView")
         {
             // GIVEN
