@@ -228,7 +228,7 @@ TEST_SUITE("Texture")
     }
 
 #if defined(VK_EXT_host_image_copy)
-    TEST_CASE("HostCopy")
+    TEST_CASE("HostCopy" * doctest::skip(!discreteGPUAdapter->features().hostImageCopy))
     {
         REQUIRE(discreteGPUAdapter->features().hostImageCopy);
 
