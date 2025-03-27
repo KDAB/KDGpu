@@ -156,4 +156,6 @@ VkChromaLocation chromaLocationToVkChromaLocation(ChromaLocation location);
 
 VkComponentSwizzle componentSwizzleToVkComponentSwizzle(ComponentSwizzle swizzle);
 
+VkImageCreateFlags textureCreateFlagsToVkImageCreateFlags(TextureCreateFlags flags);
+
 } // namespace KDGpu

@@ -32,6 +32,7 @@ struct TextureOptions {
     TextureLayout initialLayout{ TextureLayout::Undefined };
     ExternalMemoryHandleTypeFlags externalMemoryHandleType{ ExternalMemoryHandleTypeFlagBits::None };
     std::vector<uint64_t> drmFormatModifiers{};
+    TextureCreateFlags createFlags;
     // TODO: TextureFlags flags;
 };
 

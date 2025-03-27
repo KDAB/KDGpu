@@ -467,4 +467,9 @@ VkComponentSwizzle componentSwizzleToVkComponentSwizzle(ComponentSwizzle swizzle
     return static_cast<VkComponentSwizzle>(swizzle);
 }
 
+VkImageCreateFlags textureCreateFlagsToVkImageCreateFlags(TextureCreateFlags flags)
+{
+    return static_cast<VkImageCreateFlags>(flags.toInt());
+}
+
 } // namespace KDGpu

@@ -592,6 +592,30 @@ enum class TextureUsageFlagBits {
 };
 using TextureUsageFlags = KDGpu::Flags<TextureUsageFlagBits>;
 
+enum class TextureCreateFlagBits {
+    SparseBindingBit = 0x00000001,
+    SparseResidencyBit = 0x00000002,
+    SparseAliasedBit = 0x00000004,
+    MutableFormatBit = 0x00000008,
+    CubeCompatibleBit = 0x00000010,
+    AliasBit = 0x00000400,
+    SplitInstanceBindRegionBit = 0x00000040,
+    Array2DCompatibleBit = 0x00000020,
+    BlockTexelVieewCompatibleBit = 0x00000080,
+    ExtendedUsageBit = 0x00000100,
+    ProtectedBit = 0x00000800,
+    DisjointBit = 0x00000200,
+    CornerSampledBit = 0x00002000,
+    SampleLocationsCompatibleDepthBit = 0x00001000,
+    SubsampledBit = 0x00004000,
+    DescriptorBufferCaptureReplayBit = 0x00010000,
+    MultisampledRenderToSingleSampledBit = 0x00040000,
+    View2DCompatibleBit = 0x00020000,
+    VideoProfileIndepenentBit = 0x00100000,
+    FragmentDensityMapOffsetBit = 0x00008000,
+};
+using TextureCreateFlags = KDGpu::Flags<TextureCreateFlagBits>;
+
 enum class TextureTiling {
     Optimal = 0,
     Linear = 1,
@@ -1288,3 +1312,4 @@ OPERATORS_FOR_FLAGS(KDGpu::GeometryInstanceFlags)
 OPERATORS_FOR_FLAGS(KDGpu::AccelerationStructureFlags)
 OPERATORS_FOR_FLAGS(KDGpu::DependencyFlags);
 OPERATORS_FOR_FLAGS(KDGpu::HostImageCopyFlags);
+OPERATORS_FOR_FLAGS(KDGpu::TextureCreateFlags);

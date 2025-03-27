@@ -865,6 +865,8 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
     }
     createInfo.initialLayout = textureLayoutToVkImageLayout(options.initialLayout);
 
+    createInfo.flags = textureCreateFlagsToVkImageCreateFlags(options.createFlags);
+
     if (options.type == TextureType::TextureTypeCube)
         createInfo.flags |= VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
 
