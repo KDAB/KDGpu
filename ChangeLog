@@ -1,3 +1,13 @@
+- v0.8.0
+  - Add support for Immutable Samplers
+  - Add support for YCbCr conversion on Sampler and TextureView
+  - Add support for DmaBuf external handles and Texture format modifiers
+  - Add support for host copies and layout transitions on Textures
+  - KDXR OpenXR layer improvements
+  - Examples ported to Android
+  - Fix the way Vulkan extensions are handled internally
+  - Various RenderPass refactorings and fixes
+  - Graphics API polymorphism abstraction removed
 - v0.7.0
   - Add support for BufferAdress retrieval
   - Add support for rasterizerDiscard and depthClamping on GraphicsPipeline
