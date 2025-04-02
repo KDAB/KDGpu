@@ -6,7 +6,7 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
-CompileRTShader(KDGpu_HelloSphereRtGen raygen.rgen raygen.spv)
-CompileRTShader(KDGpu_HelloSphereRtMiss miss.rmiss miss.spv)
-CompileRTShader(KDGpu_HelloSphereRtClosest closest.rchit closest.spv)
-CompileRTShader(KDGpu_HelloSphereRtIntersection intersection.rint intersection.spv)
+kdgpu_compilertshader(KDGpu_HelloSphereRtGen raygen.rgen raygen.spv)
+kdgpu_compilertshader(KDGpu_HelloSphereRtMiss miss.rmiss miss.spv)
+kdgpu_compilertshader(KDGpu_HelloSphereRtClosest closest.rchit closest.spv)
+kdgpu_compilertshader(KDGpu_HelloSphereRtIntersection intersection.rint intersection.spv)

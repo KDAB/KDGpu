@@ -27,8 +27,8 @@ function(add_shaders)
     else()
         set(RESOURCE_DIR ${CMAKE_BINARY_DIR}/bin/${ARGV0}.app/Contents/Resources)
     endif()
-    CompileShader(${ARGV0}VertexShader ${PA_NAME}.vert ${RESOURCE_DIR}/${PA_NAME}.vert.spv)
-    CompileShader(${ARGV0}FragmentShader ${PA_NAME}.frag ${RESOURCE_DIR}/${PA_NAME}.frag.spv)
+    kdgpu_compileshader(${ARGV0}VertexShader ${PA_NAME}.vert ${RESOURCE_DIR}/${PA_NAME}.vert.spv)
+    kdgpu_compileshader(${ARGV0}FragmentShader ${PA_NAME}.frag ${RESOURCE_DIR}/${PA_NAME}.frag.spv)
 
     add_custom_target(
         ${ARGV0}Shaders ALL

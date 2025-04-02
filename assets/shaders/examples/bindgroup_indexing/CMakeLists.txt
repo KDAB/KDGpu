@@ -6,4 +6,4 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
-CompileShaderSet(KDGpu_BindGroupIndexing bindgroup_indexing)
+kdgpu_compileshaderset(KDGpu_BindGroupIndexing bindgroup_indexing)

@@ -6,6 +6,6 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
-CompileRTShader(KDGpu_HelloTriangleRtGen raygen.rgen raygen.spv)
-CompileRTShader(KDGpu_HelloTriangleRtMiss miss.rmiss miss.spv)
-CompileRTShader(KDGpu_HelloTriangleRtClosest closest.rchit closest.spv)
+kdgpu_compilertshader(KDGpu_HelloTriangleRtGen raygen.rgen raygen.spv)
+kdgpu_compilertshader(KDGpu_HelloTriangleRtMiss miss.rmiss miss.spv)
+kdgpu_compilertshader(KDGpu_HelloTriangleRtClosest closest.rchit closest.spv)

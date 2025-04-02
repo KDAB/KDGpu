@@ -6,5 +6,5 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
-CompileShaderSet(KDGpu_RenderToTexture1 rotating_triangle)
-CompileShaderSet(KDGpu_RenderToTexture2 desaturate)
+kdgpu_compileshaderset(KDGpu_RenderToTexture1 rotating_triangle)
+kdgpu_compileshaderset(KDGpu_RenderToTexture2 desaturate)

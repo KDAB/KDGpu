@@ -6,4 +6,4 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
-CompileShaderSet(KDGpu_BindGroupPartiallyBound bindgroup_partially_bound)
+kdgpu_compileshaderset(KDGpu_BindGroupPartiallyBound bindgroup_partially_bound)

@@ -47,7 +47,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     add_compile_options(-Wno-psabi)
 endif()
 
-include(CompileShader)
+include(KDGpuCompileShader)
 include(CheckAtomic)
 include(ECMEnableSanitizers)
 include(FeatureSummary)

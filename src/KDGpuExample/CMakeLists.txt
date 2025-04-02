@@ -14,7 +14,7 @@
 # We also enable C++17 for the resource static libs to cope with the nested namespaces we use.
 include(CMakeRC)
 
-CompileShaderSet(KDGpuExample_ImGui imgui)
+kdgpu_compileshaderset(KDGpuExample_ImGui imgui)
 cmrc_add_resource_library(
     KDGpuExampleShaderResources
     ALIAS

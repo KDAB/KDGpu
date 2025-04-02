@@ -6,5 +6,5 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
-CompileShaderSet(KDGpu_GraphicsPipeline triangle)
-CompileShaderSet(KDGpu_GraphicsPipelineSpecializationConstants specialization_constants)
+kdgpu_compileshaderset(KDGpu_GraphicsPipeline triangle)
+kdgpu_compileshaderset(KDGpu_GraphicsPipelineSpecializationConstants specialization_constants)

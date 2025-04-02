@@ -6,4 +6,4 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
-CompileShaderSet(KDGpu_OffscreenRendering_Plot plot)
+kdgpu_compileshaderset(KDGpu_OffscreenRendering_Plot plot)

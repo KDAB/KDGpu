@@ -301,5 +301,6 @@ write_basic_package_version_file(
 
 install(
     FILES ${CMAKE_CURRENT_BINARY_DIR}/KDGpuConfig.cmake ${CMAKE_CURRENT_BINARY_DIR}/KDGpuConfigVersion.cmake
+          ${CMAKE_SOURCE_DIR}/cmake/KDGpuCompileShader.cmake
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/KDGpu
 )

@@ -6,5 +6,5 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
-CompileMeshTaskShader(KDGpu_HelloMeshShaderMesh hello_sphere_mesh.mesh hello_sphere_mesh.mesh.spv)
-CompileShader(KDGpu_HelloMeshShaderFrag hello_sphere_mesh.frag hello_sphere_mesh.frag.spv)
+kdgpu_compilemeshtaskshader(KDGpu_HelloMeshShaderMesh hello_sphere_mesh.mesh hello_sphere_mesh.mesh.spv)
+kdgpu_compileshader(KDGpu_HelloMeshShaderFrag hello_sphere_mesh.frag hello_sphere_mesh.frag.spv)

@@ -6,7 +6,7 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
-CompileRTShader(KDGpu_RayTracingPipelineGen raygen.rgen raygen.spv)
-CompileRTShader(KDGpu_RayTracingPipelineGenSC raygensc.rgen raygensc.spv)
-CompileRTShader(KDGpu_RayTracingPipelineMiss miss.rmiss miss.spv)
-CompileRTShader(KDGpu_RayTracingPipelineClosest closest.rchit closest.spv)
+kdgpu_compilertshader(KDGpu_RayTracingPipelineGen raygen.rgen raygen.spv)
+kdgpu_compilertshader(KDGpu_RayTracingPipelineGenSC raygensc.rgen raygensc.spv)
+kdgpu_compilertshader(KDGpu_RayTracingPipelineMiss miss.rmiss miss.spv)
+kdgpu_compilertshader(KDGpu_RayTracingPipelineClosest closest.rchit closest.spv)

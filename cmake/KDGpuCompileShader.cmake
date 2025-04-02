@@ -22,7 +22,7 @@ if(NOT Vulkan_GLSLANG_VALIDATOR_EXECUTABLE)
 endif()
 
 # Compile a shader using glslangValidator
-function(CompileShader target shader output)
+function(KDGpu_CompileShader target shader output)
     # If just the named args are present use them. If there is an optional 4th argument
     # we pass that in too. Useful for passing in -D define options to glslangValidator.
     if(${ARGC} EQUAL 3)
@@ -57,7 +57,7 @@ function(CompileShader target shader output)
 endfunction()
 
 # Compile raytracing shader using glslangValidator
-function(CompileRTShader target shader output)
+function(KDGpu_CompileRTShader target shader output)
     add_custom_command(
         OUTPUT ${output}
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${shader}
@@ -74,7 +74,7 @@ function(CompileRTShader target shader output)
 endfunction()
 
 # Compile task shader using glslangValidator
-function(CompileMeshTaskShader target shader output)
+function(KDGpu_CompileMeshTaskShader target shader output)
     add_custom_command(
         OUTPUT ${output}
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${shader}
@@ -90,11 +90,11 @@ function(CompileMeshTaskShader target shader output)
     )
 endfunction()
 
-# Compile s shader set
-function(CompileShaderSet target name)
+# Compile a shader set with a vertex and fragment shaders
+function(KDGpu_CompileShaderSet target name)
     # TODO: in future we probably want to check which shaders we have instead of assuming vert/frag
-    CompileShader(${target}VertexShader ${name}.vert ${name}.vert.spv)
-    CompileShader(${target}FragmentShader ${name}.frag ${name}.frag.spv)
+    kdgpu_compileshader(${target}VertexShader ${name}.vert ${name}.vert.spv)
+    kdgpu_compileshader(${target}FragmentShader ${name}.frag ${name}.frag.spv)
 
     # TODO: for now generate ALL, in future would be better to build on case by case
     add_custom_target(
@@ -104,9 +104,22 @@ function(CompileShaderSet target name)
     )
 endfunction()
 
+# Compile a shader set with a vertex, geometry and fragment shaders
+function(KDGpu_CompileGeomShaderSet target name)
+    kdgpu_compileshader(${target}VertexShader ${name}.vert ${name}.vert.spv)
+    kdgpu_compileshader(${target}GeometryShader ${name}.geom ${name}.geom.spv)
+    kdgpu_compileshader(${target}FragmentShader ${name}.frag ${name}.frag.spv)
+
+    add_custom_target(
+        ${target}Shaders ALL
+        DEPENDS ${target}VertexShader ${target}GeometryShader ${target}FragmentShader
+        COMMENT "Target to compile a shader set with a geometry shader"
+    )
+endfunction()
+
 # Compile a shader using dxc
 function(
-    CompileHLSLShader
+    KDGpu_CompileHLSLShader
     target
     shader
     output
@@ -128,10 +141,10 @@ function(
 endfunction()
 
 # Compiles shader set using dxc
-function(CompileHLSLShaderSet target name)
+function(KDGpu_CompileHLSLShaderSet target name)
     # TODO: in future we probably want to check which shaders we have instead of assuming vert/frag
-    compilehlslshader(${target}VertexShader ${name}.ps.hlsl ${name}.ps.spv ps)
-    compilehlslshader(${target}FragmentShader ${name}.vs.hlsl ${name}.vs.spv vs)
+    kdgpu_compilehlslshader(${target}VertexShader ${name}.ps.hlsl ${name}.ps.spv ps)
+    kdgpu_compilehlslshader(${target}FragmentShader ${name}.vs.hlsl ${name}.vs.spv vs)
 
     # TODO: for now generate ALL, in future would be better to build on case by case
     add_custom_target(

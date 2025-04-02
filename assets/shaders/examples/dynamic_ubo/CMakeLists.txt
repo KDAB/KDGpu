@@ -6,4 +6,4 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
-CompileShaderSet(KDGpu_DynamicUBO dynamic_ubo)
+kdgpu_compileshaderset(KDGpu_DynamicUBO dynamic_ubo)

@@ -7,18 +7,18 @@
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
 
-CompileShader(KDGpu_HybridRasterRtCompParticlesShader particles.comp particles.comp.spv)
-CompileShader(KDGpu_HybridRasterRtSphereShader sphere_instanced.vert sphere_instanced.vert.spv)
-CompileShader(KDGpu_HybridRasterRtPlaneShader plane.vert plane.vert.spv)
-CompileShader(KDGpu_HybridRasterRtOpaqueShader opaque.frag opaque.frag.spv)
-CompileShader(KDGpu_HybridRasterRtZFillShader zfill.frag zfill.frag.spv)
-CompileShader(KDGpu_HybridRasterRtAlphaShader alpha.frag alpha.frag.spv)
-CompileShaderSet(KDGpu_HybridRasterRtLight light)
-CompileShaderSet(KDGpu_HybridRasterRtCompositing compositing)
-CompileRTShader(KDGpu_HybridRasterRtShadowRtGenShader shadow.rgen shadow.rgen.spv)
-CompileRTShader(KDGpu_HybridRasterRtShadowRtMissShader shadow.rmiss shadow.rmiss.spv)
-CompileRTShader(KDGpu_HybridRasterRtShadowRtAHitShader shadow.rahit shadow.rahit.spv)
-CompileRTShader(KDGpu_HybridRasterRtShadowRtCHitShader shadow.rchit shadow.rchit.spv)
+kdgpu_compileshader(KDGpu_HybridRasterRtCompParticlesShader particles.comp particles.comp.spv)
+kdgpu_compileshader(KDGpu_HybridRasterRtSphereShader sphere_instanced.vert sphere_instanced.vert.spv)
+kdgpu_compileshader(KDGpu_HybridRasterRtPlaneShader plane.vert plane.vert.spv)
+kdgpu_compileshader(KDGpu_HybridRasterRtOpaqueShader opaque.frag opaque.frag.spv)
+kdgpu_compileshader(KDGpu_HybridRasterRtZFillShader zfill.frag zfill.frag.spv)
+kdgpu_compileshader(KDGpu_HybridRasterRtAlphaShader alpha.frag alpha.frag.spv)
+kdgpu_compileshaderset(KDGpu_HybridRasterRtLight light)
+kdgpu_compileshaderset(KDGpu_HybridRasterRtCompositing compositing)
+kdgpu_compilertshader(KDGpu_HybridRasterRtShadowRtGenShader shadow.rgen shadow.rgen.spv)
+kdgpu_compilertshader(KDGpu_HybridRasterRtShadowRtMissShader shadow.rmiss shadow.rmiss.spv)
+kdgpu_compilertshader(KDGpu_HybridRasterRtShadowRtAHitShader shadow.rahit shadow.rahit.spv)
+kdgpu_compilertshader(KDGpu_HybridRasterRtShadowRtCHitShader shadow.rchit shadow.rchit.spv)
 
 add_custom_target(
     KDGpu_HybridRasterRtShaders ALL

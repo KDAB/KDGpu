@@ -6,5 +6,5 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
-CompileShaderSet(KDGpu_MultiView1 rotating_triangle)
-CompileShaderSet(KDGpu_MultiView2 fullscreenquad)
+kdgpu_compileshaderset(KDGpu_MultiView1 rotating_triangle)
+kdgpu_compileshaderset(KDGpu_MultiView2 fullscreenquad)

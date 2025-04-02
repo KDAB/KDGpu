@@ -6,13 +6,15 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
-CompileShader(KDGpu_EmptyCompute empty_compute.comp empty_compute.comp.spv)
+kdgpu_compileshader(KDGpu_EmptyCompute empty_compute.comp empty_compute.comp.spv)
 add_custom_target(
     KDGpu_EmptyComputeTmp ALL
     DEPENDS KDGpu_EmptyCompute
     COMMENT "Target to compile the empty shader"
 )
-CompileShader(KDGpu_EmptyComputeSpecializationConstant specialization_constant.comp specialization_constant.comp.spv)
+kdgpu_compileshader(
+    KDGpu_EmptyComputeSpecializationConstant specialization_constant.comp specialization_constant.comp.spv
+)
 add_custom_target(
     KDGpu_EmptyComputeSpecializationConstantsTmp ALL
     DEPENDS KDGpu_EmptyComputeSpecializationConstant

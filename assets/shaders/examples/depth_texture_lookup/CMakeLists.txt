@@ -6,5 +6,5 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
-CompileShaderSet(KDGpu_DepthTextureLookupTexturedQuad textured_quad)
-CompileShaderSet(KDGpu_DepthTextureLookupCube cube)
+kdgpu_compileshaderset(KDGpu_DepthTextureLookupTexturedQuad textured_quad)
+kdgpu_compileshaderset(KDGpu_DepthTextureLookupCube cube)

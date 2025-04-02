@@ -6,9 +6,9 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
-CompileShaderSet(KDGpu_ComputeParticles triangle)
+kdgpu_compileshaderset(KDGpu_ComputeParticles triangle)
 
-CompileShader(KDGpu_ComputeParticles particles.comp particles.comp.spv)
+kdgpu_compileshader(KDGpu_ComputeParticles particles.comp particles.comp.spv)
 add_custom_target(
     KDGpu_ComputeParticleTmp ALL
     DEPENDS KDGpu_ComputeParticles

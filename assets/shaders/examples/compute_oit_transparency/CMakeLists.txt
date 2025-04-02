@@ -7,11 +7,11 @@
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
 
-CompileShader(KDGpu_ComputeOITCompParticlesShader particles.comp particles.comp.spv)
-CompileShader(KDGpu_ComputeOITSphereShader sphere_instanced.vert sphere_instanced.vert.spv)
-CompileShader(KDGpu_ComputeOITCubeShader cube.vert cube.vert.spv)
-CompileShader(KDGpu_ComputeOITAlphaShader alpha.frag alpha.frag.spv)
-CompileShaderSet(KDGpu_ComputeOITCompositing compositing)
+kdgpu_compileshader(KDGpu_ComputeOITCompParticlesShader particles.comp particles.comp.spv)
+kdgpu_compileshader(KDGpu_ComputeOITSphereShader sphere_instanced.vert sphere_instanced.vert.spv)
+kdgpu_compileshader(KDGpu_ComputeOITCubeShader cube.vert cube.vert.spv)
+kdgpu_compileshader(KDGpu_ComputeOITAlphaShader alpha.frag alpha.frag.spv)
+kdgpu_compileshaderset(KDGpu_ComputeOITCompositing compositing)
 
 add_custom_target(
     KDGpu_ComputeOITShaders ALL

@@ -6,4 +6,4 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
-CompileShaderSet(KDGpu_HelloXrMultiview hello_xr_multiview)
+kdgpu_compileshaderset(KDGpu_HelloXrMultiview hello_xr_multiview)

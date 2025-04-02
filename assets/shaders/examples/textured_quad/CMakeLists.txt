@@ -6,4 +6,4 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
-CompileShaderSet(KDGpu_TexturedQuad textured_quad)
+kdgpu_compileshaderset(KDGpu_TexturedQuad textured_quad)

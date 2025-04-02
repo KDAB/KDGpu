@@ -6,4 +6,4 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
-CompileShaderSet(KDGpu_BufferReference buffer_reference)
+kdgpu_compileshaderset(KDGpu_BufferReference buffer_reference)
