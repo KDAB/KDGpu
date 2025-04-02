@@ -2384,10 +2384,6 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
     std::array<VkClearValue, MaxAttachmentCount> vkClearValues;
     size_t clearIdx = 0;
 
-    if (options.attachments.size() != vulkanRenderPass->attachmentDescriptions.size()) {
-        SPDLOG_LOGGER_WARN(Logger::logger(), "Mismatch between RenderPass expected attachments {} and provided attachments {}", vulkanRenderPass->attachmentDescriptions.size(), options.attachments.size());
-    }
-
     const bool isAnyOfTheAttachmentsToBeCleared = std::ranges::any_of(vulkanRenderPass->attachmentDescriptions.begin(),
                                                                       vulkanRenderPass->attachmentDescriptions.end(),
                                                                       [](const AttachmentDescription &attDescription) {
@@ -2420,6 +2416,11 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
                 attachmentKey.addAttachmentView(attachment.resolveView);
             }
         }
+    }
+
+    const size_t expectedAttachmentCount = clearIdx; // options.attachments.size() + 1 for each attachment that has a resolveView if msaa is enabled
+    if (expectedAttachmentCount != vulkanRenderPass->attachmentDescriptions.size()) {
+        SPDLOG_LOGGER_WARN(Logger::logger(), "Mismatch between RenderPass expected attachments {} and provided attachments {}", vulkanRenderPass->attachmentDescriptions.size(), options.attachments.size());
     }
 
     renderPassInfo.clearValueCount = isAnyOfTheAttachmentsToBeCleared ? clearIdx : 0;
