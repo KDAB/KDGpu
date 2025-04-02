@@ -23,12 +23,31 @@ endif()
 
 # Compile a shader using glslangValidator
 function(CompileShader target shader output)
-    add_custom_command(
-        OUTPUT ${output}
-        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${shader}
-        COMMAND ${Vulkan_GLSLANG_VALIDATOR_EXECUTABLE} --quiet -V ${CMAKE_CURRENT_SOURCE_DIR}/${shader} -o ${output}
-        COMMENT "Compile shader ${shader} using glslangValidator"
-    )
+    # If just the named args are present use them. If there is an optional 4th argument
+    # we pass that in too. Useful for passing in -D define options to glslangValidator.
+    if(${ARGC} EQUAL 3)
+        add_custom_command(
+            OUTPUT ${output}
+            DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${shader}
+            COMMAND ${Vulkan_GLSLANG_VALIDATOR_EXECUTABLE} --quiet -V ${CMAKE_CURRENT_SOURCE_DIR}/${shader} -o ${output}
+            COMMENT "Compile shader ${shader} using glslangValidator"
+        )
+    else()
+        list(
+            SUBLIST
+            ARGV
+            3
+            -1
+            REMAINING_ARGS
+        )
+        add_custom_command(
+            OUTPUT ${output}
+            DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${shader}
+            COMMAND ${Vulkan_GLSLANG_VALIDATOR_EXECUTABLE} --quiet -V ${CMAKE_CURRENT_SOURCE_DIR}/${shader} -o ${output}
+                    ${REMAINING_ARGS}
+            COMMENT "Compile shader ${shader} using glslangValidator"
+        )
+    endif()
 
     add_custom_target(
         ${target}
