@@ -8,11 +8,12 @@
 #
 
 find_package(imgui QUIET)
+
 if(NOT TARGET imgui::imgui)
     FetchContent_Declare(
         imgui
         GIT_REPOSITORY https://github.com/ocornut/imgui.git
-        GIT_TAG v1.89.5
+        GIT_TAG v1.91.9
     )
     FetchContent_MakeAvailable(imgui)
 
