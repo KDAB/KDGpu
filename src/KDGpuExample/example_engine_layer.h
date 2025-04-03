@@ -65,6 +65,9 @@ public:
 
     KDGpuKDGui::View *window() { return m_window.get(); }
 
+    void uploadBufferData(const BufferUploadOptions &options);
+    void uploadTextureData(const TextureUploadOptions &options);
+
 protected:
     virtual void initializeScene() = 0;
     virtual void cleanupScene() = 0;
@@ -87,8 +90,6 @@ protected:
     void recreateDepthTexture();
     void recreateSampleDependentResources();
 
-    void uploadBufferData(const BufferUploadOptions &options);
-    void uploadTextureData(const TextureUploadOptions &options);
     void releaseStagingBuffers();
 
     std::shared_ptr<spdlog::logger> m_logger;
