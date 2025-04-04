@@ -24,6 +24,27 @@ function(add_kdgpu_test NAME SOURCES)
     endif()
 endfunction()
 
+# Build a test program that links against KDGpuUtils
+function(add_kdgpu_utils_test NAME SOURCES)
+    set(TARGET_NAME test_kdgpuutils_${NAME})
+    add_executable(${TARGET_NAME} ${SOURCES})
+
+    target_link_libraries(
+        ${TARGET_NAME}
+        KDGpu::KDGpu
+        KDGpu::KDGpuUtils
+        KDUtils::KDUtils
+        doctest::doctest
+    )
+
+    add_test(NAME ${TARGET_NAME} COMMAND $<TARGET_FILE:${TARGET_NAME}>)
+    set_tests_properties(${TARGET_NAME} PROPERTIES LABELS "KDGpuUtils")
+
+    if(APPLE)
+        target_compile_options(${TARGET_NAME} PRIVATE -Wno-deprecated-declarations)
+    endif()
+endfunction()
+
 if(KDGPU_BUILD_EXAMPLES)
     # Build an example test program
     function(add_kdgpuexample_test NAME SOURCES)
@@ -67,6 +88,8 @@ add_subdirectory(acceleration_structure)
 add_subdirectory(raytracing_pipeline)
 add_subdirectory(raytracing_pass_command_recorder)
 add_subdirectory(ycbcrconversions)
+add_subdirectory(staging_buffer_pool)
+add_subdirectory(resource_deleter)
 
 find_package(CUDAToolkit QUIET)
 if(${CUDAToolkit_FOUND})
