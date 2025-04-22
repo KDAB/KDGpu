@@ -215,9 +215,12 @@ Handle<Instance_t> VulkanResourceManager::createInstance(const InstanceOptions &
     }
 
     VkDebugUtilsMessengerCreateInfoEXT debugUtilsCreateInfo{};
-    const bool hasExtDebugUtilsExt = std::find(requestedInstanceExtensions.begin(), requestedInstanceExtensions.end(), VK_EXT_DEBUG_UTILS_EXTENSION_NAME) != requestedInstanceExtensions.end();
+    const bool hasExtDebugUtilsExt = std::find_if(requestedInstanceExtensions.begin(),
+                                                  requestedInstanceExtensions.end(),
+                                                  [](const char *name) { return strcmp(name, VK_EXT_DEBUG_UTILS_EXTENSION_NAME) == 0; }) != requestedInstanceExtensions.end();
     const bool shouldRegisterDebugCallback = enableValidationLayers && hasExtDebugUtilsExt;
     if (shouldRegisterDebugCallback) {
+        SPDLOG_LOGGER_INFO(Logger::logger(), "Registering Validation Debug Callback");
         // Provide the debug utils creation info to the instance creation info so it can be used during instance creation
         debugUtilsCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
         debugUtilsCreateInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
