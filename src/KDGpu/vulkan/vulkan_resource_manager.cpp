@@ -2289,7 +2289,6 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
     VkRenderPass vkRenderPass = vulkanRenderPass->renderPass;
 
     // Find or create a framebuffer as per the render pass above
-    const bool usingMsaa = options.samples > SampleCountFlagBits::Samples1Bit;
     VulkanAttachmentKey attachmentKey;
     for (const auto &attachment : options.attachments) {
         // verify that only color or depth is defined
@@ -2403,8 +2402,8 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
             vkClearValue.color.uint32[3] = arg.clearValue.uint32[3];
             vkClearValues[clearIdx++] = vkClearValue;
 
-            // Include resolve clear color again if using MSAA. Must match number of attachments.
-            if (usingMsaa)
+            // Include clear color again if using a resolve view. Must match number of attachments.
+            if (attachment.resolveView.isValid())
                 vkClearValues[clearIdx++] = vkClearValue;
         } else if (attachment.depth.has_value()) {
             auto arg = attachment.depth.value();
@@ -2413,7 +2412,7 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
             vkClearValue.depthStencil.stencil = arg.clearValue.stencilClearValue;
             vkClearValues[clearIdx++] = vkClearValue;
 
-            // Include resolve clear if using MSAA and Depth Resolve. Must match number of attachments.
+            // Include depth clear again if using a Depth Resolve view. Must match number of attachments.
             if (attachment.resolveView.isValid()) {
                 vkClearValues[clearIdx++] = vkClearValue;
                 attachmentKey.addAttachmentView(attachment.resolveView);
@@ -2423,7 +2422,7 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
 
     const size_t expectedAttachmentCount = clearIdx; // options.attachments.size() + 1 for each attachment that has a resolveView if msaa is enabled
     if (expectedAttachmentCount != vulkanRenderPass->attachmentDescriptions.size()) {
-        SPDLOG_LOGGER_WARN(Logger::logger(), "Mismatch between RenderPass expected attachments {} and provided attachments {}", vulkanRenderPass->attachmentDescriptions.size(), options.attachments.size());
+        SPDLOG_LOGGER_WARN(Logger::logger(), "Mismatch between RenderPass expected attachments {} and provided attachments {}", vulkanRenderPass->attachmentDescriptions.size(), clearIdx);
     }
 
     renderPassInfo.clearValueCount = isAnyOfTheAttachmentsToBeCleared ? clearIdx : 0;

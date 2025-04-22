@@ -368,6 +368,7 @@ void HelloTriangleMSAA::render()
         m_commandRecorderOptions.colorAttachments[0].resolveView = m_swapchainViews.at(m_currentSwapchainImageIndex);
         //![1]
     } else {
+        m_commandRecorderOptions.colorAttachments[0].resolveView = {};
         m_commandRecorderOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex);
     }
 
