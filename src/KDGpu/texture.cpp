@@ -88,7 +88,7 @@ SubresourceLayout Texture::getSubresourceLayout(const TextureSubresource &subres
     return apiTexture->getSubresourceLayout(subresource);
 }
 
-bool Texture::generateMipMaps(Device &device, Queue &transferQueue, const TextureOptions &options, TextureLayout oldLayout, TextureLayout newLayout)
+bool Texture::generateMipMaps(Device &device, Queue &transferQueue, const Handle<Texture_t> &sourceTexture, const TextureOptions &options, TextureLayout oldLayout, TextureLayout newLayout)
 {
     const Adapter *adapter = device.adapter();
     if (!adapter)
@@ -99,7 +99,7 @@ bool Texture::generateMipMaps(Device &device, Queue &transferQueue, const Textur
 
     CommandRecorder commandRecorder = device.createCommandRecorder();
 
-    // Transition base miplevel to TransferSrcOptimal
+    // Transition source to TransferSrcOptimal
     if (oldLayout != TextureLayout::TransferSrcOptimal)
         commandRecorder.textureMemoryBarrier(TextureMemoryBarrierOptions{
                 .srcStages = PipelineStageFlagBit::TransferBit,
@@ -108,7 +108,7 @@ bool Texture::generateMipMaps(Device &device, Queue &transferQueue, const Textur
                 .dstMask = AccessFlagBit::TransferReadBit,
                 .oldLayout = oldLayout,
                 .newLayout = TextureLayout::TransferSrcOptimal,
-                .texture = m_texture,
+                .texture = sourceTexture,
                 .range = {
                         .aspectMask = TextureAspectFlagBits::ColorBit,
                         .baseMipLevel = 0,
@@ -116,7 +116,12 @@ bool Texture::generateMipMaps(Device &device, Queue &transferQueue, const Textur
                 },
         });
 
-    for (uint32_t mipLevel = 1; mipLevel < options.mipLevels; ++mipLevel) {
+    // when copying from ourselves, no need to copy from level 0 to 0
+    uint32_t startingMipLevel = 1;
+    if (sourceTexture != this->handle())
+        // when copying from another texture, level 0 also needs to be updated
+        startingMipLevel = 0;
+    for (uint32_t mipLevel = startingMipLevel; mipLevel < options.mipLevels; ++mipLevel) {
 
         // Transition miplevel to TransforDstOptimal
         commandRecorder.textureMemoryBarrier(TextureMemoryBarrierOptions{
@@ -136,7 +141,7 @@ bool Texture::generateMipMaps(Device &device, Queue &transferQueue, const Textur
 
         // Blit main mip level into sub level
         commandRecorder.blitTexture(TextureBlitOptions{
-                .srcTexture = m_texture,
+                .srcTexture = sourceTexture,
                 .srcLayout = TextureLayout::TransferSrcOptimal,
                 .dstTexture = m_texture,
                 .dstLayout = TextureLayout::TransferDstOptimal,
@@ -193,7 +198,7 @@ bool Texture::generateMipMaps(Device &device, Queue &transferQueue, const Textur
             });
     }
 
-    // Transition base miplevel to newLayout
+    // Transition source texture to newLayout
     if (newLayout != TextureLayout::TransferSrcOptimal && newLayout != TextureLayout::Undefined)
         commandRecorder.textureMemoryBarrier(TextureMemoryBarrierOptions{
                 .srcStages = PipelineStageFlagBit::TransferBit,
@@ -202,7 +207,7 @@ bool Texture::generateMipMaps(Device &device, Queue &transferQueue, const Textur
                 .dstMask = AccessFlagBit::None,
                 .oldLayout = TextureLayout::TransferSrcOptimal,
                 .newLayout = newLayout,
-                .texture = m_texture,
+                .texture = sourceTexture,
                 .range = {
                         .aspectMask = TextureAspectFlagBits::ColorBit,
                         .baseMipLevel = 0,
@@ -218,6 +223,11 @@ bool Texture::generateMipMaps(Device &device, Queue &transferQueue, const Textur
 
     transferQueue.waitUntilIdle();
     return true;
+}
+
+bool Texture::generateMipMaps(Device &device, Queue &transferQueue, const TextureOptions &options, TextureLayout oldLayout, TextureLayout newLayout)
+{
+    return generateMipMaps(device, transferQueue, handle(), options, oldLayout, newLayout);
 }
 
 MemoryHandle Texture::externalMemoryHandle() const

@@ -122,6 +122,27 @@ public:
 
     SubresourceLayout getSubresourceLayout(const TextureSubresource &subresource = TextureSubresource()) const;
 
+    /**
+     * @brief Generate mipmaps by copying from another texture and then generating mipmaps for this texture
+     * @param device KDGpu Device
+     * @param transferQueue KDGpu Transfer Queue
+     * @param sourceTexture Texture to copy/blit from when creating the mipmaps
+     * @param options Texture Options for the target texture
+     * @param oldLayout Transitioning from this layout
+     * @param newLayout Transitioning to this layout when the mip map creation is done
+     * @return true when successful
+     */
+    bool generateMipMaps(Device &device, Queue &transferQueue, const Handle<Texture_t> &sourceTexture, const TextureOptions &options, TextureLayout oldLayout, TextureLayout newLayout = TextureLayout::Undefined);
+
+    /**
+     * @brief Generate mipmaps for this texture
+     * @param device KDGpu Device
+     * @param transferQueue KDGpu Transfer Queue
+     * @param options Texture Options for the target texture
+     * @param oldLayout Transitioning from this layout
+     * @param newLayout Transitioning to this layout when the mip map creation is done
+     * @return true when successful
+     */
     bool generateMipMaps(Device &device, Queue &transferQueue, const TextureOptions &options, TextureLayout oldLayout, TextureLayout newLayout = TextureLayout::Undefined);
 
     MemoryHandle externalMemoryHandle() const;
