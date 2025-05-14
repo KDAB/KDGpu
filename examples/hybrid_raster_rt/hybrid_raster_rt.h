@@ -22,9 +22,7 @@
 
 #include <glm/glm.hpp>
 
-using namespace KDGpuExample;
-
-class HybridRasterRt : public SimpleExampleEngineLayer
+class HybridRasterRt : public KDGpuExample::SimpleExampleEngineLayer
 {
 public:
 protected:
@@ -46,125 +44,125 @@ private:
     void initializeAccelerationStructures();
 
     struct Particles {
-        Buffer particleDataBuffer;
-        Buffer blasTransformBuffer;
-        PipelineLayout computePipelineLayout;
-        ComputePipeline computePipeline;
-        BindGroup particleBindGroup;
+        KDGpu::Buffer particleDataBuffer;
+        KDGpu::Buffer blasTransformBuffer;
+        KDGpu::PipelineLayout computePipelineLayout;
+        KDGpu::ComputePipeline computePipeline;
+        KDGpu::BindGroup particleBindGroup;
     } m_particles;
 
     struct GBuffer {
-        Texture posTexture;
-        Texture normalTexture;
-        Texture colorTexture;
-        Texture depthTexture;
-        Texture fragmentHeadsPointer;
-        Texture shadowTexture;
+        KDGpu::Texture posTexture;
+        KDGpu::Texture normalTexture;
+        KDGpu::Texture colorTexture;
+        KDGpu::Texture depthTexture;
+        KDGpu::Texture fragmentHeadsPointer;
+        KDGpu::Texture shadowTexture;
 
-        TextureView posTextureView;
-        TextureView normalTextureView;
-        TextureView colorTextureView;
-        TextureView depthTextureView;
-        TextureView fragmentHeadsPointerView;
-        TextureView shadowTextureView;
+        KDGpu::TextureView posTextureView;
+        KDGpu::TextureView normalTextureView;
+        KDGpu::TextureView colorTextureView;
+        KDGpu::TextureView depthTextureView;
+        KDGpu::TextureView fragmentHeadsPointerView;
+        KDGpu::TextureView shadowTextureView;
 
-        Buffer fragmentLinkedListBuffer;
+        KDGpu::Buffer fragmentLinkedListBuffer;
         size_t fragmentLinkedListBufferByteSize;
-        TextureLayout fragmentHeadsPointerLayout{ TextureLayout::Undefined };
-        TextureLayout shadowTextureLayout{ TextureLayout::Undefined };
+        KDGpu::TextureLayout fragmentHeadsPointerLayout{ KDGpu::TextureLayout::Undefined };
+        KDGpu::TextureLayout shadowTextureLayout{ KDGpu::TextureLayout::Undefined };
 
-        BindGroupLayout opaqueNormalDepthBindGroupLayout;
-        BindGroupLayout alphaBindGroupLayout;
-        BindGroupLayout shadowBindGroupLayout;
+        KDGpu::BindGroupLayout opaqueNormalDepthBindGroupLayout;
+        KDGpu::BindGroupLayout alphaBindGroupLayout;
+        KDGpu::BindGroupLayout shadowBindGroupLayout;
 
-        BindGroup opaqueNormalDepthBindGroup;
-        BindGroup alphaLinkedListBindGroup;
-        BindGroup shadowBindGroup;
+        KDGpu::BindGroup opaqueNormalDepthBindGroup;
+        KDGpu::BindGroup alphaLinkedListBindGroup;
+        KDGpu::BindGroup shadowBindGroup;
 
-        Sampler sampler;
+        KDGpu::Sampler sampler;
 
-        void initialize(Device *device);
-        void resize(Device *device, Extent2D extent);
+        void initialize(KDGpu::Device *device);
+        void resize(KDGpu::Device *device, KDGpu::Extent2D extent);
         void cleanup();
 
     } m_gbuffer;
 
     struct DepthFillPass {
-        RenderPassCommandRecorderOptions renderPassOptions;
+        KDGpu::RenderPassCommandRecorderOptions renderPassOptions;
     } m_zfillPass;
 
     struct AlphaFillPass {
-        RenderPassCommandRecorderOptions renderPassOptions;
+        KDGpu::RenderPassCommandRecorderOptions renderPassOptions;
     } m_alphaPass;
 
     struct OpaquePass {
-        RenderPassCommandRecorderOptions renderPassOptions;
+        KDGpu::RenderPassCommandRecorderOptions renderPassOptions;
     } m_opaquePass;
 
     struct LightDisplayPass {
-        RenderPassCommandRecorderOptions renderPassOptions;
-        PipelineLayout graphicsPipelineLayout;
-        GraphicsPipeline graphicsPipeline;
+        KDGpu::RenderPassCommandRecorderOptions renderPassOptions;
+        KDGpu::PipelineLayout graphicsPipelineLayout;
+        KDGpu::GraphicsPipeline graphicsPipeline;
     } m_lightDisplayPass;
 
     struct ShadowPass {
-        RayTracingPassCommandRecorderOptions rtPassOptions;
-        PipelineLayout pipelineLayout;
-        RayTracingPipeline pipeline;
-        RayTracingShaderBindingTable sbt;
+        KDGpu::RayTracingPassCommandRecorderOptions rtPassOptions;
+        KDGpu::PipelineLayout pipelineLayout;
+        KDGpu::RayTracingPipeline pipeline;
+        KDGpu::RayTracingShaderBindingTable sbt;
     } m_shadowPass;
 
     struct Compositing {
-        RenderPassCommandRecorderOptions renderPassOptions;
-        PipelineLayout graphicsPipelineLayout;
-        GraphicsPipeline graphicsPipeline;
+        KDGpu::RenderPassCommandRecorderOptions renderPassOptions;
+        KDGpu::PipelineLayout graphicsPipelineLayout;
+        KDGpu::GraphicsPipeline graphicsPipeline;
     } m_compositing;
 
     struct PlaneMesh {
-        PipelineLayout zFillGraphicsPipelineLayout;
-        PipelineLayout opaqueFillGraphicsPipelineLayout;
-        GraphicsPipeline zFillGraphicsPipeline;
-        GraphicsPipeline opaqueFillGraphicsPipeline;
-        Buffer vertexBuffer;
+        KDGpu::PipelineLayout zFillGraphicsPipelineLayout;
+        KDGpu::PipelineLayout opaqueFillGraphicsPipelineLayout;
+        KDGpu::GraphicsPipeline zFillGraphicsPipeline;
+        KDGpu::GraphicsPipeline opaqueFillGraphicsPipeline;
+        KDGpu::Buffer vertexBuffer;
         size_t vertexCount;
     } m_planeMesh;
 
     struct SphereMesh {
-        PipelineLayout zFillGraphicsPipelineLayout;
-        PipelineLayout alphaFillGraphicsPipelineLayout;
-        PipelineLayout opaqueFillGraphicsPipelineLayout;
-        GraphicsPipeline zFillGraphicsPipeline;
-        GraphicsPipeline alphaFillGraphicsPipeline;
-        GraphicsPipeline opaqueFillGraphicsPipeline;
-        Buffer vertexBuffer;
+        KDGpu::PipelineLayout zFillGraphicsPipelineLayout;
+        KDGpu::PipelineLayout alphaFillGraphicsPipelineLayout;
+        KDGpu::PipelineLayout opaqueFillGraphicsPipelineLayout;
+        KDGpu::GraphicsPipeline zFillGraphicsPipeline;
+        KDGpu::GraphicsPipeline alphaFillGraphicsPipeline;
+        KDGpu::GraphicsPipeline opaqueFillGraphicsPipeline;
+        KDGpu::Buffer vertexBuffer;
         size_t vertexCount;
     } m_sphereMesh;
 
     struct AccelerationStructures {
-        AccelerationStructure opaqueSpheresBlas;
-        AccelerationStructure alphaSpheresBlas;
-        AccelerationStructure opaquePlaneBlas;
-        AccelerationStructure tBlas;
+        KDGpu::AccelerationStructure opaqueSpheresBlas;
+        KDGpu::AccelerationStructure alphaSpheresBlas;
+        KDGpu::AccelerationStructure opaquePlaneBlas;
+        KDGpu::AccelerationStructure tBlas;
 
-        BuildAccelerationStructureOptions opaqueSpheresASBuildOptions;
-        BuildAccelerationStructureOptions alphaSpheresASBuildOptions;
-        BuildAccelerationStructureOptions opaquePlaneASBuildOptions;
-        BuildAccelerationStructureOptions tlASBuildOptions;
+        KDGpu::BuildAccelerationStructureOptions opaqueSpheresASBuildOptions;
+        KDGpu::BuildAccelerationStructureOptions alphaSpheresASBuildOptions;
+        KDGpu::BuildAccelerationStructureOptions opaquePlaneASBuildOptions;
+        KDGpu::BuildAccelerationStructureOptions tlASBuildOptions;
 
-        BindGroupLayout tsASBindGroupLayout;
-        BindGroup tsASBindGroup;
+        KDGpu::BindGroupLayout tsASBindGroupLayout;
+        KDGpu::BindGroup tsASBindGroup;
 
         bool hasBuiltStaticBlas = false;
     } m_as;
 
     struct Global {
-        Buffer cameraDataBuffer;
-        BindGroupLayout cameraBindGroupLayout;
-        BindGroup cameraBindGroup;
+        KDGpu::Buffer cameraDataBuffer;
+        KDGpu::BindGroupLayout cameraBindGroupLayout;
+        KDGpu::BindGroup cameraBindGroup;
 
-        PushConstantRange lightPosPushConstant;
+        KDGpu::PushConstantRange lightPosPushConstant;
         glm::vec3 lightPos;
 
-        CommandBuffer commandBuffer;
+        KDGpu::CommandBuffer commandBuffer;
     } m_global;
 };

@@ -31,6 +31,9 @@
 #include <string>
 #include <random>
 
+using namespace KDGpu;
+using namespace KDGpuExample;
+
 HelloTriangleRt::HelloTriangleRt()
     : SimpleExampleEngineLayer()
 {

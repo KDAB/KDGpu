@@ -24,6 +24,8 @@
 #include <fstream>
 #include <string>
 
+using namespace KDGpu;
+
 void DepthBias::initializeScene()
 {
     //![3]

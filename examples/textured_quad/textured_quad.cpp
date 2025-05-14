@@ -32,6 +32,8 @@
 #include <fstream>
 #include <string>
 
+using namespace KDGpu;
+
 //![2]
 struct ImageData {
     uint32_t width{ 0 };

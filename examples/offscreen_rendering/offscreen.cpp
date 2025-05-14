@@ -82,6 +82,8 @@ void writeImage(const std::string &path, const ImageData &image)
 
 } // namespace KDGpu
 
+using namespace KDGpu;
+
 //![7]
 Offscreen::Offscreen()
     : m_api(std::make_unique<VulkanGraphicsApi>())

@@ -22,9 +22,7 @@
 
 #include <glm/glm.hpp>
 
-using namespace KDGpuExample;
-
-class BindGroupIndexing : public SimpleExampleEngineLayer
+class BindGroupIndexing : public KDGpuExample::SimpleExampleEngineLayer
 {
 public:
     BindGroupIndexing();
@@ -39,16 +37,16 @@ protected:
 private:
     void createRenderTarget();
 
-    Buffer m_buffer;
-    Buffer m_indexBuffer;
-    PipelineLayout m_pipelineLayout;
-    GraphicsPipeline m_pipeline;
-    RenderPassCommandRecorderOptions m_opaquePassOptions;
-    CommandBuffer m_commandBuffer;
+    KDGpu::Buffer m_buffer;
+    KDGpu::Buffer m_indexBuffer;
+    KDGpu::PipelineLayout m_pipelineLayout;
+    KDGpu::GraphicsPipeline m_pipeline;
+    KDGpu::RenderPassCommandRecorderOptions m_opaquePassOptions;
+    KDGpu::CommandBuffer m_commandBuffer;
 
-    std::vector<Buffer> m_transformBuffers;
-    Buffer m_frameCounterSSBO;
-    BindGroup m_transformsBindGroup;
-    BindGroup m_ssboBindGroup;
-    PushConstantRange m_transformCountPushConstant;
+    std::vector<KDGpu::Buffer> m_transformBuffers;
+    KDGpu::Buffer m_frameCounterSSBO;
+    KDGpu::BindGroup m_transformsBindGroup;
+    KDGpu::BindGroup m_ssboBindGroup;
+    KDGpu::PushConstantRange m_transformCountPushConstant;
 };

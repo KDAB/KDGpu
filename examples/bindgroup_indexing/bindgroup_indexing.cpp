@@ -27,6 +27,8 @@
 #include <fstream>
 #include <string>
 
+using namespace KDGpu;
+
 namespace {
 const size_t TransformsCount = 16;
 }

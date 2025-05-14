@@ -32,9 +32,7 @@ class XrQuadImGuiLayer;
 class XrCylinderImGuiLayer;
 } // namespace KDGpuExample
 
-using namespace KDGpuExample;
-
-class HelloXrMultiview : public XrExampleEngineLayer
+class HelloXrMultiview : public KDGpuExample::XrExampleEngineLayer
 {
 protected:
     void onAttached() override;
@@ -51,8 +49,8 @@ private:
     void processHapticAction();
 
     ProjectionLayer *m_projectionLayer{ nullptr };
-    XrQuadImGuiLayer *m_quadImguiLayer{ nullptr };
-    XrCylinderImGuiLayer *m_cylinderImguiLayer{ nullptr };
+    KDGpuExample::XrQuadImGuiLayer *m_quadImguiLayer{ nullptr };
+    KDGpuExample::XrCylinderImGuiLayer *m_cylinderImguiLayer{ nullptr };
 
     // Input/output actions
     KDXr::ActionSet m_actionSet;

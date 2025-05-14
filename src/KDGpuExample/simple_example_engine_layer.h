@@ -13,8 +13,6 @@
 #include <KDGpuExample/example_engine_layer.h>
 #include <KDGpuExample/kdgpuexample_export.h>
 
-using namespace KDGpu;
-
 namespace KDGpuExample {
 
 /**

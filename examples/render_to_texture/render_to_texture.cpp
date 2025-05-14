@@ -29,6 +29,8 @@
 #include <fstream>
 #include <string>
 
+using namespace KDGpu;
+
 void RenderToTexture::initializeScene()
 {
     using std::placeholders::_1;

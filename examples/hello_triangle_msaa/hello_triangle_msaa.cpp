@@ -26,6 +26,9 @@
 #include <fstream>
 #include <string>
 
+using namespace KDGpu;
+using namespace KDGpuExample;
+
 HelloTriangleMSAA::HelloTriangleMSAA()
     : SimpleExampleEngineLayer()
 {

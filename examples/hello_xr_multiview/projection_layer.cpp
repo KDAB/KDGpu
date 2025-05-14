@@ -28,6 +28,9 @@
 
 #include <array>
 
+using namespace KDGpuExample;
+using namespace KDGpu;
+
 ProjectionLayer::ProjectionLayer(const XrProjectionLayerOptions &options)
     : XrProjectionLayer(options)
 {

@@ -24,8 +24,6 @@
 #include <memory>
 #include <vector>
 
-using namespace KDGpu;
-
 class Offscreen
 {
 public:
@@ -51,24 +49,24 @@ private:
     void createRenderTargets();
 
     // Rendering resources
-    std::unique_ptr<GraphicsApi> m_api;
-    Instance m_instance;
-    Device m_device;
-    Queue m_queue;
-    std::vector<UploadStagingBuffer> m_stagingBuffers;
+    std::unique_ptr<KDGpu::GraphicsApi> m_api;
+    KDGpu::Instance m_instance;
+    KDGpu::Device m_device;
+    KDGpu::Queue m_queue;
+    std::vector<KDGpu::UploadStagingBuffer> m_stagingBuffers;
 
     uint32_t m_width{ 1920 };
     uint32_t m_height{ 1080 };
 
-    SampleCountFlagBits m_samples{ SampleCountFlagBits::Samples8Bit };
-    Texture m_msaaColorTexture;
-    TextureView m_msaaColorTextureView;
-    Texture m_colorTexture;
-    TextureView m_colorTextureView;
-    Texture m_depthTexture;
-    TextureView m_depthTextureView;
+    KDGpu::SampleCountFlagBits m_samples{ KDGpu::SampleCountFlagBits::Samples8Bit };
+    KDGpu::Texture m_msaaColorTexture;
+    KDGpu::TextureView m_msaaColorTextureView;
+    KDGpu::Texture m_colorTexture;
+    KDGpu::TextureView m_colorTextureView;
+    KDGpu::Texture m_depthTexture;
+    KDGpu::TextureView m_depthTextureView;
 
-    Texture m_cpuColorTexture;
+    KDGpu::Texture m_cpuColorTexture;
 
     enum class TextureBarriers : uint8_t {
         CopySrcPre = 0,
@@ -77,31 +75,31 @@ private:
         CopySrcPost,
         Count
     };
-    TextureMemoryBarrierOptions m_barriers[uint8_t(TextureBarriers::Count)];
-    TextureToTextureCopy m_copyOptions;
+    KDGpu::TextureMemoryBarrierOptions m_barriers[uint8_t(TextureBarriers::Count)];
+    KDGpu::TextureToTextureCopy m_copyOptions;
 
-    const Format m_colorFormat{ Format::R8G8B8A8_UNORM };
+    const KDGpu::Format m_colorFormat{ KDGpu::Format::R8G8B8A8_UNORM };
 #if defined(KDGPU_PLATFORM_APPLE)
-    const Format m_depthFormat{ Format::D32_SFLOAT_S8_UINT };
+    const KDGpu::Format m_depthFormat{ KDGpu::Format::D32_SFLOAT_S8_UINT };
 #else
-    const Format m_depthFormat{ Format::D24_UNORM_S8_UINT };
+    const KDGpu::Format m_depthFormat{ KDGpu::Format::D24_UNORM_S8_UINT };
 #endif
 
     // Scene Resources
-    Buffer m_dataBuffer;
+    KDGpu::Buffer m_dataBuffer;
     uint32_t m_pointCount{ 0 };
 
     glm::mat4 m_proj;
-    Buffer m_projBuffer;
-    BindGroup m_transformBindGroup;
+    KDGpu::Buffer m_projBuffer;
+    KDGpu::BindGroup m_transformBindGroup;
 
-    Texture m_pointTexture;
-    TextureView m_pointTextureView;
-    Sampler m_pointSampler;
-    BindGroup m_pointTextureBindGroup;
+    KDGpu::Texture m_pointTexture;
+    KDGpu::TextureView m_pointTextureView;
+    KDGpu::Sampler m_pointSampler;
+    KDGpu::BindGroup m_pointTextureBindGroup;
 
-    GraphicsPipeline m_pipeline;
-    PipelineLayout m_pipelineLayout;
-    RenderPassCommandRecorderOptions m_renderPassOptions;
-    CommandBuffer m_commandBuffer;
+    KDGpu::GraphicsPipeline m_pipeline;
+    KDGpu::PipelineLayout m_pipelineLayout;
+    KDGpu::RenderPassCommandRecorderOptions m_renderPassOptions;
+    KDGpu::CommandBuffer m_commandBuffer;
 };

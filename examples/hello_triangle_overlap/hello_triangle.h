@@ -18,9 +18,7 @@
 
 #include <glm/glm.hpp>
 
-using namespace KDGpuExample;
-
-class HelloTriangle : public AdvancedExampleEngineLayer
+class HelloTriangle : public KDGpuExample::AdvancedExampleEngineLayer
 {
 public:
 protected:
@@ -32,13 +30,13 @@ protected:
 
 private:
     glm::mat4 m_transform = glm::mat4(1.0f);
-    Buffer m_buffer;
-    Buffer m_indexBuffer;
-    GraphicsPipeline m_pipeline;
-    PipelineLayout m_pipelineLayout;
-    RenderPassCommandRecorderOptions m_opaquePassOptions;
-    const PushConstantRange m_transformPushConstantRange{ .offset = 0,
-                                                          .size = 16 * sizeof(float),
-                                                          .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit) };
-    std::array<CommandBuffer, MAX_FRAMES_IN_FLIGHT> m_commandBuffers;
+    KDGpu::Buffer m_buffer;
+    KDGpu::Buffer m_indexBuffer;
+    KDGpu::GraphicsPipeline m_pipeline;
+    KDGpu::PipelineLayout m_pipelineLayout;
+    KDGpu::RenderPassCommandRecorderOptions m_opaquePassOptions;
+    const KDGpu::PushConstantRange m_transformPushConstantRange{ .offset = 0,
+                                                                 .size = 16 * sizeof(float),
+                                                                 .shaderStages = KDGpu::ShaderStageFlags(KDGpu::ShaderStageFlagBits::VertexBit) };
+    std::array<KDGpu::CommandBuffer, KDGpuExample::MAX_FRAMES_IN_FLIGHT> m_commandBuffers;
 };

@@ -23,6 +23,8 @@
 #include <fstream>
 #include <string>
 
+using namespace KDGpu;
+
 namespace {
 constexpr uint32_t entityCount = 4;
 }

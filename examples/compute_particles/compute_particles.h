@@ -19,9 +19,7 @@
 
 #include <glm/glm.hpp>
 
-using namespace KDGpuExample;
-
-class ComputeParticles : public SimpleExampleEngineLayer
+class ComputeParticles : public KDGpuExample::SimpleExampleEngineLayer
 {
 public:
 protected:
@@ -35,17 +33,17 @@ protected:
     void renderMultipleCommandBuffers();
 
 private:
-    Buffer m_particleDataBuffer;
-    Buffer m_triangleVertexBuffer;
-    ComputePipeline m_computePipeline;
-    GraphicsPipeline m_graphicsPipeline;
-    PipelineLayout m_graphicsPipelineLayout;
-    PipelineLayout m_computePipelineLayout;
-    RenderPassCommandRecorderOptions m_opaquePassOptions;
-    CommandBuffer m_graphicsCommands;
-    CommandBuffer m_computeCommands;
-    CommandBuffer m_graphicsAndComputeCommands;
+    KDGpu::Buffer m_particleDataBuffer;
+    KDGpu::Buffer m_triangleVertexBuffer;
+    KDGpu::ComputePipeline m_computePipeline;
+    KDGpu::GraphicsPipeline m_graphicsPipeline;
+    KDGpu::PipelineLayout m_graphicsPipelineLayout;
+    KDGpu::PipelineLayout m_computePipelineLayout;
+    KDGpu::RenderPassCommandRecorderOptions m_opaquePassOptions;
+    KDGpu::CommandBuffer m_graphicsCommands;
+    KDGpu::CommandBuffer m_computeCommands;
+    KDGpu::CommandBuffer m_graphicsAndComputeCommands;
 
-    BindGroup m_particleBindGroup;
-    GpuSemaphore m_computeSemaphoreComplete;
+    KDGpu::BindGroup m_particleBindGroup;
+    KDGpu::GpuSemaphore m_computeSemaphoreComplete;
 };

@@ -19,9 +19,7 @@
 
 #include <glm/glm.hpp>
 
-using namespace KDGpuExample;
-
-class HelloTriangle : public SimpleExampleEngineLayer
+class HelloTriangle : public KDGpuExample::SimpleExampleEngineLayer
 {
 public:
 protected:
@@ -32,14 +30,14 @@ protected:
     void resize() override;
 
 private:
-    Buffer m_buffer;
-    Buffer m_indexBuffer;
-    PipelineLayout m_pipelineLayout;
-    GraphicsPipeline m_pipeline;
-    RenderPassCommandRecorderOptions m_opaquePassOptions;
-    CommandBuffer m_commandBuffer;
+    KDGpu::Buffer m_buffer;
+    KDGpu::Buffer m_indexBuffer;
+    KDGpu::PipelineLayout m_pipelineLayout;
+    KDGpu::GraphicsPipeline m_pipeline;
+    KDGpu::RenderPassCommandRecorderOptions m_opaquePassOptions;
+    KDGpu::CommandBuffer m_commandBuffer;
 
     glm::mat4 m_transform;
-    Buffer m_transformBuffer;
-    BindGroup m_transformBindGroup;
+    KDGpu::Buffer m_transformBuffer;
+    KDGpu::BindGroup m_transformBindGroup;
 };

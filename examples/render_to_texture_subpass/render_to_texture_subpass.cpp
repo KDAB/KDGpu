@@ -43,6 +43,8 @@ inline std::string assetPath()
 
 } // namespace KDGpu
 
+using namespace KDGpu;
+
 void RenderToTextureSubpass::initializeScene()
 {
     using std::placeholders::_1;

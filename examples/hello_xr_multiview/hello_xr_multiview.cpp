@@ -17,6 +17,8 @@
 
 #include <KDXr/session.h>
 
+using namespace KDGpuExample;
+
 void HelloXrMultiview::onAttached()
 {
     XrExampleEngineLayer::onAttached();

@@ -51,6 +51,9 @@ std::vector<uint8_t> updateCameraData(float width, float height, glm::vec3 posit
 
 } // namespace
 
+using namespace KDGpu;
+using namespace KDGpuExample;
+
 HelloSphereRt::HelloSphereRt()
     : SimpleExampleEngineLayer()
 {

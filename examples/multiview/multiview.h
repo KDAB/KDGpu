@@ -17,9 +17,7 @@
 #include <KDGpu/graphics_pipeline.h>
 #include <KDGpu/render_pass_command_recorder_options.h>
 
-using namespace KDGpuExample;
-
-class MultiView : public SimpleExampleEngineLayer
+class MultiView : public KDGpuExample::SimpleExampleEngineLayer
 {
 public:
 protected:
@@ -36,37 +34,37 @@ private:
     void updateFinalPassBindGroup();
 
     // MultiView Scene
-    Buffer m_vertexBuffer;
-    PipelineLayout m_mvPipelineLayout;
-    GraphicsPipeline m_mvPipeline;
-    const PushConstantRange m_mvPushConstantRange{
+    KDGpu::Buffer m_vertexBuffer;
+    KDGpu::PipelineLayout m_mvPipelineLayout;
+    KDGpu::GraphicsPipeline m_mvPipeline;
+    const KDGpu::PushConstantRange m_mvPushConstantRange{
         .offset = 0,
         .size = sizeof(float),
-        .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit)
+        .shaderStages = KDGpu::ShaderStageFlags(KDGpu::ShaderStageFlagBits::VertexBit)
     };
 
     // Full Screen Quad Scene
-    PipelineLayout m_fsqPipelineLayout;
-    GraphicsPipeline m_fsqPipeline;
-    BindGroupLayout m_fsqTextureBindGroupLayout;
-    BindGroup m_fsqTextureBindGroup;
-    const PushConstantRange m_fsqLayerIdxPushConstantRange{
+    KDGpu::PipelineLayout m_fsqPipelineLayout;
+    KDGpu::GraphicsPipeline m_fsqPipeline;
+    KDGpu::BindGroupLayout m_fsqTextureBindGroupLayout;
+    KDGpu::BindGroup m_fsqTextureBindGroup;
+    const KDGpu::PushConstantRange m_fsqLayerIdxPushConstantRange{
         .offset = 0,
         .size = sizeof(int),
-        .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit)
+        .shaderStages = KDGpu::ShaderStageFlags(KDGpu::ShaderStageFlagBits::FragmentBit)
     };
 
-    Texture m_multiViewColorOutput;
-    Texture m_multiViewDepth;
-    TextureView m_multiViewColorOutputView;
-    TextureView m_multiViewDepthView;
+    KDGpu::Texture m_multiViewColorOutput;
+    KDGpu::Texture m_multiViewDepth;
+    KDGpu::TextureView m_multiViewColorOutputView;
+    KDGpu::TextureView m_multiViewDepthView;
 
-    Sampler m_multiViewColorOutputSampler;
+    KDGpu::Sampler m_multiViewColorOutputSampler;
 
-    RenderPassCommandRecorderOptions m_mvPassOptions;
-    RenderPassCommandRecorderOptions m_fsqPassOptions;
-    CommandBuffer m_commandBuffer;
+    KDGpu::RenderPassCommandRecorderOptions m_mvPassOptions;
+    KDGpu::RenderPassCommandRecorderOptions m_fsqPassOptions;
+    KDGpu::CommandBuffer m_commandBuffer;
 
-    const Format m_mvColorFormat{ Format::R8G8B8A8_UNORM };
-    const Format m_mvDepthFormat{ Format::D24_UNORM_S8_UINT };
+    const KDGpu::Format m_mvColorFormat{ KDGpu::Format::R8G8B8A8_UNORM };
+    const KDGpu::Format m_mvDepthFormat{ KDGpu::Format::D24_UNORM_S8_UINT };
 };

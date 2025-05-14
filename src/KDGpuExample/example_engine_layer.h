@@ -39,8 +39,6 @@ namespace KDGpu {
 class RenderPassCommandRecorder;
 }
 
-using namespace KDGpu;
-
 namespace KDGpuExample {
 
 class ImGuiItem;
@@ -65,8 +63,8 @@ public:
 
     KDGpuKDGui::View *window() { return m_window.get(); }
 
-    void uploadBufferData(const BufferUploadOptions &options);
-    void uploadTextureData(const TextureUploadOptions &options);
+    void uploadBufferData(const KDGpu::BufferUploadOptions &options);
+    void uploadTextureData(const KDGpu::TextureUploadOptions &options);
 
 protected:
     virtual void initializeScene() = 0;
@@ -76,7 +74,7 @@ protected:
     virtual void resize() = 0;
 
     virtual void drawImGuiOverlay(ImGuiContext *ctx);
-    virtual void renderImGuiOverlay(RenderPassCommandRecorder *recorder, uint32_t inFlightIndex = 0, RenderPass *currentRenderPass = nullptr, int lastSubpassIndex = 0);
+    virtual void renderImGuiOverlay(KDGpu::RenderPassCommandRecorder *recorder, uint32_t inFlightIndex = 0, KDGpu::RenderPass *currentRenderPass = nullptr, int lastSubpassIndex = 0);
     void registerImGuiOverlayDrawFunction(const std::function<void(ImGuiContext *)> &func);
     void clearImGuiOverlayDrawFunctions();
     void recreateImGuiOverlay();
@@ -93,38 +91,38 @@ protected:
     void releaseStagingBuffers();
 
     std::shared_ptr<spdlog::logger> m_logger;
-    std::unique_ptr<GraphicsApi> m_api;
+    std::unique_ptr<KDGpu::GraphicsApi> m_api;
     std::unique_ptr<KDGpuKDGui::View> m_window;
 
-    Extent2D m_swapchainExtent;
-    KDBindings::Property<SampleCountFlagBits> m_samples{ SampleCountFlagBits::Samples1Bit };
-    TextureUsageFlags m_swapchainUsageFlags{ TextureUsageFlagBits::ColorAttachmentBit };
-    std::vector<SampleCountFlagBits> m_supportedSampleCounts;
-    Instance m_instance;
-    Surface m_surface;
-    Adapter *m_adapter;
-    Device m_device;
-    Queue m_queue;
-    PresentMode m_presentMode;
-    Swapchain m_swapchain;
-    std::vector<TextureView> m_swapchainViews;
-    Texture m_depthTexture;
-    TextureView m_depthTextureView;
+    KDGpu::Extent2D m_swapchainExtent;
+    KDBindings::Property<KDGpu::SampleCountFlagBits> m_samples{ KDGpu::SampleCountFlagBits::Samples1Bit };
+    KDGpu::TextureUsageFlags m_swapchainUsageFlags{ KDGpu::TextureUsageFlagBits::ColorAttachmentBit };
+    std::vector<KDGpu::SampleCountFlagBits> m_supportedSampleCounts;
+    KDGpu::Instance m_instance;
+    KDGpu::Surface m_surface;
+    KDGpu::Adapter *m_adapter;
+    KDGpu::Device m_device;
+    KDGpu::Queue m_queue;
+    KDGpu::PresentMode m_presentMode;
+    KDGpu::Swapchain m_swapchain;
+    std::vector<KDGpu::TextureView> m_swapchainViews;
+    KDGpu::Texture m_depthTexture;
+    KDGpu::TextureView m_depthTextureView;
 
     std::unique_ptr<ImGuiItem> m_imguiOverlay;
     std::vector<std::function<void(ImGuiContext *)>> m_imGuiOverlayDrawFunctions;
 
     uint32_t m_currentSwapchainImageIndex{ 0 };
     uint32_t m_inFlightIndex{ 0 };
-    std::array<GpuSemaphore, MAX_FRAMES_IN_FLIGHT> m_presentCompleteSemaphores;
-    std::array<GpuSemaphore, MAX_FRAMES_IN_FLIGHT> m_renderCompleteSemaphores;
-    TextureUsageFlags m_depthTextureUsageFlags{};
+    std::array<KDGpu::GpuSemaphore, MAX_FRAMES_IN_FLIGHT> m_presentCompleteSemaphores;
+    std::array<KDGpu::GpuSemaphore, MAX_FRAMES_IN_FLIGHT> m_renderCompleteSemaphores;
+    KDGpu::TextureUsageFlags m_depthTextureUsageFlags{};
 
-    std::vector<UploadStagingBuffer> m_stagingBuffers;
+    std::vector<KDGpu::UploadStagingBuffer> m_stagingBuffers;
 
-    Format m_swapchainFormat{ Format::B8G8R8A8_UNORM };
-    Format m_depthFormat;
-    CompositeAlphaFlagBits m_compositeAlpha{ CompositeAlphaFlagBits::OpaqueBit };
+    KDGpu::Format m_swapchainFormat{ KDGpu::Format::B8G8R8A8_UNORM };
+    KDGpu::Format m_depthFormat;
+    KDGpu::CompositeAlphaFlagBits m_compositeAlpha{ KDGpu::CompositeAlphaFlagBits::OpaqueBit };
 
     bool m_showSurfaceCapabilities{ false };
     std::string m_capabilitiesString;

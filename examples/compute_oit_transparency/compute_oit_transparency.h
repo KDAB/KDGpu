@@ -19,9 +19,7 @@
 
 #include <glm/glm.hpp>
 
-using namespace KDGpuExample;
-
-class ComputeOitTransparency : public SimpleExampleEngineLayer
+class ComputeOitTransparency : public KDGpuExample::SimpleExampleEngineLayer
 {
 public:
 protected:
@@ -39,46 +37,46 @@ private:
     void initializeMeshes();
 
     struct Particles {
-        Buffer particleDataBuffer;
-        PipelineLayout computePipelineLayout;
-        ComputePipeline computePipeline;
-        BindGroup particleBindGroup;
+        KDGpu::Buffer particleDataBuffer;
+        KDGpu::PipelineLayout computePipelineLayout;
+        KDGpu::ComputePipeline computePipeline;
+        KDGpu::BindGroup particleBindGroup;
     } m_particles;
 
     struct Alpha {
-        Buffer fragmentLinkedListBuffer;
-        Texture fragmentHeadsPointer;
-        TextureView fragmentHeadsPointerView;
-        RenderPassCommandRecorderOptions renderPassOptions;
+        KDGpu::Buffer fragmentLinkedListBuffer;
+        KDGpu::Texture fragmentHeadsPointer;
+        KDGpu::TextureView fragmentHeadsPointerView;
+        KDGpu::RenderPassCommandRecorderOptions renderPassOptions;
         size_t fragmentLinkedListBufferByteSize;
-        BindGroupLayout alphaBindGroupLayout;
-        BindGroup alphaLinkedListBindGroup;
-        TextureLayout fragmentHeadsPointerLayout{ TextureLayout::Undefined };
+        KDGpu::BindGroupLayout alphaBindGroupLayout;
+        KDGpu::BindGroup alphaLinkedListBindGroup;
+        KDGpu::TextureLayout fragmentHeadsPointerLayout{ KDGpu::TextureLayout::Undefined };
     } m_alpha;
 
     struct Compositing {
-        RenderPassCommandRecorderOptions renderPassOptions;
-        PipelineLayout graphicsPipelineLayout;
-        GraphicsPipeline graphicsPipeline;
+        KDGpu::RenderPassCommandRecorderOptions renderPassOptions;
+        KDGpu::PipelineLayout graphicsPipelineLayout;
+        KDGpu::GraphicsPipeline graphicsPipeline;
     } m_compositing;
 
     struct CubeMesh {
-        PipelineLayout graphicsPipelineLayout;
-        GraphicsPipeline graphicsPipeline;
-        Buffer vertexBuffer;
+        KDGpu::PipelineLayout graphicsPipelineLayout;
+        KDGpu::GraphicsPipeline graphicsPipeline;
+        KDGpu::Buffer vertexBuffer;
     } m_cubeMesh;
 
     struct SphereMesh {
-        PipelineLayout graphicsPipelineLayout;
-        GraphicsPipeline graphicsPipeline;
-        Buffer vertexBuffer;
+        KDGpu::PipelineLayout graphicsPipelineLayout;
+        KDGpu::GraphicsPipeline graphicsPipeline;
+        KDGpu::Buffer vertexBuffer;
         size_t vertexCount;
     } m_sphereMesh;
 
     struct Global {
-        Buffer cameraDataBuffer;
-        BindGroupLayout cameraBindGroupLayout;
-        BindGroup cameraBindGroup;
-        CommandBuffer commandBuffer;
+        KDGpu::Buffer cameraDataBuffer;
+        KDGpu::BindGroupLayout cameraBindGroupLayout;
+        KDGpu::BindGroup cameraBindGroup;
+        KDGpu::CommandBuffer commandBuffer;
     } m_global;
 };

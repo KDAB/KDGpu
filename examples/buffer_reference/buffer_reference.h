@@ -22,9 +22,7 @@
 
 #include <glm/glm.hpp>
 
-using namespace KDGpuExample;
-
-class BufferReference : public SimpleExampleEngineLayer
+class BufferReference : public KDGpuExample::SimpleExampleEngineLayer
 {
 public:
     BufferReference();
@@ -39,12 +37,12 @@ protected:
 private:
     void createRenderTarget();
 
-    Buffer m_vertexBuffer;
-    Buffer m_vertexColorsBuffer;
-    PipelineLayout m_pipelineLayout;
-    GraphicsPipeline m_pipeline;
-    RenderPassCommandRecorderOptions m_opaquePassOptions;
-    CommandBuffer m_commandBuffer;
+    KDGpu::Buffer m_vertexBuffer;
+    KDGpu::Buffer m_vertexColorsBuffer;
+    KDGpu::PipelineLayout m_pipelineLayout;
+    KDGpu::GraphicsPipeline m_pipeline;
+    KDGpu::RenderPassCommandRecorderOptions m_opaquePassOptions;
+    KDGpu::CommandBuffer m_commandBuffer;
 
-    PushConstantRange m_pushConstants;
+    KDGpu::PushConstantRange m_pushConstants;
 };

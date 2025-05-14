@@ -24,6 +24,8 @@
 
 #include <glm/glm.hpp>
 
+using namespace KDGpu;
+
 void MultiView::initializeScene()
 {
     createMultiViewOffscreenTextures();

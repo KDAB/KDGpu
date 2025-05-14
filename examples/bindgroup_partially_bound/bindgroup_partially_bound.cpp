@@ -33,6 +33,8 @@
 #include <fstream>
 #include <string>
 
+using namespace KDGpu;
+
 namespace {
 
 struct ImageData {

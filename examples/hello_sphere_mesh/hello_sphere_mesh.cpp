@@ -17,6 +17,8 @@
 
 #include <string>
 
+using namespace KDGpu;
+
 void HelloSphereMesh::initializeScene()
 {
     // Create a mesh shader and fragment shader

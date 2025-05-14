@@ -19,9 +19,7 @@
 
 #include <glm/glm.hpp>
 
-using namespace KDGpuExample;
-
-class RenderToTexture : public SimpleExampleEngineLayer
+class RenderToTexture : public KDGpuExample::SimpleExampleEngineLayer
 {
 public:
 protected:
@@ -39,35 +37,35 @@ private:
     void drawControls(ImGuiContext *ctx);
 
     // Main scene resources
-    Buffer m_buffer;
-    Buffer m_indexBuffer;
-    PipelineLayout m_pipelineLayout;
-    GraphicsPipeline m_pipeline;
+    KDGpu::Buffer m_buffer;
+    KDGpu::Buffer m_indexBuffer;
+    KDGpu::PipelineLayout m_pipelineLayout;
+    KDGpu::GraphicsPipeline m_pipeline;
 
     glm::mat4 m_transform;
-    Buffer m_transformBuffer;
-    BindGroup m_transformBindGroup;
+    KDGpu::Buffer m_transformBuffer;
+    KDGpu::BindGroup m_transformBindGroup;
 
     // Post process resources
-    Buffer m_fullScreenQuad;
-    PipelineLayout m_postProcessPipelineLayout;
-    GraphicsPipeline m_postProcessPipeline;
-    BindGroup m_colorBindGroup;
-    BindGroupLayout m_colorBindGroupLayout;
-    const PushConstantRange m_filterPosPushConstantRange{
+    KDGpu::Buffer m_fullScreenQuad;
+    KDGpu::PipelineLayout m_postProcessPipelineLayout;
+    KDGpu::GraphicsPipeline m_postProcessPipeline;
+    KDGpu::BindGroup m_colorBindGroup;
+    KDGpu::BindGroupLayout m_colorBindGroupLayout;
+    const KDGpu::PushConstantRange m_filterPosPushConstantRange{
         .offset = 0,
         .size = sizeof(float),
-        .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit)
+        .shaderStages = KDGpu::ShaderStageFlags(KDGpu::ShaderStageFlagBits::FragmentBit)
     };
     std::vector<uint8_t> m_filterPosData;
     float m_filterPos{ 0.0f };
 
     // Rendering resources
-    const Format m_colorFormat{ Format::R8G8B8A8_UNORM };
-    Texture m_colorOutput;
-    TextureView m_colorOutputView;
-    Sampler m_colorOutputSampler;
-    RenderPassCommandRecorderOptions m_opaquePassOptions;
-    RenderPassCommandRecorderOptions m_finalPassOptions;
-    CommandBuffer m_commandBuffer;
+    const KDGpu::Format m_colorFormat{ KDGpu::Format::R8G8B8A8_UNORM };
+    KDGpu::Texture m_colorOutput;
+    KDGpu::TextureView m_colorOutputView;
+    KDGpu::Sampler m_colorOutputSampler;
+    KDGpu::RenderPassCommandRecorderOptions m_opaquePassOptions;
+    KDGpu::RenderPassCommandRecorderOptions m_finalPassOptions;
+    KDGpu::CommandBuffer m_commandBuffer;
 };

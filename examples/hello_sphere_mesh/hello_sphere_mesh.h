@@ -17,9 +17,7 @@
 
 #include <glm/glm.hpp>
 
-using namespace KDGpuExample;
-
-class HelloSphereMesh : public SimpleExampleEngineLayer
+class HelloSphereMesh : public KDGpuExample::SimpleExampleEngineLayer
 {
 public:
 protected:
@@ -30,8 +28,8 @@ protected:
     void resize() override;
 
 private:
-    PipelineLayout m_pipelineLayout;
-    GraphicsPipeline m_pipeline;
-    RenderPassCommandRecorderOptions m_opaquePassOptions;
-    CommandBuffer m_commandBuffer;
+    KDGpu::PipelineLayout m_pipelineLayout;
+    KDGpu::GraphicsPipeline m_pipeline;
+    KDGpu::RenderPassCommandRecorderOptions m_opaquePassOptions;
+    KDGpu::CommandBuffer m_commandBuffer;
 };

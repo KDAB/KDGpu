@@ -16,10 +16,7 @@
 #include <KDGpu/buffer.h>
 #include <KDGpu/graphics_pipeline.h>
 #include <KDGpu/render_pass_command_recorder_options.h>
-
-using namespace KDGpuExample;
-
-class MultiViewStereo : public SimpleExampleEngineLayer
+class MultiViewStereo : public KDGpuExample::SimpleExampleEngineLayer
 {
 public:
 protected:
@@ -31,18 +28,18 @@ protected:
     void recreateSwapChain() override;
 
 private:
-    Buffer m_vertexBuffer;
-    PipelineLayout m_pipelineLayout;
-    GraphicsPipeline m_pipeline;
-    const PushConstantRange m_pushConstantRange{
+    KDGpu::Buffer m_vertexBuffer;
+    KDGpu::PipelineLayout m_pipelineLayout;
+    KDGpu::GraphicsPipeline m_pipeline;
+    const KDGpu::PushConstantRange m_pushConstantRange{
         .offset = 0,
         .size = sizeof(float),
-        .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit)
+        .shaderStages = KDGpu::ShaderStageFlags(KDGpu::ShaderStageFlagBits::VertexBit)
     };
 
-    RenderPassCommandRecorderOptions m_opaquePassOptions;
-    CommandBuffer m_commandBuffer;
+    KDGpu::RenderPassCommandRecorderOptions m_opaquePassOptions;
+    KDGpu::CommandBuffer m_commandBuffer;
 
-    const Format m_mvColorFormat{ Format::R8G8B8A8_UNORM };
-    const Format m_mvDepthFormat{ Format::D24_UNORM_S8_UINT };
+    const KDGpu::Format m_mvColorFormat{ KDGpu::Format::R8G8B8A8_UNORM };
+    const KDGpu::Format m_mvDepthFormat{ KDGpu::Format::D24_UNORM_S8_UINT };
 };

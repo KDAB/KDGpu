@@ -22,9 +22,7 @@
 
 #include <glm/glm.hpp>
 
-using namespace KDGpuExample;
-
-class HelloTriangleRt : public SimpleExampleEngineLayer
+class HelloTriangleRt : public KDGpuExample::SimpleExampleEngineLayer
 {
 public:
     HelloTriangleRt();
@@ -42,14 +40,14 @@ protected:
     void resize() override;
 
 private:
-    PipelineLayout m_pipelineLayout;
-    BindGroupLayout m_rtBindGroupLayout;
-    RayTracingPipeline m_pipeline;
-    CommandBuffer m_commandBuffer;
-    Buffer m_vertexBuffer;
-    RayTracingShaderBindingTable m_sbt;
-    AccelerationStructure m_bottomLevelAs;
-    AccelerationStructure m_topLevelAs;
-    BindGroup m_rtBindGroup;
-    std::vector<TextureLayout> m_swapchainImageLayouts;
+    KDGpu::PipelineLayout m_pipelineLayout;
+    KDGpu::BindGroupLayout m_rtBindGroupLayout;
+    KDGpu::RayTracingPipeline m_pipeline;
+    KDGpu::CommandBuffer m_commandBuffer;
+    KDGpu::Buffer m_vertexBuffer;
+    KDGpu::RayTracingShaderBindingTable m_sbt;
+    KDGpu::AccelerationStructure m_bottomLevelAs;
+    KDGpu::AccelerationStructure m_topLevelAs;
+    KDGpu::BindGroup m_rtBindGroup;
+    std::vector<KDGpu::TextureLayout> m_swapchainImageLayouts;
 };

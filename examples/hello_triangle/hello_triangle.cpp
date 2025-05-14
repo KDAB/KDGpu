@@ -24,6 +24,8 @@
 #include <fstream>
 #include <string>
 
+using namespace KDGpu;
+
 void HelloTriangle::initializeScene()
 {
     //![3]

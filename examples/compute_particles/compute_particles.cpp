@@ -25,6 +25,8 @@
 #include <random>
 #include <cassert>
 
+using namespace KDGpu;
+
 namespace {
 
 constexpr size_t ParticlesCount = 1024;

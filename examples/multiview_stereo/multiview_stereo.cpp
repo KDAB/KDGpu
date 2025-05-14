@@ -23,6 +23,8 @@
 
 #include <glm/glm.hpp>
 
+using namespace KDGpu;
+
 void MultiViewStereo::initializeScene()
 {
     //![1]

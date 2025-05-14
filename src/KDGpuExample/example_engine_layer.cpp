@@ -27,6 +27,8 @@
 
 #include <algorithm>
 
+using namespace KDGpu;
+
 namespace KDGpuExample {
 
 ExampleEngineLayer::ExampleEngineLayer()

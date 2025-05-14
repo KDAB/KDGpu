@@ -22,9 +22,7 @@
 
 #include <glm/glm.hpp>
 
-using namespace KDGpuExample;
-
-class HelloSphereRt : public SimpleExampleEngineLayer
+class HelloSphereRt : public KDGpuExample::SimpleExampleEngineLayer
 {
 public:
     HelloSphereRt();
@@ -42,20 +40,20 @@ protected:
     void resize() override;
 
 private:
-    PipelineLayout m_pipelineLayout;
-    BindGroupLayout m_rtBindGroupLayout;
-    BindGroupLayout m_cameraBindGroupLayout;
-    BindGroupLayout m_sphereDataBindGroupLayout;
-    RayTracingPipeline m_pipeline;
-    CommandBuffer m_commandBuffer;
-    Buffer m_aabbBuffer;
-    Buffer m_cameraUBOBuffer;
-    Buffer m_sphereDataSSBOBuffer;
-    RayTracingShaderBindingTable m_sbt;
-    AccelerationStructure m_bottomLevelAs;
-    AccelerationStructure m_topLevelAs;
-    BindGroup m_rtBindGroup;
-    BindGroup m_cameraBindGroup;
-    BindGroup m_sphereDataBindGroup;
-    std::vector<TextureLayout> m_swapchainImageLayouts;
+    KDGpu::PipelineLayout m_pipelineLayout;
+    KDGpu::BindGroupLayout m_rtBindGroupLayout;
+    KDGpu::BindGroupLayout m_cameraBindGroupLayout;
+    KDGpu::BindGroupLayout m_sphereDataBindGroupLayout;
+    KDGpu::RayTracingPipeline m_pipeline;
+    KDGpu::CommandBuffer m_commandBuffer;
+    KDGpu::Buffer m_aabbBuffer;
+    KDGpu::Buffer m_cameraUBOBuffer;
+    KDGpu::Buffer m_sphereDataSSBOBuffer;
+    KDGpu::RayTracingShaderBindingTable m_sbt;
+    KDGpu::AccelerationStructure m_bottomLevelAs;
+    KDGpu::AccelerationStructure m_topLevelAs;
+    KDGpu::BindGroup m_rtBindGroup;
+    KDGpu::BindGroup m_cameraBindGroup;
+    KDGpu::BindGroup m_sphereDataBindGroup;
+    std::vector<KDGpu::TextureLayout> m_swapchainImageLayouts;
 };

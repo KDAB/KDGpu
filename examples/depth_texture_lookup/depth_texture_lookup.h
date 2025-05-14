@@ -20,9 +20,7 @@
 
 #include <glm/glm.hpp>
 
-using namespace KDGpuExample;
-
-class DepthTextureLookup : public SimpleExampleEngineLayer
+class DepthTextureLookup : public KDGpuExample::SimpleExampleEngineLayer
 {
 public:
     DepthTextureLookup();
@@ -36,22 +34,22 @@ protected:
 
 private:
     // Scene Cube Pass
-    PipelineLayout m_sceneCubePipelineLayout;
-    GraphicsPipeline m_sceneCubePipeline;
-    RenderPassCommandRecorderOptions m_sceneCubePassOptions;
-    PushConstantRange m_rotationPushConstantRange;
+    KDGpu::PipelineLayout m_sceneCubePipelineLayout;
+    KDGpu::GraphicsPipeline m_sceneCubePipeline;
+    KDGpu::RenderPassCommandRecorderOptions m_sceneCubePassOptions;
+    KDGpu::PushConstantRange m_rotationPushConstantRange;
 
     // Depth Lookup Pass
-    Sampler m_depthTextureSampler;
-    BindGroup m_depthTextureBindGroup;
-    BindGroupLayout m_depthLookupBindGroupLayout;
-    PipelineLayout m_depthLookupPipelineLayout;
-    GraphicsPipeline m_depthLookupPipeline;
-    RenderPassCommandRecorderOptions m_depthLookupPassOptions;
+    KDGpu::Sampler m_depthTextureSampler;
+    KDGpu::BindGroup m_depthTextureBindGroup;
+    KDGpu::BindGroupLayout m_depthLookupBindGroupLayout;
+    KDGpu::PipelineLayout m_depthLookupPipelineLayout;
+    KDGpu::GraphicsPipeline m_depthLookupPipeline;
+    KDGpu::RenderPassCommandRecorderOptions m_depthLookupPassOptions;
 
     // ImGui Overlay Pass
-    RenderPassCommandRecorderOptions m_overlayPassOptions;
+    KDGpu::RenderPassCommandRecorderOptions m_overlayPassOptions;
 
-    CommandBuffer m_commandBuffer;
+    KDGpu::CommandBuffer m_commandBuffer;
     KDGpu::TextureLayout m_depthLayout = KDGpu::TextureLayout::Undefined;
 };

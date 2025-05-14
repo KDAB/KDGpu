@@ -19,9 +19,7 @@
 
 #include <glm/glm.hpp>
 
-using namespace KDGpuExample;
-
-class DepthBias : public SimpleExampleEngineLayer
+class DepthBias : public KDGpuExample::SimpleExampleEngineLayer
 {
 public:
 protected:
@@ -32,15 +30,15 @@ protected:
     void resize() override;
 
 private:
-    Buffer m_buffer;
-    Buffer m_indexBuffer;
-    PipelineLayout m_pipelineLayout;
-    GraphicsPipeline m_pipelineFront;
-    GraphicsPipeline m_pipelineBack;
-    RenderPassCommandRecorderOptions m_opaquePassOptions;
-    CommandBuffer m_commandBuffer;
+    KDGpu::Buffer m_buffer;
+    KDGpu::Buffer m_indexBuffer;
+    KDGpu::PipelineLayout m_pipelineLayout;
+    KDGpu::GraphicsPipeline m_pipelineFront;
+    KDGpu::GraphicsPipeline m_pipelineBack;
+    KDGpu::RenderPassCommandRecorderOptions m_opaquePassOptions;
+    KDGpu::CommandBuffer m_commandBuffer;
 
     glm::mat4 m_transform;
-    Buffer m_transformBuffer;
-    BindGroup m_transformBindGroup;
+    KDGpu::Buffer m_transformBuffer;
+    KDGpu::BindGroup m_transformBindGroup;
 };

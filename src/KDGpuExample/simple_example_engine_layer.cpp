@@ -20,6 +20,8 @@
 
 #include <algorithm>
 
+using namespace KDGpu;
+
 namespace KDGpuExample {
 
 SimpleExampleEngineLayer::~SimpleExampleEngineLayer()

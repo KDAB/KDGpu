@@ -34,6 +34,9 @@
 #include <random>
 #include <cassert>
 
+using namespace KDGpu;
+using namespace KDGpuExample;
+
 /**
  * This example demonstrate an advance use of raytracing and raster graphics used together.
 

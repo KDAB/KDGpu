@@ -20,9 +20,7 @@
 
 #include <glm/glm.hpp>
 
-using namespace KDGpuExample;
-
-class TexturedQuad : public SimpleExampleEngineLayer
+class TexturedQuad : public KDGpuExample::SimpleExampleEngineLayer
 {
 public:
 protected:
@@ -33,13 +31,13 @@ protected:
     void resize() override;
 
 private:
-    Buffer m_buffer;
-    Texture m_texture;
-    TextureView m_textureView;
-    Sampler m_sampler;
-    BindGroup m_textureBindGroup;
-    PipelineLayout m_pipelineLayout;
-    GraphicsPipeline m_pipeline;
-    RenderPassCommandRecorderOptions m_opaquePassOptions;
-    CommandBuffer m_commandBuffer;
+    KDGpu::Buffer m_buffer;
+    KDGpu::Texture m_texture;
+    KDGpu::TextureView m_textureView;
+    KDGpu::Sampler m_sampler;
+    KDGpu::BindGroup m_textureBindGroup;
+    KDGpu::PipelineLayout m_pipelineLayout;
+    KDGpu::GraphicsPipeline m_pipeline;
+    KDGpu::RenderPassCommandRecorderOptions m_opaquePassOptions;
+    KDGpu::CommandBuffer m_commandBuffer;
 };

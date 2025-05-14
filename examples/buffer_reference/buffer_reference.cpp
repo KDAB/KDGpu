@@ -32,6 +32,9 @@ namespace {
 const size_t TransformsCount = 16;
 }
 
+using namespace KDGpu;
+using namespace KDGpuExample;
+
 BufferReference::BufferReference()
     : SimpleExampleEngineLayer()
 {

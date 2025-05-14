@@ -21,9 +21,7 @@
 
 #include <glm/glm.hpp>
 
-using namespace KDGpuExample;
-
-class HelloTriangleMSAA : public SimpleExampleEngineLayer
+class HelloTriangleMSAA : public KDGpuExample::SimpleExampleEngineLayer
 {
 public:
     HelloTriangleMSAA();
@@ -39,22 +37,22 @@ private:
     void createRenderTarget();
     bool isMsaaEnabled() const;
     void drawMsaaSettings(ImGuiContext *);
-    void setMsaaSampleCount(SampleCountFlagBits samples);
+    void setMsaaSampleCount(KDGpu::SampleCountFlagBits samples);
 
-    Buffer m_buffer;
-    Buffer m_indexBuffer;
-    Texture m_msaaTexture;
-    TextureView m_msaaTextureView;
-    PipelineLayout m_pipelineLayout;
-    RenderPassCommandRecorderOptions m_commandRecorderOptions;
-    CommandBuffer m_commandBuffer;
+    KDGpu::Buffer m_buffer;
+    KDGpu::Buffer m_indexBuffer;
+    KDGpu::Texture m_msaaTexture;
+    KDGpu::TextureView m_msaaTextureView;
+    KDGpu::PipelineLayout m_pipelineLayout;
+    KDGpu::RenderPassCommandRecorderOptions m_commandRecorderOptions;
+    KDGpu::CommandBuffer m_commandBuffer;
 
-    std::vector<GraphicsPipeline> m_pipelines;
+    std::vector<KDGpu::GraphicsPipeline> m_pipelines;
 
     uint8_t m_requestedSampleCountIndex = 0;
     uint8_t m_currentPipelineIndex = 0;
 
     glm::mat4 m_transform;
-    Buffer m_transformBuffer;
-    BindGroup m_transformBindGroup;
+    KDGpu::Buffer m_transformBuffer;
+    KDGpu::BindGroup m_transformBindGroup;
 };

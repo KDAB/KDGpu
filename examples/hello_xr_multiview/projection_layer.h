@@ -24,14 +24,11 @@
 
 #include <glm/glm.hpp>
 
-using namespace KDGpuExample;
-using namespace KDGpu;
-
 namespace KDXr {
 class Instance;
 }
 
-class ProjectionLayer : public XrProjectionLayer
+class ProjectionLayer : public KDGpuExample::XrProjectionLayer
 {
 public:
     KDBindings::Property<bool> rotateZ{ false };
@@ -41,7 +38,7 @@ public:
     KDBindings::Property<KDXr::Pose> leftPalmPose{ KDXr::Pose{} };
     KDBindings::Property<KDXr::Pose> rightPalmPose{ KDXr::Pose{} };
 
-    explicit ProjectionLayer(const XrProjectionLayerOptions &options);
+    explicit ProjectionLayer(const KDGpuExample::XrProjectionLayerOptions &options);
     ~ProjectionLayer() override;
 
     // Not copyable
@@ -71,29 +68,29 @@ private:
     };
 
     std::vector<CameraData> m_cameraData{ 2 }; // Default to 2 views
-    Buffer m_cameraBuffer;
-    BindGroup m_cameraBindGroup;
+    KDGpu::Buffer m_cameraBuffer;
+    KDGpu::BindGroup m_cameraBindGroup;
 
-    Buffer m_buffer;
-    Buffer m_leftHandBuffer;
-    Buffer m_rightHandBuffer;
-    Buffer m_indexBuffer;
-    PipelineLayout m_pipelineLayout;
-    GraphicsPipeline m_pipeline;
-    RenderPassCommandRecorderOptions m_opaquePassOptions;
-    CommandBuffer m_commandBuffer;
+    KDGpu::Buffer m_buffer;
+    KDGpu::Buffer m_leftHandBuffer;
+    KDGpu::Buffer m_rightHandBuffer;
+    KDGpu::Buffer m_indexBuffer;
+    KDGpu::PipelineLayout m_pipelineLayout;
+    KDGpu::GraphicsPipeline m_pipeline;
+    KDGpu::RenderPassCommandRecorderOptions m_opaquePassOptions;
+    KDGpu::CommandBuffer m_commandBuffer;
 
     glm::mat4 m_transform;
-    Buffer m_transformBuffer;
-    BindGroup m_entityTransformBindGroup;
+    KDGpu::Buffer m_transformBuffer;
+    KDGpu::BindGroup m_entityTransformBindGroup;
 
     glm::mat4 m_leftHandTransform;
-    Buffer m_leftHandTransformBuffer;
-    BindGroup m_leftHandTransformBindGroup;
+    KDGpu::Buffer m_leftHandTransformBuffer;
+    KDGpu::BindGroup m_leftHandTransformBindGroup;
 
     glm::mat4 m_rightHandTransform;
-    Buffer m_rightHandTransformBuffer;
-    BindGroup m_rightHandTransformBindGroup;
+    KDGpu::Buffer m_rightHandTransformBuffer;
+    KDGpu::BindGroup m_rightHandTransformBindGroup;
 
-    Fence m_fence;
+    KDGpu::Fence m_fence;
 };
