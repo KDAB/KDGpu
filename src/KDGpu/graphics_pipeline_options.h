@@ -13,10 +13,9 @@
 #include <KDGpu/handle.h>
 #include <KDGpu/gpu_core.h>
 #include <KDGpu/handle.h>
+#include <KDGpu/utils/hash_utils.h>
 
 #include <vector>
-
-// TODO: Can we use std::span in these rather than std::vector?
 
 namespace KDGpu {
 
@@ -29,6 +28,8 @@ struct ShaderStage {
     ShaderStageFlagBits stage;
     std::string entryPoint{ "main" };
     std::vector<SpecializationConstant> specializationConstants;
+
+    friend bool operator==(const ShaderStage &, const ShaderStage &) = default;
 };
 
 struct VertexBufferLayout {
@@ -155,6 +156,222 @@ struct GraphicsPipelineOptions {
 
     Handle<RenderPass_t> renderPass;
     uint32_t subpassIndex{ 0 };
+
+    friend bool operator==(const GraphicsPipelineOptions &, const GraphicsPipelineOptions &) = default;
 };
 
 } // namespace KDGpu
+
+namespace std {
+
+template<>
+struct hash<KDGpu::ShaderStage> {
+    size_t operator()(const KDGpu::ShaderStage &stage) const noexcept
+    {
+        size_t hash = 0;
+        KDGpu::hash_combine(hash, std::hash<std::string>()(stage.entryPoint));
+        KDGpu::hash_combine(hash, std::hash<KDGpu::Handle<KDGpu::ShaderModule_t>>()(stage.shaderModule));
+        KDGpu::hash_combine(hash, static_cast<uint32_t>(stage.stage));
+        for (const auto &specConst : stage.specializationConstants) {
+            KDGpu::hash_combine(hash, specConst.constantId);
+            std::visit([&hash](const auto &value) { KDGpu::hash_combine(hash, value); }, specConst.value);
+        }
+        return hash;
+    }
+};
+
+template<>
+struct hash<KDGpu::VertexBufferLayout> {
+    size_t operator()(const KDGpu::VertexBufferLayout &layout) const noexcept
+    {
+        size_t hash = 0;
+        KDGpu::hash_combine(hash, layout.binding);
+        KDGpu::hash_combine(hash, layout.stride);
+        KDGpu::hash_combine(hash, static_cast<uint32_t>(layout.inputRate));
+        return hash;
+    }
+};
+
+template<>
+struct hash<KDGpu::VertexAttribute> {
+    size_t operator()(const KDGpu::VertexAttribute &attribute) const noexcept
+    {
+        size_t hash = 0;
+        KDGpu::hash_combine(hash, attribute.location);
+        KDGpu::hash_combine(hash, attribute.binding);
+        KDGpu::hash_combine(hash, static_cast<uint32_t>(attribute.format));
+        KDGpu::hash_combine(hash, attribute.offset);
+        return hash;
+    }
+};
+
+template<>
+struct hash<KDGpu::VertexOptions> {
+    size_t operator()(const KDGpu::VertexOptions &options) const noexcept
+    {
+        size_t hash = 0;
+        for (const auto &buffer : options.buffers) {
+            KDGpu::hash_combine(hash, buffer);
+        }
+        for (const auto &attribute : options.attributes) {
+            KDGpu::hash_combine(hash, attribute);
+        }
+        return hash;
+    }
+};
+
+template<>
+struct hash<KDGpu::BlendComponent> {
+    size_t operator()(const KDGpu::BlendComponent &component) const noexcept
+    {
+        size_t hash = 0;
+        KDGpu::hash_combine(hash, static_cast<uint32_t>(component.operation));
+        KDGpu::hash_combine(hash, static_cast<uint32_t>(component.srcFactor));
+        KDGpu::hash_combine(hash, static_cast<uint32_t>(component.dstFactor));
+        return hash;
+    }
+};
+
+template<>
+struct hash<KDGpu::BlendOptions> {
+    size_t operator()(const KDGpu::BlendOptions &options) const noexcept
+    {
+        size_t hash = 0;
+        KDGpu::hash_combine(hash, options.blendingEnabled);
+        KDGpu::hash_combine(hash, options.color);
+        KDGpu::hash_combine(hash, options.alpha);
+        return hash;
+    }
+};
+
+template<>
+struct hash<KDGpu::RenderTargetOptions> {
+    size_t operator()(const KDGpu::RenderTargetOptions &options) const noexcept
+    {
+        size_t hash = 0;
+        KDGpu::hash_combine(hash, static_cast<uint32_t>(options.format));
+        KDGpu::hash_combine(hash, static_cast<uint32_t>(options.writeMask.toInt()));
+        KDGpu::hash_combine(hash, options.blending.blendingEnabled);
+        KDGpu::hash_combine(hash, options.blending.color);
+        KDGpu::hash_combine(hash, options.blending.alpha);
+        return hash;
+    }
+};
+
+template<>
+struct hash<KDGpu::StencilOperationOptions> {
+    size_t operator()(const KDGpu::StencilOperationOptions &options) const noexcept
+    {
+        size_t hash = 0;
+        KDGpu::hash_combine(hash, static_cast<uint32_t>(options.failOp));
+        KDGpu::hash_combine(hash, static_cast<uint32_t>(options.passOp));
+        KDGpu::hash_combine(hash, static_cast<uint32_t>(options.depthFailOp));
+        KDGpu::hash_combine(hash, static_cast<uint32_t>(options.compareOp));
+        KDGpu::hash_combine(hash, options.compareMask);
+        KDGpu::hash_combine(hash, options.writeMask);
+        KDGpu::hash_combine(hash, options.reference);
+        return hash;
+    }
+};
+
+template<>
+struct hash<KDGpu::DepthStencilOptions> {
+    size_t operator()(const KDGpu::DepthStencilOptions &options) const noexcept
+    {
+        size_t hash = 0;
+        KDGpu::hash_combine(hash, static_cast<uint32_t>(options.format));
+        KDGpu::hash_combine(hash, options.depthTestEnabled);
+        KDGpu::hash_combine(hash, options.depthWritesEnabled);
+        KDGpu::hash_combine(hash, static_cast<uint32_t>(options.depthCompareOperation));
+        KDGpu::hash_combine(hash, options.stencilTestEnabled);
+        KDGpu::hash_combine(hash, options.stencilFront);
+        KDGpu::hash_combine(hash, options.stencilBack);
+        KDGpu::hash_combine(hash, options.resolveDepthStencil);
+        KDGpu::hash_combine(hash, options.depthClampEnabled);
+        return hash;
+    }
+};
+
+template<>
+struct hash<KDGpu::DepthBiasOptions> {
+    size_t operator()(const KDGpu::DepthBiasOptions &options) const noexcept
+    {
+        size_t hash = 0;
+        KDGpu::hash_combine(hash, options.enabled);
+        KDGpu::hash_combine(hash, options.biasConstantFactor);
+        KDGpu::hash_combine(hash, options.biasClamp);
+        KDGpu::hash_combine(hash, options.biasSlopeFactor);
+        return hash;
+    }
+};
+
+template<>
+struct hash<KDGpu::PrimitiveOptions> {
+    size_t operator()(const KDGpu::PrimitiveOptions &options) const noexcept
+    {
+        size_t hash = 0;
+        KDGpu::hash_combine(hash, static_cast<uint32_t>(options.topology));
+        KDGpu::hash_combine(hash, options.primitiveRestart);
+        KDGpu::hash_combine(hash, static_cast<uint32_t>(options.cullMode.toInt()));
+        KDGpu::hash_combine(hash, static_cast<uint32_t>(options.frontFace));
+        KDGpu::hash_combine(hash, static_cast<uint32_t>(options.polygonMode));
+        KDGpu::hash_combine(hash, options.patchControlPoints);
+        KDGpu::hash_combine(hash, options.depthBias);
+        KDGpu::hash_combine(hash, options.lineWidth);
+        KDGpu::hash_combine(hash, options.rasterizerDiscardEnabled);
+        return hash;
+    }
+};
+
+template<>
+struct hash<KDGpu::MultisampleOptions> {
+    size_t operator()(const KDGpu::MultisampleOptions &options) const noexcept
+    {
+        size_t hash = 0;
+        KDGpu::hash_combine(hash, static_cast<uint32_t>(options.samples));
+        for (const auto &mask : options.sampleMasks) {
+            KDGpu::hash_combine(hash, mask);
+        }
+        KDGpu::hash_combine(hash, options.alphaToCoverageEnabled);
+        return hash;
+    }
+};
+
+template<>
+struct hash<KDGpu::DynamicStateOptions> {
+    size_t operator()(const KDGpu::DynamicStateOptions &options) const noexcept
+    {
+        size_t hash = 0;
+        for (const auto &state : options.enabledDynamicStates) {
+            KDGpu::hash_combine(hash, static_cast<uint32_t>(state));
+        }
+        return hash;
+    }
+};
+
+template<>
+struct hash<KDGpu::GraphicsPipelineOptions> {
+    size_t operator()(const KDGpu::GraphicsPipelineOptions &options) const noexcept
+    {
+        size_t hash = 0;
+        KDGpu::hash_combine(hash, std::hash<std::string_view>()(options.label));
+        for (const auto &shaderStage : options.shaderStages) {
+            KDGpu::hash_combine(hash, shaderStage);
+        }
+        KDGpu::hash_combine(hash, options.layout);
+        KDGpu::hash_combine(hash, options.vertex);
+        for (const auto &renderTarget : options.renderTargets) {
+            KDGpu::hash_combine(hash, renderTarget);
+        }
+        KDGpu::hash_combine(hash, options.depthStencil);
+        KDGpu::hash_combine(hash, options.primitive);
+        KDGpu::hash_combine(hash, options.multisample);
+        KDGpu::hash_combine(hash, options.viewCount);
+        KDGpu::hash_combine(hash, options.dynamicState);
+        KDGpu::hash_combine(hash, options.renderPass);
+        KDGpu::hash_combine(hash, options.subpassIndex);
+        return hash;
+    }
+};
+
+} // namespace std

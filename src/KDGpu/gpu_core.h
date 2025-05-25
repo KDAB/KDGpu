@@ -149,6 +149,8 @@ struct Viewport {
 struct SpecializationConstant {
     uint32_t constantId;
     std::variant<bool, int32_t, uint32_t, float, double> value;
+
+    friend bool operator==(const SpecializationConstant &, const SpecializationConstant &) = default;
 };
 
 struct MemoryRequirement {

@@ -40,7 +40,7 @@ struct VulkanAttachmentKey {
         KDGpu::hash_combine(hash, view);
     }
 
-    uint64_t hash{ 0 };
+    size_t hash{ 0 };
 };
 
 struct VulkanFramebufferKey {
@@ -83,7 +83,7 @@ template<>
 struct hash<KDGpu::VulkanFramebufferKey> {
     size_t operator()(const KDGpu::VulkanFramebufferKey &value) const
     {
-        uint64_t hash = 0;
+        size_t hash = 0;
 
         KDGpu::hash_combine(hash, value.renderPass);
         KDGpu::hash_combine(hash, value.attachmentsKey.hash);

@@ -123,6 +123,12 @@ ProcessEventsResult OpenXrInstance::processEvents()
             break;
         }
 
+        default: {
+            SPDLOG_LOGGER_DEBUG(Logger::logger(), "OpenXR Event: {}", eventData.type);
+            // Handle other events if necessary
+            break;
+        }
+
         } // switch (eventData.type)
     } // while (XrPollEvents())
 

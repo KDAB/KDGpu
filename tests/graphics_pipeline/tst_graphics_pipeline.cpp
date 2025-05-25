@@ -485,4 +485,48 @@ TEST_SUITE("GraphicsPipeline")
             CHECK(api->resourceManager()->getRenderPass(renderPass.handle()) != nullptr);
         }
     }
+
+    TEST_CASE("Hashing")
+    {
+        SUBCASE("Hashing GraphicsPipelineOptions")
+        {
+            // GIVEN
+            PipelineLayoutOptions pipelineLayoutOptions{};
+            PipelineLayout pipelineLayout = device.createPipelineLayout(pipelineLayoutOptions);
+            const Format depthFormat = selectDepthFormat(adapter);
+            REQUIRE(depthFormat != Format::UNDEFINED);
+
+            GraphicsPipelineOptions pipelineOptions = {
+                .shaderStages = {
+                        { .shaderModule = vertexShader.handle(), .stage = ShaderStageFlagBits::VertexBit },
+                        { .shaderModule = fragmentShader.handle(), .stage = ShaderStageFlagBits::FragmentBit },
+                },
+                .layout = pipelineLayout.handle(),
+                .vertex = {
+                        .buffers = {
+                                { .binding = 0, .stride = 2 * 4 * sizeof(float) },
+                        },
+                        .attributes = {
+                                { .location = 0, .binding = 0, .format = Format::R32G32B32A32_SFLOAT }, // Position
+                                { .location = 1, .binding = 0, .format = Format::R32G32B32A32_SFLOAT, .offset = 4 * sizeof(float) } // Color
+                        },
+                },
+                .renderTargets = {
+                        { .format = Format::R8G8B8A8_UNORM },
+                },
+                .depthStencil = {
+                        .format = depthFormat,
+                        .depthWritesEnabled = true,
+                        .depthCompareOperation = CompareOperation::Less,
+                },
+            };
+
+            // WHEN
+            size_t hashValue1 = std::hash<GraphicsPipelineOptions>()(pipelineOptions);
+            size_t hashValue2 = std::hash<GraphicsPipelineOptions>()(pipelineOptions);
+
+            // THEN
+            CHECK(hashValue1 == hashValue2);
+        }
+    }
 }

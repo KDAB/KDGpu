@@ -32,7 +32,7 @@ struct KDGPU_EXPORT VulkanRenderPassKeyColorAttachment {
     bool operator==(const VulkanRenderPassKeyColorAttachment &other) const noexcept = default;
     bool operator!=(const VulkanRenderPassKeyColorAttachment &other) const noexcept = default;
 
-    uint64_t hash{ 0 };
+    size_t hash{ 0 };
 };
 
 struct KDGPU_EXPORT VulkanRenderPassKeyDepthStencilAttachment {
@@ -43,7 +43,7 @@ struct KDGPU_EXPORT VulkanRenderPassKeyDepthStencilAttachment {
     bool operator==(const VulkanRenderPassKeyDepthStencilAttachment &other) const noexcept = default;
     bool operator!=(const VulkanRenderPassKeyDepthStencilAttachment &other) const noexcept = default;
 
-    uint64_t hash{ 0 };
+    size_t hash{ 0 };
 };
 struct KDGPU_EXPORT VulkanRenderPassKey {
     explicit VulkanRenderPassKey(const RenderPassCommandRecorderOptions &options,
@@ -52,7 +52,7 @@ struct KDGPU_EXPORT VulkanRenderPassKey {
     bool operator==(const VulkanRenderPassKey &other) const noexcept = default;
     bool operator!=(const VulkanRenderPassKey &other) const noexcept = default;
 
-    uint64_t hash{ 0 };
+    size_t hash{ 0 };
 };
 
 struct VulkanRenderPass {

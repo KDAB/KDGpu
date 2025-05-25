@@ -75,7 +75,7 @@ template<typename T>
 struct hash<KDGpu::Handle<T>> {
     size_t operator()(const KDGpu::Handle<T> &handle) const
     {
-        uint64_t hash = 0;
+        size_t hash = 0;
 
         KDGpu::hash_combine(hash, handle.index());
         KDGpu::hash_combine(hash, handle.generation());
