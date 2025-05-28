@@ -12,6 +12,8 @@
 
 #include <KDGpu/gpu_core.h>
 #include <KDGpu/bind_group_description.h>
+#include <KDGpu/utils/hash_utils.h>
+
 namespace KDGpu {
 
 struct Sampler_t;
@@ -32,6 +34,34 @@ struct ResourceBindingLayout {
 struct BindGroupLayoutOptions {
     std::string_view label;
     std::vector<ResourceBindingLayout> bindings;
+
+    // Equality operator for caching
+    friend bool operator==(const BindGroupLayoutOptions &lhs, const BindGroupLayoutOptions &rhs) = default;
 };
 
 } // namespace KDGpu
+
+// Hash function for BindGroupLayoutOptions to enable caching
+namespace std {
+
+template<>
+struct hash<KDGpu::BindGroupLayoutOptions> {
+    size_t operator()(const KDGpu::BindGroupLayoutOptions &options) const noexcept
+    {
+        size_t hash = 0;
+        KDGpu::hash_combine(hash, std::hash<std::string_view>()(options.label));
+        for (const auto &binding : options.bindings) {
+            KDGpu::hash_combine(hash, binding.binding);
+            KDGpu::hash_combine(hash, binding.count);
+            KDGpu::hash_combine(hash, static_cast<uint32_t>(binding.resourceType));
+            KDGpu::hash_combine(hash, binding.shaderStages.toInt());
+            KDGpu::hash_combine(hash, binding.flags.toInt());
+            for (const auto &sampler : binding.immutableSamplers) {
+                KDGpu::hash_combine(hash, sampler);
+            }
+        }
+        return hash;
+    }
+};
+
+} // namespace std
