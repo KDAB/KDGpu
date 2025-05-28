@@ -119,6 +119,10 @@ public:
     friend constexpr inline bool operator!=(Flags l, E r) noexcept { return !(l == r); }
     friend constexpr inline bool operator!=(E l, Flags r) noexcept { return !(l == r); }
 
+    // Operator < is not usually defined for flags, as it does not make sense in the context of bitwise flags.
+    // However, sometimes it is useful if you want to use flags in sorted containers or algorithms.
+    friend constexpr inline bool operator<(Flags l, Flags r) noexcept { return l.m_flags < r.m_flags; }
+
 private:
     FlagsInt m_flags = FlagsInt(0);
 };
