@@ -34,8 +34,11 @@ Buffer::Buffer(Buffer &&other) noexcept
 Buffer &Buffer::operator=(Buffer &&other) noexcept
 {
     if (this != &other) {
-        if (isValid())
+        if (isValid()) {
+            if (m_mapped)
+                unmap();
             m_api->resourceManager()->deleteBuffer(handle());
+        }
 
         m_api = std::exchange(other.m_api, nullptr);
         m_device = std::exchange(other.m_device, {});
@@ -46,6 +49,9 @@ Buffer &Buffer::operator=(Buffer &&other) noexcept
 
 Buffer::~Buffer()
 {
+    if (m_mapped)
+        unmap();
+
     if (isValid())
         m_api->resourceManager()->deleteBuffer(handle());
 }

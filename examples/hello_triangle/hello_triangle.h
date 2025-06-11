@@ -39,5 +39,6 @@ private:
 
     glm::mat4 m_transform;
     KDGpu::Buffer m_transformBuffer;
+    void *m_transformBufferData{ nullptr };
     KDGpu::BindGroup m_transformBindGroup;
 };

@@ -108,9 +108,8 @@ void HelloTriangle::initializeScene()
 
         // Upload identity matrix. Updated below in updateScene()
         m_transform = glm::mat4(1.0f);
-        auto bufferData = m_transformBuffer.map();
-        std::memcpy(bufferData, &m_transform, sizeof(glm::mat4));
-        m_transformBuffer.unmap();
+        m_transformBufferData = m_transformBuffer.map();
+        std::memcpy(m_transformBufferData, &m_transform, sizeof(glm::mat4));
     }
     //![7]
 
@@ -221,6 +220,7 @@ void HelloTriangle::cleanupScene()
     m_indexBuffer = {};
     m_transformBindGroup = {};
     m_transformBuffer = {};
+    m_transformBufferData = nullptr;
     m_commandBuffer = {};
 }
 
@@ -237,10 +237,7 @@ void HelloTriangle::updateScene()
 
     m_transform = glm::mat4(1.0f);
     m_transform = glm::rotate(m_transform, glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
-
-    auto bufferData = m_transformBuffer.map();
-    std::memcpy(bufferData, &m_transform, sizeof(glm::mat4));
-    m_transformBuffer.unmap();
+    std::memcpy(m_transformBufferData, &m_transform, sizeof(glm::mat4));
 }
 //![1]
 
