@@ -62,7 +62,7 @@
             "name": "profile-install-msvc_x64",
             "displayName": "Profile-Install (msvc_x64)",
             "inherits": [
-                "profile-msvc_x86",
+                "profile-msvc_x64",
                 "install-base"
             ]
         }
