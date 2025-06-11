@@ -708,8 +708,9 @@ void VulkanResourceManager::deleteDevice(const Handle<Device_t> &handle)
     }
 
     // Destroy Descriptor Pools
-    for (VkDescriptorPool descriptorPool : vulkanDevice->descriptorSetPools)
-        vkDestroyDescriptorPool(vulkanDevice->device, descriptorPool, nullptr);
+    for (const Handle<BindGroupPool_t> &poolHandle : vulkanDevice->descriptorSetPools) {
+        deleteBindGroupPool(poolHandle);
+    }
     vulkanDevice->descriptorSetPools.clear();
 
     // Destroy Command Pool
@@ -2905,35 +2906,6 @@ Handle<BindGroup_t> VulkanResourceManager::createBindGroup(const Handle<Device_t
 {
     VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
 
-    auto createDescriptorSetPool = [](VkDevice device) {
-        const std::vector<VkDescriptorPoolSize> poolSizes{
-            { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 512 },
-            { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 16 },
-            { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 512 },
-            { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 128 },
-            { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 128 },
-            { VK_DESCRIPTOR_TYPE_SAMPLER, 8 },
-            { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 8 },
-            { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 8 },
-        };
-
-        VkDescriptorPool pool{ VK_NULL_HANDLE };
-        VkDescriptorPoolCreateInfo poolInfo = {};
-        poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-        poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
-        poolInfo.pPoolSizes = poolSizes.data();
-
-        poolInfo.maxSets = 1024;
-        poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
-
-        if (auto result = vkCreateDescriptorPool(device, &poolInfo, nullptr, &pool); result != VK_SUCCESS) {
-            SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating descriptor pool: {}", result);
-            return static_cast<VkDescriptorPool>(VK_NULL_HANDLE);
-        }
-
-        return pool;
-    };
-
     auto allocateDescriptorSet = [](VkDevice device, VkDescriptorPool descriptorPool,
                                     VulkanBindGroupLayout *bindGroupLayout, VkDescriptorSet &descriptorSet,
                                     uint32_t maxVariableDescriptorCounts) {
@@ -2957,24 +2929,53 @@ Handle<BindGroup_t> VulkanResourceManager::createBindGroup(const Handle<Device_t
         return vkAllocateDescriptorSets(device, &allocInfo, &descriptorSet);
     };
 
-    // Have we create a DescriptorSet pool already?
-    if (vulkanDevice->descriptorSetPools.empty())
-        vulkanDevice->descriptorSetPools.emplace_back(createDescriptorSetPool(vulkanDevice->device));
+    // Determine which bind group pool to use
+    Handle<BindGroupPool_t> poolHandle = options.bindGroupPool;
+    const bool useInternalPool = !poolHandle.isValid();
 
+    constexpr BindGroupPoolOptions defaultInternalPoolOptions{
+        .label = "Default BindGroupPool",
+        .uniformBufferCount = 512,
+        .dynamicUniformBufferCount = 16,
+        .storageBufferCount = 512,
+        .textureSamplerCount = 128,
+        .textureCount = 128,
+        .samplerCount = 8,
+        .imageCount = 8,
+        .inputAttachmentCount = 8,
+        .maxBindGroupCount = 1024,
+        .flags = BindGroupPoolFlagBits::CreateFreeBindGroups
+    };
+
+    if (useInternalPool) {
+        // Use or create a default pool from the device's pool vector
+        if (vulkanDevice->descriptorSetPools.empty()) {
+            // Create a default bind group pool with reasonable defaults
+            vulkanDevice->descriptorSetPools.emplace_back(createBindGroupPool(deviceHandle, defaultInternalPoolOptions));
+        }
+        poolHandle = vulkanDevice->descriptorSetPools.back();
+    }
+
+    VulkanBindGroupPool *vulkanBindGroupPool = getBindGroupPool(poolHandle);
     VulkanBindGroupLayout *bindGroupLayout = getBindGroupLayout(options.layout);
     VkDescriptorSet descriptorSet{ VK_NULL_HANDLE };
 
-    //  Create DescriptorSet
-    VkResult result = allocateDescriptorSet(vulkanDevice->device, vulkanDevice->descriptorSetPools.back(),
+    // Allocate DescriptorSet from the bind group pool
+    VkResult result = allocateDescriptorSet(vulkanDevice->device, vulkanBindGroupPool->descriptorPool,
                                             bindGroupLayout, descriptorSet, options.maxVariableArrayLength);
 
-    // If we have run out of pool memory
+    // If we have run out of pool memory and rely on internalPools, create a new internal pool and retry
     if (result == VK_ERROR_OUT_OF_POOL_MEMORY || result == VK_ERROR_FRAGMENTED_POOL) {
-        // We need to allocate a new DescriptorPool and retry
-        vulkanDevice->descriptorSetPools.emplace_back(createDescriptorSetPool(vulkanDevice->device));
-        result = allocateDescriptorSet(vulkanDevice->device, vulkanDevice->descriptorSetPools.back(),
-                                       bindGroupLayout, descriptorSet, options.maxVariableArrayLength);
+        if (useInternalPool) {
+            vulkanDevice->descriptorSetPools.emplace_back(createBindGroupPool(deviceHandle, defaultInternalPoolOptions));
+            vulkanBindGroupPool = getBindGroupPool(vulkanDevice->descriptorSetPools.back());
+            result = allocateDescriptorSet(vulkanDevice->device, vulkanBindGroupPool->descriptorPool,
+                                           bindGroupLayout, descriptorSet, options.maxVariableArrayLength);
+        } else {
+            SPDLOG_LOGGER_ERROR(Logger::logger(), "BindGroupPool out of memory");
+        }
     }
+
     if (result != VK_SUCCESS) {
         SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when allocating descriptor set: {}", result);
         return {};
@@ -2982,7 +2983,7 @@ Handle<BindGroup_t> VulkanResourceManager::createBindGroup(const Handle<Device_t
 
     setObjectName(vulkanDevice, VK_OBJECT_TYPE_DESCRIPTOR_SET, reinterpret_cast<uint64_t>(descriptorSet), options.label);
 
-    const auto vulkanBindGroupHandle = m_bindGroups.emplace(VulkanBindGroup(descriptorSet, vulkanDevice->descriptorSetPools.back(), this, deviceHandle));
+    const auto vulkanBindGroupHandle = m_bindGroups.emplace(VulkanBindGroup(descriptorSet, vulkanBindGroupPool->descriptorPool, this, deviceHandle));
     auto vulkanBindGroup = m_bindGroups.get(vulkanBindGroupHandle);
 
     // Set up the initial bindings

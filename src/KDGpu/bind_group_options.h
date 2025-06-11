@@ -13,7 +13,12 @@
 #include <KDGpu/bind_group_description.h>
 #include <KDGpu/bind_group_layout.h>
 
+#include <string_view>
+#include <vector>
+
 namespace KDGpu {
+
+struct BindGroupPool_t;
 
 struct BindGroupEntry { // An entry into a BindGroup ( == a descriptor in a descriptor set)
     uint32_t binding;
@@ -26,6 +31,7 @@ struct BindGroupOptions {
     Handle<BindGroupLayout_t> layout;
     std::vector<BindGroupEntry> resources;
     uint32_t maxVariableArrayLength{ 0 };
+    Handle<BindGroupPool_t> bindGroupPool;
 };
 
 } // namespace KDGpu

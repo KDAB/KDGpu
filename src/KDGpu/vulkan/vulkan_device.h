@@ -22,6 +22,7 @@
 #include <vulkan/vulkan.h>
 
 #include <unordered_map>
+#include <vector>
 #include <KDGpu/adapter_features.h>
 #include <KDGpu/adapter_queue_type.h>
 #include <KDGpu/device_options.h>
@@ -37,6 +38,7 @@ namespace KDGpu {
 class VulkanResourceManager;
 
 struct Adapter_t;
+struct BindGroupPool_t;
 
 /**
  * @brief VulkanDevice
@@ -82,7 +84,7 @@ struct KDGPU_EXPORT VulkanDevice {
     std::vector<MemoryHandleTypeAndAllocator> externalAllocators;
     std::vector<QueueDescription> queueDescriptions;
     std::vector<VkCommandPool> commandPools; // Indexed by queue type (family)
-    std::vector<VkDescriptorPool> descriptorSetPools;
+    std::vector<Handle<BindGroupPool_t>> descriptorSetPools;
     std::unordered_map<VulkanRenderPassKey, Handle<RenderPass_t>> renderPasses;
     std::unordered_map<VulkanFramebufferKey, Handle<Framebuffer_t>> framebuffers;
     VkQueryPool timestampQueryPool{ VK_NULL_HANDLE };

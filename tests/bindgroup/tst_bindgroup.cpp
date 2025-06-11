@@ -13,6 +13,8 @@
 #include <KDGpu/bind_group_layout.h>
 #include <KDGpu/bind_group_layout_options.h>
 #include <KDGpu/bind_group_description.h>
+#include <KDGpu/bind_group_pool.h>
+#include <KDGpu/bind_group_pool_options.h>
 #include <KDGpu/buffer_options.h>
 #include <KDGpu/buffer.h>
 #include <KDGpu/device.h>
@@ -700,6 +702,167 @@ TEST_SUITE("BindGroup")
 
             // THEN
             CHECK(a != b);
+        }
+    }
+
+    TEST_CASE("BindGroup with dedicated BindGroupPool")
+    {
+        SUBCASE("Create BindGroup using a dedicated BindGroupPool")
+        {
+            // GIVEN - Create a dedicated BindGroupPool with specific configuration
+            const BindGroupPoolOptions poolOptions{
+                .label = "Dedicated Test Pool",
+                .uniformBufferCount = 10,
+                .dynamicUniformBufferCount = 2,
+                .storageBufferCount = 5,
+                .textureSamplerCount = 8,
+                .textureCount = 8,
+                .samplerCount = 4,
+                .imageCount = 2,
+                .inputAttachmentCount = 1,
+                .maxBindGroupCount = 20,
+                .flags = BindGroupPoolFlagBits::CreateFreeBindGroups
+            };
+
+            BindGroupPool pool = device.createBindGroupPool(poolOptions);
+
+            // THEN - Pool should be valid
+            CHECK(pool.isValid());
+
+            // WHEN
+            Buffer ubo = device.createBuffer(BufferOptions{
+                    .size = 16 * sizeof(float),
+                    .usage = BufferUsageFlagBits::UniformBufferBit,
+                    .memoryUsage = MemoryUsage::CpuToGpu,
+            });
+
+            const BindGroupLayout bindGroupLayout = device.createBindGroupLayout(BindGroupLayoutOptions{
+                    .bindings = {
+                            { .binding = 0,
+                              .count = 1,
+                              .resourceType = ResourceBindingType::UniformBuffer,
+                              .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit) },
+                    },
+            });
+
+            const BindGroupOptions bindGroupOptions = {
+                .layout = bindGroupLayout,
+                .resources = {
+                        { .binding = 0,
+                          .resource = UniformBufferBinding{ .buffer = ubo } },
+                },
+                .bindGroupPool = pool // Use the dedicated pool
+            };
+
+            BindGroup bindGroup = device.createBindGroup(bindGroupOptions);
+
+            // THEN - BindGroup should be valid and created from the dedicated pool
+            CHECK(bindGroup.isValid());
+        }
+
+        SUBCASE("Create multiple BindGroups from the same pool")
+        {
+            // GIVEN - Create a BindGroupPool that can handle multiple bind groups
+            const BindGroupPoolOptions poolOptions = {
+                .label = "Multi BindGroup Pool",
+                .uniformBufferCount = 20,
+                .maxBindGroupCount = 5,
+                .flags = BindGroupPoolFlagBits::CreateFreeBindGroups
+            };
+
+            BindGroupPool pool = device.createBindGroupPool(poolOptions);
+
+            // THEN
+            CHECK(pool.isValid());
+
+            // Create resources for bind groups
+            Buffer ubo = device.createBuffer(BufferOptions{
+                    .size = 16 * sizeof(float),
+                    .usage = BufferUsageFlagBits::UniformBufferBit,
+                    .memoryUsage = MemoryUsage::CpuToGpu,
+            });
+
+            const BindGroupLayout bindGroupLayout = device.createBindGroupLayout(BindGroupLayoutOptions{
+                    .bindings = {
+                            {
+                                    .binding = 0,
+                                    .count = 1,
+                                    .resourceType = ResourceBindingType::UniformBuffer,
+                                    .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit),
+                            },
+                    },
+            });
+
+            // WHEN - Create multiple BindGroups from the same pool
+            const BindGroupOptions bindGroupOptions = {
+                .layout = bindGroupLayout,
+                .resources = {
+                        { .binding = 0, .resource = UniformBufferBinding{ .buffer = ubo } },
+                },
+                .bindGroupPool = pool
+            };
+
+            BindGroup bindGroup1 = device.createBindGroup(bindGroupOptions);
+            BindGroup bindGroup2 = device.createBindGroup(bindGroupOptions);
+
+            // THEN - Both BindGroups should be valid
+            CHECK(bindGroup1.isValid());
+            CHECK(bindGroup2.isValid());
+            CHECK(bindGroup1 != bindGroup2);
+        }
+
+        SUBCASE("Pool exhaustion behavior")
+        {
+            // GIVEN - Create a BindGroupPool with limited capacity
+            const BindGroupPoolOptions poolOptions = {
+                .label = "Limited Pool",
+                .uniformBufferCount = 2, // Very limited
+                .maxBindGroupCount = 2, // Only 2 bind groups max
+                .flags = BindGroupPoolFlagBits::CreateFreeBindGroups
+            };
+
+            BindGroupPool pool = device.createBindGroupPool(poolOptions);
+            CHECK(pool.isValid());
+
+            // Create resources
+            Buffer ubo = device.createBuffer(BufferOptions{
+                    .size = 16 * sizeof(float),
+                    .usage = BufferUsageFlagBits::UniformBufferBit,
+                    .memoryUsage = MemoryUsage::CpuToGpu,
+            });
+
+            const BindGroupLayoutOptions bindGroupLayoutOptions = {
+                .bindings = {
+                        { .binding = 0,
+                          .count = 1,
+                          .resourceType = ResourceBindingType::UniformBuffer,
+                          .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit) },
+                },
+            };
+
+            const BindGroupLayout bindGroupLayout = device.createBindGroupLayout(bindGroupLayoutOptions);
+
+            // WHEN - Create bind groups up to the pool limit
+            const BindGroupOptions bindGroupOptions = {
+                .layout = bindGroupLayout,
+                .resources = {
+                        { .binding = 0, .resource = UniformBufferBinding{ .buffer = ubo } },
+                },
+                .bindGroupPool = pool
+            };
+
+            BindGroup bindGroup1 = device.createBindGroup(bindGroupOptions);
+            BindGroup bindGroup2 = device.createBindGroup(bindGroupOptions);
+
+            // THEN - First two should succeed
+            CHECK(bindGroup1.isValid());
+            CHECK(bindGroup2.isValid());
+
+            // WHEN - Trying to allocate more BindGroups than the pool can handle
+            BindGroup bindGroup3 = device.createBindGroup(bindGroupOptions);
+
+            // THEN -> failure due to pool being exhausted at this point
+            CHECK(!bindGroup3.isValid());
         }
     }
 }
