@@ -6,4 +6,4 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
-compilehlslshaderset(KDGpu_HelloTriangleHLSL hello_triangle)
+kdgpu_compilehlslshaderset(KDGpu_HelloTriangleHLSL hello_triangle)
