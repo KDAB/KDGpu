@@ -13,6 +13,7 @@
 #include <KDGpu/vulkan/vulkan_adapter.h>
 #include <KDGpu/vulkan/vulkan_bind_group.h>
 #include <KDGpu/vulkan/vulkan_bind_group_layout.h>
+#include <KDGpu/vulkan/vulkan_bind_group_pool.h>
 #include <KDGpu/vulkan/vulkan_buffer.h>
 #include <KDGpu/vulkan/vulkan_command_buffer.h>
 #include <KDGpu/vulkan/vulkan_command_recorder.h>
@@ -56,6 +57,7 @@ namespace KDGpu {
 
 struct RenderTargetOptions;
 struct DepthStencilOptions;
+struct BindGroupPoolOptions;
 struct ShaderStage;
 
 class KDGPU_EXPORT VulkanResourceManager
@@ -178,6 +180,10 @@ public:
     void deleteCommandBuffer(const Handle<CommandBuffer_t> &handle);
     VulkanCommandBuffer *getCommandBuffer(const Handle<CommandBuffer_t> &handle) const;
 
+    Handle<BindGroupPool_t> createBindGroupPool(const Handle<Device_t> &deviceHandle, const BindGroupPoolOptions &options);
+    void deleteBindGroupPool(const Handle<BindGroupPool_t> &handle);
+    VulkanBindGroupPool *getBindGroupPool(const Handle<BindGroupPool_t> &handle) const;
+
     Handle<BindGroup_t> createBindGroup(const Handle<Device_t> &deviceHandle, const BindGroupOptions &options);
     void deleteBindGroup(const Handle<BindGroup_t> &handle);
     VulkanBindGroup *getBindGroup(const Handle<BindGroup_t> &handle) const;
@@ -266,6 +272,7 @@ private:
     Pool<VulkanPipelineLayout, PipelineLayout_t> m_pipelineLayouts{ 64 };
     Pool<VulkanBindGroupLayout, BindGroupLayout_t> m_bindGroupLayouts{ 128 };
     Pool<VulkanBindGroup, BindGroup_t> m_bindGroups{ 128 };
+    Pool<VulkanBindGroupPool, BindGroupPool_t> m_bindGroupPools{ 4 };
     Pool<VulkanGraphicsPipeline, GraphicsPipeline_t> m_graphicsPipelines{ 64 };
     Pool<VulkanComputePipeline, ComputePipeline_t> m_computePipelines{ 64 };
     Pool<VulkanRayTracingPipeline, RayTracingPipeline_t> m_rayTracingPipelines{ 64 };

@@ -1292,6 +1292,14 @@ struct ComponentMapping {
     ComponentSwizzle a;
 };
 
+enum class BindGroupPoolFlagBits {
+    None = 0,
+    CreateFreeBindGroups = 0x00000001,
+    UpdateAfterBind = 0x00000002,
+    CreateHostOnly = 0x00000004,
+};
+using BindGroupPoolFlags = KDGpu::Flags<BindGroupPoolFlagBits>;
+
 /*! @} */
 
 } // namespace KDGpu
@@ -1315,3 +1323,4 @@ OPERATORS_FOR_FLAGS(KDGpu::AccelerationStructureFlags)
 OPERATORS_FOR_FLAGS(KDGpu::DependencyFlags);
 OPERATORS_FOR_FLAGS(KDGpu::HostImageCopyFlags);
 OPERATORS_FOR_FLAGS(KDGpu::TextureCreateFlags);
+OPERATORS_FOR_FLAGS(KDGpu::BindGroupPoolFlags);

@@ -12,6 +12,7 @@
 
 #include <KDGpu/bind_group.h>
 #include <KDGpu/bind_group_layout.h>
+#include <KDGpu/bind_group_pool.h>
 #include <KDGpu/buffer.h>
 #include <KDGpu/command_recorder.h>
 #include <KDGpu/compute_pipeline.h>
@@ -50,6 +51,7 @@ struct SwapchainOptions;
 struct TextureOptions;
 struct BindGroupOptions;
 struct BindGroupLayoutOptions;
+struct BindGroupPoolOptions;
 struct BindGroupEntry;
 struct ComputePipelineOptions;
 struct RayTracingPipelineOptions;
@@ -104,6 +106,8 @@ public:
     GpuSemaphore createGpuSemaphore(const GpuSemaphoreOptions &options = GpuSemaphoreOptions());
 
     BindGroupLayout createBindGroupLayout(const BindGroupLayoutOptions &options);
+
+    BindGroupPool createBindGroupPool(const BindGroupPoolOptions &options);
 
     BindGroup createBindGroup(const BindGroupOptions &options);
 

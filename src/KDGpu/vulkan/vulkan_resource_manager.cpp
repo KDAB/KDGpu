@@ -22,6 +22,7 @@
 #include <KDGpu/acceleration_structure_options.h>
 #include <KDGpu/bind_group_options.h>
 #include <KDGpu/bind_group_layout_options.h>
+#include <KDGpu/bind_group_pool_options.h>
 #include <KDGpu/buffer_options.h>
 #include <KDGpu/compute_pipeline_options.h>
 #include <KDGpu/graphics_pipeline_options.h>
@@ -2209,6 +2210,56 @@ void VulkanResourceManager::deleteCommandBuffer(const Handle<CommandBuffer_t> &h
 VulkanCommandBuffer *VulkanResourceManager::getCommandBuffer(const Handle<CommandBuffer_t> &handle) const
 {
     return m_commandBuffers.get(handle);
+}
+
+Handle<BindGroupPool_t> VulkanResourceManager::createBindGroupPool(const Handle<Device_t> &deviceHandle, const BindGroupPoolOptions &options)
+{
+    const std::vector<VkDescriptorPoolSize> poolSizes{
+        { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, options.uniformBufferCount },
+        { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, options.dynamicUniformBufferCount },
+        { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, options.storageBufferCount },
+        { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, options.textureSamplerCount },
+        { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, options.textureCount },
+        { VK_DESCRIPTOR_TYPE_SAMPLER, options.samplerCount },
+        { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, options.imageCount },
+        { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, options.inputAttachmentCount },
+    };
+
+    VkDescriptorPool pool{ VK_NULL_HANDLE };
+    VkDescriptorPoolCreateInfo poolInfo = {};
+    poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
+    poolInfo.pPoolSizes = poolSizes.data();
+
+    poolInfo.maxSets = options.maxBindGroupCount;
+    poolInfo.flags = bindGroupPoolFlagsToVkDescriptorPoolCreateFlags(options.flags);
+
+    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
+
+    if (auto result = vkCreateDescriptorPool(vulkanDevice->device, &poolInfo, nullptr, &pool); result != VK_SUCCESS) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating bindgroup pool: {}", result);
+        return {};
+    }
+
+    setObjectName(vulkanDevice, VK_OBJECT_TYPE_DESCRIPTOR_POOL, reinterpret_cast<uint64_t>(pool), options.label);
+
+    const auto vulkanBindGroupPoolHandle = m_bindGroupPools.emplace(VulkanBindGroupPool(pool, this, deviceHandle));
+    return vulkanBindGroupPoolHandle;
+}
+
+void VulkanResourceManager::deleteBindGroupPool(const Handle<BindGroupPool_t> &handle)
+{
+    VulkanBindGroupPool *bindGroupPool = m_bindGroupPools.get(handle);
+    VulkanDevice *vulkanDevice = m_devices.get(bindGroupPool->deviceHandle);
+
+    vkDestroyDescriptorPool(vulkanDevice->device, bindGroupPool->descriptorPool, nullptr);
+
+    m_bindGroupPools.remove(handle);
+}
+
+VulkanBindGroupPool *VulkanResourceManager::getBindGroupPool(const Handle<BindGroupPool_t> &handle) const
+{
+    return m_bindGroupPools.get(handle);
 }
 
 Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassCommandRecorder(const Handle<Device_t> &deviceHandle,

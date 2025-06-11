@@ -17,6 +17,7 @@ set(SOURCES
     buffer.cpp
     bind_group.cpp
     bind_group_layout.cpp
+    bind_group_pool.cpp
     command_buffer.cpp
     command_recorder.cpp
     compute_pipeline.cpp
@@ -46,6 +47,7 @@ set(SOURCES
     vulkan/vulkan_adapter.cpp
     vulkan/vulkan_bind_group.cpp
     vulkan/vulkan_bind_group_layout.cpp
+    vulkan/vulkan_bind_group_pool.cpp
     vulkan/vulkan_buffer.cpp
     vulkan/vulkan_command_buffer.cpp
     vulkan/vulkan_command_recorder.cpp
@@ -92,6 +94,8 @@ set(HEADERS
     bind_group_description.h
     bind_group_layout.h
     bind_group_layout_options.h
+    bind_group_pool.h
+    bind_group_pool_options.h
     buffer.h
     buffer_options.h
     command_buffer.h

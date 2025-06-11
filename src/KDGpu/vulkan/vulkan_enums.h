@@ -158,4 +158,6 @@ VkComponentSwizzle componentSwizzleToVkComponentSwizzle(ComponentSwizzle swizzle
 
 VkImageCreateFlags textureCreateFlagsToVkImageCreateFlags(TextureCreateFlags flags);
 
+VkDescriptorPoolCreateFlags bindGroupPoolFlagsToVkDescriptorPoolCreateFlags(BindGroupPoolFlags flags);
+
 } // namespace KDGpu

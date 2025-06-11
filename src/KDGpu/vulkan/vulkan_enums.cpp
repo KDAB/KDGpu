@@ -472,4 +472,9 @@ VkImageCreateFlags textureCreateFlagsToVkImageCreateFlags(TextureCreateFlags fla
     return static_cast<VkImageCreateFlags>(flags.toInt());
 }
 
+VkDescriptorPoolCreateFlags bindGroupPoolFlagsToVkDescriptorPoolCreateFlags(BindGroupPoolFlags flags)
+{
+    return static_cast<VkDescriptorPoolCreateFlags>(flags.toInt());
+}
+
 } // namespace KDGpu

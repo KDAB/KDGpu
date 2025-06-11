@@ -176,6 +176,11 @@ BindGroupLayout Device::createBindGroupLayout(const BindGroupLayoutOptions &opti
     return BindGroupLayout(m_api, m_device, options);
 }
 
+BindGroupPool Device::createBindGroupPool(const BindGroupPoolOptions &options)
+{
+    return BindGroupPool(m_api, m_device, options);
+}
+
 BindGroup Device::createBindGroup(const BindGroupOptions &options)
 {
     return BindGroup(m_api, m_device, options);
