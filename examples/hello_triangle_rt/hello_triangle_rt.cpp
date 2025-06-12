@@ -156,7 +156,6 @@ void HelloTriangleRt::createAccelerationStructures()
         { 1.0f, -1.0f, 0.0f },
     };
     std::memcpy(m_vertexBuffer.map(), vertices.data(), vertices.size() * sizeof(Vertex));
-    m_vertexBuffer.unmap();
 
     const AccelerationStructureGeometryTrianglesData triangleDataGeometry{
         .vertexFormat = Format::R32G32B32_SFLOAT,

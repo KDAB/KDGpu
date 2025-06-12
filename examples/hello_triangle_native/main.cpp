@@ -291,7 +291,6 @@ int main()
     {
         void *bufferData = vertexBuffer.map();
         std::memcpy(bufferData, vertexData.data(), vertexData.size() * sizeof(float));
-        vertexBuffer.unmap();
     }
     SPDLOG_LOGGER_INFO(appLogger, "Created vertex buffer");
 
@@ -300,11 +299,14 @@ int main()
             .usage = BufferUsageFlagBits::UniformBufferBit,
             .memoryUsage = MemoryUsage::CpuToGpu, // So we can map it to CPU address space
     });
+
+    // Allows use of persistent mapping of the cameraUBOBuffer
+    void *cameraBufferData{ nullptr };
+    cameraBufferData = cameraUBOBuffer.map();
+
     {
-        void *bufferData = cameraUBOBuffer.map();
         glm::mat4 m(1.0);
-        std::memcpy(bufferData, &m, 16 * sizeof(float));
-        cameraUBOBuffer.unmap();
+        std::memcpy(cameraBufferData, &m, 16 * sizeof(float));
     }
     SPDLOG_LOGGER_INFO(appLogger, "Created camera UBO buffer");
 
@@ -425,10 +427,8 @@ int main()
         if (angle > 360.0f)
             angle -= 360.0f;
 
-        auto cameraBufferData = cameraUBOBuffer.map();
         glm::mat4 cameraMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
         std::memcpy(cameraBufferData, glm::value_ptr(cameraMatrix), 16 * sizeof(float));
-        cameraUBOBuffer.unmap();
 
         // Begin render pass
         RenderPassCommandRecorder opaquePass = commandRecorder.beginRenderPass(
