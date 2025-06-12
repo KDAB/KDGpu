@@ -69,6 +69,7 @@ private:
     };
 
     std::vector<CameraData> m_cameraData{ 2 }; // Default to 2 views
+    std::vector<glm::mat4> m_viewProjection{ 2 };
     KDGpu::Buffer m_cameraBuffer;
     float *m_cameraBufferData{ nullptr };
     KDGpu::BindGroup m_cameraBindGroup;

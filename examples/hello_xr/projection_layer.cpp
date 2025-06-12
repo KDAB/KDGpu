@@ -217,18 +217,16 @@ void ProjectionLayer::initializeScene()
     {
         const BufferOptions bufferOptions = {
             .label = "Camera Buffer",
-            .size = sizeof(glm::mat4) * 2,
+            .size = sizeof(glm::mat4),
             .usage = BufferUsageFlagBits::UniformBufferBit,
             .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
         };
         m_cameraBuffer = m_device->createBuffer(bufferOptions);
 
         // Upload identity matrices. Updated below in updateScene()
-        glm::mat4 viewMatrix(1.0f);
-        glm::mat4 projectionMatrix(1.0f);
+        glm::mat4 viewProjection(1.0f);
         m_cameraBufferData = static_cast<float *>(m_cameraBuffer.map());
-        std::memcpy(m_cameraBufferData, glm::value_ptr(viewMatrix), sizeof(glm::mat4));
-        std::memcpy(m_cameraBufferData + 16, glm::value_ptr(projectionMatrix), sizeof(glm::mat4));
+        std::memcpy(m_cameraBufferData, glm::value_ptr(viewProjection), sizeof(glm::mat4));
     }
 
     // Create a vertex shader and fragment shader
@@ -385,6 +383,7 @@ void ProjectionLayer::cleanupScene()
     m_fence = {};
 
     m_cameraBindGroup = {};
+    m_viewProjection = {};
     m_cameraBuffer = {};
     m_cameraBufferData = nullptr;
 
@@ -427,6 +426,7 @@ void ProjectionLayer::updateScene()
 {
     // Update the camera data for each view
     m_cameraData.resize(m_viewState.viewCount());
+    m_viewProjection.resize(m_viewState.viewCount());
     for (uint32_t viewIndex = 0; viewIndex < m_viewState.viewCount(); ++viewIndex) {
         const auto &view = m_viewState.views[viewIndex];
         const KDXr::Quaternion &orientation = view.pose.orientation;
@@ -446,6 +446,9 @@ void ProjectionLayer::updateScene()
             .farPlane = m_farPlane,
             .applyPostViewCorrection = ApplyPostViewCorrection::Yes
         });
+
+        // Combine the view and projection matrices
+        m_viewProjection[viewIndex] = m_cameraData[viewIndex].projection * m_cameraData[viewIndex].view;
         // clang-format on
     }
 
@@ -511,7 +514,7 @@ void ProjectionLayer::updateTransformUbo()
 
 void ProjectionLayer::updateViewUbo()
 {
-    std::memcpy(m_cameraBufferData, m_cameraData.data() + m_currentViewIndex, sizeof(CameraData));
+    std::memcpy(m_cameraBufferData, glm::value_ptr(m_viewProjection[m_currentViewIndex]), sizeof(CameraData));
 }
 
 void ProjectionLayer::renderView()

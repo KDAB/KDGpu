@@ -6,14 +6,9 @@ layout(location = 1) in vec3 vertexColor;
 
 layout(location = 0) out vec3 color;
 
-struct CameraData {
-    mat4 view;
-    mat4 projection;
-};
-
 layout(set = 0, binding = 0) uniform Camera
 {
-    CameraData data;
+    mat4 viewProjection;
 }
 camera;
 
@@ -26,5 +21,5 @@ entity;
 void main()
 {
     color = vertexColor;
-    gl_Position = camera.data.projection * camera.data.view * entity.modelMatrix * vec4(vertexPosition, 1.0);
+    gl_Position = camera.viewProjection * entity.modelMatrix * vec4(vertexPosition, 1.0);
 }
