@@ -38,6 +38,8 @@ public:
     operator Handle<BindGroupPool_t>() const noexcept { return m_bindGroupPool; }
 
     void reset();
+    uint16_t allocatedBindGroupCount() const;
+    uint16_t maxBindGroupCount() const;
 
 private:
     explicit BindGroupPool(GraphicsApi *api, const Handle<Device_t> &device, const BindGroupPoolOptions &options);

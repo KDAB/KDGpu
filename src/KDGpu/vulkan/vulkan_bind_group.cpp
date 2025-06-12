@@ -17,11 +17,11 @@
 namespace KDGpu {
 
 VulkanBindGroup::VulkanBindGroup(VkDescriptorSet _descriptorSet,
-                                 VkDescriptorPool _descriptorPool,
+                                 const Handle<BindGroupPool_t> &_bindGroupPoolHandle,
                                  VulkanResourceManager *_vulkanResourceManager,
                                  const Handle<Device_t> &_deviceHandle)
     : descriptorSet(_descriptorSet)
-    , descriptorPool(_descriptorPool)
+    , bindGroupPoolHandle(_bindGroupPoolHandle)
     , vulkanResourceManager(_vulkanResourceManager)
     , deviceHandle(_deviceHandle)
 {
@@ -35,6 +35,13 @@ void VulkanBindGroup::update(const BindGroupEntry &entry)
 
     VkDescriptorImageInfo imageInfo{};
     imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+    if (descriptorSet == VK_NULL_HANDLE) {
+        // If the descriptor set is null, we cannot update it.
+        // This can happen if the pool has been reset and our BindGroup kept alive
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "BindGroup Vulkan Handle is NULL, unable to update. This can happen if the BindGroupPool has been reset.");
+        return;
+    }
 
     VkWriteDescriptorSet descriptorWrite{};
     descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;

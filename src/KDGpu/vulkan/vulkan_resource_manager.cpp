@@ -2215,16 +2215,26 @@ VulkanCommandBuffer *VulkanResourceManager::getCommandBuffer(const Handle<Comman
 
 Handle<BindGroupPool_t> VulkanResourceManager::createBindGroupPool(const Handle<Device_t> &deviceHandle, const BindGroupPoolOptions &options)
 {
-    const std::vector<VkDescriptorPoolSize> poolSizes{
-        { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, options.uniformBufferCount },
-        { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, options.dynamicUniformBufferCount },
-        { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, options.storageBufferCount },
-        { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, options.textureSamplerCount },
-        { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, options.textureCount },
-        { VK_DESCRIPTOR_TYPE_SAMPLER, options.samplerCount },
-        { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, options.imageCount },
-        { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, options.inputAttachmentCount },
-    };
+    std::vector<VkDescriptorPoolSize> poolSizes;
+    poolSizes.reserve(9);
+    if (options.uniformBufferCount > 0)
+        poolSizes.push_back({ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, options.uniformBufferCount });
+    if (options.dynamicUniformBufferCount > 0)
+        poolSizes.push_back({ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, options.dynamicUniformBufferCount });
+    if (options.storageBufferCount > 0)
+        poolSizes.push_back({ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, options.storageBufferCount });
+    if (options.textureSamplerCount > 0)
+        poolSizes.push_back({ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, options.textureSamplerCount });
+    if (options.textureCount > 0)
+        poolSizes.push_back({ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, options.textureCount });
+    if (options.samplerCount > 0)
+        poolSizes.push_back({ VK_DESCRIPTOR_TYPE_SAMPLER, options.samplerCount });
+    if (options.imageCount > 0)
+        poolSizes.push_back({ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, options.imageCount });
+    if (options.inputAttachmentCount > 0)
+        poolSizes.push_back({ VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, options.inputAttachmentCount });
+    if (options.accelerationStructureCount > 0)
+        poolSizes.push_back({ VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, options.accelerationStructureCount });
 
     VkDescriptorPool pool{ VK_NULL_HANDLE };
     VkDescriptorPoolCreateInfo poolInfo = {};
@@ -2244,7 +2254,7 @@ Handle<BindGroupPool_t> VulkanResourceManager::createBindGroupPool(const Handle<
 
     setObjectName(vulkanDevice, VK_OBJECT_TYPE_DESCRIPTOR_POOL, reinterpret_cast<uint64_t>(pool), options.label);
 
-    const auto vulkanBindGroupPoolHandle = m_bindGroupPools.emplace(VulkanBindGroupPool(pool, this, deviceHandle));
+    const auto vulkanBindGroupPoolHandle = m_bindGroupPools.emplace(VulkanBindGroupPool(pool, this, deviceHandle, options.maxBindGroupCount));
     return vulkanBindGroupPoolHandle;
 }
 
@@ -2943,6 +2953,7 @@ Handle<BindGroup_t> VulkanResourceManager::createBindGroup(const Handle<Device_t
         .samplerCount = 8,
         .imageCount = 8,
         .inputAttachmentCount = 8,
+        .accelerationStructureCount = 8,
         .maxBindGroupCount = 1024,
         .flags = BindGroupPoolFlagBits::CreateFreeBindGroups
     };
@@ -2983,10 +2994,12 @@ Handle<BindGroup_t> VulkanResourceManager::createBindGroup(const Handle<Device_t
 
     setObjectName(vulkanDevice, VK_OBJECT_TYPE_DESCRIPTOR_SET, reinterpret_cast<uint64_t>(descriptorSet), options.label);
 
-    const auto vulkanBindGroupHandle = m_bindGroups.emplace(VulkanBindGroup(descriptorSet, vulkanBindGroupPool->descriptorPool, this, deviceHandle));
-    auto vulkanBindGroup = m_bindGroups.get(vulkanBindGroupHandle);
+    const auto vulkanBindGroupHandle = m_bindGroups.emplace(VulkanBindGroup(descriptorSet, poolHandle, this, deviceHandle));
+    // Record new bindgroup handle against pool
+    vulkanBindGroupPool->addBindGroup(vulkanBindGroupHandle);
 
     // Set up the initial bindings
+    auto vulkanBindGroup = m_bindGroups.get(vulkanBindGroupHandle);
     for (const auto &resource : options.resources)
         vulkanBindGroup->update(resource);
 
@@ -2998,7 +3011,15 @@ void VulkanResourceManager::deleteBindGroup(const Handle<BindGroup_t> &handle)
     VulkanBindGroup *vulkanBindGroup = m_bindGroups.get(handle);
     VulkanDevice *vulkanDevice = m_devices.get(vulkanBindGroup->deviceHandle);
 
-    vkFreeDescriptorSets(vulkanDevice->device, vulkanBindGroup->descriptorPool, 1, &vulkanBindGroup->descriptorSet);
+    VulkanBindGroupPool *vulkanBindGroupPool = getBindGroupPool(vulkanBindGroup->bindGroupPoolHandle);
+
+    // Destroy underlying Vulkan resource if still valid
+    if (vulkanBindGroup->descriptorSet != VK_NULL_HANDLE) {
+        vkFreeDescriptorSets(vulkanDevice->device, vulkanBindGroupPool->descriptorPool, 1, &vulkanBindGroup->descriptorSet);
+    }
+
+    // Remove the bind group handle from the bindGroupPool
+    vulkanBindGroupPool->removeBindGroup(handle);
 
     m_bindGroups.remove(handle);
 }

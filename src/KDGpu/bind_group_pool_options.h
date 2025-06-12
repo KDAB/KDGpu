@@ -16,14 +16,15 @@ namespace KDGpu {
 
 struct BindGroupPoolOptions {
     std::string_view label;
-    uint16_t uniformBufferCount{ 1 };
-    uint16_t dynamicUniformBufferCount{ 1 };
-    uint16_t storageBufferCount{ 1 };
-    uint16_t textureSamplerCount{ 1 };
-    uint16_t textureCount{ 1 };
-    uint16_t samplerCount{ 1 };
-    uint16_t imageCount{ 1 };
-    uint16_t inputAttachmentCount{ 1 };
+    uint16_t uniformBufferCount{ 0 };
+    uint16_t dynamicUniformBufferCount{ 0 };
+    uint16_t storageBufferCount{ 0 };
+    uint16_t textureSamplerCount{ 0 };
+    uint16_t textureCount{ 0 };
+    uint16_t samplerCount{ 0 };
+    uint16_t imageCount{ 0 };
+    uint16_t inputAttachmentCount{ 0 };
+    uint16_t accelerationStructureCount{ 0 };
 
     uint16_t maxBindGroupCount{ 1 };
 

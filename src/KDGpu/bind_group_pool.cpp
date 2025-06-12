@@ -53,8 +53,31 @@ BindGroupPool::BindGroupPool(GraphicsApi *api, const Handle<Device_t> &device, c
 
 void BindGroupPool::reset()
 {
+    if (m_api == nullptr)
+        return;
     auto apiBindGroupPool = m_api->resourceManager()->getBindGroupPool(m_bindGroupPool);
-    apiBindGroupPool->reset();
+    if (apiBindGroupPool)
+        apiBindGroupPool->reset();
+}
+
+uint16_t BindGroupPool::allocatedBindGroupCount() const
+{
+    if (m_api == nullptr)
+        return 0;
+    auto apiBindGroupPool = m_api->resourceManager()->getBindGroupPool(m_bindGroupPool);
+    if (apiBindGroupPool == nullptr)
+        return 0;
+    return apiBindGroupPool->bindGroupCount();
+}
+
+uint16_t BindGroupPool::maxBindGroupCount() const
+{
+    if (m_api == nullptr)
+        return 0;
+    auto apiBindGroupPool = m_api->resourceManager()->getBindGroupPool(m_bindGroupPool);
+    if (apiBindGroupPool == nullptr)
+        return 0;
+    return m_api->resourceManager()->getBindGroupPool(m_bindGroupPool)->maxBindGroupCount;
 }
 
 bool operator==(const BindGroupPool &a, const BindGroupPool &b)

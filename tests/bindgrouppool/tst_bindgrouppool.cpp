@@ -8,11 +8,18 @@
   Contact KDAB at <info@kdab.com> for commercial licensing options.
 */
 
+#include <KDGpu/bind_group.h>
+#include <KDGpu/bind_group_layout.h>
+#include <KDGpu/bind_group_options.h>
 #include <KDGpu/bind_group_pool.h>
 #include <KDGpu/bind_group_pool_options.h>
+#include <KDGpu/buffer.h>
+#include <KDGpu/buffer_options.h>
 #include <KDGpu/device.h>
 #include <KDGpu/instance.h>
 #include <KDGpu/vulkan/vulkan_graphics_api.h>
+
+#include <vector>
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest.h>
@@ -38,6 +45,8 @@ TEST_SUITE("BindGroupPool")
             BindGroupPool pool;
             // THEN
             REQUIRE(!pool.isValid());
+            CHECK(pool.maxBindGroupCount() == 0);
+            CHECK(pool.allocatedBindGroupCount() == 0);
         }
 
         SUBCASE("A constructed BindGroupPool from a Vulkan API")
@@ -62,6 +71,8 @@ TEST_SUITE("BindGroupPool")
 
             // THEN
             CHECK(pool.isValid());
+            CHECK(pool.maxBindGroupCount() == 50);
+            CHECK(pool.allocatedBindGroupCount() == 0);
         }
 
         SUBCASE("A constructed BindGroupPool with minimal options")
@@ -76,6 +87,7 @@ TEST_SUITE("BindGroupPool")
 
             // THEN
             CHECK(pool.isValid());
+            CHECK(pool.maxBindGroupCount() == 10);
         }
     }
 
@@ -86,8 +98,8 @@ TEST_SUITE("BindGroupPool")
             // GIVEN
             const BindGroupPoolOptions poolOptions = {
                 .label = "Reset Test Pool",
-                .uniformBufferCount = 5,
-                .maxBindGroupCount = 20,
+                .uniformBufferCount = 3,
+                .maxBindGroupCount = 3,
                 .flags = BindGroupPoolFlagBits::CreateFreeBindGroups
             };
 
@@ -95,12 +107,108 @@ TEST_SUITE("BindGroupPool")
 
             // THEN
             CHECK(pool.isValid());
+            CHECK(pool.maxBindGroupCount() == 3);
+            CHECK(pool.allocatedBindGroupCount() == 0);
 
             // WHEN
             pool.reset();
 
             // THEN - Pool should still be valid after reset
             CHECK(pool.isValid());
+            CHECK(pool.allocatedBindGroupCount() == 0);
+        }
+
+        SUBCASE("Reset BindGroupPool after allocating BindGroups")
+        {
+            // GIVEN
+            BindGroupPool pool = device.createBindGroupPool(BindGroupPoolOptions{
+                    .label = "Reset with BindGroups Test Pool",
+                    .uniformBufferCount = 3,
+                    .maxBindGroupCount = 3,
+                    .flags = BindGroupPoolFlagBits::CreateFreeBindGroups,
+            });
+
+            // THEN
+            CHECK(pool.isValid());
+            CHECK(pool.maxBindGroupCount() == 3);
+            CHECK(pool.allocatedBindGroupCount() == 0);
+
+            // Create a BindGroupLayout for testing
+            const BindGroupLayout bindGroupLayout = device.createBindGroupLayout(BindGroupLayoutOptions{
+                    .bindings = {
+                            {
+                                    .binding = 0,
+                                    .count = 1,
+                                    .resourceType = ResourceBindingType::UniformBuffer,
+                                    .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit),
+                            },
+                    },
+            });
+
+            // Create a buffer for the bind group
+            const Buffer ubo = device.createBuffer(BufferOptions{
+                    .size = 256,
+                    .usage = BufferUsageFlagBits::UniformBufferBit,
+                    .memoryUsage = MemoryUsage::CpuToGpu,
+            });
+
+            // WHEN - Allocate some BindGroups from the pool
+            std::vector<BindGroup> bindGroups;
+            for (int i = 0; i < 3; ++i) {
+                BindGroup bindGroup = device.createBindGroup(BindGroupOptions{
+                        .layout = bindGroupLayout,
+                        .resources = {
+                                {
+                                        .binding = 0,
+                                        .resource = UniformBufferBinding{ .buffer = ubo },
+                                },
+                        },
+                        .bindGroupPool = pool,
+                });
+                // THEN
+                CHECK(bindGroup.isValid());
+                bindGroups.emplace_back(std::move(bindGroup));
+            }
+
+            CHECK(pool.allocatedBindGroupCount() == 3);
+
+            // WHEN - Not enough room left in pool
+            BindGroup extraBindGroup = device.createBindGroup(BindGroupOptions{
+                    .layout = bindGroupLayout,
+                    .resources = {
+                            {
+                                    .binding = 0,
+                                    .resource = UniformBufferBinding{ .buffer = ubo },
+                            },
+                    },
+                    .bindGroupPool = pool,
+            });
+
+            // THEN
+            CHECK(!extraBindGroup.isValid());
+
+            // WHEN - Reset the pool (this should free all allocated descriptor sets)
+            pool.reset();
+
+            // THEN - Pool should still be valid after reset
+            CHECK(pool.isValid());
+            CHECK(pool.allocatedBindGroupCount() == 0);
+
+            // WHEN - Try to allocate new BindGroups after reset
+            BindGroup newBindGroup = device.createBindGroup(BindGroupOptions{
+                    .layout = bindGroupLayout,
+                    .resources = {
+                            {
+                                    .binding = 0,
+                                    .resource = UniformBufferBinding{ .buffer = ubo },
+                            },
+                    },
+                    .bindGroupPool = pool,
+            });
+
+            // THEN - Should be able to allocate new BindGroups successfully
+            CHECK(newBindGroup.isValid());
+            CHECK(pool.allocatedBindGroupCount() == 1);
         }
     }
 
@@ -183,6 +291,7 @@ TEST_SUITE("BindGroupPool")
                 CHECK(pool2.isValid()); // pool2 should be valid
                 CHECK(pool2.handle() == poolHandle);
                 CHECK(api->resourceManager()->getBindGroupPool(poolHandle) != nullptr);
+                CHECK(pool2.maxBindGroupCount() == 25);
             }
 
             // THEN
@@ -211,6 +320,7 @@ TEST_SUITE("BindGroupPool")
             CHECK(pool2.isValid()); // pool2 should be valid
             CHECK(pool2.handle() == poolHandle);
             CHECK(api->resourceManager()->getBindGroupPool(poolHandle) != nullptr);
+            CHECK(pool2.maxBindGroupCount() == 25);
         }
     }
 
@@ -238,9 +348,11 @@ TEST_SUITE("BindGroupPool")
 
             // THEN
             CHECK(pool.isValid());
+            CHECK(pool.maxBindGroupCount() == 200);
+            CHECK(pool.allocatedBindGroupCount() == 0);
         }
 
-        SUBCASE("Pool with zero counts (should still be valid)")
+        SUBCASE("Pool with zero counts (should still be valid but might trigger validation errors)")
         {
             // GIVEN
             const BindGroupPoolOptions poolOptions = {
@@ -262,6 +374,8 @@ TEST_SUITE("BindGroupPool")
 
             // THEN
             CHECK(pool.isValid());
+            CHECK(pool.maxBindGroupCount() == 1);
+            CHECK(pool.allocatedBindGroupCount() == 0);
         }
     }
 

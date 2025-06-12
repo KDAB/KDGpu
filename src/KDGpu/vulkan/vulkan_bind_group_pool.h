@@ -13,11 +13,13 @@
 #include <KDGpu/handle.h>
 #include <KDGpu/kdgpu_export.h>
 #include <vulkan/vulkan.h>
+#include <vector>
 
 namespace KDGpu {
 
 class VulkanResourceManager;
 struct Device_t;
+struct BindGroup_t;
 
 /**
  * @brief VulkanBindGroupPool
@@ -27,13 +29,24 @@ struct Device_t;
 struct KDGPU_EXPORT VulkanBindGroupPool {
     explicit VulkanBindGroupPool(VkDescriptorPool _descriptorPool,
                                  VulkanResourceManager *_vulkanResourceManager,
-                                 const Handle<Device_t> &_deviceHandle);
+                                 const Handle<Device_t> &_deviceHandle,
+                                 uint16_t _maxBindGroupCount);
 
     void reset();
+
+    // Methods to track allocated bind groups
+    void addBindGroup(const Handle<BindGroup_t> &bindGroupHandle);
+    void removeBindGroup(const Handle<BindGroup_t> &bindGroupHandle);
+    const std::vector<Handle<BindGroup_t>> &bindGroups() const;
+    uint16_t bindGroupCount() const;
 
     VkDescriptorPool descriptorPool{ VK_NULL_HANDLE };
     VulkanResourceManager *vulkanResourceManager;
     Handle<Device_t> deviceHandle;
+    uint16_t maxBindGroupCount;
+
+private:
+    std::vector<Handle<BindGroup_t>> m_bindGroups;
 };
 
 } // namespace KDGpu

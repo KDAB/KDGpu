@@ -19,6 +19,7 @@ namespace KDGpu {
 
 class VulkanResourceManager;
 struct Device_t;
+struct BindGroupPool_t;
 
 /**
  * @brief VulkanBindGroup
@@ -27,14 +28,14 @@ struct Device_t;
  */
 struct KDGPU_EXPORT VulkanBindGroup {
     explicit VulkanBindGroup(VkDescriptorSet _descriptorSet,
-                             VkDescriptorPool _descriptorPool,
+                             const Handle<BindGroupPool_t> &_bindGroupPoolHandle,
                              VulkanResourceManager *_vulkanResourceManager,
                              const Handle<Device_t> &_deviceHandle);
 
     void update(const BindGroupEntry &entry);
 
     VkDescriptorSet descriptorSet{ VK_NULL_HANDLE };
-    VkDescriptorPool descriptorPool{ VK_NULL_HANDLE };
+    Handle<BindGroupPool_t> bindGroupPoolHandle;
     VulkanResourceManager *vulkanResourceManager;
     Handle<Device_t> deviceHandle;
 };
