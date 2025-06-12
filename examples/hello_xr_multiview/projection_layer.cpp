@@ -179,9 +179,8 @@ void ProjectionLayer::initializeScene()
 
         // Upload identity matrix. Updated below in updateScene()
         m_transform = glm::mat4(1.0f);
-        auto bufferData = m_transformBuffer.map();
-        std::memcpy(bufferData, &m_transform, sizeof(glm::mat4));
-        m_transformBuffer.unmap();
+        m_transformBufferData = m_transformBuffer.map();
+        std::memcpy(m_transformBufferData, &m_transform, sizeof(glm::mat4));
     }
 
     // Create a buffer to hold the left hand transformation matrix
@@ -196,9 +195,8 @@ void ProjectionLayer::initializeScene()
 
         // Upload identity matrix. Updated below in updateScene()
         m_leftHandTransform = glm::mat4(1.0f);
-        auto bufferData = m_leftHandTransformBuffer.map();
-        std::memcpy(bufferData, &m_leftHandTransform, sizeof(glm::mat4));
-        m_leftHandTransformBuffer.unmap();
+        m_leftHandTransformBufferData = m_leftHandTransformBuffer.map();
+        std::memcpy(m_leftHandTransformBufferData, &m_leftHandTransform, sizeof(glm::mat4));
     }
 
     // Create a buffer to hold the right hand transformation matrix
@@ -213,9 +211,8 @@ void ProjectionLayer::initializeScene()
 
         // Upload identity matrix. Updated below in updateScene()
         m_rightHandTransform = glm::mat4(1.0f);
-        auto bufferData = m_rightHandTransformBuffer.map();
-        std::memcpy(bufferData, &m_rightHandTransform, sizeof(glm::mat4));
-        m_rightHandTransformBuffer.unmap();
+        m_rightHandTransformBufferData = m_rightHandTransformBuffer.map();
+        std::memcpy(m_rightHandTransformBufferData, &m_rightHandTransform, sizeof(glm::mat4));
     }
 
     // Create a buffer to hold the camera view and projection matrices. In a multiview
@@ -231,12 +228,11 @@ void ProjectionLayer::initializeScene()
 
         // Upload identity matrices. Updated below in updateScene()
         glm::mat4 identityMatrix(1.0f);
-        auto bufferData = static_cast<float *>(m_cameraBuffer.map());
-        std::memcpy(bufferData, glm::value_ptr(identityMatrix), sizeof(glm::mat4));
-        std::memcpy(bufferData + 16, glm::value_ptr(identityMatrix), sizeof(glm::mat4));
-        std::memcpy(bufferData + 32, glm::value_ptr(identityMatrix), sizeof(glm::mat4));
-        std::memcpy(bufferData + 48, glm::value_ptr(identityMatrix), sizeof(glm::mat4));
-        m_cameraBuffer.unmap();
+        m_cameraBufferData = static_cast<float *>(m_cameraBuffer.map());
+        std::memcpy(m_cameraBufferData, glm::value_ptr(identityMatrix), sizeof(glm::mat4));
+        std::memcpy(m_cameraBufferData + 16, glm::value_ptr(identityMatrix), sizeof(glm::mat4));
+        std::memcpy(m_cameraBufferData + 32, glm::value_ptr(identityMatrix), sizeof(glm::mat4));
+        std::memcpy(m_cameraBufferData + 48, glm::value_ptr(identityMatrix), sizeof(glm::mat4));
     }
 
     // Create a vertex shader and fragment shader
@@ -395,13 +391,17 @@ void ProjectionLayer::cleanupScene()
     m_fence = {};
 
     m_cameraBindGroup = {};
+    m_cameraBufferData = nullptr;
     m_cameraBuffer = {};
 
     m_rightHandTransformBindGroup = {};
     m_rightHandTransformBuffer = {};
+    m_rightHandTransformBufferData = nullptr;
     m_rightHandBuffer = {};
+
     m_leftHandTransformBindGroup = {};
     m_leftHandTransformBuffer = {};
+    m_leftHandTransformBufferData = nullptr;
     m_leftHandBuffer = {};
 
     m_pipeline = {};
@@ -410,6 +410,7 @@ void ProjectionLayer::cleanupScene()
     m_indexBuffer = {};
     m_entityTransformBindGroup = {};
     m_transformBuffer = {};
+    m_transformBufferData = nullptr;
     m_commandBuffer = {};
 }
 
@@ -517,24 +518,16 @@ void ProjectionLayer::updateScene()
 
 void ProjectionLayer::updateTransformUbo()
 {
-    auto bufferData = m_transformBuffer.map();
-    std::memcpy(bufferData, &m_transform, sizeof(glm::mat4));
-    m_transformBuffer.unmap();
+    std::memcpy(m_transformBufferData, &m_transform, sizeof(glm::mat4));
 
-    bufferData = m_leftHandTransformBuffer.map();
-    std::memcpy(bufferData, &m_leftHandTransform, sizeof(glm::mat4));
-    m_leftHandTransformBuffer.unmap();
+    std::memcpy(m_leftHandTransformBufferData, &m_leftHandTransform, sizeof(glm::mat4));
 
-    bufferData = m_rightHandTransformBuffer.map();
-    std::memcpy(bufferData, &m_rightHandTransform, sizeof(glm::mat4));
-    m_rightHandTransformBuffer.unmap();
+    std::memcpy(m_rightHandTransformBufferData, &m_rightHandTransform, sizeof(glm::mat4));
 }
 
 void ProjectionLayer::updateViewUbo()
 {
-    auto cameraBufferData = static_cast<float *>(m_cameraBuffer.map());
-    std::memcpy(cameraBufferData, m_cameraData.data(), viewCount() * sizeof(CameraData));
-    m_cameraBuffer.unmap();
+    std::memcpy(m_cameraBufferData, m_cameraData.data(), viewCount() * sizeof(CameraData));
 }
 
 void ProjectionLayer::renderView()

@@ -69,6 +69,7 @@ private:
 
     std::vector<CameraData> m_cameraData{ 2 }; // Default to 2 views
     KDGpu::Buffer m_cameraBuffer;
+    float *m_cameraBufferData{ nullptr };
     KDGpu::BindGroup m_cameraBindGroup;
 
     KDGpu::Buffer m_buffer;
@@ -82,14 +83,17 @@ private:
 
     glm::mat4 m_transform;
     KDGpu::Buffer m_transformBuffer;
+    void *m_transformBufferData{ nullptr };
     KDGpu::BindGroup m_entityTransformBindGroup;
 
     glm::mat4 m_leftHandTransform;
     KDGpu::Buffer m_leftHandTransformBuffer;
+    void *m_leftHandTransformBufferData{ nullptr };
     KDGpu::BindGroup m_leftHandTransformBindGroup;
 
     glm::mat4 m_rightHandTransform;
     KDGpu::Buffer m_rightHandTransformBuffer;
+    void *m_rightHandTransformBufferData{ nullptr };
     KDGpu::BindGroup m_rightHandTransformBindGroup;
 
     KDGpu::Fence m_fence;
