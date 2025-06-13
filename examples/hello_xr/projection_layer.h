@@ -24,6 +24,9 @@
 
 #include <glm/glm.hpp>
 
+#include <array>
+#include <vector>
+
 namespace KDXr {
 class Instance;
 }
@@ -69,10 +72,15 @@ private:
     };
 
     std::vector<CameraData> m_cameraData{ 2 }; // Default to 2 views
-    std::vector<glm::mat4> m_viewProjection{ 2 };
+    std::vector<glm::mat4> m_viewProjections{ 2 };
     KDGpu::Buffer m_cameraBuffer;
     float *m_cameraBufferData{ nullptr };
     KDGpu::BindGroup m_cameraBindGroup;
+    const KDGpu::PushConstantRange m_viewIndexPushConstant{
+        .offset = 0,
+        .size = sizeof(uint32_t),
+        .shaderStages = KDGpu::ShaderStageFlagBits::VertexBit
+    };
 
     KDGpu::Buffer m_buffer;
     KDGpu::Buffer m_leftHandBuffer;
@@ -81,7 +89,7 @@ private:
     KDGpu::PipelineLayout m_pipelineLayout;
     KDGpu::GraphicsPipeline m_pipeline;
     KDGpu::RenderPassCommandRecorderOptions m_opaquePassOptions;
-    KDGpu::CommandBuffer m_commandBuffer;
+    std::array<KDGpu::CommandBuffer, 2> m_commandBuffers;
 
     glm::mat4 m_transform;
     KDGpu::Buffer m_transformBuffer;
@@ -97,6 +105,4 @@ private:
     KDGpu::Buffer m_rightHandTransformBuffer;
     void *m_rightHandTransformBufferData{ nullptr };
     KDGpu::BindGroup m_rightHandTransformBindGroup;
-
-    KDGpu::Fence m_fence;
 };

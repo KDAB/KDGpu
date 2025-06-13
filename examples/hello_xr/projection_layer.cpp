@@ -217,16 +217,18 @@ void ProjectionLayer::initializeScene()
     {
         const BufferOptions bufferOptions = {
             .label = "Camera Buffer",
-            .size = sizeof(glm::mat4),
+            .size = sizeof(glm::mat4) * 2,
             .usage = BufferUsageFlagBits::UniformBufferBit,
             .memoryUsage = MemoryUsage::CpuToGpu // So we can map it to CPU address space
         };
         m_cameraBuffer = m_device->createBuffer(bufferOptions);
 
         // Upload identity matrices. Updated below in updateScene()
-        glm::mat4 viewProjection(1.0f);
+        m_viewProjections.resize(2);
+        m_viewProjections[0] = glm::mat4(1.0f);
+        m_viewProjections[1] = glm::mat4(1.0f);
         m_cameraBufferData = static_cast<float *>(m_cameraBuffer.map());
-        std::memcpy(m_cameraBufferData, glm::value_ptr(viewProjection), sizeof(glm::mat4));
+        std::memcpy(m_cameraBufferData, glm::value_ptr(m_viewProjections[0]), sizeof(glm::mat4) * sizeof(m_viewProjections));
     }
 
     // Create a vertex shader and fragment shader
@@ -265,7 +267,8 @@ void ProjectionLayer::initializeScene()
     // Create a pipeline layout (array of bind group layouts)
     const PipelineLayoutOptions pipelineLayoutOptions = {
         .label = "Triangle",
-        .bindGroupLayouts = { entityBindGroupLayout, cameraBindGroupLayout }
+        .bindGroupLayouts = { entityBindGroupLayout, cameraBindGroupLayout },
+        .pushConstantRanges = { m_viewIndexPushConstant }
     };
     m_pipelineLayout = m_device->createPipelineLayout(pipelineLayoutOptions);
 
@@ -371,19 +374,12 @@ void ProjectionLayer::initializeScene()
         }
     };
     // clang-format on
-
-    // We will use a fence to synchronize CPU and GPU. When we render image for each view (eye), we
-    // shall wait for the fence to be signaled before we update any shared resources such as a view
-    // matrix UBO (not used yet). An alternative would be to index into an array of such matrices.
-    m_fence = m_device->createFence({ .label = "Projection Layer Scene Fence" });
 }
 
 void ProjectionLayer::cleanupScene()
 {
-    m_fence = {};
-
     m_cameraBindGroup = {};
-    m_viewProjection = {};
+    m_viewProjections = {};
     m_cameraBuffer = {};
     m_cameraBufferData = nullptr;
 
@@ -403,7 +399,7 @@ void ProjectionLayer::cleanupScene()
     m_indexBuffer = {};
     m_entityTransformBindGroup = {};
     m_transformBuffer = {};
-    m_commandBuffer = {};
+    m_commandBuffers = {};
 }
 
 void ProjectionLayer::initialize()
@@ -426,7 +422,7 @@ void ProjectionLayer::updateScene()
 {
     // Update the camera data for each view
     m_cameraData.resize(m_viewState.viewCount());
-    m_viewProjection.resize(m_viewState.viewCount());
+    m_viewProjections.resize(m_viewState.viewCount());
     for (uint32_t viewIndex = 0; viewIndex < m_viewState.viewCount(); ++viewIndex) {
         const auto &view = m_viewState.views[viewIndex];
         const KDXr::Quaternion &orientation = view.pose.orientation;
@@ -448,7 +444,7 @@ void ProjectionLayer::updateScene()
         });
 
         // Combine the view and projection matrices
-        m_viewProjection[viewIndex] = m_cameraData[viewIndex].projection * m_cameraData[viewIndex].view;
+        m_viewProjections[viewIndex] = m_cameraData[viewIndex].projection * m_cameraData[viewIndex].view;
         // clang-format on
     }
 
@@ -514,21 +510,16 @@ void ProjectionLayer::updateTransformUbo()
 
 void ProjectionLayer::updateViewUbo()
 {
-    std::memcpy(m_cameraBufferData, glm::value_ptr(m_viewProjection[m_currentViewIndex]), sizeof(CameraData));
+    std::memcpy(m_cameraBufferData, glm::value_ptr(m_viewProjections[0]), sizeof(glm::mat4) * m_viewProjections.size());
 }
 
 void ProjectionLayer::renderView()
 {
-    m_fence.wait();
-    m_fence.reset();
-
-    // Update the scene data once per frame
+    //  Update the scene and camera data once per frame
     if (m_currentViewIndex == 0) {
         updateTransformUbo();
+        updateViewUbo();
     }
-
-    // Update the per-view camera matrices
-    updateViewUbo();
 
     auto commandRecorder = m_device->createCommandRecorder();
 
@@ -539,6 +530,7 @@ void ProjectionLayer::renderView()
 
     // Draw the main triangle
     opaquePass.setPipeline(m_pipeline);
+    opaquePass.pushConstant(m_viewIndexPushConstant, &m_currentViewIndex);
     opaquePass.setVertexBuffer(0, m_buffer);
     opaquePass.setIndexBuffer(m_indexBuffer);
     opaquePass.setBindGroup(0, m_cameraBindGroup);
@@ -557,11 +549,10 @@ void ProjectionLayer::renderView()
     opaquePass.drawIndexed(drawCmd);
 
     opaquePass.end();
-    m_commandBuffer = commandRecorder.finish();
+    m_commandBuffers[m_currentViewIndex] = commandRecorder.finish();
 
     const SubmitOptions submitOptions = {
-        .commandBuffers = { m_commandBuffer },
-        .signalFence = m_fence
+        .commandBuffers = { m_commandBuffers[m_currentViewIndex] },
     };
     m_queue->submit(submitOptions);
 }
