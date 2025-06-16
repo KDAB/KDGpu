@@ -152,6 +152,7 @@ set(HEADERS
     vulkan/vulkan_adapter.h
     vulkan/vulkan_bind_group.h
     vulkan/vulkan_bind_group_layout.h
+    vulkan/vulkan_bind_group_pool.h
     vulkan/vulkan_buffer.h
     vulkan/vulkan_command_buffer.h
     vulkan/vulkan_command_recorder.h
