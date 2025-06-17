@@ -19,8 +19,9 @@ namespace KDGpu {
 VulkanBindGroupPool::VulkanBindGroupPool(VkDescriptorPool _descriptorPool,
                                          VulkanResourceManager *_vulkanResourceManager,
                                          const Handle<Device_t> &_deviceHandle,
-                                         uint16_t _maxBindGroupCount)
-    : descriptorPool(_descriptorPool), vulkanResourceManager(_vulkanResourceManager), deviceHandle(_deviceHandle), maxBindGroupCount(_maxBindGroupCount)
+                                         uint16_t _maxBindGroupCount,
+                                         BindGroupPoolFlags _flags)
+    : descriptorPool(_descriptorPool), vulkanResourceManager(_vulkanResourceManager), deviceHandle(_deviceHandle), maxBindGroupCount(_maxBindGroupCount), flags(_flags)
 {
 }
 

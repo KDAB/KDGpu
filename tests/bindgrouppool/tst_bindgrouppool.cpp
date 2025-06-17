@@ -210,6 +210,168 @@ TEST_SUITE("BindGroupPool")
             CHECK(newBindGroup.isValid());
             CHECK(pool.allocatedBindGroupCount() == 1);
         }
+
+        SUBCASE("Explicitly Freed BindGroup are not freed when destroyed")
+        {
+            // GIVEN
+            const BindGroupPoolOptions poolOptions = {
+                .label = "ExplicitFree Individual Test Pool",
+                .uniformBufferCount = 10,
+                .maxBindGroupCount = 5,
+                .flags = BindGroupPoolFlagBits::CreateFreeBindGroups
+            };
+            BindGroupPool pool = device.createBindGroupPool(poolOptions);
+
+            const BufferOptions bufferOptions = {
+                .size = 1024,
+                .usage = BufferUsageFlagBits::UniformBufferBit,
+                .memoryUsage = MemoryUsage::CpuToGpu
+            };
+            Buffer buffer = device.createBuffer(bufferOptions);
+
+            const BindGroupLayoutOptions layoutOptions = {
+                .bindings = { { .binding = 0,
+                                .count = 1,
+                                .resourceType = ResourceBindingType::UniformBuffer,
+                                .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit) } }
+            };
+            BindGroupLayout layout = device.createBindGroupLayout(layoutOptions);
+
+            // Create multiple BindGroups with explicitFree
+            std::vector<BindGroup> bindGroups;
+            for (int i = 0; i < 3; ++i) {
+                const BindGroupOptions bindGroupOptions = {
+                    .layout = layout.handle(),
+                    .resources = {
+                            {
+                                    .binding = 0,
+                                    .resource = UniformBufferBinding{ .buffer = buffer.handle() },
+                            },
+                    },
+                    .bindGroupPool = pool.handle(),
+                    .implicitFree = false,
+                };
+                bindGroups.push_back(device.createBindGroup(bindGroupOptions));
+            }
+
+            CHECK(pool.allocatedBindGroupCount() == 3);
+
+            // WHEN -> BindGroups are releases
+            bindGroups.clear();
+
+            // THEN -> Then they've not been freed at the pool level
+            CHECK(pool.allocatedBindGroupCount() == 3);
+        }
+
+        SUBCASE("Free explicitly free individual BindGroups on pool destruction")
+        {
+            // GIVEN
+            const BindGroupPoolOptions poolOptions = {
+                .label = "ExplicitFree Individual Test Pool",
+                .uniformBufferCount = 10,
+                .maxBindGroupCount = 5,
+                .flags = BindGroupPoolFlagBits::CreateFreeBindGroups
+            };
+            BindGroupPool pool = device.createBindGroupPool(poolOptions);
+
+            const BufferOptions bufferOptions = {
+                .size = 1024,
+                .usage = BufferUsageFlagBits::UniformBufferBit,
+                .memoryUsage = MemoryUsage::CpuToGpu
+            };
+            Buffer buffer = device.createBuffer(bufferOptions);
+
+            const BindGroupLayoutOptions layoutOptions = {
+                .bindings = { { .binding = 0,
+                                .count = 1,
+                                .resourceType = ResourceBindingType::UniformBuffer,
+                                .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit) } }
+            };
+            BindGroupLayout layout = device.createBindGroupLayout(layoutOptions);
+
+            // Create multiple BindGroups with explicitFree
+            std::vector<BindGroup> bindGroups;
+            for (int i = 0; i < 3; ++i) {
+                const BindGroupOptions bindGroupOptions = {
+                    .layout = layout.handle(),
+                    .resources = {
+                            {
+                                    .binding = 0,
+                                    .resource = UniformBufferBinding{ .buffer = buffer.handle() },
+                            },
+                    },
+                    .bindGroupPool = pool.handle(),
+                    .implicitFree = false,
+                };
+                bindGroups.push_back(device.createBindGroup(bindGroupOptions));
+            }
+
+            CHECK(pool.allocatedBindGroupCount() == 3);
+
+            // WHEN - Pool destroyed
+            pool = {};
+
+            // THEN -> All BindGroups should have been freed
+            CHECK(pool.allocatedBindGroupCount() == 0);
+            CHECK(!bindGroups[0].isValid());
+            CHECK(!bindGroups[1].isValid());
+            CHECK(!bindGroups[2].isValid());
+        }
+
+        SUBCASE("Free explicitly free individual BindGroups on pool reset")
+        {
+            // GIVEN
+            const BindGroupPoolOptions poolOptions = {
+                .label = "ExplicitFree Individual Test Pool",
+                .uniformBufferCount = 10,
+                .maxBindGroupCount = 5,
+                .flags = BindGroupPoolFlagBits::CreateFreeBindGroups
+            };
+            BindGroupPool pool = device.createBindGroupPool(poolOptions);
+
+            const BufferOptions bufferOptions = {
+                .size = 1024,
+                .usage = BufferUsageFlagBits::UniformBufferBit,
+                .memoryUsage = MemoryUsage::CpuToGpu
+            };
+            Buffer buffer = device.createBuffer(bufferOptions);
+
+            const BindGroupLayoutOptions layoutOptions = {
+                .bindings = { { .binding = 0,
+                                .count = 1,
+                                .resourceType = ResourceBindingType::UniformBuffer,
+                                .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit) } }
+            };
+            BindGroupLayout layout = device.createBindGroupLayout(layoutOptions);
+
+            // Create multiple BindGroups with explicitFree
+            std::vector<BindGroup> bindGroups;
+            for (int i = 0; i < 3; ++i) {
+                const BindGroupOptions bindGroupOptions = {
+                    .layout = layout.handle(),
+                    .resources = {
+                            {
+                                    .binding = 0,
+                                    .resource = UniformBufferBinding{ .buffer = buffer.handle() },
+                            },
+                    },
+                    .bindGroupPool = pool.handle(),
+                    .implicitFree = false,
+                };
+                bindGroups.push_back(device.createBindGroup(bindGroupOptions));
+            }
+
+            CHECK(pool.allocatedBindGroupCount() == 3);
+
+            // WHEN - Pool destroyed
+            pool.reset();
+
+            // THEN -> All BindGroups should have been freed
+            CHECK(pool.allocatedBindGroupCount() == 0);
+            CHECK(!bindGroups[1].isValid());
+            CHECK(!bindGroups[0].isValid());
+            CHECK(!bindGroups[2].isValid());
+        }
     }
 
     TEST_CASE("Destruction")

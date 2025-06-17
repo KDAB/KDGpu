@@ -2254,7 +2254,7 @@ Handle<BindGroupPool_t> VulkanResourceManager::createBindGroupPool(const Handle<
 
     setObjectName(vulkanDevice, VK_OBJECT_TYPE_DESCRIPTOR_POOL, reinterpret_cast<uint64_t>(pool), options.label);
 
-    const auto vulkanBindGroupPoolHandle = m_bindGroupPools.emplace(VulkanBindGroupPool(pool, this, deviceHandle, options.maxBindGroupCount));
+    const auto vulkanBindGroupPoolHandle = m_bindGroupPools.emplace(VulkanBindGroupPool(pool, this, deviceHandle, options.maxBindGroupCount, options.flags));
     return vulkanBindGroupPoolHandle;
 }
 
@@ -2264,6 +2264,16 @@ void VulkanResourceManager::deleteBindGroupPool(const Handle<BindGroupPool_t> &h
     VulkanDevice *vulkanDevice = m_devices.get(bindGroupPool->deviceHandle);
 
     vkDestroyDescriptorPool(vulkanDevice->device, bindGroupPool->descriptorPool, nullptr);
+
+    // Reset descriptorSet handle of all the bind groups that were created from this pool in case they have no implicit free
+    const auto referencedBindGroups = bindGroupPool->bindGroups();
+    for (const Handle<BindGroup_t> &bindGroupHandle : referencedBindGroups) {
+        VulkanBindGroup *vulkanBindGroup = m_bindGroups.get(bindGroupHandle);
+        if (vulkanBindGroup != nullptr) {
+            // If the bind group is still valid, we can delete it
+            vulkanBindGroup->descriptorSet = VK_NULL_HANDLE;
+        }
+    }
 
     m_bindGroupPools.remove(handle);
 }
@@ -2994,7 +3004,16 @@ Handle<BindGroup_t> VulkanResourceManager::createBindGroup(const Handle<Device_t
 
     setObjectName(vulkanDevice, VK_OBJECT_TYPE_DESCRIPTOR_SET, reinterpret_cast<uint64_t>(descriptorSet), options.label);
 
-    const auto vulkanBindGroupHandle = m_bindGroups.emplace(VulkanBindGroup(descriptorSet, poolHandle, this, deviceHandle));
+    // Warn users that internalPools can't be reset/explicit destroyed since they have no user visible handles
+    if (!options.implicitFree && useInternalPool) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "BindGroups with explicit free option must not use internal pools since these can't be reset. Please provide a valid BindGroupPool handle or set implicitFree to true.");
+    }
+
+    if (options.implicitFree && !vulkanBindGroupPool->flags.testFlag(BindGroupPoolFlagBits::CreateFreeBindGroups)) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "BindGroupPool does not support individual BindGroup free. Please change BindGroupPool creation flags or set implicitFree to false.");
+    }
+
+    const auto vulkanBindGroupHandle = m_bindGroups.emplace(VulkanBindGroup(descriptorSet, poolHandle, this, deviceHandle, options.implicitFree));
     // Record new bindgroup handle against pool
     vulkanBindGroupPool->addBindGroup(vulkanBindGroupHandle);
 
@@ -3013,13 +3032,15 @@ void VulkanResourceManager::deleteBindGroup(const Handle<BindGroup_t> &handle)
 
     VulkanBindGroupPool *vulkanBindGroupPool = getBindGroupPool(vulkanBindGroup->bindGroupPoolHandle);
 
-    // Destroy underlying Vulkan resource if still valid
-    if (vulkanBindGroup->descriptorSet != VK_NULL_HANDLE) {
+    // Destroy underlying Vulkan resource if still valid and bind group doesn't require explicit free
+    if (vulkanBindGroup->descriptorSet != VK_NULL_HANDLE && vulkanBindGroup->implicitFree) {
         vkFreeDescriptorSets(vulkanDevice->device, vulkanBindGroupPool->descriptorPool, 1, &vulkanBindGroup->descriptorSet);
-    }
 
-    // Remove the bind group handle from the bindGroupPool
-    vulkanBindGroupPool->removeBindGroup(handle);
+        // Remove the bind group handle from the bindGroupPool if using implicit free
+        // If using explicit free, removing the bindGroup which hasn't been freed
+        // would make BindGroupPool::allocatedBindGroupCount() return an incorrect value.
+        vulkanBindGroupPool->removeBindGroup(handle);
+    }
 
     m_bindGroups.remove(handle);
 }

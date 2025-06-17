@@ -30,7 +30,8 @@ struct KDGPU_EXPORT VulkanBindGroup {
     explicit VulkanBindGroup(VkDescriptorSet _descriptorSet,
                              const Handle<BindGroupPool_t> &_bindGroupPoolHandle,
                              VulkanResourceManager *_vulkanResourceManager,
-                             const Handle<Device_t> &_deviceHandle);
+                             const Handle<Device_t> &_deviceHandle,
+                             bool _implicitFree);
 
     void update(const BindGroupEntry &entry);
     bool hasValidHandle() const { return descriptorSet != VK_NULL_HANDLE; };
@@ -39,6 +40,7 @@ struct KDGPU_EXPORT VulkanBindGroup {
     Handle<BindGroupPool_t> bindGroupPoolHandle;
     VulkanResourceManager *vulkanResourceManager;
     Handle<Device_t> deviceHandle;
+    bool implicitFree{ false };
 };
 
 } // namespace KDGpu

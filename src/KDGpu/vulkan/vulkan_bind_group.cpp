@@ -19,11 +19,13 @@ namespace KDGpu {
 VulkanBindGroup::VulkanBindGroup(VkDescriptorSet _descriptorSet,
                                  const Handle<BindGroupPool_t> &_bindGroupPoolHandle,
                                  VulkanResourceManager *_vulkanResourceManager,
-                                 const Handle<Device_t> &_deviceHandle)
+                                 const Handle<Device_t> &_deviceHandle,
+                                 bool _implicitFree)
     : descriptorSet(_descriptorSet)
     , bindGroupPoolHandle(_bindGroupPoolHandle)
     , vulkanResourceManager(_vulkanResourceManager)
     , deviceHandle(_deviceHandle)
+    , implicitFree(_implicitFree)
 {
 }
 

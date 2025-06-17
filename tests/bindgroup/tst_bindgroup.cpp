@@ -916,5 +916,97 @@ TEST_SUITE("BindGroup")
             // THEN -> BindGroup is now invalid because underlying api resource has been reset
             CHECK(!bindGroup.isValid());
         }
+
+        SUBCASE("Create BindGroups with implicitFree = false")
+        {
+            // GIVEN
+            const BindGroupPoolOptions poolOptions = {
+                .label = "ExplicitFree Test Pool",
+                .uniformBufferCount = 10,
+                .maxBindGroupCount = 5,
+                .flags = BindGroupPoolFlagBits::CreateFreeBindGroups
+            };
+            BindGroupPool pool = device.createBindGroupPool(poolOptions);
+
+            const BindGroupLayoutOptions layoutOptions = {
+                .bindings = { { .binding = 0,
+                                .count = 1,
+                                .resourceType = ResourceBindingType::UniformBuffer,
+                                .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit) } }
+            };
+            BindGroupLayout layout = device.createBindGroupLayout(layoutOptions);
+
+            const BindGroupOptions bindGroupOptions = {
+                .layout = layout.handle(),
+                .bindGroupPool = pool.handle(),
+                .implicitFree = false,
+            };
+
+            // WHEN
+            BindGroup bindGroup = device.createBindGroup(bindGroupOptions);
+
+            // THEN
+            CHECK(bindGroup.isValid());
+            CHECK(pool.allocatedBindGroupCount() == 1);
+
+            // WHEN
+            bindGroup = {};
+
+            // THEN - BindGroup has not been freed against the BindGroupPool
+            CHECK(pool.allocatedBindGroupCount() == 1);
+        }
+
+        SUBCASE("Warn when creating BindGroup with explicitFree = false on internal pool")
+        {
+            // GIVEN
+            const BindGroupLayoutOptions layoutOptions = {
+                .bindings = { { .binding = 0,
+                                .count = 1,
+                                .resourceType = ResourceBindingType::UniformBuffer,
+                                .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit) } }
+            };
+            BindGroupLayout layout = device.createBindGroupLayout(layoutOptions);
+
+            const BindGroupOptions bindGroupOptions = {
+                .layout = layout.handle(),
+                .implicitFree = false,
+            };
+
+            // WHEN
+            BindGroup bindGroup = device.createBindGroup(bindGroupOptions);
+
+            // THEN -> Should have Error in the console
+        }
+
+        SUBCASE("Warn when creating BindGroup with implicitFree = true on incompatible pool")
+        {
+            // GIVEN
+            const BindGroupPoolOptions poolOptions = {
+                .label = "No Explicit Free Pool",
+                .uniformBufferCount = 10,
+                .maxBindGroupCount = 5,
+                .flags = BindGroupPoolFlagBits::None
+            };
+            BindGroupPool pool = device.createBindGroupPool(poolOptions);
+
+            const BindGroupLayoutOptions layoutOptions = {
+                .bindings = { { .binding = 0,
+                                .count = 1,
+                                .resourceType = ResourceBindingType::UniformBuffer,
+                                .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit) } }
+            };
+            BindGroupLayout layout = device.createBindGroupLayout(layoutOptions);
+
+            const BindGroupOptions bindGroupOptions = {
+                .layout = layout.handle(),
+                .bindGroupPool = pool.handle(),
+                .implicitFree = true,
+            };
+
+            // WHEN
+            BindGroup bindGroup = device.createBindGroup(bindGroupOptions);
+
+            // THEN -> Should have Error in the console + Validation Error
+        }
     }
 }
