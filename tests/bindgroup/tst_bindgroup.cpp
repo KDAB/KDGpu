@@ -864,5 +864,57 @@ TEST_SUITE("BindGroup")
             // THEN -> failure due to pool being exhausted at this point
             CHECK(!bindGroup3.isValid());
         }
+
+        SUBCASE("BindGroup become invalid after pool reset")
+        {
+            // GIVEN - Create a BindGroupPool with limited capacity
+            const BindGroupPoolOptions poolOptions = {
+                .label = "Limited Pool",
+                .uniformBufferCount = 2, // Very limited
+                .maxBindGroupCount = 2, // Only 2 bind groups max
+                .flags = BindGroupPoolFlagBits::CreateFreeBindGroups
+            };
+
+            BindGroupPool pool = device.createBindGroupPool(poolOptions);
+            CHECK(pool.isValid());
+
+            // Create resources
+            Buffer ubo = device.createBuffer(BufferOptions{
+                    .size = 16 * sizeof(float),
+                    .usage = BufferUsageFlagBits::UniformBufferBit,
+                    .memoryUsage = MemoryUsage::CpuToGpu,
+            });
+
+            const BindGroupLayoutOptions bindGroupLayoutOptions = {
+                .bindings = {
+                        { .binding = 0,
+                          .count = 1,
+                          .resourceType = ResourceBindingType::UniformBuffer,
+                          .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit) },
+                },
+            };
+
+            const BindGroupLayout bindGroupLayout = device.createBindGroupLayout(bindGroupLayoutOptions);
+
+            // WHEN - Create bind groups up to the pool limit
+            const BindGroupOptions bindGroupOptions = {
+                .layout = bindGroupLayout,
+                .resources = {
+                        { .binding = 0, .resource = UniformBufferBinding{ .buffer = ubo } },
+                },
+                .bindGroupPool = pool
+            };
+
+            BindGroup bindGroup = device.createBindGroup(bindGroupOptions);
+
+            // THEN
+            CHECK(bindGroup.isValid());
+
+            // WHEN
+            pool.reset();
+
+            // THEN -> BindGroup is now invalid because underlying api resource has been reset
+            CHECK(!bindGroup.isValid());
+        }
     }
 }

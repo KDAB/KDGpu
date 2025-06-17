@@ -33,6 +33,7 @@ struct KDGPU_EXPORT VulkanBindGroup {
                              const Handle<Device_t> &_deviceHandle);
 
     void update(const BindGroupEntry &entry);
+    bool hasValidHandle() const { return descriptorSet != VK_NULL_HANDLE; };
 
     VkDescriptorSet descriptorSet{ VK_NULL_HANDLE };
     Handle<BindGroupPool_t> bindGroupPoolHandle;

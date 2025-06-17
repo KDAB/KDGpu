@@ -44,6 +44,18 @@ BindGroup &BindGroup::operator=(BindGroup &&other) noexcept
     return *this;
 }
 
+bool BindGroup::isValid() const
+{
+    if (!m_bindGroup.isValid())
+        return false;
+
+    auto *apiBindGroup = m_api->resourceManager()->getBindGroup(m_bindGroup);
+    if (apiBindGroup == nullptr || !apiBindGroup->hasValidHandle())
+        return false;
+
+    return true;
+}
+
 BindGroup::BindGroup(GraphicsApi *api, const Handle<Device_t> &device, const BindGroupOptions &options)
     : m_api(api)
     , m_device(device)
@@ -53,7 +65,7 @@ BindGroup::BindGroup(GraphicsApi *api, const Handle<Device_t> &device, const Bin
 
 void BindGroup::update(const BindGroupEntry &entry)
 {
-    auto apiBindGroup = m_api->resourceManager()->getBindGroup(m_bindGroup);
+    auto *apiBindGroup = m_api->resourceManager()->getBindGroup(m_bindGroup);
     apiBindGroup->update(entry);
 }
 

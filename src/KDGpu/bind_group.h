@@ -42,7 +42,7 @@ public:
     BindGroup &operator=(const BindGroup &) = delete;
 
     const Handle<BindGroup_t> &handle() const noexcept { return m_bindGroup; }
-    bool isValid() const noexcept { return m_bindGroup.isValid(); }
+    bool isValid() const;
 
     operator Handle<BindGroup_t>() const noexcept { return m_bindGroup; }
 
