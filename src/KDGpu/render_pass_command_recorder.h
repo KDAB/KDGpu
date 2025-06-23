@@ -29,6 +29,7 @@ struct RenderPassCommandRecorder_t;
 struct Rect2D;
 struct Viewport;
 struct PushConstantRange;
+struct BindGroupEntry;
 
 struct DrawCommand {
     uint32_t vertexCount{ 0 };
@@ -126,6 +127,9 @@ public:
     void drawMeshTasksIndirect(const std::vector<DrawMeshIndirectCommand> &drawCommands);
 
     void pushConstant(const PushConstantRange &constantRange, const void *data, const Handle<PipelineLayout_t> &pipelineLayout = {});
+    void pushBindGroup(uint32_t group,
+                       const std::vector<BindGroupEntry> &bindGroupEntries,
+                       const Handle<PipelineLayout_t> &pipelineLayout = Handle<PipelineLayout_t>());
 
     void nextSubpass();
 

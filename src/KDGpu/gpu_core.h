@@ -1300,6 +1300,13 @@ enum class BindGroupPoolFlagBits {
 };
 using BindGroupPoolFlags = KDGpu::Flags<BindGroupPoolFlagBits>;
 
+enum class BindGroupLayoutFlagBits {
+    None = 0,
+    PushBindGroup = 0x00000001, // BindGroup to be used with RenderPassCommandRecorder::pushBindGroup and not allocated from a BindGroupPool
+    UpdateAfterBind = 0x00000002, // BindGroups will have to be allocated with a BindGroupPool that was created with BindGroupPoolFlagBits::UpdateAfterBind
+};
+using BindGroupLayoutFlags = KDGpu::Flags<BindGroupLayoutFlagBits>;
+
 /*! @} */
 
 } // namespace KDGpu
@@ -1324,3 +1331,4 @@ OPERATORS_FOR_FLAGS(KDGpu::DependencyFlags);
 OPERATORS_FOR_FLAGS(KDGpu::HostImageCopyFlags);
 OPERATORS_FOR_FLAGS(KDGpu::TextureCreateFlags);
 OPERATORS_FOR_FLAGS(KDGpu::BindGroupPoolFlags);
+OPERATORS_FOR_FLAGS(KDGpu::BindGroupLayoutFlags);

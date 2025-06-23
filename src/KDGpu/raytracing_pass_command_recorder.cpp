@@ -75,6 +75,14 @@ void RayTracingPassCommandRecorder::pushConstant(const PushConstantRange &consta
     apiRayTracingPassCommandRecorder->pushConstant(constantRange, data);
 }
 
+void RayTracingPassCommandRecorder::pushBindGroup(uint32_t group,
+                                                  const std::vector<BindGroupEntry> &bindGroupEntries,
+                                                  const Handle<PipelineLayout_t> &pipelineLayout)
+{
+    auto apiRayTracingPassCommandRecorder = m_api->resourceManager()->getRayTracingPassCommandRecorder(m_rayTracingCommandRecorder);
+    apiRayTracingPassCommandRecorder->pushBindGroup(group, bindGroupEntries, pipelineLayout);
+}
+
 void RayTracingPassCommandRecorder::end()
 {
     auto apiRayTracingPassCommandRecorder = m_api->resourceManager()->getRayTracingPassCommandRecorder(m_rayTracingCommandRecorder);

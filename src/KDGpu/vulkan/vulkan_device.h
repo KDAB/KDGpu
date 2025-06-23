@@ -39,6 +39,14 @@ class VulkanResourceManager;
 
 struct Adapter_t;
 struct BindGroupPool_t;
+struct BindGroupEntry;
+
+struct WriteBindGroupData {
+    VkDescriptorBufferInfo bufferInfo{};
+    VkDescriptorImageInfo imageInfo{};
+    VkWriteDescriptorSetAccelerationStructureKHR accelerationStructureKhr{};
+    VkWriteDescriptorSet descriptorWrite{};
+};
 
 /**
  * @brief VulkanDevice
@@ -69,6 +77,7 @@ struct KDGPU_EXPORT VulkanDevice {
 
     VmaAllocator getOrCreateExternalMemoryAllocator(ExternalMemoryHandleTypeFlags externalMemoryHandleType);
     VmaAllocator createMemoryAllocator(ExternalMemoryHandleTypeFlags externalMemoryHandleType = ExternalMemoryHandleTypeFlagBits::None) const;
+    void fillWriteBindGroupDataForBindGroupEntry(WriteBindGroupData &writeBindGroupData, const BindGroupEntry &entry, const VkDescriptorSet &descriptorSet = VK_NULL_HANDLE) const;
 
     VkDevice device{ VK_NULL_HANDLE };
     uint32_t apiVersion{};
@@ -147,6 +156,10 @@ struct KDGPU_EXPORT VulkanDevice {
 #if defined(VK_KHR_sampler_ycbcr_conversion)
     PFN_vkCreateSamplerYcbcrConversionKHR vkCreateSamplerYcbcrConversionKHR{ nullptr };
     PFN_vkDestroySamplerYcbcrConversionKHR vkDestroySamplerYcbcrConversionKHR{ nullptr };
+#endif
+
+#if defined(VK_KHR_push_descriptor)
+    PFN_vkCmdPushDescriptorSetKHR vkCmdPushDescriptorSetKHR{ nullptr };
 #endif
 
     bool isOwned{ true };

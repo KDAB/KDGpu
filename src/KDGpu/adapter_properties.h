@@ -238,6 +238,10 @@ struct HostImageCopyProperties {
     std::vector<TextureLayout> dstCopyLayouts;
 };
 
+struct PushBindGroupProperties {
+    uint32_t maxPushBindGroups;
+};
+
 /**
     @headerfile adapter_properties.h <KDGpu/adapter_properties.h>
  */
@@ -257,6 +261,7 @@ struct AdapterProperties {
     RayTracingProperties rayTracingProperties;
     MeshShaderProperties meshShaderProperties;
     HostImageCopyProperties hostImageCopyProperties;
+    PushBindGroupProperties pushBindGroupProperties;
 };
 
 /**

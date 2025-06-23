@@ -256,6 +256,49 @@ void VulkanRenderPassCommandRecorder::pushConstant(const PushConstantRange &cons
                        data);
 }
 
+void VulkanRenderPassCommandRecorder::pushBindGroup(uint32_t group, const std::vector<BindGroupEntry> &bindGroupEntries,
+                                                    const Handle<PipelineLayout_t> &pipelineLayout)
+{
+#if defined(VK_KHR_push_descriptor)
+    VulkanDevice *device = vulkanResourceManager->getDevice(deviceHandle);
+    if (device->vkCmdPushDescriptorSetKHR) {
+
+        VkPipelineLayout vkPipelineLayout{ VK_NULL_HANDLE };
+
+        if (pipelineLayout.isValid()) {
+            VulkanPipelineLayout *vulkanPipelineLayout = vulkanResourceManager->getPipelineLayout(pipelineLayout);
+            if (vulkanPipelineLayout)
+                vkPipelineLayout = vulkanPipelineLayout->pipelineLayout;
+        } else if (pipeline.isValid()) {
+            VulkanGraphicsPipeline *vulkanPipeline = vulkanResourceManager->getGraphicsPipeline(pipeline);
+            VulkanPipelineLayout *vulkanPipelineLayout = vulkanResourceManager->getPipelineLayout(vulkanPipeline->pipelineLayoutHandle);
+            if (vulkanPipelineLayout)
+                vkPipelineLayout = vulkanPipelineLayout->pipelineLayout;
+        }
+
+        std::vector<WriteBindGroupData> writeBindGroupData;
+        std::vector<VkWriteDescriptorSet> writeDescriptorSets;
+        const size_t bindGroupEntryCount = bindGroupEntries.size();
+        writeBindGroupData.resize(bindGroupEntryCount);
+        writeDescriptorSets.resize(bindGroupEntryCount);
+        for (size_t i = 0; i < bindGroupEntryCount; ++i) {
+            WriteBindGroupData &writeData = writeBindGroupData[i];
+            device->fillWriteBindGroupDataForBindGroupEntry(writeData, bindGroupEntries[i]);
+            writeDescriptorSets[i] = writeData.descriptorWrite;
+        }
+
+        device->vkCmdPushDescriptorSetKHR(commandBuffer,
+                                          VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                          vkPipelineLayout,
+                                          group,
+                                          writeDescriptorSets.size(),
+                                          writeDescriptorSets.data());
+    }
+#else
+    assert(false);
+#endif
+}
+
 void VulkanRenderPassCommandRecorder::nextSubpass()
 {
     // For now we assume renderpass/subpass are always recorded inline (primary command buffer)

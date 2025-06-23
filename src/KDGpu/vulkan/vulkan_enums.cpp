@@ -477,4 +477,9 @@ VkDescriptorPoolCreateFlags bindGroupPoolFlagsToVkDescriptorPoolCreateFlags(Bind
     return static_cast<VkDescriptorPoolCreateFlags>(flags.toInt());
 }
 
+VkDescriptorSetLayoutCreateFlags bindGroupLayoutFlagsToVkDescriptorSetLayoutCreateFlags(BindGroupLayoutFlags flags)
+{
+    return static_cast<VkDescriptorSetLayoutCreateFlags>(flags.toInt());
+}
+
 } // namespace KDGpu

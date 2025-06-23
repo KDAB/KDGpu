@@ -3101,6 +3101,7 @@ Handle<BindGroupLayout_t> VulkanResourceManager::createBindGroupLayout(const Han
     createInfo.bindingCount = static_cast<uint32_t>(vkBindingLayouts.size());
     createInfo.pBindings = vkBindingLayouts.data();
     createInfo.pNext = &setLayoutBindingFlags;
+    createInfo.flags = bindGroupLayoutFlagsToVkDescriptorSetLayoutCreateFlags(options.flags);
 
     VkDescriptorSetLayout vkDescriptorSetLayout{ VK_NULL_HANDLE };
     if (auto result = vkCreateDescriptorSetLayout(vulkanDevice->device, &createInfo, nullptr, &vkDescriptorSetLayout); result != VK_SUCCESS) {

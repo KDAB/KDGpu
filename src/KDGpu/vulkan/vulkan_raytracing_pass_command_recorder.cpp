@@ -12,6 +12,10 @@
 #include <KDGpu/vulkan/vulkan_raytracing_pipeline.h>
 #include <KDGpu/vulkan/vulkan_resource_manager.h>
 #include <KDGpu/vulkan/vulkan_enums.h>
+#include <KDGpu/vulkan/vulkan_device.h>
+#include <KDGpu/bind_group_options.h>
+
+#include <vector>
 
 namespace KDGpu {
 
@@ -123,6 +127,50 @@ void VulkanRayTracingPassCommandRecorder::pushConstant(const PushConstantRange &
                        constantRange.offset,
                        constantRange.size,
                        data);
+}
+
+void VulkanRayTracingPassCommandRecorder::pushBindGroup(uint32_t group,
+                                                        const std::vector<BindGroupEntry> &bindGroupEntries,
+                                                        const Handle<PipelineLayout_t> &pipelineLayout)
+{
+#if defined(VK_KHR_push_descriptor)
+    VulkanDevice *device = vulkanResourceManager->getDevice(deviceHandle);
+    if (device->vkCmdPushDescriptorSetKHR) {
+
+        VkPipelineLayout vkPipelineLayout{ VK_NULL_HANDLE };
+
+        if (pipelineLayout.isValid()) {
+            VulkanPipelineLayout *vulkanPipelineLayout = vulkanResourceManager->getPipelineLayout(pipelineLayout);
+            if (vulkanPipelineLayout)
+                vkPipelineLayout = vulkanPipelineLayout->pipelineLayout;
+        } else if (pipeline.isValid()) {
+            VulkanRayTracingPipeline *vulkanPipeline = vulkanResourceManager->getRayTracingPipeline(pipeline);
+            VulkanPipelineLayout *vulkanPipelineLayout = vulkanResourceManager->getPipelineLayout(vulkanPipeline->pipelineLayoutHandle);
+            if (vulkanPipelineLayout)
+                vkPipelineLayout = vulkanPipelineLayout->pipelineLayout;
+        }
+
+        std::vector<WriteBindGroupData> writeBindGroupData;
+        std::vector<VkWriteDescriptorSet> writeDescriptorSets;
+        const size_t bindGroupEntryCount = bindGroupEntries.size();
+        writeBindGroupData.resize(bindGroupEntryCount);
+        writeDescriptorSets.resize(bindGroupEntryCount);
+        for (size_t i = 0; i < bindGroupEntryCount; ++i) {
+            WriteBindGroupData &writeData = writeBindGroupData[i];
+            device->fillWriteBindGroupDataForBindGroupEntry(writeData, bindGroupEntries[i]);
+            writeDescriptorSets[i] = writeData.descriptorWrite;
+        }
+
+        device->vkCmdPushDescriptorSetKHR(commandBuffer,
+                                          VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR,
+                                          vkPipelineLayout,
+                                          group,
+                                          writeDescriptorSets.size(),
+                                          writeDescriptorSets.data());
+    }
+#else
+    assert(false);
+#endif
 }
 
 void VulkanRayTracingPassCommandRecorder::end()

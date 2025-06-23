@@ -116,6 +116,12 @@ AdapterProperties VulkanAdapter::queryAdapterProperties()
     addToChain(&hostImageCopyProperties);
 #endif
 
+#if defined(VK_KHR_push_descriptor)
+    VkPhysicalDevicePushDescriptorPropertiesKHR pushDescriptorProperties{};
+    pushDescriptorProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PUSH_DESCRIPTOR_PROPERTIES_KHR;
+    addToChain(&pushDescriptorProperties);
+#endif
+
     vkGetPhysicalDeviceProperties2(physicalDevice, &deviceProperties2);
 
     const VkPhysicalDeviceProperties &deviceProperties = deviceProperties2.properties;
@@ -383,7 +389,12 @@ AdapterProperties VulkanAdapter::queryAdapterProperties()
                 .srcCopyLayouts = toTextureLayouts(hostImageCopyProperties.copySrcLayoutCount, hostImageCopyProperties.pCopySrcLayouts),
                 .dstCopyLayouts = toTextureLayouts(hostImageCopyProperties.copyDstLayoutCount, hostImageCopyProperties.pCopyDstLayouts),
 #endif
+        },
+#if defined(VK_KHR_push_descriptor)
+        .pushBindGroupProperties = {
+                .maxPushBindGroups = pushDescriptorProperties.maxPushDescriptors,
         }
+#endif
     };
     return properties;
 }

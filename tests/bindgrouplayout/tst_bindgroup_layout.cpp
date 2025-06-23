@@ -221,6 +221,31 @@ TEST_SUITE("BindGroupLayout")
         }
     }
 
+#if defined(VK_KHR_push_descriptor)
+    TEST_CASE("Push BindGroup")
+    {
+        // GIVEN
+        const BindGroupLayoutOptions bindGroupLayoutOptions = {
+            .bindings = {
+                    { .binding = 0,
+                      .count = 1,
+                      .resourceType = ResourceBindingType::UniformBuffer,
+                      .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit) },
+            },
+            .flags = BindGroupLayoutFlagBits::PushBindGroup,
+        };
+
+        // THEN
+        CHECK(discreteGPUAdapter->properties().pushBindGroupProperties.maxPushBindGroups > 0);
+
+        // WHEN
+        BindGroupLayout bindGroupLayout = device.createBindGroupLayout(bindGroupLayoutOptions);
+
+        // THEN
+        CHECK(bindGroupLayout.isValid());
+    }
+#endif
+
     TEST_CASE("Comparison")
     {
         SUBCASE("Compare default constructed BindGroupLayouts")

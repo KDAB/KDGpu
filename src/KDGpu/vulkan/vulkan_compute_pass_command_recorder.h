@@ -43,6 +43,9 @@ struct KDGPU_EXPORT VulkanComputePassCommandRecorder {
     void dispatchComputeIndirect(const ComputeCommandIndirect &command);
     void dispatchComputeIndirect(const std::vector<ComputeCommandIndirect> &commands);
     void pushConstant(const PushConstantRange &constantRange, const void *data);
+    void pushBindGroup(uint32_t group,
+                       const std::vector<BindGroupEntry> &bindGroupEntries,
+                       const Handle<PipelineLayout_t> &pipelineLayout);
     void end();
 
     VkCommandBuffer commandBuffer{ VK_NULL_HANDLE };

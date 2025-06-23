@@ -22,11 +22,17 @@
 #include <KDGpu/texture_view.h>
 #include <KDGpu/device_options.h>
 #include <KDGpu/vulkan/vulkan_graphics_api.h>
+#include <KDGpu/buffer.h>
+#include <KDGpu/buffer_options.h>
+#include <KDGpu/bind_group.h>
+#include <KDGpu/bind_group_layout.h>
+#include <KDGpu/bind_group_layout_options.h>
+#include <KDGpu/bind_group_options.h>
+#include <KDGpu/sampler.h>
+#include <KDGpu/pipeline_layout_options.h>
 
 #include <KDUtils/file.h>
 #include <KDUtils/dir.h>
-
-#include <type_traits>
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest.h>
@@ -383,6 +389,156 @@ TEST_SUITE("RenderPassCommandRecorder")
             CHECK(api->resourceManager()->getRenderPassCommandRecorder(recorderHandle) == nullptr);
         }
     }
+
+#if defined(VK_KHR_push_descriptor)
+    TEST_CASE("RenderPassCommandRecorder - PushBindGroup")
+    {
+        Device device = discreteGPUAdapter->createDevice();
+        REQUIRE(device.adapter()->properties().pushBindGroupProperties.maxPushBindGroups > 0);
+
+        // GIVEN
+        const Buffer uniformBuffer = device.createBuffer(BufferOptions{
+                .size = 64, // 64 bytes for a 4x4 matrix
+                .usage = BufferUsageFlagBits::UniformBufferBit,
+                .memoryUsage = MemoryUsage::CpuToGpu,
+        });
+
+        const Texture texture = device.createTexture(TextureOptions{
+                .type = TextureType::TextureType2D,
+                .format = Format::R8G8B8A8_UNORM,
+                .extent = { 64, 64, 1 },
+                .mipLevels = 1,
+                .usage = TextureUsageFlagBits::SampledBit,
+                .memoryUsage = MemoryUsage::GpuOnly,
+        });
+        const TextureView textureView = texture.createView();
+        const Sampler sampler = device.createSampler();
+
+        // Create bind group layout for the push descriptor test
+        const BindGroupLayoutOptions bindGroupLayoutOptions = {
+            .bindings = {
+                    { .binding = 0, .resourceType = ResourceBindingType::UniformBuffer, .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit) },
+                    { .binding = 1, .resourceType = ResourceBindingType::CombinedImageSampler, .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit) },
+            },
+            .flags = BindGroupLayoutFlagBits::PushBindGroup, // Enable push descriptor
+        };
+        const BindGroupLayout bindGroupLayout = device.createBindGroupLayout(bindGroupLayoutOptions);
+
+        // Create pipeline layout with the bind group layout
+        const PipelineLayoutOptions pipelineLayoutOptions = {
+            .bindGroupLayouts = { bindGroupLayout },
+        };
+        const PipelineLayout pushBindGroupPipelineLayout = device.createPipelineLayout(pipelineLayoutOptions);
+
+        // Create a pipeline that uses the bind group layout
+        const auto vertexShaderPath = assetPath() + "/shaders/tests/render_pass_command_recorder/triangle-pushbindgroup.vert.spv";
+        auto vertexShader = device.createShaderModule(readShaderFile(vertexShaderPath));
+
+        const auto fragmentShaderPath = assetPath() + "/shaders/tests/render_pass_command_recorder/triangle-pushbindgroup.frag.spv";
+        auto fragmentShader = device.createShaderModule(readShaderFile(fragmentShaderPath));
+
+        const GraphicsPipeline pushBindGroupPipeline = device.createGraphicsPipeline(GraphicsPipelineOptions{
+                .shaderStages = {
+                        { .shaderModule = vertexShader.handle(), .stage = ShaderStageFlagBits::VertexBit },
+                        { .shaderModule = fragmentShader.handle(), .stage = ShaderStageFlagBits::FragmentBit },
+                },
+                .layout = pushBindGroupPipelineLayout.handle(),
+                .vertex = {
+                        .buffers = {
+                                { .binding = 0, .stride = 3 * sizeof(float) },
+                        },
+                        .attributes = {
+                                { .location = 0, .binding = 0, .format = Format::R32G32B32A32_SFLOAT }, // Position
+                        },
+                },
+                .renderTargets = {
+                        { .format = Format::R8G8B8A8_UNORM },
+                },
+                .depthStencil = { .format = Format::D24_UNORM_S8_UINT, .depthWritesEnabled = true, .depthCompareOperation = CompareOperation::Less },
+        });
+
+        // THEN
+        REQUIRE(bindGroupLayout.isValid());
+        REQUIRE(pushBindGroupPipelineLayout.isValid());
+        REQUIRE(pushBindGroupPipeline.isValid());
+        REQUIRE(pushBindGroupPipeline.isValid());
+        REQUIRE(vertexShader.isValid());
+        REQUIRE(fragmentShader.isValid());
+        REQUIRE(device.isValid());
+
+        // WHEN
+        const Texture colorTexture = device.createTexture(TextureOptions{
+                .type = TextureType::TextureType2D,
+                .format = Format::R8G8B8A8_UNORM,
+                .extent = { 256, 256, 1 },
+                .mipLevels = 1,
+                .samples = SampleCountFlagBits::Samples1Bit,
+                .usage = TextureUsageFlagBits::ColorAttachmentBit,
+                .memoryUsage = MemoryUsage::GpuOnly,
+        });
+        const Texture depthTexture = device.createTexture(TextureOptions{
+                .type = TextureType::TextureType2D,
+#if defined(KD_PLATFORM_MACOS)
+                .format = Format::D32_SFLOAT_S8_UINT,
+#else
+                .format = Format::D24_UNORM_S8_UINT,
+#endif
+                .extent = { 256, 256, 1 },
+                .mipLevels = 1,
+                .samples = SampleCountFlagBits::Samples1Bit,
+                .usage = TextureUsageFlagBits::DepthStencilAttachmentBit,
+                .memoryUsage = MemoryUsage::GpuOnly,
+        });
+
+        const TextureView colorTextureView = colorTexture.createView();
+        const TextureView depthTextureView = depthTexture.createView();
+
+        const RenderPassCommandRecorderOptions renderPassOptions{
+            .colorAttachments = {
+                    { .view = colorTextureView,
+                      .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
+                      .finalLayout = TextureLayout::PresentSrc } },
+            .depthStencilAttachment = {
+                    .view = depthTextureView,
+            }
+        };
+
+        CommandRecorder commandRecorder = device.createCommandRecorder();
+        RenderPassCommandRecorder renderPassRecorder = commandRecorder.beginRenderPass(renderPassOptions);
+
+        // Test pushBindGroup functionality
+        renderPassRecorder.setPipeline(pushBindGroupPipeline);
+
+        // Push the bind group
+        renderPassRecorder.pushBindGroup(0,
+                                         std::vector<BindGroupEntry>{
+                                                 BindGroupEntry{
+                                                         .binding = 0,
+                                                         .resource = UniformBufferBinding{ .buffer = uniformBuffer },
+                                                 },
+                                                 BindGroupEntry{
+                                                         .binding = 1,
+                                                         .resource = TextureViewSamplerBinding{ .textureView = textureView, .sampler = sampler },
+                                                 },
+                                         },
+                                         pushBindGroupPipelineLayout);
+
+        renderPassRecorder.end();
+        CommandBuffer commandBuffer = commandRecorder.finish();
+
+        // THEN
+        CHECK(commandRecorder.isValid());
+        CHECK(renderPassRecorder.isValid());
+        CHECK(uniformBuffer.isValid());
+        CHECK(texture.isValid());
+        CHECK(textureView.isValid());
+        CHECK(sampler.isValid());
+        CHECK(bindGroupLayout.isValid());
+        CHECK(pushBindGroupPipelineLayout.isValid());
+        CHECK(pushBindGroupPipeline.isValid());
+        CHECK(commandBuffer.isValid());
+    }
+#endif
 
     TEST_CASE("RenderPassCommandRecorder - MultiView")
     {

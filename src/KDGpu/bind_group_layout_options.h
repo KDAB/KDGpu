@@ -34,6 +34,7 @@ struct ResourceBindingLayout {
 struct BindGroupLayoutOptions {
     std::string_view label;
     std::vector<ResourceBindingLayout> bindings;
+    BindGroupLayoutFlags flags{ BindGroupLayoutFlagBits::None };
 
     // Equality operator for caching
     friend bool operator==(const BindGroupLayoutOptions &lhs, const BindGroupLayoutOptions &rhs) = default;

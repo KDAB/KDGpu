@@ -25,6 +25,7 @@ struct Device_t;
 struct ComputePipeline_t;
 struct ComputePassCommandRecorder_t;
 struct PipelineLayout_t;
+struct BindGroupEntry;
 
 struct PushConstantRange;
 
@@ -75,6 +76,9 @@ public:
     void dispatchComputeIndirect(const std::vector<ComputeCommandIndirect> &commands);
 
     void pushConstant(const PushConstantRange &constantRange, const void *data);
+    void pushBindGroup(uint32_t group,
+                       const std::vector<BindGroupEntry> &bindGroupEntries,
+                       const Handle<PipelineLayout_t> &pipelineLayout = Handle<PipelineLayout_t>());
 
     void end();
 

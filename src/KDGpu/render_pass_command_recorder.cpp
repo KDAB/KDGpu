@@ -177,6 +177,14 @@ void RenderPassCommandRecorder::pushConstant(const PushConstantRange &constantRa
     apiRenderPassCommandRecorder->pushConstant(constantRange, data, pipelineLayout);
 }
 
+void RenderPassCommandRecorder::pushBindGroup(uint32_t group,
+                                              const std::vector<BindGroupEntry> &bindGroupEntries,
+                                              const Handle<PipelineLayout_t> &pipelineLayout)
+{
+    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    apiRenderPassCommandRecorder->pushBindGroup(group, bindGroupEntries, pipelineLayout);
+}
+
 void RenderPassCommandRecorder::nextSubpass()
 {
     auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);

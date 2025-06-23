@@ -9,3 +9,4 @@
 kdgpu_compileshaderset(KDGpu_RenderPassCommandRecorderSubpass read-image)
 kdgpu_compileshaderset(KDGpu_RenderPassCommandRecorder triangle)
 kdgpu_compileshaderset(KDGpu_RenderPassCommandRecorderMultiView triangle-multi-view)
+kdgpu_compileshaderset(KDGpu_RenderPassCommandRecorderPushBindGroup triangle-pushbindgroup)

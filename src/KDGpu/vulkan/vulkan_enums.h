@@ -160,4 +160,6 @@ VkImageCreateFlags textureCreateFlagsToVkImageCreateFlags(TextureCreateFlags fla
 
 VkDescriptorPoolCreateFlags bindGroupPoolFlagsToVkDescriptorPoolCreateFlags(BindGroupPoolFlags flags);
 
+VkDescriptorSetLayoutCreateFlags bindGroupLayoutFlagsToVkDescriptorSetLayoutCreateFlags(BindGroupLayoutFlags flags);
+
 } // namespace KDGpu

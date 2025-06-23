@@ -26,6 +26,7 @@ struct PushConstantRange;
 struct PipelineLayout_t;
 struct RayTracingPipeline_t;
 struct RayTracingPassCommandRecorder_t;
+struct BindGroupEntry;
 
 struct StridedDeviceRegion {
     Handle<Buffer_t> buffer;
@@ -75,6 +76,10 @@ public:
     void traceRays(const RayTracingCommand &rayTracingCommand);
 
     void pushConstant(const PushConstantRange &constantRange, const void *data);
+
+    void pushBindGroup(uint32_t group,
+                       const std::vector<BindGroupEntry> &bindGroupEntries,
+                       const Handle<PipelineLayout_t> &pipelineLayout = Handle<PipelineLayout_t>());
 
     void end();
 

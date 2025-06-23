@@ -200,6 +200,10 @@ VulkanDevice::VulkanDevice(VkDevice _device,
         }
     }
 #endif
+
+#if defined(VK_KHR_push_descriptor)
+    this->vkCmdPushDescriptorSetKHR = (PFN_vkCmdPushDescriptorSetKHR)vkGetDeviceProcAddr(device, "vkCmdPushDescriptorSetKHR");
+#endif
 }
 
 std::vector<QueueDescription> VulkanDevice::getQueues(ResourceManager *resourceManager,
@@ -286,6 +290,144 @@ VmaAllocator VulkanDevice::createMemoryAllocator(ExternalMemoryHandleTypeFlags e
         SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to create Vulkan external memory allocator!");
 
     return allocator;
+}
+
+void VulkanDevice::fillWriteBindGroupDataForBindGroupEntry(WriteBindGroupData &writeBindGroupData, const BindGroupEntry &entry, const VkDescriptorSet &descriptorSet) const
+{
+    writeBindGroupData.imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+    writeBindGroupData.descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    writeBindGroupData.descriptorWrite.dstSet = descriptorSet;
+    writeBindGroupData.descriptorWrite.dstBinding = entry.binding;
+    writeBindGroupData.descriptorWrite.dstArrayElement = entry.arrayElement;
+    writeBindGroupData.descriptorWrite.descriptorCount = 0;
+    writeBindGroupData.descriptorWrite.pImageInfo = nullptr;
+    writeBindGroupData.descriptorWrite.pTexelBufferView = nullptr;
+    writeBindGroupData.descriptorWrite.pBufferInfo = nullptr;
+    writeBindGroupData.descriptorWrite.pTexelBufferView = nullptr;
+
+    writeBindGroupData.accelerationStructureKhr.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
+
+    switch (entry.resource.type()) {
+    case ResourceBindingType::CombinedImageSampler: {
+        const TextureViewSamplerBinding &textureViewBinding = entry.resource.textureViewSamplerBinding();
+        VulkanTextureView *textView = vulkanResourceManager->getTextureView(textureViewBinding.textureView);
+        VulkanSampler *sampler = vulkanResourceManager->getSampler(textureViewBinding.sampler);
+        assert(textView != nullptr);
+        writeBindGroupData.imageInfo.imageView = textView->imageView;
+        writeBindGroupData.imageInfo.imageLayout = textureLayoutToVkImageLayout(textureViewBinding.layout);
+
+        // Sampler can be null if the pipelineLayout was allocated with an immutableSampler for that binding
+        if (sampler != nullptr)
+            writeBindGroupData.imageInfo.sampler = sampler->sampler;
+
+        writeBindGroupData.descriptorWrite.descriptorCount = 1;
+        writeBindGroupData.descriptorWrite.pImageInfo = &writeBindGroupData.imageInfo;
+        writeBindGroupData.descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        break;
+    }
+    case ResourceBindingType::SampledImage: {
+        const TextureViewBinding &textureViewBinding = entry.resource.textureViewBinding();
+        VulkanTextureView *textView = vulkanResourceManager->getTextureView(textureViewBinding.textureView);
+        assert(textView != nullptr);
+        writeBindGroupData.imageInfo.imageView = textView->imageView;
+        writeBindGroupData.imageInfo.imageLayout = textureLayoutToVkImageLayout(textureViewBinding.layout);
+
+        writeBindGroupData.descriptorWrite.descriptorCount = 1;
+        writeBindGroupData.descriptorWrite.pImageInfo = &writeBindGroupData.imageInfo;
+        writeBindGroupData.descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+        break;
+    }
+    case ResourceBindingType::Sampler: {
+        const SamplerBinding &samplerBinding = entry.resource.samplerBinding();
+        VulkanSampler *sampler = vulkanResourceManager->getSampler(samplerBinding.sampler);
+        assert(sampler != nullptr);
+        writeBindGroupData.imageInfo.sampler = sampler->sampler;
+
+        writeBindGroupData.descriptorWrite.descriptorCount = 1;
+        writeBindGroupData.descriptorWrite.pImageInfo = &writeBindGroupData.imageInfo;
+        writeBindGroupData.descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+        break;
+    }
+    case ResourceBindingType::StorageImage: {
+        const ImageBinding &imageBinding = entry.resource.imageBinding();
+        VulkanTextureView *textView = vulkanResourceManager->getTextureView(imageBinding.textureView);
+        assert(textView != nullptr);
+        writeBindGroupData.imageInfo.imageView = textView->imageView;
+        writeBindGroupData.imageInfo.imageLayout = textureLayoutToVkImageLayout(imageBinding.layout);
+
+        writeBindGroupData.descriptorWrite.descriptorCount = 1;
+        writeBindGroupData.descriptorWrite.pImageInfo = &writeBindGroupData.imageInfo;
+        writeBindGroupData.descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+        break;
+    }
+    case ResourceBindingType::UniformBuffer: {
+        const UniformBufferBinding &bufferBinding = entry.resource.uniformBufferBinding();
+        VulkanBuffer *buffer = vulkanResourceManager->getBuffer(bufferBinding.buffer);
+        assert(buffer != nullptr);
+        writeBindGroupData.bufferInfo.buffer = buffer->buffer; // VkBuffer
+        writeBindGroupData.bufferInfo.offset = bufferBinding.offset;
+        writeBindGroupData.bufferInfo.range = (bufferBinding.size == UniformBufferBinding::WholeSize) ? VK_WHOLE_SIZE : bufferBinding.size;
+
+        writeBindGroupData.descriptorWrite.descriptorCount = 1;
+        writeBindGroupData.descriptorWrite.pBufferInfo = &writeBindGroupData.bufferInfo;
+        writeBindGroupData.descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        break;
+    }
+    case ResourceBindingType::StorageBuffer: {
+        const StorageBufferBinding &bufferBinding = entry.resource.storageBufferBinding();
+        VulkanBuffer *buffer = vulkanResourceManager->getBuffer(bufferBinding.buffer);
+        assert(buffer != nullptr);
+        writeBindGroupData.bufferInfo.buffer = buffer->buffer; // VkBuffer
+        writeBindGroupData.bufferInfo.offset = bufferBinding.offset;
+        writeBindGroupData.bufferInfo.range = (bufferBinding.size == StorageBufferBinding::WholeSize) ? VK_WHOLE_SIZE : bufferBinding.size;
+
+        writeBindGroupData.descriptorWrite.descriptorCount = 1;
+        writeBindGroupData.descriptorWrite.pBufferInfo = &writeBindGroupData.bufferInfo;
+        writeBindGroupData.descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        break;
+    }
+    case ResourceBindingType::DynamicUniformBuffer: {
+        const DynamicUniformBufferBinding &bufferBinding = entry.resource.dynamicUniformBufferBinding();
+        VulkanBuffer *buffer = vulkanResourceManager->getBuffer(bufferBinding.buffer);
+        assert(buffer != nullptr);
+        writeBindGroupData.bufferInfo.buffer = buffer->buffer; // VkBuffer
+        writeBindGroupData.bufferInfo.offset = bufferBinding.offset;
+        writeBindGroupData.bufferInfo.range = (bufferBinding.size == StorageBufferBinding::WholeSize) ? VK_WHOLE_SIZE : bufferBinding.size;
+
+        writeBindGroupData.descriptorWrite.descriptorCount = 1;
+        writeBindGroupData.descriptorWrite.pBufferInfo = &writeBindGroupData.bufferInfo;
+        writeBindGroupData.descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+        break;
+    }
+    case ResourceBindingType::AccelerationStructure: {
+        const AccelerationStructureBinding &bufferBinding = entry.resource.accelerationStructure();
+        VulkanAccelerationStructure *buffer = vulkanResourceManager->getAccelerationStructure(bufferBinding.accelerationStructure);
+        assert(buffer != nullptr);
+
+        writeBindGroupData.accelerationStructureKhr.accelerationStructureCount = 1;
+        writeBindGroupData.accelerationStructureKhr.pAccelerationStructures = &buffer->accelerationStructure;
+
+        writeBindGroupData.descriptorWrite.descriptorCount = 1;
+        writeBindGroupData.descriptorWrite.pNext = &writeBindGroupData.accelerationStructureKhr;
+        writeBindGroupData.descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
+        break;
+    }
+    case ResourceBindingType::InputAttachment: {
+        const InputAttachmentBinding &inputAttachmentBinding = entry.resource.inputAttachmentBinding();
+        VulkanTextureView *textView = vulkanResourceManager->getTextureView(inputAttachmentBinding.textureView);
+        assert(textView != nullptr);
+        writeBindGroupData.imageInfo.imageView = textView->imageView;
+        writeBindGroupData.imageInfo.imageLayout = textureLayoutToVkImageLayout(inputAttachmentBinding.layout);
+
+        writeBindGroupData.descriptorWrite.descriptorCount = 1;
+        writeBindGroupData.descriptorWrite.pImageInfo = &writeBindGroupData.imageInfo;
+        writeBindGroupData.descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
+        break;
+    }
+    default:
+        break;
+    }
 }
 
 } // namespace KDGpu

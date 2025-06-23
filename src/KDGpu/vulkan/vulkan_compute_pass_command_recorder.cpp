@@ -12,6 +12,7 @@
 #include <KDGpu/vulkan/vulkan_compute_pipeline.h>
 #include <KDGpu/vulkan/vulkan_resource_manager.h>
 #include <KDGpu/vulkan/vulkan_enums.h>
+#include <KDGpu/vulkan/vulkan_device.h>
 
 namespace KDGpu {
 
@@ -98,6 +99,50 @@ void VulkanComputePassCommandRecorder::pushConstant(const PushConstantRange &con
                        constantRange.offset,
                        constantRange.size,
                        data);
+}
+
+void VulkanComputePassCommandRecorder::pushBindGroup(uint32_t group,
+                                                     const std::vector<BindGroupEntry> &bindGroupEntries,
+                                                     const Handle<PipelineLayout_t> &pipelineLayout)
+{
+#if defined(VK_KHR_push_descriptor)
+    VulkanDevice *device = vulkanResourceManager->getDevice(deviceHandle);
+    if (device->vkCmdPushDescriptorSetKHR) {
+
+        VkPipelineLayout vkPipelineLayout{ VK_NULL_HANDLE };
+
+        if (pipelineLayout.isValid()) {
+            VulkanPipelineLayout *vulkanPipelineLayout = vulkanResourceManager->getPipelineLayout(pipelineLayout);
+            if (vulkanPipelineLayout)
+                vkPipelineLayout = vulkanPipelineLayout->pipelineLayout;
+        } else if (pipeline.isValid()) {
+            VulkanComputePipeline *vulkanPipeline = vulkanResourceManager->getComputePipeline(pipeline);
+            VulkanPipelineLayout *vulkanPipelineLayout = vulkanResourceManager->getPipelineLayout(vulkanPipeline->pipelineLayoutHandle);
+            if (vulkanPipelineLayout)
+                vkPipelineLayout = vulkanPipelineLayout->pipelineLayout;
+        }
+
+        std::vector<WriteBindGroupData> writeBindGroupData;
+        std::vector<VkWriteDescriptorSet> writeDescriptorSets;
+        const size_t bindGroupEntryCount = bindGroupEntries.size();
+        writeBindGroupData.resize(bindGroupEntryCount);
+        writeDescriptorSets.resize(bindGroupEntryCount);
+        for (size_t i = 0; i < bindGroupEntryCount; ++i) {
+            WriteBindGroupData &writeData = writeBindGroupData[i];
+            device->fillWriteBindGroupDataForBindGroupEntry(writeData, bindGroupEntries[i]);
+            writeDescriptorSets[i] = writeData.descriptorWrite;
+        }
+
+        device->vkCmdPushDescriptorSetKHR(commandBuffer,
+                                          VK_PIPELINE_BIND_POINT_COMPUTE,
+                                          vkPipelineLayout,
+                                          group,
+                                          writeDescriptorSets.size(),
+                                          writeDescriptorSets.data());
+    }
+#else
+    assert(false);
+#endif
 }
 
 void VulkanComputePassCommandRecorder::end()

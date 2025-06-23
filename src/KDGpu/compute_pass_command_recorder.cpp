@@ -92,6 +92,14 @@ void ComputePassCommandRecorder::pushConstant(const PushConstantRange &constantR
     apiComputePassCommandRecorder->pushConstant(constantRange, data);
 }
 
+void ComputePassCommandRecorder::pushBindGroup(uint32_t group,
+                                               const std::vector<BindGroupEntry> &bindGroupEntries,
+                                               const Handle<PipelineLayout_t> &pipelineLayout)
+{
+    auto apiComputePassCommandRecorder = m_api->resourceManager()->getComputePassCommandRecorder(m_computePassCommandRecorder);
+    apiComputePassCommandRecorder->pushBindGroup(group, bindGroupEntries, pipelineLayout);
+}
+
 void ComputePassCommandRecorder::end()
 {
     auto apiComputePassCommandRecorder = m_api->resourceManager()->getComputePassCommandRecorder(m_computePassCommandRecorder);
