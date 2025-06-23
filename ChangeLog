@@ -1,3 +1,6 @@
+- v0.9.0
+  - Add support for explicit BindGroupPool
+  - Add support for pushBindGroup / VK_KHR_push_descriptor
 - v0.8.0
   - Add support for Immutable Samplers
   - Add support for YCbCr conversion on Sampler and TextureView
