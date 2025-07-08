@@ -14,6 +14,8 @@
 #include <KDGpu/vulkan/vulkan_resource_manager.h>
 #include <KDGpu/vulkan/vulkan_surface.h>
 
+#include <algorithm>
+
 namespace KDGpu {
 
 namespace {
