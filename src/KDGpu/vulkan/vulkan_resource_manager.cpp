@@ -2215,6 +2215,8 @@ VulkanCommandBuffer *VulkanResourceManager::getCommandBuffer(const Handle<Comman
 
 Handle<BindGroupPool_t> VulkanResourceManager::createBindGroupPool(const Handle<Device_t> &deviceHandle, const BindGroupPoolOptions &options)
 {
+    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
+
     std::vector<VkDescriptorPoolSize> poolSizes;
     poolSizes.reserve(9);
     if (options.uniformBufferCount > 0)
@@ -2233,7 +2235,7 @@ Handle<BindGroupPool_t> VulkanResourceManager::createBindGroupPool(const Handle<
         poolSizes.push_back({ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, options.imageCount });
     if (options.inputAttachmentCount > 0)
         poolSizes.push_back({ VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, options.inputAttachmentCount });
-    if (options.accelerationStructureCount > 0)
+    if (options.accelerationStructureCount > 0 && vulkanDevice->requestedFeatures.accelerationStructures)
         poolSizes.push_back({ VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, options.accelerationStructureCount });
 
     VkDescriptorPool pool{ VK_NULL_HANDLE };
@@ -2244,8 +2246,6 @@ Handle<BindGroupPool_t> VulkanResourceManager::createBindGroupPool(const Handle<
 
     poolInfo.maxSets = options.maxBindGroupCount;
     poolInfo.flags = bindGroupPoolFlagsToVkDescriptorPoolCreateFlags(options.flags);
-
-    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
 
     if (auto result = vkCreateDescriptorPool(vulkanDevice->device, &poolInfo, nullptr, &pool); result != VK_SUCCESS) {
         SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating bindgroup pool: {}", result);
