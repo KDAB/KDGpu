@@ -40,6 +40,8 @@ set_target_properties(
                RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
                CXX_VISIBILITY_PRESET hidden
                VISIBILITY_INLINES_HIDDEN 1
+               VERSION ${PROJECT_VERSION}
+               SOVERSION ${PROJECT_VERSION}
 )
 
 include(GenerateExportHeader)
