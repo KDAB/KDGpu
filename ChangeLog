@@ -1,3 +1,6 @@
+- v0.9.1
+  - Fix compilation with some gcc versions
+  - Resolve validation error when AccelerationStructures are not supported
 - v0.9.0
   - Add support for explicit BindGroupPool
   - Add support for pushBindGroup / VK_KHR_push_descriptor
