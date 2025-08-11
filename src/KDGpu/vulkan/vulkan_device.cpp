@@ -204,6 +204,13 @@ VulkanDevice::VulkanDevice(VkDevice _device,
 #if defined(VK_KHR_push_descriptor)
     this->vkCmdPushDescriptorSetKHR = (PFN_vkCmdPushDescriptorSetKHR)vkGetDeviceProcAddr(device, "vkCmdPushDescriptorSetKHR");
 #endif
+
+#if defined(VK_KHR_dynamic_rendering)
+    if (vulkanAdapter->queryAdapterFeatures().dynamicRendering) {
+        this->vkCmdBeginRenderingKHR = (PFN_vkCmdBeginRenderingKHR)vkGetDeviceProcAddr(device, "vkCmdBeginRenderingKHR");
+        this->vkCmdEndRenderingKHR = (PFN_vkCmdEndRenderingKHR)vkGetDeviceProcAddr(device, "vkCmdEndRenderingKHR");
+    }
+#endif
 }
 
 std::vector<QueueDescription> VulkanDevice::getQueues(ResourceManager *resourceManager,

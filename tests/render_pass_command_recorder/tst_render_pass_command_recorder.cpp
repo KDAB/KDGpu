@@ -77,6 +77,7 @@ TEST_SUITE("RenderPassCommandRecorder")
             .applicationVersion = KDGPU_MAKE_API_VERSION(0, 1, 0, 0) });
 
     Adapter *discreteGPUAdapter = instance.selectAdapter(AdapterDeviceType::Default);
+    const bool hasDynamicRenderingSupport = discreteGPUAdapter->features().dynamicRendering;
 
     TEST_CASE("RenderPassCommandRecorder")
     {
@@ -1021,4 +1022,122 @@ TEST_SUITE("RenderPassCommandRecorder")
             // And has no validation errors in console
         }
     }
+
+#if defined(VK_KHR_dynamic_rendering)
+    TEST_CASE("RenderPassCommandRecorder - Dynamic Rendering" * doctest::skip(!hasDynamicRenderingSupport))
+    {
+        // GIVEN
+        Device device = discreteGPUAdapter->createDevice(DeviceOptions{
+                .requestedFeatures{
+                        .dynamicRendering = true,
+                },
+        });
+
+        // Create a bind group layout
+        const BindGroupLayout bindGroupLayout = device.createBindGroupLayout(BindGroupLayoutOptions{
+                .bindings = {},
+        });
+
+        // Create pipeline layout with the bind group layout
+        const PipelineLayout pipelineLayout = device.createPipelineLayout(PipelineLayoutOptions{
+                .bindGroupLayouts = { bindGroupLayout },
+        });
+
+        // Create a pipeline that uses dynamic rendering
+        const auto vertexShaderPath = assetPath() + "/shaders/tests/render_pass_command_recorder/triangle.vert.spv";
+        auto vertexShader = device.createShaderModule(readShaderFile(vertexShaderPath));
+
+        const auto fragmentShaderPath = assetPath() + "/shaders/tests/render_pass_command_recorder/triangle.frag.spv";
+        auto fragmentShader = device.createShaderModule(readShaderFile(fragmentShaderPath));
+
+        const GraphicsPipeline pipeline = device.createGraphicsPipeline(GraphicsPipelineOptions{
+                .shaderStages = {
+                        { .shaderModule = vertexShader.handle(), .stage = ShaderStageFlagBits::VertexBit },
+                        { .shaderModule = fragmentShader.handle(), .stage = ShaderStageFlagBits::FragmentBit },
+                },
+                .layout = pipelineLayout.handle(),
+                .vertex = {
+                        .buffers = {
+                                { .binding = 0, .stride = 6 * sizeof(float) },
+                        },
+                        .attributes = {
+                                { .location = 0, .binding = 0, .format = Format::R32G32B32A32_SFLOAT }, // Position
+                                { .location = 1, .binding = 0, .format = Format::R32G32B32A32_SFLOAT, .offset = 3 * sizeof(float) }, // Color
+                        },
+                },
+                .renderTargets = {
+                        { .format = Format::R8G8B8A8_UNORM },
+                },
+                .depthStencil = { .format = Format::D24_UNORM_S8_UINT, .depthWritesEnabled = true, .depthCompareOperation = CompareOperation::Less },
+                .dynamicRendering = true,
+        });
+
+        // THEN
+        CHECK(device.isValid());
+        CHECK(vertexShader.isValid());
+        CHECK(fragmentShader.isValid());
+        CHECK(bindGroupLayout.isValid());
+        CHECK(pipelineLayout.isValid());
+        CHECK(pipeline.isValid());
+
+        // WHEN -> Create Texture Attachments
+        const Texture colorTexture = device.createTexture(TextureOptions{
+                .type = TextureType::TextureType2D,
+                .format = Format::R8G8B8A8_UNORM,
+                .extent = { 256, 256, 1 },
+                .mipLevels = 1,
+                .samples = SampleCountFlagBits::Samples1Bit,
+                .usage = TextureUsageFlagBits::ColorAttachmentBit,
+                .memoryUsage = MemoryUsage::GpuOnly,
+        });
+        const Texture depthTexture = device.createTexture(TextureOptions{
+                .type = TextureType::TextureType2D,
+#if defined(KD_PLATFORM_MACOS)
+                .format = Format::D32_SFLOAT_S8_UINT,
+#else
+                .format = Format::D24_UNORM_S8_UINT,
+#endif
+                .extent = { 256, 256, 1 },
+                .mipLevels = 1,
+                .samples = SampleCountFlagBits::Samples1Bit,
+                .usage = TextureUsageFlagBits::DepthStencilAttachmentBit,
+                .memoryUsage = MemoryUsage::GpuOnly,
+        });
+
+        const TextureView colorTextureView = colorTexture.createView();
+        const TextureView depthTextureView = depthTexture.createView();
+
+        // THEN
+        CHECK(colorTextureView.isValid());
+        CHECK(depthTextureView.isValid());
+
+        // WHEN -> Creating Dynamic Rendering RenderPassCommandRecorder
+        const RenderPassCommandRecorderWithDynamicRenderingOptions dynamicRenderingOptions{
+            .colorAttachments = {
+                    {
+                            .view = colorTextureView,
+                            .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
+                            .finalLayout = TextureLayout::PresentSrc,
+                    },
+            },
+            .depthStencilAttachment = {
+                    .view = depthTextureView,
+            }
+        };
+
+        CommandRecorder commandRecorder = device.createCommandRecorder();
+        RenderPassCommandRecorder renderPassRecorder = commandRecorder.beginRenderPass(dynamicRenderingOptions);
+
+        // Test can use dynamic rendering pipeline
+        renderPassRecorder.setPipeline(pipeline);
+
+        renderPassRecorder.end();
+        CommandBuffer commandBuffer = commandRecorder.finish();
+
+        // THEN
+        CHECK(commandRecorder.isValid());
+        CHECK(renderPassRecorder.isValid());
+        CHECK(commandBuffer.isValid());
+    }
+#endif
 }

@@ -162,6 +162,11 @@ struct KDGPU_EXPORT VulkanDevice {
     PFN_vkCmdPushDescriptorSetKHR vkCmdPushDescriptorSetKHR{ nullptr };
 #endif
 
+#if defined(VK_KHR_dynamic_rendering)
+    PFN_vkCmdBeginRenderingKHR vkCmdBeginRenderingKHR{ nullptr };
+    PFN_vkCmdEndRenderingKHR vkCmdEndRenderingKHR{ nullptr };
+#endif
+
     bool isOwned{ true };
 };
 

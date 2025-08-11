@@ -107,6 +107,16 @@ struct RenderPassCommandRecorderWithRenderPassOptions {
     uint32_t framebufferArrayLayers{ 0 }; // Default to first attachment arrayLayer
 };
 
+struct RenderPassCommandRecorderWithDynamicRenderingOptions {
+    std::vector<ColorAttachment> colorAttachments;
+    DepthStencilAttachment depthStencilAttachment;
+    SampleCountFlagBits samples{ SampleCountFlagBits::Samples1Bit };
+    uint32_t viewCount{ 1 };
+    uint32_t framebufferWidth{ 0 }; // Default to first attachment width
+    uint32_t framebufferHeight{ 0 }; // Default to first attachment height
+    uint32_t framebufferArrayLayers{ 0 }; // Default to first attachment arrayLayer
+};
+
 struct DebugLabelOptions {
     std::string_view label;
     float color[4];

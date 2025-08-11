@@ -154,8 +154,13 @@ struct GraphicsPipelineOptions {
     uint32_t viewCount{ 1 };
     DynamicStateOptions dynamicState;
 
+    // Explicit RenderPass Usage (incompatible with dynamic rendering)
+    // Use implicit RenderPass if none specified
     Handle<RenderPass_t> renderPass;
     uint32_t subpassIndex{ 0 };
+
+    // Only available if DynamicRendering feature is available and enabled
+    bool dynamicRendering{ false };
 
     friend bool operator==(const GraphicsPipelineOptions &, const GraphicsPipelineOptions &) = default;
 };

@@ -114,6 +114,7 @@ struct AdapterFeatures {
     bool meshShaderQueries;
     bool hostImageCopy;
     bool samplerYCbCrConversion;
+    bool dynamicRendering;
 };
 
 /*! @} */

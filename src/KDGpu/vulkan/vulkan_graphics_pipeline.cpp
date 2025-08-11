@@ -17,13 +17,15 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VkPipeline _pipeline,
                                                const Handle<RenderPass_t> &_renderPassHandle,
                                                const std::vector<VkDynamicState> &_enabledDynamicState,
                                                const Handle<Device_t> &_deviceHandle,
-                                               const Handle<PipelineLayout_t> &_pipelineLayoutHandle)
+                                               const Handle<PipelineLayout_t> &_pipelineLayoutHandle,
+                                               bool _dynamicRendering)
     : pipeline(_pipeline)
     , vulkanResourceManager(_vulkanResourceManager)
     , renderPassHandle(_renderPassHandle)
     , enabledDynamicState(_enabledDynamicState)
     , deviceHandle(_deviceHandle)
     , pipelineLayoutHandle(_pipelineLayoutHandle)
+    , dynamicRendering(_dynamicRendering)
 {
 }
 

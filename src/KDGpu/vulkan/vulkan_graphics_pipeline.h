@@ -36,7 +36,8 @@ struct KDGPU_EXPORT VulkanGraphicsPipeline {
                                     const Handle<RenderPass_t> &_renderPassHandle,
                                     const std::vector<VkDynamicState> &_enabledDynamicState,
                                     const Handle<Device_t> &_deviceHandle,
-                                    const Handle<PipelineLayout_t> &_pipelineLayoutHandle);
+                                    const Handle<PipelineLayout_t> &_pipelineLayoutHandle,
+                                    bool _dynamicRendering);
 
     VkPipeline pipeline{ VK_NULL_HANDLE };
     VkRenderPass renderPass{ VK_NULL_HANDLE };
@@ -46,6 +47,7 @@ struct KDGPU_EXPORT VulkanGraphicsPipeline {
     Handle<RenderPass_t> renderPassHandle;
     Handle<Device_t> deviceHandle;
     Handle<PipelineLayout_t> pipelineLayoutHandle;
+    bool dynamicRendering{ false };
 };
 
 } // namespace KDGpu
