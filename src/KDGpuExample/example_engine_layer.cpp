@@ -174,12 +174,24 @@ void ExampleEngineLayer::drawImGuiOverlay(ImGuiContext *ctx)
         func(ctx);
 }
 
-void ExampleEngineLayer::renderImGuiOverlay(RenderPassCommandRecorder *recorder, uint32_t inFlightIndex, RenderPass *currentRenderPass, int lastSubpassIndex)
+void ExampleEngineLayer::renderImGuiOverlay(RenderPassCommandRecorder *recorder,
+                                            uint32_t inFlightIndex,
+                                            RenderPass *currentRenderPass,
+                                            int lastSubpassIndex)
 {
     // Updates the geometry buffers used by ImGui and records the commands needed to
     // get the ui into a render target.
     const Extent2D extent{ m_window->width(), m_window->height() };
     m_imguiOverlay->render(recorder, extent, inFlightIndex, currentRenderPass, lastSubpassIndex);
+}
+
+void ExampleEngineLayer::renderImGuiOverlayDynamic(KDGpu::RenderPassCommandRecorder *recorder,
+                                                   uint32_t inFlightIndex)
+{
+    // Updates the geometry buffers used by ImGui and records the commands needed to
+    // get the ui into a render target.
+    const Extent2D extent{ m_window->width(), m_window->height() };
+    m_imguiOverlay->renderDynamic(recorder, extent, inFlightIndex);
 }
 
 void ExampleEngineLayer::registerImGuiOverlayDrawFunction(const std::function<void(ImGuiContext *)> &func)

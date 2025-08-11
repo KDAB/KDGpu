@@ -272,9 +272,18 @@ bool ImGuiRenderer::updateGeometryBuffers(uint32_t inFlightIndex)
     return m_mesh->vertexCount != 0;
 }
 
-void ImGuiRenderer::recordCommands(KDGpu::RenderPassCommandRecorder *recorder, KDGpu::Extent2D extent, uint32_t inFlightIndex, KDGpu::RenderPass *currentRenderPass, int lastSubpassIndex)
+void ImGuiRenderer::recordCommands(KDGpu::RenderPassCommandRecorder *recorder,
+                                   KDGpu::Extent2D extent,
+                                   uint32_t inFlightIndex,
+                                   KDGpu::RenderPass *currentRenderPass,
+                                   int lastSubpassIndex,
+                                   bool dynamicRendering)
 {
     ImDrawData *imDrawData = ImGui::GetDrawData();
+
+    assert((dynamicRendering && !currentRenderPass) ||
+           (currentRenderPass && !dynamicRendering) ||
+           (!currentRenderPass && !dynamicRendering)); // We can't have both dynamic rendering and a render pass
 
     if ((!imDrawData) || (imDrawData->CmdListsCount == 0))
         return;
@@ -288,6 +297,7 @@ void ImGuiRenderer::recordCommands(KDGpu::RenderPassCommandRecorder *recorder, K
         m_pipelineInfo.renderPass = currentRenderPass->handle();
         m_pipelineInfo.subpassIndex = lastSubpassIndex;
     }
+    m_pipelineInfo.dynamicRendering = dynamicRendering;
 
     if (!m_pipeline.isValid())
         m_pipeline = m_device->createGraphicsPipeline(m_pipelineInfo);

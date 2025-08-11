@@ -59,7 +59,15 @@ public:
 
     void event(KDFoundation::EventReceiver *target, KDFoundation::Event *ev);
 
-    void render(KDGpu::RenderPassCommandRecorder *recorder, const KDGpu::Extent2D &extent, uint32_t inFlightIndex = 0, KDGpu::RenderPass *currentRenderPass = nullptr, int lastSubpassIndex = 0);
+    void render(KDGpu::RenderPassCommandRecorder *recorder,
+                const KDGpu::Extent2D &extent,
+                uint32_t inFlightIndex = 0,
+                KDGpu::RenderPass *currentRenderPass = nullptr,
+                int lastSubpassIndex = 0);
+
+    void renderDynamic(KDGpu::RenderPassCommandRecorder *recorder,
+                       const KDGpu::Extent2D &extent,
+                       uint32_t inFlightIndex = 0);
 
 private:
     ImGuiContext *m_context{ nullptr };

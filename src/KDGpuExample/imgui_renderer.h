@@ -60,7 +60,12 @@ public:
     void cleanup();
 
     bool updateGeometryBuffers(uint32_t inFlightIndex);
-    void recordCommands(KDGpu::RenderPassCommandRecorder *recorder, KDGpu::Extent2D extent, uint32_t inFlightIndex, KDGpu::RenderPass *currentRenderPass = nullptr, int lastSubpassIndex = 0);
+    void recordCommands(KDGpu::RenderPassCommandRecorder *recorder,
+                        KDGpu::Extent2D extent,
+                        uint32_t inFlightIndex,
+                        KDGpu::RenderPass *currentRenderPass = nullptr,
+                        int lastSubpassIndex = 0,
+                        bool dynamicRendering = false);
 
 private:
     void initializeFontData(float scaleFactor);
