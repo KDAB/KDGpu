@@ -35,7 +35,8 @@ struct KDGPU_EXPORT VulkanRenderPassCommandRecorder {
     explicit VulkanRenderPassCommandRecorder(VkCommandBuffer _commandBuffer,
                                              VkRect2D _renderArea,
                                              VulkanResourceManager *_vulkanResourceManager,
-                                             const Handle<Device_t> &_deviceHandle);
+                                             const Handle<Device_t> &_deviceHandle,
+                                             bool _dynamicRendering);
 
     void setPipeline(const Handle<GraphicsPipeline_t> &pipeline);
     void setVertexBuffer(uint32_t index, const Handle<Buffer_t> &buffer, DeviceSize offset);
@@ -68,6 +69,7 @@ struct KDGPU_EXPORT VulkanRenderPassCommandRecorder {
     Handle<Device_t> deviceHandle;
     Handle<GraphicsPipeline_t> pipeline;
     bool firstPipelineWasSet{ false };
+    bool dynamicRendering{ false };
 };
 
 } // namespace KDGpu

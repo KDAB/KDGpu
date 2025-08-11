@@ -133,6 +133,9 @@ std::vector<const char *> getDefaultRequestedDeviceExtensions()
 #if defined(VK_KHR_push_descriptor)
         VK_KHR_PUSH_DESCRIPTOR_EXTENSION_NAME,
 #endif
+#if defined(VK_KHR_dynamic_rendering)
+        VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
+#endif
     };
 
     return extensions;

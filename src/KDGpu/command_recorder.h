@@ -161,6 +161,8 @@ public:
 
     RenderPassCommandRecorder beginRenderPass(const RenderPassCommandRecorderOptions &options);
     RenderPassCommandRecorder beginRenderPass(const RenderPassCommandRecorderWithRenderPassOptions &options);
+    RenderPassCommandRecorder beginRenderPass(const RenderPassCommandRecorderWithDynamicRenderingOptions &options);
+
     ComputePassCommandRecorder beginComputePass(const ComputePassCommandRecorderOptions &options = {});
     RayTracingPassCommandRecorder beginRayTracingPass(const RayTracingPassCommandRecorderOptions &options = {});
     TimestampQueryRecorder beginTimestampRecording(const TimestampQueryRecorderOptions &options = {});

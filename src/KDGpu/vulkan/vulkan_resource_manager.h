@@ -148,6 +148,9 @@ public:
     Handle<RenderPassCommandRecorder_t> createRenderPassCommandRecorder(const Handle<Device_t> &deviceHandle,
                                                                         const Handle<CommandRecorder_t> &commandRecorderHandle,
                                                                         const RenderPassCommandRecorderWithRenderPassOptions &options);
+    Handle<RenderPassCommandRecorder_t> createRenderPassCommandRecorder(const Handle<Device_t> &deviceHandle,
+                                                                        const Handle<CommandRecorder_t> &commandRecorderHandle,
+                                                                        const RenderPassCommandRecorderWithDynamicRenderingOptions &options);
     void deleteRenderPassCommandRecorder(const Handle<RenderPassCommandRecorder_t> &handle);
     VulkanRenderPassCommandRecorder *getRenderPassCommandRecorder(const Handle<RenderPassCommandRecorder_t> &handle) const;
 

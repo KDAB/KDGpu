@@ -620,6 +620,16 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     addToChain(&sync2Features);
 #endif
 
+#if defined(VK_KHR_dynamic_rendering)
+    if (options.requestedFeatures.dynamicRendering) {
+        // Enable dynamic rendering
+        VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamicRenderingFeatures{};
+        dynamicRenderingFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR;
+        dynamicRenderingFeatures.dynamicRendering = options.requestedFeatures.dynamicRendering;
+        addToChain(&dynamicRenderingFeatures);
+    }
+#endif
+
     VkDeviceCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     createInfo.pNext = &physicalDeviceFeatures2;
@@ -1588,6 +1598,13 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
 {
     VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
 
+    if (options.dynamicRendering) {
+#if !defined(VK_KHR_dynamic_rendering)
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Dynamic Rendering not supported by this Vulkan SDK");
+        return {};
+#endif
+    }
+
     // Fetch the specified pipeline layout
     VulkanPipelineLayout *vulkanPipelineLayout = getPipelineLayout(options.layout);
     if (!vulkanPipelineLayout) {
@@ -1700,6 +1717,10 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     const uint32_t attachmentCount = options.renderTargets.size();
     std::vector<VkPipelineColorBlendAttachmentState> attachmentBlends;
     attachmentBlends.reserve(attachmentCount);
+
+    std::vector<VkFormat> vkColorFormats;
+    vkColorFormats.reserve(attachmentCount);
+
     for (uint32_t i = 0; i < attachmentCount; ++i) {
         const auto &renderTarget = options.renderTargets.at(i);
 
@@ -1714,6 +1735,7 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
         vkAttachmentBlend.alphaBlendOp = blendOperationToVkBlendOp(renderTarget.blending.alpha.operation);
 
         attachmentBlends.emplace_back(vkAttachmentBlend);
+        vkColorFormats.emplace_back(formatToVkFormat(renderTarget.format));
     }
 
     VkPipelineColorBlendStateCreateInfo colorBlending = {};
@@ -1754,40 +1776,32 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     viewportState.scissorCount = 1;
     viewportState.pScissors = nullptr; // Provided by dynamic state
 
-    // TODO: Investigate using VK_KHR_dynamic_rendering (core in Vulkan 1.3).
-    //       Do the other graphics APIs have an equivalent or perhaps they default
-    //       to that sort of model? We also need this to be supported across all
-    //       Vulkan target platforms (desktop, pi, android, imx8).
-    //
-    // Create a render pass that serves to specify the layout / compatibility of
-    // concrete render passes and framebuffers used to perform rendering with this
-    // pipeline at command record time. We only do this if the pipeline outputs to
-    // render targets.
+    // We will use VK_KHR_dynamic_rendering (core in Vulkan 1.3) if options.dynamicRendering is enabled
+    // Otherwise we will resolve options.renderPass if provided or create an implicit render pass otherwise
     VkRenderPass vkRenderPass = VK_NULL_HANDLE;
     Handle<RenderPass_t> vulkanRenderPassHandle = options.renderPass;
 
-    // Specify attachment refs for all color and resolve render targets and any
-    // depth-stencil target. Concrete render passes that want to use this pipeline
-    // to render, must begin a render pass that is compatible with this render pass.
-    // See the detailed description of render pass compatibility at:
-    //
-    // https://registry.khronos.org/vulkan/specs/1.3-extensions/html/vkspec.html#renderpass-compatibility
-    //
-    // But in short, the concrete render pass must match attachment counts of each
-    // type and match the formats and sample counts in each case.
+    if (!vulkanRenderPassHandle.isValid() && !options.dynamicRendering) {
+        // Create a render pass that serves to specify the layout / compatibility of
+        // concrete render passes and framebuffers used to perform rendering with this
+        // pipeline at command record time. We only do this if the pipeline outputs to
+        // render targets.
+        // Specify attachment refs for all color and resolve render targets and any
+        // depth-stencil target. Concrete render passes that want to use this pipeline
+        // to render, must begin a render pass that is compatible with this render pass.
+        // See the detailed description of render pass compatibility at:
+        //
+        // https://registry.khronos.org/vulkan/specs/1.3-extensions/html/vkspec.html#renderpass-compatibility
+        //
+        // But in short, the concrete render pass must match attachment counts of each
+        // type and match the formats and sample counts in each case.
 
-    if (!vulkanRenderPassHandle.isValid()) {
         vulkanRenderPassHandle = createImplicitRenderPass(deviceHandle,
                                                           options.renderTargets,
                                                           options.depthStencil,
                                                           options.multisample.samples,
                                                           options.viewCount);
     }
-
-    // Note: at the moment this render pass isn't shared. It might make sense to do so at some point,
-    // in which case, the renderPass handle will have to be added to vulkanDevice->renderPasses
-    VulkanRenderPass *vulkanRenderPass = m_renderPasses.get(vulkanRenderPassHandle);
-    vkRenderPass = vulkanRenderPass->renderPass;
 
     // Bring it all together in the all-knowing pipeline create info
     VkGraphicsPipelineCreateInfo pipelineInfo = {};
@@ -1806,8 +1820,33 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     pipelineInfo.pColorBlendState = &colorBlending;
     pipelineInfo.pDynamicState = &dynamicStateInfo;
     pipelineInfo.layout = vulkanPipelineLayout->pipelineLayout;
-    pipelineInfo.renderPass = vkRenderPass;
-    pipelineInfo.subpass = options.subpassIndex;
+
+#if defined(VK_KHR_dynamic_rendering)
+    VkPipelineRenderingCreateInfoKHR pipelineDynamicRenderingCreateInfo{};
+    if (options.dynamicRendering) {
+        assert(!vulkanRenderPassHandle.isValid()); // Dynamic Rendering is not compatible with explicit RenderPasses
+        assert(vulkanDevice->requestedFeatures.dynamicRendering); // Dynamic Rendering feature should be enabled
+        pipelineDynamicRenderingCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR;
+        pipelineDynamicRenderingCreateInfo.pNext = VK_NULL_HANDLE;
+
+        const uint32_t multiViewMaskMask = uint32_t(1 << options.viewCount) - 1;
+        pipelineDynamicRenderingCreateInfo.viewMask = (options.viewCount > 1) ? multiViewMaskMask : 0;
+
+        pipelineDynamicRenderingCreateInfo.colorAttachmentCount = attachmentCount;
+        pipelineDynamicRenderingCreateInfo.pColorAttachmentFormats = vkColorFormats.data();
+        pipelineDynamicRenderingCreateInfo.depthAttachmentFormat = formatToVkFormat(options.depthStencil.format);
+        pipelineDynamicRenderingCreateInfo.stencilAttachmentFormat = formatToVkFormat(options.depthStencil.format);
+        pipelineInfo.pNext = &pipelineDynamicRenderingCreateInfo;
+    } else
+#endif
+    {
+        // Note: at the moment this render pass isn't shared. It might make sense to do so at some point,
+        // in which case, the renderPass handle will have to be added to vulkanDevice->renderPasses
+        VulkanRenderPass *vulkanRenderPass = m_renderPasses.get(vulkanRenderPassHandle);
+        vkRenderPass = vulkanRenderPass->renderPass;
+        pipelineInfo.renderPass = vkRenderPass;
+        pipelineInfo.subpass = options.subpassIndex;
+    }
 
     VkPipeline vkPipeline{ VK_NULL_HANDLE };
     if (auto result = vkCreateGraphicsPipelines(vulkanDevice->device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &vkPipeline); result != VK_SUCCESS) {
@@ -1824,7 +1863,8 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
             (options.renderPass.isValid() ? (Handle<KDGpu::RenderPass_t>()) : (vulkanRenderPassHandle)), // pipeline do not own the renderpass if it's passed in
             dynamicStates,
             deviceHandle,
-            options.layout));
+            options.layout,
+            options.dynamicRendering));
 
     return vulkanGraphicsPipelineHandle;
 }
@@ -2570,8 +2610,164 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
     vkCmdBeginRenderPass(vkCommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
     const auto vulkanRenderPassCommandRecorderHandle = m_renderPassCommandRecorders.emplace(
-            VulkanRenderPassCommandRecorder(vkCommandBuffer, renderPassInfo.renderArea, this, deviceHandle));
+            VulkanRenderPassCommandRecorder(vkCommandBuffer, renderPassInfo.renderArea, this, deviceHandle, false));
     return vulkanRenderPassCommandRecorderHandle;
+}
+
+Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassCommandRecorder(const Handle<Device_t> &deviceHandle,
+                                                                                           const Handle<CommandRecorder_t> &commandRecorderHandle,
+                                                                                           const RenderPassCommandRecorderWithDynamicRenderingOptions &options)
+{
+#if defined(VK_KHR_dynamic_rendering)
+    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
+
+    uint32_t fbWidth = options.framebufferWidth;
+    uint32_t fbHeight = options.framebufferHeight;
+    uint32_t fbArrayLayers = options.framebufferArrayLayers;
+
+    bool shouldFetchTextureToDetermineFBDimensions = (fbWidth == 0 || fbHeight == 0) || fbArrayLayers == 0;
+
+    // Fill Color Attachments Info
+    std::vector<VkRenderingAttachmentInfoKHR> colorAttachmentsInfo;
+    colorAttachmentsInfo.reserve(options.colorAttachments.size());
+    for (const ColorAttachment &attachment : options.colorAttachments) {
+        VulkanTextureView *view = getTextureView(attachment.view);
+        if (!view) {
+            SPDLOG_LOGGER_ERROR(Logger::logger(), "Invalid texture view for Attachment");
+            return {};
+        }
+
+        // If no FB dimensions set, determine these by retrieving the texture attached to the view
+        if (shouldFetchTextureToDetermineFBDimensions) {
+            VulkanTexture *texture = getTexture(view->textureHandle);
+            if (!texture) {
+                SPDLOG_LOGGER_ERROR(Logger::logger(), "Invalid texture for Attachment");
+                return {};
+            }
+
+            if ((fbWidth == 0 || fbHeight == 0)) {
+                // Take the dimensions of the first attachment as the framebuffer dimensions
+                fbWidth = texture->extent.width;
+                fbHeight = texture->extent.height;
+            }
+
+            if (fbArrayLayers == 0) {
+                fbArrayLayers = texture->arrayLayers;
+            }
+
+            shouldFetchTextureToDetermineFBDimensions = false;
+        }
+
+        VulkanTextureView *resolveView = nullptr;
+        if (attachment.resolveView.isValid()) {
+            resolveView = getTextureView(attachment.resolveView);
+            if (!resolveView) {
+                SPDLOG_LOGGER_ERROR(Logger::logger(), "Invalid resolve texture view for Attachment");
+                return {};
+            }
+        }
+
+        VkClearValue vkClearValue = {};
+        vkClearValue.color.uint32[0] = attachment.clearValue.uint32[0];
+        vkClearValue.color.uint32[1] = attachment.clearValue.uint32[1];
+        vkClearValue.color.uint32[2] = attachment.clearValue.uint32[2];
+        vkClearValue.color.uint32[3] = attachment.clearValue.uint32[3];
+
+        colorAttachmentsInfo.emplace_back(VkRenderingAttachmentInfoKHR{
+                .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR,
+                .pNext = nullptr,
+                .imageView = view->imageView,
+                .imageLayout = textureLayoutToVkImageLayout(attachment.layout),
+                .resolveMode = (resolveView) ? VK_RESOLVE_MODE_AVERAGE_BIT : VK_RESOLVE_MODE_NONE,
+                .resolveImageView = (resolveView) ? resolveView->imageView : VK_NULL_HANDLE,
+                .resolveImageLayout = textureLayoutToVkImageLayout(attachment.layout),
+                .loadOp = attachmentLoadOperationToVkAttachmentLoadOp(attachment.loadOperation),
+                .storeOp = attachmentStoreOperationToVkAttachmentStoreOp(attachment.storeOperation),
+                .clearValue = vkClearValue,
+        });
+    }
+
+    // Fill Depth & Stencil Attachments Info
+    VkRenderingAttachmentInfoKHR depthAttachmentsInfo{};
+    VkRenderingAttachmentInfoKHR stencilAttachmentsInfo{};
+    const bool hasDepthAttachment = options.depthStencilAttachment.view.isValid();
+    const bool hasStencilAttachment = hasDepthAttachment;
+
+    if (hasDepthAttachment) {
+        depthAttachmentsInfo.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR;
+        stencilAttachmentsInfo.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR;
+
+        VulkanTextureView *view = getTextureView(options.depthStencilAttachment.view);
+        if (!view) {
+            SPDLOG_LOGGER_ERROR(Logger::logger(), "Invalid texture view for Depth/Stencil Attachment");
+            return {};
+        }
+
+        VulkanTextureView *resolveView = nullptr;
+        if (options.depthStencilAttachment.resolveView.isValid()) {
+            resolveView = getTextureView(options.depthStencilAttachment.resolveView);
+            if (!resolveView) {
+                SPDLOG_LOGGER_ERROR(Logger::logger(), "Invalid resolve texture view Depth/Stencil Attachment");
+                return {};
+            }
+        }
+
+        depthAttachmentsInfo.imageView = view->imageView;
+        depthAttachmentsInfo.imageLayout = textureLayoutToVkImageLayout(options.depthStencilAttachment.layout);
+        depthAttachmentsInfo.resolveMode = (resolveView) ? resolveModeToVkResolveMode(options.depthStencilAttachment.depthResolveMode) : VK_RESOLVE_MODE_NONE;
+        depthAttachmentsInfo.resolveImageView = (resolveView) ? resolveView->imageView : VK_NULL_HANDLE;
+        depthAttachmentsInfo.resolveImageLayout = textureLayoutToVkImageLayout(options.depthStencilAttachment.layout);
+        depthAttachmentsInfo.loadOp = attachmentLoadOperationToVkAttachmentLoadOp(options.depthStencilAttachment.depthLoadOperation);
+        depthAttachmentsInfo.storeOp = attachmentStoreOperationToVkAttachmentStoreOp(options.depthStencilAttachment.depthStoreOperation);
+        depthAttachmentsInfo.clearValue.depthStencil.depth = options.depthStencilAttachment.depthClearValue;
+
+        stencilAttachmentsInfo.imageView = view->imageView;
+        stencilAttachmentsInfo.imageLayout = textureLayoutToVkImageLayout(options.depthStencilAttachment.layout),
+        stencilAttachmentsInfo.resolveMode = (resolveView) ? resolveModeToVkResolveMode(options.depthStencilAttachment.stencilResolveMode) : VK_RESOLVE_MODE_NONE;
+        stencilAttachmentsInfo.resolveImageView = (resolveView) ? resolveView->imageView : VK_NULL_HANDLE;
+        stencilAttachmentsInfo.resolveImageLayout = textureLayoutToVkImageLayout(options.depthStencilAttachment.layout);
+        stencilAttachmentsInfo.loadOp = attachmentLoadOperationToVkAttachmentLoadOp(options.depthStencilAttachment.stencilLoadOperation);
+        stencilAttachmentsInfo.storeOp = attachmentStoreOperationToVkAttachmentStoreOp(options.depthStencilAttachment.stencilStoreOperation);
+        stencilAttachmentsInfo.clearValue.depthStencil.stencil = options.depthStencilAttachment.stencilClearValue;
+    }
+
+    // Retrieve Command Buffer
+    VulkanCommandRecorder *vulkanCommandRecorder = m_commandRecorders.get(commandRecorderHandle);
+    if (!vulkanCommandRecorder) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Could not find a valid command recorder");
+        return {};
+    }
+    VkCommandBuffer vkCommandBuffer = vulkanCommandRecorder->commandBuffer;
+
+    // Fill up dynamic rendering struct
+    VkRenderingInfoKHR renderingInfo{};
+    renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO_KHR;
+
+    // Render area - assume full view area for now. Can expose as an option later if needed.
+    renderingInfo.renderArea = {
+        .offset = { .x = 0, .y = 0 },
+        .extent = { .width = fbWidth, .height = fbHeight }
+    };
+    renderingInfo.layerCount = fbArrayLayers;
+    renderingInfo.layerCount = fbArrayLayers;
+
+    const uint32_t multiViewMaskMask = uint32_t(1 << options.viewCount) - 1;
+    renderingInfo.viewMask = (options.viewCount > 1) ? multiViewMaskMask : 0;
+
+    renderingInfo.colorAttachmentCount = colorAttachmentsInfo.size();
+    renderingInfo.pColorAttachments = colorAttachmentsInfo.data();
+    renderingInfo.pDepthAttachment = hasDepthAttachment ? &depthAttachmentsInfo : nullptr;
+    renderingInfo.pStencilAttachment = hasStencilAttachment ? &stencilAttachmentsInfo : nullptr;
+
+    vulkanDevice->vkCmdBeginRenderingKHR(vkCommandBuffer, &renderingInfo);
+
+    const auto vulkanRenderPassCommandRecorderHandle = m_renderPassCommandRecorders.emplace(
+            VulkanRenderPassCommandRecorder(vkCommandBuffer, renderingInfo.renderArea, this, deviceHandle, true));
+    return vulkanRenderPassCommandRecorderHandle;
+#else
+    SPDLOG_LOGGER_ERROR(Logger::logger(), "Dynamic Rendering not supported by this Vulkan SDK");
+    return {};
+#endif
 }
 
 VulkanRenderPassCommandRecorder *VulkanResourceManager::getRenderPassCommandRecorder(const Handle<RenderPassCommandRecorder_t> &handle) const

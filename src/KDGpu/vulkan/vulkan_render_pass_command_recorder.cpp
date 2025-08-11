@@ -21,11 +21,13 @@ namespace KDGpu {
 VulkanRenderPassCommandRecorder::VulkanRenderPassCommandRecorder(VkCommandBuffer _commandBuffer,
                                                                  VkRect2D _renderArea,
                                                                  VulkanResourceManager *_vulkanResourceManager,
-                                                                 const Handle<Device_t> &_deviceHandle)
+                                                                 const Handle<Device_t> &_deviceHandle,
+                                                                 bool _dynamicRendering)
     : commandBuffer(_commandBuffer)
     , renderArea(_renderArea)
     , vulkanResourceManager(_vulkanResourceManager)
     , deviceHandle(_deviceHandle)
+    , dynamicRendering(_dynamicRendering)
 {
 }
 
@@ -301,13 +303,22 @@ void VulkanRenderPassCommandRecorder::pushBindGroup(uint32_t group, const std::v
 
 void VulkanRenderPassCommandRecorder::nextSubpass()
 {
-    // For now we assume renderpass/subpass are always recorded inline (primary command buffer)
-    vkCmdNextSubpass(commandBuffer, VK_SUBPASS_CONTENTS_INLINE);
+    if (!dynamicRendering) {
+        // For now we assume renderpass/subpass are always recorded inline (primary command buffer)
+        vkCmdNextSubpass(commandBuffer, VK_SUBPASS_CONTENTS_INLINE);
+    }
 }
 
 void VulkanRenderPassCommandRecorder::end()
 {
-    vkCmdEndRenderPass(commandBuffer);
+    if (dynamicRendering) {
+#if defined(VK_KHR_dynamic_rendering)
+        VulkanDevice *device = vulkanResourceManager->getDevice(deviceHandle);
+        device->vkCmdEndRenderingKHR(commandBuffer);
+#endif
+    } else {
+        vkCmdEndRenderPass(commandBuffer);
+    }
 }
 
 } // namespace KDGpu
