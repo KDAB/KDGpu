@@ -72,7 +72,10 @@ struct VulkanFramebufferKey {
 struct VulkanFramebuffer {
     explicit VulkanFramebuffer(VkFramebuffer _framebuffer);
 
+    inline static int DefaultScore = 5;
+
     VkFramebuffer framebuffer{ VK_NULL_HANDLE };
+    int score{ DefaultScore };
 };
 
 } // namespace KDGpu

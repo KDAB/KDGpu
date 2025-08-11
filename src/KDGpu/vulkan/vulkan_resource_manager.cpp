@@ -2203,8 +2203,31 @@ void VulkanResourceManager::deleteCommandBuffer(const Handle<CommandBuffer_t> &h
     for (const Handle<Buffer_t> buf : commandBuffer->temporaryBuffersToRelease)
         deleteBuffer(buf);
 
-    vkFreeCommandBuffers(vulkanDevice->device, commandBuffer->commandPool, 1, &commandBuffer->commandBuffer);
+    // Destroy Framebuffers from device that haven't been used for a while
+    std::unordered_map<VulkanFramebufferKey, Handle<Framebuffer_t>> &deviceFramebuffers = vulkanDevice->framebuffers;
 
+    auto it = deviceFramebuffers.begin();
+    while (it != deviceFramebuffers.end()) {
+        const auto fbHandle = it->second;
+        VulkanFramebuffer *fb = m_framebuffers.get(fbHandle);
+
+        // Decrement FB scrore
+        --(fb->score);
+
+        // Release FB if score indicates it has not be used for a while
+        if (fb->score <= 0) {
+            // Destroy VkFramebuffer and remove from Framebuffer Pool
+            vkDestroyFramebuffer(vulkanDevice->device, fb->framebuffer, nullptr);
+            m_framebuffers.remove(fbHandle);
+
+            // Erase entry from VulkanDevice
+            it = deviceFramebuffers.erase(it);
+        } else {
+            ++it;
+        }
+    }
+
+    vkFreeCommandBuffers(vulkanDevice->device, commandBuffer->commandPool, 1, &commandBuffer->commandBuffer);
     m_commandBuffers.remove(handle);
 }
 
@@ -2438,6 +2461,10 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
         SPDLOG_LOGGER_ERROR(Logger::logger(), "Could not create or find a framebuffer");
         return {};
     }
+
+    // Reset Framebuffer Score to indicate it is being used
+    vulkanFramebuffer->score = VulkanFramebuffer::DefaultScore;
+
     VkFramebuffer vkFramebuffer = vulkanFramebuffer->framebuffer;
 
     VkRenderPassBeginInfo renderPassInfo = {};
