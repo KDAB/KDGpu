@@ -35,13 +35,14 @@ public:
     uint32_t index() const noexcept { return m_index; }
     uint32_t generation() const noexcept { return m_generation; }
 
-private:
+protected:
     explicit Handle(uint32_t index, uint32_t generation)
         : m_index(index)
         , m_generation(generation)
     {
     }
 
+private:
     uint32_t m_index;
     uint32_t m_generation;
 
