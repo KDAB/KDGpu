@@ -74,7 +74,12 @@ protected:
     virtual void resize() = 0;
 
     virtual void drawImGuiOverlay(ImGuiContext *ctx);
-    virtual void renderImGuiOverlay(KDGpu::RenderPassCommandRecorder *recorder, uint32_t inFlightIndex = 0, KDGpu::RenderPass *currentRenderPass = nullptr, int lastSubpassIndex = 0);
+    virtual void renderImGuiOverlay(KDGpu::RenderPassCommandRecorder *recorder,
+                                    uint32_t inFlightIndex = 0,
+                                    KDGpu::RenderPass *currentRenderPass = nullptr,
+                                    int lastSubpassIndex = 0);
+    virtual void renderImGuiOverlayDynamic(KDGpu::RenderPassCommandRecorder *recorder,
+                                           uint32_t inFlightIndex = 0);
     void registerImGuiOverlayDrawFunction(const std::function<void(ImGuiContext *)> &func);
     void clearImGuiOverlayDrawFunctions();
     void recreateImGuiOverlay();

@@ -61,4 +61,13 @@ void ImGuiItem::render(KDGpu::RenderPassCommandRecorder *recorder, const KDGpu::
         m_renderer->recordCommands(recorder, extent, inFlightIndex, currentRenderPass, lastSubpassIndex);
 }
 
+void ImGuiItem::renderDynamic(KDGpu::RenderPassCommandRecorder *recorder,
+                              const KDGpu::Extent2D &extent,
+                              uint32_t inFlightIndex)
+{
+    // Update the geometry buffers
+    if (m_renderer->updateGeometryBuffers(inFlightIndex))
+        m_renderer->recordCommands(recorder, extent, inFlightIndex, nullptr, 0, true);
+}
+
 } // namespace KDGpuExample

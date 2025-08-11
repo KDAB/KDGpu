@@ -1,0 +1,42 @@
+/*
+  This file is part of KDGpu.
+
+  SPDX-FileCopyrightText: 2025 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+
+  SPDX-License-Identifier: MIT
+
+  Contact KDAB at <info@kdab.com> for commercial licensing options.
+*/
+
+/**
+    @page hello_triangle_msaa_dynamic_rendering Hello Triangle MSAA Dynamic Rendering
+    @ingroup kdgpu-examples
+
+    @brief This example shows how to use KDGpu with Dynamic Rendering API (no RenderPass).
+
+    This example showcases the minimal changes needed to use dynamic rendering on the existing hello triangle msaa example. Read the [Hello Triangle MSAA](#hello_triangle_msaa) example to see the differences.
+
+    The first place to look is ``mkPipelineOptions``, where the dynamicRendering flag is set. This function is called when the GraphicsPipeline are created and tells our pipeline will be using dynamic rendering.
+
+       @snippet hello_triangle_msaa_dynamic_renderering/hello_triangle_msaa_dynamic_renderering.cpp 1
+
+    Next, we create the texture and a view with the correct multisampling configuration and new dimensions, which we will attach to the render pass option struct. Note that we use the type KDGpu::RenderPassCommandRecorderWithDynamicRenderingOptions instead of KDGpu::RenderPassCommandRecorderOptions.
+    Whilst using RenderPassCommandRecorderOptions would lead to an internal implicit RenderPass being created to hold the attachment specifications, using KDGpu::RenderPassCommandRecorderWithDynamicRenderingOptions will use Vulkan's dynamic rendering extension to more efficiently and conveniently specify
+    these information. Internally this means we don't have to maintain RenderPasses, Framebuffers ...
+
+       @snippet hello_triangle_msaa_dynamic_renderering/hello_triangle_msaa_dynamic_renderering.cpp 2
+
+    The rendering submission itself doesn't change much. The noticeable change is we call renderImGuiOverlayDynamic instead of renderImGuiOverlay to render the ImGui overlay. That is so that we use a version that has a pipeline compatible with dynamic rendering.
+
+       @snippet hello_triangle_msaa_dynamic_renderering/hello_triangle_msaa_dynamic_renderering.cpp 4
+
+    Notice that with dynamic rendering, there is no implicit initial and final layout conversions of the attachments. This means we have to take care of doing this part ourselves.
+
+    Prior to rendering:
+
+       @snippet hello_triangle_msaa_dynamic_renderering/hello_triangle_msaa_dynamic_renderering.cpp 3
+
+   and after rendering, prior to presenting:
+
+       @snippet hello_triangle_msaa_dynamic_renderering/hello_triangle_msaa_dynamic_renderering.cpp 5
+*/
