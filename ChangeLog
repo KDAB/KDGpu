@@ -1,3 +1,8 @@
+- v0.10.0
+  - Add support for dynamic rendering
+  - Use vcpkg for dependency management
+  - Fix Device initialization when using RenderDoc
+  - Fix synchronization issue with presentation
 - v0.9.3
   - Fix hash collision in AttachmentKey
   - Release Framebuffers when referenced TextureViews are destroyed
