@@ -1,3 +1,5 @@
+- v0.10.0
+  - Add support for dynamic rendering
 - v0.9.3
   - Fix hash collision in AttachmentKey
   - Release Framebuffers when referenced TextureViews are destroyed
