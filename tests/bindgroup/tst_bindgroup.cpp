@@ -25,6 +25,7 @@
 #include <KDGpu/sampler.h>
 #include <KDGpu/texture.h>
 #include <KDGpu/vulkan/vulkan_graphics_api.h>
+#include <KDGpu/vulkan/vulkan_bind_group.h>
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest.h>
@@ -33,7 +34,7 @@ using namespace KDGpu;
 
 TEST_SUITE("BindGroup")
 {
-    std::unique_ptr<GraphicsApi> api = std::make_unique<VulkanGraphicsApi>();
+    std::unique_ptr<VulkanGraphicsApi> api = std::make_unique<VulkanGraphicsApi>();
     Instance instance = api->createInstance(InstanceOptions{
             .applicationName = "BindGroup",
             .applicationVersion = KDGPU_MAKE_API_VERSION(0, 1, 0, 0) });
@@ -1008,5 +1009,62 @@ TEST_SUITE("BindGroup")
 
             // THEN -> Should have Error in the console + Validation Error
         }
+    }
+
+    TEST_CASE("BindGroup from implicit pool Exhaustion handling")
+    {
+        // GIVEN (Each internal bindgroup pools only has room for 8 storages at once)
+        const BindGroupLayoutOptions bindGroupLayoutOptions = {
+            .bindings = {
+                    {
+                            .binding = 0,
+                            .count = 8,
+                            .resourceType = ResourceBindingType::StorageImage,
+                            .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit),
+                    },
+            },
+        };
+
+        const BindGroupLayout bindGroupLayout = device.createBindGroupLayout(bindGroupLayoutOptions);
+
+        // WHEN - Create bind groups up to the pool limit
+        const BindGroupOptions bindGroupOptions = {
+            .layout = bindGroupLayout,
+        };
+
+        BindGroup b1 = device.createBindGroup(bindGroupOptions);
+        BindGroup b2 = device.createBindGroup(bindGroupOptions);
+
+        // THEN
+        CHECK(b1.isValid());
+        CHECK(b2.isValid());
+
+        const VulkanBindGroup *vB1 = api->resourceManager()->getBindGroup(b1.handle());
+        const VulkanBindGroup *vB2 = api->resourceManager()->getBindGroup(b2.handle());
+
+        // 1) We have an internal BindGroupPool that we use to allocate BindGroups.
+        //    This BindGroupPool should only allow to allocate up to a fixed amount of BindGroups.
+        // 2) If a BindGroup allocation against a pool fails (VK_ERROR_OUT_OF_POOL_MEMORY),
+        //    it means that our internal BindGroupPool is full. So we create a new one and allocate
+        //    the BindGroup against it.
+        // 3) For each BindGroup we allocate, we need the BindGroup to record a handle to the BindGroupPool
+        //    that was used for its allocation. That is needed so that we can release it from the right pool
+        //    upon destruction.
+
+        // This test is an attempt at making sure that when we end up with BindGroups allocated from different
+        // internal BindGroupPools(due to running out of space), each BindGroup references the right pool.
+
+        // However it appears that depending on the driver, vulkan implementation ... BindGroup allocations that
+        // reach past the official capacity of a BindGroupPool, and which should therefore fail, don't. So instead
+        // of having 2 BindGroups held by 2 different pools, you have 2 BindGroups held by the same pool, hence why
+        // the check below is commented.
+
+        // CHECK(vB1->bindGroupPoolHandle != vB2->bindGroupPoolHandle);
+
+        // WHEN -> Releasing bind groups
+        b1 = {};
+        b2 = {};
+
+        // THEN -> No validation errors (BindGroups are released against the BindGroupPool they were created with)
     }
 }

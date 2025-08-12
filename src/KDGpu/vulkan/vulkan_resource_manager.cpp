@@ -2988,8 +2988,10 @@ Handle<BindGroup_t> VulkanResourceManager::createBindGroup(const Handle<Device_t
     // If we have run out of pool memory and rely on internalPools, create a new internal pool and retry
     if (result == VK_ERROR_OUT_OF_POOL_MEMORY || result == VK_ERROR_FRAGMENTED_POOL) {
         if (useInternalPool) {
+            SPDLOG_LOGGER_INFO(Logger::logger(), "Internal BindGroup pool out of memory, creating additional pool");
             vulkanDevice->descriptorSetPools.emplace_back(createBindGroupPool(deviceHandle, defaultInternalPoolOptions));
-            vulkanBindGroupPool = getBindGroupPool(vulkanDevice->descriptorSetPools.back());
+            poolHandle = vulkanDevice->descriptorSetPools.back();
+            vulkanBindGroupPool = getBindGroupPool(poolHandle);
             result = allocateDescriptorSet(vulkanDevice->device, vulkanBindGroupPool->descriptorPool,
                                            bindGroupLayout, descriptorSet, options.maxVariableArrayLength);
         } else {
@@ -3013,7 +3015,11 @@ Handle<BindGroup_t> VulkanResourceManager::createBindGroup(const Handle<Device_t
         SPDLOG_LOGGER_ERROR(Logger::logger(), "BindGroupPool does not support individual BindGroup free. Please change BindGroupPool creation flags or set implicitFree to false.");
     }
 
-    const auto vulkanBindGroupHandle = m_bindGroups.emplace(VulkanBindGroup(descriptorSet, poolHandle, this, deviceHandle, options.implicitFree));
+    const auto vulkanBindGroupHandle = m_bindGroups.emplace(VulkanBindGroup(descriptorSet,
+                                                                            poolHandle,
+                                                                            this,
+                                                                            deviceHandle,
+                                                                            options.implicitFree));
     // Record new bindgroup handle against pool
     vulkanBindGroupPool->addBindGroup(vulkanBindGroupHandle);
 
