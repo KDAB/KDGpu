@@ -130,7 +130,7 @@ message(STATUS "Vcpkg manifest features: ${VCPKG_MANIFEST_FEATURES}")
 project(
     KDGpu
     LANGUAGES CXX C
-    VERSION 0.9.3
+    VERSION 0.10.0
 )
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
