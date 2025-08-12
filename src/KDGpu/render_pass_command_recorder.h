@@ -16,6 +16,7 @@
 #include <KDGpu/graphics_api.h>
 
 #include <vector>
+#include <optional>
 
 namespace KDGpu {
 
@@ -132,6 +133,15 @@ public:
                        const Handle<PipelineLayout_t> &pipelineLayout = Handle<PipelineLayout_t>());
 
     void nextSubpass();
+
+    // Remap Dynamic Rendering attachments to input attachments for the following draw calls
+    // (e.g RenderTarget Color[0] -> Input[2])
+    void setInputAttachmentMapping(std::vector<uint32_t> colorAttachmentIndices,
+                                   std::optional<uint32_t> depthAttachmentIndex,
+                                   std::optional<uint32_t> stencilAttachmentIndex);
+
+    // Remap Fragment Outputs for the following draw calls [e.g RenderTarget Color[0] -> Output[2]]
+    void setOutputAttachmentMapping(std::vector<uint32_t> remappedOutputs);
 
     void end();
 

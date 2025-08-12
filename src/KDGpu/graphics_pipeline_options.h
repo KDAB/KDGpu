@@ -16,6 +16,7 @@
 #include <KDGpu/utils/hash_utils.h>
 
 #include <vector>
+#include <optional>
 
 namespace KDGpu {
 
@@ -142,6 +143,21 @@ struct DynamicStateOptions {
     friend bool operator==(const DynamicStateOptions &, const DynamicStateOptions &) = default;
 };
 
+struct DynamicAttachmentMapping {
+    bool enabled;
+    uint32_t remappedIndex;
+};
+
+struct DynamicInputAttachmentLocations {
+    std::vector<DynamicAttachmentMapping> inputColorAttachments;
+    DynamicAttachmentMapping inputDepthAttachment;
+    DynamicAttachmentMapping inputStencilAttachment;
+};
+
+struct DynamicOutputAttachmentLocations {
+    std::vector<DynamicAttachmentMapping> outputAttachments;
+};
+
 struct GraphicsPipelineOptions {
     std::string_view label;
     std::vector<ShaderStage> shaderStages;
@@ -160,7 +176,12 @@ struct GraphicsPipelineOptions {
     uint32_t subpassIndex{ 0 };
 
     // Only available if DynamicRendering feature is available and enabled
-    bool dynamicRendering{ false };
+    struct DynamicRendering {
+        bool enabled = false;
+        std::optional<DynamicInputAttachmentLocations> dynamicInputLocations;
+        std::optional<DynamicOutputAttachmentLocations> dynamicOutputLocations;
+    };
+    DynamicRendering dynamicRendering{};
 
     friend bool operator==(const GraphicsPipelineOptions &, const GraphicsPipelineOptions &) = default;
 };

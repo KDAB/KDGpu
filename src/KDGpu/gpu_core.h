@@ -653,6 +653,7 @@ enum class TextureLayout {
     VideoEncodeDpb = 1000299002,
     ReadOnlyOptimal = 1000314000,
     AttachmentOptimal = 1000314001,
+    DynamicLocalRead = 1000232000,
     MaxEnum = 0x7fffffff
 };
 

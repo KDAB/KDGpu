@@ -136,6 +136,9 @@ std::vector<const char *> getDefaultRequestedDeviceExtensions()
 #if defined(VK_KHR_dynamic_rendering)
         VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
 #endif
+#if defined(VK_KHR_dynamic_rendering_local_read)
+        VK_KHR_DYNAMIC_RENDERING_LOCAL_READ_EXTENSION_NAME
+#endif
     };
 
     return extensions;

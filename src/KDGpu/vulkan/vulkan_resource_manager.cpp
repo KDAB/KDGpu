@@ -630,6 +630,15 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     }
 #endif
 
+#if defined(VK_KHR_dynamic_rendering_local_read)
+    if (options.requestedFeatures.dynamicRenderingLocalRead) {
+        VkPhysicalDeviceDynamicRenderingLocalReadFeaturesKHR dynamicLocalReadFeatures{};
+        dynamicLocalReadFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_LOCAL_READ_FEATURES_KHR;
+        dynamicLocalReadFeatures.dynamicRenderingLocalRead = static_cast<bool>(options.requestedFeatures.dynamicRenderingLocalRead);
+        addToChain(&dynamicLocalReadFeatures);
+    }
+#endif
+
     VkDeviceCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     createInfo.pNext = &physicalDeviceFeatures2;
@@ -1598,7 +1607,7 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
 {
     VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
 
-    if (options.dynamicRendering) {
+    if (options.dynamicRendering.enabled) {
 #if !defined(VK_KHR_dynamic_rendering)
         SPDLOG_LOGGER_ERROR(Logger::logger(), "Dynamic Rendering not supported by this Vulkan SDK");
         return {};
@@ -1781,7 +1790,7 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     VkRenderPass vkRenderPass = VK_NULL_HANDLE;
     Handle<RenderPass_t> vulkanRenderPassHandle = options.renderPass;
 
-    if (!vulkanRenderPassHandle.isValid() && !options.dynamicRendering) {
+    if (!vulkanRenderPassHandle.isValid() && !options.dynamicRendering.enabled) {
         // Create a render pass that serves to specify the layout / compatibility of
         // concrete render passes and framebuffers used to perform rendering with this
         // pipeline at command record time. We only do this if the pipeline outputs to
@@ -1821,9 +1830,24 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     pipelineInfo.pDynamicState = &dynamicStateInfo;
     pipelineInfo.layout = vulkanPipelineLayout->pipelineLayout;
 
+    VkBaseOutStructure *chainCurrent = reinterpret_cast<VkBaseOutStructure *>(&pipelineInfo);
+    auto addToChain = [&chainCurrent](auto *next) {
+        auto n = reinterpret_cast<VkBaseOutStructure *>(next);
+        chainCurrent->pNext = n;
+        chainCurrent = n;
+    };
+
 #if defined(VK_KHR_dynamic_rendering)
     VkPipelineRenderingCreateInfoKHR pipelineDynamicRenderingCreateInfo{};
-    if (options.dynamicRendering) {
+    VkRenderingInputAttachmentIndexInfoKHR inputAttachmentLocations{};
+    VkRenderingAttachmentLocationInfoKHR outputAttachmentLocations{};
+
+    std::vector<uint32_t> outputLocations;
+    std::vector<uint32_t> inputColorLocations;
+    uint32_t inputDepthLocation{ VK_ATTACHMENT_UNUSED };
+    uint32_t inputStencilLocation{ VK_ATTACHMENT_UNUSED };
+
+    if (options.dynamicRendering.enabled) {
         assert(!vulkanRenderPassHandle.isValid()); // Dynamic Rendering is not compatible with explicit RenderPasses
         assert(vulkanDevice->requestedFeatures.dynamicRendering); // Dynamic Rendering feature should be enabled
         pipelineDynamicRenderingCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR;
@@ -1835,8 +1859,39 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
         pipelineDynamicRenderingCreateInfo.colorAttachmentCount = attachmentCount;
         pipelineDynamicRenderingCreateInfo.pColorAttachmentFormats = vkColorFormats.data();
         pipelineDynamicRenderingCreateInfo.depthAttachmentFormat = formatToVkFormat(options.depthStencil.format);
-        pipelineDynamicRenderingCreateInfo.stencilAttachmentFormat = formatToVkFormat(options.depthStencil.format);
-        pipelineInfo.pNext = &pipelineDynamicRenderingCreateInfo;
+        pipelineDynamicRenderingCreateInfo.stencilAttachmentFormat = hasStencilFormat(options.depthStencil.format) ? formatToVkFormat(options.depthStencil.format) : VK_FORMAT_UNDEFINED;
+        addToChain(&pipelineDynamicRenderingCreateInfo);
+
+        inputAttachmentLocations.sType = VK_STRUCTURE_TYPE_RENDERING_INPUT_ATTACHMENT_INDEX_INFO_KHR;
+        outputAttachmentLocations.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_LOCATION_INFO_KHR;
+
+        // Input Attachments Locations
+        if (options.dynamicRendering.dynamicInputLocations) {
+            inputDepthLocation = (options.dynamicRendering.dynamicInputLocations->inputDepthAttachment.enabled) ? options.dynamicRendering.dynamicInputLocations->inputDepthAttachment.remappedIndex : VK_ATTACHMENT_UNUSED;
+            inputStencilLocation = (options.dynamicRendering.dynamicInputLocations->inputStencilAttachment.enabled) ? options.dynamicRendering.dynamicInputLocations->inputStencilAttachment.remappedIndex : VK_ATTACHMENT_UNUSED;
+
+            inputAttachmentLocations.pDepthInputAttachmentIndex = (options.dynamicRendering.dynamicInputLocations->inputDepthAttachment.enabled) ? &inputDepthLocation : nullptr;
+            inputAttachmentLocations.pStencilInputAttachmentIndex = (options.dynamicRendering.dynamicInputLocations->inputStencilAttachment.enabled) ? &inputStencilLocation : nullptr;
+
+            inputColorLocations.reserve(options.dynamicRendering.dynamicInputLocations->inputColorAttachments.size());
+            for (const DynamicAttachmentMapping &mapping : options.dynamicRendering.dynamicInputLocations->inputColorAttachments) {
+                inputColorLocations.push_back(mapping.enabled ? mapping.remappedIndex : VK_ATTACHMENT_UNUSED);
+            }
+            inputAttachmentLocations.colorAttachmentCount = inputColorLocations.size();
+            inputAttachmentLocations.pColorAttachmentInputIndices = inputColorLocations.data();
+            addToChain(&inputAttachmentLocations);
+        }
+
+        // Output Attachments Locations
+        if (options.dynamicRendering.dynamicOutputLocations) {
+            outputLocations.reserve(options.dynamicRendering.dynamicOutputLocations->outputAttachments.size());
+            for (const DynamicAttachmentMapping &mapping : options.dynamicRendering.dynamicOutputLocations->outputAttachments) {
+                outputLocations.push_back(mapping.enabled ? mapping.remappedIndex : VK_ATTACHMENT_UNUSED);
+            }
+            outputAttachmentLocations.colorAttachmentCount = outputLocations.size();
+            outputAttachmentLocations.pColorAttachmentLocations = outputLocations.data();
+            addToChain(&outputAttachmentLocations);
+        }
     } else
 #endif
     {
@@ -1864,7 +1919,7 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
             dynamicStates,
             deviceHandle,
             options.layout,
-            options.dynamicRendering));
+            options.dynamicRendering.enabled));
 
     return vulkanGraphicsPipelineHandle;
 }

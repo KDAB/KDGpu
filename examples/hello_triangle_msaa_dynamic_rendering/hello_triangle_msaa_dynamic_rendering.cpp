@@ -167,7 +167,9 @@ void HelloTriangleMSAAWithDynamicRendering::initializeScene()
             .multisample = {
                     .samples = samples,
             },
-            .dynamicRendering = true, // Mark that we want to use it with dynamic rendering
+            .dynamicRendering = {
+                    .enabled = true, // Mark that we want to use it with dynamic rendering
+            },
             //![1]
         };
     };

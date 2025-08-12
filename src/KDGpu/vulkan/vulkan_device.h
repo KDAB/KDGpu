@@ -167,6 +167,11 @@ struct KDGPU_EXPORT VulkanDevice {
     PFN_vkCmdEndRenderingKHR vkCmdEndRenderingKHR{ nullptr };
 #endif
 
+#if defined(VK_KHR_dynamic_rendering_local_read)
+    PFN_vkCmdSetRenderingAttachmentLocationsKHR vkCmdSetRenderingAttachmentLocationsKHR{ nullptr };
+    PFN_vkCmdSetRenderingInputAttachmentIndicesKHR vkCmdSetRenderingInputAttachmentIndicesKHR{ nullptr };
+#endif
+
     bool isOwned{ true };
 };
 
