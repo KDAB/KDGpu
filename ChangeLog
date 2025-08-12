@@ -1,3 +1,5 @@
+- v0.9.2
+  - Fix wrong internal pool handle set on BindGroups
 - v0.9.1
   - Fix compilation with some gcc versions
   - Resolve validation error when AccelerationStructures are not supported
