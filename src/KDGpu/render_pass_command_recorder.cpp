@@ -191,4 +191,18 @@ void RenderPassCommandRecorder::nextSubpass()
     apiRenderPassCommandRecorder->nextSubpass();
 }
 
+void RenderPassCommandRecorder::setInputAttachmentMapping(std::vector<uint32_t> colorAttachmentIndices,
+                                                          std::optional<uint32_t> depthAttachmentIndex,
+                                                          std::optional<uint32_t> stencilAttachmentIndex)
+{
+    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    apiRenderPassCommandRecorder->setInputAttachmentMapping(colorAttachmentIndices, depthAttachmentIndex, stencilAttachmentIndex);
+}
+
+void RenderPassCommandRecorder::setOutputAttachmentMapping(std::vector<uint32_t> remappedOutputs)
+{
+    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    apiRenderPassCommandRecorder->setOutputAttachmentMapping(remappedOutputs);
+}
+
 } // namespace KDGpu

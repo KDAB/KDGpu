@@ -1069,7 +1069,9 @@ TEST_SUITE("RenderPassCommandRecorder")
                         { .format = Format::R8G8B8A8_UNORM },
                 },
                 .depthStencil = { .format = Format::D24_UNORM_S8_UINT, .depthWritesEnabled = true, .depthCompareOperation = CompareOperation::Less },
-                .dynamicRendering = true,
+                .dynamicRendering = {
+                        .enabled = true,
+                },
         });
 
         // THEN

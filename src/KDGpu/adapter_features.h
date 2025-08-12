@@ -115,6 +115,7 @@ struct AdapterFeatures {
     bool hostImageCopy;
     bool samplerYCbCrConversion;
     bool dynamicRendering;
+    bool dynamicRenderingLocalRead;
 };
 
 /*! @} */

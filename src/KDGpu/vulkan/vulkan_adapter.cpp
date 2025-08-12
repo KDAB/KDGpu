@@ -472,6 +472,12 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
     addToChain(&dynamicRenderingFeatures);
 #endif
 
+#if defined(VK_KHR_dynamic_rendering_local_read)
+    VkPhysicalDeviceDynamicRenderingLocalReadFeaturesKHR dynamicLocalReadFeatures{};
+    dynamicLocalReadFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_LOCAL_READ_FEATURES_KHR;
+    addToChain(&dynamicLocalReadFeatures);
+#endif
+
     vkGetPhysicalDeviceFeatures2(physicalDevice, &deviceFeatures2);
     const VkPhysicalDeviceFeatures &deviceFeatures = deviceFeatures2.features;
 
@@ -570,6 +576,7 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
         .hostImageCopy = false,
         .samplerYCbCrConversion = false,
         .dynamicRendering = false,
+        .dynamicRenderingLocalRead = false,
     };
 
 #if defined(VK_KHR_acceleration_structure)
@@ -605,6 +612,10 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
 
 #if defined(VK_KHR_dynamic_rendering)
     features.dynamicRendering = static_cast<bool>(dynamicRenderingFeatures.dynamicRendering);
+#endif
+
+#if defined(VK_KHR_dynamic_rendering_local_read)
+    features.dynamicRenderingLocalRead = static_cast<bool>(dynamicLocalReadFeatures.dynamicRenderingLocalRead);
 #endif
 
     return features;

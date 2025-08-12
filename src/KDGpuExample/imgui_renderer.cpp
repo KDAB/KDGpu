@@ -297,7 +297,7 @@ void ImGuiRenderer::recordCommands(KDGpu::RenderPassCommandRecorder *recorder,
         m_pipelineInfo.renderPass = currentRenderPass->handle();
         m_pipelineInfo.subpassIndex = lastSubpassIndex;
     }
-    m_pipelineInfo.dynamicRendering = dynamicRendering;
+    m_pipelineInfo.dynamicRendering.enabled = dynamicRendering;
 
     if (!m_pipeline.isValid())
         m_pipeline = m_device->createGraphicsPipeline(m_pipelineInfo);

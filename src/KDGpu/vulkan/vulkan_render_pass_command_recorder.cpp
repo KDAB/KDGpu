@@ -309,6 +309,48 @@ void VulkanRenderPassCommandRecorder::nextSubpass()
     }
 }
 
+void VulkanRenderPassCommandRecorder::setOutputAttachmentMapping(std::vector<uint32_t> remappedOutputs)
+{
+#if defined(VK_KHR_dynamic_rendering_local_read)
+    assert(dynamicRendering);
+    VulkanDevice *device = vulkanResourceManager->getDevice(deviceHandle);
+    if (device->vkCmdSetRenderingAttachmentLocationsKHR) {
+        VkRenderingAttachmentLocationInfoKHR locationInfo{};
+        locationInfo.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR;
+        locationInfo.colorAttachmentCount = remappedOutputs.size();
+        locationInfo.pColorAttachmentLocations = remappedOutputs.data();
+        device->vkCmdSetRenderingAttachmentLocationsKHR(commandBuffer, &locationInfo);
+    }
+#else
+    assert(false);
+#endif
+}
+
+void VulkanRenderPassCommandRecorder::setInputAttachmentMapping(std::vector<uint32_t> colorAttachmentIndices,
+                                                                std::optional<uint32_t> depthAttachmentIndex,
+                                                                std::optional<uint32_t> stencilAttachmentIndex)
+{
+#if defined(VK_KHR_dynamic_rendering_local_read)
+    assert(dynamicRendering);
+    VulkanDevice *device = vulkanResourceManager->getDevice(deviceHandle);
+    if (device->vkCmdSetRenderingInputAttachmentIndicesKHR) {
+        const uint32_t depthInputLocationIdx = depthAttachmentIndex ? *depthAttachmentIndex : VK_ATTACHMENT_UNUSED;
+        const uint32_t stencilInputLocationIdx = stencilAttachmentIndex ? *stencilAttachmentIndex : VK_ATTACHMENT_UNUSED;
+
+        VkRenderingInputAttachmentIndexInfoKHR locationInfo{};
+        locationInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INPUT_ATTACHMENT_INDEX_INFO_KHR;
+        locationInfo.colorAttachmentCount = colorAttachmentIndices.size();
+        locationInfo.pColorAttachmentInputIndices = colorAttachmentIndices.data();
+        locationInfo.pDepthInputAttachmentIndex = &depthInputLocationIdx;
+        locationInfo.pStencilInputAttachmentIndex = &stencilInputLocationIdx;
+
+        device->vkCmdSetRenderingInputAttachmentIndicesKHR(commandBuffer, &locationInfo);
+    }
+#else
+    assert(false);
+#endif
+}
+
 void VulkanRenderPassCommandRecorder::end()
 {
     if (dynamicRendering) {

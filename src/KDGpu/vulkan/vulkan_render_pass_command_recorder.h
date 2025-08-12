@@ -61,6 +61,11 @@ struct KDGPU_EXPORT VulkanRenderPassCommandRecorder {
     void pushConstant(const PushConstantRange &constantRange, const void *data, const Handle<PipelineLayout_t> &pipelineLayout = {});
     void pushBindGroup(uint32_t group, const std::vector<BindGroupEntry> &bindGroupEntries, const Handle<PipelineLayout_t> &pipelineLayout = {});
     void nextSubpass();
+    void setInputAttachmentMapping(std::vector<uint32_t> colorAttachmentIndices,
+                                   std::optional<uint32_t> depthAttachmentIndex,
+                                   std::optional<uint32_t> stencilAttachmentIndex);
+    void setOutputAttachmentMapping(std::vector<uint32_t> remappedOutputs);
+
     void end();
 
     VkCommandBuffer commandBuffer{ VK_NULL_HANDLE };
