@@ -76,11 +76,34 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
     return VK_FALSE;
 }
 
-bool findExtension(const std::vector<KDGpu::Extension> &extensions, const std::string_view &name)
+bool hasStencilFormat(KDGpu::Format f)
 {
-    const auto it = std::find_if(begin(extensions), end(extensions), [name](const KDGpu::Extension &ext) { return ext.name == name; });
-    return it != std::end(extensions);
+    switch (f) {
+    case KDGpu::Format::S8_UINT:
+    case KDGpu::Format::D16_UNORM_S8_UINT:
+    case KDGpu::Format::D24_UNORM_S8_UINT:
+    case KDGpu::Format::D32_SFLOAT_S8_UINT:
+        return true;
+    default:
+        return false;
+    }
 };
+
+bool hasExtension(const std::vector<KDGpu::Extension> &extensions, const std::string_view &name)
+{
+    const auto it = std::find_if(extensions.begin(),
+                                 extensions.end(),
+                                 [name](const KDGpu::Extension &ext) { return ext.name == name; });
+    return it != extensions.end();
+};
+
+bool hasExtension(const std::vector<const char *> &extensions, const char *targetExtension)
+{
+    const auto it = std::find_if(extensions.begin(),
+                                 extensions.end(),
+                                 [&](const char *ext) { return strcmp(ext, targetExtension) == 0; });
+    return it != extensions.end();
+}
 
 struct SpecializationConstantData {
     uint32_t byteSize;
@@ -194,7 +217,7 @@ Handle<Instance_t> VulkanResourceManager::createInstance(const InstanceOptions &
 
     const auto defaultRequestedExtensions = getDefaultRequestedInstanceExtensions();
     for (const char *requestedExtension : defaultRequestedExtensions) {
-        if (findExtension(availableExtensions, requestedExtension)) {
+        if (hasExtension(availableExtensions, requestedExtension)) {
             requestedInstanceExtensions.push_back(requestedExtension);
         } else {
             SPDLOG_LOGGER_WARN(Logger::logger(), "Unable to find default requested extension {}", requestedExtension);
@@ -202,7 +225,7 @@ Handle<Instance_t> VulkanResourceManager::createInstance(const InstanceOptions &
     }
 
     for (const std::string &userExtension : options.extensions) {
-        if (findExtension(availableExtensions, userExtension)) {
+        if (hasExtension(availableExtensions, userExtension)) {
             requestedInstanceExtensions.push_back(userExtension.c_str());
         } else {
             SPDLOG_LOGGER_WARN(Logger::logger(), "Unable to find user requested extensions {}", userExtension);
@@ -333,6 +356,23 @@ VulkanAdapter *VulkanResourceManager::getAdapter(const Handle<Adapter_t> &handle
 Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &adapterHandle, const DeviceOptions &options, std::vector<QueueRequest> &queueRequests)
 {
     VulkanAdapter *vulkanAdapter = getAdapter(adapterHandle);
+
+    // Merge requested device extensions and layers with our defaults
+    const auto availableDeviceExtensions = vulkanAdapter->extensions();
+    std::vector<const char *> requestedDeviceExtensions;
+    auto defaultRequestedDeviceExtensions = getDefaultRequestedDeviceExtensions();
+
+    // Add requested device extensions set by user in the options
+    for (const std::string &userRequestedExtension : options.extensions)
+        defaultRequestedDeviceExtensions.push_back(userRequestedExtension.c_str());
+
+    for (const char *requestedDeviceExtension : defaultRequestedDeviceExtensions) {
+        if (hasExtension(availableDeviceExtensions, requestedDeviceExtension)) {
+            requestedDeviceExtensions.push_back(requestedDeviceExtension);
+        } else {
+            SPDLOG_LOGGER_WARN(Logger::logger(), "Unable to find default requested device extension {}", requestedDeviceExtension);
+        }
+    }
 
     // This makes it easier to chain pNext pointers in the device createInfo struct especially when we
     // have a lot of them and some of them are optional.
@@ -486,14 +526,26 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     bufferDeviceFeature.bufferDeviceAddress = options.requestedFeatures.bufferDeviceAddress;
     addToChain(&bufferDeviceFeature);
 
+#if defined(VK_KHR_acceleration_structure)
     VkPhysicalDeviceAccelerationStructureFeaturesKHR accelerationStructureFeaturesKhr{};
-    VkPhysicalDeviceRayTracingPipelineFeaturesKHR raytracingFeaturesKhr{};
-    if (options.requestedFeatures.accelerationStructures && options.requestedFeatures.rayTracingPipeline) {
+    if (options.requestedFeatures.accelerationStructures) {
         // Enable raytracing acceleration structure
         accelerationStructureFeaturesKhr.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
         accelerationStructureFeaturesKhr.accelerationStructure = options.requestedFeatures.accelerationStructures;
         addToChain(&accelerationStructureFeaturesKhr);
+    }
+#endif
 
+#if defined(VK_KHR_ray_tracing_pipeline)
+    VkPhysicalDeviceRayTracingPipelineFeaturesKHR raytracingFeaturesKhr{};
+
+    // When running with RenderDoc (as of 1.39) it appears that options.requestedFeatures.rayTracingPipeline returns true
+    // even though VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME is not present in the list of supported runtime extensions
+    // (they've likely not handled all checks in their VulkanLoader)
+    // Launching an application with RenderDoc then fails at device creation (returning unsupported features). To bypass
+    // this, we add an extra check to see if the extension is in the list of runtime supported extensions.
+    const bool deviceHasRuntimeRayTracingPipelineExtension = hasExtension(requestedDeviceExtensions, VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME);
+    if (options.requestedFeatures.rayTracingPipeline && deviceHasRuntimeRayTracingPipelineExtension) {
         // Enable raytracing pipelines
         raytracingFeaturesKhr.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
         raytracingFeaturesKhr.rayTracingPipeline = options.requestedFeatures.rayTracingPipeline;
@@ -503,7 +555,9 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
         raytracingFeaturesKhr.rayTraversalPrimitiveCulling = options.requestedFeatures.rayTraversalPrimitiveCulling;
         addToChain(&raytracingFeaturesKhr);
     }
+#endif
 
+#if defined(VK_EXT_mesh_shader)
     VkPhysicalDeviceMeshShaderFeaturesEXT meshShaderFeatures{};
     if (options.requestedFeatures.meshShader) {
         // Enable Mesh/Task shading
@@ -517,6 +571,7 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
         meshShaderFeatures.meshShaderQueries = options.requestedFeatures.meshShaderQueries;
         addToChain(&meshShaderFeatures);
     }
+#endif
 
 #if defined(VK_EXT_host_image_copy)
     VkPhysicalDeviceHostImageCopyFeaturesEXT hostImageCopyFeatures{};
@@ -575,23 +630,6 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     createInfo.ppEnabledLayerNames = nullptr;
     createInfo.enabledExtensionCount = 0;
     createInfo.ppEnabledExtensionNames = nullptr;
-
-    // Merge requested device extensions and layers with our defaults
-    const auto availableDeviceExtensions = vulkanAdapter->extensions();
-    std::vector<const char *> requestedDeviceExtensions;
-    auto defaultRequestedDeviceExtensions = getDefaultRequestedDeviceExtensions();
-
-    // Add requested device extensions set by user in the options
-    for (const std::string &userRequestedExtension : options.extensions)
-        defaultRequestedDeviceExtensions.push_back(userRequestedExtension.c_str());
-
-    for (const char *requestedDeviceExtension : defaultRequestedDeviceExtensions) {
-        if (findExtension(availableDeviceExtensions, requestedDeviceExtension)) {
-            requestedDeviceExtensions.push_back(requestedDeviceExtension);
-        } else {
-            SPDLOG_LOGGER_WARN(Logger::logger(), "Unable to find default requested device extension {}", requestedDeviceExtension);
-        }
-    }
 
     // check for Vulkan API support, fall back to extensions if needed
     auto maxApiVersionSupportedByPhysicalDevice = vulkanAdapter->queryAdapterProperties().apiVersion;
@@ -653,7 +691,7 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
             VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME
         };
         for (const char *requestedVulkan11Extension : vulkan11Extensions) {
-            if (findExtension(availableDeviceExtensions, requestedVulkan11Extension)) {
+            if (hasExtension(availableDeviceExtensions, requestedVulkan11Extension)) {
                 requestedDeviceExtensions.push_back(requestedVulkan11Extension);
             } else {
                 SPDLOG_LOGGER_WARN(Logger::logger(), "Unable to find default requested Vulkan 1.1 extension {}", requestedVulkan11Extension);
