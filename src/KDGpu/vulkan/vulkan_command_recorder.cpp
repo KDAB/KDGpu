@@ -360,6 +360,7 @@ void VulkanCommandRecorder::memoryBarrier(const MemoryBarrierOptions &options)
         vkDependencyInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO_KHR;
         vkDependencyInfo.memoryBarrierCount = memoryBarriers.size();
         vkDependencyInfo.pMemoryBarriers = memoryBarriers.data();
+        vkDependencyInfo.dependencyFlags = dependencyFlagsToVkDependencyFlags(options.depencendyFlags);
 
         vulkanDevice->vkCmdPipelineBarrier2(commandBuffer, &vkDependencyInfo);
     } else {
@@ -377,7 +378,7 @@ void VulkanCommandRecorder::memoryBarrier(const MemoryBarrierOptions &options)
         vkCmdPipelineBarrier(commandBuffer,
                              pipelineStageFlagsToVkPipelineStageFlagBits(options.srcStages),
                              pipelineStageFlagsToVkPipelineStageFlagBits(options.dstStages),
-                             0, // None
+                             dependencyFlagsToVkDependencyFlags(options.depencendyFlags),
                              memoryBarriers.size(), memoryBarriers.data(),
                              0, nullptr,
                              0, nullptr);
@@ -411,6 +412,7 @@ void VulkanCommandRecorder::bufferMemoryBarrier(const BufferMemoryBarrierOptions
         vkDependencyInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO_KHR;
         vkDependencyInfo.bufferMemoryBarrierCount = 1;
         vkDependencyInfo.pBufferMemoryBarriers = &vkBufferBarrier;
+        vkDependencyInfo.dependencyFlags = dependencyFlagsToVkDependencyFlags(options.depencendyFlags);
 
         vulkanDevice->vkCmdPipelineBarrier2(commandBuffer, &vkDependencyInfo);
     } else {
@@ -429,7 +431,7 @@ void VulkanCommandRecorder::bufferMemoryBarrier(const BufferMemoryBarrierOptions
         vkCmdPipelineBarrier(commandBuffer,
                              pipelineStageFlagsToVkPipelineStageFlagBits(options.srcStages),
                              pipelineStageFlagsToVkPipelineStageFlagBits(options.dstStages),
-                             0, // None
+                             dependencyFlagsToVkDependencyFlags(options.depencendyFlags),
                              0, nullptr,
                              1, &vkBufferBarrier,
                              0, nullptr);
@@ -470,6 +472,7 @@ void VulkanCommandRecorder::textureMemoryBarrier(const TextureMemoryBarrierOptio
         vkDependencyInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO_KHR;
         vkDependencyInfo.imageMemoryBarrierCount = 1;
         vkDependencyInfo.pImageMemoryBarriers = &vkImageBarrier;
+        vkDependencyInfo.dependencyFlags = dependencyFlagsToVkDependencyFlags(options.depencendyFlags);
 
         vulkanDevice->vkCmdPipelineBarrier2(commandBuffer, &vkDependencyInfo);
     } else {
@@ -497,7 +500,7 @@ void VulkanCommandRecorder::textureMemoryBarrier(const TextureMemoryBarrierOptio
         vkCmdPipelineBarrier(commandBuffer,
                              pipelineStageFlagsToVkPipelineStageFlagBits(options.srcStages),
                              pipelineStageFlagsToVkPipelineStageFlagBits(options.dstStages),
-                             0, // None
+                             dependencyFlagsToVkDependencyFlags(options.depencendyFlags),
                              0, nullptr,
                              0, nullptr,
                              1, &vkImageBarrier);
