@@ -30,6 +30,7 @@ struct MemoryBarrierOptions {
     PipelineStageFlags srcStages;
     PipelineStageFlags dstStages;
     std::vector<MemoryBarrier> memoryBarriers;
+    DependencyFlags depencendyFlags{ DependencyFlagBits::ByRegion };
 };
 
 // The new stuff
@@ -43,6 +44,7 @@ struct BufferMemoryBarrierOptions {
     Handle<Buffer_t> buffer;
     DeviceSize offset{ 0 };
     DeviceSize size{ WholeSize };
+    DependencyFlags depencendyFlags{ DependencyFlagBits::ByRegion };
 };
 
 struct TextureMemoryBarrierOptions {
@@ -56,6 +58,7 @@ struct TextureMemoryBarrierOptions {
     uint32_t dstQueueTypeIndex{ IgnoreQueueType };
     Handle<Texture_t> texture;
     TextureSubresourceRange range{};
+    DependencyFlags depencendyFlags{ DependencyFlagBits::ByRegion };
 };
 
 } // namespace KDGpu
