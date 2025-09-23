@@ -32,8 +32,9 @@ namespace {
 struct Vertex {
     glm::vec3 position;
     glm::vec3 normal;
+    float excludeEdge; // Set to 1.0 to exclude edge opposite this vertex from the wireframe, 0.0 to include
 };
-static_assert(sizeof(Vertex) == 6 * sizeof(float));
+static_assert(sizeof(Vertex) == 7 * sizeof(float));
 
 std::vector<Vertex> initializeCubeMesh()
 {
@@ -54,25 +55,28 @@ std::vector<Vertex> initializeCubeMesh()
     const glm::vec3 nLeft(1.0f, 0.0f, 0.0f);
     const glm::vec3 nRight(-1.0f, 0.0f, 0.0f);
 
+    const float includeEdge = 0.0f;
+    const float excludeEdge = 1.0f;
+
     return {
         // Top
-        {A, nTop}, {C, nTop}, {D, nTop},
-        {D, nTop}, {B, nTop}, {A, nTop},
+        {A, nTop, includeEdge}, {C, nTop, excludeEdge}, {D, nTop, includeEdge},
+        {D, nTop, includeEdge}, {B, nTop, excludeEdge}, {A, nTop, includeEdge},
         // Front
-        {B, nFront}, {F, nFront}, {E, nFront},
-        {E, nFront}, {A, nFront}, {B, nFront},
+        {B, nFront, includeEdge}, {F, nFront, excludeEdge}, {E, nFront, includeEdge},
+        {E, nFront, includeEdge}, {A, nFront, excludeEdge}, {B, nFront, includeEdge},
         // Back
-        {G, nBack}, {H, nBack}, {D, nBack},
-        {D, nBack}, {C, nBack}, {G, nBack},
+        {G, nBack, includeEdge}, {H, nBack, excludeEdge}, {D, nBack, includeEdge},
+        {D, nBack, includeEdge}, {C, nBack, excludeEdge}, {G, nBack, includeEdge},
         // Bottom
-        {E, nBottom}, {F, nBottom}, {H, nBottom},
-        {H, nBottom}, {G, nBottom}, {E, nBottom},
+        {E, nBottom, includeEdge}, {F, nBottom, excludeEdge}, {H, nBottom, includeEdge},
+        {H, nBottom, includeEdge}, {G, nBottom, excludeEdge}, {E, nBottom, includeEdge},
         // Left
-        {F, nLeft}, {B, nLeft}, {D, nLeft},
-        {D, nLeft}, {H, nLeft}, {F, nLeft},
+        {F, nLeft, includeEdge}, {B, nLeft, excludeEdge}, {D, nLeft, includeEdge},
+        {D, nLeft, includeEdge}, {H, nLeft, excludeEdge}, {F, nLeft, includeEdge},
         // Right
-        {A, nRight}, {E, nRight}, {G, nRight},
-        {G, nRight}, {C, nRight}, {A, nRight},
+        {A, nRight, includeEdge}, {E, nRight, excludeEdge}, {G, nRight, includeEdge},
+        {G, nRight, includeEdge}, {C, nRight, excludeEdge}, {A, nRight, includeEdge},
     };
     // clang-format on
 }
@@ -250,7 +254,8 @@ void WireframeGeometry::initializeScene()
             },
             .attributes = {
                 { .location = 0, .binding = 0, .format = Format::R32G32B32_SFLOAT }, // Position
-                { .location = 1, .binding = 0, .format = Format::R32G32B32_SFLOAT, .offset = sizeof(glm::vec3) } // Normal
+                { .location = 1, .binding = 0, .format = Format::R32G32B32_SFLOAT, .offset = offsetof(Vertex, normal) }, // Normal
+                { .location = 2, .binding = 0, .format = Format::R32_SFLOAT, .offset = offsetof(Vertex, excludeEdge) } // ExcludeEdge
             }
         },
         .renderTargets = {

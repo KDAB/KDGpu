@@ -17,6 +17,8 @@
 #include <KDGpu/graphics_pipeline.h>
 #include <KDGpu/render_pass_command_recorder_options.h>
 
+#include <KDUtils/tailwind_colors.h>
+
 #include <glm/glm.hpp>
 
 class WireframeGeometry : public KDGpuExample::SimpleExampleEngineLayer
@@ -63,8 +65,8 @@ private:
     KDGpu::BindGroup m_transformBindGroup;
 
     struct MaterialData {
-        glm::vec4 baseColorFactor{ 1.0f, 0.0f, 0.0f, 1.0f };
-        glm::vec4 wireframeColorAndWidth{ 0.0f, 0.0f, 0.0f, 2.0f }; // Black wireframe, 2 pixel width
+        glm::vec4 baseColorFactor{ KDUtils::tailwindColorToRgba<glm::vec4>(KDUtils::TailwindColor::Zinc100, 1.0f) };
+        glm::vec4 wireframeColorAndWidth{ KDUtils::tailwindColorToRgba<glm::vec4>(KDUtils::TailwindColor::Sky500, 6.0f) }; // Blue wireframe, 4 pixel width
     };
     MaterialData m_materialData;
     KDGpu::Buffer m_materialBuffer;
