@@ -18,6 +18,7 @@
 #include <KDGpu/bind_group_options.h>
 #include <KDGpu/buffer_options.h>
 #include <KDGpu/graphics_pipeline_options.h>
+#include <KDGpu/texture_options.h>
 
 #include <imgui.h>
 
@@ -87,6 +88,22 @@ std::vector<Vertex> initializeCubeMesh()
 
 void WireframeGeometry::initializeScene()
 {
+    // Select a reasonable sample count for our device. 8 samples or as good as we can get
+    m_samples = SampleCountFlagBits::Samples1Bit;
+
+    const std::array<SampleCountFlagBits, 3> suitableSamples{
+        SampleCountFlagBits::Samples8Bit,
+        SampleCountFlagBits::Samples4Bit,
+        SampleCountFlagBits::Samples2Bit,
+    };
+
+    for (auto suitableSample : suitableSamples) {
+        if (std::find(m_supportedSampleCounts.begin(), m_supportedSampleCounts.end(), suitableSample) != m_supportedSampleCounts.end()) {
+            m_samples = suitableSample;
+            break;
+        }
+    }
+
     // Create a buffer to hold triangle vertex data for the cube
     {
         const std::vector<Vertex> vertexData = initializeCubeMesh();
@@ -267,7 +284,10 @@ void WireframeGeometry::initializeScene()
             .format = m_depthFormat,
             .depthWritesEnabled = true,
             .depthCompareOperation = CompareOperation::Less
-        }
+        },
+        .multisample = {
+            .samples = m_samples.get()
+        },
     };
     // clang-format on
     m_pipeline = m_device.createGraphicsPipeline(pipelineOptions);
@@ -323,16 +343,22 @@ void WireframeGeometry::initializeScene()
     m_opaquePassOptions = {
         .colorAttachments = {
             {
-                .view = {}, // Not setting the swapchain texture view just yet
+                .view = m_msaaTextureView, // We render to a multisampled texture, not directly to the swapchain image
+                .resolveView = {}, // Not setting the swapchain texture view just yet
                 .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
                 .finalLayout = TextureLayout::PresentSrc
             }
         },
         .depthStencilAttachment = {
             .view = m_depthTextureView,
-        }
+        },
+        .samples = m_samples.get()
     };
     // clang-format on
+
+    // Create a multisample texture into which we will render. The pipeline will then resolve the
+    // multi-sampled texture into the current swapchain image.
+    createRenderTarget();
 
     registerImGuiOverlayDrawFunction([this](ImGuiContext *ctx) {
         drawControls(ctx);
@@ -357,6 +383,36 @@ void WireframeGeometry::cleanupScene()
     m_viewportBuffer = {};
     m_viewportBufferData = nullptr;
     m_commandBuffer = {};
+    m_msaaTextureView = {};
+    m_msaaTexture = {};
+}
+
+void WireframeGeometry::createRenderTarget()
+{
+    // Reset depthTextureView as depthStencilAttachment view as it might
+    // have been recreated following a resize
+    m_opaquePassOptions.depthStencilAttachment.view = m_depthTextureView;
+
+    const TextureOptions options = {
+        .type = TextureType::TextureType2D,
+        .format = m_swapchainFormat,
+        .extent = { .width = m_swapchainExtent.width, .height = m_swapchainExtent.height, .depth = 1 },
+        .mipLevels = 1,
+        .samples = m_samples.get(),
+        .usage = TextureUsageFlagBits::ColorAttachmentBit,
+        .memoryUsage = MemoryUsage::GpuOnly,
+        .initialLayout = TextureLayout::Undefined
+    };
+    m_msaaTexture = m_device.createTexture(options);
+    m_msaaTextureView = m_msaaTexture.createView();
+
+    if (isMsaaEnabled())
+        m_opaquePassOptions.colorAttachments[0].view = m_msaaTextureView;
+}
+
+bool WireframeGeometry::isMsaaEnabled() const
+{
+    return m_samples.get() != SampleCountFlagBits::Samples1Bit;
 }
 
 void WireframeGeometry::updateScene()
@@ -440,8 +496,8 @@ void WireframeGeometry::drawControls(ImGuiContext *ctx)
 
 void WireframeGeometry::resize()
 {
-    // Swapchain might have been resized and texture views recreated. Ensure we update the PassOptions accordingly
-    m_opaquePassOptions.depthStencilAttachment.view = m_depthTextureView;
+    // Update the render target (MSAA texture if enabled)
+    createRenderTarget();
 
     // Update the viewport matrix as well
     updateViewportBuffer();
@@ -451,7 +507,7 @@ void WireframeGeometry::render()
 {
     auto commandRecorder = m_device.createCommandRecorder();
 
-    m_opaquePassOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex);
+    m_opaquePassOptions.colorAttachments[0].resolveView = m_swapchainViews.at(m_currentSwapchainImageIndex);
     auto opaquePass = commandRecorder.beginRenderPass(m_opaquePassOptions);
 
     opaquePass.setPipeline(m_pipeline);

@@ -32,8 +32,13 @@ protected:
     void resize() override;
 
 private:
+    void createRenderTarget();
+    bool isMsaaEnabled() const;
     void updateViewportBuffer();
     void drawControls(ImGuiContext *);
+
+    KDGpu::Texture m_msaaTexture;
+    KDGpu::TextureView m_msaaTextureView;
 
     glm::vec3 m_cameraPosition{ 0.0f, 2.0f, 4.0f };
 
