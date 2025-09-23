@@ -1,8 +1,8 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
-layout(location = 0) in vec3 position;
-layout(location = 1) in vec3 normal;
+layout(location = 0) in vec3 position; // World space position
+layout(location = 1) in vec3 normal; // World space normal
 layout(location = 2) noperspective in vec4 edgeA; // From geometry shader
 layout(location = 3) noperspective in vec4 edgeB; // From geometry shader
 layout(location = 4) flat in vec3 excludeEdge; // From geometry shader
@@ -14,6 +14,7 @@ layout(set = 1, binding = 0) uniform Material
 {
     vec4 baseColorFactor;
     vec4 wireframeColorAndWidth; // .xyz = color, .w = width in pixels
+    vec2 wireframeGradient; // x: world space start, y: world space end
 }
 material;
 
@@ -67,12 +68,17 @@ void main()
         edgeDistance = sqrt(edgeDistance);
     }
 
-    // Compute the anti-aliased line factor using smoothstep
+    // Compute the anti-aliased line factor using smoothstep. Line factor is 1 on the edge and 0 at edgeWidth distance away from the edge.
     float edgeWidth = material.wireframeColorAndWidth.w; // in pixels
-    float lineFactor = smoothstep(0.0, edgeWidth, edgeDistance);
+    float lineFactor = 1.0 - smoothstep(0.0, edgeWidth, edgeDistance);
+
+    // Mask the line factor with a gradient based upon the world space height of the fragment
+    // We begin to fade out the wireframe starting at wireframeGradient.x and it is fully faded out by wireframeGradient.y
+    float heightFactor = 1.0 - clamp((position.y - material.wireframeGradient.x) / (material.wireframeGradient.y - material.wireframeGradient.x), 0.0, 1.0);
+    lineFactor *= heightFactor;
 
     // Mix the surface color with the wireframe color based on the line factor
-    surfaceColor = mix(material.wireframeColorAndWidth.xyz, surfaceColor, lineFactor);
+    surfaceColor = mix(surfaceColor, material.wireframeColorAndWidth.xyz, lineFactor);
 
     fragColor = vec4(surfaceColor, baseColor.a);
 }

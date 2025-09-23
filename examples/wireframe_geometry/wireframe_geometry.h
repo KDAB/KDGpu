@@ -67,6 +67,7 @@ private:
     struct MaterialData {
         glm::vec4 baseColorFactor{ KDUtils::tailwindColorToRgba<glm::vec4>(KDUtils::TailwindColor::Zinc100, 1.0f) };
         glm::vec4 wireframeColorAndWidth{ KDUtils::tailwindColorToRgba<glm::vec4>(KDUtils::TailwindColor::Sky500, 6.0f) }; // Blue wireframe, 4 pixel width
+        glm::vec2 wireframeGradient{ 0.7f, 1.0f }; // x: world space start, y: world space end
     };
     MaterialData m_materialData;
     KDGpu::Buffer m_materialBuffer;

@@ -25,6 +25,7 @@ entity;
 void main()
 {
     excludeEdge = vertexExcludeEdge;
-    normal = normalize((camera.view * entity.model * vec4(vertexNormal, 0.0)).xyz);
+    normal = normalize((entity.model * vec4(vertexNormal, 0.0)).xyz); // Use transpose(inverse(model)) for non-uniform scale
+    position = (entity.model * vec4(vertexPosition, 1.0)).xyz;
     gl_Position = camera.projection * camera.view * entity.model * vec4(vertexPosition, 1.0);
 }
