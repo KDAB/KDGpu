@@ -33,6 +33,7 @@ protected:
 
 private:
     void updateViewportBuffer();
+    void drawControls(ImGuiContext *);
 
     glm::vec3 m_cameraPosition{ 0.0f, 2.0f, 4.0f };
 
@@ -73,4 +74,5 @@ private:
     KDGpu::Buffer m_materialBuffer;
     void *m_materialBufferData{ nullptr };
     KDGpu::BindGroup m_materialBindGroup;
+    bool m_materialDirty{ true };
 };

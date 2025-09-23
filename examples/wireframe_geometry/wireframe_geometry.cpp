@@ -19,6 +19,8 @@
 #include <KDGpu/buffer_options.h>
 #include <KDGpu/graphics_pipeline_options.h>
 
+#include <imgui.h>
+
 #include <glm/gtx/transform.hpp>
 
 #include <cmath>
@@ -331,6 +333,10 @@ void WireframeGeometry::initializeScene()
         }
     };
     // clang-format on
+
+    registerImGuiOverlayDrawFunction([this](ImGuiContext *ctx) {
+        drawControls(ctx);
+    });
 }
 
 void WireframeGeometry::cleanupScene()
@@ -372,6 +378,12 @@ void WireframeGeometry::updateScene()
         std::memcpy(m_viewportBufferData, &m_viewportMatrix, sizeof(glm::mat4));
         m_viewportDirty = false;
     }
+
+    // If the material has changed (via ImGui), update the material UBO
+    if (m_materialDirty) {
+        std::memcpy(m_materialBufferData, &m_materialData, sizeof(MaterialData));
+        m_materialDirty = false;
+    }
 }
 
 void WireframeGeometry::updateViewportBuffer()
@@ -384,6 +396,46 @@ void WireframeGeometry::updateViewportBuffer()
             0.0f, 0.0f, 1.0f, 0.0f,
             w2, h2, 0.0f, 1.0f);
     m_viewportDirty = true;
+}
+
+void WireframeGeometry::drawControls(ImGuiContext *ctx)
+{
+    constexpr ImVec2 winOffset(10, 180);
+
+    ImGui::SetCurrentContext(ctx);
+    ImGui::SetNextWindowPos(winOffset);
+    ImGui::SetNextWindowSize(ImVec2(0, 0), ImGuiCond_FirstUseEver);
+    ImGui::Begin("Controls",
+                 nullptr,
+                 ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize);
+
+    ImGui::Text("Wireframe Color and Width");
+    if (ImGui::ColorEdit3("Wireframe Color", &m_materialData.wireframeColorAndWidth.r))
+        m_materialDirty = true;
+    if (ImGui::SliderFloat("Wireframe Width (pixels)", &m_materialData.wireframeColorAndWidth.w, 1.0f, 10.0f))
+        m_materialDirty = true;
+    ImGui::Spacing();
+
+    ImGui::Text("Base Color");
+    if (ImGui::ColorEdit3("Base Color", &m_materialData.baseColorFactor.r))
+        m_materialDirty = true;
+    ImGui::Spacing();
+
+    ImGui::Text("Wireframe Gradient (world space height)");
+    if (ImGui::SliderFloat("Gradient Start", &m_materialData.wireframeGradient.x, -2.0f, 2.0f)) {
+        m_materialDirty = true;
+        if (m_materialData.wireframeGradient.x > m_materialData.wireframeGradient.y)
+            m_materialData.wireframeGradient.y = m_materialData.wireframeGradient.x;
+    }
+
+    if (ImGui::SliderFloat("Gradient End", &m_materialData.wireframeGradient.y, -2.0f, 2.0f)) {
+        m_materialDirty = true;
+        if (m_materialData.wireframeGradient.y < m_materialData.wireframeGradient.x)
+            m_materialData.wireframeGradient.x = m_materialData.wireframeGradient.y;
+    }
+    ImGui::Spacing();
+
+    ImGui::End();
 }
 
 void WireframeGeometry::resize()
