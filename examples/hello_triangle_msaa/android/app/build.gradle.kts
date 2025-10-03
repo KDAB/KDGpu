@@ -20,8 +20,8 @@ android {
             abiFilters += mutableSetOf("arm64-v8a")
         }
         applicationId = "com.kdab.hello_triangle_msaa"
-        minSdk = 32
-        targetSdk = 32
+        minSdk = 33
+        targetSdk = 33
         versionCode = 1
         versionName = "1.0"
 

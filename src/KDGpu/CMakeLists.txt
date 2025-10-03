@@ -235,7 +235,7 @@ endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Android")
     set(KDGPU_PLATFORM_ANDROID ON)
-    target_compile_definitions(KDGpu PUBLIC VK_USE_PLATFORM_ANDROID_KHR=1 VMA_VULKAN_VERSION=1001000)
+    target_compile_definitions(KDGpu PUBLIC VK_USE_PLATFORM_ANDROID_KHR=1)
 endif()
 
 # Require >=C++20 for us and downstream projects
