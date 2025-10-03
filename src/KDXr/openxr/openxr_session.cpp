@@ -181,6 +181,9 @@ EndFrameResult OpenXrSession::endFrame(const EndFrameOptions &options)
     xrLayerCubes.clear();
     xrLayerPassthrough.clear();
 
+    // count the layers we actually add, in case some are skipped
+    uint32_t addedLayerCount = 0;
+
     for (size_t layerIndex = 0; layerIndex < layerCount; ++layerIndex) {
         switch (options.layers[layerIndex]->type) {
         case CompositionLayerType::Projection: {
@@ -238,7 +241,7 @@ EndFrameResult OpenXrSession::endFrame(const EndFrameOptions &options)
                 projectionLayerProjection.next = &layerDepthTest;
             }
 
-            xrLayers[layerIndex] = reinterpret_cast<XrCompositionLayerBaseHeader *>(&projectionLayerProjection);
+            xrLayers[addedLayerCount++] = reinterpret_cast<XrCompositionLayerBaseHeader *>(&projectionLayerProjection);
 
             break;
         }
@@ -270,7 +273,7 @@ EndFrameResult OpenXrSession::endFrame(const EndFrameOptions &options)
                 quadLayerQuad.next = &layerDepthTest;
             }
 
-            xrLayers[layerIndex] = reinterpret_cast<XrCompositionLayerBaseHeader *>(&quadLayerQuad);
+            xrLayers[addedLayerCount++] = reinterpret_cast<XrCompositionLayerBaseHeader *>(&quadLayerQuad);
 
             break;
         }
@@ -304,7 +307,7 @@ EndFrameResult OpenXrSession::endFrame(const EndFrameOptions &options)
                 cylinderLayerCylinder.next = &layerDepthTest;
             }
 
-            xrLayers[layerIndex] = reinterpret_cast<XrCompositionLayerBaseHeader *>(&cylinderLayerCylinder);
+            xrLayers[addedLayerCount++] = reinterpret_cast<XrCompositionLayerBaseHeader *>(&cylinderLayerCylinder);
 
             break;
         }
@@ -339,7 +342,7 @@ EndFrameResult OpenXrSession::endFrame(const EndFrameOptions &options)
                 cubeLayerCube.next = &layerDepthTest;
             }
 
-            xrLayers[layerIndex] = reinterpret_cast<XrCompositionLayerBaseHeader *>(&cubeLayerCube);
+            xrLayers[addedLayerCount++] = reinterpret_cast<XrCompositionLayerBaseHeader *>(&cubeLayerCube);
 
             break;
         }
@@ -364,7 +367,7 @@ EndFrameResult OpenXrSession::endFrame(const EndFrameOptions &options)
                 passthroughLayerPassthrough.next = &layerDepthTest;
             }
 
-            xrLayers[layerIndex] = reinterpret_cast<XrCompositionLayerBaseHeader *>(&passthroughLayerPassthrough);
+            xrLayers[addedLayerCount++] = reinterpret_cast<XrCompositionLayerBaseHeader *>(&passthroughLayerPassthrough);
 
             break;
         }
@@ -379,7 +382,7 @@ EndFrameResult OpenXrSession::endFrame(const EndFrameOptions &options)
     XrFrameEndInfo frameEndInfo{ XR_TYPE_FRAME_END_INFO };
     frameEndInfo.displayTime = options.displayTime;
     frameEndInfo.environmentBlendMode = environmentBlendModeToXrEnvironmentBlendMode(options.environmentBlendMode);
-    frameEndInfo.layerCount = static_cast<uint32_t>(layerCount);
+    frameEndInfo.layerCount = static_cast<uint32_t>(addedLayerCount);
     frameEndInfo.layers = xrLayers.data();
 
     const auto result = xrEndFrame(session, &frameEndInfo);
