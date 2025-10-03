@@ -234,7 +234,7 @@ EndFrameResult OpenXrSession::endFrame(const EndFrameOptions &options)
                 xrLayerDepthTests.push_back({ XR_TYPE_COMPOSITION_LAYER_DEPTH_TEST_FB });
                 auto &layerDepthTest = xrLayerDepthTests.back();
                 layerDepthTest.depthMask = XR_TRUE;
-                layerDepthTest.compareOp = XR_COMPARE_OP_LESS_FB;
+                layerDepthTest.compareOp = XR_COMPARE_OP_LESS_OR_EQUAL_FB;
                 projectionLayerProjection.next = &layerDepthTest;
             }
 
@@ -266,7 +266,7 @@ EndFrameResult OpenXrSession::endFrame(const EndFrameOptions &options)
                 xrLayerDepthTests.push_back({ XR_TYPE_COMPOSITION_LAYER_DEPTH_TEST_FB });
                 auto &layerDepthTest = xrLayerDepthTests.back();
                 layerDepthTest.depthMask = XR_TRUE;
-                layerDepthTest.compareOp = XR_COMPARE_OP_LESS_FB;
+                layerDepthTest.compareOp = XR_COMPARE_OP_LESS_OR_EQUAL_FB;
                 quadLayerQuad.next = &layerDepthTest;
             }
 
@@ -300,7 +300,7 @@ EndFrameResult OpenXrSession::endFrame(const EndFrameOptions &options)
                 xrLayerDepthTests.push_back({ XR_TYPE_COMPOSITION_LAYER_DEPTH_TEST_FB });
                 auto &layerDepthTest = xrLayerDepthTests.back();
                 layerDepthTest.depthMask = XR_TRUE;
-                layerDepthTest.compareOp = XR_COMPARE_OP_LESS_FB;
+                layerDepthTest.compareOp = XR_COMPARE_OP_LESS_OR_EQUAL_FB;
                 cylinderLayerCylinder.next = &layerDepthTest;
             }
 
@@ -335,7 +335,7 @@ EndFrameResult OpenXrSession::endFrame(const EndFrameOptions &options)
                 xrLayerDepthTests.push_back({ XR_TYPE_COMPOSITION_LAYER_DEPTH_TEST_FB });
                 auto &layerDepthTest = xrLayerDepthTests.back();
                 layerDepthTest.depthMask = XR_TRUE;
-                layerDepthTest.compareOp = XR_COMPARE_OP_LESS_FB;
+                layerDepthTest.compareOp = XR_COMPARE_OP_LESS_OR_EQUAL_FB;
                 cubeLayerCube.next = &layerDepthTest;
             }
 
