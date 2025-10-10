@@ -20,6 +20,7 @@
 #include <KDGpu/api/graphics_api_impl.h>
 
 #include <algorithm>
+#include <mutex>
 
 namespace {
 
@@ -67,6 +68,11 @@ XrRect2Di rect2DToXrRecti(const KDGpu::Rect2D &rect)
     };
 }
 
+// Prevent per-frame warnings for incompatible layers
+std::once_flag cylinderWarningIssued;
+std::once_flag cubeWarningIssued;
+std::once_flag passthroughWarningIssued;
+
 } // namespace
 
 namespace KDXr {
@@ -86,13 +92,18 @@ OpenXrSession::OpenXrSession(OpenXrResourceManager *_openxrResourceManager,
     , deviceHandle(_device)
     , queueIndex(queueIndex)
 {
-    // If the instance extensions includes XR_FB_composition_layer_depth_test, mark it as supported
-    // so we can query it efficiently in OpenXRSession::endFrame().
+    // Discover extension support flags for optional composition layer types.
     OpenXrInstance *openXrInstance = openxrResourceManager->getInstance(instanceHandle);
     assert(openXrInstance);
-    supportsCompositorLayerDepth = std::any_of(openXrInstance->extensions.begin(), openXrInstance->extensions.end(), [](const Extension &extension) {
-        return extension.name == XR_FB_COMPOSITION_LAYER_DEPTH_TEST_EXTENSION_NAME;
-    });
+    auto hasExtension = [&](const char *extName) {
+        return std::any_of(openXrInstance->extensions.begin(), openXrInstance->extensions.end(), [&](const Extension &extension) {
+            return extension.name == extName;
+        });
+    };
+    supportsCompositorLayerDepth = hasExtension(XR_FB_COMPOSITION_LAYER_DEPTH_TEST_EXTENSION_NAME);
+    supportsCylinderLayer = hasExtension(XR_KHR_COMPOSITION_LAYER_CYLINDER_EXTENSION_NAME);
+    supportsCubeLayer = hasExtension(XR_KHR_COMPOSITION_LAYER_CUBE_EXTENSION_NAME);
+    supportsPassthroughLayer = hasExtension(XR_FB_PASSTHROUGH_EXTENSION_NAME);
 }
 
 void OpenXrSession::initialize(Session *_frontendSession)
@@ -279,6 +290,10 @@ EndFrameResult OpenXrSession::endFrame(const EndFrameOptions &options)
         }
 
         case CompositionLayerType::Cylinder: {
+            if (!supportsCylinderLayer) {
+                std::call_once(cylinderWarningIssued, []() { SPDLOG_LOGGER_INFO(Logger::logger(), "Cylinder layer requested but XR_KHR_composition_layer_cylinder not supported. Skipping layer."); });
+                break; // skip
+            }
             auto &cylinderLayer = reinterpret_cast<CylinderLayer &>(*options.layers[layerIndex]);
 
             auto openxrSwapchain = openxrResourceManager->getSwapchain(cylinderLayer.swapchainSubTexture.swapchain);
@@ -313,6 +328,10 @@ EndFrameResult OpenXrSession::endFrame(const EndFrameOptions &options)
         }
 
         case CompositionLayerType::Cube: {
+            if (!supportsCubeLayer) {
+                std::call_once(cubeWarningIssued, []() { SPDLOG_LOGGER_INFO(Logger::logger(), "Cube layer requested but XR_KHR_composition_layer_cube not supported. Skipping layer."); });
+                break; // skip
+            }
             auto &cubeLayer = reinterpret_cast<CubeLayer &>(*options.layers[layerIndex]);
 
             auto openxrSwapchain = openxrResourceManager->getSwapchain(cubeLayer.swapchain);
@@ -348,6 +367,10 @@ EndFrameResult OpenXrSession::endFrame(const EndFrameOptions &options)
         }
 
         case CompositionLayerType::PassThrough: {
+            if (!supportsPassthroughLayer) {
+                std::call_once(passthroughWarningIssued, []() { SPDLOG_LOGGER_INFO(Logger::logger(), "Passthrough layer requested but XR_FB_passthrough not supported. Skipping layer."); });
+                break; // skip
+            }
             auto &passthroughLayer = reinterpret_cast<PassthroughCompositionLayer &>(*options.layers[layerIndex]);
 
             xrLayerPassthrough.push_back({ XR_TYPE_COMPOSITION_LAYER_PASSTHROUGH_FB });

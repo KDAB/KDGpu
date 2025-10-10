@@ -78,7 +78,11 @@ struct KDXR_EXPORT OpenXrSession {
     XrSession session{ XR_NULL_HANDLE };
     KDGpu::Handle<System_t> systemHandle;
     KDGpu::Handle<Instance_t> instanceHandle;
+    // Optional layer extension support flags
     bool supportsCompositorLayerDepth{ false };
+    bool supportsCylinderLayer{ false };
+    bool supportsCubeLayer{ false };
+    bool supportsPassthroughLayer{ false };
 
     // Graphics related stuff
     KDGpu::GraphicsApi *graphicsApi{ nullptr };
