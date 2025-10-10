@@ -133,6 +133,7 @@ public:
         std::vector<bool> frameReferences;
         ResourcesHolder<KDGpu::Buffer,
                         KDGpu::BindGroup,
+                        KDGpu::BindGroupLayout,
                         KDGpu::Texture,
                         KDGpu::TextureView,
                         KDGpu::Sampler,
@@ -188,6 +189,7 @@ private:
 // clang-format off
 template<> KDGPUUTILS_EXPORT void ResourceDeleter::releaseResourcesOfType<KDGpu::Buffer>(const std::vector<KDGpu::Buffer> &);
 template<> KDGPUUTILS_EXPORT void ResourceDeleter::releaseResourcesOfType<KDGpu::BindGroup>(const std::vector<KDGpu::BindGroup> &);
+template<> KDGPUUTILS_EXPORT void ResourceDeleter::releaseResourcesOfType<KDGpu::BindGroupLayout>(const std::vector<KDGpu::BindGroupLayout> &);
 template<> KDGPUUTILS_EXPORT void ResourceDeleter::releaseResourcesOfType<KDGpu::Texture>(const std::vector<KDGpu::Texture> &);
 template<> KDGPUUTILS_EXPORT void ResourceDeleter::releaseResourcesOfType<KDGpu::TextureView>(const std::vector<KDGpu::TextureView> &);
 template<> KDGPUUTILS_EXPORT void ResourceDeleter::releaseResourcesOfType<KDGpu::Sampler>(const std::vector<KDGpu::Sampler> &);

@@ -125,6 +125,13 @@ void ResourceDeleter::releaseResourcesOfType<KDGpu::BindGroup>(const std::vector
 }
 
 template<>
+void ResourceDeleter::releaseResourcesOfType<KDGpu::BindGroupLayout>(const std::vector<KDGpu::BindGroupLayout> &)
+{
+    // Nothing to do, BindGroupLayout will be implicitly destroyed
+    // when entries are removed from the vector
+}
+
+template<>
 void ResourceDeleter::releaseResourcesOfType<KDGpu::Texture>(const std::vector<KDGpu::Texture> &)
 {
     // Nothing to do, Textures will be implicitly destroyed
