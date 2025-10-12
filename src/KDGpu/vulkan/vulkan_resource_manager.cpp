@@ -1037,6 +1037,20 @@ void VulkanResourceManager::deleteTextureView(const Handle<TextureView_t> &handl
 {
     VulkanTextureView *vulkanTextureView = m_textureViews.get(handle);
     VulkanDevice *vulkanDevice = m_devices.get(vulkanTextureView->deviceHandle);
+
+    for(const auto &vulkanFramebufferKey : vulkanTextureView->associatedFrameBuffers) {
+        auto itFramebuffer = vulkanDevice->framebuffers.find(vulkanFramebufferKey);
+        if (itFramebuffer == vulkanDevice->framebuffers.end()) {
+            // This framebuffer has already been destroyed, just ignore
+            continue;
+        }
+
+        auto *framebuffer = m_framebuffers.get(itFramebuffer->second);
+        vkDestroyFramebuffer(vulkanDevice->device, framebuffer->framebuffer, nullptr);
+        vulkanDevice->framebuffers.erase(itFramebuffer);
+        m_framebuffers.remove(itFramebuffer->second);
+    }
+
     vkDestroyImageView(vulkanDevice->device, vulkanTextureView->imageView, nullptr);
 
     m_textureViews.remove(handle);
@@ -2917,6 +2931,9 @@ Handle<Framebuffer_t> VulkanResourceManager::createFramebuffer(const Handle<Devi
         SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating framebuffer: {}", result);
         return {};
     }
+
+    for (uint32_t i = 0; i < attachmentCount; ++i)
+        m_textureViews.get(attachments.at(i))->associatedFrameBuffers.push_back(frameBufferKey);
 
     const auto vulkanFramebufferHandle = m_framebuffers.emplace(VulkanFramebuffer(vkFramebuffer));
     return vulkanFramebufferHandle;

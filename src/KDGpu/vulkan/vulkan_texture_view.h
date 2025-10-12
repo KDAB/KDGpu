@@ -15,6 +15,8 @@
 
 #include <vulkan/vulkan.h>
 
+#include "vulkan_framebuffer.h"
+
 namespace KDGpu {
 
 struct Texture_t;
@@ -33,6 +35,7 @@ struct KDGPU_EXPORT VulkanTextureView {
     VkImageView imageView{ VK_NULL_HANDLE };
     Handle<Texture_t> textureHandle;
     Handle<Device_t> deviceHandle;
+    std::vector<VulkanFramebufferKey> associatedFrameBuffers;
 };
 
 } // namespace KDGpu
