@@ -194,4 +194,11 @@ void ResourceDeleter::releaseResourcesOfType<KDGpu::RayTracingShaderBindingTable
     // when entries are removed from the vector
 }
 
+template<>
+void ResourceDeleter::releaseResourcesOfType<KDGpu::ShaderModule>(const std::vector<KDGpu::ShaderModule> &)
+{
+    // Nothing to do, ShaderModule will be implicitly destroyed
+    // when entries are removed from the vector
+}
+
 } // namespace KDGpuUtils

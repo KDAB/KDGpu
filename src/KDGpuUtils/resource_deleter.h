@@ -23,6 +23,7 @@
 #include <KDGpu/acceleration_structure.h>
 #include <KDGpu/raytracing_shader_binding_table.h>
 #include <KDGpu/sampler.h>
+#include <KDGpu/shader_module.h>
 
 #include <algorithm>
 #include <vector>
@@ -142,7 +143,8 @@ public:
                         KDGpu::RayTracingPipeline,
                         KDGpu::PipelineLayout,
                         KDGpu::AccelerationStructure,
-                        KDGpu::RayTracingShaderBindingTable>
+                        KDGpu::RayTracingShaderBindingTable,
+                        KDGpu::ShaderModule>
                 resources;
 
         // clang-format off
@@ -199,6 +201,7 @@ template<> KDGPUUTILS_EXPORT void ResourceDeleter::releaseResourcesOfType<KDGpu:
 template<> KDGPUUTILS_EXPORT void ResourceDeleter::releaseResourcesOfType<KDGpu::RayTracingPipeline>(const std::vector<KDGpu::RayTracingPipeline> &);
 template<> KDGPUUTILS_EXPORT void ResourceDeleter::releaseResourcesOfType<KDGpu::AccelerationStructure>(const std::vector<KDGpu::AccelerationStructure> &);
 template<> KDGPUUTILS_EXPORT void ResourceDeleter::releaseResourcesOfType<KDGpu::RayTracingShaderBindingTable>(const std::vector<KDGpu::RayTracingShaderBindingTable> &);
+template<> KDGPUUTILS_EXPORT void ResourceDeleter::releaseResourcesOfType<KDGpu::ShaderModule>(const std::vector<KDGpu::ShaderModule> &);
 // clang-format on
 
 } // namespace KDGpuUtils
