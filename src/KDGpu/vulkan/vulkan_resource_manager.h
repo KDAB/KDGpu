@@ -247,10 +247,11 @@ private:
                                                   uint32_t viewCount);
 
     Handle<Framebuffer_t> createFramebuffer(const Handle<Device_t> &deviceHandle,
-                                            const RenderPassCommandRecorderWithRenderPassOptions &options,
                                             const VulkanFramebufferKey &frameBufferKey);
 
     void setObjectName(VulkanDevice *device, const VkObjectType type, const uint64_t handle, const std::string_view name);
+
+    void deleteFramebuffer(const Handle<Framebuffer_t> &handle);
 
     std::vector<std::string> getAvailableLayers() const;
 

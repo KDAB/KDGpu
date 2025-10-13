@@ -19,6 +19,7 @@
 
 namespace KDGpu {
 
+struct Device_t;
 struct Framebuffer_t;
 struct RenderPass_t;
 struct TextureView_t;
@@ -70,12 +71,10 @@ struct VulkanFramebufferKey {
 };
 
 struct VulkanFramebuffer {
-    explicit VulkanFramebuffer(VkFramebuffer _framebuffer);
-
-    inline static int DefaultScore = 5;
+    explicit VulkanFramebuffer(VkFramebuffer _framebuffer, const Handle<Device_t> &_deviceHandle);
 
     VkFramebuffer framebuffer{ VK_NULL_HANDLE };
-    int score{ DefaultScore };
+    Handle<Device_t> deviceHandle;
 };
 
 } // namespace KDGpu

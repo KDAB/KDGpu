@@ -700,11 +700,14 @@ void VulkanResourceManager::deleteDevice(const Handle<Device_t> &handle)
         m_renderPasses.remove(passHandle);
     }
 
-    // Destroy FrameBuffers
+    // Framebuffers with TextureViews attachments ought to have all been destroyed
+    // since all TextureViews used as attached ought to have been destroyed by now;
+    // This means we should only have imageless Framebuffers left
+
+    // Destroy imageless FrameBuffers
     for (const auto &[fbKey, fbHandle] : vulkanDevice->framebuffers) {
-        VulkanFramebuffer *fb = m_framebuffers.get(fbHandle);
-        vkDestroyFramebuffer(vulkanDevice->device, fb->framebuffer, nullptr);
-        m_framebuffers.remove(fbHandle);
+        assert(fbKey.attachmentsKey.handles.empty());
+        deleteFramebuffer(fbHandle);
     }
 
     // Destroy Descriptor Pools
@@ -1037,6 +1040,23 @@ void VulkanResourceManager::deleteTextureView(const Handle<TextureView_t> &handl
 {
     VulkanTextureView *vulkanTextureView = m_textureViews.get(handle);
     VulkanDevice *vulkanDevice = m_devices.get(vulkanTextureView->deviceHandle);
+
+    // Iterate over Framebuffers to destroy Framebuffers where texture view was being used as an attachment
+    auto it = vulkanDevice->framebuffers.begin();
+    while (it != vulkanDevice->framebuffers.end()) {
+        const VulkanFramebufferKey &fbKey = it->first;
+        const std::vector<Handle<TextureView_t>> &fbAttachmentHandles = fbKey.attachmentsKey.handles;
+        const bool viewReferencedAsAttachment = std::ranges::find(fbAttachmentHandles, handle) != fbAttachmentHandles.end();
+        if (viewReferencedAsAttachment) {
+            // Destroy Framebuffer
+            deleteFramebuffer(it->second);
+            // Remove Framebuffer entry from the device
+            it = vulkanDevice->framebuffers.erase(it);
+        } else {
+            ++it;
+        }
+    }
+
     vkDestroyImageView(vulkanDevice->device, vulkanTextureView->imageView, nullptr);
 
     m_textureViews.remove(handle);
@@ -2203,30 +2223,6 @@ void VulkanResourceManager::deleteCommandBuffer(const Handle<CommandBuffer_t> &h
     for (const Handle<Buffer_t> buf : commandBuffer->temporaryBuffersToRelease)
         deleteBuffer(buf);
 
-    // Destroy Framebuffers from device that haven't been used for a while
-    std::unordered_map<VulkanFramebufferKey, Handle<Framebuffer_t>> &deviceFramebuffers = vulkanDevice->framebuffers;
-
-    auto it = deviceFramebuffers.begin();
-    while (it != deviceFramebuffers.end()) {
-        const auto fbHandle = it->second;
-        VulkanFramebuffer *fb = m_framebuffers.get(fbHandle);
-
-        // Decrement FB scrore
-        --(fb->score);
-
-        // Release FB if score indicates it has not be used for a while
-        if (fb->score <= 0) {
-            // Destroy VkFramebuffer and remove from Framebuffer Pool
-            vkDestroyFramebuffer(vulkanDevice->device, fb->framebuffer, nullptr);
-            m_framebuffers.remove(fbHandle);
-
-            // Erase entry from VulkanDevice
-            it = deviceFramebuffers.erase(it);
-        } else {
-            ++it;
-        }
-    }
-
     vkFreeCommandBuffers(vulkanDevice->device, commandBuffer->commandPool, 1, &commandBuffer->commandBuffer);
     m_commandBuffers.remove(handle);
 }
@@ -2383,6 +2379,8 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
     }
     VkRenderPass vkRenderPass = vulkanRenderPass->renderPass;
 
+    const bool usingMsaa = options.samples > SampleCountFlagBits::Samples1Bit;
+
     // Find or create a framebuffer as per the render pass above
     VulkanAttachmentKey attachmentKey;
     for (const auto &attachment : options.attachments) {
@@ -2395,7 +2393,7 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
         }
         attachmentKey.addAttachmentView(attachment.view);
         // Include resolve attachments if using MSAA.
-        if (attachment.resolveView.isValid())
+        if (usingMsaa && attachment.resolveView.isValid())
             attachmentKey.addAttachmentView(attachment.resolveView);
     }
 
@@ -2450,7 +2448,7 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
     Handle<Framebuffer_t> vulkanFramebufferHandle;
     if (itFramebuffer == vulkanDevice->framebuffers.end()) {
         // Create the framebuffer and cache the handle for it
-        vulkanFramebufferHandle = createFramebuffer(deviceHandle, options, framebufferKey);
+        vulkanFramebufferHandle = createFramebuffer(deviceHandle, framebufferKey);
         vulkanDevice->framebuffers.insert({ framebufferKey, vulkanFramebufferHandle });
     } else {
         vulkanFramebufferHandle = itFramebuffer->second;
@@ -2461,9 +2459,6 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
         SPDLOG_LOGGER_ERROR(Logger::logger(), "Could not create or find a framebuffer");
         return {};
     }
-
-    // Reset Framebuffer Score to indicate it is being used
-    vulkanFramebuffer->score = VulkanFramebuffer::DefaultScore;
 
     VkFramebuffer vkFramebuffer = vulkanFramebuffer->framebuffer;
 
@@ -2907,28 +2902,17 @@ Handle<RenderPass_t> VulkanResourceManager::createImplicitRenderPass(const Handl
 }
 
 Handle<Framebuffer_t> VulkanResourceManager::createFramebuffer(const Handle<Device_t> &deviceHandle,
-                                                               const RenderPassCommandRecorderWithRenderPassOptions &options,
                                                                const VulkanFramebufferKey &frameBufferKey)
 {
     VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
 
     VkRenderPass vkRenderPass = m_renderPasses.get(frameBufferKey.renderPass)->renderPass;
 
-    const bool usingMsaa = options.samples > SampleCountFlagBits::Samples1Bit;
-    std::vector<Handle<TextureView_t>> attachments;
-
-    for (const auto &attachment : options.attachments) {
-        attachments.push_back(attachment.view);
-        // Include resolve attachments if using MSAA.
-        if (usingMsaa && attachment.resolveView.isValid())
-            attachments.push_back(attachment.resolveView);
-    }
-
-    const uint32_t attachmentCount = static_cast<uint32_t>(attachments.size());
+    const uint32_t attachmentCount = frameBufferKey.attachmentsKey.handles.size();
     std::vector<VkImageView> vkAttachments;
     vkAttachments.reserve(attachmentCount);
     for (uint32_t i = 0; i < attachmentCount; ++i)
-        vkAttachments.push_back(m_textureViews.get(attachments.at(i))->imageView);
+        vkAttachments.push_back(m_textureViews.get(frameBufferKey.attachmentsKey.handles.at(i))->imageView);
 
     VkFramebufferCreateInfo framebufferInfo = {};
     framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -2945,8 +2929,18 @@ Handle<Framebuffer_t> VulkanResourceManager::createFramebuffer(const Handle<Devi
         return {};
     }
 
-    const auto vulkanFramebufferHandle = m_framebuffers.emplace(VulkanFramebuffer(vkFramebuffer));
+    const auto vulkanFramebufferHandle = m_framebuffers.emplace(VulkanFramebuffer(vkFramebuffer, deviceHandle));
     return vulkanFramebufferHandle;
+}
+
+void VulkanResourceManager::deleteFramebuffer(const Handle<Framebuffer_t> &handle)
+{
+    VulkanFramebuffer *framebuffer = m_framebuffers.get(handle);
+    VulkanDevice *vulkanDevice = m_devices.get(framebuffer->deviceHandle);
+
+    vkDestroyFramebuffer(vulkanDevice->device, framebuffer->framebuffer, nullptr);
+
+    m_framebuffers.remove(handle);
 }
 
 Handle<BindGroup_t> VulkanResourceManager::createBindGroup(const Handle<Device_t> &deviceHandle, const BindGroupOptions &options)

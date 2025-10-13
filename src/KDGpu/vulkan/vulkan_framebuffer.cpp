@@ -12,8 +12,9 @@
 
 namespace KDGpu {
 
-KDGpu::VulkanFramebuffer::VulkanFramebuffer(VkFramebuffer _framebuffer)
+KDGpu::VulkanFramebuffer::VulkanFramebuffer(VkFramebuffer _framebuffer, const Handle<Device_t> &_deviceHandle)
     : framebuffer(_framebuffer)
+    , deviceHandle(_deviceHandle)
 {
 }
 
