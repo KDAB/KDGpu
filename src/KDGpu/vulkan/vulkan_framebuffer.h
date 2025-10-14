@@ -27,7 +27,7 @@ struct VulkanAttachmentKey {
 
     bool operator==(const VulkanAttachmentKey &other) const noexcept
     {
-        return hash == other.hash;
+        return handles == other.handles;
     }
 
     bool operator!=(const VulkanAttachmentKey &other) const noexcept
@@ -37,10 +37,10 @@ struct VulkanAttachmentKey {
 
     void addAttachmentView(const Handle<TextureView_t> &view)
     {
-        KDGpu::hash_combine(hash, view);
+        handles.push_back(view);
     }
 
-    size_t hash{ 0 };
+    std::vector<KDGpu::Handle<TextureView_t>> handles;
 };
 
 struct VulkanFramebufferKey {
@@ -83,13 +83,26 @@ struct VulkanFramebuffer {
 namespace std {
 
 template<>
+struct hash<KDGpu::VulkanAttachmentKey> {
+    size_t operator()(const KDGpu::VulkanAttachmentKey &value) const
+    {
+        size_t hash = 0;
+
+        for (const KDGpu::Handle<KDGpu::TextureView_t> &handle : value.handles)
+            KDGpu::hash_combine(hash, handle);
+
+        return hash;
+    }
+};
+
+template<>
 struct hash<KDGpu::VulkanFramebufferKey> {
     size_t operator()(const KDGpu::VulkanFramebufferKey &value) const
     {
         size_t hash = 0;
 
         KDGpu::hash_combine(hash, value.renderPass);
-        KDGpu::hash_combine(hash, value.attachmentsKey.hash);
+        KDGpu::hash_combine(hash, value.attachmentsKey);
         KDGpu::hash_combine(hash, value.width);
         KDGpu::hash_combine(hash, value.height);
         KDGpu::hash_combine(hash, value.layers);

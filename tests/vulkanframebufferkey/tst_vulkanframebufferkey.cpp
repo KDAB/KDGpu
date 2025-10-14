@@ -25,6 +25,31 @@ struct MyHandle : public Handle<T> {
     }
 };
 
+struct MyHashedType {
+    bool operator==(const MyHashedType &other) const noexcept
+    {
+        return v == other.v;
+    }
+
+    bool operator!=(const MyHashedType &other) const noexcept
+    {
+        return !(*this == other);
+    }
+
+    int v{ 0 };
+};
+
+namespace std {
+template<>
+struct hash<MyHashedType> {
+    size_t operator()(const MyHashedType &) const
+    {
+        return 0;
+    }
+};
+
+} // namespace std
+
 TEST_SUITE("VulkanFramebufferKey")
 {
     TEST_CASE("VulkanAttachmentKey")
@@ -45,6 +70,32 @@ TEST_SUITE("VulkanFramebufferKey")
             // THEN
             CHECK(key1 != key2);
         }
+    }
+
+    TEST_CASE("std::unordered_map collision handling")
+    {
+        // GIVEN
+        std::unordered_map<MyHashedType, int> map;
+
+        MyHashedType t1{ .v = 1 };
+        MyHashedType t2{ .v = 2 };
+
+        // THEN
+        CHECK(t1 != t2);
+        CHECK(std::hash<MyHashedType>{}(t1) == std::hash<MyHashedType>{}(t2));
+
+        // WHEN
+        map[t1] = 3;
+
+        // THEN
+        CHECK(map.at(t1) == 3);
+
+        // WHEN -> hash collision, should use operator==
+        map[t2] = 4;
+
+        // THEN
+        CHECK(map.at(t1) == 3);
+        CHECK(map.at(t2) == 4);
     }
 
     TEST_CASE("VulkanFramebufferKey")
