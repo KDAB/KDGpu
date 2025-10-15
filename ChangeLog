@@ -1,3 +1,6 @@
+- v0.9.3
+  - Fix hash collision in AttachmentKey
+  - Release Framebuffers when referenced TextureViews are destroyed
 - v0.9.2
   - Fix wrong internal pool handle set on BindGroups
 - v0.9.1
