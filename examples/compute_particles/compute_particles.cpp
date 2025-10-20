@@ -324,7 +324,7 @@ void ComputeParticles::renderSingleCommandBuffer()
     const SubmitOptions submitOptions = {
         .commandBuffers = { m_graphicsAndComputeCommands },
         .waitSemaphores = { m_presentCompleteSemaphores[m_inFlightIndex] },
-        .signalSemaphores = { m_renderCompleteSemaphores[m_inFlightIndex] }
+        .signalSemaphores = { m_renderCompleteSemaphores[m_currentSwapchainImageIndex] }
     };
     m_queue.submit(submitOptions);
     //![9]
@@ -376,7 +376,7 @@ void ComputeParticles::renderMultipleCommandBuffers()
     const SubmitOptions graphicsSubmitOptions = {
         .commandBuffers = { m_graphicsCommands },
         .waitSemaphores = { m_computeSemaphoreComplete },
-        .signalSemaphores = { m_renderCompleteSemaphores[m_inFlightIndex] }
+        .signalSemaphores = { m_renderCompleteSemaphores[m_currentSwapchainImageIndex] }
     };
     m_queue.submit(graphicsSubmitOptions);
     //![10]

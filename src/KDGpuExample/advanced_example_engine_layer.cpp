@@ -73,7 +73,7 @@ void AdvancedExampleEngineLayer::update()
 
     // Present the swapchain image
     PresentOptions presentOptions = {
-        .waitSemaphores = { m_renderCompleteSemaphores[m_inFlightIndex] },
+        .waitSemaphores = { m_renderCompleteSemaphores[m_currentSwapchainImageIndex] },
         .swapchainInfos = {
                 {
                         .swapchain = m_swapchain,
