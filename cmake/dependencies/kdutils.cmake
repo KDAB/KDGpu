@@ -22,7 +22,7 @@ elseif(NOT TARGET KDUtils)
         FetchContent_Declare(
             KDUtils
             GIT_REPOSITORY https://github.com/KDAB/KDUtils.git
-            GIT_TAG main
+            GIT_TAG d90d6894d97847ada0cbf4cd50dc0166dc81ebc7
             USES_TERMINAL_DOWNLOAD YES USES_TERMINAL_UPDATE YES
         )
 
