@@ -196,7 +196,7 @@ void HelloTriangle::render()
     const SubmitOptions submitOptions = {
         .commandBuffers = { m_commandBuffers[m_inFlightIndex] },
         .waitSemaphores = { m_presentCompleteSemaphores[m_inFlightIndex] }, // Wait for swapchain image acquisition
-        .signalSemaphores = { m_renderCompleteSemaphores[m_inFlightIndex] },
+        .signalSemaphores = { m_renderCompleteSemaphores[m_currentSwapchainImageIndex] },
         .signalFence = m_frameFences[m_inFlightIndex] // Signal Fence once submission and execution is complete
     };
     //![1]

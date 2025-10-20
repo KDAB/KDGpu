@@ -114,8 +114,8 @@ protected:
 
     uint32_t m_currentSwapchainImageIndex{ 0 };
     uint32_t m_inFlightIndex{ 0 };
-    std::array<KDGpu::GpuSemaphore, MAX_FRAMES_IN_FLIGHT> m_presentCompleteSemaphores;
-    std::array<KDGpu::GpuSemaphore, MAX_FRAMES_IN_FLIGHT> m_renderCompleteSemaphores;
+    std::array<KDGpu::GpuSemaphore, MAX_FRAMES_IN_FLIGHT> m_presentCompleteSemaphores; // One Per Frame in flight
+    std::vector<KDGpu::GpuSemaphore> m_renderCompleteSemaphores; // One Per Swapchain Image
     KDGpu::TextureUsageFlags m_depthTextureUsageFlags{};
 
     std::vector<KDGpu::UploadStagingBuffer> m_stagingBuffers;

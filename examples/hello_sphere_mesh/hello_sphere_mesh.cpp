@@ -108,7 +108,7 @@ void HelloSphereMesh::render()
     const SubmitOptions submitOptions = {
         .commandBuffers = { m_commandBuffer },
         .waitSemaphores = { m_presentCompleteSemaphores[m_inFlightIndex] },
-        .signalSemaphores = { m_renderCompleteSemaphores[m_inFlightIndex] }
+        .signalSemaphores = { m_renderCompleteSemaphores[m_currentSwapchainImageIndex] }
     };
     m_queue.submit(submitOptions);
 }

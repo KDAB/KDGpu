@@ -290,7 +290,17 @@ void ExampleEngineLayer::onAttached()
     // Create the present complete and render complete semaphores
     for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
         m_presentCompleteSemaphores[i] = m_device.createGpuSemaphore();
-        m_renderCompleteSemaphores[i] = m_device.createGpuSemaphore();
+    }
+
+    // https://docs.vulkan.org/guide/latest/swapchain_semaphore_reuse.html
+    // We index renderCompleteSemaphore by swapchain image index rather than
+    // frame in flight index to ensure presentation has been fully completed
+    // before we try to reuse a swapchain image in subsequent frames (waiting
+    // on the fence we use during submission doesn't guarantee present operations
+    // have been completed).
+    m_renderCompleteSemaphores.reserve(m_swapchainViews.size());
+    for (size_t i = 0, m = m_swapchainViews.size(); i < m; ++i) {
+        m_renderCompleteSemaphores.emplace_back(std::move(m_device.createGpuSemaphore()));
     }
 
     constexpr std::array availableSampleCounts{
@@ -327,7 +337,7 @@ void ExampleEngineLayer::onDetached()
     m_imguiOverlay = {};
 
     m_presentCompleteSemaphores = {};
-    m_renderCompleteSemaphores = {};
+    m_renderCompleteSemaphores.clear();
     m_depthTextureView = {};
     m_depthTexture = {};
     m_swapchainViews.clear();

@@ -69,7 +69,7 @@ void SimpleExampleEngineLayer::update()
     // Present the swapchain image
     // clang-format off
     PresentOptions presentOptions = {
-        .waitSemaphores = { m_renderCompleteSemaphores[m_inFlightIndex] },
+        .waitSemaphores = { m_renderCompleteSemaphores[m_currentSwapchainImageIndex] },
         .swapchainInfos = {{
             .swapchain = m_swapchain,
             .imageIndex = m_currentSwapchainImageIndex
