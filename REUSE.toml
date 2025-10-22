@@ -4,7 +4,7 @@ SPDX-PackageSupplier = "Sean Harmer <sean.harmer@kdab.com>"
 
 #misc source code
 [[annotations]]
-path = ["CMakePresets.json", "CMakeUserPresets-example.json"]
+path = ["CMakePresets.json", "CMakeUserPresets-example.json", "vcpkg.json", "vcpkg-configuration.json"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>"
 SPDX-License-Identifier = "MIT"
@@ -87,4 +87,11 @@ SPDX-License-Identifier = "LicenseRef-Apple-Sample-Code"
 path = ["examples/hello_triangle_apple/**.frag", "examples/hello_triangle_apple/**.vert", "examples/hello_triangle_apple/Application/AppKit/macOS/Info.plist.in"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>"
+SPDX-License-Identifier = "MIT"
+
+# Git Submodules
+[[annotations]]
+path = [".gitmodules"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2025 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>"
 SPDX-License-Identifier = "MIT"

@@ -6,38 +6,30 @@
 #
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
-include(FetchContent)
-
-# Note: FetchContent_MakeAvailable builds the project
-# if it contains a CMakeLists.txt, otherwise it does nothing.
-# ${package_SOURCE_DIR} ${package_BINARY_DIR} are made available by
-# MakeAvailable or Populate
-message(STATUS "Checking/updating dependencies. This may take a little while...
-    Set the FETCHCONTENT_QUIET option to OFF to get verbose output.
-"
-)
 
 # KDUtils
 if(KDGPU_BUILD_TESTS OR KDGPU_BUILD_KDGPUKDGUI)
-    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/kdutils.cmake)
+    find_package(KDUtils REQUIRED)
+    find_package(KDFoundation REQUIRED)
+    find_package(KDGui REQUIRED)
 endif()
 
 # spdlog
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/spdlog.cmake)
+find_package(spdlog REQUIRED)
 
 # Vulkan & VMA
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/vulkan.cmake)
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/vulkan_memory_allocator.cmake)
+find_package(VulkanMemoryAllocator REQUIRED)
 
 if(KDGPU_BUILD_EXAMPLES)
     # glm
-    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/glm.cmake)
+    find_package(glm CONFIG REQUIRED)
 
     # stb (for stb image)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/stb.cmake)
 
     # imgui (for 2D UI)
-    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/imgui.cmake)
+    find_package(imgui REQUIRED)
 
     if(KDGPU_HLSL_SUPPORT)
         # dxc (for shader compilation)
@@ -45,9 +37,9 @@ if(KDGPU_BUILD_EXAMPLES)
     endif()
 endif()
 
-if(KDGPU_OPENXR_SUPPORT)
+if(KDGPU_BUILD_KDXR)
     # OpenXR
-    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies/openxr.cmake)
+    find_package(OpenXR REQUIRED)
 endif()
 
 if(KDGPU_BUILD_TESTS)

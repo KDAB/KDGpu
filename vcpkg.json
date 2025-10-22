@@ -1,0 +1,93 @@
+{
+    "name": "kdgpu",
+    "version": "0.10.0",
+    "description": "KDGPU Library - C++ Vulkan wrapper for GPU programming",
+    "homepage": "https://github.com/KDAB/kdgpu",
+    "license": "MIT",
+    "supports": "(windows | linux | android | osx) & (arm | x86 | x64)",
+    "builtin-baseline": "faf665cf8aca288b636d9de887f5cdfa3cff1a9e",
+    "dependencies": [
+        {
+            "name": "vulkan-memory-allocator",
+            "version>=": "3.3.0"
+        },
+        {
+            "name": "pkgconf",
+            "version>=": "2.5.1"
+        },
+        {
+            "name": "spdlog",
+            "version>=": "1.15.2"
+        }
+    ],
+    "features": {
+        "testing": {
+            "description": "Enable testing support",
+            "dependencies": [
+                {
+                    "name": "doctest",
+                    "version>=": "2.4.9"
+                },
+                {
+                    "name": "kdutils",
+                    "version>=": "0.1.12"
+                }
+            ]
+        },
+        "kdgpukdgui": {
+            "description": "Enable KDGui integration",
+            "dependencies": [
+                {
+                    "name": "kdutils",
+                    "version>=": "0.1.12"
+                }
+            ]
+        },
+        "kdgpuutils": {
+            "description": "Enable KDGpuUtils",
+            "dependencies": [
+                {
+                    "name": "kdutils",
+                    "version>=": "0.1.12"
+                }
+            ]
+        },
+        "examples": {
+            "description": "Build examples",
+            "dependencies": [
+                {
+                    "name": "glm",
+                    "version>=": "1.0.2"
+                },
+                {
+                    "name": "stb",
+                    "version>=": "2024-07-29#1"
+                },
+                {
+                    "name": "imgui",
+                    "version>=": "1.91.9",
+                    "features": [
+                        "vulkan-binding"
+                    ]
+                }
+            ]
+        },
+        "openxr": {
+            "description": "Enable OpenXR support for VR/AR",
+            "dependencies": [
+                {
+                    "name": "openxr-loader",
+                    "version>=": "1.1.45"
+                },
+                {
+                    "name": "kdbindings",
+                    "version>=": "1.1.0"
+                }
+            ]
+        },
+        "hlsl": {
+            "description": "Enable HLSL shader support",
+            "dependencies": []
+        }
+    }
+}

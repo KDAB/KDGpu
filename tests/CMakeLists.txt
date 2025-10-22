@@ -90,8 +90,11 @@ add_subdirectory(acceleration_structure)
 add_subdirectory(raytracing_pipeline)
 add_subdirectory(raytracing_pass_command_recorder)
 add_subdirectory(ycbcrconversions)
-add_subdirectory(staging_buffer_pool)
-add_subdirectory(resource_deleter)
+
+if(KDGPU_BUILD_KDGPUUTILS)
+    add_subdirectory(staging_buffer_pool)
+    add_subdirectory(resource_deleter)
+endif()
 
 find_package(CUDAToolkit QUIET)
 if(${CUDAToolkit_FOUND})
