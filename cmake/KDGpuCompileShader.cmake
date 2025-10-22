@@ -14,9 +14,12 @@ if(NOT Vulkan_GLSLANG_VALIDATOR_EXECUTABLE)
     find_program(
         Vulkan_GLSLANG_VALIDATOR_EXECUTABLE
         NAMES glslangValidator
-        HINTS "$ENV{VULKAN_SDK}/bin"
+        HINTS
+            "$ENV{VULKAN_SDK}/bin"
+            "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/tools/glslang" # Fallback: when using vcpkg to provide glslang and vulkan sdk
     )
 endif()
+
 if(NOT Vulkan_GLSLANG_VALIDATOR_EXECUTABLE)
     message(FATAL_ERROR "glslangValidator executable not found")
 endif()

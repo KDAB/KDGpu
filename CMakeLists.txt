@@ -8,11 +8,22 @@
 #
 cmake_minimum_required(VERSION 3.16)
 
+option(KDGPU_USE_EXTERNAL_DEPENDENCIES
+       "Assume all project dependencies are available on the system. Don't fetch through vcpkg." OFF
+)
+
+# vcpkg manifest mode
+if(NOT KDGPU_USE_EXTERNAL_DEPENDENCIES)
+    if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+        include(cmake/KDGpuFunctions.cmake)
+        kdgpu_check_submodule_exists(vcpkg vcpkg)
+        set(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake)
+    endif()
+endif()
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 cmake_policy(SET CMP0090 NEW) # Stop export(PACKAGE) from modifying the system-wide cmake package system
 cmake_policy(SET CMP0117 NEW) # Do not add /GR to CMAKE_CXX_FLAGS
-
-project(KDGpu VERSION 0.9.3)
 
 add_definitions(-DKDGPU_ASSET_PATH="${CMAKE_CURRENT_BINARY_DIR}/assets")
 
@@ -47,49 +58,50 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     add_compile_options(-Wno-psabi)
 endif()
 
-include(KDGpuCompileShader)
-include(CheckAtomic)
-include(ECMEnableSanitizers)
 include(FeatureSummary)
 include(CMakeDependentOption)
-include(GNUInstallDirs)
-
-# Note: Set before including dependencies.cmake, so 3rd party libs end up in the correct dir
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
 option(KDGPU_BUILD_SHARED_LIBS "Build shared libraries" ON)
 set(BUILD_SHARED_LIBS ${KDGPU_BUILD_SHARED_LIBS})
 
 option(KDGPU_CODE_COVERAGE "Code Coverage" OFF)
 option(KDGPU_BUILD_TESTS "Build tests" ON)
+option(KDGPU_BUILD_EXAMPLES "Build examples" ON)
 option(KDGPU_BUILD_KDGPUKDGUI "Build KDGpuKDGui" ON)
+option(KDGPU_BUILD_KDGPUUTILS "Build KDGpuUtils" ON)
 cmake_dependent_option(
     KDGPU_BUILD_KDGPUEXAMPLE
     "Build KDGpuExample"
     ON
-    KDGPU_BUILD_KDGPUKDGUI
-    OFF
-)
-option(KDGPU_BUILD_EXAMPLES "Build examples" ON)
-cmake_dependent_option(
-    KDGPU_BUILD_ASSETS
-    "Build Assets"
-    ON
     KDGPU_BUILD_EXAMPLES
     OFF
 )
+
+# Ensure KDGpuKDGui, KDGpuUtils and KDGpuExample are ON when examples are ON
+if(KDGPU_BUILD_EXAMPLES)
+    set(KDGPU_BUILD_KDGPUKDGUI
+        ON
+        CACHE BOOL "Build KDGpuKDGui" FORCE
+    )
+    set(KDGPU_BUILD_KDGPUUTILS
+        ON
+        CACHE BOOL "Build KDGpuUtils" FORCE
+    )
+    set(KDGPU_BUILD_KDGPUEXAMPLE
+        ON
+        CACHE BOOL "Build KDGpuExample" FORCE
+    )
+endif()
+
+set(KDGPU_BUILD_ASSETS "KDGPU_BUILD_TESTS OR KDGPU_BUILD_EXAMPLES")
+
 option(KDGPU_HLSL_SUPPORT "Try to find and use the dxc HLSL to SPIR-V compiler" OFF)
 
 add_feature_info(KDGpuKDGui ${KDGPU_BUILD_KDGPUKDGUI} "Build KDGpuKDGui")
 add_feature_info(KDGpuExample ${KDGPU_BUILD_KDGPUEXAMPLE} "Build KDGpuExample")
 
 option(KDGPU_BUILD_KDXR "Build KDXr" ON)
-option(KDGPU_OPENXR_SUPPORT "Enable support for OpenXR" ON)
-add_feature_info(OpenXR ${KDGPU_OPENXR_SUPPORT} "Enable support for OpenXR")
-
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies.cmake)
+add_feature_info(OpenXR ${KDGPU_BUILD_KDXR} "Enable support for OpenXR")
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
@@ -99,8 +111,69 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
     endif()
 endif()
 
+# vcpkg conditional features
+if(KDGPU_BUILD_KDGPUKDGUI)
+    list(APPEND VCPKG_MANIFEST_FEATURES "kdgpukdgui")
+endif()
+
+if(KDGPU_BUILD_KDGPUUTILS)
+    list(APPEND VCPKG_MANIFEST_FEATURES "kdgpuutils")
+endif()
+
+if(KDGPU_BUILD_KDGPUEXAMPLE)
+    list(APPEND VCPKG_MANIFEST_FEATURES "kdgpuexample")
+endif()
+
+if(KDGPU_BUILD_EXAMPLES)
+    list(APPEND VCPKG_MANIFEST_FEATURES "examples")
+endif()
+
+if(KDGPU_BUILD_TESTS)
+    list(APPEND VCPKG_MANIFEST_FEATURES "testing")
+endif()
+
+if(KDGPU_HLSL_SUPPORT)
+    list(APPEND VCPKG_MANIFEST_FEATURES "hlsl")
+endif()
+
+if(KDGPU_BUILD_KDXR)
+    list(APPEND VCPKG_MANIFEST_FEATURES "openxr")
+endif()
+
+if("$ENV{VULKAN_SDK}" STREQUAL "")
+    # Use vcpkg to fetch Vulkan SDK when env variable VULKAN_SDK is not set
+    list(APPEND VCPKG_MANIFEST_FEATURES "vulkan-sdk")
+endif()
+
+message(STATUS "Vcpkg manifest features: ${VCPKG_MANIFEST_FEATURES}")
+
+# Register Project once all vcpkg features have been set
+project(
+    KDGpu
+    LANGUAGES CXX
+    VERSION 0.9.3
+)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+include(CheckAtomic)
+include(GNUInstallDirs)
+include(KDGpuCompileShader)
+include(ECMEnableSanitizers)
+
+# Note: Set before including dependencies.cmake, so 3rd party libs end up in the correct dir
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+
+# Package Dependencies
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/dependencies.cmake)
+
+# Add sources
 add_subdirectory(src)
 
+# Feature Summary
+add_feature_info(KDGpu-DXC ${KDGPU_HLSL_SUPPORT} "HLSL Shader Support")
 add_feature_info(KDGpu-Assets ${KDGPU_BUILD_ASSETS} "Build Assets")
 if(KDGPU_BUILD_ASSETS)
     add_subdirectory(assets)
