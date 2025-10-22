@@ -15,7 +15,7 @@ find_dependency(KDGpuKDGui REQUIRED)
 find_dependency(KDFoundation REQUIRED)
 find_dependency(imgui REQUIRED)
 
-if (@KDGPU_OPENXR_SUPPORT@)
+if (@KDGPU_BUILD_KDXR@)
     find_dependency(KDXr REQUIRED)
 endif ()
 

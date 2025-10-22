@@ -70,7 +70,7 @@ set(HEADERS
     view_projection.h
 )
 
-if(KDGPU_OPENXR_SUPPORT)
+if(KDGPU_BUILD_KDXR)
     set(XR_SOURCES
         xr_compositor/xr_compositor_layer.cpp
         xr_compositor/xr_cube_layer.cpp
@@ -116,7 +116,7 @@ set(KDGPUEXAMPLE_PUBLIC_LIBS
     glm::glm
 )
 
-if(KDGPU_OPENXR_SUPPORT)
+if(KDGPU_BUILD_KDXR)
     set(KDGPU_OPENXR ON)
     list(APPEND KDGPUEXAMPLE_PUBLIC_LIBS KDXr::KDXr)
 endif()

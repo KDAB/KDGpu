@@ -4,7 +4,7 @@ SPDX-PackageSupplier = "Paul Lemire <paul.lemire@kdab.com>"
 
 #misc source code
 [[annotations]]
-path = ["CMakePresets.json", "CMakeUserPresets-example.json"]
+path = ["CMakePresets.json", "CMakeUserPresets-example.json", "vcpkg.json", "vcpkg-configuration.json"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>"
 SPDX-License-Identifier = "MIT"
@@ -102,4 +102,3 @@ path = ["vcpkg"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "Copyright (c) Microsoft Corporation"
 SPDX-License-Identifier = "MIT"
-
