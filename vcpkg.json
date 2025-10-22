@@ -1,0 +1,94 @@
+{
+    "name": "kdgpu",
+    "version": "0.10.0",
+    "description": "KDGPU Library - C++ Vulkan wrapper for GPU programming",
+    "homepage": "https://github.com/KDAB/kdgpu",
+    "license": "MIT",
+    "supports": "!uwp",
+    "dependencies": [
+        "kdutils",
+        "spdlog",
+        "vulkan-memory-allocator",
+        {
+            "name": "pkgconf",
+            "host": true
+        }
+    ],
+    "features": {
+        "examples": {
+            "description": "Build examples",
+            "dependencies": [
+                {
+                    "name": "kdgpu",
+                    "features": [
+                        "kdgpuexample",
+                        "kdgpukdgui",
+                        "kdgpuutils"
+                    ]
+                },
+                "stb"
+            ]
+        },
+        "hlsl": {
+            "description": "Enable HLSL shader support",
+            "supports": "(windows & !arm32 & !uwp & !xbox) | (linux & x64)",
+            "dependencies": [
+                {
+                    "name": "directx-dxc",
+                    "host": true
+                }
+            ]
+        },
+        "kdgpuexample": {
+            "description": "Enable KDGpuExample",
+            "dependencies": [
+                "glm",
+                {
+                    "name": "imgui",
+                    "features": [
+                        "vulkan-binding"
+                    ]
+                }
+            ]
+        },
+        "kdgpukdgui": {
+            "description": "Enable KDGui integration"
+        },
+        "kdgpuutils": {
+            "description": "Enable KDGpuUtils"
+        },
+        "openxr": {
+            "description": "Enable OpenXR support for VR/AR",
+            "dependencies": [
+                "kdbindings",
+                "openxr-loader"
+            ]
+        },
+        "testing": {
+            "description": "Enable testing support",
+            "dependencies": [
+                "doctest"
+            ]
+        },
+        "vulkan-sdk": {
+            "description": "Use vpckg fetched VulkanSDK",
+            "dependencies": [
+                {
+                    "name": "glslang",
+                    "features": [
+                        "tools"
+                    ],
+                    "host": true
+                },
+                "vulkan-sdk-components"
+            ]
+        }
+    },
+    "configuration": {
+        "default-registry": {
+            "kind": "git",
+            "baseline": "61092ca859d11d616e9db065b1cf4a42ca67d128",
+            "repository": "https://github.com/microsoft/vcpkg"
+        }
+    }
+}
