@@ -8,6 +8,13 @@
 #
 message("-- Locating the DXC compiler...")
 
+find_package(directx-dxc CONFIG QUIET)
+if(directx-dxc_FOUND)
+    message("-- Using the DXC compiler from DirectX-DXC package... ${DIRECTX_DXC_TOOL}")
+    set(DXC_EXECUTABLE ${DIRECTX_DXC_TOOL})
+    return()
+endif()
+
 find_program(DXC_EXECUTABLE dxc HINTS "$ENV{VULKAN_SDK}/bin")
 if(NOT DXC_EXECUTABLE)
     message(
