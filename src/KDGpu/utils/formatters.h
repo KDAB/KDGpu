@@ -11,12 +11,13 @@
 #pragma once
 
 #include <KDGpu/gpu_core.h>
+#include <KDGpu/handle.h>
 #include <KDGpu/kdgpu_export.h>
 
 #include <KDGpu/utils/logging.h>
 
 template<>
-struct KDGPU_EXPORT fmt::formatter<KDGpu::AdapterDeviceType> {
+struct fmt::formatter<KDGpu::AdapterDeviceType> {
     template<typename ParseContext>
     constexpr auto parse(ParseContext &ctx)
     {
@@ -31,7 +32,7 @@ struct KDGPU_EXPORT fmt::formatter<KDGpu::AdapterDeviceType> {
 };
 
 template<>
-struct KDGPU_EXPORT fmt::formatter<KDGpu::SurfaceCapabilities> {
+struct fmt::formatter<KDGpu::SurfaceCapabilities> {
     template<typename ParseContext>
     constexpr auto parse(ParseContext &ctx)
     {
@@ -46,7 +47,7 @@ struct KDGPU_EXPORT fmt::formatter<KDGpu::SurfaceCapabilities> {
 };
 
 template<>
-struct KDGPU_EXPORT fmt::formatter<KDGpu::PresentMode> {
+struct fmt::formatter<KDGpu::PresentMode> {
     template<typename ParseContext>
     constexpr auto parse(ParseContext &ctx)
     {
@@ -61,7 +62,7 @@ struct KDGPU_EXPORT fmt::formatter<KDGpu::PresentMode> {
 };
 
 template<>
-struct KDGPU_EXPORT fmt::formatter<KDGpu::SurfaceTransformFlagBits> {
+struct fmt::formatter<KDGpu::SurfaceTransformFlagBits> {
     template<typename ParseContext>
     constexpr auto parse(ParseContext &ctx)
     {
@@ -76,7 +77,7 @@ struct KDGPU_EXPORT fmt::formatter<KDGpu::SurfaceTransformFlagBits> {
 };
 
 template<class T>
-struct KDGPU_EXPORT fmt::formatter<KDGpu::Handle<T>> {
+struct fmt::formatter<KDGpu::Handle<T>> {
     using HandleType = KDGpu::Handle<T>;
 
     template<typename ParseContext>

@@ -50,7 +50,7 @@ inline std::string getVersionAsString(uint64_t version)
 } // namespace KDXr
 
 template<>
-struct KDXR_EXPORT fmt::formatter<KDXr::SessionState> : fmt::formatter<std::string> {
+struct fmt::formatter<KDXr::SessionState> : fmt::formatter<std::string> {
     template<typename FormatContext>
     auto format(KDXr::SessionState const &state, FormatContext &ctx) const
     {
