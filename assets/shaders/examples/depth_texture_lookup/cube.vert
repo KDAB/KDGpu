@@ -49,7 +49,7 @@ const int indices[36] = int[36](
     1, 7, 5,
     3, 7, 1,
 
-    // Botton
+    // Bottom
     4, 5, 6,
     6, 5, 7
 

@@ -8,7 +8,7 @@ struct ParticleData {
     vec4 color;
 };
 
-// Particles from previouse frame
+// Particles from previous frame
 layout(std430, set = 0, binding = 0) coherent buffer Particles
 {
     ParticleData particles[];
