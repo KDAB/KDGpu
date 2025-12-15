@@ -129,7 +129,7 @@ message(STATUS "Vcpkg manifest features: ${VCPKG_MANIFEST_FEATURES}")
 # Register Project once all vcpkg features have been set
 project(
     KDGpu
-    LANGUAGES CXX
+    LANGUAGES CXX C
     VERSION 0.9.3
 )
 set(CMAKE_CXX_STANDARD 17)
