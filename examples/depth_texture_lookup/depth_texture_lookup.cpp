@@ -22,8 +22,6 @@
 
 #include <glm/gtx/transform.hpp>
 
-#include <cmath>
-#include <fstream>
 #include <string>
 
 using namespace KDGpu;

@@ -69,29 +69,29 @@ public:
     Handle<Instance_t> createInstance(const InstanceOptions &options);
     Handle<Instance_t> createInstanceFromExistingVkInstance(VkInstance vkInstance);
     void deleteInstance(const Handle<Instance_t> &handle);
-    VulkanInstance *getInstance(const Handle<Instance_t> &handle) const;
-    std::vector<Extension> getInstanceExtensions() const;
+    [[nodiscard]] VulkanInstance *getInstance(const Handle<Instance_t> &handle) const;
+    [[nodiscard]] static std::vector<Extension> getInstanceExtensions();
 
-    Handle<Adapter_t> insertAdapter(const VulkanAdapter &vulkanAdapter);
+    Handle<Adapter_t> insertAdapter(const VulkanAdapter &physicalDevice);
     void removeAdapter(const Handle<Adapter_t> &handle);
-    VulkanAdapter *getAdapter(const Handle<Adapter_t> &handle) const;
+    [[nodiscard]] VulkanAdapter *getAdapter(const Handle<Adapter_t> &handle) const;
 
     Handle<Device_t> createDevice(const Handle<Adapter_t> &adapterHandle, const DeviceOptions &options, std::vector<QueueRequest> &queueRequests);
     Handle<Device_t> createDeviceFromExistingVkDevice(const Handle<Adapter_t> &adapterHandle, VkDevice vkDevice);
     void deleteDevice(const Handle<Device_t> &handle);
-    VulkanDevice *getDevice(const Handle<Device_t> &handle) const;
+    [[nodiscard]] VulkanDevice *getDevice(const Handle<Device_t> &handle) const;
 
     Handle<Queue_t> insertQueue(const VulkanQueue &vulkanQueue);
     void removeQueue(const Handle<Queue_t> &handle);
-    VulkanQueue *getQueue(const Handle<Queue_t> &handle) const;
+    [[nodiscard]] VulkanQueue *getQueue(const Handle<Queue_t> &handle) const;
 
     Handle<Swapchain_t> createSwapchain(const Handle<Device_t> &deviceHandle, const SwapchainOptions &options);
     void deleteSwapchain(const Handle<Swapchain_t> &handle);
-    VulkanSwapchain *getSwapchain(const Handle<Swapchain_t> &handle) const;
+    [[nodiscard]] VulkanSwapchain *getSwapchain(const Handle<Swapchain_t> &handle) const;
 
     Handle<Surface_t> insertSurface(const VulkanSurface &surface);
     void deleteSurface(const Handle<Surface_t> &handle);
-    VulkanSurface *getSurface(const Handle<Surface_t> &handle) const;
+    [[nodiscard]] VulkanSurface *getSurface(const Handle<Surface_t> &handle) const;
 
     // For swapchain-owned images
     Handle<Texture_t> insertTexture(const VulkanTexture &texture);
@@ -100,47 +100,47 @@ public:
     // For user-created textures
     Handle<Texture_t> createTexture(const Handle<Device_t> &deviceHandle, const TextureOptions &options);
     void deleteTexture(const Handle<Texture_t> &handle);
-    VulkanTexture *getTexture(const Handle<Texture_t> &handle) const;
+    [[nodiscard]] VulkanTexture *getTexture(const Handle<Texture_t> &handle) const;
 
     Handle<TextureView_t> createTextureView(const Handle<Device_t> &deviceHandle, const Handle<Texture_t> &textureHandle, const TextureViewOptions &options);
     void deleteTextureView(const Handle<TextureView_t> &handle);
-    VulkanTextureView *getTextureView(const Handle<TextureView_t> &handle) const;
+    [[nodiscard]] VulkanTextureView *getTextureView(const Handle<TextureView_t> &handle) const;
 
     Handle<Buffer_t> createBuffer(const Handle<Device_t> &deviceHandle, const BufferOptions &options, const void *initialData);
     void deleteBuffer(const Handle<Buffer_t> &handle);
-    VulkanBuffer *getBuffer(const Handle<Buffer_t> &handle) const;
+    [[nodiscard]] VulkanBuffer *getBuffer(const Handle<Buffer_t> &handle) const;
 
     Handle<ShaderModule_t> createShaderModule(const Handle<Device_t> &deviceHandle, const std::vector<uint32_t> &code);
     void deleteShaderModule(const Handle<ShaderModule_t> &handle);
-    VulkanShaderModule *getShaderModule(const Handle<ShaderModule_t> &handle) const;
+    [[nodiscard]] VulkanShaderModule *getShaderModule(const Handle<ShaderModule_t> &handle) const;
 
     Handle<RenderPass_t> createRenderPass(const Handle<Device_t> &deviceHandle, const RenderPassOptions &options);
     void deleteRenderPass(const Handle<RenderPass_t> &handle);
-    VulkanRenderPass *getRenderPass(const Handle<RenderPass_t> &handle);
+    [[nodiscard]] VulkanRenderPass *getRenderPass(const Handle<RenderPass_t> &handle);
 
     Handle<PipelineLayout_t> createPipelineLayout(const Handle<Device_t> &deviceHandle, const PipelineLayoutOptions &options);
     void deletePipelineLayout(const Handle<PipelineLayout_t> &handle);
-    VulkanPipelineLayout *getPipelineLayout(const Handle<PipelineLayout_t> &handle) const;
+    [[nodiscard]] VulkanPipelineLayout *getPipelineLayout(const Handle<PipelineLayout_t> &handle) const;
 
     Handle<GraphicsPipeline_t> createGraphicsPipeline(const Handle<Device_t> &deviceHandle, const GraphicsPipelineOptions &options);
     void deleteGraphicsPipeline(const Handle<GraphicsPipeline_t> &handle);
-    VulkanGraphicsPipeline *getGraphicsPipeline(const Handle<GraphicsPipeline_t> &handle) const;
+    [[nodiscard]] VulkanGraphicsPipeline *getGraphicsPipeline(const Handle<GraphicsPipeline_t> &handle) const;
 
     Handle<ComputePipeline_t> createComputePipeline(const Handle<Device_t> &deviceHandle, const ComputePipelineOptions &options);
     void deleteComputePipeline(const Handle<ComputePipeline_t> &handle);
-    VulkanComputePipeline *getComputePipeline(const Handle<ComputePipeline_t> &handle) const;
+    [[nodiscard]] VulkanComputePipeline *getComputePipeline(const Handle<ComputePipeline_t> &handle) const;
 
     Handle<RayTracingPipeline_t> createRayTracingPipeline(const Handle<Device_t> &deviceHandle, const RayTracingPipelineOptions &options);
     void deleteRayTracingPipeline(const Handle<RayTracingPipeline_t> &handle);
-    VulkanRayTracingPipeline *getRayTracingPipeline(const Handle<RayTracingPipeline_t> &handle) const;
+    [[nodiscard]] VulkanRayTracingPipeline *getRayTracingPipeline(const Handle<RayTracingPipeline_t> &handle) const;
 
     Handle<GpuSemaphore_t> createGpuSemaphore(const Handle<Device_t> &deviceHandle, const GpuSemaphoreOptions &options);
     void deleteGpuSemaphore(const Handle<GpuSemaphore_t> &handle);
-    VulkanGpuSemaphore *getGpuSemaphore(const Handle<GpuSemaphore_t> &handle) const;
+    [[nodiscard]] VulkanGpuSemaphore *getGpuSemaphore(const Handle<GpuSemaphore_t> &handle) const;
 
     Handle<CommandRecorder_t> createCommandRecorder(const Handle<Device_t> &deviceHandle, const CommandRecorderOptions &options);
     void deleteCommandRecorder(const Handle<CommandRecorder_t> &handle);
-    VulkanCommandRecorder *getCommandRecorder(const Handle<CommandRecorder_t> &handle) const;
+    [[nodiscard]] VulkanCommandRecorder *getCommandRecorder(const Handle<CommandRecorder_t> &handle) const;
 
     Handle<RenderPassCommandRecorder_t> createRenderPassCommandRecorder(const Handle<Device_t> &deviceHandle,
                                                                         const Handle<CommandRecorder_t> &commandRecorderHandle,
@@ -152,16 +152,16 @@ public:
                                                                         const Handle<CommandRecorder_t> &commandRecorderHandle,
                                                                         const RenderPassCommandRecorderWithDynamicRenderingOptions &options);
     void deleteRenderPassCommandRecorder(const Handle<RenderPassCommandRecorder_t> &handle);
-    VulkanRenderPassCommandRecorder *getRenderPassCommandRecorder(const Handle<RenderPassCommandRecorder_t> &handle) const;
+    [[nodiscard]] VulkanRenderPassCommandRecorder *getRenderPassCommandRecorder(const Handle<RenderPassCommandRecorder_t> &handle) const;
 
     Handle<ComputePassCommandRecorder_t> createComputePassCommandRecorder(const Handle<Device_t> &deviceHandle,
                                                                           const Handle<CommandRecorder_t> &commandRecorderHandle,
                                                                           const ComputePassCommandRecorderOptions &options);
     void deleteComputePassCommandRecorder(const Handle<ComputePassCommandRecorder_t> &handle);
-    VulkanComputePassCommandRecorder *getComputePassCommandRecorder(const Handle<ComputePassCommandRecorder_t> &handle) const;
+    [[nodiscard]] VulkanComputePassCommandRecorder *getComputePassCommandRecorder(const Handle<ComputePassCommandRecorder_t> &handle) const;
 
     void deleteRayTracingPassCommandRecorder(const Handle<RayTracingPassCommandRecorder_t> &handle);
-    VulkanRayTracingPassCommandRecorder *getRayTracingPassCommandRecorder(const Handle<RayTracingPassCommandRecorder_t> &handle) const;
+    [[nodiscard]] VulkanRayTracingPassCommandRecorder *getRayTracingPassCommandRecorder(const Handle<RayTracingPassCommandRecorder_t> &handle) const;
 
     Handle<RayTracingPassCommandRecorder_t> createRayTracingPassCommandRecorder(const Handle<Device_t> &deviceHandle,
                                                                                 const Handle<CommandRecorder_t> &commandRecorderHandle,
@@ -171,7 +171,7 @@ public:
                                                                   const Handle<CommandRecorder_t> &commandRecorderHandle,
                                                                   const TimestampQueryRecorderOptions &options);
     void deleteTimestampQueryRecorder(const Handle<TimestampQueryRecorder_t> &handle);
-    VulkanTimestampQueryRecorder *getTimestampQueryRecorder(const Handle<TimestampQueryRecorder_t> &handle) const;
+    [[nodiscard]] VulkanTimestampQueryRecorder *getTimestampQueryRecorder(const Handle<TimestampQueryRecorder_t> &handle) const;
 
     // Command buffers are not created by the api. It is up to the concrete subclasses to insert the command buffers
     // by whatever mechanism they wish. They also do not need to be destroyed as they are cleaned up by the owning
@@ -181,50 +181,49 @@ public:
                                                 const QueueDescription &queueDescription,
                                                 CommandBufferLevel commandLevel);
     void deleteCommandBuffer(const Handle<CommandBuffer_t> &handle);
-    VulkanCommandBuffer *getCommandBuffer(const Handle<CommandBuffer_t> &handle) const;
+    [[nodiscard]] VulkanCommandBuffer *getCommandBuffer(const Handle<CommandBuffer_t> &handle) const;
 
     Handle<BindGroupPool_t> createBindGroupPool(const Handle<Device_t> &deviceHandle, const BindGroupPoolOptions &options);
     void deleteBindGroupPool(const Handle<BindGroupPool_t> &handle);
-    VulkanBindGroupPool *getBindGroupPool(const Handle<BindGroupPool_t> &handle) const;
+    [[nodiscard]] VulkanBindGroupPool *getBindGroupPool(const Handle<BindGroupPool_t> &handle) const;
 
     Handle<BindGroup_t> createBindGroup(const Handle<Device_t> &deviceHandle, const BindGroupOptions &options);
     void deleteBindGroup(const Handle<BindGroup_t> &handle);
-    VulkanBindGroup *getBindGroup(const Handle<BindGroup_t> &handle) const;
+    [[nodiscard]] VulkanBindGroup *getBindGroup(const Handle<BindGroup_t> &handle) const;
 
     Handle<BindGroupLayout_t> createBindGroupLayout(const Handle<Device_t> &deviceHandle, const BindGroupLayoutOptions &options);
     void deleteBindGroupLayout(const Handle<BindGroupLayout_t> &handle);
-    VulkanBindGroupLayout *getBindGroupLayout(const Handle<BindGroupLayout_t> &handle) const;
+    [[nodiscard]] VulkanBindGroupLayout *getBindGroupLayout(const Handle<BindGroupLayout_t> &handle) const;
 
     Handle<Sampler_t> createSampler(const Handle<Device_t> &deviceHandle, const SamplerOptions &options);
     void deleteSampler(const Handle<Sampler_t> &handle);
-    VulkanSampler *getSampler(const Handle<Sampler_t> &handle) const;
+    [[nodiscard]] VulkanSampler *getSampler(const Handle<Sampler_t> &handle) const;
 
     Handle<Fence_t> createFence(const Handle<Device_t> &deviceHandle, const FenceOptions &options);
     void deleteFence(const Handle<Fence_t> &handle);
-    VulkanFence *getFence(const Handle<Fence_t> &handle) const;
-
+    [[nodiscard]] VulkanFence *getFence(const Handle<Fence_t> &handle) const;
     Handle<AccelerationStructure_t> createAccelerationStructure(const Handle<Device_t> &deviceHandle, const AccelerationStructureOptions &options);
     void deleteAccelerationStructure(const Handle<AccelerationStructure_t> &handle);
     VulkanAccelerationStructure *getAccelerationStructure(const Handle<AccelerationStructure_t> &handle) const;
 
     Handle<YCbCrConversion_t> createYCbCrConversion(const Handle<Device_t> &deviceHandle, const YCbCrConversionOptions &options);
     void deleteYCbCrConversion(const Handle<YCbCrConversion_t> &handle);
-    VulkanYCbCrConversion *getYCbCrConversion(const Handle<YCbCrConversion_t> &handle) const;
+    [[nodiscard]] VulkanYCbCrConversion *getYCbCrConversion(const Handle<YCbCrConversion_t> &handle) const;
 
-    std::string getMemoryStats(const Handle<Device_t> &device) const;
+    [[nodiscard]] std::string getMemoryStats(const Handle<Device_t> &device) const;
 
-    KDGpu::Format formatFromTextureView(const Handle<TextureView_t> &viewHandle) const;
+    [[nodiscard]] KDGpu::Format formatFromTextureView(const Handle<TextureView_t> &viewHandle) const;
 
 private:
-    SubpassDescription fillAttachmentDescriptionAndCreateSubpassDescription(std::vector<AttachmentDescription> &attachmentDescriptions,
-                                                                            const std::vector<ColorAttachment> &colorAttachments,
-                                                                            const DepthStencilAttachment &depthAttachment,
-                                                                            SampleCountFlagBits samples);
+    [[nodiscard]] SubpassDescription fillAttachmentDescriptionAndCreateSubpassDescription(std::vector<AttachmentDescription> &attachmentDescriptions,
+                                                                                          const std::vector<ColorAttachment> &colorAttachments,
+                                                                                          const DepthStencilAttachment &depthAttachment,
+                                                                                          SampleCountFlagBits samples) const;
 
-    SubpassDescription fillAttachmentDescriptionAndCreateSubpassDescription(std::vector<AttachmentDescription> &attachmentDescriptions,
-                                                                            const std::vector<RenderTargetOptions> &colorAttachments,
-                                                                            const DepthStencilOptions &depthStencilAttachment,
-                                                                            SampleCountFlagBits samples);
+    [[nodiscard]] static SubpassDescription fillAttachmentDescriptionAndCreateSubpassDescription(std::vector<AttachmentDescription> &attachmentDescriptions,
+                                                                                                 const std::vector<RenderTargetOptions> &colorAttachments,
+                                                                                                 const DepthStencilOptions &depthStencilAttachment,
+                                                                                                 SampleCountFlagBits samples);
     struct ShaderStagesInfo {
         std::vector<VkPipelineShaderStageCreateInfo> shaderInfos;
         std::vector<VkSpecializationInfo> shaderSpecializationInfos;
@@ -233,35 +232,34 @@ private:
     };
 
     bool fillShaderStageInfos(const std::vector<ShaderStage> &stages,
-                              ShaderStagesInfo &shaderStagesInfo);
+                              ShaderStagesInfo &shaderStagesInfo) const;
 
     // For RenderPassCommandRecorder implicit RenderPass creation
     Handle<RenderPass_t> createImplicitRenderPass(const Handle<Device_t> &deviceHandle,
                                                   const std::vector<ColorAttachment> &colorAttachments,
-                                                  const DepthStencilAttachment &depthAttachment,
+                                                  const DepthStencilAttachment &depthStencilAttachment,
                                                   SampleCountFlagBits samples,
                                                   uint32_t viewCount);
 
     // For GraphicsPipeline implicit RenderPass creation
     Handle<RenderPass_t> createImplicitRenderPass(const Handle<Device_t> &deviceHandle,
                                                   const std::vector<RenderTargetOptions> &colorAttachments,
-                                                  const DepthStencilOptions &depthAttachment,
+                                                  const DepthStencilOptions &depthStencilAttachment,
                                                   SampleCountFlagBits samples,
                                                   uint32_t viewCount);
 
     Handle<Framebuffer_t> createFramebuffer(const Handle<Device_t> &deviceHandle,
                                             const VulkanFramebufferKey &frameBufferKey);
-
-    void setObjectName(VulkanDevice *device, const VkObjectType type, const uint64_t handle, const std::string_view name);
-
     void deleteFramebuffer(const Handle<Framebuffer_t> &handle);
 
-    std::vector<std::string> getAvailableLayers() const;
+    static void setObjectName(VulkanDevice *device, VkObjectType type, uint64_t handle, std::string_view name);
 
-    MemoryHandle retrieveExternalMemoryHandle(VulkanInstance *instance,
-                                              VulkanDevice *vulkanDevice,
-                                              const VmaAllocationInfo &allocationInfo,
-                                              ExternalMemoryHandleTypeFlags handleType) const;
+    [[nodiscard]] static std::vector<std::string> getAvailableLayers();
+
+    [[nodiscard]] static MemoryHandle retrieveExternalMemoryHandle(VulkanInstance *instance,
+                                                                   VulkanDevice *vulkanDevice,
+                                                                   const VmaAllocationInfo &allocationInfo,
+                                                                   ExternalMemoryHandleTypeFlags handleType);
 
     Pool<VulkanInstance, Instance_t> m_instances{ 1 };
     Pool<VulkanAdapter, Adapter_t> m_adapters{ 1 };

@@ -37,21 +37,24 @@ struct KDGPU_EXPORT VulkanComputePassCommandRecorder {
 
     void setPipeline(const Handle<ComputePipeline_t> &pipeline);
     void setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroup,
-                      const Handle<PipelineLayout_t> &pipelineLayout, std::span<const uint32_t> dynamicBufferOffsets);
-    void dispatchCompute(const ComputeCommand &command);
-    void dispatchCompute(std::span<const ComputeCommand> commands);
-    void dispatchComputeIndirect(const ComputeCommandIndirect &command);
-    void dispatchComputeIndirect(std::span<const ComputeCommandIndirect> commands);
-    void pushConstant(const PushConstantRange &constantRange, const void *data);
+                      const Handle<PipelineLayout_t> &pipelineLayout,
+                      std::span<const uint32_t> dynamicBufferOffsets) const;
+    void dispatchCompute(const ComputeCommand &command) const;
+    void dispatchCompute(std::span<const ComputeCommand> commands) const;
+    void dispatchComputeIndirect(const ComputeCommandIndirect &command) const;
+    void dispatchComputeIndirect(std::span<const ComputeCommandIndirect> commands) const;
+    void pushConstant(const PushConstantRange &constantRange, const void *data) const;
     void pushBindGroup(uint32_t group,
                        std::span<const BindGroupEntry> bindGroupEntries,
-                       const Handle<PipelineLayout_t> &pipelineLayout);
-    void end();
+                       const Handle<PipelineLayout_t> &pipelineLayout) const;
+    void end() const;
 
+    // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
     VkCommandBuffer commandBuffer{ VK_NULL_HANDLE };
     VulkanResourceManager *vulkanResourceManager{ nullptr };
     Handle<Device_t> deviceHandle;
     Handle<ComputePipeline_t> pipeline;
+    // NOLINTEND(misc-non-private-member-variables-in-classes)
 };
 
 } // namespace KDGpu

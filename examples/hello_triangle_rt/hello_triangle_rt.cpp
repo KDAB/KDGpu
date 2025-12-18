@@ -26,10 +26,7 @@
 
 #include <glm/glm.hpp>
 
-#include <cmath>
-#include <fstream>
 #include <string>
-#include <random>
 
 using namespace KDGpu;
 using namespace KDGpuExample;

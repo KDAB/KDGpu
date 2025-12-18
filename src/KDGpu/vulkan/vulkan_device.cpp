@@ -15,7 +15,7 @@
 #include <KDGpu/vulkan/vulkan_queue.h>
 #include <KDGpu/vulkan/vulkan_resource_manager.h>
 
-#include <stdexcept>
+// NOLINTBEGIN(readability-function-cognitive-complexity)
 
 #if defined(KDGPU_PLATFORM_WIN32)
 // Avoid having to define VK_USE_PLATFORM_WIN32_KHR which would result in windows.h being included when vulkan.h is included
@@ -224,7 +224,7 @@ std::vector<QueueDescription> VulkanDevice::getQueues(ResourceManager *resourceM
                                                       const std::vector<QueueRequest> &queueRequests,
                                                       std::span<AdapterQueueType> queueTypes)
 {
-    auto vulkanResourceManager = dynamic_cast<VulkanResourceManager *>(resourceManager);
+    auto *vulkanResourceManager = dynamic_cast<VulkanResourceManager *>(resourceManager);
     assert(vulkanResourceManager);
 
     uint32_t queueCount = 0;
@@ -258,7 +258,7 @@ std::vector<QueueDescription> VulkanDevice::getQueues(ResourceManager *resourceM
     return queueDescriptions;
 }
 
-void VulkanDevice::waitUntilIdle()
+void VulkanDevice::waitUntilIdle() const
 {
     vkDeviceWaitIdle(device);
 }
@@ -445,3 +445,5 @@ void VulkanDevice::fillWriteBindGroupDataForBindGroupEntry(WriteBindGroupData &w
 }
 
 } // namespace KDGpu
+
+// NOLINTEND(readability-function-cognitive-complexity)

@@ -31,7 +31,6 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <cmath>
-#include <fstream>
 #include <string>
 #include <random>
 

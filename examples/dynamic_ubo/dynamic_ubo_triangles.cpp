@@ -20,7 +20,6 @@
 
 #include <glm/gtx/transform.hpp>
 
-#include <fstream>
 #include <string>
 
 using namespace KDGpu;
@@ -50,7 +49,7 @@ void DynamicUBOTriangles::initializeScene()
             0.0f,  0.0f, 1.0f, 1.0f, // color
         };
         // clang-format on
-        auto bufferData = m_buffer.map();
+        auto *bufferData = m_buffer.map();
         std::memcpy(bufferData, vertexData.data(), vertexData.size() * sizeof(float));
         m_buffer.unmap();
     }
@@ -65,7 +64,7 @@ void DynamicUBOTriangles::initializeScene()
         };
         m_indexBuffer = m_device.createBuffer(bufferOptions);
         std::vector<uint32_t> indexData = { 0, 1, 2 };
-        auto bufferData = m_indexBuffer.map();
+        auto *bufferData = m_indexBuffer.map();
         std::memcpy(bufferData, indexData.data(), indexData.size() * sizeof(uint32_t));
         m_indexBuffer.unmap();
         //![3]
@@ -200,14 +199,14 @@ void DynamicUBOTriangles::updateScene()
     // Update EntityCount matrices into the single buffer we have
     for (size_t i = 0; i < entityCount; ++i) {
         auto transform = glm::mat4(1.0f);
-        transform = glm::translate(transform, glm::vec3(-0.7f + i * 0.5f, 0.0f, 0.0f));
+        transform = glm::translate(transform, glm::vec3(-0.7f + (i * 0.5f), 0.0f, 0.0f));
         transform = glm::scale(transform, glm::vec3(0.2f));
-        transform = glm::rotate(transform, glm::radians(angle + 45.0f * i), glm::vec3(0.0f, 0.0f, 1.0f));
+        transform = glm::rotate(transform, glm::radians(angle + (45.0f * i)), glm::vec3(0.0f, 0.0f, 1.0f));
 
-        std::memcpy(rawTransformData.data() + i * m_dynamicUBOByteStride, &transform, sizeof(glm::mat4));
+        std::memcpy(rawTransformData.data() + (i * m_dynamicUBOByteStride), &transform, sizeof(glm::mat4));
     }
 
-    auto bufferData = m_transformDynamicUBOBuffer.map();
+    auto *bufferData = m_transformDynamicUBOBuffer.map();
     std::memcpy(bufferData, rawTransformData.data(), rawTransformData.size());
     m_transformDynamicUBOBuffer.unmap();
     //![2]

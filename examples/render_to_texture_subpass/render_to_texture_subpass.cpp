@@ -27,7 +27,6 @@
 #include <glm/gtx/transform.hpp>
 
 #include <cmath>
-#include <fstream>
 #include <string>
 
 namespace KDGpu {
@@ -47,9 +46,9 @@ using namespace KDGpu;
 
 void RenderToTextureSubpass::initializeScene()
 {
-    using std::placeholders::_1;
-    auto func = std::bind(&RenderToTextureSubpass::drawControls, this, _1);
-    registerImGuiOverlayDrawFunction(func);
+    registerImGuiOverlayDrawFunction([](ImGuiContext *ctx) {
+        RenderToTextureSubpass::drawControls(ctx);
+    });
 
     createRenderPass();
     initializeMainScene();
@@ -159,7 +158,7 @@ void RenderToTextureSubpass::initializeMainScene()
         vertexData[1] = { { r * std::cos(11.0f * M_PI / 6.0f), -r * std::sin(11.0f * M_PI / 6.0f), 0.0f }, { 0.0f, 1.0, 0.0f } }; // Bottom-right, green
         vertexData[2] = { { 0.0f, -r, 0.0f }, { 0.0f, 0.0, 1.0f } }; // Top, blue
 
-        auto bufferData = m_buffer.map();
+        auto *bufferData = m_buffer.map();
         std::memcpy(bufferData, vertexData.data(), vertexData.size() * sizeof(Vertex));
         m_buffer.unmap();
     }
@@ -173,7 +172,7 @@ void RenderToTextureSubpass::initializeMainScene()
         };
         m_indexBuffer = m_device.createBuffer(bufferOptions);
         std::vector<uint32_t> indexData = { 0, 1, 2 };
-        auto bufferData = m_indexBuffer.map();
+        auto *bufferData = m_indexBuffer.map();
         std::memcpy(bufferData, indexData.data(), indexData.size() * sizeof(uint32_t));
         m_indexBuffer.unmap();
     }
@@ -190,7 +189,7 @@ void RenderToTextureSubpass::initializeMainScene()
         // Upload identify matrix
         m_transform = glm::mat4(1.0f);
 
-        auto bufferData = m_transformBuffer.map();
+        auto *bufferData = m_transformBuffer.map();
         std::memcpy(bufferData, &m_transform, sizeof(glm::mat4));
         m_transformBuffer.unmap();
     }
@@ -277,7 +276,7 @@ void RenderToTextureSubpass::initializePostProcess()
             1.0f, -1.0f, 0.0f, 1.0f, 0.0f
         };
 
-        auto bufferData = m_fullScreenQuad.map();
+        auto *bufferData = m_fullScreenQuad.map();
         std::memcpy(bufferData, vertexData.data(), vertexData.size() * sizeof(float));
         m_fullScreenQuad.unmap();
     }
@@ -419,7 +418,7 @@ void RenderToTextureSubpass::updateScene()
     m_transform = glm::mat4(1.0f);
     m_transform = glm::rotate(m_transform, glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
 
-    auto bufferData = m_transformBuffer.map();
+    auto *bufferData = m_transformBuffer.map();
     std::memcpy(bufferData, &m_transform, sizeof(glm::mat4));
     m_transformBuffer.unmap();
 

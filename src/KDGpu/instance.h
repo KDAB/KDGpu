@@ -19,7 +19,6 @@
 
 #include <KDGpu/kdgpu_export.h>
 
-#include <span>
 #include <string>
 #include <vector>
 
@@ -59,22 +58,22 @@ public:
     Instance(const Instance &) = delete;
     Instance &operator=(const Instance &) = delete;
 
-    Handle<Instance_t> handle() const noexcept { return m_instance; }
-    bool isValid() const { return m_instance.isValid(); }
+    [[nodiscard]] Handle<Instance_t> handle() const noexcept { return m_instance; }
+    [[nodiscard]] bool isValid() const { return m_instance.isValid(); }
 
     operator Handle<Instance_t>() const noexcept { return m_instance; }
 
-    std::vector<Extension> extensions() const;
+    [[nodiscard]] std::vector<Extension> extensions() const;
 
-    AdapterAndDevice createDefaultDevice(const Surface &surface,
-                                         AdapterDeviceType deviceType = AdapterDeviceType::Default) const;
+    [[nodiscard]] AdapterAndDevice createDefaultDevice(const Surface &surface,
+                                                       AdapterDeviceType deviceType = AdapterDeviceType::Default) const;
 
-    std::vector<Adapter *> adapters() const;
-    std::vector<AdapterGroup> adapterGroups() const;
+    [[nodiscard]] std::vector<Adapter *> adapters() const;
+    [[nodiscard]] const std::vector<AdapterGroup> &adapterGroups() const;
 
-    Adapter *selectAdapter(AdapterDeviceType deviceType) const;
+    [[nodiscard]] Adapter *selectAdapter(AdapterDeviceType deviceType) const;
 
-    Surface createSurface(const SurfaceOptions &options);
+    [[nodiscard]] Surface createSurface(const SurfaceOptions &options);
 
 private:
     Instance(GraphicsApi *api, const InstanceOptions &options);

@@ -37,7 +37,7 @@ void VulkanRayTracingPassCommandRecorder::setPipeline(const Handle<RayTracingPip
 
 void VulkanRayTracingPassCommandRecorder::setBindGroup(uint32_t group, const Handle<BindGroup_t> &_bindGroup,
                                                        const Handle<PipelineLayout_t> &pipelineLayout,
-                                                       std::span<const uint32_t> dynamicBufferOffsets)
+                                                       std::span<const uint32_t> dynamicBufferOffsets) const
 {
     VulkanBindGroup *bindGroup = vulkanResourceManager->getBindGroup(_bindGroup);
     VkDescriptorSet set = bindGroup->descriptorSet;
@@ -71,7 +71,6 @@ void VulkanRayTracingPassCommandRecorder::setBindGroup(uint32_t group, const Han
 namespace {
 
 VkStridedDeviceAddressRegionKHR buildVkStridedDeviceAddressRegion(
-        VulkanDevice *vulkanDevice,
         VulkanResourceManager *vulkanResourceManager,
         const StridedDeviceRegion &region)
 {
@@ -90,16 +89,16 @@ VkStridedDeviceAddressRegionKHR buildVkStridedDeviceAddressRegion(
 
 } // namespace
 
-void VulkanRayTracingPassCommandRecorder::traceRays(const RayTracingCommand &rayTracingCommand)
+void VulkanRayTracingPassCommandRecorder::traceRays(const RayTracingCommand &rayTracingCommand) const
 {
 #if defined(VK_KHR_ray_tracing_pipeline)
     VulkanDevice *device = vulkanResourceManager->getDevice(deviceHandle);
     if (device->vkCmdTraceRaysKHR) {
 
-        VkStridedDeviceAddressRegionKHR raygenShaderBindingTableRegion = buildVkStridedDeviceAddressRegion(device, vulkanResourceManager, rayTracingCommand.raygenShaderBindingTable);
-        VkStridedDeviceAddressRegionKHR hitShaderBindingTableRegion = buildVkStridedDeviceAddressRegion(device, vulkanResourceManager, rayTracingCommand.hitShaderBindingTable);
-        VkStridedDeviceAddressRegionKHR missShaderBindingTableRegion = buildVkStridedDeviceAddressRegion(device, vulkanResourceManager, rayTracingCommand.missShaderBindingTable);
-        VkStridedDeviceAddressRegionKHR callableShaderBindingTableRegion = buildVkStridedDeviceAddressRegion(device, vulkanResourceManager, rayTracingCommand.callableShaderBindingTable);
+        VkStridedDeviceAddressRegionKHR raygenShaderBindingTableRegion = buildVkStridedDeviceAddressRegion(vulkanResourceManager, rayTracingCommand.raygenShaderBindingTable);
+        VkStridedDeviceAddressRegionKHR hitShaderBindingTableRegion = buildVkStridedDeviceAddressRegion(vulkanResourceManager, rayTracingCommand.hitShaderBindingTable);
+        VkStridedDeviceAddressRegionKHR missShaderBindingTableRegion = buildVkStridedDeviceAddressRegion(vulkanResourceManager, rayTracingCommand.missShaderBindingTable);
+        VkStridedDeviceAddressRegionKHR callableShaderBindingTableRegion = buildVkStridedDeviceAddressRegion(vulkanResourceManager, rayTracingCommand.callableShaderBindingTable);
 
         device->vkCmdTraceRaysKHR(commandBuffer,
                                   &raygenShaderBindingTableRegion,
@@ -115,7 +114,7 @@ void VulkanRayTracingPassCommandRecorder::traceRays(const RayTracingCommand &ray
 #endif
 }
 
-void VulkanRayTracingPassCommandRecorder::pushConstant(const PushConstantRange &constantRange, const void *data)
+void VulkanRayTracingPassCommandRecorder::pushConstant(const PushConstantRange &constantRange, const void *data) const
 {
     VulkanRayTracingPipeline *vulkanPipeline = vulkanResourceManager->getRayTracingPipeline(pipeline);
     VulkanPipelineLayout *pLayout = vulkanResourceManager->getPipelineLayout(vulkanPipeline->pipelineLayoutHandle);
@@ -131,7 +130,7 @@ void VulkanRayTracingPassCommandRecorder::pushConstant(const PushConstantRange &
 
 void VulkanRayTracingPassCommandRecorder::pushBindGroup(uint32_t group,
                                                         std::span<const BindGroupEntry> bindGroupEntries,
-                                                        const Handle<PipelineLayout_t> &pipelineLayout)
+                                                        const Handle<PipelineLayout_t> &pipelineLayout) const
 {
 #if defined(VK_KHR_push_descriptor)
     VulkanDevice *device = vulkanResourceManager->getDevice(deviceHandle);
@@ -173,7 +172,7 @@ void VulkanRayTracingPassCommandRecorder::pushBindGroup(uint32_t group,
 #endif
 }
 
-void VulkanRayTracingPassCommandRecorder::end()
+void VulkanRayTracingPassCommandRecorder::end() const
 {
     // No op
 }

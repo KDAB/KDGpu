@@ -36,7 +36,7 @@ private:
     void initializePostProcess();
     void createOffscreenTexture();
     void updateColorBindGroup();
-    void drawControls(ImGuiContext *ctx);
+    static void drawControls(ImGuiContext *ctx);
 
     KDGpu::Buffer m_buffer;
     KDGpu::Buffer m_indexBuffer;

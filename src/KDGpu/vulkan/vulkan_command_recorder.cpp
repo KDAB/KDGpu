@@ -41,7 +41,7 @@ std::vector<VkBufferImageCopy> buildRegions(const std::vector<KDGpu::BufferTextu
             .imageOffset = { .x = region.textureOffset.x, .y = region.textureOffset.y, .z = region.textureOffset.z },
             .imageExtent = { .width = region.textureExtent.width, .height = region.textureExtent.height, .depth = region.textureExtent.depth }
         };
-        vkRegions.emplace_back(std::move(vkRegion));
+        vkRegions.emplace_back(vkRegion);
     }
     return vkRegions;
 }
@@ -70,7 +70,7 @@ std::vector<VkImageCopy> buildRegions(const std::vector<KDGpu::TextureCopyRegion
             .extent = { .width = region.extent.width, .height = region.extent.height, .depth = region.extent.depth }
             // clang-format on
         };
-        vkRegions.emplace_back(std::move(vkRegion));
+        vkRegions.emplace_back(vkRegion);
     }
     return vkRegions;
 }
@@ -120,7 +120,7 @@ std::vector<VkImageBlit> buildRegions(const std::vector<KDGpu::TextureBlitRegion
                     },
             },
         };
-        vkRegions.emplace_back(std::move(vkRegion));
+        vkRegions.emplace_back(vkRegion);
     }
     return vkRegions;
 }
@@ -161,7 +161,7 @@ std::vector<VkImageResolve> buildResolveRegions(const std::vector<KDGpu::Texture
                     .depth = region.extent.depth,
             }
         };
-        vkRegions.emplace_back(std::move(vkRegion));
+        vkRegions.emplace_back(vkRegion);
     }
     return vkRegions;
 }
@@ -181,7 +181,7 @@ std::vector<VkImageSubresourceRange> buildImageSubresourceRanges(const std::vect
             .layerCount = range.layerCount
         };
 
-        vkRanges.emplace_back(std::move(vkRange));
+        vkRanges.emplace_back(vkRange);
     }
 
     return vkRanges;
@@ -195,7 +195,7 @@ inline constexpr bool always_false = false;
 namespace KDGpu {
 
 VulkanCommandRecorder::VulkanCommandRecorder(VkCommandPool _commandPool,
-                                             const Handle<CommandBuffer_t> _commandBufferHandle,
+                                             const Handle<CommandBuffer_t> &_commandBufferHandle,
                                              VulkanResourceManager *_vulkanResourceManager,
                                              const Handle<Device_t> &_deviceHandle)
     : commandPool(_commandPool)
@@ -207,13 +207,13 @@ VulkanCommandRecorder::VulkanCommandRecorder(VkCommandPool _commandPool,
     commandBuffer = vulkanCommandBuffer->commandBuffer;
 }
 
-void VulkanCommandRecorder::begin()
+void VulkanCommandRecorder::begin() const
 {
     VulkanCommandBuffer *commandBuffer = vulkanResourceManager->getCommandBuffer(commandBufferHandle);
     commandBuffer->begin();
 }
 
-void VulkanCommandRecorder::blitTexture(const TextureBlitOptions &options)
+void VulkanCommandRecorder::blitTexture(const TextureBlitOptions &options) const
 {
     VulkanTexture *srcVulkanTexture = vulkanResourceManager->getTexture(options.srcTexture);
     VulkanTexture *dstVulkanTexture = vulkanResourceManager->getTexture(options.dstTexture);
@@ -229,7 +229,7 @@ void VulkanCommandRecorder::blitTexture(const TextureBlitOptions &options)
                    filterModeToVkFilterMode(options.scalingFilter));
 }
 
-void VulkanCommandRecorder::clearBuffer(const BufferClear &clear)
+void VulkanCommandRecorder::clearBuffer(const BufferClear &clear) const
 {
     VulkanBuffer *dstBuf = vulkanResourceManager->getBuffer(clear.dstBuffer);
 
@@ -239,7 +239,7 @@ void VulkanCommandRecorder::clearBuffer(const BufferClear &clear)
                     clear.byteSize, clear.clearValue);
 }
 
-void VulkanCommandRecorder::clearColorTexture(const ClearColorTexture &clear)
+void VulkanCommandRecorder::clearColorTexture(const ClearColorTexture &clear) const
 {
     VulkanTexture *texture = vulkanResourceManager->getTexture(clear.texture);
     VkClearColorValue clearValue{};
@@ -254,7 +254,7 @@ void VulkanCommandRecorder::clearColorTexture(const ClearColorTexture &clear)
                          vkRanges.data());
 }
 
-void VulkanCommandRecorder::clearDepthStencilTexture(const ClearDepthStencilTexture &clear)
+void VulkanCommandRecorder::clearDepthStencilTexture(const ClearDepthStencilTexture &clear) const
 {
     VulkanTexture *texture = vulkanResourceManager->getTexture(clear.texture);
     const VkClearDepthStencilValue clearValue{
@@ -271,7 +271,7 @@ void VulkanCommandRecorder::clearDepthStencilTexture(const ClearDepthStencilText
                                 vkRanges.data());
 }
 
-void VulkanCommandRecorder::copyBuffer(const BufferCopy &copy)
+void VulkanCommandRecorder::copyBuffer(const BufferCopy &copy) const
 {
     VulkanBuffer *srcBuf = vulkanResourceManager->getBuffer(copy.src);
     VulkanBuffer *dstBuf = vulkanResourceManager->getBuffer(copy.dst);
@@ -284,7 +284,7 @@ void VulkanCommandRecorder::copyBuffer(const BufferCopy &copy)
     vkCmdCopyBuffer(commandBuffer, srcBuf->buffer, dstBuf->buffer, 1, &bufferCopy);
 }
 
-void VulkanCommandRecorder::copyBufferToTexture(const BufferToTextureCopy &copy)
+void VulkanCommandRecorder::copyBufferToTexture(const BufferToTextureCopy &copy) const
 {
     VulkanBuffer *srcVulkanBuffer = vulkanResourceManager->getBuffer(copy.srcBuffer);
     VulkanTexture *dstVulkanTexture = vulkanResourceManager->getTexture(copy.dstTexture);
@@ -298,7 +298,7 @@ void VulkanCommandRecorder::copyBufferToTexture(const BufferToTextureCopy &copy)
                            vkRegions.data());
 }
 
-void VulkanCommandRecorder::copyTextureToBuffer(const TextureToBufferCopy &copy)
+void VulkanCommandRecorder::copyTextureToBuffer(const TextureToBufferCopy &copy) const
 {
     VulkanTexture *srcVulkanTexture = vulkanResourceManager->getTexture(copy.srcTexture);
     VulkanBuffer *dstVulkanBuffer = vulkanResourceManager->getBuffer(copy.dstBuffer);
@@ -312,7 +312,7 @@ void VulkanCommandRecorder::copyTextureToBuffer(const TextureToBufferCopy &copy)
                            vkRegions.data());
 }
 
-void VulkanCommandRecorder::copyTextureToTexture(const TextureToTextureCopy &copy)
+void VulkanCommandRecorder::copyTextureToTexture(const TextureToTextureCopy &copy) const
 {
     VulkanTexture *srcVulkanTexture = vulkanResourceManager->getTexture(copy.srcTexture);
     VulkanTexture *dstVulkanTexture = vulkanResourceManager->getTexture(copy.dstTexture);
@@ -327,7 +327,7 @@ void VulkanCommandRecorder::copyTextureToTexture(const TextureToTextureCopy &cop
                    vkRegions.data());
 }
 
-void VulkanCommandRecorder::updateBuffer(const BufferUpdate &update)
+void VulkanCommandRecorder::updateBuffer(const BufferUpdate &update) const
 {
     VulkanBuffer *dstVulkanBuffer = vulkanResourceManager->getBuffer(update.dstBuffer);
     // Note: to be used for update size smaller than 65536, we won't warn but Validation Layer should
@@ -338,9 +338,9 @@ void VulkanCommandRecorder::updateBuffer(const BufferUpdate &update)
                       update.data);
 }
 
-void VulkanCommandRecorder::memoryBarrier(const MemoryBarrierOptions &options)
+void VulkanCommandRecorder::memoryBarrier(const MemoryBarrierOptions &options) const
 {
-    auto vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
+    auto *vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
 
 #if defined(VK_KHR_synchronization2)
     if (vulkanDevice->vkCmdPipelineBarrier2 != nullptr) {
@@ -389,9 +389,9 @@ void VulkanCommandRecorder::memoryBarrier(const MemoryBarrierOptions &options)
 
 // TODO: Implement an array version. Perhaps also a way to refer to the set of arguments via a
 // handle to a backend type if we find we keep issuing barriers in the same way many times.
-void VulkanCommandRecorder::bufferMemoryBarrier(const BufferMemoryBarrierOptions &options)
+void VulkanCommandRecorder::bufferMemoryBarrier(const BufferMemoryBarrierOptions &options) const
 {
-    auto vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
+    auto *vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
 #if defined(VK_KHR_synchronization2)
     if (vulkanDevice->vkCmdPipelineBarrier2 != nullptr) {
         VkBufferMemoryBarrier2KHR vkBufferBarrier = {};
@@ -403,7 +403,7 @@ void VulkanCommandRecorder::bufferMemoryBarrier(const BufferMemoryBarrierOptions
         vkBufferBarrier.srcQueueFamilyIndex = options.srcQueueTypeIndex;
         vkBufferBarrier.dstQueueFamilyIndex = options.dstQueueTypeIndex;
 
-        const auto vulkanBuffer = vulkanResourceManager->getBuffer(options.buffer);
+        const auto *vulkanBuffer = vulkanResourceManager->getBuffer(options.buffer);
         vkBufferBarrier.buffer = vulkanBuffer->buffer;
         vkBufferBarrier.offset = options.offset;
         vkBufferBarrier.size = options.size;
@@ -423,7 +423,7 @@ void VulkanCommandRecorder::bufferMemoryBarrier(const BufferMemoryBarrierOptions
         vkBufferBarrier.srcAccessMask = accessFlagsToVkAccessFlagBits(options.srcMask);
         vkBufferBarrier.dstAccessMask = accessFlagsToVkAccessFlagBits(options.dstMask);
 
-        const auto vulkanBuffer = vulkanResourceManager->getBuffer(options.buffer);
+        const auto *vulkanBuffer = vulkanResourceManager->getBuffer(options.buffer);
         vkBufferBarrier.buffer = vulkanBuffer->buffer;
         vkBufferBarrier.offset = options.offset;
         vkBufferBarrier.size = options.size;
@@ -442,9 +442,9 @@ void VulkanCommandRecorder::bufferMemoryBarrier(const BufferMemoryBarrierOptions
 
 // TODO: Implement an array version. Perhaps also a way to refer to the set of arguments via a
 // handle to a backend type if we find we keep issuing barriers in the same way many times.
-void VulkanCommandRecorder::textureMemoryBarrier(const TextureMemoryBarrierOptions &options)
+void VulkanCommandRecorder::textureMemoryBarrier(const TextureMemoryBarrierOptions &options) const
 {
-    auto vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
+    auto *vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
 #if defined(VK_KHR_synchronization2)
     if (vulkanDevice->vkCmdPipelineBarrier2 != nullptr) {
         VkImageMemoryBarrier2KHR vkImageBarrier = {};
@@ -458,7 +458,7 @@ void VulkanCommandRecorder::textureMemoryBarrier(const TextureMemoryBarrierOptio
         vkImageBarrier.oldLayout = textureLayoutToVkImageLayout(options.oldLayout);
         vkImageBarrier.newLayout = textureLayoutToVkImageLayout(options.newLayout);
 
-        const auto vulkanTexture = vulkanResourceManager->getTexture(options.texture);
+        const auto *vulkanTexture = vulkanResourceManager->getTexture(options.texture);
         vkImageBarrier.image = vulkanTexture->image;
         vkImageBarrier.subresourceRange = {
             .aspectMask = textureAspectFlagsToVkImageAspectFlags(options.range.aspectMask),
@@ -487,7 +487,7 @@ void VulkanCommandRecorder::textureMemoryBarrier(const TextureMemoryBarrierOptio
         vkImageBarrier.oldLayout = textureLayoutToVkImageLayout(options.oldLayout);
         vkImageBarrier.newLayout = textureLayoutToVkImageLayout(options.newLayout);
 
-        const auto vulkanTexture = vulkanResourceManager->getTexture(options.texture);
+        const auto *vulkanTexture = vulkanResourceManager->getTexture(options.texture);
         vkImageBarrier.image = vulkanTexture->image;
         vkImageBarrier.subresourceRange = {
             .aspectMask = textureAspectFlagsToVkImageAspectFlags(options.range.aspectMask),
@@ -509,14 +509,14 @@ void VulkanCommandRecorder::textureMemoryBarrier(const TextureMemoryBarrierOptio
 #endif
 }
 
-void VulkanCommandRecorder::executeSecondaryCommandBuffer(const Handle<CommandBuffer_t> &secondaryCommandBuffer)
+void VulkanCommandRecorder::executeSecondaryCommandBuffer(const Handle<CommandBuffer_t> &secondaryCommandBuffer) const
 {
     VulkanCommandBuffer *vulkanSecondaryCommandBuffer = vulkanResourceManager->getCommandBuffer(secondaryCommandBuffer);
     assert(vulkanSecondaryCommandBuffer->commandLevel == VK_COMMAND_BUFFER_LEVEL_SECONDARY);
     vkCmdExecuteCommands(commandBuffer, 1, &vulkanSecondaryCommandBuffer->commandBuffer);
 }
 
-void VulkanCommandRecorder::resolveTexture(const TextureResolveOptions &options)
+void VulkanCommandRecorder::resolveTexture(const TextureResolveOptions &options) const
 {
     VulkanTexture *srcVulkanTexture = vulkanResourceManager->getTexture(options.srcTexture);
     VulkanTexture *dstVulkanTexture = vulkanResourceManager->getTexture(options.dstTexture);
@@ -531,10 +531,11 @@ void VulkanCommandRecorder::resolveTexture(const TextureResolveOptions &options)
                       vkRegions.data());
 }
 
-void VulkanCommandRecorder::buildAccelerationStructures(const BuildAccelerationStructureOptions &options)
+// NOLINTBEGIN(readability-function-cognitive-complexity)
+void VulkanCommandRecorder::buildAccelerationStructures(const BuildAccelerationStructureOptions &options) const
 {
 #if defined(VK_KHR_acceleration_structure)
-    auto vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
+    auto *vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
 
     // So it doesn't go out of scope and destroy itself before the cmd is called
     std::vector<std::vector<VkAccelerationStructureGeometryKHR>> geometriesBacking;
@@ -698,6 +699,7 @@ void VulkanCommandRecorder::buildAccelerationStructures(const BuildAccelerationS
     }
 
     std::vector<VkAccelerationStructureBuildRangeInfoKHR *> rangePtrs;
+    rangePtrs.reserve(ranges.size());
     for (auto &range : ranges) {
         rangePtrs.push_back(range.data());
     }
@@ -712,11 +714,12 @@ void VulkanCommandRecorder::buildAccelerationStructures(const BuildAccelerationS
     assert(false);
 #endif
 }
+// NOLINTEND(readability-function-cognitive-complexity)
 
-void VulkanCommandRecorder::beginDebugLabel(const DebugLabelOptions &options)
+void VulkanCommandRecorder::beginDebugLabel(const DebugLabelOptions &options) const
 {
 #if defined(VK_EXT_debug_utils)
-    auto vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
+    auto *vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
     if (vulkanDevice->vkCmdBeginDebugUtilsLabelEXT != nullptr) {
         VkDebugUtilsLabelEXT labelsInfo{
             .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT,
@@ -730,16 +733,16 @@ void VulkanCommandRecorder::beginDebugLabel(const DebugLabelOptions &options)
 #endif
 }
 
-void VulkanCommandRecorder::endDebugLabel()
+void VulkanCommandRecorder::endDebugLabel() const
 {
 #if defined(VK_EXT_debug_utils)
-    auto vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
+    auto *vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
     if (vulkanDevice->vkCmdBeginDebugUtilsLabelEXT != nullptr)
         vulkanDevice->vkCmdEndDebugUtilsLabelEXT(commandBuffer);
 #endif
 }
 
-Handle<CommandBuffer_t> VulkanCommandRecorder::finish()
+Handle<CommandBuffer_t> VulkanCommandRecorder::finish() const
 {
     VulkanCommandBuffer *commandBuffer = vulkanResourceManager->getCommandBuffer(commandBufferHandle);
     commandBuffer->finish();

@@ -86,7 +86,7 @@ public:
 private:
     explicit RayTracingPassCommandRecorder(GraphicsApi *api,
                                            const Handle<Device_t> &device,
-                                           const Handle<RayTracingPassCommandRecorder_t> &rayTracingCommandRecorder);
+                                           const Handle<RayTracingPassCommandRecorder_t> &rayTracingPassRecorder);
 
     GraphicsApi *m_api{ nullptr };
     Handle<Device_t> m_device;

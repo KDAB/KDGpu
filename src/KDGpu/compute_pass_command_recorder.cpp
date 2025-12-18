@@ -50,7 +50,7 @@ ComputePassCommandRecorder &ComputePassCommandRecorder::operator=(ComputePassCom
 
 void ComputePassCommandRecorder::setPipeline(const Handle<ComputePipeline_t> &pipeline)
 {
-    auto apiComputePassCommandRecorder = m_api->resourceManager()->getComputePassCommandRecorder(m_computePassCommandRecorder);
+    auto *apiComputePassCommandRecorder = m_api->resourceManager()->getComputePassCommandRecorder(m_computePassCommandRecorder);
     apiComputePassCommandRecorder->setPipeline(pipeline);
 }
 
@@ -58,37 +58,37 @@ void ComputePassCommandRecorder::setBindGroup(uint32_t group, const Handle<BindG
                                               const Handle<PipelineLayout_t> &pipelineLayout,
                                               std::span<const uint32_t> dynamicBufferOffsets)
 {
-    auto apiComputePassCommandRecorder = m_api->resourceManager()->getComputePassCommandRecorder(m_computePassCommandRecorder);
+    auto *apiComputePassCommandRecorder = m_api->resourceManager()->getComputePassCommandRecorder(m_computePassCommandRecorder);
     apiComputePassCommandRecorder->setBindGroup(group, bindGroup, pipelineLayout, dynamicBufferOffsets);
 }
 
 void ComputePassCommandRecorder::dispatchCompute(const ComputeCommand &command)
 {
-    auto apiComputePassCommandRecorder = m_api->resourceManager()->getComputePassCommandRecorder(m_computePassCommandRecorder);
+    auto *apiComputePassCommandRecorder = m_api->resourceManager()->getComputePassCommandRecorder(m_computePassCommandRecorder);
     apiComputePassCommandRecorder->dispatchCompute(command);
 }
 
 void ComputePassCommandRecorder::dispatchCompute(std::span<const ComputeCommand> commands)
 {
-    auto apiComputePassCommandRecorder = m_api->resourceManager()->getComputePassCommandRecorder(m_computePassCommandRecorder);
+    auto *apiComputePassCommandRecorder = m_api->resourceManager()->getComputePassCommandRecorder(m_computePassCommandRecorder);
     apiComputePassCommandRecorder->dispatchCompute(commands);
 }
 
 void ComputePassCommandRecorder::dispatchComputeIndirect(const ComputeCommandIndirect &command)
 {
-    auto apiComputePassCommandRecorder = m_api->resourceManager()->getComputePassCommandRecorder(m_computePassCommandRecorder);
+    auto *apiComputePassCommandRecorder = m_api->resourceManager()->getComputePassCommandRecorder(m_computePassCommandRecorder);
     apiComputePassCommandRecorder->dispatchComputeIndirect(command);
 }
 
 void ComputePassCommandRecorder::dispatchComputeIndirect(std::span<const ComputeCommandIndirect> commands)
 {
-    auto apiComputePassCommandRecorder = m_api->resourceManager()->getComputePassCommandRecorder(m_computePassCommandRecorder);
+    auto *apiComputePassCommandRecorder = m_api->resourceManager()->getComputePassCommandRecorder(m_computePassCommandRecorder);
     apiComputePassCommandRecorder->dispatchComputeIndirect(commands);
 }
 
 void ComputePassCommandRecorder::pushConstant(const PushConstantRange &constantRange, const void *data)
 {
-    auto apiComputePassCommandRecorder = m_api->resourceManager()->getComputePassCommandRecorder(m_computePassCommandRecorder);
+    auto *apiComputePassCommandRecorder = m_api->resourceManager()->getComputePassCommandRecorder(m_computePassCommandRecorder);
     apiComputePassCommandRecorder->pushConstant(constantRange, data);
 }
 
@@ -96,13 +96,13 @@ void ComputePassCommandRecorder::pushBindGroup(uint32_t group,
                                                std::span<const BindGroupEntry> bindGroupEntries,
                                                const Handle<PipelineLayout_t> &pipelineLayout)
 {
-    auto apiComputePassCommandRecorder = m_api->resourceManager()->getComputePassCommandRecorder(m_computePassCommandRecorder);
+    auto *apiComputePassCommandRecorder = m_api->resourceManager()->getComputePassCommandRecorder(m_computePassCommandRecorder);
     apiComputePassCommandRecorder->pushBindGroup(group, bindGroupEntries, pipelineLayout);
 }
 
 void ComputePassCommandRecorder::end()
 {
-    auto apiComputePassCommandRecorder = m_api->resourceManager()->getComputePassCommandRecorder(m_computePassCommandRecorder);
+    auto *apiComputePassCommandRecorder = m_api->resourceManager()->getComputePassCommandRecorder(m_computePassCommandRecorder);
     apiComputePassCommandRecorder->end();
 }
 

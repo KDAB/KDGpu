@@ -159,40 +159,42 @@ public:
 
     operator Handle<CommandRecorder_t>() const noexcept { return m_commandRecorder; }
 
-    RenderPassCommandRecorder beginRenderPass(const RenderPassCommandRecorderOptions &options);
-    RenderPassCommandRecorder beginRenderPass(const RenderPassCommandRecorderWithRenderPassOptions &options);
-    RenderPassCommandRecorder beginRenderPass(const RenderPassCommandRecorderWithDynamicRenderingOptions &options);
+    RenderPassCommandRecorder beginRenderPass(const RenderPassCommandRecorderOptions &options) const;
+    RenderPassCommandRecorder beginRenderPass(const RenderPassCommandRecorderWithRenderPassOptions &options) const;
+    RenderPassCommandRecorder beginRenderPass(const RenderPassCommandRecorderWithDynamicRenderingOptions &options) const;
 
-    ComputePassCommandRecorder beginComputePass(const ComputePassCommandRecorderOptions &options = {});
-    RayTracingPassCommandRecorder beginRayTracingPass(const RayTracingPassCommandRecorderOptions &options = {});
-    TimestampQueryRecorder beginTimestampRecording(const TimestampQueryRecorderOptions &options = {});
-    void blitTexture(const TextureBlitOptions &options);
-    void clearBuffer(const BufferClear &clear);
-    void clearColorTexture(const ClearColorTexture &clear);
-    void clearDepthStencilTexture(const ClearDepthStencilTexture &clear);
-    void copyBuffer(const BufferCopy &copy);
-    void copyBufferToTexture(const BufferToTextureCopy &copy);
-    void copyTextureToBuffer(const TextureToBufferCopy &copy);
-    void copyTextureToTexture(const TextureToTextureCopy &copy);
-    void updateBuffer(const BufferUpdate &update);
-    void memoryBarrier(const MemoryBarrierOptions &options);
-    void bufferMemoryBarrier(const BufferMemoryBarrierOptions &options);
-    void textureMemoryBarrier(const TextureMemoryBarrierOptions &options);
-    void executeSecondaryCommandBuffer(const Handle<CommandBuffer_t> &secondaryCommandBuffer);
-    void resolveTexture(const TextureResolveOptions &options);
-    void buildAccelerationStructures(const BuildAccelerationStructureOptions &options);
-    void beginDebugLabel(const DebugLabelOptions &options);
-    void endDebugLabel();
+    [[nodiscard]] ComputePassCommandRecorder beginComputePass(const ComputePassCommandRecorderOptions &options = {}) const;
+    [[nodiscard]] RayTracingPassCommandRecorder beginRayTracingPass(const RayTracingPassCommandRecorderOptions &options = {}) const;
+    [[nodiscard]] TimestampQueryRecorder beginTimestampRecording(const TimestampQueryRecorderOptions &options = {}) const;
+    void blitTexture(const TextureBlitOptions &options) const;
+    void clearBuffer(const BufferClear &clear) const;
+    void clearColorTexture(const ClearColorTexture &clear) const;
+    void clearDepthStencilTexture(const ClearDepthStencilTexture &clear) const;
+    void copyBuffer(const BufferCopy &copy) const;
+    void copyBufferToTexture(const BufferToTextureCopy &copy) const;
+    void copyTextureToBuffer(const TextureToBufferCopy &copy) const;
+    void copyTextureToTexture(const TextureToTextureCopy &copy) const;
+    void updateBuffer(const BufferUpdate &update) const;
+    void memoryBarrier(const MemoryBarrierOptions &options) const;
+    void bufferMemoryBarrier(const BufferMemoryBarrierOptions &options) const;
+    void textureMemoryBarrier(const TextureMemoryBarrierOptions &options) const;
+    void executeSecondaryCommandBuffer(const Handle<CommandBuffer_t> &secondaryCommandBuffer) const;
+    void resolveTexture(const TextureResolveOptions &options) const;
+    void buildAccelerationStructures(const BuildAccelerationStructureOptions &options) const;
+    void beginDebugLabel(const DebugLabelOptions &options) const;
+    void endDebugLabel() const;
 
-    CommandBuffer finish();
+    [[nodiscard]] CommandBuffer finish() const;
 
 protected:
     explicit CommandRecorder(GraphicsApi *api, const Handle<Device_t> &device, const CommandRecorderOptions &options);
 
+    // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
     GraphicsApi *m_api{ nullptr };
     Handle<Device_t> m_device;
     Handle<CommandRecorder_t> m_commandRecorder;
     CommandBufferLevel m_level;
+    // NOLINTEND(misc-non-private-member-variables-in-classes)
 
     friend class Device;
     friend class Queue;

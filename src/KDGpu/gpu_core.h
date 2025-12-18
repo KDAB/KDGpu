@@ -12,9 +12,11 @@
 
 #include <KDGpu/utils/flags.h>
 
-#include <stdint.h>
+#include <cstdint>
 #include <string>
 #include <variant>
+
+// NOLINTBEGIN(performance-enum-size)
 
 using HANDLE = void *;
 
@@ -1338,3 +1340,5 @@ OPERATORS_FOR_FLAGS(KDGpu::HostImageCopyFlags);
 OPERATORS_FOR_FLAGS(KDGpu::TextureCreateFlags);
 OPERATORS_FOR_FLAGS(KDGpu::BindGroupPoolFlags);
 OPERATORS_FOR_FLAGS(KDGpu::BindGroupLayoutFlags);
+
+// NOLINTEND(performance-enum-size)

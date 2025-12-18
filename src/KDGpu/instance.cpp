@@ -96,7 +96,7 @@ Instance &Instance::operator=(Instance &&other) noexcept
  */
 std::vector<Extension> Instance::extensions() const
 {
-    auto apiInstance = m_api->resourceManager()->getInstance(m_instance);
+    auto *apiInstance = m_api->resourceManager()->getInstance(m_instance);
     return apiInstance->extensions();
 }
 
@@ -172,7 +172,7 @@ AdapterAndDevice Instance::createDefaultDevice(const Surface &surface,
 std::vector<Adapter *> Instance::adapters() const
 {
     if (m_adapters.empty()) {
-        auto apiInstance = m_api->resourceManager()->getInstance(m_instance);
+        auto *apiInstance = m_api->resourceManager()->getInstance(m_instance);
         // TODO: If we could look up a handle from a value, we would not need to pass m_instance into
         // queryAdapters(). It is needed so the adapter can store the instance handle for later use
         // when a device needs it to create a VMA allocator.
@@ -197,10 +197,10 @@ std::vector<Adapter *> Instance::adapters() const
  * @brief Returns a vector of the AdapterGroups available for the instance.
  * AdapterGroup allow to spread operations across multiple adapters;
  */
-std::vector<AdapterGroup> Instance::adapterGroups() const
+const std::vector<AdapterGroup> &Instance::adapterGroups() const
 {
     if (m_adapters.empty())
-        adapters();
+        std::ignore = adapters();
     return m_adapterGroups;
 }
 
@@ -233,7 +233,7 @@ Adapter *Instance::selectAdapter(AdapterDeviceType deviceType) const
  */
 Surface Instance::createSurface(const SurfaceOptions &options)
 {
-    auto apiInstance = m_api->resourceManager()->getInstance(m_instance);
+    auto *apiInstance = m_api->resourceManager()->getInstance(m_instance);
     return Surface(m_api, apiInstance->createSurface(options));
 }
 

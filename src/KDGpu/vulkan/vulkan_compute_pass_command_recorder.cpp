@@ -33,7 +33,8 @@ void VulkanComputePassCommandRecorder::setPipeline(const Handle<ComputePipeline_
 }
 
 void VulkanComputePassCommandRecorder::setBindGroup(uint32_t group, const Handle<BindGroup_t> &_bindGroup,
-                                                    const Handle<PipelineLayout_t> &pipelineLayout, std::span<const uint32_t> dynamicBufferOffsets)
+                                                    const Handle<PipelineLayout_t> &pipelineLayout,
+                                                    std::span<const uint32_t> dynamicBufferOffsets) const
 {
     VulkanBindGroup *bindGroup = vulkanResourceManager->getBindGroup(_bindGroup);
     VkDescriptorSet set = bindGroup->descriptorSet;
@@ -43,13 +44,13 @@ void VulkanComputePassCommandRecorder::setBindGroup(uint32_t group, const Handle
     VkPipelineLayout vkPipelineLayout{ VK_NULL_HANDLE };
     if (pipelineLayout.isValid()) {
         VulkanPipelineLayout *vulkanPipelineLayout = vulkanResourceManager->getPipelineLayout(pipelineLayout);
-        if (vulkanPipelineLayout)
+        if (vulkanPipelineLayout != nullptr)
             vkPipelineLayout = vulkanPipelineLayout->pipelineLayout;
     } else if (pipeline.isValid()) {
         VulkanComputePipeline *vulkanPipeline = vulkanResourceManager->getComputePipeline(pipeline);
-        if (vulkanPipeline) {
+        if (vulkanPipeline != nullptr) {
             VulkanPipelineLayout *vulkanPipelineLayout = vulkanResourceManager->getPipelineLayout(vulkanPipeline->pipelineLayoutHandle);
-            if (vulkanPipelineLayout)
+            if (vulkanPipelineLayout != nullptr)
                 vkPipelineLayout = vulkanPipelineLayout->pipelineLayout;
         }
     }
@@ -64,30 +65,30 @@ void VulkanComputePassCommandRecorder::setBindGroup(uint32_t group, const Handle
                             dynamicBufferOffsets.size(), dynamicBufferOffsets.data());
 }
 
-void VulkanComputePassCommandRecorder::dispatchCompute(const ComputeCommand &command)
+void VulkanComputePassCommandRecorder::dispatchCompute(const ComputeCommand &command) const
 {
     vkCmdDispatch(commandBuffer, command.workGroupX, command.workGroupY, command.workGroupZ);
 }
 
-void VulkanComputePassCommandRecorder::dispatchCompute(std::span<const ComputeCommand> commands)
+void VulkanComputePassCommandRecorder::dispatchCompute(std::span<const ComputeCommand> commands) const
 {
     for (const auto &c : commands)
         dispatchCompute(c);
 }
 
-void VulkanComputePassCommandRecorder::dispatchComputeIndirect(const ComputeCommandIndirect &command)
+void VulkanComputePassCommandRecorder::dispatchComputeIndirect(const ComputeCommandIndirect &command) const
 {
     VulkanBuffer *vulkanBuffer = vulkanResourceManager->getBuffer(command.buffer);
     vkCmdDispatchIndirect(commandBuffer, vulkanBuffer->buffer, command.offset);
 }
 
-void VulkanComputePassCommandRecorder::dispatchComputeIndirect(std::span<const ComputeCommandIndirect> commands)
+void VulkanComputePassCommandRecorder::dispatchComputeIndirect(std::span<const ComputeCommandIndirect> commands) const
 {
     for (const auto &c : commands)
         dispatchComputeIndirect(c);
 }
 
-void VulkanComputePassCommandRecorder::pushConstant(const PushConstantRange &constantRange, const void *data)
+void VulkanComputePassCommandRecorder::pushConstant(const PushConstantRange &constantRange, const void *data) const
 {
     VulkanComputePipeline *vulkanPipeline = vulkanResourceManager->getComputePipeline(pipeline);
     VulkanPipelineLayout *pLayout = vulkanResourceManager->getPipelineLayout(vulkanPipeline->pipelineLayoutHandle);
@@ -103,7 +104,7 @@ void VulkanComputePassCommandRecorder::pushConstant(const PushConstantRange &con
 
 void VulkanComputePassCommandRecorder::pushBindGroup(uint32_t group,
                                                      std::span<const BindGroupEntry> bindGroupEntries,
-                                                     const Handle<PipelineLayout_t> &pipelineLayout)
+                                                     const Handle<PipelineLayout_t> &pipelineLayout) const
 {
 #if defined(VK_KHR_push_descriptor)
     VulkanDevice *device = vulkanResourceManager->getDevice(deviceHandle);
@@ -145,7 +146,7 @@ void VulkanComputePassCommandRecorder::pushBindGroup(uint32_t group,
 #endif
 }
 
-void VulkanComputePassCommandRecorder::end()
+void VulkanComputePassCommandRecorder::end() const
 {
     // No op
 }

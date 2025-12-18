@@ -37,18 +37,21 @@ struct KDGPU_EXPORT VulkanRayTracingPassCommandRecorder {
 
     void setPipeline(const Handle<RayTracingPipeline_t> &pipeline);
     void setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroup,
-                      const Handle<PipelineLayout_t> &pipelineLayout, std::span<const uint32_t> dynamicBufferOffsets);
-    void traceRays(const RayTracingCommand &rayTracingCommand);
-    void pushConstant(const PushConstantRange &constantRange, const void *data);
+                      const Handle<PipelineLayout_t> &pipelineLayout,
+                      std::span<const uint32_t> dynamicBufferOffsets) const;
+    void traceRays(const RayTracingCommand &rayTracingCommand) const;
+    void pushConstant(const PushConstantRange &constantRange, const void *data) const;
     void pushBindGroup(uint32_t group,
                        std::span<const BindGroupEntry> bindGroupEntries,
-                       const Handle<PipelineLayout_t> &pipelineLayout);
-    void end();
+                       const Handle<PipelineLayout_t> &pipelineLayout) const;
+    void end() const;
 
+    // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
     VkCommandBuffer commandBuffer{ VK_NULL_HANDLE };
     VulkanResourceManager *vulkanResourceManager{ nullptr };
     Handle<Device_t> deviceHandle;
     Handle<RayTracingPipeline_t> pipeline;
+    // NOLINTEND(misc-non-private-member-variables-in-classes)
 };
 
 } // namespace KDGpu

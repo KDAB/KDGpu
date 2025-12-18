@@ -51,19 +51,19 @@ RenderPassCommandRecorder &RenderPassCommandRecorder::operator=(RenderPassComman
 
 void RenderPassCommandRecorder::setPipeline(const Handle<GraphicsPipeline_t> &pipeline)
 {
-    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    auto *apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->setPipeline(pipeline);
 }
 
 void RenderPassCommandRecorder::setVertexBuffer(uint32_t index, const Handle<Buffer_t> &buffer, DeviceSize offset)
 {
-    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    auto *apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->setVertexBuffer(index, buffer, offset);
 }
 
 void RenderPassCommandRecorder::setIndexBuffer(const Handle<Buffer_t> &buffer, DeviceSize offset, IndexType indexType)
 {
-    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    auto *apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->setIndexBuffer(buffer, offset, indexType);
 }
 
@@ -71,109 +71,109 @@ void RenderPassCommandRecorder::setBindGroup(uint32_t group, const Handle<BindGr
                                              const Handle<PipelineLayout_t> &pipelineLayout,
                                              std::span<const uint32_t> dynamicBufferOffsets)
 {
-    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    auto *apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->setBindGroup(group, bindGroup, pipelineLayout, dynamicBufferOffsets);
 }
 
 void RenderPassCommandRecorder::setViewport(const Viewport &viewport)
 {
-    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    auto *apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->setViewport(viewport);
 }
 
 void RenderPassCommandRecorder::setScissor(const Rect2D &scissor)
 {
-    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    auto *apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->setScissor(scissor);
 }
 
 void RenderPassCommandRecorder::setStencilReference(const StencilFaceFlags faceMask, const int reference)
 {
-    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    auto *apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->setStencilReference(faceMask, reference);
 }
 
 void RenderPassCommandRecorder::end()
 {
-    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    auto *apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->end();
 }
 
 void RenderPassCommandRecorder::draw(const DrawCommand &drawCommand)
 {
-    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    auto *apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->draw(drawCommand);
 }
 
 void RenderPassCommandRecorder::draw(std::span<const DrawCommand> drawCommands)
 {
-    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    auto *apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->draw(drawCommands);
 }
 
 void RenderPassCommandRecorder::drawIndexed(const DrawIndexedCommand &drawCommand)
 {
-    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    auto *apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->drawIndexed(drawCommand);
 }
 
 void RenderPassCommandRecorder::drawIndexed(std::span<const DrawIndexedCommand> drawCommands)
 {
-    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    auto *apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->drawIndexed(drawCommands);
 }
 
 void RenderPassCommandRecorder::drawIndirect(const DrawIndirectCommand &drawCommand)
 {
-    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    auto *apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->drawIndirect(drawCommand);
 }
 
 void RenderPassCommandRecorder::drawIndirect(std::span<const DrawIndirectCommand> drawCommands)
 {
-    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    auto *apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->drawIndirect(drawCommands);
 }
 
 void RenderPassCommandRecorder::drawIndexedIndirect(const DrawIndexedIndirectCommand &drawCommand)
 {
-    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    auto *apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->drawIndexedIndirect(drawCommand);
 }
 
 void RenderPassCommandRecorder::drawIndexedIndirect(std::span<const DrawIndexedIndirectCommand> drawCommands)
 {
-    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    auto *apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->drawIndexedIndirect(drawCommands);
 }
 
 void RenderPassCommandRecorder::drawMeshTasks(const DrawMeshCommand &drawCommand)
 {
-    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    auto *apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->drawMeshTasks(drawCommand);
 }
 
 void RenderPassCommandRecorder::drawMeshTasks(std::span<const DrawMeshCommand> drawCommands)
 {
-    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    auto *apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->drawMeshTasks(drawCommands);
 }
 
 void RenderPassCommandRecorder::drawMeshTasksIndirect(const DrawMeshIndirectCommand &drawCommand)
 {
-    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    auto *apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->drawMeshTasksIndirect(drawCommand);
 }
 
 void RenderPassCommandRecorder::drawMeshTasksIndirect(std::span<const DrawMeshIndirectCommand> drawCommands)
 {
-    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    auto *apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->drawMeshTasksIndirect(drawCommands);
 }
 
 void RenderPassCommandRecorder::pushConstant(const PushConstantRange &constantRange, const void *data, const Handle<PipelineLayout_t> &pipelineLayout)
 {
-    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    auto *apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->pushConstant(constantRange, data, pipelineLayout);
 }
 
@@ -181,13 +181,13 @@ void RenderPassCommandRecorder::pushBindGroup(uint32_t group,
                                               std::span<const BindGroupEntry> bindGroupEntries,
                                               const Handle<PipelineLayout_t> &pipelineLayout)
 {
-    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    auto *apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->pushBindGroup(group, bindGroupEntries, pipelineLayout);
 }
 
 void RenderPassCommandRecorder::nextSubpass()
 {
-    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    auto *apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->nextSubpass();
 }
 
@@ -195,13 +195,13 @@ void RenderPassCommandRecorder::setInputAttachmentMapping(std::span<const uint32
                                                           std::optional<uint32_t> depthAttachmentIndex,
                                                           std::optional<uint32_t> stencilAttachmentIndex)
 {
-    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    auto *apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->setInputAttachmentMapping(colorAttachmentIndices, depthAttachmentIndex, stencilAttachmentIndex);
 }
 
 void RenderPassCommandRecorder::setOutputAttachmentMapping(std::span<const uint32_t> remappedOutputs)
 {
-    auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
+    auto *apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->setOutputAttachmentMapping(remappedOutputs);
 }
 

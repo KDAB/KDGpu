@@ -35,7 +35,6 @@
 #include <KDGpu/kdgpu_export.h>
 
 #include <span>
-#include <string>
 #include <vector>
 
 namespace KDGpu {
@@ -69,57 +68,57 @@ public:
     Device(const Device &) = delete;
     Device &operator=(const Device &) = delete;
 
-    Handle<Device_t> handle() const noexcept { return m_device; }
-    bool isValid() const noexcept { return m_device.isValid(); }
+    [[nodiscard]] Handle<Device_t> handle() const noexcept { return m_device; }
+    [[nodiscard]] bool isValid() const noexcept { return m_device.isValid(); }
 
     operator Handle<Device_t>() const noexcept { return m_device; }
 
-    std::span<Queue> queues() { return m_queues; }
+    [[nodiscard]] std::span<Queue> queues() { return m_queues; }
 
     void waitUntilIdle();
 
-    const Adapter *adapter() const;
+    [[nodiscard]] const Adapter *adapter() const;
 
-    Swapchain createSwapchain(const SwapchainOptions &options);
-    Texture createTexture(const TextureOptions &options);
+    [[nodiscard]] Swapchain createSwapchain(const SwapchainOptions &options);
+    [[nodiscard]] Texture createTexture(const TextureOptions &options);
 
     // TODO: If initialData is set, upload this to the newly created buffer.
     // OR should this helper functionality go in a slightly higher layer that
     // knows about the concept of a frame so that it can correctly submit such commands
     // as part of the frame submission along with suitable memory barriers?
-    Buffer createBuffer(const BufferOptions &options, const void *initialData = nullptr);
+    [[nodiscard]] Buffer createBuffer(const BufferOptions &options, const void *initialData = nullptr);
 
-    ShaderModule createShaderModule(const std::vector<uint32_t> &code);
+    [[nodiscard]] ShaderModule createShaderModule(const std::vector<uint32_t> &code);
 
-    RenderPass createRenderPass(const RenderPassOptions &options);
+    [[nodiscard]] RenderPass createRenderPass(const RenderPassOptions &options);
 
-    PipelineLayout createPipelineLayout(const PipelineLayoutOptions &options = PipelineLayoutOptions());
+    [[nodiscard]] PipelineLayout createPipelineLayout(const PipelineLayoutOptions &options = PipelineLayoutOptions());
 
-    GraphicsPipeline createGraphicsPipeline(const GraphicsPipelineOptions &options);
+    [[nodiscard]] GraphicsPipeline createGraphicsPipeline(const GraphicsPipelineOptions &options);
 
-    ComputePipeline createComputePipeline(const ComputePipelineOptions &options);
+    [[nodiscard]] ComputePipeline createComputePipeline(const ComputePipelineOptions &options);
 
-    RayTracingPipeline createRayTracingPipeline(const RayTracingPipelineOptions &options);
+    [[nodiscard]] RayTracingPipeline createRayTracingPipeline(const RayTracingPipelineOptions &options);
 
-    CommandRecorder createCommandRecorder(const CommandRecorderOptions &options = CommandRecorderOptions());
+    [[nodiscard]] CommandRecorder createCommandRecorder(const CommandRecorderOptions &options = CommandRecorderOptions());
 
-    GpuSemaphore createGpuSemaphore(const GpuSemaphoreOptions &options = GpuSemaphoreOptions());
+    [[nodiscard]] GpuSemaphore createGpuSemaphore(const GpuSemaphoreOptions &options = GpuSemaphoreOptions());
 
-    BindGroupLayout createBindGroupLayout(const BindGroupLayoutOptions &options);
+    [[nodiscard]] BindGroupLayout createBindGroupLayout(const BindGroupLayoutOptions &options);
 
-    BindGroupPool createBindGroupPool(const BindGroupPoolOptions &options);
+    [[nodiscard]] BindGroupPool createBindGroupPool(const BindGroupPoolOptions &options);
 
-    BindGroup createBindGroup(const BindGroupOptions &options);
+    [[nodiscard]] BindGroup createBindGroup(const BindGroupOptions &options);
 
-    Sampler createSampler(const SamplerOptions &options = SamplerOptions());
+    [[nodiscard]] Sampler createSampler(const SamplerOptions &options = SamplerOptions());
 
-    Fence createFence(const FenceOptions &options = FenceOptions());
+    [[nodiscard]] Fence createFence(const FenceOptions &options = FenceOptions());
 
-    AccelerationStructure createAccelerationStructure(const AccelerationStructureOptions &options = AccelerationStructureOptions());
+    [[nodiscard]] AccelerationStructure createAccelerationStructure(const AccelerationStructureOptions &options = AccelerationStructureOptions());
 
-    YCbCrConversion createYCbCrConversion(const YCbCrConversionOptions &options);
+    [[nodiscard]] YCbCrConversion createYCbCrConversion(const YCbCrConversionOptions &options);
 
-    GraphicsApi *graphicsApi() const;
+    [[nodiscard]] GraphicsApi *graphicsApi() const;
 
 private:
     Device(Adapter *adapter, GraphicsApi *api, const DeviceOptions &options);

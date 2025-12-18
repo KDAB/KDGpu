@@ -42,14 +42,18 @@
 #include <variant>
 #include <algorithm>
 
+// NOLINTBEGIN(readability-function-cognitive-complexity)
+
 namespace {
 
-static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
+VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
         VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
         VkDebugUtilsMessageTypeFlagsEXT messageType,
         const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
         void *pUserData)
 {
+    (void)pUserData;
+    (void)messageType;
     if (std::ranges::any_of(KDGpu::VulkanGraphicsApi::validationMessagesToIgnore(),
                             [pCallbackData](const std::string &error) -> bool { return pCallbackData->pMessageIdName != nullptr &&
                                                                                         error == pCallbackData->pMessageIdName; }))
@@ -142,13 +146,9 @@ template<class>
 inline constexpr bool always_false = false;
 
 template<typename F>
-bool testIfContainsAnyFlags(const KDGpu::Flags<F> &flags, const std::vector<F> &flagsToTest)
+bool testIfContainsAnyFlags(const KDGpu::Flags<F> &flags, std::span<const F> flagsToTest)
 {
-    for (const auto f : flagsToTest) {
-        if (flags.testFlag(f))
-            return true;
-    }
-    return false;
+    return std::ranges::any_of(flagsToTest, [&](F f) { return flags.testFlag(f); });
 }
 
 } // namespace
@@ -309,7 +309,7 @@ VulkanInstance *VulkanResourceManager::getInstance(const Handle<Instance_t> &han
     return m_instances.get(handle);
 }
 
-std::vector<Extension> VulkanResourceManager::getInstanceExtensions() const
+std::vector<Extension> VulkanResourceManager::getInstanceExtensions()
 {
     uint32_t extensionCount{ 0 };
     if (auto result = vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr); result != VK_SUCCESS) {
@@ -378,7 +378,7 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     // have a lot of them and some of them are optional.
     VkBaseOutStructure *chainCurrent{ nullptr };
     auto addToChain = [&chainCurrent](auto *next) {
-        auto n = reinterpret_cast<VkBaseOutStructure *>(next);
+        auto *n = reinterpret_cast<VkBaseOutStructure *>(next);
         chainCurrent->pNext = n;
         chainCurrent = n;
     };
@@ -1189,7 +1189,7 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
 
     if (initialData) {
         VulkanBuffer *vulkanBuffer = m_buffers.get(vulkanBufferHandle);
-        auto bufferData = vulkanBuffer->map();
+        auto *bufferData = vulkanBuffer->map();
         std::memcpy(bufferData, initialData, createInfo.size);
         vulkanBuffer->unmap();
     }
@@ -1560,7 +1560,7 @@ Handle<PipelineLayout_t> VulkanResourceManager::createPipelineLayout(const Handl
             .size = pushConstantRange.size
         };
 
-        vkPushConstantRanges.emplace_back(std::move(vkPushConstantRange));
+        vkPushConstantRanges.emplace_back(vkPushConstantRange);
     }
 
     VkPipelineLayoutCreateInfo createInfo = {};
@@ -1832,7 +1832,7 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
 
     VkBaseOutStructure *chainCurrent = reinterpret_cast<VkBaseOutStructure *>(&pipelineInfo);
     auto addToChain = [&chainCurrent](auto *next) {
-        auto n = reinterpret_cast<VkBaseOutStructure *>(next);
+        auto *n = reinterpret_cast<VkBaseOutStructure *>(next);
         chainCurrent->pNext = n;
         chainCurrent = n;
     };
@@ -1968,7 +1968,7 @@ Handle<ComputePipeline_t> VulkanResourceManager::createComputePipeline(const Han
     std::vector<uint8_t> shaderSpecializationRawData;
 
     // Lookup the shader module
-    const auto vulkanShaderModule = getShaderModule(options.shaderStage.shaderModule);
+    const auto *vulkanShaderModule = getShaderModule(options.shaderStage.shaderModule);
     if (!vulkanShaderModule)
         return {};
     computeShaderInfo.module = vulkanShaderModule->shaderModule;
@@ -2257,7 +2257,7 @@ Handle<CommandRecorder_t> VulkanResourceManager::createCommandRecorder(const Han
             SPDLOG_LOGGER_ERROR(Logger::logger(), "No more queue descriptors available for device");
             return {};
         }
-        queueDescription = &vulkanDevice->queueDescriptions[0];
+        queueDescription = vulkanDevice->queueDescriptions.data();
     } else {
         // Look for this queue on the device
         const auto it = std::find_if(
@@ -2609,7 +2609,7 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
     // Clear values - at most 2 x color attachments + depth
     // Maybe update in the future since a complex renderpass with subpass could exceed that? maybe 50?
     constexpr size_t MaxAttachmentCount = 20;
-    assert(2 * options.attachments.size() + 1 <= MaxAttachmentCount);
+    assert((2 * options.attachments.size()) + 1 <= MaxAttachmentCount);
     std::array<VkClearValue, MaxAttachmentCount> vkClearValues;
     size_t clearIdx = 0;
 
@@ -2881,7 +2881,7 @@ VulkanRayTracingPassCommandRecorder *VulkanResourceManager::getRayTracingPassCom
 
 Handle<RayTracingPassCommandRecorder_t> VulkanResourceManager::createRayTracingPassCommandRecorder(const Handle<Device_t> &deviceHandle,
                                                                                                    const Handle<CommandRecorder_t> &commandRecorderHandle,
-                                                                                                   const RayTracingPassCommandRecorderOptions &options)
+                                                                                                   const RayTracingPassCommandRecorderOptions &)
 {
     VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
 
@@ -2901,7 +2901,7 @@ Handle<RayTracingPassCommandRecorder_t> VulkanResourceManager::createRayTracingP
 SubpassDescription VulkanResourceManager::fillAttachmentDescriptionAndCreateSubpassDescription(std::vector<AttachmentDescription> &attachmentDescriptions,
                                                                                                const std::vector<ColorAttachment> &colorAttachments,
                                                                                                const DepthStencilAttachment &depthAttachment,
-                                                                                               SampleCountFlagBits samples)
+                                                                                               SampleCountFlagBits samples) const
 {
     const bool useMultiSampling = samples > SampleCountFlagBits::Samples1Bit;
 
@@ -3176,7 +3176,7 @@ Handle<RenderPass_t> VulkanResourceManager::createImplicitRenderPass(const Handl
 // Created from RenderTarget descriptions (GraphicsPipeline)
 Handle<RenderPass_t> VulkanResourceManager::createImplicitRenderPass(const Handle<Device_t> &deviceHandle,
                                                                      const std::vector<RenderTargetOptions> &colorAttachments,
-                                                                     const DepthStencilOptions &depthAttachment,
+                                                                     const DepthStencilOptions &depthStencilAttachment,
                                                                      SampleCountFlagBits samples,
                                                                      uint32_t viewCount)
 {
@@ -3185,7 +3185,7 @@ Handle<RenderPass_t> VulkanResourceManager::createImplicitRenderPass(const Handl
     const uint32_t multiViewMaskMask = uint32_t(1 << viewCount) - 1;
 
     std::vector<AttachmentDescription> attachmentDescriptions;
-    SubpassDescription subpassDescription = fillAttachmentDescriptionAndCreateSubpassDescription(attachmentDescriptions, colorAttachments, depthAttachment, samples);
+    SubpassDescription subpassDescription = fillAttachmentDescriptionAndCreateSubpassDescription(attachmentDescriptions, colorAttachments, depthStencilAttachment, samples);
 
     std::vector<uint32_t> viewMasks;
     if (viewCount > 1) {
@@ -3345,7 +3345,7 @@ Handle<BindGroup_t> VulkanResourceManager::createBindGroup(const Handle<Device_t
     vulkanBindGroupPool->addBindGroup(vulkanBindGroupHandle);
 
     // Set up the initial bindings
-    auto vulkanBindGroup = m_bindGroups.get(vulkanBindGroupHandle);
+    auto *vulkanBindGroup = m_bindGroups.get(vulkanBindGroupHandle);
     for (const auto &resource : options.resources)
         vulkanBindGroup->update(resource);
 
@@ -3411,10 +3411,10 @@ Handle<BindGroupLayout_t> VulkanResourceManager::createBindGroupLayout(const Han
             vkBindingLayout.pImmutableSamplers = immutableSamplers.data() + lastImmutableSamplersOffset;
         };
 
-        vkBindingLayouts.emplace_back(std::move(vkBindingLayout));
+        vkBindingLayouts.emplace_back(vkBindingLayout);
 
         VkDescriptorBindingFlags vkBindingFlag = resourceBindingFlagsToVkDescriptorBindingFlags(bindingLayout.flags);
-        vkBindingFlags.emplace_back(std::move(vkBindingFlag));
+        vkBindingFlags.emplace_back(vkBindingFlag);
     }
 
     VkDescriptorSetLayoutBindingFlagsCreateInfo setLayoutBindingFlags{};
@@ -3832,7 +3832,7 @@ KDGpu::Format VulkanResourceManager::formatFromTextureView(const Handle<KDGpu::T
 }
 
 bool VulkanResourceManager::fillShaderStageInfos(const std::vector<ShaderStage> &stages,
-                                                 ShaderStagesInfo &shaderStagesInfo)
+                                                 ShaderStagesInfo &shaderStagesInfo) const
 {
     const uint32_t shaderCount = static_cast<uint32_t>(stages.size());
     shaderStagesInfo.shaderInfos.reserve(shaderCount);
@@ -3848,7 +3848,7 @@ bool VulkanResourceManager::fillShaderStageInfos(const std::vector<ShaderStage> 
         shaderInfo.stage = shaderStageFlagBitsToVkShaderStageFlagBits(shaderStage.stage);
 
         // Lookup the shader module
-        const auto vulkanShaderModule = getShaderModule(shaderStage.shaderModule);
+        const auto *vulkanShaderModule = getShaderModule(shaderStage.shaderModule);
         if (!vulkanShaderModule)
             return false;
         shaderInfo.module = vulkanShaderModule->shaderModule;
@@ -3894,7 +3894,7 @@ bool VulkanResourceManager::fillShaderStageInfos(const std::vector<ShaderStage> 
     return true;
 }
 
-std::vector<std::string> VulkanResourceManager::getAvailableLayers() const
+std::vector<std::string> VulkanResourceManager::getAvailableLayers()
 {
     uint32_t layerCount{ 0 };
     if (auto result = vkEnumerateInstanceLayerProperties(&layerCount, nullptr); result != VK_SUCCESS) {
@@ -3920,20 +3920,20 @@ std::vector<std::string> VulkanResourceManager::getAvailableLayers() const
 MemoryHandle VulkanResourceManager::retrieveExternalMemoryHandle(VulkanInstance *instance,
                                                                  VulkanDevice *vulkanDevice,
                                                                  const VmaAllocationInfo &allocationInfo,
-                                                                 ExternalMemoryHandleTypeFlags handleType) const
+                                                                 ExternalMemoryHandleTypeFlags handleType)
 {
     MemoryHandle memoryHandle{
         .allocationSize = allocationInfo.size,
         .allocationOffset = allocationInfo.offset,
     };
 #if !defined(KDGPU_PLATFORM_WIN32)
-    if (testIfContainsAnyFlags(handleType,
-                               {
-                                       ExternalMemoryHandleTypeFlagBits::OpaqueFD,
+    constexpr std::array handleTypes{
+        ExternalMemoryHandleTypeFlagBits::OpaqueFD,
 #if defined(VK_EXT_external_memory_dma_buf)
-                                       ExternalMemoryHandleTypeFlagBits::DmaBuf,
+        ExternalMemoryHandleTypeFlagBits::DmaBuf,
 #endif
-                               })) {
+    };
+    if (testIfContainsAnyFlags<ExternalMemoryHandleTypeFlagBits>(handleType, handleTypes)) {
 #if defined(VK_KHR_external_memory_fd)
         if (instance->vkGetMemoryFdKHR) {
             VkMemoryGetFdInfoKHR vkMemoryGetFdInfoKHR = {
@@ -3952,16 +3952,16 @@ MemoryHandle VulkanResourceManager::retrieveExternalMemoryHandle(VulkanInstance 
     }
 
 #else // KDGPU_PLATFORM_WIN32
+    constexpr std::array handleTypes{
+        ExternalMemoryHandleTypeFlagBits::OpaqueWin32,
+        ExternalMemoryHandleTypeFlagBits::OpaqueWin32Kmt,
+        ExternalMemoryHandleTypeFlagBits::D3D11Texture,
+        ExternalMemoryHandleTypeFlagBits::D3D11TextureKmt,
+        ExternalMemoryHandleTypeFlagBits::D3D12Heap,
+        ExternalMemoryHandleTypeFlagBits::D3D12Resource,
+    };
 
-    if (testIfContainsAnyFlags(handleType,
-                               {
-                                       ExternalMemoryHandleTypeFlagBits::OpaqueWin32,
-                                       ExternalMemoryHandleTypeFlagBits::OpaqueWin32Kmt,
-                                       ExternalMemoryHandleTypeFlagBits::D3D11Texture,
-                                       ExternalMemoryHandleTypeFlagBits::D3D11TextureKmt,
-                                       ExternalMemoryHandleTypeFlagBits::D3D12Heap,
-                                       ExternalMemoryHandleTypeFlagBits::D3D12Resource,
-                               })) {
+    if (testIfContainsAnyFlags<ExternalMemoryHandleTypeFlagBits>(handleType, handleTypes)) {
 #if defined(VK_KHR_external_memory_win32)
         if (instance->vkGetMemoryWin32HandleKHR) {
             VkMemoryGetWin32HandleInfoKHR vkGetWin32HandleInfoKHR = {
@@ -3986,6 +3986,8 @@ MemoryHandle VulkanResourceManager::retrieveExternalMemoryHandle(VulkanInstance 
     }
 
     return memoryHandle;
-}
+} // namespace KDGpu
 
 } // namespace KDGpu
+
+// NOLINTEND(readability-function-cognitive-complexity)

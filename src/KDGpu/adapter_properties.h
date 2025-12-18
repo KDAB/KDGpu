@@ -14,6 +14,7 @@
 
 #include <stdint.h>
 #include <string>
+#include <vector>
 
 namespace KDGpu {
 

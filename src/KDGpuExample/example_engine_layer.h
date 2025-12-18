@@ -67,6 +67,7 @@ public:
     void uploadTextureData(const KDGpu::TextureUploadOptions &options);
 
 protected:
+    // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
     virtual void initializeScene() = 0;
     virtual void cleanupScene() = 0;
     virtual void updateScene() = 0;
@@ -121,7 +122,7 @@ protected:
     uint32_t m_inFlightIndex{ 0 };
     std::array<KDGpu::GpuSemaphore, MAX_FRAMES_IN_FLIGHT> m_presentCompleteSemaphores; // One Per Frame in flight
     std::vector<KDGpu::GpuSemaphore> m_renderCompleteSemaphores; // One Per Swapchain Image
-    KDGpu::TextureUsageFlags m_depthTextureUsageFlags{};
+    KDGpu::TextureUsageFlags m_depthTextureUsageFlags;
 
     std::vector<KDGpu::UploadStagingBuffer> m_stagingBuffers;
 
@@ -131,6 +132,7 @@ protected:
 
     bool m_showSurfaceCapabilities{ false };
     std::string m_capabilitiesString;
+    // NOLINTEND(misc-non-private-member-variables-in-classes)
 };
 
 } // namespace KDGpuExample

@@ -73,12 +73,13 @@ struct KDGPU_EXPORT VulkanDevice {
                                             const std::vector<QueueRequest> &queueRequests,
                                             std::span<AdapterQueueType> queueTypes);
 
-    void waitUntilIdle();
+    void waitUntilIdle() const;
 
     VmaAllocator getOrCreateExternalMemoryAllocator(ExternalMemoryHandleTypeFlags externalMemoryHandleType);
     VmaAllocator createMemoryAllocator(ExternalMemoryHandleTypeFlags externalMemoryHandleType = ExternalMemoryHandleTypeFlagBits::None) const;
     void fillWriteBindGroupDataForBindGroupEntry(WriteBindGroupData &writeBindGroupData, const BindGroupEntry &entry, const VkDescriptorSet &descriptorSet = VK_NULL_HANDLE) const;
 
+    // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
     VkDevice device{ VK_NULL_HANDLE };
     uint32_t apiVersion{};
     AdapterFeatures requestedFeatures{};
@@ -173,6 +174,7 @@ struct KDGPU_EXPORT VulkanDevice {
 #endif
 
     bool isOwned{ true };
+    // NOLINTEND(misc-non-private-member-variables-in-classes)
 };
 
 } // namespace KDGpu
