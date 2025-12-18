@@ -122,9 +122,10 @@ void RenderToTextureSubpass::createRenderPass()
                 .srcSubpass = 0,
                 .dstSubpass = 1,
                 .srcStageMask = PipelineStageFlagBit::ColorAttachmentOutputBit,
-                .dstStageMask = PipelineStageFlagBit::FragmentShaderBit,
+                .dstStageMask = PipelineStageFlagBit::ColorAttachmentOutputBit | PipelineStageFlagBit::FragmentShaderBit,
                 .srcAccessMask = AccessFlagBit::ColorAttachmentWriteBit,
-                .dstAccessMask = AccessFlagBit::InputAttachmentReadBit }
+                .dstAccessMask = AccessFlagBit::InputAttachmentReadBit | AccessFlagBit::ColorAttachmentWriteBit | AccessFlagBit::ColorAttachmentReadBit,
+        }
     };
 
     const RenderPassOptions renderPassInfo = {

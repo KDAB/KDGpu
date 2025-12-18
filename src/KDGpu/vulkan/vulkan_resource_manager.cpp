@@ -3060,22 +3060,33 @@ VulkanTimestampQueryRecorder *VulkanResourceManager::getTimestampQueryRecorder(c
 
 namespace {
 const std::vector<SubpassDependenciesDescriptions> defaultImplicitSubpassDependencies = {
+
     // Color & Depth Buffer Dependency to prevent clearing before previous renderpass has been completed
+    // and allow to to read back from the attachments after previous pass has fully written into them.
+
+    // This effectively combines 2 dependencies in 1:
+    // 1) Layout transition → clear (write ordering) ensures:
+    //    - layout transition (write)
+    //    - clear (write)
+    //   are correctly ordered to prevent a Write on Write Hazard
+    // 2) Make writes (clear, fragment outputs) -> visible to reads in fragment shader
+    //   (for input attachments / depth / color reads)
     {
             .srcSubpass = ExternalSubpass,
             .dstSubpass = 0,
-            .srcStageMask = PipelineStageFlagBit::TopOfPipeBit,
-            .dstStageMask = PipelineStageFlagBit::AllGraphicsBit,
+            .srcStageMask = (PipelineStageFlagBit::ColorAttachmentOutputBit |
+                             PipelineStageFlagBit::EarlyFragmentTestBit |
+                             PipelineStageFlagBit::LateFragmentTestBit),
+            .dstStageMask = (PipelineStageFlagBit::ColorAttachmentOutputBit |
+                             PipelineStageFlagBit::EarlyFragmentTestBit |
+                             PipelineStageFlagBit::LateFragmentTestBit |
+                             PipelineStageFlagBit::FragmentShaderBit),
             .srcAccessMask = AccessFlagBit::None,
-            .dstAccessMask = AccessFlagBit::ColorAttachmentWriteBit | AccessFlagBit::ColorAttachmentReadBit | AccessFlagBit::DepthStencilAttachmentWriteBit | AccessFlagBit::DepthStencilAttachmentReadBit | AccessFlagBit::InputAttachmentReadBit,
-    },
-    {
-            .srcSubpass = ExternalSubpass,
-            .dstSubpass = 0,
-            .srcStageMask = PipelineStageFlagBit::AllGraphicsBit,
-            .dstStageMask = PipelineStageFlagBit::BottomOfPipeBit,
-            .srcAccessMask = AccessFlagBit::ColorAttachmentWriteBit | AccessFlagBit::ColorAttachmentReadBit | AccessFlagBit::DepthStencilAttachmentWriteBit | AccessFlagBit::DepthStencilAttachmentReadBit | AccessFlagBit::InputAttachmentReadBit,
-            .dstAccessMask = AccessFlagBit::None,
+            .dstAccessMask = (AccessFlagBit::ColorAttachmentWriteBit |
+                              AccessFlagBit::DepthStencilAttachmentWriteBit |
+                              AccessFlagBit::InputAttachmentReadBit |
+                              AccessFlagBit::ColorAttachmentReadBit |
+                              AccessFlagBit::DepthStencilAttachmentReadBit),
     },
 };
 
