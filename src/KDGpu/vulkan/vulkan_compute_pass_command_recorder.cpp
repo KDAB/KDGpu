@@ -33,7 +33,7 @@ void VulkanComputePassCommandRecorder::setPipeline(const Handle<ComputePipeline_
 }
 
 void VulkanComputePassCommandRecorder::setBindGroup(uint32_t group, const Handle<BindGroup_t> &_bindGroup,
-                                                    const Handle<PipelineLayout_t> &pipelineLayout, const std::vector<uint32_t> &dynamicBufferOffsets)
+                                                    const Handle<PipelineLayout_t> &pipelineLayout, std::span<const uint32_t> dynamicBufferOffsets)
 {
     VulkanBindGroup *bindGroup = vulkanResourceManager->getBindGroup(_bindGroup);
     VkDescriptorSet set = bindGroup->descriptorSet;
@@ -69,7 +69,7 @@ void VulkanComputePassCommandRecorder::dispatchCompute(const ComputeCommand &com
     vkCmdDispatch(commandBuffer, command.workGroupX, command.workGroupY, command.workGroupZ);
 }
 
-void VulkanComputePassCommandRecorder::dispatchCompute(const std::vector<ComputeCommand> &commands)
+void VulkanComputePassCommandRecorder::dispatchCompute(std::span<const ComputeCommand> commands)
 {
     for (const auto &c : commands)
         dispatchCompute(c);
@@ -81,7 +81,7 @@ void VulkanComputePassCommandRecorder::dispatchComputeIndirect(const ComputeComm
     vkCmdDispatchIndirect(commandBuffer, vulkanBuffer->buffer, command.offset);
 }
 
-void VulkanComputePassCommandRecorder::dispatchComputeIndirect(const std::vector<ComputeCommandIndirect> &commands)
+void VulkanComputePassCommandRecorder::dispatchComputeIndirect(std::span<const ComputeCommandIndirect> commands)
 {
     for (const auto &c : commands)
         dispatchComputeIndirect(c);
@@ -102,7 +102,7 @@ void VulkanComputePassCommandRecorder::pushConstant(const PushConstantRange &con
 }
 
 void VulkanComputePassCommandRecorder::pushBindGroup(uint32_t group,
-                                                     const std::vector<BindGroupEntry> &bindGroupEntries,
+                                                     std::span<const BindGroupEntry> bindGroupEntries,
                                                      const Handle<PipelineLayout_t> &pipelineLayout)
 {
 #if defined(VK_KHR_push_descriptor)

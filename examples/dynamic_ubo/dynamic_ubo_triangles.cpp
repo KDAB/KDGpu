@@ -234,7 +234,7 @@ void DynamicUBOTriangles::render()
     for (size_t i = 0; i < entityCount; ++i) {
         // Bind Group and provide offset into the Dynamic UBO that holds all the transform matrices
         const uint32_t dynamicUBOOffset = i * m_dynamicUBOByteStride;
-        opaquePass.setBindGroup(0, m_transformBindGroup, m_pipelineLayout, { dynamicUBOOffset });
+        opaquePass.setBindGroup(0, m_transformBindGroup, m_pipelineLayout, std::array{ dynamicUBOOffset });
         const DrawIndexedCommand drawCmd = { .indexCount = 3 };
         opaquePass.drawIndexed(drawCmd);
     }

@@ -15,7 +15,7 @@
 #include <KDGpu/kdgpu_export.h>
 #include <KDGpu/graphics_api.h>
 
-#include <vector>
+#include <span>
 
 namespace KDGpu {
 
@@ -71,14 +71,14 @@ public:
     void setBindGroup(uint32_t group,
                       const Handle<BindGroup_t> &bindGroup,
                       const Handle<PipelineLayout_t> &pipelineLayout = Handle<PipelineLayout_t>(),
-                      const std::vector<uint32_t> &dynamicBufferOffsets = {});
+                      std::span<const uint32_t> dynamicBufferOffsets = {});
 
     void traceRays(const RayTracingCommand &rayTracingCommand);
 
     void pushConstant(const PushConstantRange &constantRange, const void *data);
 
     void pushBindGroup(uint32_t group,
-                       const std::vector<BindGroupEntry> &bindGroupEntries,
+                       std::span<const BindGroupEntry> bindGroupEntries,
                        const Handle<PipelineLayout_t> &pipelineLayout = Handle<PipelineLayout_t>());
 
     void end();

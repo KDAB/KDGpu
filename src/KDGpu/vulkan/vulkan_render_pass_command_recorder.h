@@ -42,29 +42,29 @@ struct KDGPU_EXPORT VulkanRenderPassCommandRecorder {
     void setVertexBuffer(uint32_t index, const Handle<Buffer_t> &buffer, DeviceSize offset);
     void setIndexBuffer(const Handle<Buffer_t> &buffer, DeviceSize offset, IndexType indexType);
     void setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroup,
-                      const Handle<PipelineLayout_t> &pipelineLayout, const std::vector<uint32_t> &dynamicBufferOffsets);
+                      const Handle<PipelineLayout_t> &pipelineLayout, std::span<const uint32_t> dynamicBufferOffsets);
     void setViewport(const Viewport &viewport);
     void setScissor(const Rect2D &scissor);
     void setStencilReference(StencilFaceFlags faceMask, int reference);
     void draw(const DrawCommand &drawCommand);
-    void draw(const std::vector<DrawCommand> &drawCommands);
+    void draw(std::span<const DrawCommand> drawCommands);
     void drawIndexed(const DrawIndexedCommand &drawCommand);
-    void drawIndexed(const std::vector<DrawIndexedCommand> &drawCommands);
+    void drawIndexed(std::span<const DrawIndexedCommand> drawCommands);
     void drawIndirect(const DrawIndirectCommand &drawCommand);
-    void drawIndirect(const std::vector<DrawIndirectCommand> &drawCommands);
+    void drawIndirect(std::span<const DrawIndirectCommand> drawCommands);
     void drawIndexedIndirect(const DrawIndexedIndirectCommand &drawCommand);
-    void drawIndexedIndirect(const std::vector<DrawIndexedIndirectCommand> &drawCommands);
+    void drawIndexedIndirect(std::span<const DrawIndexedIndirectCommand> drawCommands);
     void drawMeshTasks(const DrawMeshCommand &drawCommand);
-    void drawMeshTasks(const std::vector<DrawMeshCommand> &drawCommands);
+    void drawMeshTasks(std::span<const DrawMeshCommand> drawCommands);
     void drawMeshTasksIndirect(const DrawMeshIndirectCommand &drawCommand);
-    void drawMeshTasksIndirect(const std::vector<DrawMeshIndirectCommand> &drawCommands);
+    void drawMeshTasksIndirect(std::span<const DrawMeshIndirectCommand> drawCommands);
     void pushConstant(const PushConstantRange &constantRange, const void *data, const Handle<PipelineLayout_t> &pipelineLayout = {});
-    void pushBindGroup(uint32_t group, const std::vector<BindGroupEntry> &bindGroupEntries, const Handle<PipelineLayout_t> &pipelineLayout = {});
+    void pushBindGroup(uint32_t group, std::span<const BindGroupEntry> bindGroupEntries, const Handle<PipelineLayout_t> &pipelineLayout = {});
     void nextSubpass();
-    void setInputAttachmentMapping(std::vector<uint32_t> colorAttachmentIndices,
+    void setInputAttachmentMapping(std::span<const uint32_t> colorAttachmentIndices,
                                    std::optional<uint32_t> depthAttachmentIndex,
                                    std::optional<uint32_t> stencilAttachmentIndex);
-    void setOutputAttachmentMapping(std::vector<uint32_t> remappedOutputs);
+    void setOutputAttachmentMapping(std::span<const uint32_t> remappedOutputs);
 
     void end();
 

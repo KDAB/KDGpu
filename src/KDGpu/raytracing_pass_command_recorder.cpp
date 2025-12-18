@@ -57,7 +57,7 @@ void RayTracingPassCommandRecorder::setPipeline(const Handle<RayTracingPipeline_
 
 void RayTracingPassCommandRecorder::setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroup,
                                                  const Handle<PipelineLayout_t> &pipelineLayout,
-                                                 const std::vector<uint32_t> &dynamicBufferOffsets)
+                                                 std::span<const uint32_t> dynamicBufferOffsets)
 {
     auto apiRayTracingPassCommandRecorder = m_api->resourceManager()->getRayTracingPassCommandRecorder(m_rayTracingCommandRecorder);
     apiRayTracingPassCommandRecorder->setBindGroup(group, bindGroup, pipelineLayout, dynamicBufferOffsets);
@@ -76,7 +76,7 @@ void RayTracingPassCommandRecorder::pushConstant(const PushConstantRange &consta
 }
 
 void RayTracingPassCommandRecorder::pushBindGroup(uint32_t group,
-                                                  const std::vector<BindGroupEntry> &bindGroupEntries,
+                                                  std::span<const BindGroupEntry> bindGroupEntries,
                                                   const Handle<PipelineLayout_t> &pipelineLayout)
 {
     auto apiRayTracingPassCommandRecorder = m_api->resourceManager()->getRayTracingPassCommandRecorder(m_rayTracingCommandRecorder);

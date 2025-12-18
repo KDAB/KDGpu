@@ -70,7 +70,7 @@ void VulkanRenderPassCommandRecorder::setIndexBuffer(const Handle<Buffer_t> &buf
 }
 
 void VulkanRenderPassCommandRecorder::setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroupH,
-                                                   const Handle<PipelineLayout_t> &pipelineLayout, const std::vector<uint32_t> &dynamicBufferOffsets)
+                                                   const Handle<PipelineLayout_t> &pipelineLayout, std::span<const uint32_t> dynamicBufferOffsets)
 {
     VulkanBindGroup *bindGroup = vulkanResourceManager->getBindGroup(bindGroupH);
     VkDescriptorSet set = bindGroup->descriptorSet;
@@ -137,7 +137,7 @@ void VulkanRenderPassCommandRecorder::draw(const DrawCommand &drawCommand)
               drawCommand.firstInstance);
 }
 
-void VulkanRenderPassCommandRecorder::draw(const std::vector<DrawCommand> &drawCommands)
+void VulkanRenderPassCommandRecorder::draw(std::span<const DrawCommand> drawCommands)
 {
     for (const auto &drawCommand : drawCommands)
         draw(drawCommand);
@@ -153,7 +153,7 @@ void VulkanRenderPassCommandRecorder::drawIndexed(const DrawIndexedCommand &draw
                      drawCommand.firstInstance);
 }
 
-void VulkanRenderPassCommandRecorder::drawIndexed(const std::vector<DrawIndexedCommand> &drawCommands)
+void VulkanRenderPassCommandRecorder::drawIndexed(std::span<const DrawIndexedCommand> drawCommands)
 {
     for (const auto &drawCommand : drawCommands)
         drawIndexed(drawCommand);
@@ -169,7 +169,7 @@ void VulkanRenderPassCommandRecorder::drawIndirect(const DrawIndirectCommand &dr
                       drawCommand.stride);
 }
 
-void VulkanRenderPassCommandRecorder::drawIndirect(const std::vector<DrawIndirectCommand> &drawCommands)
+void VulkanRenderPassCommandRecorder::drawIndirect(std::span<const DrawIndirectCommand> drawCommands)
 {
     for (const auto &drawCommand : drawCommands)
         drawIndirect(drawCommand);
@@ -185,7 +185,7 @@ void VulkanRenderPassCommandRecorder::drawIndexedIndirect(const DrawIndexedIndir
                              drawCommand.stride);
 }
 
-void VulkanRenderPassCommandRecorder::drawIndexedIndirect(const std::vector<DrawIndexedIndirectCommand> &drawCommands)
+void VulkanRenderPassCommandRecorder::drawIndexedIndirect(std::span<const DrawIndexedIndirectCommand> drawCommands)
 {
     for (const auto &drawCommand : drawCommands)
         drawIndexedIndirect(drawCommand);
@@ -206,7 +206,7 @@ void VulkanRenderPassCommandRecorder::drawMeshTasks(const DrawMeshCommand &drawC
 #endif
 }
 
-void VulkanRenderPassCommandRecorder::drawMeshTasks(const std::vector<DrawMeshCommand> &drawCommands)
+void VulkanRenderPassCommandRecorder::drawMeshTasks(std::span<const DrawMeshCommand> drawCommands)
 {
     for (const auto &drawCommand : drawCommands)
         drawMeshTasks(drawCommand);
@@ -229,7 +229,7 @@ void VulkanRenderPassCommandRecorder::drawMeshTasksIndirect(const DrawMeshIndire
 #endif
 }
 
-void VulkanRenderPassCommandRecorder::drawMeshTasksIndirect(const std::vector<DrawMeshIndirectCommand> &drawCommands)
+void VulkanRenderPassCommandRecorder::drawMeshTasksIndirect(std::span<const DrawMeshIndirectCommand> drawCommands)
 {
     for (const auto &drawCommand : drawCommands)
         drawMeshTasksIndirect(drawCommand);
@@ -258,7 +258,7 @@ void VulkanRenderPassCommandRecorder::pushConstant(const PushConstantRange &cons
                        data);
 }
 
-void VulkanRenderPassCommandRecorder::pushBindGroup(uint32_t group, const std::vector<BindGroupEntry> &bindGroupEntries,
+void VulkanRenderPassCommandRecorder::pushBindGroup(uint32_t group, std::span<const BindGroupEntry> bindGroupEntries,
                                                     const Handle<PipelineLayout_t> &pipelineLayout)
 {
 #if defined(VK_KHR_push_descriptor)
@@ -309,7 +309,7 @@ void VulkanRenderPassCommandRecorder::nextSubpass()
     }
 }
 
-void VulkanRenderPassCommandRecorder::setOutputAttachmentMapping(std::vector<uint32_t> remappedOutputs)
+void VulkanRenderPassCommandRecorder::setOutputAttachmentMapping(std::span<const uint32_t> remappedOutputs)
 {
 #if defined(VK_KHR_dynamic_rendering_local_read)
     assert(dynamicRendering);
@@ -326,7 +326,7 @@ void VulkanRenderPassCommandRecorder::setOutputAttachmentMapping(std::vector<uin
 #endif
 }
 
-void VulkanRenderPassCommandRecorder::setInputAttachmentMapping(std::vector<uint32_t> colorAttachmentIndices,
+void VulkanRenderPassCommandRecorder::setInputAttachmentMapping(std::span<const uint32_t> colorAttachmentIndices,
                                                                 std::optional<uint32_t> depthAttachmentIndex,
                                                                 std::optional<uint32_t> stencilAttachmentIndex)
 {

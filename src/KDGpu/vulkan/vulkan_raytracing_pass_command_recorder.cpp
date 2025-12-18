@@ -37,7 +37,7 @@ void VulkanRayTracingPassCommandRecorder::setPipeline(const Handle<RayTracingPip
 
 void VulkanRayTracingPassCommandRecorder::setBindGroup(uint32_t group, const Handle<BindGroup_t> &_bindGroup,
                                                        const Handle<PipelineLayout_t> &pipelineLayout,
-                                                       const std::vector<uint32_t> &dynamicBufferOffsets)
+                                                       std::span<const uint32_t> dynamicBufferOffsets)
 {
     VulkanBindGroup *bindGroup = vulkanResourceManager->getBindGroup(_bindGroup);
     VkDescriptorSet set = bindGroup->descriptorSet;
@@ -130,7 +130,7 @@ void VulkanRayTracingPassCommandRecorder::pushConstant(const PushConstantRange &
 }
 
 void VulkanRayTracingPassCommandRecorder::pushBindGroup(uint32_t group,
-                                                        const std::vector<BindGroupEntry> &bindGroupEntries,
+                                                        std::span<const BindGroupEntry> bindGroupEntries,
                                                         const Handle<PipelineLayout_t> &pipelineLayout)
 {
 #if defined(VK_KHR_push_descriptor)

@@ -56,7 +56,7 @@ void ComputePassCommandRecorder::setPipeline(const Handle<ComputePipeline_t> &pi
 
 void ComputePassCommandRecorder::setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroup,
                                               const Handle<PipelineLayout_t> &pipelineLayout,
-                                              const std::vector<uint32_t> &dynamicBufferOffsets)
+                                              std::span<const uint32_t> dynamicBufferOffsets)
 {
     auto apiComputePassCommandRecorder = m_api->resourceManager()->getComputePassCommandRecorder(m_computePassCommandRecorder);
     apiComputePassCommandRecorder->setBindGroup(group, bindGroup, pipelineLayout, dynamicBufferOffsets);
@@ -68,7 +68,7 @@ void ComputePassCommandRecorder::dispatchCompute(const ComputeCommand &command)
     apiComputePassCommandRecorder->dispatchCompute(command);
 }
 
-void ComputePassCommandRecorder::dispatchCompute(const std::vector<ComputeCommand> &commands)
+void ComputePassCommandRecorder::dispatchCompute(std::span<const ComputeCommand> commands)
 {
     auto apiComputePassCommandRecorder = m_api->resourceManager()->getComputePassCommandRecorder(m_computePassCommandRecorder);
     apiComputePassCommandRecorder->dispatchCompute(commands);
@@ -80,7 +80,7 @@ void ComputePassCommandRecorder::dispatchComputeIndirect(const ComputeCommandInd
     apiComputePassCommandRecorder->dispatchComputeIndirect(command);
 }
 
-void ComputePassCommandRecorder::dispatchComputeIndirect(const std::vector<ComputeCommandIndirect> &commands)
+void ComputePassCommandRecorder::dispatchComputeIndirect(std::span<const ComputeCommandIndirect> commands)
 {
     auto apiComputePassCommandRecorder = m_api->resourceManager()->getComputePassCommandRecorder(m_computePassCommandRecorder);
     apiComputePassCommandRecorder->dispatchComputeIndirect(commands);
@@ -93,7 +93,7 @@ void ComputePassCommandRecorder::pushConstant(const PushConstantRange &constantR
 }
 
 void ComputePassCommandRecorder::pushBindGroup(uint32_t group,
-                                               const std::vector<BindGroupEntry> &bindGroupEntries,
+                                               std::span<const BindGroupEntry> bindGroupEntries,
                                                const Handle<PipelineLayout_t> &pipelineLayout)
 {
     auto apiComputePassCommandRecorder = m_api->resourceManager()->getComputePassCommandRecorder(m_computePassCommandRecorder);

@@ -69,7 +69,7 @@ void RenderPassCommandRecorder::setIndexBuffer(const Handle<Buffer_t> &buffer, D
 
 void RenderPassCommandRecorder::setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroup,
                                              const Handle<PipelineLayout_t> &pipelineLayout,
-                                             const std::vector<uint32_t> &dynamicBufferOffsets)
+                                             std::span<const uint32_t> dynamicBufferOffsets)
 {
     auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->setBindGroup(group, bindGroup, pipelineLayout, dynamicBufferOffsets);
@@ -105,7 +105,7 @@ void RenderPassCommandRecorder::draw(const DrawCommand &drawCommand)
     apiRenderPassCommandRecorder->draw(drawCommand);
 }
 
-void RenderPassCommandRecorder::draw(const std::vector<DrawCommand> &drawCommands)
+void RenderPassCommandRecorder::draw(std::span<const DrawCommand> drawCommands)
 {
     auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->draw(drawCommands);
@@ -117,7 +117,7 @@ void RenderPassCommandRecorder::drawIndexed(const DrawIndexedCommand &drawComman
     apiRenderPassCommandRecorder->drawIndexed(drawCommand);
 }
 
-void RenderPassCommandRecorder::drawIndexed(const std::vector<DrawIndexedCommand> &drawCommands)
+void RenderPassCommandRecorder::drawIndexed(std::span<const DrawIndexedCommand> drawCommands)
 {
     auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->drawIndexed(drawCommands);
@@ -129,7 +129,7 @@ void RenderPassCommandRecorder::drawIndirect(const DrawIndirectCommand &drawComm
     apiRenderPassCommandRecorder->drawIndirect(drawCommand);
 }
 
-void RenderPassCommandRecorder::drawIndirect(const std::vector<DrawIndirectCommand> &drawCommands)
+void RenderPassCommandRecorder::drawIndirect(std::span<const DrawIndirectCommand> drawCommands)
 {
     auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->drawIndirect(drawCommands);
@@ -141,7 +141,7 @@ void RenderPassCommandRecorder::drawIndexedIndirect(const DrawIndexedIndirectCom
     apiRenderPassCommandRecorder->drawIndexedIndirect(drawCommand);
 }
 
-void RenderPassCommandRecorder::drawIndexedIndirect(const std::vector<DrawIndexedIndirectCommand> &drawCommands)
+void RenderPassCommandRecorder::drawIndexedIndirect(std::span<const DrawIndexedIndirectCommand> drawCommands)
 {
     auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->drawIndexedIndirect(drawCommands);
@@ -153,7 +153,7 @@ void RenderPassCommandRecorder::drawMeshTasks(const DrawMeshCommand &drawCommand
     apiRenderPassCommandRecorder->drawMeshTasks(drawCommand);
 }
 
-void RenderPassCommandRecorder::drawMeshTasks(const std::vector<DrawMeshCommand> &drawCommands)
+void RenderPassCommandRecorder::drawMeshTasks(std::span<const DrawMeshCommand> drawCommands)
 {
     auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->drawMeshTasks(drawCommands);
@@ -165,7 +165,7 @@ void RenderPassCommandRecorder::drawMeshTasksIndirect(const DrawMeshIndirectComm
     apiRenderPassCommandRecorder->drawMeshTasksIndirect(drawCommand);
 }
 
-void RenderPassCommandRecorder::drawMeshTasksIndirect(const std::vector<DrawMeshIndirectCommand> &drawCommands)
+void RenderPassCommandRecorder::drawMeshTasksIndirect(std::span<const DrawMeshIndirectCommand> drawCommands)
 {
     auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->drawMeshTasksIndirect(drawCommands);
@@ -178,7 +178,7 @@ void RenderPassCommandRecorder::pushConstant(const PushConstantRange &constantRa
 }
 
 void RenderPassCommandRecorder::pushBindGroup(uint32_t group,
-                                              const std::vector<BindGroupEntry> &bindGroupEntries,
+                                              std::span<const BindGroupEntry> bindGroupEntries,
                                               const Handle<PipelineLayout_t> &pipelineLayout)
 {
     auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
@@ -191,7 +191,7 @@ void RenderPassCommandRecorder::nextSubpass()
     apiRenderPassCommandRecorder->nextSubpass();
 }
 
-void RenderPassCommandRecorder::setInputAttachmentMapping(std::vector<uint32_t> colorAttachmentIndices,
+void RenderPassCommandRecorder::setInputAttachmentMapping(std::span<const uint32_t> colorAttachmentIndices,
                                                           std::optional<uint32_t> depthAttachmentIndex,
                                                           std::optional<uint32_t> stencilAttachmentIndex)
 {
@@ -199,7 +199,7 @@ void RenderPassCommandRecorder::setInputAttachmentMapping(std::vector<uint32_t> 
     apiRenderPassCommandRecorder->setInputAttachmentMapping(colorAttachmentIndices, depthAttachmentIndex, stencilAttachmentIndex);
 }
 
-void RenderPassCommandRecorder::setOutputAttachmentMapping(std::vector<uint32_t> remappedOutputs)
+void RenderPassCommandRecorder::setOutputAttachmentMapping(std::span<const uint32_t> remappedOutputs)
 {
     auto apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->setOutputAttachmentMapping(remappedOutputs);

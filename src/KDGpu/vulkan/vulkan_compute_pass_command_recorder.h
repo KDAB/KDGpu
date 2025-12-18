@@ -37,14 +37,14 @@ struct KDGPU_EXPORT VulkanComputePassCommandRecorder {
 
     void setPipeline(const Handle<ComputePipeline_t> &pipeline);
     void setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroup,
-                      const Handle<PipelineLayout_t> &pipelineLayout, const std::vector<uint32_t> &dynamicBufferOffsets);
+                      const Handle<PipelineLayout_t> &pipelineLayout, std::span<const uint32_t> dynamicBufferOffsets);
     void dispatchCompute(const ComputeCommand &command);
-    void dispatchCompute(const std::vector<ComputeCommand> &commands);
+    void dispatchCompute(std::span<const ComputeCommand> commands);
     void dispatchComputeIndirect(const ComputeCommandIndirect &command);
-    void dispatchComputeIndirect(const std::vector<ComputeCommandIndirect> &commands);
+    void dispatchComputeIndirect(std::span<const ComputeCommandIndirect> commands);
     void pushConstant(const PushConstantRange &constantRange, const void *data);
     void pushBindGroup(uint32_t group,
-                       const std::vector<BindGroupEntry> &bindGroupEntries,
+                       std::span<const BindGroupEntry> bindGroupEntries,
                        const Handle<PipelineLayout_t> &pipelineLayout);
     void end();
 
