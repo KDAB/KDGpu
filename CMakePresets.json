@@ -4,11 +4,7 @@
         {
             "name": "configure-base",
             "hidden": true,
-            "generator": "Ninja",
-            "cacheVariables": {
-                "KDGPU_BUILD_TESTS": "OFF",
-                "KDGPU_CODE_COVERAGE": "OFF"
-            }
+            "generator": "Ninja"
         },
         {
             "name": "msvc_x64",
@@ -27,8 +23,16 @@
             }
         },
         {
-            "name": "debug",
-            "displayName": "Debug",
+            "name": "clang",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "/usr/bin/clang",
+                "CMAKE_CXX_COMPILER": "/usr/bin/clang++"
+            }
+        },
+        {
+            "name": "debug-base",
+            "hidden": true,
             "inherits": [
                 "configure-base"
             ],
@@ -41,6 +45,21 @@
             "environment": {
                 "KDGPUEXAMPLE_ASSET_PATH": "${sourceDir}/build/Debug/assets"
             }
+        },
+        {
+            "name": "debug",
+            "displayName": "Debug (Default)",
+            "inherits": [
+                "debug-base"
+            ]
+        },
+        {
+            "name": "debug-clang",
+            "displayName": "Debug (Clang)",
+            "inherits": [
+                "debug-base",
+                "clang"
+            ]
         },
         {
             "name": "debug-msvc_x64",
@@ -121,6 +140,10 @@
         {
             "name": "debug",
             "configurePreset": "debug"
+        },
+        {
+            "name": "debug-clang",
+            "configurePreset": "debug-clang"
         },
         {
             "name": "release",

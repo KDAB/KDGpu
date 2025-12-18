@@ -146,16 +146,22 @@ struct DynamicStateOptions {
 struct DynamicAttachmentMapping {
     bool enabled;
     uint32_t remappedIndex;
+
+    friend bool operator==(const DynamicAttachmentMapping &, const DynamicAttachmentMapping &) = default;
 };
 
 struct DynamicInputAttachmentLocations {
     std::vector<DynamicAttachmentMapping> inputColorAttachments;
     DynamicAttachmentMapping inputDepthAttachment;
     DynamicAttachmentMapping inputStencilAttachment;
+
+    friend bool operator==(const DynamicInputAttachmentLocations &, const DynamicInputAttachmentLocations &) = default;
 };
 
 struct DynamicOutputAttachmentLocations {
     std::vector<DynamicAttachmentMapping> outputAttachments;
+
+    friend bool operator==(const DynamicOutputAttachmentLocations &, const DynamicOutputAttachmentLocations &) = default;
 };
 
 struct GraphicsPipelineOptions {
@@ -180,6 +186,8 @@ struct GraphicsPipelineOptions {
         bool enabled = false;
         std::optional<DynamicInputAttachmentLocations> dynamicInputLocations;
         std::optional<DynamicOutputAttachmentLocations> dynamicOutputLocations;
+
+        friend bool operator==(const DynamicRendering &, const DynamicRendering &) = default;
     };
     DynamicRendering dynamicRendering{};
 

@@ -76,7 +76,7 @@ private:
     KDGpu::Buffer m_cameraBuffer;
     float *m_cameraBufferData{ nullptr };
     KDGpu::BindGroup m_cameraBindGroup;
-    const KDGpu::PushConstantRange m_viewIndexPushConstant{
+    KDGpu::PushConstantRange m_viewIndexPushConstant{
         .offset = 0,
         .size = sizeof(uint32_t),
         .shaderStages = KDGpu::ShaderStageFlagBits::VertexBit
