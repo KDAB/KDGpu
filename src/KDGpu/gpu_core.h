@@ -1132,10 +1132,15 @@ enum class PresentResult {
     // Error nothing submitted
     OutOfMemory,
     DeviceLost,
+    Unknown,
     // Error but commands submitted
     OutOfDate,
     SurfaceLost,
+    ValidationFailed,
     // Success
+    Timeout,
+    SubOptimal,
+    NotReady,
     Success,
 };
 

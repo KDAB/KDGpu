@@ -102,10 +102,17 @@ AcquireImageResult VulkanSwapchain::getNextImageIndex(uint32_t &imageIndex, cons
         case VK_ERROR_SURFACE_LOST_KHR:
         case VK_ERROR_FULL_SCREEN_EXCLUSIVE_MODE_LOST_EXT:
             return AcquireImageResult::SurfaceLost;
+        case VK_ERROR_VALIDATION_FAILED_EXT:
+            return AcquireImageResult::ValidationFailed;
+        case VK_NOT_READY:
+            return AcquireImageResult::NotReady;
         case VK_SUBOPTIMAL_KHR:
+            return AcquireImageResult::SubOptimal;
         case VK_SUCCESS:
-        default:
             return AcquireImageResult::Success;
+        case VK_ERROR_UNKNOWN:
+        default:
+            return AcquireImageResult::Unknown;
         }
     };
 

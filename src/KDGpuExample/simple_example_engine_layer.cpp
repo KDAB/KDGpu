@@ -60,6 +60,7 @@ void SimpleExampleEngineLayer::update()
         return;
     } else if (result != AcquireImageResult::Success) {
         // Something went wrong and we can't recover from it
+        SPDLOG_LOGGER_TRACE(logger, "Failed to acquire SwapChain image with error {}", result);
         return;
     }
 
