@@ -35,3 +35,35 @@ struct PipelineLayoutOptions {
 };
 
 } // namespace KDGpu
+
+namespace std {
+
+template<>
+struct hash<KDGpu::PushConstantRange> {
+    size_t operator()(const KDGpu::PushConstantRange &p) const noexcept
+    {
+        uint64_t hash = 0;
+        KDFoundation::hash_combine(hash, p.size);
+        KDFoundation::hash_combine(hash, p.offset);
+        KDFoundation::hash_combine(hash, p.shaderStages);
+        return hash;
+    }
+};
+
+template<>
+struct hash<KDGpu::PipelineLayoutOptions> {
+    size_t operator()(const KDGpu::PipelineLayoutOptions &options) const noexcept
+    {
+        uint64_t hash = 0;
+        KDFoundation::hash_combine(hash, std::hash<std::string_view>()(options.label));
+        for (const auto &layout : options.bindGroupLayouts) {
+            KDFoundation::hash_combine(hash, layout);
+        }
+        for (const auto &pushConstantRange : options.pushConstantRanges) {
+            KDFoundation::hash_combine(hash, pushConstantRange);
+        }
+        return hash;
+    }
+};
+
+} // namespace std
