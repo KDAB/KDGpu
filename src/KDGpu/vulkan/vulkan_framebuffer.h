@@ -11,7 +11,7 @@
 #pragma once
 
 #include <KDGpu/handle.h>
-#include <KDGpu/utils/hash_utils.h>
+#include <KDFoundation/hashutils.h>
 
 #include <vulkan/vulkan.h>
 
@@ -85,10 +85,10 @@ template<>
 struct hash<KDGpu::VulkanAttachmentKey> {
     size_t operator()(const KDGpu::VulkanAttachmentKey &value) const
     {
-        size_t hash = 0;
+        uint64_t hash = 0;
 
         for (const KDGpu::Handle<KDGpu::TextureView_t> &handle : value.handles)
-            KDGpu::hash_combine(hash, handle);
+            KDFoundation::hash_combine(hash, handle);
 
         return hash;
     }
@@ -98,14 +98,14 @@ template<>
 struct hash<KDGpu::VulkanFramebufferKey> {
     size_t operator()(const KDGpu::VulkanFramebufferKey &value) const
     {
-        size_t hash = 0;
+        uint64_t hash = 0;
 
-        KDGpu::hash_combine(hash, value.renderPass);
-        KDGpu::hash_combine(hash, value.attachmentsKey);
-        KDGpu::hash_combine(hash, value.width);
-        KDGpu::hash_combine(hash, value.height);
-        KDGpu::hash_combine(hash, value.layers);
-        KDGpu::hash_combine(hash, value.viewCount);
+        KDFoundation::hash_combine(hash, value.renderPass);
+        KDFoundation::hash_combine(hash, value.attachmentsKey);
+        KDFoundation::hash_combine(hash, value.width);
+        KDFoundation::hash_combine(hash, value.height);
+        KDFoundation::hash_combine(hash, value.layers);
+        KDFoundation::hash_combine(hash, value.viewCount);
 
         return hash;
     }
