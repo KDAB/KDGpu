@@ -146,7 +146,6 @@ set(HEADERS
     api/api_type.h
     utils/flags.h
     utils/formatters.h
-    utils/hash_utils.h
     utils/logging.h
     vulkan/vulkan_acceleration_structure.h
     vulkan/vulkan_adapter.h
