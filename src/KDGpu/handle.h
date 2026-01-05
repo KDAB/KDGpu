@@ -10,9 +10,7 @@
 
 #pragma once
 
-#include <KDGpu/utils/hash_utils.h>
-
-#include <stdint.h>
+#include <KDFoundation/hashutils.h>
 
 namespace KDGpu {
 
@@ -76,10 +74,10 @@ template<typename T>
 struct hash<KDGpu::Handle<T>> {
     size_t operator()(const KDGpu::Handle<T> &handle) const
     {
-        size_t hash = 0;
+        uint64_t hash = 0;
 
-        KDGpu::hash_combine(hash, handle.index());
-        KDGpu::hash_combine(hash, handle.generation());
+        KDFoundation::hash_combine(hash, handle.index());
+        KDFoundation::hash_combine(hash, handle.generation());
 
         return hash;
     }
