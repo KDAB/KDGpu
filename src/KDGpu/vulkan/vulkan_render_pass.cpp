@@ -10,6 +10,7 @@
 
 #include <KDGpu/vulkan/vulkan_resource_manager.h>
 #include <KDGpu/render_pass_command_recorder_options.h>
+#include <KDFoundation/hashutils.h>
 #include "vulkan_render_pass.h"
 
 namespace {
@@ -39,39 +40,39 @@ VulkanRenderPassKey::VulkanRenderPassKey(const RenderPassCommandRecorderOptions 
                 colorAttachment,
                 resourceManager->formatFromTextureView(colorAttachment.view),
                 resourceManager->formatFromTextureView(colorAttachment.resolveView));
-        KDGpu::hash_combine(hash, colorAttachmentKey.hash);
+        KDFoundation::hash_combine(hash, colorAttachmentKey.hash);
     }
 
     if (options.depthStencilAttachment.view.isValid()) {
         const VulkanRenderPassKeyDepthStencilAttachment depthAttachmentKey(options.depthStencilAttachment,
                                                                            resourceManager->formatFromTextureView(options.depthStencilAttachment.view),
                                                                            resourceManager->formatFromTextureView(options.depthStencilAttachment.resolveView));
-        KDGpu::hash_combine(hash, depthAttachmentKey.hash);
+        KDFoundation::hash_combine(hash, depthAttachmentKey.hash);
     }
-    KDGpu::hash_combine(hash, options.samples);
-    KDGpu::hash_combine(hash, options.viewCount);
+    KDFoundation::hash_combine(hash, options.samples);
+    KDFoundation::hash_combine(hash, options.viewCount);
 }
 
 VulkanRenderPassKeyDepthStencilAttachment::VulkanRenderPassKeyDepthStencilAttachment(const DepthStencilAttachment &attachment, KDGpu::Format viewFormat, KDGpu::Format resolveViewFormat)
 {
-    KDGpu::hash_combine(hash, viewFormat);
-    KDGpu::hash_combine(hash, resolveViewFormat);
-    KDGpu::hash_combine(hash, attachment.depthLoadOperation);
-    KDGpu::hash_combine(hash, attachment.depthStoreOperation);
-    KDGpu::hash_combine(hash, attachment.stencilLoadOperation);
-    KDGpu::hash_combine(hash, attachment.stencilStoreOperation);
-    KDGpu::hash_combine(hash, attachment.initialLayout);
-    KDGpu::hash_combine(hash, attachment.finalLayout);
+    KDFoundation::hash_combine(hash, viewFormat);
+    KDFoundation::hash_combine(hash, resolveViewFormat);
+    KDFoundation::hash_combine(hash, attachment.depthLoadOperation);
+    KDFoundation::hash_combine(hash, attachment.depthStoreOperation);
+    KDFoundation::hash_combine(hash, attachment.stencilLoadOperation);
+    KDFoundation::hash_combine(hash, attachment.stencilStoreOperation);
+    KDFoundation::hash_combine(hash, attachment.initialLayout);
+    KDFoundation::hash_combine(hash, attachment.finalLayout);
 }
 
 VulkanRenderPassKeyColorAttachment::VulkanRenderPassKeyColorAttachment(const ColorAttachment &attachment, KDGpu::Format viewFormat, KDGpu::Format resolveViewFormat)
 {
-    KDGpu::hash_combine(hash, viewFormat);
-    KDGpu::hash_combine(hash, resolveViewFormat);
-    KDGpu::hash_combine(hash, attachment.loadOperation);
-    KDGpu::hash_combine(hash, attachment.storeOperation);
-    KDGpu::hash_combine(hash, attachment.initialLayout);
-    KDGpu::hash_combine(hash, attachment.finalLayout);
+    KDFoundation::hash_combine(hash, viewFormat);
+    KDFoundation::hash_combine(hash, resolveViewFormat);
+    KDFoundation::hash_combine(hash, attachment.loadOperation);
+    KDFoundation::hash_combine(hash, attachment.storeOperation);
+    KDFoundation::hash_combine(hash, attachment.initialLayout);
+    KDFoundation::hash_combine(hash, attachment.finalLayout);
 }
 
 } // namespace KDGpu

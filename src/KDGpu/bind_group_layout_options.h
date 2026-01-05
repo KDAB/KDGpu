@@ -12,7 +12,7 @@
 
 #include <KDGpu/gpu_core.h>
 #include <KDGpu/bind_group_description.h>
-#include <KDGpu/utils/hash_utils.h>
+#include <KDFoundation/hashutils.h>
 
 namespace KDGpu {
 
@@ -49,16 +49,16 @@ template<>
 struct hash<KDGpu::BindGroupLayoutOptions> {
     size_t operator()(const KDGpu::BindGroupLayoutOptions &options) const noexcept
     {
-        size_t hash = 0;
-        KDGpu::hash_combine(hash, std::hash<std::string_view>()(options.label));
+        uint64_t hash = 0;
+        KDFoundation::hash_combine(hash, std::hash<std::string_view>()(options.label));
         for (const auto &binding : options.bindings) {
-            KDGpu::hash_combine(hash, binding.binding);
-            KDGpu::hash_combine(hash, binding.count);
-            KDGpu::hash_combine(hash, static_cast<uint32_t>(binding.resourceType));
-            KDGpu::hash_combine(hash, binding.shaderStages.toInt());
-            KDGpu::hash_combine(hash, binding.flags.toInt());
+            KDFoundation::hash_combine(hash, binding.binding);
+            KDFoundation::hash_combine(hash, binding.count);
+            KDFoundation::hash_combine(hash, static_cast<uint32_t>(binding.resourceType));
+            KDFoundation::hash_combine(hash, binding.shaderStages.toInt());
+            KDFoundation::hash_combine(hash, binding.flags.toInt());
             for (const auto &sampler : binding.immutableSamplers) {
-                KDGpu::hash_combine(hash, sampler);
+                KDFoundation::hash_combine(hash, sampler);
             }
         }
         return hash;
