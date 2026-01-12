@@ -44,6 +44,10 @@ set_target_properties(
                SOVERSION ${PROJECT_VERSION}
 )
 
+if(KDGPU_CODE_COVERAGE)
+    append_coverage_compiler_flags()
+endif()
+
 include(GenerateExportHeader)
 generate_export_header(KDGpuUtils BASE_NAME kdgpuutils)
 configure_file(
