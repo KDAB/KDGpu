@@ -12,6 +12,7 @@
 
 #include <KDGpu/gpu_core.h>
 
+#include <array>
 #include <stdint.h>
 #include <string>
 #include <vector>
@@ -26,131 +27,131 @@ namespace KDGpu {
     @headerfile adapter_properties.h <KDGpu/adapter_properties.h>
  */
 struct AdapterLimits {
-    uint32_t maxImageDimension1D;
-    uint32_t maxImageDimension2D;
-    uint32_t maxImageDimension3D;
-    uint32_t maxImageDimensionCube;
-    uint32_t maxImageArrayLayers;
-    uint32_t maxTexelBufferElements;
-    uint32_t maxUniformBufferRange;
-    uint32_t maxStorageBufferRange;
-    uint32_t maxPushConstantsSize;
-    uint32_t maxMemoryAllocationCount;
-    uint32_t maxSamplerAllocationCount;
-    DeviceSize bufferImageGranularity;
-    DeviceSize sparseAddressSpaceSize;
-    uint32_t maxBoundDescriptorSets;
-    uint32_t maxPerStageDescriptorSamplers;
-    uint32_t maxPerStageDescriptorUniformBuffers;
-    uint32_t maxPerStageDescriptorStorageBuffers;
-    uint32_t maxPerStageDescriptorSampledImages;
-    uint32_t maxPerStageDescriptorStorageImages;
-    uint32_t maxPerStageDescriptorInputAttachments;
-    uint32_t maxPerStageResources;
-    uint32_t maxDescriptorSetSamplers;
-    uint32_t maxDescriptorSetUniformBuffers;
-    uint32_t maxDescriptorSetUniformBuffersDynamic;
-    uint32_t maxDescriptorSetStorageBuffers;
-    uint32_t maxDescriptorSetStorageBuffersDynamic;
-    uint32_t maxDescriptorSetSampledImages;
-    uint32_t maxDescriptorSetStorageImages;
-    uint32_t maxDescriptorSetInputAttachments;
-    uint32_t maxVertexInputAttributes;
-    uint32_t maxVertexInputBindings;
-    uint32_t maxVertexInputAttributeOffset;
-    uint32_t maxVertexInputBindingStride;
-    uint32_t maxVertexOutputComponents;
-    uint32_t maxTessellationGenerationLevel;
-    uint32_t maxTessellationPatchSize;
-    uint32_t maxTessellationControlPerVertexInputComponents;
-    uint32_t maxTessellationControlPerVertexOutputComponents;
-    uint32_t maxTessellationControlPerPatchOutputComponents;
-    uint32_t maxTessellationControlTotalOutputComponents;
-    uint32_t maxTessellationEvaluationInputComponents;
-    uint32_t maxTessellationEvaluationOutputComponents;
-    uint32_t maxGeometryShaderInvocations;
-    uint32_t maxGeometryInputComponents;
-    uint32_t maxGeometryOutputComponents;
-    uint32_t maxGeometryOutputVertices;
-    uint32_t maxGeometryTotalOutputComponents;
-    uint32_t maxFragmentInputComponents;
-    uint32_t maxFragmentOutputAttachments;
-    uint32_t maxFragmentDualSrcAttachments;
-    uint32_t maxFragmentCombinedOutputResources;
-    uint32_t maxComputeSharedMemorySize;
-    uint32_t maxComputeWorkGroupCount[3];
-    uint32_t maxComputeWorkGroupInvocations;
-    uint32_t maxComputeWorkGroupSize[3];
-    uint32_t subPixelPrecisionBits;
-    uint32_t subTexelPrecisionBits;
-    uint32_t mipmapPrecisionBits;
-    uint32_t maxDrawIndexedIndexValue;
-    uint32_t maxDrawIndirectCount;
-    float maxSamplerLodBias;
-    float maxSamplerAnisotropy;
-    uint32_t maxViewports;
-    uint32_t maxViewportDimensions[2];
-    float viewportBoundsRange[2];
-    uint32_t viewportSubPixelBits;
-    size_t minMemoryMapAlignment;
-    DeviceSize minTexelBufferOffsetAlignment;
-    DeviceSize minUniformBufferOffsetAlignment;
-    DeviceSize minStorageBufferOffsetAlignment;
-    int32_t minTexelOffset;
-    uint32_t maxTexelOffset;
-    int32_t minTexelGatherOffset;
-    uint32_t maxTexelGatherOffset;
-    float minInterpolationOffset;
-    float maxInterpolationOffset;
-    uint32_t subPixelInterpolationOffsetBits;
-    uint32_t maxFramebufferWidth;
-    uint32_t maxFramebufferHeight;
-    uint32_t maxFramebufferLayers;
+    uint32_t maxImageDimension1D{ 0 };
+    uint32_t maxImageDimension2D{ 0 };
+    uint32_t maxImageDimension3D{ 0 };
+    uint32_t maxImageDimensionCube{ 0 };
+    uint32_t maxImageArrayLayers{ 0 };
+    uint32_t maxTexelBufferElements{ 0 };
+    uint32_t maxUniformBufferRange{ 0 };
+    uint32_t maxStorageBufferRange{ 0 };
+    uint32_t maxPushConstantsSize{ 0 };
+    uint32_t maxMemoryAllocationCount{ 0 };
+    uint32_t maxSamplerAllocationCount{ 0 };
+    DeviceSize bufferImageGranularity{ 0 };
+    DeviceSize sparseAddressSpaceSize{ 0 };
+    uint32_t maxBoundDescriptorSets{ 0 };
+    uint32_t maxPerStageDescriptorSamplers{ 0 };
+    uint32_t maxPerStageDescriptorUniformBuffers{ 0 };
+    uint32_t maxPerStageDescriptorStorageBuffers{ 0 };
+    uint32_t maxPerStageDescriptorSampledImages{ 0 };
+    uint32_t maxPerStageDescriptorStorageImages{ 0 };
+    uint32_t maxPerStageDescriptorInputAttachments{ 0 };
+    uint32_t maxPerStageResources{ 0 };
+    uint32_t maxDescriptorSetSamplers{ 0 };
+    uint32_t maxDescriptorSetUniformBuffers{ 0 };
+    uint32_t maxDescriptorSetUniformBuffersDynamic{ 0 };
+    uint32_t maxDescriptorSetStorageBuffers{ 0 };
+    uint32_t maxDescriptorSetStorageBuffersDynamic{ 0 };
+    uint32_t maxDescriptorSetSampledImages{ 0 };
+    uint32_t maxDescriptorSetStorageImages{ 0 };
+    uint32_t maxDescriptorSetInputAttachments{ 0 };
+    uint32_t maxVertexInputAttributes{ 0 };
+    uint32_t maxVertexInputBindings{ 0 };
+    uint32_t maxVertexInputAttributeOffset{ 0 };
+    uint32_t maxVertexInputBindingStride{ 0 };
+    uint32_t maxVertexOutputComponents{ 0 };
+    uint32_t maxTessellationGenerationLevel{ 0 };
+    uint32_t maxTessellationPatchSize{ 0 };
+    uint32_t maxTessellationControlPerVertexInputComponents{ 0 };
+    uint32_t maxTessellationControlPerVertexOutputComponents{ 0 };
+    uint32_t maxTessellationControlPerPatchOutputComponents{ 0 };
+    uint32_t maxTessellationControlTotalOutputComponents{ 0 };
+    uint32_t maxTessellationEvaluationInputComponents{ 0 };
+    uint32_t maxTessellationEvaluationOutputComponents{ 0 };
+    uint32_t maxGeometryShaderInvocations{ 0 };
+    uint32_t maxGeometryInputComponents{ 0 };
+    uint32_t maxGeometryOutputComponents{ 0 };
+    uint32_t maxGeometryOutputVertices{ 0 };
+    uint32_t maxGeometryTotalOutputComponents{ 0 };
+    uint32_t maxFragmentInputComponents{ 0 };
+    uint32_t maxFragmentOutputAttachments{ 0 };
+    uint32_t maxFragmentDualSrcAttachments{ 0 };
+    uint32_t maxFragmentCombinedOutputResources{ 0 };
+    uint32_t maxComputeSharedMemorySize{ 0 };
+    std::array<uint32_t, 3> maxComputeWorkGroupCount{ 0, 0, 0 };
+    uint32_t maxComputeWorkGroupInvocations{ 0 };
+    std::array<uint32_t, 3> maxComputeWorkGroupSize{ 0, 0, 0 };
+    uint32_t subPixelPrecisionBits{ 0 };
+    uint32_t subTexelPrecisionBits{ 0 };
+    uint32_t mipmapPrecisionBits{ 0 };
+    uint32_t maxDrawIndexedIndexValue{ 0 };
+    uint32_t maxDrawIndirectCount{ 0 };
+    float maxSamplerLodBias{ 0.0f };
+    float maxSamplerAnisotropy{ 0.0f };
+    uint32_t maxViewports{ 0 };
+    std::array<uint32_t, 2> maxViewportDimensions{ 0, 0 };
+    std::array<float, 2> viewportBoundsRange{ 0.0f, 0.0f };
+    uint32_t viewportSubPixelBits{ 0 };
+    size_t minMemoryMapAlignment{ 0 };
+    DeviceSize minTexelBufferOffsetAlignment{ 0 };
+    DeviceSize minUniformBufferOffsetAlignment{ 0 };
+    DeviceSize minStorageBufferOffsetAlignment{ 0 };
+    int32_t minTexelOffset{ 0 };
+    uint32_t maxTexelOffset{ 0 };
+    int32_t minTexelGatherOffset{ 0 };
+    uint32_t maxTexelGatherOffset{ 0 };
+    float minInterpolationOffset{ 0.0f };
+    float maxInterpolationOffset{ 0.0f };
+    uint32_t subPixelInterpolationOffsetBits{ 0 };
+    uint32_t maxFramebufferWidth{ 0 };
+    uint32_t maxFramebufferHeight{ 0 };
+    uint32_t maxFramebufferLayers{ 0 };
     SampleCountFlags framebufferColorSampleCounts;
     SampleCountFlags framebufferDepthSampleCounts;
     SampleCountFlags framebufferStencilSampleCounts;
     SampleCountFlags framebufferNoAttachmentsSampleCounts;
-    uint32_t maxColorAttachments;
+    uint32_t maxColorAttachments{ 0 };
     SampleCountFlags sampledImageColorSampleCounts;
     SampleCountFlags sampledImageIntegerSampleCounts;
     SampleCountFlags sampledImageDepthSampleCounts;
     SampleCountFlags sampledImageStencilSampleCounts;
     SampleCountFlags storageImageSampleCounts;
-    uint32_t maxSampleMaskWords;
-    bool timestampComputeAndGraphics;
-    float timestampPeriod;
-    uint32_t maxClipDistances;
-    uint32_t maxCullDistances;
-    uint32_t maxCombinedClipAndCullDistances;
-    uint32_t discreteQueuePriorities;
-    float pointSizeRange[2];
-    float lineWidthRange[2];
-    float pointSizeGranularity;
-    float lineWidthGranularity;
-    bool strictLines;
-    bool standardSampleLocations;
-    DeviceSize optimalBufferCopyOffsetAlignment;
-    DeviceSize optimalBufferCopyRowPitchAlignment;
-    DeviceSize nonCoherentAtomSize;
+    uint32_t maxSampleMaskWords{ 0 };
+    bool timestampComputeAndGraphics{ false };
+    float timestampPeriod{ 0.0f };
+    uint32_t maxClipDistances{ 0 };
+    uint32_t maxCullDistances{ 0 };
+    uint32_t maxCombinedClipAndCullDistances{ 0 };
+    uint32_t discreteQueuePriorities{ 0 };
+    std::array<float, 2> pointSizeRange{ 0.0f, 0.0f };
+    std::array<float, 2> lineWidthRange{ 0.0f, 0.0f };
+    float pointSizeGranularity{ 0.0f };
+    float lineWidthGranularity{ 0.0f };
+    bool strictLines{ false };
+    bool standardSampleLocations{ false };
+    DeviceSize optimalBufferCopyOffsetAlignment{ 0 };
+    DeviceSize optimalBufferCopyRowPitchAlignment{ 0 };
+    DeviceSize nonCoherentAtomSize{ 0 };
 };
 
 /**
     @headerfile adapter_properties.h <KDGpu/adapter_properties.h>
  */
 struct AdapterSparseProperties {
-    bool residencyStandard2DBlockShape;
-    bool residencyStandard2DMultisampleBlockShape;
-    bool residencyStandard3DBlockShape;
-    bool residencyAlignedMipSize;
-    bool residencyNonResidentStrict;
+    bool residencyStandard2DBlockShape{ false };
+    bool residencyStandard2DMultisampleBlockShape{ false };
+    bool residencyStandard3DBlockShape{ false };
+    bool residencyAlignedMipSize{ false };
+    bool residencyNonResidentStrict{ false };
 };
 
 /**
     @headerfile adapter_properties.h <KDGpu/adapter_properties.h>
  */
 struct AdapterMultiViewProperties {
-    uint32_t maxMultiViewCount;
-    uint32_t maxMultiviewInstanceIndex;
+    uint32_t maxMultiViewCount{ 0 };
+    uint32_t maxMultiviewInstanceIndex{ 0 };
 };
 
 /**
@@ -159,101 +160,113 @@ struct AdapterMultiViewProperties {
 struct AdapterDepthStencilResolveProperties {
     ResolveModeFlags supportedDepthResolveModes;
     ResolveModeFlags supportedStencilResolveModes;
-    bool independentResolveNone;
-    bool independentResolve;
+    bool independentResolveNone{ false };
+    bool independentResolve{ false };
 };
 
 /**
     @headerfile adapter_properties.h <KDGpu/adapter_properties.h>
  */
 struct BindGroupIndexingProperties {
-    uint32_t maxUpdateAfterBindBindGroups;
-    bool shaderUniformBufferArrayNonUniformIndexingNative;
-    bool shaderSampledImageArrayNonUniformIndexingNative;
-    bool shaderStorageBufferArrayNonUniformIndexingNative;
-    bool shaderStorageImageArrayNonUniformIndexingNative;
-    bool shaderInputAttachmentArrayNonUniformIndexingNative;
-    bool robustBufferAccessUpdateAfterBind;
-    bool quadDivergentImplicitLod;
-    uint32_t maxPerStageBindGroupEntriesUpdateAfterBindSamplers;
-    uint32_t maxPerStageBindGroupEntriesUpdateAfterBindUniformBuffers;
-    uint32_t maxPerStageBindGroupEntriesUpdateAfterBindStorageBuffers;
-    uint32_t maxPerStageBindGroupEntriesUpdateAfterBindSampledImages;
-    uint32_t maxPerStageBindGroupEntriesUpdateAfterBindStorageImages;
-    uint32_t maxPerStageBindGroupEntriesUpdateAfterBindInputAttachments;
-    uint32_t maxPerStageUpdateAfterBindResources;
-    uint32_t maxBindGroupUpdateAfterBindSamplers;
-    uint32_t maxBindGroupUpdateAfterBindUniformBuffers;
-    uint32_t maxBindGroupUpdateAfterBindUniformBuffersDynamic;
-    uint32_t maxBindGroupUpdateAfterBindStorageBuffers;
-    uint32_t maxBindGroupUpdateAfterBindStorageBuffersDynamic;
-    uint32_t maxBindGroupUpdateAfterBindSampledImages;
-    uint32_t maxBindGroupUpdateAfterBindStorageImages;
-    uint32_t maxBindGroupUpdateAfterBindInputAttachments;
+    uint32_t maxUpdateAfterBindBindGroups{ 0 };
+    bool shaderUniformBufferArrayNonUniformIndexingNative{ false };
+    bool shaderSampledImageArrayNonUniformIndexingNative{ false };
+    bool shaderStorageBufferArrayNonUniformIndexingNative{ false };
+    bool shaderStorageImageArrayNonUniformIndexingNative{ false };
+    bool shaderInputAttachmentArrayNonUniformIndexingNative{ false };
+    bool robustBufferAccessUpdateAfterBind{ false };
+    bool quadDivergentImplicitLod{ false };
+    uint32_t maxPerStageBindGroupEntriesUpdateAfterBindSamplers{ 0 };
+    uint32_t maxPerStageBindGroupEntriesUpdateAfterBindUniformBuffers{ 0 };
+    uint32_t maxPerStageBindGroupEntriesUpdateAfterBindStorageBuffers{ 0 };
+    uint32_t maxPerStageBindGroupEntriesUpdateAfterBindSampledImages{ 0 };
+    uint32_t maxPerStageBindGroupEntriesUpdateAfterBindStorageImages{ 0 };
+    uint32_t maxPerStageBindGroupEntriesUpdateAfterBindInputAttachments{ 0 };
+    uint32_t maxPerStageUpdateAfterBindResources{ 0 };
+    uint32_t maxBindGroupUpdateAfterBindSamplers{ 0 };
+    uint32_t maxBindGroupUpdateAfterBindUniformBuffers{ 0 };
+    uint32_t maxBindGroupUpdateAfterBindUniformBuffersDynamic{ 0 };
+    uint32_t maxBindGroupUpdateAfterBindStorageBuffers{ 0 };
+    uint32_t maxBindGroupUpdateAfterBindStorageBuffersDynamic{ 0 };
+    uint32_t maxBindGroupUpdateAfterBindSampledImages{ 0 };
+    uint32_t maxBindGroupUpdateAfterBindStorageImages{ 0 };
+    uint32_t maxBindGroupUpdateAfterBindInputAttachments{ 0 };
 };
 
+/**
+    @headerfile adapter_properties.h <KDGpu/adapter_properties.h>
+ */
 struct RayTracingProperties {
-    uint32_t shaderGroupHandleSize;
-    uint32_t maxRayRecursionDepth;
-    uint32_t maxShaderGroupStride;
-    uint32_t shaderGroupBaseAlignment;
-    uint32_t shaderGroupHandleCaptureReplaySize;
-    uint32_t maxRayDispatchInvocationCount;
-    uint32_t shaderGroupHandleAlignment;
-    uint32_t maxRayHitAttributeSize;
+    uint32_t shaderGroupHandleSize{ 0 };
+    uint32_t maxRayRecursionDepth{ 0 };
+    uint32_t maxShaderGroupStride{ 0 };
+    uint32_t shaderGroupBaseAlignment{ 0 };
+    uint32_t shaderGroupHandleCaptureReplaySize{ 0 };
+    uint32_t maxRayDispatchInvocationCount{ 0 };
+    uint32_t shaderGroupHandleAlignment{ 0 };
+    uint32_t maxRayHitAttributeSize{ 0 };
 };
 
+/**
+    @headerfile adapter_properties.h <KDGpu/adapter_properties.h>
+ */
 struct MeshShaderProperties {
-    uint32_t maxTaskWorkGroupTotalCount;
-    uint32_t maxTaskWorkGroupCount[3];
-    uint32_t maxTaskWorkGroupInvocations;
-    uint32_t maxTaskWorkGroupSize[3];
-    uint32_t maxTaskPayloadSize;
-    uint32_t maxTaskSharedMemorySize;
-    uint32_t maxTaskPayloadAndSharedMemorySize;
-    uint32_t maxMeshWorkGroupTotalCount;
-    uint32_t maxMeshWorkGroupCount[3];
-    uint32_t maxMeshWorkGroupInvocations;
-    uint32_t maxMeshWorkGroupSize[3];
-    uint32_t maxMeshSharedMemorySize;
-    uint32_t maxMeshPayloadAndSharedMemorySize;
-    uint32_t maxMeshOutputMemorySize;
-    uint32_t maxMeshPayloadAndOutputMemorySize;
-    uint32_t maxMeshOutputComponents;
-    uint32_t maxMeshOutputVertices;
-    uint32_t maxMeshOutputPrimitives;
-    uint32_t maxMeshOutputLayers;
-    uint32_t maxMeshMultiviewViewCount;
-    uint32_t meshOutputPerVertexGranularity;
-    uint32_t meshOutputPerPrimitiveGranularity;
-    uint32_t maxPreferredTaskWorkGroupInvocations;
-    uint32_t maxPreferredMeshWorkGroupInvocations;
-    bool prefersLocalInvocationVertexOutput;
-    bool prefersLocalInvocationPrimitiveOutput;
-    bool prefersCompactVertexOutput;
-    bool prefersCompactPrimitiveOutput;
+    uint32_t maxTaskWorkGroupTotalCount{ 0 };
+    std::array<uint32_t, 3> maxTaskWorkGroupCount{ 0, 0, 0 };
+    uint32_t maxTaskWorkGroupInvocations{ 0 };
+    std::array<uint32_t, 3> maxTaskWorkGroupSize{ 0, 0, 0 };
+    uint32_t maxTaskPayloadSize{ 0 };
+    uint32_t maxTaskSharedMemorySize{ 0 };
+    uint32_t maxTaskPayloadAndSharedMemorySize{ 0 };
+    uint32_t maxMeshWorkGroupTotalCount{ 0 };
+    std::array<uint32_t, 3> maxMeshWorkGroupCount{ 0, 0, 0 };
+    uint32_t maxMeshWorkGroupInvocations{ 0 };
+    std::array<uint32_t, 3> maxMeshWorkGroupSize{ 0, 0, 0 };
+    uint32_t maxMeshSharedMemorySize{ 0 };
+    uint32_t maxMeshPayloadAndSharedMemorySize{ 0 };
+    uint32_t maxMeshOutputMemorySize{ 0 };
+    uint32_t maxMeshPayloadAndOutputMemorySize{ 0 };
+    uint32_t maxMeshOutputComponents{ 0 };
+    uint32_t maxMeshOutputVertices{ 0 };
+    uint32_t maxMeshOutputPrimitives{ 0 };
+    uint32_t maxMeshOutputLayers{ 0 };
+    uint32_t maxMeshMultiviewViewCount{ 0 };
+    uint32_t meshOutputPerVertexGranularity{ 0 };
+    uint32_t meshOutputPerPrimitiveGranularity{ 0 };
+    uint32_t maxPreferredTaskWorkGroupInvocations{ 0 };
+    uint32_t maxPreferredMeshWorkGroupInvocations{ 0 };
+    bool prefersLocalInvocationVertexOutput{ false };
+    bool prefersLocalInvocationPrimitiveOutput{ false };
+    bool prefersCompactVertexOutput{ false };
+    bool prefersCompactPrimitiveOutput{ false };
 };
 
+/**
+    @headerfile adapter_properties.h <KDGpu/adapter_properties.h>
+ */
 struct HostImageCopyProperties {
     std::vector<TextureLayout> srcCopyLayouts;
     std::vector<TextureLayout> dstCopyLayouts;
 };
 
+/**
+    @headerfile adapter_properties.h <KDGpu/adapter_properties.h>
+ */
 struct PushBindGroupProperties {
-    uint32_t maxPushBindGroups;
+    uint32_t maxPushBindGroups{ 0 };
 };
 
 /**
     @headerfile adapter_properties.h <KDGpu/adapter_properties.h>
  */
 struct AdapterProperties {
-    uint32_t apiVersion;
-    uint32_t driverVersion;
-    uint32_t vendorID;
-    uint32_t deviceID;
+    uint32_t apiVersion{ 0 };
+    uint32_t driverVersion{ 0 };
+    uint32_t vendorID{ 0 };
+    uint32_t deviceID{ 0 };
     AdapterDeviceType deviceType;
     std::string deviceName;
-    uint8_t pipelineCacheUUID[UuidSize];
+    std::array<uint8_t, UuidSize> pipelineCacheUUID{};
     AdapterLimits limits;
     AdapterSparseProperties sparseProperties;
     AdapterMultiViewProperties multiViewProperties;
@@ -278,8 +291,8 @@ struct FormatProperties {
     @headerfile adapter_properties.h <KDGpu/adapter_properties.h>
  */
 struct DrmFormatModifierProperties {
-    uint64_t formatModifier;
-    uint32_t planeCount;
+    uint64_t formatModifier{ 0 };
+    uint32_t planeCount{ 0 };
     FormatFeatureFlags featureFlags;
 };
 
