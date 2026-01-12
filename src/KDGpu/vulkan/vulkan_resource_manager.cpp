@@ -1190,8 +1190,12 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
     if (initialData) {
         VulkanBuffer *vulkanBuffer = m_buffers.get(vulkanBufferHandle);
         auto *bufferData = vulkanBuffer->map();
-        std::memcpy(bufferData, initialData, createInfo.size);
-        vulkanBuffer->unmap();
+        if (bufferData != nullptr) {
+            std::memcpy(bufferData, initialData, createInfo.size);
+            vulkanBuffer->unmap();
+        } else {
+            SPDLOG_LOGGER_ERROR(Logger::logger(), "Unable to map buffer to transfer initial data");
+        }
     }
 
     return vulkanBufferHandle;

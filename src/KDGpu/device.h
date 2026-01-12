@@ -82,10 +82,6 @@ public:
     [[nodiscard]] Swapchain createSwapchain(const SwapchainOptions &options);
     [[nodiscard]] Texture createTexture(const TextureOptions &options);
 
-    // TODO: If initialData is set, upload this to the newly created buffer.
-    // OR should this helper functionality go in a slightly higher layer that
-    // knows about the concept of a frame so that it can correctly submit such commands
-    // as part of the frame submission along with suitable memory barriers?
     [[nodiscard]] Buffer createBuffer(const BufferOptions &options, const void *initialData = nullptr);
 
     [[nodiscard]] ShaderModule createShaderModule(const std::vector<uint32_t> &code);
