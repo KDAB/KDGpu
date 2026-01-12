@@ -60,7 +60,11 @@ public:
     Device createDeviceFromExistingVkDevice(Adapter *adapter,
                                             VkDevice vkDevice,
                                             std::vector<Queue> &&queues);
+    VkInstance vkInstanceFromInstance(const Handle<Instance_t> &instanceH) const;
+    VkPhysicalDevice vkPhysicalDeviceFromAdapter(const Handle<Adapter_t> &adapterH) const;
+    VkDevice vkDeviceFromDevice(const Handle<Device_t> &deviceH) const;
     VkImage vkImageFromTexture(const Handle<Texture_t> textureH) const;
+    VkQueue vkQueueFromQueue(const Handle<Queue_t> &queueH) const;
     Texture createTextureFromExistingVkImage(const Handle<Device_t> &deviceHandle, const TextureOptions &options, VkImage vkImage);
 
     std::string getMemoryStats(const Handle<Device_t> &device) const;

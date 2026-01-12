@@ -100,11 +100,48 @@ Device VulkanGraphicsApi::createDeviceFromExistingVkDevice(Adapter *adapter,
     return device;
 }
 
+VkInstance VulkanGraphicsApi::vkInstanceFromInstance(const Handle<Instance_t> &instanceH) const
+{
+    VulkanInstance *vulkanInstance = m_vulkanResourceManager.getInstance(instanceH);
+    if (vulkanInstance)
+        return vulkanInstance->instance;
+
+    return VK_NULL_HANDLE;
+}
+
+VkPhysicalDevice VulkanGraphicsApi::vkPhysicalDeviceFromAdapter(const Handle<Adapter_t> &adapterH) const
+{
+    VulkanAdapter *vulkanAdapter = m_vulkanResourceManager.getAdapter(adapterH);
+    if (vulkanAdapter)
+        return vulkanAdapter->physicalDevice;
+
+    return VK_NULL_HANDLE;
+}
+
+VkDevice VulkanGraphicsApi::vkDeviceFromDevice(const Handle<Device_t> &deviceH) const
+{
+    VulkanDevice *vulkanDevice = m_vulkanResourceManager.getDevice(deviceH);
+    if (vulkanDevice)
+        return vulkanDevice->device;
+
+    return VK_NULL_HANDLE;
+}
+
 VkImage VulkanGraphicsApi::vkImageFromTexture(const Handle<Texture_t> textureH) const
 {
     VulkanTexture *vulkanTexture = m_vulkanResourceManager.getTexture(textureH);
     if (vulkanTexture)
         return vulkanTexture->image;
+
+    return VK_NULL_HANDLE;
+}
+
+VkQueue VulkanGraphicsApi::vkQueueFromQueue(const Handle<Queue_t> &queueH) const
+{
+    VulkanQueue *vulkanQueue = m_vulkanResourceManager.getQueue(queueH);
+    if (vulkanQueue)
+        return vulkanQueue->queue;
+
     return VK_NULL_HANDLE;
 }
 
