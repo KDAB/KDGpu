@@ -101,3 +101,35 @@ find_package(CUDAToolkit QUIET)
 if(${CUDAToolkit_FOUND})
     add_subdirectory(fragmentation)
 endif()
+
+if(KDGPU_CODE_COVERAGE)
+
+    # Detect if using Clang and set the correct gcov executable
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        find_program(LLVM_COV_PATH llvm-cov)
+        if(LLVM_COV_PATH)
+            set(GCOVR_ADDITIONAL_ARGS --gcov-executable "${LLVM_COV_PATH} gcov" --gcov-ignore-parse-errors
+                                      --print-summary
+            )
+        endif()
+    else()
+        set(GCOVR_ADDITIONAL_ARGS --gcov-ignore-parse-errors --print-summary)
+    endif()
+
+    setup_target_for_coverage_gcovr_html(
+        NAME
+        coverage
+        BASE_DIRECTORY
+        ${CMAKE_SOURCE_DIR}
+        EXECUTABLE
+        ctest
+        -L
+        "KDGpu;KDGpuUtils"
+        EXCLUDE
+        "${CMAKE_BINARY_DIR}/_deps/*"
+        "${CMAKE_BINARY_DIR}/src/*"
+        "*/vcpkg_installed/*"
+        "*/tests/*"
+    )
+    add_feature_info(KDGpu-Coverage ON "Generate Code Coverage - ninja coverage")
+endif()

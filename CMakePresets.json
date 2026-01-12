@@ -40,7 +40,9 @@
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
                 "KDGPU_BUILD_TESTS": "ON",
-                "KDGPU_CODE_COVERAGE": "ON"
+                "KDGPU_CODE_COVERAGE": "ON",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "CMAKE_VERBOSE_MAKEFILE": "ON"
             },
             "environment": {
                 "KDGPUEXAMPLE_ASSET_PATH": "${sourceDir}/build/Debug/assets"

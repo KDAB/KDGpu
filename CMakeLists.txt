@@ -64,7 +64,6 @@ include(CMakeDependentOption)
 option(KDGPU_BUILD_SHARED_LIBS "Build shared libraries" ON)
 set(BUILD_SHARED_LIBS ${KDGPU_BUILD_SHARED_LIBS})
 
-option(KDGPU_CODE_COVERAGE "Code Coverage" OFF)
 option(KDGPU_BUILD_TESTS "Build tests" ON)
 option(KDGPU_BUILD_KDGPUKDGUI "Build KDGpuKDGui" ON)
 option(KDGPU_BUILD_KDGPUUTILS "Build KDGpuUtils" ON)
@@ -84,6 +83,7 @@ cmake_dependent_option(
     OFF
 )
 option(KDGPU_HLSL_SUPPORT "Try to find and use the dxc HLSL to SPIR-V compiler" OFF)
+option(KDGPU_CODE_COVERAGE "Code Coverage" OFF)
 
 add_feature_info(KDGpuKDGui ${KDGPU_BUILD_KDGPUKDGUI} "Build KDGpuKDGui")
 add_feature_info(KDGpuExample ${KDGPU_BUILD_KDGPUEXAMPLE} "Build KDGpuExample")
@@ -92,12 +92,6 @@ option(KDGPU_BUILD_KDXR "Build KDXr" ON)
 add_feature_info(OpenXR ${KDGPU_BUILD_KDXR} "Enable support for OpenXR")
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
-if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    if(KDGPU_CODE_COVERAGE)
-        include(cmake/CodeCoverage.cmake)
-    endif()
-endif()
 
 # vcpkg conditional features
 if(KDGPU_BUILD_EXAMPLES)
@@ -140,6 +134,15 @@ include(GNUInstallDirs)
 include(KDGpuCompileShader)
 include(ECMEnableSanitizers)
 
+if(KDGPU_CODE_COVERAGE)
+    if(NOT (KDGPU_BUILD_TESTS AND CMAKE_CXX_COMPILER_ID MATCHES "Clang|AppleClang|GNU"))
+        message(FATAL_ERROR "KDGPU_CODE_COVERAGE=ON requires:\n" "  - KDGPU_BUILD_TESTS=ON\n"
+                            "  - Compiler: Clang or GCC"
+        )
+    endif()
+    include(cmake/CodeCoverage.cmake)
+endif()
+
 # Note: Set before including dependencies.cmake, so 3rd party libs end up in the correct dir
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
@@ -159,6 +162,7 @@ if(KDGPU_BUILD_ASSETS)
 endif()
 
 add_feature_info(KDGpu-Tests ${KDGPU_BUILD_TESTS} "Build Tests")
+add_feature_info(KDGpu-CodeCoverage ${KDGPU_CODE_COVERAGE} "Code Coverage Support")
 if(KDGPU_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
