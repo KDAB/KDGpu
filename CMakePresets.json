@@ -134,6 +134,51 @@
             "environment": {
                 "KDGPUEXAMPLE_ASSET_PATH": "${sourceDir}/build/Profile/assets"
             }
+        },
+        {
+            "name": "sanitize-address",
+            "displayName": "Sanitize Address (Clang)",
+            "inherits": [
+                "debug-base",
+                "clang"
+            ],
+            "binaryDir": "${sourceDir}/build/SanitizeAddress",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "-fsanitize=address -fno-omit-frame-pointer",
+                "CMAKE_C_FLAGS": "-fsanitize=address -fno-omit-frame-pointer",
+                "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=address",
+                "CMAKE_SHARED_LINKER_FLAGS": "-fsanitize=address"
+            }
+        },
+        {
+            "name": "sanitize-undefined",
+            "displayName": "Sanitize Undefined Behavior (Clang)",
+            "inherits": [
+                "debug-base",
+                "clang"
+            ],
+            "binaryDir": "${sourceDir}/build/SanitizeUndefined",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "-fsanitize=undefined -fno-omit-frame-pointer",
+                "CMAKE_C_FLAGS": "-fsanitize=undefined -fno-omit-frame-pointer",
+                "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=undefined",
+                "CMAKE_SHARED_LINKER_FLAGS": "-fsanitize=undefined"
+            }
+        },
+        {
+            "name": "sanitize-all",
+            "displayName": "Sanitize Address + Undefined (Clang)",
+            "inherits": [
+                "debug-base",
+                "clang"
+            ],
+            "binaryDir": "${sourceDir}/build/SanitizeAll",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "-fsanitize=address,undefined -fno-omit-frame-pointer",
+                "CMAKE_C_FLAGS": "-fsanitize=address,undefined -fno-omit-frame-pointer",
+                "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=address,undefined",
+                "CMAKE_SHARED_LINKER_FLAGS": "-fsanitize=address,undefined"
+            }
         }
     ],
     "buildPresets": [
@@ -164,6 +209,18 @@
         {
             "name": "profile-msvc_x64",
             "configurePreset": "profile-msvc_x64"
+        },
+        {
+            "name": "sanitize-address",
+            "configurePreset": "sanitize-address"
+        },
+        {
+            "name": "sanitize-undefined",
+            "configurePreset": "sanitize-undefined"
+        },
+        {
+            "name": "sanitize-all",
+            "configurePreset": "sanitize-all"
         }
     ],
     "testPresets": [
@@ -174,6 +231,18 @@
         {
             "name": "debug-msvc_x64",
             "configurePreset": "debug-msvc_x64"
+        },
+        {
+            "name": "sanitize-address",
+            "configurePreset": "sanitize-address"
+        },
+        {
+            "name": "sanitize-undefined",
+            "configurePreset": "sanitize-undefined"
+        },
+        {
+            "name": "sanitize-all",
+            "configurePreset": "sanitize-all"
         }
     ]
 }
