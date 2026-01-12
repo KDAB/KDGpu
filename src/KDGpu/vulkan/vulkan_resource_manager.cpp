@@ -621,9 +621,9 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
 #endif
 
 #if defined(VK_KHR_dynamic_rendering)
+    VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamicRenderingFeatures{};
     if (options.requestedFeatures.dynamicRendering) {
         // Enable dynamic rendering
-        VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamicRenderingFeatures{};
         dynamicRenderingFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR;
         dynamicRenderingFeatures.dynamicRendering = options.requestedFeatures.dynamicRendering;
         addToChain(&dynamicRenderingFeatures);
@@ -631,8 +631,8 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
 #endif
 
 #if defined(VK_KHR_dynamic_rendering_local_read)
+    VkPhysicalDeviceDynamicRenderingLocalReadFeaturesKHR dynamicLocalReadFeatures{};
     if (options.requestedFeatures.dynamicRenderingLocalRead) {
-        VkPhysicalDeviceDynamicRenderingLocalReadFeaturesKHR dynamicLocalReadFeatures{};
         dynamicLocalReadFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_LOCAL_READ_FEATURES_KHR;
         dynamicLocalReadFeatures.dynamicRenderingLocalRead = static_cast<bool>(options.requestedFeatures.dynamicRenderingLocalRead);
         addToChain(&dynamicLocalReadFeatures);
