@@ -225,7 +225,7 @@ TEST_SUITE("Texture")
         CHECK(success);
     }
 
-#if defined(VK_EXT_host_image_copy)
+#if defined(VK_EXT_host_image_copy) && !defined(KDGPU_PLATFORM_APPLE) // MoltenVK does not support VK_EXT_host_image_copy
     TEST_CASE("HostCopy" * doctest::skip(!discreteGPUAdapter->features().hostImageCopy))
     {
         REQUIRE(discreteGPUAdapter->features().hostImageCopy);
