@@ -1,6 +1,6 @@
 version = 1
 SPDX-PackageName = "KDGpu"
-SPDX-PackageSupplier = "Sean Harmer <sean.harmer@kdab.com>"
+SPDX-PackageSupplier = "Paul Lemire <paul.lemire@kdab.com>"
 
 #misc source code
 [[annotations]]
@@ -88,3 +88,18 @@ path = ["examples/hello_triangle_apple/**.frag", "examples/hello_triangle_apple/
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>"
 SPDX-License-Identifier = "MIT"
+
+# Git Submodules
+[[annotations]]
+path = [".gitmodules"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2025 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>"
+SPDX-License-Identifier = "MIT"
+
+# vcpkg submodule
+[[annotations]]
+path = ["vcpkg"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Copyright (c) Microsoft Corporation"
+SPDX-License-Identifier = "MIT"
+
