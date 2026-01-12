@@ -237,6 +237,10 @@ endif()
 # Require >=C++20 for us and downstream projects
 target_compile_features(KDGpu PUBLIC cxx_std_20)
 
+if(KDGPU_CODE_COVERAGE)
+    append_coverage_compiler_flags()
+endif()
+
 target_include_directories(
     KDGpu
     PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include> $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
