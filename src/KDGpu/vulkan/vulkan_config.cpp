@@ -112,6 +112,9 @@ std::vector<const char *> getDefaultRequestedDeviceExtensions()
 #if defined(VK_KHR_acceleration_structure)
         VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,
 #endif
+#if defined(VK_KHR_fragment_shading_rate)
+        VK_KHR_FRAGMENT_SHADING_RATE_EXTENSION_NAME,
+#endif
 #if defined(VK_EXT_mesh_shader)
         VK_EXT_MESH_SHADER_EXTENSION_NAME,
 #endif

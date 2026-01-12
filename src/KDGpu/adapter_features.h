@@ -101,6 +101,9 @@ struct AdapterFeatures {
     bool bindGroupBindingVariableDescriptorCount;
     bool runtimeBindGroupArray;
     bool bufferDeviceAddress;
+    bool pipelineFragmentShadingRate;
+    bool primitiveFragmentShadingRate;
+    bool attachmentFragmentShadingRate;
     bool accelerationStructures;
     bool rayTracingPipeline;
     bool rayTracingPipelineShaderGroupHandleCaptureReplay;

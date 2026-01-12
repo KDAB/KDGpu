@@ -430,6 +430,12 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
     physicalDeviceFeatures12.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
     addToChain(&physicalDeviceFeatures12);
 
+#if defined(VK_KHR_fragment_shading_rate)
+    VkPhysicalDeviceFragmentShadingRateFeaturesKHR fragmentShadingRateFeatures{};
+    fragmentShadingRateFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADING_RATE_FEATURES_KHR;
+    addToChain(&fragmentShadingRateFeatures);
+#endif
+
 #if defined(VK_KHR_acceleration_structure)
     VkPhysicalDeviceAccelerationStructureFeaturesKHR accelerationStructureFeaturesKhr{};
     accelerationStructureFeaturesKhr.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
@@ -562,6 +568,9 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
         .bindGroupBindingVariableDescriptorCount = static_cast<bool>(deviceDescriptorIndexingFeatures.descriptorBindingVariableDescriptorCount),
         .runtimeBindGroupArray = static_cast<bool>(deviceDescriptorIndexingFeatures.runtimeDescriptorArray),
         .bufferDeviceAddress = static_cast<bool>(physicalDeviceFeatures12.bufferDeviceAddress),
+        .pipelineFragmentShadingRate = false,
+        .primitiveFragmentShadingRate = false,
+        .attachmentFragmentShadingRate = false,
         .accelerationStructures = false,
         .rayTracingPipeline = false,
         .rayTracingPipelineShaderGroupHandleCaptureReplay = false,
@@ -570,14 +579,20 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
         .rayTraversalPrimitiveCulling = false,
         .taskShader = false,
         .meshShader = false,
-        .multiviewMeshShader = static_cast<bool>(meshShaderFeatures.multiviewMeshShader),
-        .primitiveFragmentShadingRateMeshShader = static_cast<bool>(meshShaderFeatures.primitiveFragmentShadingRateMeshShader),
+        .multiviewMeshShader = false,
+        .primitiveFragmentShadingRateMeshShader = false,
         .meshShaderQueries = false,
         .hostImageCopy = false,
         .samplerYCbCrConversion = false,
         .dynamicRendering = false,
         .dynamicRenderingLocalRead = false,
     };
+
+#if defined(VK_KHR_fragment_shading_rate)
+    features.pipelineFragmentShadingRate = static_cast<bool>(fragmentShadingRateFeatures.pipelineFragmentShadingRate);
+    features.primitiveFragmentShadingRate = static_cast<bool>(fragmentShadingRateFeatures.primitiveFragmentShadingRate);
+    features.attachmentFragmentShadingRate = static_cast<bool>(fragmentShadingRateFeatures.attachmentFragmentShadingRate);
+#endif
 
 #if defined(VK_KHR_acceleration_structure)
     features.accelerationStructures = static_cast<bool>(accelerationStructureFeaturesKhr.accelerationStructure);
@@ -596,6 +611,7 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
     features.meshShader = static_cast<bool>(meshShaderFeatures.meshShader);
     features.multiviewMeshShader = static_cast<bool>(meshShaderFeatures.multiviewMeshShader);
     features.meshShaderQueries = static_cast<bool>(meshShaderFeatures.meshShaderQueries);
+    features.primitiveFragmentShadingRateMeshShader = static_cast<bool>(meshShaderFeatures.primitiveFragmentShadingRateMeshShader);
 #endif
 
 #if defined(VK_KHR_synchronization2)

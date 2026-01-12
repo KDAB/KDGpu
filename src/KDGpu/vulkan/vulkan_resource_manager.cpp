@@ -526,6 +526,15 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     bufferDeviceFeature.bufferDeviceAddress = options.requestedFeatures.bufferDeviceAddress;
     addToChain(&bufferDeviceFeature);
 
+#if defined(VK_KHR_fragment_shading_rate)
+    VkPhysicalDeviceFragmentShadingRateFeaturesKHR fragmentShadingRateFeatures{};
+    fragmentShadingRateFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADING_RATE_FEATURES_KHR;
+    fragmentShadingRateFeatures.pipelineFragmentShadingRate = options.requestedFeatures.pipelineFragmentShadingRate;
+    fragmentShadingRateFeatures.primitiveFragmentShadingRate = options.requestedFeatures.primitiveFragmentShadingRate;
+    fragmentShadingRateFeatures.attachmentFragmentShadingRate = static_cast<bool>(options.requestedFeatures.attachmentFragmentShadingRate);
+    addToChain(&fragmentShadingRateFeatures);
+#endif
+
 #if defined(VK_KHR_acceleration_structure)
     VkPhysicalDeviceAccelerationStructureFeaturesKHR accelerationStructureFeaturesKhr{};
     if (options.requestedFeatures.accelerationStructures) {
@@ -565,9 +574,14 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
         meshShaderFeatures.taskShader = options.requestedFeatures.taskShader;
         meshShaderFeatures.meshShader = options.requestedFeatures.meshShader;
         meshShaderFeatures.multiviewMeshShader = options.requestedFeatures.multiviewMeshShader;
-        // Would need to enable VkPhysicalDeviceFragmentShadingRateFeaturesKHR
-        // if options.requestedFeatures.primitiveFragmentShadingRateMeshShader is enabled
+#if defined(VK_KHR_fragment_shading_rate)
+        // Requires to have VkPhysicalDeviceFragmentShadingRateFeaturesKHR enabled
+        meshShaderFeatures.primitiveFragmentShadingRateMeshShader =
+                options.requestedFeatures.primitiveFragmentShadingRate &&
+                options.requestedFeatures.primitiveFragmentShadingRateMeshShader;
+#else
         meshShaderFeatures.primitiveFragmentShadingRateMeshShader = false;
+#endif
         meshShaderFeatures.meshShaderQueries = options.requestedFeatures.meshShaderQueries;
         addToChain(&meshShaderFeatures);
     }
