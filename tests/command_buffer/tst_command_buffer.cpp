@@ -90,6 +90,31 @@ TEST_CASE("CommandBuffer")
         CHECK(cb.isValid());
     }
 
+    SUBCASE("Move constructor & move assignment")
+    {
+        // GIVEN
+        CommandRecorder recorder = device.createCommandRecorder();
+        CommandBuffer commandBuffer = recorder.finish();
+
+        // WHEN
+        CommandBuffer commandBuffer2(std::move(commandBuffer));
+
+        // THEN
+        CHECK(!commandBuffer.isValid());
+        CHECK(commandBuffer2.isValid());
+
+        // WHEN
+        CommandRecorder recorder2 = device.createCommandRecorder();
+        CommandBuffer commandBuffer3 = recorder2.finish();
+        const auto commandBuffer2Handle = commandBuffer2.handle();
+        commandBuffer3 = std::move(commandBuffer2);
+
+        // THEN
+        CHECK(!commandBuffer2.isValid());
+        CHECK(commandBuffer3.isValid());
+        CHECK(commandBuffer3.handle() == commandBuffer2Handle);
+    }
+
     SUBCASE("Destruction - Going Out of Scope")
     {
         // GIVEN

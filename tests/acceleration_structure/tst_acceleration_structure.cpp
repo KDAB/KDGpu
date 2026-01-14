@@ -108,6 +108,45 @@ TEST_SUITE("AccelerationStructure")
             // THEN
             CHECK(accelerationStructure.isValid());
         }
+
+        SUBCASE("Move constructor & move assignment")
+        {
+            // GIVEN
+            const AccelerationStructureOptions accelerationStructureOptions = {
+                .type = AccelerationStructureType::BottomLevel,
+                .geometryTypesAndCount = {
+                        {
+                                .geometry = AccelerationStructureGeometryTrianglesData{
+                                        .vertexFormat = Format::R32G32B32_SFLOAT,
+                                        .vertexData = {}, // actual data is not needed for the creation
+                                        .vertexStride = sizeof(Vertex),
+                                        .maxVertex = 5,
+                                },
+                                .maxPrimitiveCount = 1,
+                        },
+                },
+            };
+
+            AccelerationStructure accelerationStructure1 = device.createAccelerationStructure(accelerationStructureOptions);
+            REQUIRE(accelerationStructure1.isValid());
+
+            // WHEN
+            AccelerationStructure accelerationStructure2(std::move(accelerationStructure1));
+
+            // THEN
+            CHECK(!accelerationStructure1.isValid());
+            CHECK(accelerationStructure2.isValid());
+
+            // WHEN
+            AccelerationStructure accelerationStructure3 = device.createAccelerationStructure(accelerationStructureOptions);
+            const auto accelerationStructure2Handle = accelerationStructure2.handle();
+            accelerationStructure3 = std::move(accelerationStructure2);
+
+            // THEN
+            CHECK(!accelerationStructure2.isValid());
+            CHECK(accelerationStructure3.isValid());
+            CHECK(accelerationStructure3.handle() == accelerationStructure2Handle);
+        }
     }
 
     TEST_CASE("Destruction" * doctest::skip(!supportsRayTracing))
@@ -397,6 +436,67 @@ TEST_SUITE("AccelerationStructure")
             }
 
             // THEN -> Shouldn't log validation errors
+        }
+    }
+
+    TEST_CASE("Comparison" * doctest::skip(!supportsRayTracing))
+    {
+        SUBCASE("Compare default constructed AccelerationStructures")
+        {
+            // GIVEN
+            AccelerationStructure a;
+            AccelerationStructure b;
+
+            // THEN
+            CHECK(a == b);
+        }
+
+        SUBCASE("Compare device created AccelerationStructures")
+        {
+            // GIVEN
+            const AccelerationStructureOptions accelerationStructureOptions = {
+                .type = AccelerationStructureType::BottomLevel,
+                .geometryTypesAndCount = {
+                        {
+                                .geometry = AccelerationStructureGeometryAabbsData{
+                                        .data = {}, // actual data is not needed for the creation
+                                        .stride = sizeof(VkAabbPositionsKHR),
+                                },
+                        },
+                },
+            };
+
+            AccelerationStructure accelerationStructure = device.createAccelerationStructure(accelerationStructureOptions);
+
+            // WHEN
+            AccelerationStructure a = device.createAccelerationStructure(accelerationStructureOptions);
+            AccelerationStructure b = device.createAccelerationStructure(accelerationStructureOptions);
+
+            // THEN
+            CHECK(a != b); // Different accelerationStructures should not be equal
+        }
+
+        SUBCASE("Compare moved AccelerationStructures")
+        {
+            // GIVEN
+            const AccelerationStructureOptions accelerationStructureOptions = {
+                .type = AccelerationStructureType::BottomLevel,
+                .geometryTypesAndCount = {
+                        {
+                                .geometry = AccelerationStructureGeometryAabbsData{
+                                        .data = {}, // actual data is not needed for the creation
+                                        .stride = sizeof(VkAabbPositionsKHR),
+                                },
+                        },
+                },
+            };
+
+            // WHEN
+            AccelerationStructure original = device.createAccelerationStructure(accelerationStructureOptions);
+            AccelerationStructure moved = std::move(original);
+
+            // THEN
+            CHECK(original != moved); // Original should be invalid, moved should be valid
         }
     }
 }

@@ -82,6 +82,32 @@ TEST_SUITE("Fence")
             CHECK(std::get<HANDLE>(externalHandleOrFD) != nullptr);
         }
 #endif
+
+        SUBCASE("Move constructor & move assignment")
+        {
+            // GIVEN
+            const FenceOptions fenceOptions{};
+
+            // WHEN
+            Fence s1 = device.createFence(fenceOptions);
+            REQUIRE(s1.isValid());
+
+            Fence s2(std::move(s1));
+
+            // THEN
+            CHECK(!s1.isValid());
+            CHECK(s2.isValid());
+
+            // WHEN
+            Fence s3 = device.createFence(fenceOptions);
+            const auto s2Handle = s2.handle();
+            s3 = std::move(s2);
+
+            // THEN
+            CHECK(s3.isValid());
+            CHECK(!s2.isValid());
+            CHECK(s3.handle() == s2Handle);
+        }
     }
 
     TEST_CASE("Destruction")
@@ -151,5 +177,57 @@ TEST_SUITE("Fence")
             // THEN
             CHECK(a != b);
         }
+    }
+
+    TEST_CASE("Reset")
+    {
+        // GIVEN
+        const FenceOptions fenceOptions{};
+
+        // WHEN
+        Fence a = device.createFence(fenceOptions);
+
+        // THEN
+        REQUIRE(a.isValid());
+        CHECK(a.status() == FenceStatus::Signalled);
+
+        // WHEN
+        a.reset();
+
+        // THEN
+        CHECK(a.status() == FenceStatus::Unsignalled);
+    }
+
+    TEST_CASE("Wait")
+    {
+        // GIVEN
+        const FenceOptions fenceOptions{
+            .createSignalled = false,
+        };
+
+        // WHEN
+        Fence a = device.createFence(fenceOptions);
+
+        // THEN
+        REQUIRE(a.isValid());
+        CHECK(a.status() == FenceStatus::Unsignalled);
+
+        // GIVEN
+        CommandRecorder c = device.createCommandRecorder();
+
+        // THEN
+        CHECK(c.isValid());
+
+        // WHEN
+        CommandBuffer commandBuffer = c.finish();
+        device.queues().front().submit(SubmitOptions{
+                .commandBuffers = { commandBuffer },
+                .signalFence = a,
+        });
+
+        a.wait();
+
+        // THEN
+        CHECK(a.status() == FenceStatus::Signalled);
     }
 }

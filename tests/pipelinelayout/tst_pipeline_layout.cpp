@@ -51,6 +51,35 @@ TEST_SUITE("PipelineLayout")
             // THEN
             CHECK(pipelineLayout.isValid());
         }
+
+        SUBCASE("Move constructor & move assignment")
+        {
+            // GIVEN
+            PipelineLayoutOptions pipelineLayoutOptions = {
+                .bindGroupLayouts = {}
+            };
+            PipelineLayout pipelineLayout1 = device.createPipelineLayout(pipelineLayoutOptions);
+
+            // THEN
+            CHECK(pipelineLayout1.isValid());
+
+            // WHEN
+            PipelineLayout pipelineLayout2(std::move(pipelineLayout1));
+
+            // THEN
+            CHECK(!pipelineLayout1.isValid());
+            CHECK(pipelineLayout2.isValid());
+
+            // WHEN
+            PipelineLayout pipelineLayout3 = device.createPipelineLayout(pipelineLayoutOptions);
+            const auto pipelineLayout2Handle = pipelineLayout2.handle();
+            pipelineLayout3 = std::move(pipelineLayout2);
+
+            // THEN
+            CHECK(!pipelineLayout2.isValid());
+            CHECK(pipelineLayout3.isValid());
+            CHECK(pipelineLayout3.handle() == pipelineLayout2Handle);
+        }
     }
 
     TEST_CASE("Destruction")

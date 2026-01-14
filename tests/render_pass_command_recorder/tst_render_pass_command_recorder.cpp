@@ -278,6 +278,39 @@ TEST_SUITE("RenderPassCommandRecorder")
             CHECK(renderPassRecorder.isValid());
         }
 
+        SUBCASE("Move constructor & move assignment")
+        {
+            // GIVEN
+            CommandRecorder commandRecorder = device.createCommandRecorder();
+            const RenderPassCommandRecorderOptions renderPassOptions{
+                .colorAttachments = {
+                        { .view = colorTextureView,
+                          .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
+                          .finalLayout = TextureLayout::PresentSrc } },
+                .depthStencilAttachment = {
+                        .view = depthTextureView,
+                }
+            };
+
+            // WHEN
+            RenderPassCommandRecorder renderPassRecorder1 = commandRecorder.beginRenderPass(renderPassOptions);
+            RenderPassCommandRecorder renderPassRecorder2(std::move(renderPassRecorder1));
+
+            // THEN
+            CHECK(!renderPassRecorder1.isValid());
+            CHECK(renderPassRecorder2.isValid());
+
+            // WHEN
+            RenderPassCommandRecorder renderPassRecorder3 = commandRecorder.beginRenderPass(renderPassOptions);
+            const auto renderPassRecorder2Handle = renderPassRecorder2.handle();
+            renderPassRecorder3 = std::move(renderPassRecorder2);
+
+            // THEN
+            CHECK(!renderPassRecorder2.isValid());
+            CHECK(renderPassRecorder3.isValid());
+            CHECK(renderPassRecorder3.handle() == renderPassRecorder2Handle);
+        }
+
         SUBCASE("Uses different implicit RenderPasses if depth attachment is not used")
         {
             // GIVEN

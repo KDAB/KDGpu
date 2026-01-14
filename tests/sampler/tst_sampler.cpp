@@ -50,6 +50,31 @@ TEST_SUITE("Sampler")
             // THEN
             CHECK(s.isValid());
         }
+
+        SUBCASE("Move constructor & move assigment")
+        {
+            // GIVEN
+            const SamplerOptions samplerOptions{};
+
+            Sampler s1 = device.createSampler(samplerOptions);
+
+            // WHEN
+            Sampler s2(std::move(s1));
+
+            // THEN
+            CHECK(s2.isValid());
+            CHECK(!s1.isValid());
+
+            // WHEN
+            Sampler s3 = device.createSampler(samplerOptions);
+            const auto s2Handle = s2.handle();
+            s3 = std::move(s2);
+
+            // THEN
+            CHECK(s3.isValid());
+            CHECK(!s2.isValid());
+            CHECK(s3.handle() == s2Handle);
+        }
     }
 
     TEST_CASE("Destruction")

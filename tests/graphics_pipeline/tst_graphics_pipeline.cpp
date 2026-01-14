@@ -151,6 +151,64 @@ TEST_SUITE("GraphicsPipeline")
             CHECK(g.isValid());
         }
 
+        SUBCASE("Move constructor & move assignment")
+        {
+            // GIVEN
+            PipelineLayoutOptions pipelineLayoutOptions{};
+            PipelineLayout pipelineLayout = device.createPipelineLayout(pipelineLayoutOptions);
+            const Format depthFormat = selectDepthFormat(adapter);
+            REQUIRE(depthFormat != Format::UNDEFINED);
+
+            GraphicsPipelineOptions pipelineOptions = {
+                .shaderStages = {
+                        { .shaderModule = vertexShader.handle(), .stage = ShaderStageFlagBits::VertexBit },
+                        { .shaderModule = fragmentShader.handle(), .stage = ShaderStageFlagBits::FragmentBit },
+                },
+                .layout = pipelineLayout.handle(),
+                .vertex = {
+                        .buffers = { { .binding = 0, .stride = 2 * 4 * sizeof(float) } },
+                        .attributes = {
+                                {
+                                        .location = 0,
+                                        .binding = 0,
+                                        .format = Format::R32G32B32A32_SFLOAT,
+                                }, // Position
+                                {
+                                        .location = 1,
+                                        .binding = 0,
+                                        .format = Format::R32G32B32A32_SFLOAT,
+                                        .offset = 4 * sizeof(float),
+                                }, // Color
+                        },
+                },
+                .renderTargets = { { .format = Format::R8G8B8A8_UNORM } },
+                .depthStencil = {
+                        .format = depthFormat,
+                        .depthWritesEnabled = true,
+                        .depthCompareOperation = CompareOperation::Less,
+                },
+                .primitive = {
+                        .lineWidth = adapter->features().wideLines ? 20.0f : 1.0f,
+                }
+            };
+
+            // WHEN
+            GraphicsPipeline g1 = device.createGraphicsPipeline(pipelineOptions);
+            GraphicsPipeline g2 = std::move(g1);
+
+            // THEN
+            CHECK(!g1.isValid());
+            CHECK(g2.isValid());
+
+            // WHEN
+            GraphicsPipeline g3 = device.createGraphicsPipeline(pipelineOptions);
+            g3 = std::move(g2);
+
+            // THEN
+            CHECK(!g2.isValid());
+            CHECK(g3.isValid());
+        }
+
         SUBCASE("A GraphicsPipeline from a Vulkan API that does MSAA color and depth resolves")
         {
             // GIVEN

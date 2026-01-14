@@ -90,6 +90,30 @@ TEST_CASE("CommandRecorder")
         CHECK(c.isValid());
     }
 
+    SUBCASE("Move constructor & move assignment")
+    {
+        // GIVEN
+        CommandRecorder c1 = device.createCommandRecorder();
+        REQUIRE(c1.isValid());
+
+        // WHEN
+        CommandRecorder c2(std::move(c1));
+
+        // THEN
+        CHECK(!c1.isValid());
+        CHECK(c2.isValid());
+
+        // WHEN
+        CommandRecorder c3 = device.createCommandRecorder();
+        const auto c2Handle = c2.handle();
+        c3 = std::move(c2);
+
+        // THEN
+        CHECK(!c2.isValid());
+        CHECK(c3.isValid());
+        CHECK(c3.handle() == c2Handle);
+    }
+
     SUBCASE("Buffer Copies No Barriers")
     {
         // GIVEN

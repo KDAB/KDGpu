@@ -62,6 +62,36 @@ TEST_SUITE("BindGroupLayout")
             // THEN
             CHECK(bindGroupLayout.isValid());
         }
+
+        SUBCASE("Move constructor & move assignment")
+        {
+            // GIVEN
+            const BindGroupLayoutOptions bindGroupLayoutOptions = {
+                .bindings = { { .binding = 0,
+                                .count = 1,
+                                .resourceType = ResourceBindingType::UniformBuffer,
+                                .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit) } }
+            };
+
+            BindGroupLayout bindGroupLayout1 = device.createBindGroupLayout(bindGroupLayoutOptions);
+
+            // WHEN
+            BindGroupLayout bindGroupLayout2(std::move(bindGroupLayout1));
+
+            // THEN
+            CHECK(!bindGroupLayout1.isValid());
+            CHECK(bindGroupLayout2.isValid());
+
+            // WHEN
+            BindGroupLayout bindGroupLayout3 = device.createBindGroupLayout(bindGroupLayoutOptions);
+            const auto bindGroupLayout2Handle = bindGroupLayout2.handle();
+            bindGroupLayout3 = std::move(bindGroupLayout2);
+
+            // THEN
+            CHECK(!bindGroupLayout2.isValid());
+            CHECK(bindGroupLayout3.isValid());
+            CHECK(bindGroupLayout3.handle() == bindGroupLayout2Handle);
+        }
     }
 
     TEST_CASE("Destruction")
@@ -298,6 +328,26 @@ TEST_SUITE("BindGroupLayout")
             // WHEN
             BindGroupLayout a = device.createBindGroupLayout(bindGroupLayoutOptions1);
             BindGroupLayout b = device.createBindGroupLayout(bindGroupLayoutOptions2);
+
+            // THEN
+            CHECK(!a.isCompatibleWith(b.handle()));
+            CHECK(a != b);
+        }
+
+        SUBCASE("Compare with unitialize BindGroupLayouts")
+        {
+            // GIVEN
+            const BindGroupLayoutOptions bindGroupLayoutOptions = {
+                .bindings = { { // Camera uniforms
+                                .binding = 0,
+                                .count = 1,
+                                .resourceType = ResourceBindingType::UniformBuffer,
+                                .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit) } }
+            };
+
+            // WHEN
+            BindGroupLayout a = device.createBindGroupLayout(bindGroupLayoutOptions);
+            BindGroupLayout b;
 
             // THEN
             CHECK(!a.isCompatibleWith(b.handle()));

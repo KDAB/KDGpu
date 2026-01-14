@@ -66,6 +66,34 @@ TEST_SUITE("TimestampQueryRecorder")
             CHECK(timestampQueryRecorder.isValid());
         }
 
+        SUBCASE("Move constructor & move assignment")
+        {
+            // GIVEN
+            CommandRecorder commandRecorder = device.createCommandRecorder();
+
+            TimestampQueryRecorder timestampQueryRecorder1 = commandRecorder.beginTimestampRecording(TimestampQueryRecorderOptions{
+                    .queryCount = 2,
+            });
+            // WHEN
+            TimestampQueryRecorder timestampQueryRecorder2(std::move(timestampQueryRecorder1));
+
+            // THEN
+            CHECK(!timestampQueryRecorder1.isValid());
+            CHECK(timestampQueryRecorder2.isValid());
+
+            // WHEN
+            TimestampQueryRecorder timestampQueryRecorder3 = commandRecorder.beginTimestampRecording(TimestampQueryRecorderOptions{
+                    .queryCount = 2,
+            });
+            const auto timestampQueryRecorder2Handle = timestampQueryRecorder2.handle();
+            timestampQueryRecorder3 = std::move(timestampQueryRecorder2);
+
+            // THEN
+            CHECK(!timestampQueryRecorder2.isValid());
+            CHECK(timestampQueryRecorder3.isValid());
+            CHECK(timestampQueryRecorder3.handle() == timestampQueryRecorder2Handle);
+        }
+
         SUBCASE("Can record timestamps")
         {
 

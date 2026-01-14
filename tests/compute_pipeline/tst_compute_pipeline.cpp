@@ -94,6 +94,40 @@ TEST_SUITE("ComputePipeline")
             // THEN
             CHECK(c.isValid());
         }
+
+        SUBCASE("Move constructor & move assigment")
+        {
+            // GIVEN
+            PipelineLayoutOptions pipelineLayoutOptions{};
+            PipelineLayout pipelineLayout = device.createPipelineLayout(pipelineLayoutOptions);
+
+            // clang-format off
+            const ComputePipelineOptions computePipelineOptions {
+                .layout = pipelineLayout,
+                .shaderStage = ComputeShaderStage {
+                    .shaderModule = computeShader.handle()
+                }
+            };
+            // clang-format on
+
+            ComputePipeline computePipeline = device.createComputePipeline(computePipelineOptions);
+
+            // WHEN
+            ComputePipeline computePipeline2(std::move(computePipeline));
+
+            // THEN
+            CHECK(computePipeline2.isValid());
+
+            // WHEN
+            ComputePipeline computePipeline3 = device.createComputePipeline(computePipelineOptions);
+            const auto computePipeline2Handle = computePipeline2.handle();
+            computePipeline3 = std::move(computePipeline2);
+
+            // THEN
+            CHECK(computePipeline3.isValid());
+            CHECK(!computePipeline2.isValid());
+            CHECK(computePipeline3.handle() == computePipeline2Handle);
+        }
     }
 
     TEST_CASE("Destruction")
