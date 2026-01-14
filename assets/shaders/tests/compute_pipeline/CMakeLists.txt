@@ -20,3 +20,9 @@ add_custom_target(
     DEPENDS KDGpu_EmptyComputeSpecializationConstant
     COMMENT "Target to compile the empty shader"
 )
+kdgpu_compileshader(KDGpu_EmptyComputeBindGroup empty_compute_with_bindgroup.comp empty_compute_with_bindgroup.comp.spv)
+add_custom_target(
+    KDGpu_EmptyComputeBindGroupTmp ALL
+    DEPENDS KDGpu_EmptyComputeBindGroup
+    COMMENT "Target to compile the empty shader with bindgroup"
+)

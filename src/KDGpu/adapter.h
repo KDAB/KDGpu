@@ -73,7 +73,7 @@ public:
 
     Device createDevice(const DeviceOptions &options = DeviceOptions());
 
-private:
+protected:
     explicit Adapter(GraphicsApi *api, const Handle<Adapter_t> &adapter);
 
     GraphicsApi *m_api{ nullptr };
