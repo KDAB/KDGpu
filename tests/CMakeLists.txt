@@ -64,6 +64,7 @@ if(KDGPU_BUILD_EXAMPLES)
     add_subdirectory(instance)
 endif()
 
+add_subdirectory(adapter)
 add_subdirectory(pool)
 add_subdirectory(buffer)
 add_subdirectory(texture)
