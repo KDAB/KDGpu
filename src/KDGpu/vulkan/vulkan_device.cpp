@@ -212,7 +212,7 @@ VulkanDevice::VulkanDevice(VkDevice _device,
     }
 #endif
 
-#if defined(VK_KHR_dynamic_rendering)
+#if defined(VK_KHR_dynamic_rendering_local_read)
     if (vulkanAdapter->queryAdapterFeatures().dynamicRenderingLocalRead) {
         this->vkCmdSetRenderingAttachmentLocationsKHR = (PFN_vkCmdSetRenderingAttachmentLocationsKHR)vkGetDeviceProcAddr(device, "vkCmdSetRenderingAttachmentLocationsKHR");
         this->vkCmdSetRenderingInputAttachmentIndicesKHR = (PFN_vkCmdSetRenderingInputAttachmentIndicesKHR)vkGetDeviceProcAddr(device, "vkCmdSetRenderingInputAttachmentIndicesKHR");

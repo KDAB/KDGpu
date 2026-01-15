@@ -1857,14 +1857,20 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
 
 #if defined(VK_KHR_dynamic_rendering)
     VkPipelineRenderingCreateInfoKHR pipelineDynamicRenderingCreateInfo{};
-    VkRenderingInputAttachmentIndexInfoKHR inputAttachmentLocations{};
-    VkRenderingAttachmentLocationInfoKHR outputAttachmentLocations{};
+
+    // clang-format off
+    #if defined(VK_KHR_dynamic_rendering_local_read)
+    VkRenderingInputAttachmentIndexInfoKHR inputAttachmentLocations{ .sType = VK_STRUCTURE_TYPE_RENDERING_INPUT_ATTACHMENT_INDEX_INFO_KHR };
+    VkRenderingAttachmentLocationInfoKHR outputAttachmentLocations{ .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_LOCATION_INFO_KHR };
+    #endif
+    // clang-format on
 
     std::vector<uint32_t> outputLocations;
     std::vector<uint32_t> inputColorLocations;
     uint32_t inputDepthLocation{ VK_ATTACHMENT_UNUSED };
     uint32_t inputStencilLocation{ VK_ATTACHMENT_UNUSED };
 
+    // Dynamic Rendering
     if (options.dynamicRendering.enabled) {
         assert(!vulkanRenderPassHandle.isValid()); // Dynamic Rendering is not compatible with explicit RenderPasses
         assert(vulkanDevice->requestedFeatures.dynamicRendering); // Dynamic Rendering feature should be enabled
@@ -1880,38 +1886,49 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
         pipelineDynamicRenderingCreateInfo.stencilAttachmentFormat = hasStencilFormat(options.depthStencil.format) ? formatToVkFormat(options.depthStencil.format) : VK_FORMAT_UNDEFINED;
         addToChain(&pipelineDynamicRenderingCreateInfo);
 
-        inputAttachmentLocations.sType = VK_STRUCTURE_TYPE_RENDERING_INPUT_ATTACHMENT_INDEX_INFO_KHR;
-        outputAttachmentLocations.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_LOCATION_INFO_KHR;
-
         // Input Attachments Locations
         if (options.dynamicRendering.dynamicInputLocations) {
+            // clang-format off
+            #if defined(VK_KHR_dynamic_rendering_local_read)
             inputDepthLocation = (options.dynamicRendering.dynamicInputLocations->inputDepthAttachment.enabled) ? options.dynamicRendering.dynamicInputLocations->inputDepthAttachment.remappedIndex : VK_ATTACHMENT_UNUSED;
             inputStencilLocation = (options.dynamicRendering.dynamicInputLocations->inputStencilAttachment.enabled) ? options.dynamicRendering.dynamicInputLocations->inputStencilAttachment.remappedIndex : VK_ATTACHMENT_UNUSED;
-
-            inputAttachmentLocations.pDepthInputAttachmentIndex = (options.dynamicRendering.dynamicInputLocations->inputDepthAttachment.enabled) ? &inputDepthLocation : nullptr;
-            inputAttachmentLocations.pStencilInputAttachmentIndex = (options.dynamicRendering.dynamicInputLocations->inputStencilAttachment.enabled) ? &inputStencilLocation : nullptr;
 
             inputColorLocations.reserve(options.dynamicRendering.dynamicInputLocations->inputColorAttachments.size());
             for (const DynamicAttachmentMapping &mapping : options.dynamicRendering.dynamicInputLocations->inputColorAttachments) {
                 inputColorLocations.push_back(mapping.enabled ? mapping.remappedIndex : VK_ATTACHMENT_UNUSED);
             }
+
+            inputAttachmentLocations.pDepthInputAttachmentIndex = (options.dynamicRendering.dynamicInputLocations->inputDepthAttachment.enabled) ? &inputDepthLocation : nullptr;
+            inputAttachmentLocations.pStencilInputAttachmentIndex = (options.dynamicRendering.dynamicInputLocations->inputStencilAttachment.enabled) ? &inputStencilLocation : nullptr;
             inputAttachmentLocations.colorAttachmentCount = inputColorLocations.size();
             inputAttachmentLocations.pColorAttachmentInputIndices = inputColorLocations.data();
             addToChain(&inputAttachmentLocations);
+            #else
+                SPDLOG_LOGGER_WARN(Logger::logger(), "GraphicsPipelineOptions { dynamicRendering.dynamicInputLocations } requires Vulkan SDK 1.4 with support for VK_KHR_dynamic_rendering_local_read");
+            #endif
+            // clang-format on
         }
 
         // Output Attachments Locations
         if (options.dynamicRendering.dynamicOutputLocations) {
+            // clang-format off
+            #if defined(VK_KHR_dynamic_rendering_local_read)
             outputLocations.reserve(options.dynamicRendering.dynamicOutputLocations->outputAttachments.size());
             for (const DynamicAttachmentMapping &mapping : options.dynamicRendering.dynamicOutputLocations->outputAttachments) {
                 outputLocations.push_back(mapping.enabled ? mapping.remappedIndex : VK_ATTACHMENT_UNUSED);
             }
+
             outputAttachmentLocations.colorAttachmentCount = outputLocations.size();
             outputAttachmentLocations.pColorAttachmentLocations = outputLocations.data();
             addToChain(&outputAttachmentLocations);
+            #else
+                SPDLOG_LOGGER_WARN(Logger::logger(), "GraphicsPipelineOptions { dynamicRendering.dynamicOutputLocations } requires Vulkan SDK 1.4 with support for VK_KHR_dynamic_rendering_local_read");
+            #endif
+            // clang-format on
         }
     } else
 #endif
+    // RenderPass Rendering
     {
         // Note: at the moment this render pass isn't shared. It might make sense to do so at some point,
         // in which case, the renderPass handle will have to be added to vulkanDevice->renderPasses
