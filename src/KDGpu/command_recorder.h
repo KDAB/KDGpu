@@ -37,10 +37,10 @@ struct CommandRecorderOptions {
 
 struct BufferCopy {
     Handle<Buffer_t> src;
-    size_t srcOffset{ 0 };
+    DeviceSize srcOffset{ 0 };
     Handle<Buffer_t> dst;
-    size_t dstOffset{ 0 };
-    size_t byteSize{ 0 };
+    DeviceSize dstOffset{ 0 };
+    DeviceSize byteSize{ 0 };
 };
 
 struct BufferTextureCopyRegion {
