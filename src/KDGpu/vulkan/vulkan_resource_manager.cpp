@@ -151,6 +151,20 @@ bool testIfContainsAnyFlags(const KDGpu::Flags<F> &flags, std::span<const F> fla
     return std::ranges::any_of(flagsToTest, [&](F f) { return flags.testFlag(f); });
 }
 
+template<typename VulkanHandleType>
+inline uint64_t vulkanHandleToUint64(VulkanHandleType handle)
+{
+    // For opaque Vulkan handles, reinterpret through uintptr_t for platform independence
+    return static_cast<uint64_t>(reinterpret_cast<uintptr_t>(handle));
+}
+
+// Specialization for 64-bit handles that are already uint64_t
+template<>
+inline uint64_t vulkanHandleToUint64<uint64_t>(uint64_t handle)
+{
+    return handle;
+}
+
 } // namespace
 namespace KDGpu {
 
@@ -269,7 +283,7 @@ Handle<Instance_t> VulkanResourceManager::createInstance(const InstanceOptions &
         auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(vulkanInstance.instance, "vkCreateDebugUtilsMessengerEXT");
         if (func != nullptr) {
             if (func(vulkanInstance.instance, &debugUtilsCreateInfo, nullptr, &vulkanInstance.debugMessenger) != VK_SUCCESS)
-                vulkanInstance.debugMessenger = nullptr;
+                vulkanInstance.debugMessenger = VK_NULL_HANDLE;
         }
     }
 
@@ -862,7 +876,7 @@ Handle<Swapchain_t> VulkanResourceManager::createSwapchain(const Handle<Device_t
         return {};
     }
 
-    setObjectName(vulkanDevice, VK_OBJECT_TYPE_SWAPCHAIN_KHR, reinterpret_cast<uint64_t>(vkSwapchain), options.label);
+    setObjectName(vulkanDevice, VK_OBJECT_TYPE_SWAPCHAIN_KHR, vulkanHandleToUint64(vkSwapchain), options.label);
 
     const auto swapchainHandle = m_swapchains.emplace(VulkanSwapchain{
             vkSwapchain,
@@ -1004,7 +1018,7 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
     }
 #endif
 
-    setObjectName(vulkanDevice, VK_OBJECT_TYPE_IMAGE, reinterpret_cast<uint64_t>(vkImage), options.label);
+    setObjectName(vulkanDevice, VK_OBJECT_TYPE_IMAGE, vulkanHandleToUint64(vkImage), options.label);
 
     const auto vulkanTextureHandle = m_textures.emplace(VulkanTexture(
             vkImage,
@@ -1101,7 +1115,7 @@ Handle<TextureView_t> VulkanResourceManager::createTextureView(const Handle<Devi
         return {};
     }
 
-    setObjectName(vulkanDevice, VK_OBJECT_TYPE_IMAGE_VIEW, reinterpret_cast<uint64_t>(imageView), options.label);
+    setObjectName(vulkanDevice, VK_OBJECT_TYPE_IMAGE_VIEW, vulkanHandleToUint64(imageView), options.label);
 
     const auto vulkanTextureViewHandle = m_textureViews.emplace(VulkanTextureView(imageView, textureHandle, deviceHandle));
     return vulkanTextureViewHandle;
@@ -1197,7 +1211,7 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
         bufferDeviceAddress = vkGetBufferDeviceAddress(vulkanDevice->device, &addressInfo);
     }
 
-    setObjectName(vulkanDevice, VK_OBJECT_TYPE_BUFFER, reinterpret_cast<uint64_t>(vkBuffer), options.label);
+    setObjectName(vulkanDevice, VK_OBJECT_TYPE_BUFFER, vulkanHandleToUint64(vkBuffer), options.label);
 
     const auto vulkanBufferHandle = m_buffers.emplace(VulkanBuffer(vkBuffer, vmaAllocation, allocator, this, deviceHandle, memoryHandle, bufferDeviceAddress));
 
@@ -1594,7 +1608,7 @@ Handle<PipelineLayout_t> VulkanResourceManager::createPipelineLayout(const Handl
         return {};
     }
 
-    setObjectName(vulkanDevice, VK_OBJECT_TYPE_PIPELINE_LAYOUT, reinterpret_cast<uint64_t>(vkPipelineLayout), options.label);
+    setObjectName(vulkanDevice, VK_OBJECT_TYPE_PIPELINE_LAYOUT, vulkanHandleToUint64(vkPipelineLayout), options.label);
 
     // Store the results
     const auto vulkanPipelineLayoutHandle = m_pipelineLayouts.emplace(VulkanPipelineLayout(
@@ -1944,7 +1958,7 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
         return {};
     }
 
-    setObjectName(vulkanDevice, VK_OBJECT_TYPE_PIPELINE, reinterpret_cast<uint64_t>(vkPipeline), options.label);
+    setObjectName(vulkanDevice, VK_OBJECT_TYPE_PIPELINE, vulkanHandleToUint64(vkPipeline), options.label);
 
     // Create VulkanPipeline object and return handle
     const auto vulkanGraphicsPipelineHandle = m_graphicsPipelines.emplace(VulkanGraphicsPipeline(
@@ -2051,7 +2065,7 @@ Handle<ComputePipeline_t> VulkanResourceManager::createComputePipeline(const Han
         return {};
     }
 
-    setObjectName(vulkanDevice, VK_OBJECT_TYPE_PIPELINE, reinterpret_cast<uint64_t>(vkPipeline), options.label);
+    setObjectName(vulkanDevice, VK_OBJECT_TYPE_PIPELINE, vulkanHandleToUint64(vkPipeline), options.label);
 
     // Create VulkanPipeline object and return handle
     const auto vulkanComputePipelineHandle = m_computePipelines.emplace(VulkanComputePipeline(
@@ -2167,7 +2181,7 @@ Handle<RayTracingPipeline_t> VulkanResourceManager::createRayTracingPipeline(con
         return {};
     }
 
-    setObjectName(vulkanDevice, VK_OBJECT_TYPE_PIPELINE, reinterpret_cast<uint64_t>(vkPipeline), options.label);
+    setObjectName(vulkanDevice, VK_OBJECT_TYPE_PIPELINE, vulkanHandleToUint64(vkPipeline), options.label);
 
     // Create VulkanPipeline object and return handle
     const auto vulkanRayTracingPipelineHandle = m_rayTracingPipelines.emplace(VulkanRayTracingPipeline(
@@ -2253,7 +2267,7 @@ Handle<GpuSemaphore_t> VulkanResourceManager::createGpuSemaphore(const Handle<De
 #endif
     }
 
-    setObjectName(vulkanDevice, VK_OBJECT_TYPE_SEMAPHORE, reinterpret_cast<uint64_t>(vkSemaphore), options.label);
+    setObjectName(vulkanDevice, VK_OBJECT_TYPE_SEMAPHORE, vulkanHandleToUint64(vkSemaphore), options.label);
 
     const auto vulkanGpuSemaphoreHandle = m_gpuSemaphores.emplace(VulkanGpuSemaphore(
             vkSemaphore,
@@ -2439,7 +2453,7 @@ Handle<BindGroupPool_t> VulkanResourceManager::createBindGroupPool(const Handle<
         return {};
     }
 
-    setObjectName(vulkanDevice, VK_OBJECT_TYPE_DESCRIPTOR_POOL, reinterpret_cast<uint64_t>(pool), options.label);
+    setObjectName(vulkanDevice, VK_OBJECT_TYPE_DESCRIPTOR_POOL, vulkanHandleToUint64(pool), options.label);
 
     const auto vulkanBindGroupPoolHandle = m_bindGroupPools.emplace(VulkanBindGroupPool(pool, this, deviceHandle, options.maxBindGroupCount, options.flags));
     return vulkanBindGroupPoolHandle;
@@ -3360,7 +3374,7 @@ Handle<BindGroup_t> VulkanResourceManager::createBindGroup(const Handle<Device_t
         return {};
     }
 
-    setObjectName(vulkanDevice, VK_OBJECT_TYPE_DESCRIPTOR_SET, reinterpret_cast<uint64_t>(descriptorSet), options.label);
+    setObjectName(vulkanDevice, VK_OBJECT_TYPE_DESCRIPTOR_SET, vulkanHandleToUint64(descriptorSet), options.label);
 
     // Warn users that internalPools can't be reset/explicit destroyed since they have no user visible handles
     if (!options.implicitFree && useInternalPool) {
@@ -3470,7 +3484,7 @@ Handle<BindGroupLayout_t> VulkanResourceManager::createBindGroupLayout(const Han
         SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating pipeline layout: {}", result);
     }
 
-    setObjectName(vulkanDevice, VK_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT, reinterpret_cast<uint64_t>(vkDescriptorSetLayout), options.label);
+    setObjectName(vulkanDevice, VK_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT, vulkanHandleToUint64(vkDescriptorSetLayout), options.label);
 
     const auto vulkanBindGroupLayoutHandle = m_bindGroupLayouts.emplace(VulkanBindGroupLayout(vkDescriptorSetLayout, deviceHandle, options.bindings));
     return vulkanBindGroupLayoutHandle;
@@ -3542,7 +3556,7 @@ Handle<Sampler_t> VulkanResourceManager::createSampler(const Handle<Device_t> &d
         return {};
     }
 
-    setObjectName(vulkanDevice, VK_OBJECT_TYPE_SAMPLER, reinterpret_cast<uint64_t>(sampler), options.label);
+    setObjectName(vulkanDevice, VK_OBJECT_TYPE_SAMPLER, vulkanHandleToUint64(sampler), options.label);
 
     auto samplerHandle = m_samplers.emplace(VulkanSampler(sampler, deviceHandle));
     return samplerHandle;
@@ -3619,7 +3633,7 @@ Handle<Fence_t> VulkanResourceManager::createFence(const Handle<Device_t> &devic
 #endif
     }
 
-    setObjectName(vulkanDevice, VK_OBJECT_TYPE_FENCE, reinterpret_cast<uint64_t>(vkFence), options.label);
+    setObjectName(vulkanDevice, VK_OBJECT_TYPE_FENCE, vulkanHandleToUint64(vkFence), options.label);
 
     auto fenceHandle = m_fences.emplace(VulkanFence(vkFence, this, deviceHandle, externalFenceHandle));
     return fenceHandle;
@@ -3640,7 +3654,7 @@ VulkanFence *VulkanResourceManager::getFence(const Handle<Fence_t> &handle) cons
     return m_fences.get(handle);
 }
 
-void VulkanResourceManager::setObjectName(VulkanDevice *device, const VkObjectType type, const uint64_t handle, const std::string_view name)
+void VulkanResourceManager::setObjectName(VulkanDevice *device, VkObjectType type, uint64_t handle, std::string_view name)
 {
 #if defined(VK_EXT_debug_utils)
     if (device == nullptr || device->vkSetDebugUtilsObjectNameEXT == nullptr || name.empty()) {
@@ -3733,7 +3747,7 @@ Handle<AccelerationStructure_t> VulkanResourceManager::createAccelerationStructu
 
     auto accelerationStructureHandle = m_accelerationStructures.emplace(VulkanAccelerationStructure(deviceHandle, this, accelerationStructureKhr, backingBufferH, options.type, buildSizesInfoKhr, geometryInfoKhr.flags));
 
-    setObjectName(vulkanDevice, VK_OBJECT_TYPE_ACCELERATION_STRUCTURE_KHR, reinterpret_cast<uint64_t>(accelerationStructureKhr), options.label);
+    setObjectName(vulkanDevice, VK_OBJECT_TYPE_ACCELERATION_STRUCTURE_KHR, vulkanHandleToUint64(accelerationStructureKhr), options.label);
 
     return accelerationStructureHandle;
 #else
@@ -3792,7 +3806,7 @@ Handle<YCbCrConversion_t> VulkanResourceManager::createYCbCrConversion(const Han
         return {};
     }
 
-    setObjectName(vulkanDevice, VK_OBJECT_TYPE_SAMPLER_YCBCR_CONVERSION_KHR, reinterpret_cast<uint64_t>(vkYCbCrConversion), options.label);
+    setObjectName(vulkanDevice, VK_OBJECT_TYPE_SAMPLER_YCBCR_CONVERSION_KHR, vulkanHandleToUint64(vkYCbCrConversion), options.label);
 
     auto conversionHandle = m_yCbCrConversions.emplace(VulkanYCbCrConversion(vkYCbCrConversion, deviceHandle));
     return conversionHandle;

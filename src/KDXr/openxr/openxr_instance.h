@@ -56,7 +56,7 @@ struct KDXR_EXPORT OpenXrInstance {
 
     OpenXrResourceManager *openxrResourceManager{ nullptr };
     XrInstance instance{ XR_NULL_HANDLE };
-    XrDebugUtilsMessengerEXT debugMessenger{ nullptr };
+    XrDebugUtilsMessengerEXT debugMessenger{ XR_NULL_HANDLE };
     bool isOwned{ true };
     std::vector<ApiLayer> apiLayers;
     std::vector<Extension> extensions;
