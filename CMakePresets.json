@@ -23,6 +23,22 @@
             }
         },
         {
+            "name": "msvc_x86",
+            "hidden": true,
+            "architecture": {
+                "value": "x86",
+                "strategy": "external"
+            },
+            "toolset": {
+                "value": "host=x64",
+                "strategy": "external"
+            },
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "cl",
+                "CMAKE_CXX_COMPILER": "cl"
+            }
+        },
+        {
             "name": "clang",
             "hidden": true,
             "cacheVariables": {
@@ -40,7 +56,6 @@
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
                 "KDGPU_BUILD_TESTS": "ON",
-                "KDGPU_CODE_COVERAGE": "ON",
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
                 "CMAKE_VERBOSE_MAKEFILE": "ON"
             },
@@ -51,6 +66,9 @@
         {
             "name": "debug",
             "displayName": "Debug (Default)",
+            "cacheVariables": {
+                "KDGPU_CODE_COVERAGE": "ON"
+            },
             "inherits": [
                 "debug-base"
             ]
@@ -67,17 +85,17 @@
             "name": "debug-msvc_x64",
             "displayName": "Debug (msvc_x64)",
             "inherits": [
-                "configure-base",
+                "debug-base",
                 "msvc_x64"
-            ],
-            "binaryDir": "${sourceDir}/build/Debug",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
-                "KDGPU_BUILD_TESTS": "ON"
-            },
-            "environment": {
-                "KDGPUEXAMPLE_ASSET_PATH": "${sourceDir}/build/Debug/assets"
-            }
+            ]
+        },
+        {
+            "name": "debug-msvc_x86",
+            "displayName": "Debug (msvc_x86)",
+            "inherits": [
+                "debug-base",
+                "msvc_x86"
+            ]
         },
         {
             "name": "release",
@@ -203,6 +221,10 @@
         {
             "name": "debug-msvc_x64",
             "configurePreset": "debug-msvc_x64"
+        },
+        {
+            "name": "debug-msvc_x86",
+            "configurePreset": "debug-msvc_x86"
         },
         {
             "name": "release-msvc_x64",
