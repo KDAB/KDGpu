@@ -59,8 +59,8 @@ using HandleOrFD = std::variant<std::monostate, int, HANDLE>;
 
 struct MemoryHandle {
     HandleOrFD handle;
-    size_t allocationSize{ 0 };
-    size_t allocationOffset{ 0 };
+    DeviceSize allocationSize{ 0 };
+    DeviceSize allocationOffset{ 0 };
 
     friend bool operator==(const MemoryHandle &, const MemoryHandle &) = default;
 };

@@ -99,7 +99,11 @@ endif()
 
 find_package(CUDAToolkit QUIET)
 if(${CUDAToolkit_FOUND})
-    add_subdirectory(fragmentation)
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8) # CUDA typically only provides x64 libraries
+        add_subdirectory(fragmentation)
+    else()
+        message(STATUS "Skipping CUDA fragmentation tests (x86 target, CUDA is x64-only)")
+    endif()
 endif()
 
 if(KDGPU_CODE_COVERAGE)
