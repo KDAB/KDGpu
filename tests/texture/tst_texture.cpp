@@ -307,7 +307,7 @@ TEST_SUITE("Texture")
             // GIVEN
             Texture t = device.createTexture(TextureOptions{
                     .type = TextureType::TextureType2D,
-                    .format = Format::R8G8B8A8_SNORM,
+                    .format = Format::R8G8B8A8_UNORM,
                     .extent = { 512, 512, 1 },
                     .mipLevels = 8,
                     .usage = TextureUsageFlagBits::SampledBit | TextureUsageFlagBits::HostTransferBit | TextureUsageFlagBits::TransferDstBit,
@@ -376,9 +376,9 @@ TEST_SUITE("Texture")
             });
 
             // THEN -> No validation errors
-            std::ranges::all_of(rawImageData.begin(), rawImageData.end(), [](int rgba) {
+            CHECK(std::ranges::all_of(rawImageData.begin(), rawImageData.end(), [](int rgba) {
                 return rgba == 0xff0000ff;
-            });
+            }));
         }
 
         SUBCASE("Image -> Image -> Host")
@@ -386,7 +386,7 @@ TEST_SUITE("Texture")
             // GIVEN
             const TextureOptions textureOptions{
                 .type = TextureType::TextureType2D,
-                .format = Format::R8G8B8A8_SNORM,
+                .format = Format::R8G8B8A8_UNORM,
                 .extent = { 512, 512, 1 },
                 .mipLevels = 8,
                 .usage = TextureUsageFlagBits::HostTransferBit | TextureUsageFlagBits::TransferDstBit | TextureUsageFlagBits::TransferSrcBit,
@@ -484,9 +484,9 @@ TEST_SUITE("Texture")
             });
 
             // THEN -> No validation errors
-            std::ranges::all_of(rawImageData.begin(), rawImageData.end(), [](int rgba) {
+            CHECK(std::ranges::all_of(rawImageData.begin(), rawImageData.end(), [](int rgba) {
                 return rgba == 0xff0000ff;
-            });
+            }));
         }
     }
 #endif
