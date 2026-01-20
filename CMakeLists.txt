@@ -139,6 +139,55 @@ if("$ENV{VULKAN_SDK}" STREQUAL "")
     list(APPEND VCPKG_MANIFEST_FEATURES "vulkan-sdk")
 endif()
 
+# Deduce VCPKG_HOST_TRIPLET if not already set
+if(NOT DEFINED VCPKG_HOST_TRIPLET)
+
+    # Determine OS
+    if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
+        set(VCPKG_HOST_OS "windows")
+    elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
+        set(VCPKG_HOST_OS "linux")
+    elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
+        set(VCPKG_HOST_OS "osx")
+    endif()
+
+    # Determine architecture - use multiple fallbacks
+    if(CMAKE_HOST_SYSTEM_PROCESSOR)
+        set(PROCESSOR "${CMAKE_HOST_SYSTEM_PROCESSOR}")
+    elseif(APPLE)
+        # On macOS, try to detect ARM vs Intel
+        execute_process(
+            COMMAND uname -m
+            OUTPUT_VARIABLE PROCESSOR
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+    elseif(UNIX)
+        # On Linux, use uname
+        execute_process(
+            COMMAND uname -m
+            OUTPUT_VARIABLE PROCESSOR
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+    endif()
+
+    if(PROCESSOR MATCHES "x86_64|AMD64|amd64|x64")
+        set(VCPKG_HOST_ARCH "x64")
+    elseif(PROCESSOR MATCHES "x86|i686|i386")
+        set(VCPKG_HOST_ARCH "x86")
+    elseif(PROCESSOR MATCHES "aarch64|arm64")
+        set(VCPKG_HOST_ARCH "arm64")
+    elseif(PROCESSOR MATCHES "arm")
+        set(VCPKG_HOST_ARCH "arm")
+    else()
+        message(WARNING "Unknown processor: ${PROCESSOR}, defaulting to x64")
+        set(VCPKG_HOST_ARCH "x64")
+    endif()
+
+    # Construct triplet
+    set(VCPKG_HOST_TRIPLET "${VCPKG_HOST_ARCH}-${VCPKG_HOST_OS}")
+    message(STATUS "Deduced VCPKG_HOST_TRIPLET: ${VCPKG_HOST_TRIPLET}")
+endif()
+
 message(STATUS "Vcpkg manifest features: ${VCPKG_MANIFEST_FEATURES}")
 
 # Register Project once all vcpkg features have been set
