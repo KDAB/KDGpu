@@ -11,10 +11,15 @@
 # Vulkan_GLSLANG_VALIDATOR_EXECUTABLE by itself When requiring this version we
 # can remove the next block then
 if(NOT Vulkan_GLSLANG_VALIDATOR_EXECUTABLE)
+    message(STATUS "LOOKING FOR GLSLANG IN $ENV{VULKAN_SDK}/bin, "
+                   "${VCPKG_HOST_TRIPLET}/${VCPKG_TARGET_TRIPLET}/tools/glslang, "
+                   "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/tools/glslang"
+    )
     find_program(
         Vulkan_GLSLANG_VALIDATOR_EXECUTABLE
         NAMES glslangValidator
-        HINTS "$ENV{VULKAN_SDK}/bin" "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/tools/glslang"
+        HINTS "$ENV{VULKAN_SDK}/bin" "${VCPKG_INSTALLED_DIR}/${VCPKG_HOST_TRIPLET}/tools/glslang"
+              "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/tools/glslang"
               # Fallback: when using vcpkg to provide glslang and vulkan sdk
     )
 endif()
