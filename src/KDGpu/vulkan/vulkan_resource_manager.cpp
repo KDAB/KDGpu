@@ -540,7 +540,7 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     bufferDeviceFeature.bufferDeviceAddress = options.requestedFeatures.bufferDeviceAddress;
     addToChain(&bufferDeviceFeature);
 
-#if defined(VK_KHR_fragment_shading_rate)
+#if VK_KHR_fragment_shading_rate
     VkPhysicalDeviceFragmentShadingRateFeaturesKHR fragmentShadingRateFeatures{};
     fragmentShadingRateFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADING_RATE_FEATURES_KHR;
     fragmentShadingRateFeatures.pipelineFragmentShadingRate = options.requestedFeatures.pipelineFragmentShadingRate;
@@ -549,7 +549,7 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     addToChain(&fragmentShadingRateFeatures);
 #endif
 
-#if defined(VK_KHR_acceleration_structure)
+#if VK_KHR_acceleration_structure
     VkPhysicalDeviceAccelerationStructureFeaturesKHR accelerationStructureFeaturesKhr{};
     if (options.requestedFeatures.accelerationStructures) {
         // Enable raytracing acceleration structure
@@ -559,7 +559,7 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     }
 #endif
 
-#if defined(VK_KHR_ray_tracing_pipeline)
+#if VK_KHR_ray_tracing_pipeline
     VkPhysicalDeviceRayTracingPipelineFeaturesKHR raytracingFeaturesKhr{};
 
     // When running with RenderDoc (as of 1.39) it appears that options.requestedFeatures.rayTracingPipeline returns true
@@ -580,7 +580,7 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     }
 #endif
 
-#if defined(VK_EXT_mesh_shader)
+#if VK_EXT_mesh_shader
     VkPhysicalDeviceMeshShaderFeaturesEXT meshShaderFeatures{};
     if (options.requestedFeatures.meshShader) {
         // Enable Mesh/Task shading
@@ -588,7 +588,7 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
         meshShaderFeatures.taskShader = options.requestedFeatures.taskShader;
         meshShaderFeatures.meshShader = options.requestedFeatures.meshShader;
         meshShaderFeatures.multiviewMeshShader = options.requestedFeatures.multiviewMeshShader;
-#if defined(VK_KHR_fragment_shading_rate)
+#if VK_KHR_fragment_shading_rate
         // Requires to have VkPhysicalDeviceFragmentShadingRateFeaturesKHR enabled
         meshShaderFeatures.primitiveFragmentShadingRateMeshShader =
                 options.requestedFeatures.primitiveFragmentShadingRate &&
@@ -601,7 +601,7 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     }
 #endif
 
-#if defined(VK_EXT_host_image_copy)
+#if VK_EXT_host_image_copy
     VkPhysicalDeviceHostImageCopyFeaturesEXT hostImageCopyFeatures{};
     if (options.requestedFeatures.hostImageCopy) {
         // Enable HostImage copy
@@ -611,7 +611,7 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     }
 #endif
 
-#if defined(VK_KHR_sampler_ycbcr_conversion)
+#if VK_KHR_sampler_ycbcr_conversion
     VkPhysicalDeviceSamplerYcbcrConversionFeaturesKHR ycbcrConversionFeatures{};
     if (options.requestedFeatures.samplerYCbCrConversion) {
         // Enable yCbCr sampler conversion
@@ -640,7 +640,7 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
         addToChain(&deviceGroupInfo);
     }
 
-#if defined(VK_KHR_synchronization2)
+#if VK_KHR_synchronization2
     // Enable the VK_KHR_Synchronization2 extension features by chaining this into the createInfo chain.
     VkPhysicalDeviceSynchronization2FeaturesKHR sync2Features = {};
     sync2Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES_KHR;
@@ -648,7 +648,7 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     addToChain(&sync2Features);
 #endif
 
-#if defined(VK_KHR_dynamic_rendering)
+#if VK_KHR_dynamic_rendering
     VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamicRenderingFeatures{};
     if (options.requestedFeatures.dynamicRendering) {
         // Enable dynamic rendering
@@ -658,7 +658,7 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     }
 #endif
 
-#if defined(VK_KHR_dynamic_rendering_local_read)
+#if VK_KHR_dynamic_rendering_local_read
     VkPhysicalDeviceDynamicRenderingLocalReadFeaturesKHR dynamicLocalReadFeatures{};
     if (options.requestedFeatures.dynamicRenderingLocalRead) {
         dynamicLocalReadFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_LOCAL_READ_FEATURES_KHR;
@@ -667,7 +667,7 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     }
 #endif
 
-#if defined(VK_KHR_swapchain_maintenance1)
+#if VK_KHR_swapchain_maintenance1
     VkPhysicalDeviceSwapchainMaintenance1FeaturesKHR swapchainMaintenanceFeatures{};
     if (options.requestedFeatures.swapchainMaintenance1) {
         swapchainMaintenanceFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SWAPCHAIN_MAINTENANCE_1_FEATURES_KHR;
@@ -988,7 +988,7 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
         allocInfo.flags = VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
     }
 
-#if defined(VK_EXT_image_drm_format_modifier)
+#if VK_EXT_image_drm_format_modifier
     VkImageDrmFormatModifierListCreateInfoEXT vkImageDrmFormatModifierListCreateInfo = {};
     if (options.tiling == TextureTiling::DrmFormatModifier) {
         vkImageDrmFormatModifierListCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_DRM_FORMAT_MODIFIER_LIST_CREATE_INFO_EXT;
@@ -1018,7 +1018,7 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
             : MemoryHandle{};
 
     uint64_t drmFormatModifier = 0;
-#if defined(VK_EXT_image_drm_format_modifier)
+#if VK_EXT_image_drm_format_modifier
     if (options.tiling == TextureTiling::DrmFormatModifier) {
         VkImageDrmFormatModifierPropertiesEXT modifierProps = {};
         modifierProps.sType = VK_STRUCTURE_TYPE_IMAGE_DRM_FORMAT_MODIFIER_PROPERTIES_EXT;
@@ -1102,7 +1102,7 @@ Handle<TextureView_t> VulkanResourceManager::createTextureView(const Handle<Devi
         }
     }
 
-#if defined(VK_KHR_sampler_ycbcr_conversion)
+#if VK_KHR_sampler_ycbcr_conversion
     VkSamplerYcbcrConversionKHR yCbCrConversion{ VK_NULL_HANDLE };
     VkSamplerYcbcrConversionInfoKHR yCbCrInfo{ .sType = VK_STRUCTURE_TYPE_SAMPLER_YCBCR_CONVERSION_INFO_KHR };
 
@@ -1878,11 +1878,11 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
         chainCurrent = n;
     };
 
-#if defined(VK_KHR_dynamic_rendering)
+#if VK_KHR_dynamic_rendering
     VkPipelineRenderingCreateInfoKHR pipelineDynamicRenderingCreateInfo{};
 
     // clang-format off
-    #if defined(VK_KHR_dynamic_rendering_local_read)
+    #if VK_KHR_dynamic_rendering_local_read
     VkRenderingInputAttachmentIndexInfoKHR inputAttachmentLocations{ .sType = VK_STRUCTURE_TYPE_RENDERING_INPUT_ATTACHMENT_INDEX_INFO_KHR };
     VkRenderingAttachmentLocationInfoKHR outputAttachmentLocations{ .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_LOCATION_INFO_KHR };
     #endif
@@ -1912,7 +1912,7 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
         // Input Attachments Locations
         if (options.dynamicRendering.dynamicInputLocations) {
             // clang-format off
-            #if defined(VK_KHR_dynamic_rendering_local_read)
+            #if VK_KHR_dynamic_rendering_local_read
             inputDepthLocation = (options.dynamicRendering.dynamicInputLocations->inputDepthAttachment.enabled) ? options.dynamicRendering.dynamicInputLocations->inputDepthAttachment.remappedIndex : VK_ATTACHMENT_UNUSED;
             inputStencilLocation = (options.dynamicRendering.dynamicInputLocations->inputStencilAttachment.enabled) ? options.dynamicRendering.dynamicInputLocations->inputStencilAttachment.remappedIndex : VK_ATTACHMENT_UNUSED;
 
@@ -1935,7 +1935,7 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
         // Output Attachments Locations
         if (options.dynamicRendering.dynamicOutputLocations) {
             // clang-format off
-            #if defined(VK_KHR_dynamic_rendering_local_read)
+            #if VK_KHR_dynamic_rendering_local_read
             outputLocations.reserve(options.dynamicRendering.dynamicOutputLocations->outputAttachments.size());
             for (const DynamicAttachmentMapping &mapping : options.dynamicRendering.dynamicOutputLocations->outputAttachments) {
                 outputLocations.push_back(mapping.enabled ? mapping.remappedIndex : VK_ATTACHMENT_UNUSED);
@@ -2103,7 +2103,7 @@ VulkanComputePipeline *VulkanResourceManager::getComputePipeline(const Handle<Co
 Handle<RayTracingPipeline_t> VulkanResourceManager::createRayTracingPipeline(const Handle<Device_t> &deviceHandle,
                                                                              const RayTracingPipelineOptions &options)
 {
-#if defined(VK_KHR_ray_tracing_pipeline)
+#if VK_KHR_ray_tracing_pipeline
     VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
 
     // Fetch the specified pipeline layout
@@ -2243,7 +2243,7 @@ Handle<GpuSemaphore_t> VulkanResourceManager::createGpuSemaphore(const Handle<De
 
     HandleOrFD externalSemaphoreHandle{};
     if (options.externalSemaphoreHandleType == ExternalSemaphoreHandleTypeFlagBits::OpaqueFD) {
-#if defined(VK_KHR_external_semaphore_fd)
+#if VK_KHR_external_semaphore_fd
         if (vulkanDevice->vkGetSemaphoreFdKHR) {
             VkSemaphoreGetFdInfoKHR vulkanSemaphoreGetFdInfoKHR = {
                 .sType = VK_STRUCTURE_TYPE_SEMAPHORE_GET_FD_INFO_KHR,
@@ -2259,7 +2259,7 @@ Handle<GpuSemaphore_t> VulkanResourceManager::createGpuSemaphore(const Handle<De
         assert(false);
 #endif
     } else if (options.externalSemaphoreHandleType == ExternalSemaphoreHandleTypeFlagBits::OpaqueWin32) {
-#if defined(VK_KHR_external_fence_win32)
+#if VK_KHR_external_fence_win32
         if (vulkanDevice->vkGetSemaphoreWin32HandleKHR) {
             VkSemaphoreGetWin32HandleInfoKHR vulkanSemaphoreGetHandleInfoKHR = {
                 .sType = VK_STRUCTURE_TYPE_SEMAPHORE_GET_WIN32_HANDLE_INFO_KHR,
@@ -2731,7 +2731,7 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
                                                                                            const Handle<CommandRecorder_t> &commandRecorderHandle,
                                                                                            const RenderPassCommandRecorderWithDynamicRenderingOptions &options)
 {
-#if defined(VK_KHR_dynamic_rendering)
+#if VK_KHR_dynamic_rendering
     VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
 
     uint32_t fbWidth = options.framebufferWidth;
@@ -3543,7 +3543,7 @@ Handle<Sampler_t> VulkanResourceManager::createSampler(const Handle<Device_t> &d
 
     samplerInfo.unnormalizedCoordinates = !options.normalizedCoordinates;
 
-#if defined(VK_KHR_sampler_ycbcr_conversion)
+#if VK_KHR_sampler_ycbcr_conversion
     VkSamplerYcbcrConversionKHR yCbCrConversion{ VK_NULL_HANDLE };
     VkSamplerYcbcrConversionInfoKHR yCbCrInfo{ .sType = VK_STRUCTURE_TYPE_SAMPLER_YCBCR_CONVERSION_INFO_KHR };
 
@@ -3609,7 +3609,7 @@ Handle<Fence_t> VulkanResourceManager::createFence(const Handle<Device_t> &devic
 
     HandleOrFD externalFenceHandle{};
     if (options.externalFenceHandleType == ExternalFenceHandleTypeFlagBits::OpaqueFD) {
-#if defined(VK_KHR_external_fence_fd)
+#if VK_KHR_external_fence_fd
         if (vulkanDevice->vkGetFenceFdKHR) {
             VkFenceGetFdInfoKHR vulkanFenceGetFdInfoKHR = {
                 .sType = VK_STRUCTURE_TYPE_FENCE_GET_FD_INFO_KHR,
@@ -3625,7 +3625,7 @@ Handle<Fence_t> VulkanResourceManager::createFence(const Handle<Device_t> &devic
         assert(false);
 #endif
     } else if (options.externalFenceHandleType == ExternalFenceHandleTypeFlagBits::OpaqueWin32) {
-#if defined(VK_KHR_external_fence_win32)
+#if VK_KHR_external_fence_win32
         if (vulkanDevice->vkGetFenceWin32HandleKHR) {
             VkFenceGetWin32HandleInfoKHR vulkanFenceGetHandleInfoKHR = {
                 .sType = VK_STRUCTURE_TYPE_FENCE_GET_WIN32_HANDLE_INFO_KHR,
@@ -3665,7 +3665,7 @@ VulkanFence *VulkanResourceManager::getFence(const Handle<Fence_t> &handle) cons
 
 void VulkanResourceManager::setObjectName(VulkanDevice *device, VkObjectType type, uint64_t handle, std::string_view name)
 {
-#if defined(VK_EXT_debug_utils)
+#if VK_EXT_debug_utils
     if (device == nullptr || device->vkSetDebugUtilsObjectNameEXT == nullptr || name.empty()) {
         return;
     }
@@ -3681,7 +3681,7 @@ void VulkanResourceManager::setObjectName(VulkanDevice *device, VkObjectType typ
 
 Handle<AccelerationStructure_t> VulkanResourceManager::createAccelerationStructure(const Handle<Device_t> &deviceHandle, const AccelerationStructureOptions &options)
 {
-#if defined(VK_KHR_acceleration_structure)
+#if VK_KHR_acceleration_structure
     VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
 
     std::vector<VkAccelerationStructureGeometryKHR> geometries;
@@ -3767,7 +3767,7 @@ Handle<AccelerationStructure_t> VulkanResourceManager::createAccelerationStructu
 
 void VulkanResourceManager::deleteAccelerationStructure(const Handle<AccelerationStructure_t> &handle)
 {
-#if defined(VK_KHR_acceleration_structure)
+#if VK_KHR_acceleration_structure
     VulkanAccelerationStructure *accelerationStructure = m_accelerationStructures.get(handle);
     VulkanDevice *vulkanDevice = m_devices.get(accelerationStructure->deviceHandle);
 
@@ -3786,7 +3786,7 @@ VulkanAccelerationStructure *VulkanResourceManager::getAccelerationStructure(con
 
 Handle<YCbCrConversion_t> VulkanResourceManager::createYCbCrConversion(const Handle<Device_t> &deviceHandle, const YCbCrConversionOptions &options)
 {
-#if defined(VK_KHR_sampler_ycbcr_conversion)
+#if VK_KHR_sampler_ycbcr_conversion
     VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
 
     assert(vulkanDevice->requestedFeatures.samplerYCbCrConversion);
@@ -3826,7 +3826,7 @@ Handle<YCbCrConversion_t> VulkanResourceManager::createYCbCrConversion(const Han
 
 void VulkanResourceManager::deleteYCbCrConversion(const Handle<YCbCrConversion_t> &handle)
 {
-#if defined(VK_KHR_sampler_ycbcr_conversion)
+#if VK_KHR_sampler_ycbcr_conversion
     VulkanYCbCrConversion *conversion = m_yCbCrConversions.get(handle);
     VulkanDevice *vulkanDevice = m_devices.get(conversion->deviceHandle);
     vulkanDevice->vkDestroySamplerYcbcrConversionKHR(vulkanDevice->device, conversion->yCbCrConversion, nullptr);
@@ -3836,7 +3836,7 @@ void VulkanResourceManager::deleteYCbCrConversion(const Handle<YCbCrConversion_t
 
 VulkanYCbCrConversion *VulkanResourceManager::getYCbCrConversion(const Handle<YCbCrConversion_t> &handle) const
 {
-#if defined(VK_KHR_sampler_ycbcr_conversion)
+#if VK_KHR_sampler_ycbcr_conversion
     return m_yCbCrConversions.get(handle);
 #endif
     return nullptr;
@@ -3987,12 +3987,12 @@ MemoryHandle VulkanResourceManager::retrieveExternalMemoryHandle(VulkanInstance 
 #if !defined(KDGPU_PLATFORM_WIN32)
     constexpr std::array handleTypes{
         ExternalMemoryHandleTypeFlagBits::OpaqueFD,
-#if defined(VK_EXT_external_memory_dma_buf)
+#if VK_EXT_external_memory_dma_buf
         ExternalMemoryHandleTypeFlagBits::DmaBuf,
 #endif
     };
     if (testIfContainsAnyFlags<ExternalMemoryHandleTypeFlagBits>(handleType, handleTypes)) {
-#if defined(VK_KHR_external_memory_fd)
+#if VK_KHR_external_memory_fd
         if (instance->vkGetMemoryFdKHR) {
             VkMemoryGetFdInfoKHR vkMemoryGetFdInfoKHR = {
                 .sType = VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR,
@@ -4020,7 +4020,7 @@ MemoryHandle VulkanResourceManager::retrieveExternalMemoryHandle(VulkanInstance 
     };
 
     if (testIfContainsAnyFlags<ExternalMemoryHandleTypeFlagBits>(handleType, handleTypes)) {
-#if defined(VK_KHR_external_memory_win32)
+#if VK_KHR_external_memory_win32
         if (instance->vkGetMemoryWin32HandleKHR) {
             VkMemoryGetWin32HandleInfoKHR vkGetWin32HandleInfoKHR = {
                 .sType = VK_STRUCTURE_TYPE_MEMORY_GET_WIN32_HANDLE_INFO_KHR,

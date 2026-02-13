@@ -56,11 +56,11 @@ struct KDGPU_EXPORT VulkanInstance {
     PFN_vkGetMemoryWin32HandleKHR vkGetMemoryWin32HandleKHR{ nullptr };
 #endif
 
-#if defined(VK_KHR_external_memory_fd)
+#if VK_KHR_external_memory_fd
     PFN_vkGetMemoryFdKHR vkGetMemoryFdKHR{ nullptr };
 #endif
 
-#if defined(VK_EXT_image_drm_format_modifier)
+#if VK_EXT_image_drm_format_modifier
     PFN_vkGetImageDrmFormatModifierPropertiesEXT vkGetImageDrmFormatModifierPropertiesEXT{ nullptr };
 #endif
 

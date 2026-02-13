@@ -424,7 +424,7 @@ TEST_SUITE("RenderPassCommandRecorder")
         }
     }
 
-#if defined(VK_KHR_push_descriptor)
+#if VK_KHR_push_descriptor
     TEST_CASE("RenderPassCommandRecorder - PushBindGroup")
     {
         Device device = discreteGPUAdapter->createDevice();
@@ -1056,7 +1056,7 @@ TEST_SUITE("RenderPassCommandRecorder")
         }
     }
 
-#if defined(VK_KHR_dynamic_rendering)
+#if VK_KHR_dynamic_rendering
     TEST_CASE("RenderPassCommandRecorder - Dynamic Rendering" * doctest::skip(!hasDynamicRenderingSupport))
     {
         // GIVEN

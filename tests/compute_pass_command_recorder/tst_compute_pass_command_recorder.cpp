@@ -337,7 +337,7 @@ TEST_SUITE("ComputePassCommandRecorder")
         }
     }
 
-#if defined(VK_KHR_push_descriptor)
+#if VK_KHR_push_descriptor
     TEST_CASE("PushBindGroup" * doctest::skip((computeAdapter == nullptr || !(computeAdapter->properties().pushBindGroupProperties.maxPushBindGroups > 0))))
     {
         REQUIRE(computeAdapter);

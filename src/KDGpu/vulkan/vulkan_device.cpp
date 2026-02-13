@@ -53,7 +53,7 @@ VulkanDevice::VulkanDevice(VkDevice _device,
     for (uint32_t i = 0; i < queueTypeCount; ++i)
         commandPools[i] = VK_NULL_HANDLE;
 
-#if defined(VK_EXT_debug_utils)
+#if VK_EXT_debug_utils
     const auto instanceExtensions = vulkanInstance->extensions();
     for (const auto &extension : instanceExtensions) {
         if (extension.name == VK_EXT_DEBUG_UTILS_EXTENSION_NAME) {
@@ -65,7 +65,7 @@ VulkanDevice::VulkanDevice(VkDevice _device,
     }
 #endif
 
-#if defined(VK_KHR_synchronization2)
+#if VK_KHR_synchronization2
     // Check to see if we have the VK_KHR_synchronization2 extension or not
     if (vulkanAdapter->supportsSynchronization2) {
         const auto adapterExtensions = vulkanAdapter->extensions();
@@ -80,7 +80,7 @@ VulkanDevice::VulkanDevice(VkDevice _device,
     }
 #endif
 
-#if defined(VK_KHR_acceleration_structure)
+#if VK_KHR_acceleration_structure
     if (vulkanAdapter->queryAdapterFeatures().accelerationStructures) {
         const auto adapterExtensions = vulkanAdapter->extensions();
         for (const auto &extension : adapterExtensions) {
@@ -109,7 +109,7 @@ VulkanDevice::VulkanDevice(VkDevice _device,
     }
 #endif
 
-#if defined(VK_KHR_ray_tracing_pipeline)
+#if VK_KHR_ray_tracing_pipeline
     if (vulkanAdapter->queryAdapterFeatures().rayTracingPipeline) {
         const auto adapterExtensions = vulkanAdapter->extensions();
         for (const auto &extension : adapterExtensions) {
@@ -131,7 +131,7 @@ VulkanDevice::VulkanDevice(VkDevice _device,
     }
 #endif
 
-#if defined(VK_EXT_mesh_shader)
+#if VK_EXT_mesh_shader
     if (vulkanAdapter->queryAdapterFeatures().taskShader && vulkanAdapter->queryAdapterFeatures().meshShader) {
         const auto adapterExtensions = vulkanAdapter->extensions();
         for (const auto &extension : adapterExtensions) {
@@ -146,19 +146,19 @@ VulkanDevice::VulkanDevice(VkDevice _device,
     }
 #endif
 
-#if defined(VK_KHR_external_semaphore_fd)
+#if VK_KHR_external_semaphore_fd
     vkGetSemaphoreFdKHR = (PFN_vkGetSemaphoreFdKHR)vkGetDeviceProcAddr(device, "vkGetSemaphoreFdKHR");
 #endif
 
-#if defined(VK_KHR_external_fence_fd)
+#if VK_KHR_external_fence_fd
     vkGetFenceFdKHR = (PFN_vkGetFenceFdKHR)vkGetDeviceProcAddr(device, "vkGetFenceFdKHR");
 #endif
 
-#if defined(VK_KHR_external_semaphore_win32)
+#if VK_KHR_external_semaphore_win32
     vkGetSemaphoreWin32HandleKHR = (PFN_vkGetSemaphoreWin32HandleKHR)vkGetDeviceProcAddr(device, "vkGetSemaphoreWin32HandleKHR");
 #endif
 
-#if defined(VK_KHR_external_fence_win32)
+#if VK_KHR_external_fence_win32
     vkGetFenceWin32HandleKHR = (PFN_vkGetFenceWin32HandleKHR)vkGetDeviceProcAddr(device, "vkGetFenceWin32HandleKHR");
 #endif
 
@@ -175,7 +175,7 @@ VulkanDevice::VulkanDevice(VkDevice _device,
         this->vkCreateRenderPass2 = ::vkCreateRenderPass2;
     }
 
-#if defined(VK_EXT_host_image_copy)
+#if VK_EXT_host_image_copy
     if (vulkanAdapter->queryAdapterFeatures().hostImageCopy) {
         const auto adapterExtensions = vulkanAdapter->extensions();
         for (const auto &extension : adapterExtensions) {
@@ -189,7 +189,7 @@ VulkanDevice::VulkanDevice(VkDevice _device,
     }
 #endif
 
-#if defined(VK_KHR_sampler_ycbcr_conversion)
+#if VK_KHR_sampler_ycbcr_conversion
     if (vulkanAdapter->queryAdapterFeatures().samplerYCbCrConversion) {
         const auto adapterExtensions = vulkanAdapter->extensions();
         for (const auto &extension : adapterExtensions) {
@@ -201,18 +201,18 @@ VulkanDevice::VulkanDevice(VkDevice _device,
     }
 #endif
 
-#if defined(VK_KHR_push_descriptor)
+#if VK_KHR_push_descriptor
     this->vkCmdPushDescriptorSetKHR = (PFN_vkCmdPushDescriptorSetKHR)vkGetDeviceProcAddr(device, "vkCmdPushDescriptorSetKHR");
 #endif
 
-#if defined(VK_KHR_dynamic_rendering)
+#if VK_KHR_dynamic_rendering
     if (vulkanAdapter->queryAdapterFeatures().dynamicRendering) {
         this->vkCmdBeginRenderingKHR = (PFN_vkCmdBeginRenderingKHR)vkGetDeviceProcAddr(device, "vkCmdBeginRenderingKHR");
         this->vkCmdEndRenderingKHR = (PFN_vkCmdEndRenderingKHR)vkGetDeviceProcAddr(device, "vkCmdEndRenderingKHR");
     }
 #endif
 
-#if defined(VK_KHR_dynamic_rendering_local_read)
+#if VK_KHR_dynamic_rendering_local_read
     if (vulkanAdapter->queryAdapterFeatures().dynamicRenderingLocalRead) {
         this->vkCmdSetRenderingAttachmentLocationsKHR = (PFN_vkCmdSetRenderingAttachmentLocationsKHR)vkGetDeviceProcAddr(device, "vkCmdSetRenderingAttachmentLocationsKHR");
         this->vkCmdSetRenderingInputAttachmentIndicesKHR = (PFN_vkCmdSetRenderingInputAttachmentIndicesKHR)vkGetDeviceProcAddr(device, "vkCmdSetRenderingInputAttachmentIndicesKHR");

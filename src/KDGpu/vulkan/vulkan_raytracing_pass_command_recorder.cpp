@@ -91,7 +91,7 @@ VkStridedDeviceAddressRegionKHR buildVkStridedDeviceAddressRegion(
 
 void VulkanRayTracingPassCommandRecorder::traceRays(const RayTracingCommand &rayTracingCommand) const
 {
-#if defined(VK_KHR_ray_tracing_pipeline)
+#if VK_KHR_ray_tracing_pipeline
     VulkanDevice *device = vulkanResourceManager->getDevice(deviceHandle);
     if (device->vkCmdTraceRaysKHR) {
 
@@ -132,7 +132,7 @@ void VulkanRayTracingPassCommandRecorder::pushBindGroup(uint32_t group,
                                                         std::span<const BindGroupEntry> bindGroupEntries,
                                                         const Handle<PipelineLayout_t> &pipelineLayout) const
 {
-#if defined(VK_KHR_push_descriptor)
+#if VK_KHR_push_descriptor
     VulkanDevice *device = vulkanResourceManager->getDevice(deviceHandle);
     if (device->vkCmdPushDescriptorSetKHR) {
 

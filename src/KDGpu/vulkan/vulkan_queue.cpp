@@ -154,7 +154,7 @@ PresentResult VulkanQueue::present(const PresentOptions &options)
     presentInfo.pImageIndices = m_imageIndices.data();
     presentInfo.pResults = m_presentResults.data();
 
-#if defined(VK_KHR_swapchain_maintenance1)
+#if VK_KHR_swapchain_maintenance1
     VkSwapchainPresentFenceInfoKHR presentFenceInfo = {};
     presentFenceInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_PRESENT_FENCE_INFO_KHR;
     presentFenceInfo.swapchainCount = presentInfo.swapchainCount;

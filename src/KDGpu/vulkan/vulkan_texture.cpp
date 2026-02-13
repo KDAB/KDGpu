@@ -46,7 +46,7 @@ VulkanTexture::VulkanTexture(VkImage _image,
 
 void VulkanTexture::hostLayoutTransition(const HostLayoutTransition &transition)
 {
-#if defined(VK_EXT_host_image_copy)
+#if VK_EXT_host_image_copy
     VulkanDevice *vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
     assert(vulkanDevice->vkTransitionImageLayout != nullptr);
 
@@ -73,7 +73,7 @@ void VulkanTexture::hostLayoutTransition(const HostLayoutTransition &transition)
 
 void VulkanTexture::copyHostMemoryToTexture(const HostMemoryToTextureCopy &copy)
 {
-#if defined(VK_EXT_host_image_copy)
+#if VK_EXT_host_image_copy
     VulkanDevice *vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
     assert(vulkanDevice->vkCopyMemoryToImage != nullptr);
 
@@ -115,7 +115,7 @@ void VulkanTexture::copyHostMemoryToTexture(const HostMemoryToTextureCopy &copy)
 
 void VulkanTexture::copyTextureToHostMemory(const TextureToHostMemoryCopy &copy)
 {
-#if defined(VK_EXT_host_image_copy)
+#if VK_EXT_host_image_copy
     VulkanDevice *vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
     assert(vulkanDevice->vkCopyImageToMemory != nullptr);
 
@@ -157,7 +157,7 @@ void VulkanTexture::copyTextureToHostMemory(const TextureToHostMemoryCopy &copy)
 
 void VulkanTexture::copyTextureToTextureHost(const TextureToTextureCopyHost &copy)
 {
-#if defined(VK_EXT_host_image_copy)
+#if VK_EXT_host_image_copy
     VulkanDevice *vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
     assert(vulkanDevice->vkCopyImageToImage != nullptr);
 

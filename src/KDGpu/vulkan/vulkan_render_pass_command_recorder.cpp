@@ -194,7 +194,7 @@ void VulkanRenderPassCommandRecorder::drawIndexedIndirect(std::span<const DrawIn
 
 void VulkanRenderPassCommandRecorder::drawMeshTasks(const DrawMeshCommand &drawCommand) const
 {
-#if defined(VK_EXT_mesh_shader)
+#if VK_EXT_mesh_shader
     VulkanDevice *device = vulkanResourceManager->getDevice(deviceHandle);
     if (device->vkCmdDrawMeshTasksEXT) {
         device->vkCmdDrawMeshTasksEXT(commandBuffer,
@@ -215,7 +215,7 @@ void VulkanRenderPassCommandRecorder::drawMeshTasks(std::span<const DrawMeshComm
 
 void VulkanRenderPassCommandRecorder::drawMeshTasksIndirect(const DrawMeshIndirectCommand &drawCommand) const
 {
-#if defined(VK_EXT_mesh_shader)
+#if VK_EXT_mesh_shader
     VulkanDevice *device = vulkanResourceManager->getDevice(deviceHandle);
     if (device->vkCmdDrawMeshTasksIndirectEXT) {
         VulkanBuffer *vulkanBuffer = vulkanResourceManager->getBuffer(drawCommand.buffer);
@@ -265,7 +265,7 @@ void VulkanRenderPassCommandRecorder::pushBindGroup(uint32_t group,
                                                     std::span<const BindGroupEntry> bindGroupEntries,
                                                     const Handle<PipelineLayout_t> &pipelineLayout) const
 {
-#if defined(VK_KHR_push_descriptor)
+#if VK_KHR_push_descriptor
     VulkanDevice *device = vulkanResourceManager->getDevice(deviceHandle);
     if (device->vkCmdPushDescriptorSetKHR) {
 
@@ -315,7 +315,7 @@ void VulkanRenderPassCommandRecorder::nextSubpass() const
 
 void VulkanRenderPassCommandRecorder::setOutputAttachmentMapping(std::span<const uint32_t> remappedOutputs) const
 {
-#if defined(VK_KHR_dynamic_rendering_local_read)
+#if VK_KHR_dynamic_rendering_local_read
     assert(dynamicRendering);
     VulkanDevice *device = vulkanResourceManager->getDevice(deviceHandle);
     if (device->vkCmdSetRenderingAttachmentLocationsKHR) {
@@ -334,7 +334,7 @@ void VulkanRenderPassCommandRecorder::setInputAttachmentMapping(std::span<const 
                                                                 std::optional<uint32_t> depthAttachmentIndex,
                                                                 std::optional<uint32_t> stencilAttachmentIndex) const
 {
-#if defined(VK_KHR_dynamic_rendering_local_read)
+#if VK_KHR_dynamic_rendering_local_read
     assert(dynamicRendering);
     VulkanDevice *device = vulkanResourceManager->getDevice(deviceHandle);
     if (device->vkCmdSetRenderingInputAttachmentIndicesKHR) {
@@ -358,7 +358,7 @@ void VulkanRenderPassCommandRecorder::setInputAttachmentMapping(std::span<const 
 void VulkanRenderPassCommandRecorder::end() const
 {
     if (dynamicRendering) {
-#if defined(VK_KHR_dynamic_rendering)
+#if VK_KHR_dynamic_rendering
         VulkanDevice *device = vulkanResourceManager->getDevice(deviceHandle);
         device->vkCmdEndRenderingKHR(commandBuffer);
 #endif

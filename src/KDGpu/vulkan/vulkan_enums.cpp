@@ -313,7 +313,7 @@ VkAccessFlagBits accessFlagsToVkAccessFlagBits(AccessFlags accessFlags)
     return static_cast<VkAccessFlagBits>(static_cast<uint32_t>(accessFlags.toInt()));
 }
 
-#if defined(VK_KHR_synchronization2)
+#if VK_KHR_synchronization2
 VkAccessFlagBits2KHR accessFlagsToVkAccessFlagBits2(AccessFlags accessFlags)
 {
     return static_cast<VkAccessFlagBits2KHR>(accessFlags.toInt());
@@ -328,7 +328,7 @@ VkPipelineStageFlagBits pipelineStageFlagsToVkPipelineStageFlagBits(PipelineStag
     return static_cast<VkPipelineStageFlagBits>(static_cast<uint32_t>(pipelineFlags.toInt()));
 }
 
-#if defined(VK_KHR_synchronization2)
+#if VK_KHR_synchronization2
 VkPipelineStageFlagBits2KHR pipelineStageFlagsToVkPipelineStageFlagBits2(PipelineStageFlags pipelineFlags)
 {
     return static_cast<VkPipelineStageFlagBits2KHR>(pipelineFlags.toInt());
@@ -435,7 +435,7 @@ VkDependencyFlags dependencyFlagsToVkDependencyFlags(DependencyFlags flags)
     return static_cast<VkDependencyFlags>(flags.toInt());
 }
 
-#if defined(VK_EXT_host_image_copy)
+#if VK_EXT_host_image_copy
 VkHostImageCopyFlagsEXT hostImageCopyFlagsToVkHostImageCopyFlags(HostImageCopyFlags flags)
 {
     return static_cast<VkHostImageCopyFlagsEXT>(flags.toInt());

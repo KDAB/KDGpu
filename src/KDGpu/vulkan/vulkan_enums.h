@@ -99,7 +99,7 @@ VkSamplerAddressMode addressModeToVkSamplerAddressMode(AddressMode mode);
 VkAccessFlagBits accessFlagsToVkAccessFlagBits(AccessFlags accessFlags);
 VkPipelineStageFlagBits pipelineStageFlagsToVkPipelineStageFlagBits(PipelineStageFlags pipelineFlags);
 
-#if defined(VK_KHR_synchronization2)
+#if VK_KHR_synchronization2
 VkAccessFlagBits2KHR accessFlagsToVkAccessFlagBits2(AccessFlags accessFlags);
 VkPipelineStageFlagBits2KHR pipelineStageFlagsToVkPipelineStageFlagBits2(PipelineStageFlags pipelineFlags);
 #endif
@@ -142,7 +142,7 @@ VkBuildAccelerationStructureFlagsKHR accelerationStructureFlagsToVkBuildAccelera
 
 VkDependencyFlags dependencyFlagsToVkDependencyFlags(DependencyFlags flags);
 
-#if defined(VK_EXT_host_image_copy)
+#if VK_EXT_host_image_copy
 VkHostImageCopyFlagsEXT hostImageCopyFlagsToVkHostImageCopyFlags(HostImageCopyFlags flags);
 #endif
 

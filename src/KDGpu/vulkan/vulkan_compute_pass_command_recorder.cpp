@@ -106,7 +106,7 @@ void VulkanComputePassCommandRecorder::pushBindGroup(uint32_t group,
                                                      std::span<const BindGroupEntry> bindGroupEntries,
                                                      const Handle<PipelineLayout_t> &pipelineLayout) const
 {
-#if defined(VK_KHR_push_descriptor)
+#if VK_KHR_push_descriptor
     VulkanDevice *device = vulkanResourceManager->getDevice(deviceHandle);
     if (device->vkCmdPushDescriptorSetKHR) {
 
