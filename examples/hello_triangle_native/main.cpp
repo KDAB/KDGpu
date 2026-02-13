@@ -184,6 +184,12 @@ int main()
     // We can easily query the adapter for various features, properties and limits.
     SPDLOG_LOGGER_DEBUG(appLogger, "maxBoundDescriptorSets = {}", selectedAdapter->properties().limits.maxBoundDescriptorSets);
     SPDLOG_LOGGER_DEBUG(appLogger, "multiDrawIndirect = {}", selectedAdapter->features().multiDrawIndirect);
+
+    if (!selectedAdapter->features().swapchainMaintenance1) {
+        SPDLOG_LOGGER_CRITICAL(appLogger, "Selected adapter does not support VK_KHR_swapchain_maintenance1 which is required for proper presentation synchronization. Aborting...");
+        return -1;
+    }
+
     //![5]
 
     //![6]
@@ -206,7 +212,9 @@ int main()
 
     //![8]
     // Now we can create a device from the selected adapter that we can then use to interact with the GPU.
-    Device device = selectedAdapter->createDevice();
+    Device device = selectedAdapter->createDevice(DeviceOptions{
+            .requestedFeatures = selectedAdapter->features(),
+    });
     Queue queue = device.queues()[0];
     SPDLOG_LOGGER_INFO(appLogger, "Created device with {} queues", device.queues().size());
 
@@ -230,10 +238,28 @@ int main()
                                  surfaceCapabilities.maxImageExtent.height),
         };
 
+        // Choose a presentation mode from the ones supported
+        constexpr std::array<PresentMode, 4> preferredPresentModes = {
+            PresentMode::Mailbox, PresentMode::FifoRelaxed, PresentMode::Fifo,
+            PresentMode::Immediate
+        };
+        const auto &availableModes = swapchainProperties.presentModes;
+        KDGpu::PresentMode selectedPresentMode = PresentMode::Fifo; // Fallback to guaranteed available mode
+
+        for (const auto &presentMode : preferredPresentModes) {
+            const auto it =
+                    std::find(availableModes.begin(), availableModes.end(), presentMode);
+            if (it != availableModes.end()) {
+                selectedPresentMode = presentMode;
+                break;
+            }
+        }
+
         const SwapchainOptions swapchainOptions = {
             .surface = surface.handle(),
             .minImageCount = getSuitableImageCount(swapchainProperties.capabilities),
             .imageExtent = { .width = swapchainExtent.width, .height = swapchainExtent.height },
+            .presentMode = selectedPresentMode,
             .oldSwapchain = swapchain,
         };
 
@@ -475,9 +501,6 @@ int main()
                 .commandBuffers = { commands },
                 .waitSemaphores = { imageAvailableSemaphore },
                 .signalSemaphores = { renderCompleteSemaphore },
-                //![16]
-                .signalFence = frameInFlightFence,
-                //![16]
         });
         //![13]
 
@@ -488,10 +511,13 @@ int main()
         queue.present(PresentOptions{
                 .waitSemaphores = { renderCompleteSemaphore },
                 .swapchainInfos = { { .swapchain = swapchain, .imageIndex = currentImageIndex } },
+                //![16]
+                .signalFence = { frameInFlightFence },
+                //![16]
         });
         //![14]
 
-        // Wait for frame to have completed its execution
+        // Wait for frame to have completed its execution and presentation
         //![18]
         frameInFlightFence.wait();
         //![18]
