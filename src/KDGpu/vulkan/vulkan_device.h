@@ -99,13 +99,13 @@ struct KDGPU_EXPORT VulkanDevice {
     std::unordered_map<VulkanFramebufferKey, Handle<Framebuffer_t>> framebuffers;
     VkQueryPool timestampQueryPool{ VK_NULL_HANDLE };
 
-#if defined(VK_EXT_debug_utils)
+#if VK_EXT_debug_utils
     PFN_vkSetDebugUtilsObjectNameEXT vkSetDebugUtilsObjectNameEXT{ nullptr };
     PFN_vkCmdBeginDebugUtilsLabelEXT vkCmdBeginDebugUtilsLabelEXT{ nullptr };
     PFN_vkCmdEndDebugUtilsLabelEXT vkCmdEndDebugUtilsLabelEXT{ nullptr };
 #endif
 
-#if defined(VK_KHR_synchronization2)
+#if VK_KHR_synchronization2
     PFN_vkCmdPipelineBarrier2KHR vkCmdPipelineBarrier2{ nullptr };
 #endif
 
@@ -119,16 +119,16 @@ struct KDGPU_EXPORT VulkanDevice {
     PFN_vkGetFenceWin32HandleKHR vkGetFenceWin32HandleKHR{ nullptr };
 #endif
 
-#if defined(VK_KHR_external_semaphore_fd)
+#if VK_KHR_external_semaphore_fd
     PFN_vkGetSemaphoreFdKHR vkGetSemaphoreFdKHR{ nullptr };
 #endif
-#if defined(VK_KHR_external_fence_fd)
+#if VK_KHR_external_fence_fd
     PFN_vkGetFenceFdKHR vkGetFenceFdKHR{ nullptr };
 #endif
 
     PFN_vkCreateRenderPass2 vkCreateRenderPass2{ nullptr };
 
-#if defined(VK_KHR_acceleration_structure)
+#if VK_KHR_acceleration_structure
     PFN_vkCmdBuildAccelerationStructuresKHR vkCmdBuildAccelerationStructuresKHR{ nullptr };
     PFN_vkGetAccelerationStructureDeviceAddressKHR vkGetAccelerationStructureDeviceAddressKHR{ nullptr };
     PFN_vkCreateAccelerationStructureKHR vkCreateAccelerationStructureKHR{ nullptr };
@@ -136,39 +136,39 @@ struct KDGPU_EXPORT VulkanDevice {
     PFN_vkGetAccelerationStructureBuildSizesKHR vkGetAccelerationStructureBuildSizesKHR{ nullptr };
 #endif
 
-#if defined(VK_KHR_ray_tracing_pipeline)
+#if VK_KHR_ray_tracing_pipeline
     PFN_vkCreateRayTracingPipelinesKHR vkCreateRayTracingPipelinesKHR{ nullptr };
     PFN_vkCmdTraceRaysKHR vkCmdTraceRaysKHR{ nullptr };
     PFN_vkGetRayTracingShaderGroupHandlesKHR vkGetRayTracingShaderGroupHandlesKHR{ nullptr };
 #endif
 
-#if defined(VK_EXT_host_image_copy)
+#if VK_EXT_host_image_copy
     PFN_vkTransitionImageLayoutEXT vkTransitionImageLayout{ nullptr };
     PFN_vkCopyImageToMemoryEXT vkCopyImageToMemory{ nullptr };
     PFN_vkCopyMemoryToImageEXT vkCopyMemoryToImage{ nullptr };
     PFN_vkCopyImageToImageEXT vkCopyImageToImage{ nullptr };
 #endif
 
-#if defined(VK_EXT_mesh_shader)
+#if VK_EXT_mesh_shader
     PFN_vkCmdDrawMeshTasksEXT vkCmdDrawMeshTasksEXT{ nullptr };
     PFN_vkCmdDrawMeshTasksIndirectEXT vkCmdDrawMeshTasksIndirectEXT{ nullptr };
 #endif
 
-#if defined(VK_KHR_sampler_ycbcr_conversion)
+#if VK_KHR_sampler_ycbcr_conversion
     PFN_vkCreateSamplerYcbcrConversionKHR vkCreateSamplerYcbcrConversionKHR{ nullptr };
     PFN_vkDestroySamplerYcbcrConversionKHR vkDestroySamplerYcbcrConversionKHR{ nullptr };
 #endif
 
-#if defined(VK_KHR_push_descriptor)
+#if VK_KHR_push_descriptor
     PFN_vkCmdPushDescriptorSetKHR vkCmdPushDescriptorSetKHR{ nullptr };
 #endif
 
-#if defined(VK_KHR_dynamic_rendering)
+#if VK_KHR_dynamic_rendering
     PFN_vkCmdBeginRenderingKHR vkCmdBeginRenderingKHR{ nullptr };
     PFN_vkCmdEndRenderingKHR vkCmdEndRenderingKHR{ nullptr };
 #endif
 
-#if defined(VK_KHR_dynamic_rendering_local_read)
+#if VK_KHR_dynamic_rendering_local_read
     PFN_vkCmdSetRenderingAttachmentLocationsKHR vkCmdSetRenderingAttachmentLocationsKHR{ nullptr };
     PFN_vkCmdSetRenderingInputAttachmentIndicesKHR vkCmdSetRenderingInputAttachmentIndicesKHR{ nullptr };
 #endif

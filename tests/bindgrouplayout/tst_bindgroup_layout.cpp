@@ -251,7 +251,7 @@ TEST_SUITE("BindGroupLayout")
         }
     }
 
-#if defined(VK_KHR_push_descriptor)
+#if VK_KHR_push_descriptor
     TEST_CASE("Push BindGroup")
     {
         // GIVEN

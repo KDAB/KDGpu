@@ -21,7 +21,7 @@ struct Device_t;
 
 struct KDGPU_EXPORT VulkanYCbCrConversion {
 
-#if defined(VK_KHR_sampler_ycbcr_conversion)
+#if VK_KHR_sampler_ycbcr_conversion
     explicit VulkanYCbCrConversion(VkSamplerYcbcrConversionKHR _yCbCrConversion,
                                    const Handle<Device_t> &_deviceHandle);
 

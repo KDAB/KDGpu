@@ -150,7 +150,7 @@ TEST_SUITE("Sampler")
         }
     }
 
-#if defined(VK_KHR_sampler_ycbcr_conversion)
+#if VK_KHR_sampler_ycbcr_conversion
     TEST_CASE("YUV Sampling" * doctest::skip(!discreteGPUAdapter->features().samplerYCbCrConversion))
     {
         REQUIRE(discreteGPUAdapter->features().samplerYCbCrConversion);

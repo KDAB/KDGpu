@@ -12,7 +12,7 @@
 
 namespace KDGpu {
 
-#if defined(VK_KHR_sampler_ycbcr_conversion)
+#if VK_KHR_sampler_ycbcr_conversion
 VulkanYCbCrConversion::VulkanYCbCrConversion(VkSamplerYcbcrConversionKHR _yCbCrConversion,
                                              const Handle<Device_t> &_deviceHandle)
     : yCbCrConversion(_yCbCrConversion)

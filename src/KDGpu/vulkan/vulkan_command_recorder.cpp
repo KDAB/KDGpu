@@ -342,7 +342,7 @@ void VulkanCommandRecorder::memoryBarrier(const MemoryBarrierOptions &options) c
 {
     auto *vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
 
-#if defined(VK_KHR_synchronization2)
+#if VK_KHR_synchronization2
     if (vulkanDevice->vkCmdPipelineBarrier2 != nullptr) {
         std::vector<VkMemoryBarrier2KHR> memoryBarriers;
         memoryBarriers.reserve(options.memoryBarriers.size());
@@ -382,7 +382,7 @@ void VulkanCommandRecorder::memoryBarrier(const MemoryBarrierOptions &options) c
                              memoryBarriers.size(), memoryBarriers.data(),
                              0, nullptr,
                              0, nullptr);
-#if defined(VK_KHR_synchronization2)
+#if VK_KHR_synchronization2
     }
 #endif
 }
@@ -392,7 +392,7 @@ void VulkanCommandRecorder::memoryBarrier(const MemoryBarrierOptions &options) c
 void VulkanCommandRecorder::bufferMemoryBarrier(const BufferMemoryBarrierOptions &options) const
 {
     auto *vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
-#if defined(VK_KHR_synchronization2)
+#if VK_KHR_synchronization2
     if (vulkanDevice->vkCmdPipelineBarrier2 != nullptr) {
         VkBufferMemoryBarrier2KHR vkBufferBarrier = {};
         vkBufferBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2_KHR;
@@ -435,7 +435,7 @@ void VulkanCommandRecorder::bufferMemoryBarrier(const BufferMemoryBarrierOptions
                              0, nullptr,
                              1, &vkBufferBarrier,
                              0, nullptr);
-#if defined(VK_KHR_synchronization2)
+#if VK_KHR_synchronization2
     }
 #endif
 }
@@ -445,7 +445,7 @@ void VulkanCommandRecorder::bufferMemoryBarrier(const BufferMemoryBarrierOptions
 void VulkanCommandRecorder::textureMemoryBarrier(const TextureMemoryBarrierOptions &options) const
 {
     auto *vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
-#if defined(VK_KHR_synchronization2)
+#if VK_KHR_synchronization2
     if (vulkanDevice->vkCmdPipelineBarrier2 != nullptr) {
         VkImageMemoryBarrier2KHR vkImageBarrier = {};
         vkImageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2_KHR;
@@ -504,7 +504,7 @@ void VulkanCommandRecorder::textureMemoryBarrier(const TextureMemoryBarrierOptio
                              0, nullptr,
                              0, nullptr,
                              1, &vkImageBarrier);
-#if defined(VK_KHR_synchronization2)
+#if VK_KHR_synchronization2
     }
 #endif
 }
@@ -534,7 +534,7 @@ void VulkanCommandRecorder::resolveTexture(const TextureResolveOptions &options)
 // NOLINTBEGIN(readability-function-cognitive-complexity)
 void VulkanCommandRecorder::buildAccelerationStructures(const BuildAccelerationStructureOptions &options) const
 {
-#if defined(VK_KHR_acceleration_structure)
+#if VK_KHR_acceleration_structure
     auto *vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
 
     // So it doesn't go out of scope and destroy itself before the cmd is called
@@ -718,7 +718,7 @@ void VulkanCommandRecorder::buildAccelerationStructures(const BuildAccelerationS
 
 void VulkanCommandRecorder::beginDebugLabel(const DebugLabelOptions &options) const
 {
-#if defined(VK_EXT_debug_utils)
+#if VK_EXT_debug_utils
     auto *vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
     if (vulkanDevice->vkCmdBeginDebugUtilsLabelEXT != nullptr) {
         VkDebugUtilsLabelEXT labelsInfo{
@@ -735,7 +735,7 @@ void VulkanCommandRecorder::beginDebugLabel(const DebugLabelOptions &options) co
 
 void VulkanCommandRecorder::endDebugLabel() const
 {
-#if defined(VK_EXT_debug_utils)
+#if VK_EXT_debug_utils
     auto *vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
     if (vulkanDevice->vkCmdBeginDebugUtilsLabelEXT != nullptr)
         vulkanDevice->vkCmdEndDebugUtilsLabelEXT(commandBuffer);
