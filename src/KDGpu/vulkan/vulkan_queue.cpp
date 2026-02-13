@@ -154,6 +154,31 @@ PresentResult VulkanQueue::present(const PresentOptions &options)
     presentInfo.pImageIndices = m_imageIndices.data();
     presentInfo.pResults = m_presentResults.data();
 
+#if defined(VK_KHR_swapchain_maintenance1)
+    VkSwapchainPresentFenceInfoKHR presentFenceInfo = {};
+    presentFenceInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_PRESENT_FENCE_INFO_KHR;
+    presentFenceInfo.swapchainCount = presentInfo.swapchainCount;
+
+    std::vector<VkFence> presentVkFencesToSignal(presentFenceInfo.swapchainCount, VK_NULL_HANDLE);
+    assert(options.signalFence.size() <= presentVkFencesToSignal.size());
+    size_t lastFenceIndex = 0;
+    for (const auto &fenceHandle : options.signalFence) {
+        VulkanFence *vulkanFence = vulkanResourceManager->getFence(fenceHandle);
+        if (vulkanFence != nullptr) {
+            presentVkFencesToSignal[lastFenceIndex++] = vulkanFence->fence;
+        }
+    }
+    presentFenceInfo.pFences = presentVkFencesToSignal.data();
+
+    // Set VkSwapchainPresentFenceInfoKHR on VkPresentInfoKHR
+    presentInfo.pNext = &presentFenceInfo;
+#else
+    if (!options.signalFence.empty()) {
+        // We have fences to signal but the extension isn't available
+        SPDLOG_LOGGER_WARN(Logger::logger(), "PresentOptions included signal fences but VK_EXT_swapchain_maintenance1 is not available, ignoring fences");
+    }
+#endif
+
     const VkResult result = vkQueuePresentKHR(queue, &presentInfo);
     return mapVkResultToPresentResult(result);
 }

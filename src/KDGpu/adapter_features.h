@@ -119,6 +119,7 @@ struct AdapterFeatures {
     bool samplerYCbCrConversion{ false };
     bool dynamicRendering{ false };
     bool dynamicRenderingLocalRead{ false };
+    bool swapchainMaintenance1{ false };
 };
 
 /*! @} */
