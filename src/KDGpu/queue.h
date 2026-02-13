@@ -57,6 +57,7 @@ struct SwapchainPresentInfo {
 struct PresentOptions {
     std::vector<Handle<GpuSemaphore_t>> waitSemaphores;
     std::vector<SwapchainPresentInfo> swapchainInfos;
+    std::vector<Handle<Fence_t>> signalFence; // Per Swapchain
 };
 
 /**

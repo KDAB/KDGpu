@@ -484,6 +484,12 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
     addToChain(&dynamicLocalReadFeatures);
 #endif
 
+#if defined(VK_KHR_swapchain_maintenance1)
+    VkPhysicalDeviceSwapchainMaintenance1FeaturesKHR swapchainMaintenanceFeatures{};
+    swapchainMaintenanceFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SWAPCHAIN_MAINTENANCE_1_FEATURES_KHR;
+    addToChain(&swapchainMaintenanceFeatures);
+#endif
+
     vkGetPhysicalDeviceFeatures2(physicalDevice, &deviceFeatures2);
     const VkPhysicalDeviceFeatures &deviceFeatures = deviceFeatures2.features;
 
@@ -632,6 +638,10 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
 
 #if defined(VK_KHR_dynamic_rendering_local_read)
     features.dynamicRenderingLocalRead = static_cast<bool>(dynamicLocalReadFeatures.dynamicRenderingLocalRead);
+#endif
+
+#if defined(VK_KHR_swapchain_maintenance1)
+    features.swapchainMaintenance1 = swapchainMaintenanceFeatures.swapchainMaintenance1;
 #endif
 
     return features;

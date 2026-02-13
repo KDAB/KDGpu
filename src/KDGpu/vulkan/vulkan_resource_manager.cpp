@@ -667,6 +667,15 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     }
 #endif
 
+#if defined(VK_KHR_swapchain_maintenance1)
+    VkPhysicalDeviceSwapchainMaintenance1FeaturesKHR swapchainMaintenanceFeatures{};
+    if (options.requestedFeatures.swapchainMaintenance1) {
+        swapchainMaintenanceFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SWAPCHAIN_MAINTENANCE_1_FEATURES_KHR;
+        swapchainMaintenanceFeatures.swapchainMaintenance1 = static_cast<bool>(options.requestedFeatures.swapchainMaintenance1);
+        addToChain(&swapchainMaintenanceFeatures);
+    }
+#endif
+
     VkDeviceCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     createInfo.pNext = &physicalDeviceFeatures2;

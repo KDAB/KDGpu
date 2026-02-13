@@ -77,6 +77,9 @@ std::vector<const char *> getDefaultRequestedDeviceExtensions()
 {
     std::vector<const char *> extensions{
         VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+#if defined(VK_KHR_swapchain_maintenance1)
+        VK_KHR_SWAPCHAIN_MAINTENANCE_1_EXTENSION_NAME,
+#endif
 #if defined(VK_EXT_host_image_copy)
         VK_KHR_COPY_COMMANDS_2_EXTENSION_NAME, // Needed by VK_EXT_HOST_IMAGE_COPY_EXTENSION_NAME
         VK_KHR_FORMAT_FEATURE_FLAGS_2_EXTENSION_NAME, // Needed by VK_EXT_HOST_IMAGE_COPY_EXTENSION_NAME
