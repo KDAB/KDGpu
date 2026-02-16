@@ -153,6 +153,67 @@ TEST_SUITE("RayTracingPipeline")
             // THEN
             CHECK(c.isValid());
         }
+
+        SUBCASE("Create pipeline with cache")
+        {
+            // GIVEN
+            PipelineCache cache = device.createPipelineCache();
+            CHECK(cache.isValid());
+
+            PipelineLayoutOptions pipelineLayoutOptions{
+                .bindGroupLayouts = { bindGroupLayout },
+            };
+            PipelineLayout pipelineLayout = device.createPipelineLayout(pipelineLayoutOptions);
+
+            const RayTracingPipelineOptions rayTracingPipelineOptions{
+                .shaderStages = {
+                        ShaderStage{
+                                .shaderModule = rayTracingGenShader.handle(),
+                                .stage = ShaderStageFlagBits::RaygenBit,
+                        },
+                        ShaderStage{
+                                .shaderModule = rayTracingMissShader.handle(),
+                                .stage = ShaderStageFlagBits::MissBit,
+                        },
+                        ShaderStage{
+                                .shaderModule = rayTracingClosestShader.handle(),
+                                .stage = ShaderStageFlagBits::ClosestHitBit,
+                        },
+                },
+                .shaderGroups = {
+                        // Gen
+                        RayTracingShaderGroupOptions{
+                                .type = RayTracingShaderGroupType::General,
+                                .generalShaderIndex = 0,
+                        },
+                        // Miss
+                        RayTracingShaderGroupOptions{
+                                .type = RayTracingShaderGroupType::General,
+                                .generalShaderIndex = 1,
+                        },
+                        // Closest Hit
+                        RayTracingShaderGroupOptions{
+                                .type = RayTracingShaderGroupType::TrianglesHit,
+                                .generalShaderIndex = 0,
+                                .closestHitShaderIndex = 2,
+                        },
+                },
+                .layout = pipelineLayout,
+                .pipelineCache = cache.handle(),
+            };
+
+            // WHEN
+            RayTracingPipeline c = device.createRayTracingPipeline(rayTracingPipelineOptions);
+
+            // THEN
+            CHECK(c.isValid());
+
+            // WHEN
+            const std::vector<uint8_t> cacheData = cache.getData();
+
+            // THEN
+            CHECK(cacheData.size() > 0);
+        }
     }
 
     TEST_CASE("Destruction" * doctest::skip(!supportsRayTracing))

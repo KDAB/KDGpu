@@ -27,6 +27,7 @@ set(SOURCES
     graphics_pipeline.cpp
     gpu_semaphore.cpp
     instance.cpp
+    pipeline_cache.cpp
     pipeline_layout.cpp
     queue.cpp
     raytracing_pass_command_recorder.cpp
@@ -62,6 +63,7 @@ set(SOURCES
     vulkan/vulkan_graphics_api.cpp
     vulkan/vulkan_graphics_pipeline.cpp
     vulkan/vulkan_instance.cpp
+    vulkan/vulkan_pipeline_cache.cpp
     vulkan/vulkan_pipeline_layout.cpp
     vulkan/vulkan_queue.cpp
     vulkan/vulkan_raytracing_pass_command_recorder.cpp
@@ -114,6 +116,8 @@ set(HEADERS
     instance.h
     handle.h
     memory_barrier.h
+    pipeline_cache_options.h
+    pipeline_cache.h
     pipeline_layout.h
     pipeline_layout_options.h
     pool.h
@@ -167,6 +171,7 @@ set(HEADERS
     vulkan/vulkan_graphics_api.h
     vulkan/vulkan_graphics_pipeline.h
     vulkan/vulkan_instance.h
+    vulkan/vulkan_pipeline_cache.h
     vulkan/vulkan_pipeline_layout.h
     vulkan/vulkan_queue.h
     vulkan/vulkan_raytracing_pass_command_recorder.h

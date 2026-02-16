@@ -12,7 +12,6 @@
 
 #include <KDGpu/handle.h>
 #include <KDGpu/gpu_core.h>
-#include <KDGpu/handle.h>
 #include <KDFoundation/hashutils.h>
 
 #include <vector>
@@ -23,6 +22,7 @@ namespace KDGpu {
 struct PipelineLayout_t;
 struct ShaderModule_t;
 struct RenderPass_t;
+struct PipelineCache_t;
 
 struct ShaderStage {
     Handle<ShaderModule_t> shaderModule;
@@ -180,6 +180,9 @@ struct GraphicsPipelineOptions {
     // Use implicit RenderPass if none specified
     Handle<RenderPass_t> renderPass;
     uint32_t subpassIndex{ 0 };
+
+    // Optional pipeline cache to speed up pipeline creation
+    Handle<PipelineCache_t> pipelineCache;
 
     // Only available if DynamicRendering feature is available and enabled
     struct DynamicRendering {

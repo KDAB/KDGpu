@@ -40,10 +40,12 @@
 #include <KDGpu/vulkan/vulkan_raytracing_pipeline.h>
 #include <KDGpu/vulkan/vulkan_raytracing_pass_command_recorder.h>
 #include <KDGpu/vulkan/vulkan_ycbcr_conversion.h>
+#include <KDGpu/vulkan/vulkan_pipeline_cache.h>
 
 #include <KDGpu/instance.h>
 #include <KDGpu/pool.h>
 #include <KDGpu/kdgpu_export.h>
+#include <KDGpu/pipeline_cache_options.h>
 
 #include <vulkan/vulkan.h>
 
@@ -210,6 +212,10 @@ public:
     void deleteYCbCrConversion(const Handle<YCbCrConversion_t> &handle);
     [[nodiscard]] VulkanYCbCrConversion *getYCbCrConversion(const Handle<YCbCrConversion_t> &handle) const;
 
+    Handle<PipelineCache_t> createPipelineCache(const Handle<Device_t> &deviceHandle, const PipelineCacheOptions &options);
+    void deletePipelineCache(const Handle<PipelineCache_t> &handle);
+    [[nodiscard]] VulkanPipelineCache *getPipelineCache(const Handle<PipelineCache_t> &handle) const;
+
     [[nodiscard]] std::string getMemoryStats(const Handle<Device_t> &device) const;
 
     [[nodiscard]] KDGpu::Format formatFromTextureView(const Handle<TextureView_t> &viewHandle) const;
@@ -285,6 +291,7 @@ private:
     Pool<VulkanRayTracingPassCommandRecorder, RayTracingPassCommandRecorder_t> m_rayTracingPassCommandRecorders{ 32 };
     Pool<VulkanCommandBuffer, CommandBuffer_t> m_commandBuffers{ 128 };
     Pool<VulkanRenderPass, RenderPass_t> m_renderPasses{ 16 };
+    Pool<VulkanPipelineCache, PipelineCache_t> m_pipelineCaches{ 4 };
     Pool<VulkanFramebuffer, Framebuffer_t> m_framebuffers{ 16 };
     Pool<VulkanSampler, Sampler_t> m_samplers{ 16 };
     Pool<VulkanFence, Fence_t> m_fences{ 16 };
