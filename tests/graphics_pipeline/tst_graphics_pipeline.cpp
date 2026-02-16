@@ -14,6 +14,7 @@
 #include <KDGpu/instance.h>
 #include <KDGpu/render_pass.h>
 #include <KDGpu/render_pass_options.h>
+#include <KDGpu/pipeline_cache.h>
 #include <KDGpu/vulkan/vulkan_graphics_api.h>
 
 #include <KDUtils/file.h>
@@ -585,6 +586,97 @@ TEST_SUITE("GraphicsPipeline")
 
             // THEN
             CHECK(hashValue1 == hashValue2);
+        }
+    }
+
+    TEST_CASE("Pipeline Cache")
+    {
+        SUBCASE("Create pipeline with cache")
+        {
+            // GIVEN
+            PipelineCache cache = device.createPipelineCache();
+            CHECK(cache.isValid());
+
+            PipelineLayoutOptions pipelineLayoutOptions{};
+            PipelineLayout pipelineLayout = device.createPipelineLayout(pipelineLayoutOptions);
+            const Format depthFormat = selectDepthFormat(adapter);
+            REQUIRE(depthFormat != Format::UNDEFINED);
+
+            GraphicsPipelineOptions pipelineOptions = {
+                .shaderStages = {
+                        { .shaderModule = vertexShader.handle(), .stage = ShaderStageFlagBits::VertexBit },
+                        { .shaderModule = fragmentShader.handle(), .stage = ShaderStageFlagBits::FragmentBit },
+                },
+                .layout = pipelineLayout.handle(),
+                .vertex = {
+                        .buffers = { { .binding = 0, .stride = 2 * 4 * sizeof(float) } },
+                        .attributes = { { .location = 0, .binding = 0, .format = Format::R32G32B32A32_SFLOAT }, { .location = 1, .binding = 0, .format = Format::R32G32B32A32_SFLOAT, .offset = 4 * sizeof(float) } },
+                },
+                .renderTargets = { { .format = Format::R8G8B8A8_UNORM } },
+                .depthStencil = {
+                        .format = depthFormat,
+                        .depthWritesEnabled = true,
+                        .depthCompareOperation = CompareOperation::Less,
+                },
+                .pipelineCache = cache.handle()
+            };
+
+            // WHEN
+            GraphicsPipeline pipeline = device.createGraphicsPipeline(pipelineOptions);
+
+            // THEN
+            CHECK(pipeline.isValid());
+
+            // WHEN
+            const std::vector<uint8_t> cacheData = cache.getData();
+
+            // THEN
+            CHECK(cacheData.size() > 0);
+        }
+
+        SUBCASE("Create multiple pipelines with same cache")
+        {
+            // GIVEN
+            PipelineCache cache = device.createPipelineCache();
+            CHECK(cache.isValid());
+
+            PipelineLayoutOptions pipelineLayoutOptions{};
+            PipelineLayout pipelineLayout = device.createPipelineLayout(pipelineLayoutOptions);
+            const Format depthFormat = selectDepthFormat(adapter);
+            REQUIRE(depthFormat != Format::UNDEFINED);
+
+            GraphicsPipelineOptions pipelineOptions = {
+                .shaderStages = {
+                        { .shaderModule = vertexShader.handle(), .stage = ShaderStageFlagBits::VertexBit },
+                        { .shaderModule = fragmentShader.handle(), .stage = ShaderStageFlagBits::FragmentBit },
+                },
+                .layout = pipelineLayout.handle(),
+                .vertex = {
+                        .buffers = { { .binding = 0, .stride = 2 * 4 * sizeof(float) } },
+                        .attributes = { { .location = 0, .binding = 0, .format = Format::R32G32B32A32_SFLOAT }, { .location = 1, .binding = 0, .format = Format::R32G32B32A32_SFLOAT, .offset = 4 * sizeof(float) } },
+                },
+                .renderTargets = { { .format = Format::R8G8B8A8_UNORM } },
+                .depthStencil = {
+                        .format = depthFormat,
+                        .depthWritesEnabled = true,
+                        .depthCompareOperation = CompareOperation::Less,
+                },
+                .pipelineCache = cache.handle()
+            };
+
+            // WHEN - Create multiple pipelines with the same cache
+            GraphicsPipeline pipeline1 = device.createGraphicsPipeline(pipelineOptions);
+            GraphicsPipeline pipeline2 = device.createGraphicsPipeline(pipelineOptions);
+
+            // THEN
+            CHECK(pipeline1.isValid());
+            CHECK(pipeline2.isValid());
+
+            // WHEN
+            const std::vector<uint8_t> cacheData = cache.getData();
+
+            // THEN
+            CHECK(cacheData.size() > 0);
         }
     }
 }

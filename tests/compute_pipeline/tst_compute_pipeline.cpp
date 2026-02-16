@@ -12,6 +12,7 @@
 #include <KDGpu/compute_pipeline_options.h>
 #include <KDGpu/device.h>
 #include <KDGpu/instance.h>
+#include <KDGpu/pipeline_cache.h>
 #include <KDGpu/vulkan/vulkan_graphics_api.h>
 
 #include <KDUtils/file.h>
@@ -245,6 +246,71 @@ TEST_SUITE("ComputePipeline")
 
             // THEN
             CHECK(c.isValid());
+        }
+    }
+
+    TEST_CASE("Pipeline Cache")
+    {
+        SUBCASE("Create compute pipeline with cache")
+        {
+            // GIVEN
+            PipelineCache cache = device.createPipelineCache();
+            CHECK(cache.isValid());
+
+            PipelineLayoutOptions pipelineLayoutOptions{};
+            PipelineLayout pipelineLayout = device.createPipelineLayout(pipelineLayoutOptions);
+
+            ComputePipelineOptions pipelineOptions = {
+                .layout = pipelineLayout.handle(),
+                .shaderStage = {
+                        .shaderModule = computeShader.handle(),
+                },
+                .pipelineCache = cache.handle()
+            };
+
+            // WHEN
+            ComputePipeline pipeline = device.createComputePipeline(pipelineOptions);
+
+            // THEN
+            CHECK(pipeline.isValid());
+
+            // WHEN
+            const std::vector<uint8_t> cacheData = cache.getData();
+
+            // THEN
+            CHECK(cacheData.size() > 0);
+        }
+
+        SUBCASE("Create multiple compute pipelines with same cache")
+        {
+            // GIVEN
+            PipelineCache cache = device.createPipelineCache();
+            CHECK(cache.isValid());
+
+            PipelineLayoutOptions pipelineLayoutOptions{};
+            PipelineLayout pipelineLayout = device.createPipelineLayout(pipelineLayoutOptions);
+
+            ComputePipelineOptions pipelineOptions = {
+                .layout = pipelineLayout.handle(),
+                .shaderStage = {
+                        .shaderModule = computeShader.handle(),
+                },
+                .pipelineCache = cache.handle()
+            };
+
+            // WHEN
+            ComputePipeline pipeline1 = device.createComputePipeline(pipelineOptions);
+            ComputePipeline pipeline2 = device.createComputePipeline(pipelineOptions);
+
+            // THEN
+            CHECK(pipeline1.isValid());
+            CHECK(pipeline2.isValid());
+
+            // WHEN
+            const std::vector<uint8_t> cacheData = cache.getData();
+
+            // THEN
+            CHECK(cacheData.size() > 0);
         }
     }
 }

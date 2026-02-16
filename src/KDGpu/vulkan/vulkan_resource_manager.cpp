@@ -1961,8 +1961,15 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
         pipelineInfo.subpass = options.subpassIndex;
     }
 
+    VkPipelineCache vkPipelineCache = VK_NULL_HANDLE;
+    if (options.pipelineCache.isValid()) {
+        VulkanPipelineCache *pipelineCache = getPipelineCache(options.pipelineCache);
+        assert(pipelineCache != nullptr);
+        vkPipelineCache = pipelineCache->pipelineCache;
+    }
+
     VkPipeline vkPipeline{ VK_NULL_HANDLE };
-    if (auto result = vkCreateGraphicsPipelines(vulkanDevice->device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &vkPipeline); result != VK_SUCCESS) {
+    if (auto result = vkCreateGraphicsPipelines(vulkanDevice->device, vkPipelineCache, 1, &pipelineInfo, nullptr, &vkPipeline); result != VK_SUCCESS) {
         SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating graphics pipeline: {}", result);
         return {};
     }
@@ -2067,9 +2074,16 @@ Handle<ComputePipeline_t> VulkanResourceManager::createComputePipeline(const Han
     pipelineInfo.stage = computeShaderInfo;
     pipelineInfo.layout = vulkanPipelineLayout->pipelineLayout;
 
+    VkPipelineCache vkPipelineCache = VK_NULL_HANDLE;
+    if (options.pipelineCache.isValid()) {
+        VulkanPipelineCache *pipelineCache = getPipelineCache(options.pipelineCache);
+        assert(pipelineCache != nullptr);
+        vkPipelineCache = pipelineCache->pipelineCache;
+    }
+
     VkPipeline vkPipeline{ VK_NULL_HANDLE };
 
-    if (auto result = vkCreateComputePipelines(vulkanDevice->device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &vkPipeline); result != VK_SUCCESS) {
+    if (auto result = vkCreateComputePipelines(vulkanDevice->device, vkPipelineCache, 1, &pipelineInfo, nullptr, &vkPipeline); result != VK_SUCCESS) {
         SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating compute pipeline: {}", result);
         return {};
     }
@@ -2182,10 +2196,17 @@ Handle<RayTracingPipeline_t> VulkanResourceManager::createRayTracingPipeline(con
     pipelineInfo.pDynamicState = &dynamicStateInfo;
     pipelineInfo.layout = vulkanPipelineLayout->pipelineLayout;
 
+    VkPipelineCache vkPipelineCache = VK_NULL_HANDLE;
+    if (options.pipelineCache.isValid()) {
+        VulkanPipelineCache *pipelineCache = getPipelineCache(options.pipelineCache);
+        assert(pipelineCache != nullptr);
+        vkPipelineCache = pipelineCache->pipelineCache;
+    }
+
     VkPipeline vkPipeline{ VK_NULL_HANDLE };
 
     assert(vulkanDevice->vkCreateRayTracingPipelinesKHR != nullptr);
-    if (auto result = vulkanDevice->vkCreateRayTracingPipelinesKHR(vulkanDevice->device, VK_NULL_HANDLE, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &vkPipeline); result != VK_SUCCESS) {
+    if (auto result = vulkanDevice->vkCreateRayTracingPipelinesKHR(vulkanDevice->device, VK_NULL_HANDLE, vkPipelineCache, 1, &pipelineInfo, nullptr, &vkPipeline); result != VK_SUCCESS) {
         SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating raytracing pipeline: {}", result);
         return {};
     }
@@ -3840,6 +3861,41 @@ VulkanYCbCrConversion *VulkanResourceManager::getYCbCrConversion(const Handle<YC
     return m_yCbCrConversions.get(handle);
 #endif
     return nullptr;
+}
+
+Handle<PipelineCache_t> VulkanResourceManager::createPipelineCache(const Handle<Device_t> &deviceHandle, const PipelineCacheOptions &options)
+{
+    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
+
+    VkPipelineCacheCreateInfo createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
+    createInfo.initialDataSize = options.initialData.size();
+    createInfo.pInitialData = options.initialData.data();
+
+    VkPipelineCache vkPipelineCache{ VK_NULL_HANDLE };
+    if (auto result = vkCreatePipelineCache(vulkanDevice->device, &createInfo, nullptr, &vkPipelineCache); result != VK_SUCCESS) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating pipeline cache: {}", result);
+        return {};
+    }
+
+    setObjectName(vulkanDevice, VK_OBJECT_TYPE_PIPELINE_CACHE, vulkanHandleToUint64(vkPipelineCache), options.label);
+
+    auto vulkanPipelineCacheHandle = m_pipelineCaches.emplace(VulkanPipelineCache(vkPipelineCache, this, deviceHandle));
+    return vulkanPipelineCacheHandle;
+}
+
+void VulkanResourceManager::deletePipelineCache(const Handle<PipelineCache_t> &handle)
+{
+    VulkanPipelineCache *vulkanCache = m_pipelineCaches.get(handle);
+    VulkanDevice *vulkanDevice = m_devices.get(vulkanCache->deviceHandle);
+
+    vkDestroyPipelineCache(vulkanDevice->device, vulkanCache->pipelineCache, nullptr);
+    m_pipelineCaches.remove(handle);
+}
+
+VulkanPipelineCache *VulkanResourceManager::getPipelineCache(const Handle<PipelineCache_t> &handle) const
+{
+    return m_pipelineCaches.get(handle);
 }
 
 std::string VulkanResourceManager::getMemoryStats(const Handle<Device_t> &device) const

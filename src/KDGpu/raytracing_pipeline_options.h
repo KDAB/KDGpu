@@ -20,6 +20,7 @@ namespace KDGpu {
 
 struct PipelineLayout_t;
 struct ShaderModule_t;
+struct PipelineCache_t;
 
 struct RayTracingShaderGroupOptions {
     RayTracingShaderGroupType type;
@@ -38,6 +39,9 @@ struct RayTracingPipelineOptions {
     std::vector<RayTracingShaderGroupOptions> shaderGroups;
     Handle<PipelineLayout_t> layout;
     uint32_t maxRecursionDepth{ 0 }; // 0 will default to maxRecursionDepthLimit
+
+    // Optional pipeline cache to speed up pipeline creation
+    Handle<PipelineCache_t> pipelineCache;
 };
 
 } // namespace KDGpu

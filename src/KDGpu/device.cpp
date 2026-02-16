@@ -206,6 +206,11 @@ YCbCrConversion Device::createYCbCrConversion(const YCbCrConversionOptions &opti
     return YCbCrConversion(m_api, m_device, options);
 }
 
+PipelineCache Device::createPipelineCache(const PipelineCacheOptions &options)
+{
+    return PipelineCache(m_api, m_device, options);
+}
+
 GraphicsApi *Device::graphicsApi() const
 {
     return m_api;

@@ -31,6 +31,8 @@
 #include <KDGpu/acceleration_structure_options.h>
 #include <KDGpu/raytracing_pipeline.h>
 #include <KDGpu/render_pass.h>
+#include <KDGpu/pipeline_cache.h>
+#include <KDGpu/pipeline_cache_options.h>
 
 #include <KDGpu/kdgpu_export.h>
 
@@ -55,6 +57,7 @@ struct BindGroupEntry;
 struct ComputePipelineOptions;
 struct RayTracingPipelineOptions;
 struct RenderPassOptions;
+struct PipelineCacheOptions;
 
 class KDGPU_EXPORT Device
 {
@@ -89,6 +92,8 @@ public:
     [[nodiscard]] RenderPass createRenderPass(const RenderPassOptions &options);
 
     [[nodiscard]] PipelineLayout createPipelineLayout(const PipelineLayoutOptions &options = PipelineLayoutOptions());
+
+    [[nodiscard]] PipelineCache createPipelineCache(const PipelineCacheOptions &options = PipelineCacheOptions());
 
     [[nodiscard]] GraphicsPipeline createGraphicsPipeline(const GraphicsPipelineOptions &options);
 

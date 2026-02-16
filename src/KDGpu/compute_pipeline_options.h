@@ -19,6 +19,7 @@ namespace KDGpu {
 
 struct PipelineLayout_t;
 struct ShaderModule_t;
+struct PipelineCache_t;
 
 struct ComputeShaderStage {
     Handle<ShaderModule_t> shaderModule;
@@ -30,6 +31,9 @@ struct ComputePipelineOptions {
     std::string_view label;
     Handle<PipelineLayout_t> layout;
     ComputeShaderStage shaderStage;
+
+    // Optional pipeline cache to speed up pipeline creation
+    Handle<PipelineCache_t> pipelineCache;
 };
 
 } // namespace KDGpu
