@@ -1,0 +1,239 @@
+/*
+  This file is part of KDGpu.
+
+  SPDX-FileCopyrightText: 2024 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+
+  SPDX-License-Identifier: MIT
+
+  Contact KDAB at <info@kdab.com> for commercial licensing options.
+*/
+
+/*!
+\page hello_triangle_rt Hello Triangle Ray Tracing
+\ingroup kdgpu-examples
+
+\brief Demonstrates Vulkan ray tracing with built-in triangle intersection.
+
+\image html hello_triangle_rt.png
+
+This example shows the fundamentals of Vulkan ray tracing: creating acceleration structures, ray tracing pipelines, shader binding tables, and tracing rays against geometry. Unlike \ref hello_sphere_rt which uses custom intersection shaders, this example uses Vulkan's built-in triangle intersection which is highly optimized. This is your starting point for learning modern GPU ray tracing for realistic lighting, reflections, and global illumination.
+
+The example uses the KDGpuExample helper API, demonstrating low-level ray tracing setup.
+
+\section hello_triangle_rt_overview Overview
+
+<b>What this example demonstrates:</b>
+- Enabling VK_KHR_ray_tracing_pipeline extension
+- Creating bottom-level acceleration structures (BLAS) for triangle geometry
+- Creating top-level acceleration structures (TLAS) for scene instances
+- Ray tracing pipeline with ray generation, miss, and closest-hit shaders
+- Shader binding table (SBT) setup and ray tracing dispatch
+- Writing ray traced output to storage image
+.
+<br/>
+
+<b>Use cases:</b>
+- Realistic lighting and shadows
+- Reflections and refractions
+- Global illumination
+- Ambient occlusion
+- Path tracing
+
+\section hello_triangle_rt_requirements Vulkan Requirements
+
+- <b>Vulkan Version</b>: 1.2+
+- <b>Extensions</b>:
+  - VK_KHR_ray_tracing_pipeline
+  - VK_KHR_acceleration_structure
+  - VK_KHR_buffer_device_address (required for ray tracing)
+  - VK_KHR_deferred_host_operations (optional, for async builds)
+- <b>Features</b>:
+  - `rayTracingPipeline`
+  - `accelerationStructure`
+  - `bufferDeviceAddress`
+- <b>Shader</b>: SPIR-V 1.4+ with ray tracing instructions
+
+\section hello_triangle_rt_concepts Key Concepts
+
+<b>Ray Tracing Pipeline:</b>
+
+Traditional rasterization: Vertices → Rasterization → Fragment Shaders → Pixels
+
+Ray tracing: Rays → Acceleration Structure Traversal → Intersection → Shading
+
+Ray tracing shaders:
+- <b>Ray Generation</b> (`.rgen`): Launches rays (one per pixel typically)
+- <b>Miss</b> (`.rmiss`): Executed when ray hits nothing (sky color)
+- <b>Closest Hit</b> (`.rchit`): Executed on nearest intersection (shading)
+- <b>Any Hit</b> (`.rahit`): Executed on any intersection (transparency)
+- <b>Intersection</b> (`.rint`): Custom intersection test (for non-triangles)
+.
+<br/>
+
+Spec: https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_KHR_ray_tracing_pipeline.html
+
+<b>Acceleration Structures:</b>
+
+Ray-triangle intersection is expensive (O(N) for N triangles). Acceleration structures are BVH (Bounding Volume Hierarchy) trees that accelerate intersection to O(log N).
+
+<b>BLAS (Bottom-Level AS):</b>
+- Contains actual geometry (triangles or AABBs)
+- Built from vertex/index buffers
+- One BLAS per mesh typically
+- Device address used for referencing
+.
+<br/>
+
+<b>TLAS (Top-Level AS):</b>
+- Contains instances of BLAS (transforms + BLAS references)
+- Defines scene layout
+- One TLAS per scene
+- Ray tracing traces against TLAS
+.
+<br/>
+
+Example:
+
+```
+TLAS:
+  Instance 0: BLAS_cube, transform = translate(1, 0, 0)
+  Instance 1: BLAS_cube, transform = translate(-1, 0, 0)
+  Instance 2: BLAS_sphere, transform = scale(2)
+```
+
+Spec: https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_KHR_acceleration_structure.html
+
+<b>Shader Binding Table (SBT):</b>
+
+SBT maps ray tracing shader groups to device memory regions:
+
+```
+SBT Layout:
+  [Ray Gen Shader 0]
+  [Miss Shader 0] [Miss Shader 1] ...
+  [Hit Group 0] [Hit Group 1] ...
+```
+
+During tracing, SBT selects which shader to execute based on ray type, geometry hit, etc.
+
+\section hello_triangle_rt_implementation Implementation
+
+\subsection hello_triangle_rt_pipeline Ray Tracing Pipeline
+
+The bind group layout exposes the TLAS and the output storage image to the ray generation shader:
+
+\snippet hello_triangle_rt/hello_triangle_rt.cpp bindgroup_layout
+
+The pipeline brings together all three shader stages and organises them into shader groups.
+A `General` group is used for both the ray generation and miss shaders.
+The closest-hit shader uses `TrianglesHit`, which tells the driver to use the GPU's built-in hardware triangle intersection unit rather than a custom intersection shader:
+
+\snippet hello_triangle_rt/hello_triangle_rt.cpp rt_pipeline
+
+Key points:
+- `RayTracingShaderGroupType::TrianglesHit`: delegates intersection to dedicated RT hardware
+- `maxRecursionDepth = 1`: primary rays only — no recursive bounces
+.
+<br/>
+
+\subsection hello_triangle_rt_sbt Shader Binding Table
+
+The [Shader Binding Table](https://docs.vulkan.org/spec/latest/chapters/raytracing.html#shader-binding-table) maps the pipeline's shader groups to device memory regions and is used by the `traceRays` call to select which shaders execute at runtime:
+
+\snippet hello_triangle_rt/hello_triangle_rt.cpp sbt
+
+\subsection hello_triangle_rt_as Acceleration Structures
+
+<b>Bottom-Level AS (triangle geometry):</b>
+
+`AccelerationStructureGeometryTrianglesData` describes the vertex buffer layout.
+The BLAS is sized at creation time and filled during the GPU build step:
+
+\snippet hello_triangle_rt/hello_triangle_rt.cpp blas_creation
+
+<b>Top-Level AS (scene instances):</b>
+
+The TLAS holds one instance of the BLAS with a scale transform applied.
+`TriangleFacingCullDisable` ensures both faces of the triangle are visible:
+
+\snippet hello_triangle_rt/hello_triangle_rt.cpp tlas_creation
+
+<b>Building the acceleration structures:</b>
+
+Both structures must be built on the GPU via a command buffer.
+A memory barrier between the BLAS and TLAS builds is mandatory — failing to synchronize here means the TLAS may read an incomplete BLAS:
+
+\snippet hello_triangle_rt/hello_triangle_rt.cpp build_as
+
+\subsection hello_triangle_rt_rendering Rendering
+
+Each frame the swapchain image is transitioned to `General` layout so it can be written by the ray generation shader as a storage image.
+The `traceRays` call dispatches one ray per pixel using the three SBT regions:
+
+\snippet hello_triangle_rt/hello_triangle_rt.cpp trace_rays
+
+\section hello_triangle_rt_shaders Ray Tracing Shaders
+
+The pipeline uses three GLSL shaders located under `assets/shaders/examples/hello_triangle_rt/`.
+
+\subsection hello_triangle_rt_shader_raygen Ray Generation — raygen.rgen
+
+The ray generation shader fires one ray per pixel with a fixed forward direction (no camera matrix — the triangle lives in NDC space).
+`traceRayEXT` traverses the TLAS and the result written by the hit or miss shader is stored into the output image:
+
+\snippet hello_triangle_rt/raygen.rgen raygen
+
+\subsection hello_triangle_rt_shader_closest Closest Hit — closest.rchit
+
+When the ray intersects the triangle the closest-hit shader runs.
+`hitAttributeEXT vec2 rayAttributes` contains the hardware-computed barycentric coordinates (u, v) of the hit point; the third coordinate is derived.
+The three barycentric weights are mapped directly to RGB to produce the classic multi-coloured triangle:
+
+\snippet hello_triangle_rt/closest.rchit closest
+
+\subsection hello_triangle_rt_shader_miss Miss — miss.rmiss
+
+When no geometry is hit the miss shader writes a flat dark-gray background into the payload:
+
+\snippet hello_triangle_rt/miss.rmiss miss
+
+\section hello_triangle_rt_performance Performance Notes
+
+<b>Ray Tracing Cost:</b>
+- More expensive than rasterization for primary visibility
+- Excellent for secondary rays (reflections, shadows, GI)
+- AS build cost: ~1-10ms for complex scenes (can be amortized)
+- AS memory: ~10-30% of geometry size
+.
+<br/>
+
+<b>Optimization Tips:</b>
+- Use `Opaque` flag when possible (skip any-hit)
+- Compact acceleration structures after build (reduces memory)
+- Update TLAS for dynamic objects (cheaper than rebuild)
+- Use ray culling (tMin/tMax, ray masks)
+- Batch rays for coherence (nearby pixels shoot similar rays)
+.
+<br/>
+
+<b>Hardware Requirements:</b>
+- <b>NVIDIA</b>: RTX series (Turing+), dedicated RT cores
+- <b>AMD</b>: RDNA 2+ (RX 6000+), ray accelerators
+- <b>Intel</b>: Arc series (Alchemist+)
+- <b>Mobile</b>: Limited support; check vendor specs
+
+\section hello_triangle_rt_seealso See Also
+
+- \ref hello_sphere_rt - Custom intersection shaders for spheres
+- \ref hybrid_raster_rt - Combining rasterization with ray tracing
+- \ref buffer_reference - Buffer device address (required for RT)
+- [Ray Tracing In Vulkan](https://www.khronos.org/blog/ray-tracing-in-vulkan) - Official Vulkan blog
+- [Ray Tracing Guide](https://docs.vulkan.org/guide/latest/extensions/ray_tracing.html) - Official Vulkan documentation
+- [NVIDIA Ray Tracing Tutorial](https://nvpro-samples.github.io/vk_raytracing_tutorial_KHR/) - Advanced techniques
+
+
+\section hello_triangle_rt_further_reading Further Reading
+
+- [Ray Tracing Gems](https://www.realtimerendering.com/raytracinggems/) - Free book on ray tracing
+- [Path Tracing](https://raytracing.github.io/) - Path tracing theory
+*/

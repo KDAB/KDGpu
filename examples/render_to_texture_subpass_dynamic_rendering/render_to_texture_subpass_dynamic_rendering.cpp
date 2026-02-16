@@ -153,6 +153,7 @@ void RenderToTextureSubpassDynamicRendering::initializeMainScene() // Pass 1
     m_pipelineLayout = m_device.createPipelineLayout(pipelineLayoutOptions);
 
     // Create a pipeline
+    //![main_scene_pipeline]
     const GraphicsPipelineOptions pipelineOptions = {
         .label = "Main scene pipeline",
         .shaderStages = {
@@ -201,6 +202,7 @@ void RenderToTextureSubpassDynamicRendering::initializeMainScene() // Pass 1
         },
     };
     m_pipeline = m_device.createGraphicsPipeline(pipelineOptions);
+    //![main_scene_pipeline]
 
     // Create a bindGroup to hold the UBO with the transform
     const BindGroupOptions bindGroupOptions = {
@@ -268,6 +270,7 @@ void RenderToTextureSubpassDynamicRendering::initializePostProcess() // Pass 2
     m_postProcessPipelineLayout = m_device.createPipelineLayout(pipelineLayoutOptions);
 
     // Create a pipeline
+    //![post_process_pipeline]
     const GraphicsPipelineOptions pipelineOptions = {
         .label = "Post-process pipeline",
         .shaderStages = {
@@ -316,6 +319,7 @@ void RenderToTextureSubpassDynamicRendering::initializePostProcess() // Pass 2
         },
     };
     m_postProcessPipeline = m_device.createGraphicsPipeline(pipelineOptions);
+    //![post_process_pipeline]
 
     // Create BindGroup to bind the ColorTexture to our final pass shader for sampling
     updateColorBindGroup();
@@ -323,6 +327,7 @@ void RenderToTextureSubpassDynamicRendering::initializePostProcess() // Pass 2
 
 void RenderToTextureSubpassDynamicRendering::createOffscreenTexture()
 {
+    //![offscreen_texture]
     const TextureOptions colorTextureOptions = {
         .type = TextureType::TextureType2D,
         .format = m_colorFormat,
@@ -333,11 +338,13 @@ void RenderToTextureSubpassDynamicRendering::createOffscreenTexture()
     };
     m_colorOutput = m_device.createTexture(colorTextureOptions);
     m_colorOutputView = m_colorOutput.createView();
+    //![offscreen_texture]
 }
 
 void RenderToTextureSubpassDynamicRendering::updateColorBindGroup()
 {
     // Create a bindGroup to hold the Offscreen Color Texture
+    //![color_bind_group]
     const BindGroupOptions bindGroupOptions = {
         .layout = m_colorBindGroupLayout,
         .resources = {
@@ -351,6 +358,7 @@ void RenderToTextureSubpassDynamicRendering::updateColorBindGroup()
         },
     };
     m_colorBindGroup = m_device.createBindGroup(bindGroupOptions);
+    //![color_bind_group]
 }
 
 void RenderToTextureSubpassDynamicRendering::drawControls(ImGuiContext *ctx)
@@ -450,6 +458,7 @@ void RenderToTextureSubpassDynamicRendering::render()
     // Set up the options for the 2 passes:
     // Pass 1: Render main scene into the color texture
     // Pass 2: Render a full screen quad that samples from the color texture from pass 1
+    //![begin_render_pass]
     auto opaquePass = commandRecorder.beginRenderPass(RenderPassCommandRecorderWithDynamicRenderingOptions{
             .colorAttachments = {
                     {
@@ -466,6 +475,7 @@ void RenderToTextureSubpassDynamicRendering::render()
                     },
             },
     });
+    //![begin_render_pass]
 
     // Pass 1: Color pass
 
@@ -474,6 +484,7 @@ void RenderToTextureSubpassDynamicRendering::render()
     // Set the attachment location/input mapping to match what the main scene pipeline declares.
     // These calls emit vkCmdSetRenderingAttachmentLocationsKHR / vkCmdSetRenderingInputAttachmentIndicesKHR
     // so the render pass instance state matches the pipeline's pNext chains.
+    //![pass1_draw]
     std::array<std::optional<uint32_t>, 2> pass1InputIndices = { std::nullopt, std::nullopt }; // no input attachments
     std::array<std::optional<uint32_t>, 2> pass1OutputLocations = { 0, std::nullopt }; // frag output 0 -> attachment 0; attachment 1 unused
     opaquePass.setInputAttachmentMapping(pass1InputIndices, {}, {});
@@ -484,7 +495,9 @@ void RenderToTextureSubpassDynamicRendering::render()
     opaquePass.setIndexBuffer(m_indexBuffer);
     opaquePass.setBindGroup(0, m_transformBindGroup);
     opaquePass.drawIndexed(DrawIndexedCommand{ .indexCount = 3 });
+    //![pass1_draw]
 
+    //![between_pass_barrier]
     commandRecorder.memoryBarrier(MemoryBarrierOptions{
             .srcStages = PipelineStageFlagBit::ColorAttachmentOutputBit,
             .dstStages = PipelineStageFlagBit::FragmentShaderBit,
@@ -495,6 +508,7 @@ void RenderToTextureSubpassDynamicRendering::render()
                     },
             },
     });
+    //![between_pass_barrier]
 
     // Pass 2: Post process
 
@@ -502,6 +516,7 @@ void RenderToTextureSubpassDynamicRendering::render()
     // fragOutput[0] maps to ColorAttachment[1] -> m_swapchainOutput
 
     // Update the dynamic location/input mapping for the post-process pipeline.
+    //![pass2_draw]
     std::array<std::optional<uint32_t>, 2> pass2InputIndices = { 0, std::nullopt }; // input attachment 0 reads from attachment 0
     const std::array<std::optional<uint32_t>, 2> pass2OutputLocations = { std::nullopt, 0 }; // frag output 0 -> attachment 1; frag output 1 -> attachment 0 unused
     opaquePass.setInputAttachmentMapping(pass2InputIndices, {}, {});
@@ -512,6 +527,7 @@ void RenderToTextureSubpassDynamicRendering::render()
     opaquePass.setBindGroup(0, m_colorBindGroup);
     opaquePass.pushConstant(m_filterPosPushConstantRange, m_filterPosData.data());
     opaquePass.draw(DrawCommand{ .vertexCount = 4 });
+    //![pass2_draw]
     // renderImGuiOverlayDynamic(&opaquePass, m_inFlightIndex);
 
     opaquePass.end();

@@ -1,3 +1,4 @@
+//! [shadow_rmiss]
 #version 460 core
 #extension GL_EXT_ray_tracing : enable
 
@@ -7,3 +8,4 @@ void main()
 {
     hitCounter = 0;
 }
+//! [shadow_rmiss]

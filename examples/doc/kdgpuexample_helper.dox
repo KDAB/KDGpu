@@ -1,0 +1,124 @@
+/*
+  This file is part of KDGpu.
+
+  SPDX-FileCopyrightText: 2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+
+  SPDX-License-Identifier: MIT
+
+  Contact KDAB at <info@kdab.com> for commercial licensing options.
+*/
+
+/*!
+    \page kdgpuexample_helper KDGpuExample Helper API
+    \ingroup kdgpu-examples
+
+    \brief Overview of the KDGpuExample helper API that simplifies example creation.
+
+    Most examples in this collection use the <b>KDGpuExample helper API</b> to reduce boilerplate code and focus on demonstrating specific Vulkan features and rendering techniques. This page explains what the helper API provides and how it simplifies example development.
+
+    \section helper_overview What is KDGpuExample?
+
+    The KDGpuExample helper API is an abstraction layer that handles common initialization and management tasks that would otherwise need to be repeated in every example:
+
+    - <b>Instance and Device Creation</b>: Automatically creates a Vulkan instance with appropriate extensions and selects a suitable physical device
+    - <b>Surface and Swapchain Management</b>: Creates the window surface and manages the swapchain, including recreation on window resize
+    - <b>Command Buffer Management</b>: Provides command buffers for recording rendering commands
+    - <b>Frame Synchronization</b>: Handles frame pacing and synchronization primitives (semaphores, fences) for multi-buffered rendering
+    - <b>Window and Event Loop</b>: Creates and manages the application window and processes input events
+    - <b>ImGui Integration</b>: Provides optional UI overlay support for debugging and visualization
+
+    \section helper_vs_native Helper API vs Native API
+
+    To understand the difference between using the helper API and raw KDGpu, compare these two examples:
+
+    - \subpage hello_triangle - Uses KDGpuExample helper API (~100 lines of example-specific code)
+    - \subpage hello_triangle_native - Uses raw KDGpu API (~300+ lines including all initialization)
+
+    The <b>hello_triangle_native</b> example shows everything that KDGpuExample handles for you: instance creation with validation layers, physical device selection, logical device creation, surface setup, swapchain management with recreation logic, command pool management, and frame synchronization with multiple in-flight frames.
+
+    \section helper_usage Using KDGpuExample
+
+    To use the helper API in your example, inherit from `KDGpuExample::SimpleExampleEngineLayer` or `KDGpuExample::ExampleEngineLayer` and implement the required virtual methods:
+
+    \code{.cpp}
+    class MyExample : public KDGpuExample::SimpleExampleEngineLayer
+    {
+    public:
+        MyExample()
+            : KDGpuExample::SimpleExampleEngineLayer()
+        {
+        }
+
+    protected:
+        void initializeScene() override
+        {
+            // Create buffers, pipelines, textures, etc.
+            // The device, queue, and swapchain are already initialized
+        }
+
+        void cleanupScene() override
+        {
+            // Clean up resources created in initializeScene()
+        }
+
+        void updateScene() override
+        {
+            // Per-frame logic: update uniforms, physics, etc.
+        }
+
+        void render() override
+        {
+            // Record and submit rendering commands
+            auto commandRecorder = m_device.createCommandRecorder();
+            auto renderPass = commandRecorder.beginRenderPass(/* ... */);
+            // ... rendering commands ...
+        }
+    };
+    \endcode
+
+    \section helper_provided What the Helper Provides
+
+    When your example runs, the helper API provides these pre-initialized members:
+
+    - `m_device` - KDGpu::Device ready for creating resources
+    - `m_queue` - KDGpu::Queue for submitting commands
+    - `m_swapchainViews` - Array of image views for the swapchain images
+    - `m_depthTextureView` - Depth buffer (if depth testing is enabled)
+    - `m_commandBuffer` - Current frame's command buffer
+    - `m_window` - Application window
+
+    Helper utility methods:
+
+    - `uploadBufferData()` - Uploads data to GPU buffers using staging buffers
+    - `uploadTextureData()` - Uploads texture data to GPU images
+    - `renderImGuiOverlay()` - Renders the ImGui UI overlay
+    - `currentSwapchainIndex()` - Returns the current swapchain image index
+
+    \section helper_when_to_use When to Use the Helper API
+
+    <b>Use the helper API when:</b>
+    - You want to focus on demonstrating a specific Vulkan feature or technique
+    - Your example doesn't require custom instance extensions or device features beyond the defaults
+    - You're creating a learning example that should be easy to understand
+    - You want to minimize boilerplate code
+
+    <b>Use the native API when:</b>
+    - You need full control over instance/device creation (custom extensions, validation layers)
+    - You're demonstrating low-level Vulkan concepts like synchronization or swapchain management
+    - Your example requires platform-specific initialization (see \subpage hello_triangle_apple)
+    - You're building production code or a framework rather than a learning example
+
+    \section helper_customization Customization
+
+    While the helper API uses sensible defaults, you can customize behavior by:
+
+    - Overriding `createEngineOptions()` to specify custom device features, extensions, or window properties
+    - Accessing the underlying KDGpu objects directly for advanced use cases
+    - Implementing custom frame synchronization if the default triple-buffering doesn't fit your needs
+
+    \section helper_seealso See Also
+
+    - \subpage hello_triangle - Your first example using the helper API
+    - \subpage hello_triangle_native - Detailed native API example showing what the helper does behind the scenes
+    - \ref kdgpu-examples - Full list of examples organized by complexity
+*/

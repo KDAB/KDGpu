@@ -1,0 +1,192 @@
+/*
+  This file is part of KDGpu.
+
+  SPDX-FileCopyrightText: 2025 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+
+  SPDX-License-Identifier: MIT
+
+  Contact KDAB at <info@kdab.com> for commercial licensing options.
+*/
+
+/*!
+\page render_to_texture_subpass_dynamic_rendering Render to Texture (Dynamic Rendering with Local Read)
+\ingroup kdgpu-examples
+\brief Combines <b>Dynamic Rendering</b> (Vulkan 1.3) with <b>Local Read</b> (KHR extension) to implement subpass-like multi-pass rendering without the complexity of traditional render pass objects and framebuffers.
+
+\image html render_to_texture_subpass_dynamic_rendering.png
+
+\section render_to_texture_subpass_dynamic_overview Overview
+
+Traditional Vulkan requires creating `VkRenderPass` and `VkFramebuffer` objects to define multi-pass rendering. These API objects are verbose to create and inflexible—changing attachment formats or load/store operations requires rebuilding the entire render pass. Vulkan 1.3 introduced <b>Dynamic Rendering</b>, which eliminates these objects by specifying attachments directly in the command buffer.
+
+However, dynamic rendering initially lacked a critical feature: the ability to read from attachments within the same render pass (like subpass input attachments). The <b>`VK_KHR_dynamic_rendering_local_read`</b> extension (and `VK_EXT_shader_tile_image` for mobile) fills this gap. You can now render to an attachment in one draw call and immediately sample it in a subsequent draw call—all within a single dynamic render pass.
+
+This example demonstrates a <b>deferred shading</b> pipeline:
+
+1. <b>Scene pass</b>: Render scene geometry to an output color attachment
+2. <b>Post Processing pass</b>: Sample the input color attachment (output of the scene pass), add some post processing effect and render to the final color attachment
+.
+<br/>
+
+Both passes occur within one dynamic rendering scope, avoiding the overhead of separate render passes. On tile-based GPUs (mobile, Apple Silicon), attachments remain in on-chip tile memory between passes, preserving the performance benefits of traditional subpasses.
+
+\section render_to_texture_subpass_dynamic_vulkan_reqs Vulkan Requirements
+
+- <b>Vulkan Version</b>: 1.3 (for dynamic rendering core support)
+- <b>Required Extensions</b>:
+  - `VK_KHR_dynamic_rendering_local_read` (enables reading attachments during dynamic rendering)
+  - Alternatively: `VK_EXT_shader_tile_image` (mobile-focused tile image extension)
+- <b>Required Features</b>:
+  - `dynamicRendering`: Enables render pass-free rendering
+  - `dynamicRenderingLocalRead`: Allows reading from local attachments within dynamic render pass
+- <b>Dynamic Rendering</b>: Must begin render pass with \ref KDGpu::RenderPassCommandRecorderWithDynamicRenderingOptions "RenderPassCommandRecorderWithDynamicRenderingOptions" using dynamic rendering options
+
+\section render_to_texture_subpass_dynamic_concepts Key Concepts
+
+<b>Dynamic Rendering</b>:
+
+Instead of pre-creating `VkRenderPass` and `VkFramebuffer`, you begin rendering by directly specifying attachments:
+
+\snippet render_to_texture_subpass_dynamic_rendering/render_to_texture_subpass_dynamic_rendering.cpp begin_render_pass
+
+This eliminates hundreds of lines of boilerplate and makes render pass configuration data-driven.
+
+<b>Local Read</b>:
+
+Traditional subpass dependencies allow reading from attachments using `input_attachment` (GLSL).
+
+Local read extends this to dynamic rendering. Mark an attachment with `TextureLayout::DynamicLocalRead` layout and bind it as an input attachment for subsequent draws within the same render pass:
+
+\snippet render_to_texture_subpass_dynamic_rendering/render_to_texture_subpass_dynamic_rendering.cpp color_bind_group
+
+<b>On-Tile Memory (TBDR GPUs)</b>:
+
+Tile-based deferred rendering GPUs (ARM Mali, Qualcomm Adreno, Apple GPUs) render to on-chip "tile memory" before writing to main memory. Local reads keep data on-chip between passes, avoiding expensive memory bandwidth:
+- <b>Traditional subpasses</b>: Keep data on-chip automatically
+- <b>Dynamic rendering + local read</b>: Achieves the same optimization with simpler API
+.
+<br/>
+
+For mobile VR and high-resolution rendering, this bandwidth saving is critical.
+
+<b>Shader Integration</b>:
+
+The scene pass fragment shader writes its output to `layout(location = 0)`, which the pipeline's `dynamicOutputLocations` maps to color attachment 0:
+
+\snippet assets/shaders/examples/render_to_texture_subpass/rotating_triangle.frag scene_frag
+
+The post-process fragment shader declares its input using the standard `subpassInput` type, bound to `input_attachment_index = 0`.
+
+This index corresponds to the remapping set up by `dynamicInputLocations` in the post-process pipeline — color attachment 0 is exposed as input attachment 0:
+
+\snippet assets/shaders/examples/render_to_texture_subpass/desaturate.frag postprocess_input_decl
+
+The input is read with `subpassLoad`, and the result is written to `layout(location = 0)` which the pipeline maps to color attachment 1 (the swapchain image):
+
+\snippet assets/shaders/examples/render_to_texture_subpass/desaturate.frag postprocess_main
+
+\section render_to_texture_subpass_dynamic_impl Implementation Details
+
+<b>Dynamic Rendering Configuration</b>:
+
+- Specify all attachments when beginning the render pass.
+- Specify all attachments when creating the pipelines and whether they are used and if so, to which shader input or output index they are to be bound
+- BindGroups can use `InputAttachmentBinding` bindings with layout `DynamicLocalRead` to enable sampling from input attachments. The `DynamicLocalRead` layout tells the driver this attachment will be read later in the same pass.
+
+<b>Graphics Pipeline Setup</b>:
+
+Pipelines must declare their attachment formats in `dynamicRendering` options (since no `VkRenderPass` provides this info). This replaces the `renderPass` field used in traditional pipelines.
+
+\section render_to_texture_subpass_dynamic_remapping Attachment Location and Input Remapping
+
+Dynamic rendering with local read introduces a two-level remapping system that controls how color attachments are wired to shader inputs and outputs. Both levels must agree for the draw to be valid.
+
+<b>Level 1 — Pipeline declaration</b>:
+
+Each pipeline statically declares which attachments it reads from and writes to, baked into the pipeline object at creation time. This maps to `VkRenderingAttachmentLocationInfoKHR` and `VkRenderingInputAttachmentIndexInfoKHR` in the `pNext` chain.
+
+- `dynamicInputLocations.inputColorAttachments[i]`: for each color attachment index `i`, declares whether it is exposed as an input attachment and, if so, which input attachment index (`remappedIndex`) the shader sees it under.
+- `dynamicOutputLocations.outputAttachments[i]`: for each color attachment index `i`, declares whether the pipeline writes to it and, if so, which fragment shader output location (`remappedIndex`) drives it.
+.
+<br/>
+
+Setting `.enabled = false` marks an attachment as <b>unused</b> for that pipeline — the pipeline will neither read from nor write to it, even though the attachment exists in the dynamic render pass.
+
+Main scene pipeline declaration — no input attachments, frag output 0 writes only to color attachment 0, color attachment 1 unused:
+
+\snippet render_to_texture_subpass_dynamic_rendering/render_to_texture_subpass_dynamic_rendering.cpp main_scene_pipeline
+
+Post-process pipeline declaration — color attachment 0 is exposed as input attachment 0, frag output 0 writes only to color attachment 1, color attachment 0 output is unused:
+
+\snippet render_to_texture_subpass_dynamic_rendering/render_to_texture_subpass_dynamic_rendering.cpp post_process_pipeline
+
+<b>Level 2 — Per-draw command buffer state (`vkCmdSet*`)</b>:
+
+When switching pipelines within the same render pass, the render pass instance must also be updated to match the new pipeline's declared mapping. This is done with `setInputAttachmentMapping()` and `setOutputAttachmentMapping()`, which call `vkCmdSetRenderingInputAttachmentIndicesKHR` and `vkCmdSetRenderingAttachmentLocationsKHR` respectively.
+
+The array passed to each call mirrors the pipeline's declaration:
+- `setOutputAttachmentMapping(locations)`: `locations[i]` is the fragment shader output location that writes to color attachment `i`. Pass `std::nullopt` to mark attachment `i` as unused for output.
+- `setInputAttachmentMapping(inputIndices, ...)`: `inputIndices[i]` is the input attachment index that the shader reads color attachment `i` from. Pass `std::nullopt` to mark attachment `i` as unused for input.
+.
+<br/>
+
+<b>Multi-Pass Execution</b>:
+
+Pass 1 — set state for main scene pipeline, render geometry into color attachment 0, leave attachment 1 untouched:
+
+\snippet render_to_texture_subpass_dynamic_rendering/render_to_texture_subpass_dynamic_rendering.cpp pass1_draw
+
+Pass 2 — update state for post-process pipeline: color attachment 0 is now read as input attachment 0, frag output 0 now routes to color attachment 1:
+
+\snippet render_to_texture_subpass_dynamic_rendering/render_to_texture_subpass_dynamic_rendering.cpp pass2_draw
+
+No `nextSubpass()` call needed—just update the mapping state and issue draws in sequence.
+
+<b>Memory Barrier (if needed)</b>:
+
+If the implementation requires explicit barriers between local reads, insert a pipeline barrier:
+
+\snippet render_to_texture_subpass_dynamic_rendering/render_to_texture_subpass_dynamic_rendering.cpp between_pass_barrier
+
+Many drivers optimize this away for tile-based architectures.
+
+\section render_to_texture_subpass_dynamic_perf Performance Notes
+
+<b>Tile Memory Efficiency</b>: On mobile GPUs, local reads keep intermediate data on-chip:
+- <b>Without local read</b>: G-Buffer written to RAM (bandwidth cost), then read back (bandwidth cost)
+- <b>With local read</b>: G-Buffer stays in tile memory (~95% bandwidth saving)
+.
+<br/>
+
+For a 2048x2048 G-Buffer (3 textures × 16 bytes = 96 MB), this saves ~190 MB of bandwidth per frame.
+
+<b>Desktop GPUs</b>: Less dramatic but still beneficial:
+- Improved cache locality
+- Reduced command buffer overhead
+- Driver-side optimization opportunities
+.
+<br/>
+
+<b>API Simplicity</b>: Dynamic rendering reduces validation layers overhead and driver complexity, improving frame pacing and CPU performance.
+
+<b>Best Practices</b>:
+- Use local read for all multi-pass effects: deferred shading, SSAO, post-processing chains
+- Profile bandwidth with GPU tools (Snapdragon Profiler, ARM Streamline, Xcode Instruments)
+- Consider `VK_EXT_shader_tile_image` for explicit tile memory control on supported hardware
+- Minimize attachment format changes mid-pass
+.
+<br/>
+
+\section render_to_texture_subpass_dynamic_see_also See also
+
+\see \ref render_to_texture_subpass for traditional subpass-based implementation
+\see \ref hello_triangle_msaa_dynamic_rendering for basic dynamic rendering
+\see \ref render_to_texture for separate render pass approach
+
+\section render_to_texture_subpass_dynamic_further Further Reading
+
+- [Vulkan Dynamic Rendering Guide](https://docs.vulkan.org/samples/latest/samples/extensions/dynamic_rendering/README.html)
+- [VK_KHR_dynamic_rendering_local_read Spec](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_KHR_dynamic_rendering_local_read.html)
+- [Tile-Based Deferred Rendering](https://developer.arm.com/documentation/102479/0100/Mali-GPUs-and-Tile-Rendering)
+- [Shader Tile Image Extension](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_EXT_shader_tile_image.html)
+*/

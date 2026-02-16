@@ -322,6 +322,7 @@ void HybridRasterRt::initializeAlpha()
 
 void HybridRasterRt::initializeShadows()
 {
+    //![shadow_pipeline]
     // Create raytracing shaders
     auto rayTracingGenShaderPath = KDGpuExample::assetDir().file("shaders/examples/hybrid_raster_rt/shadow.rgen.spv");
     auto rayTracingMissShaderPath = KDGpuExample::assetDir().file("shaders/examples/hybrid_raster_rt/shadow.rmiss.spv");
@@ -390,6 +391,7 @@ void HybridRasterRt::initializeShadows()
     m_shadowPass.sbt.addRayGenShaderGroup(m_shadowPass.pipeline, 0);
     m_shadowPass.sbt.addMissShaderGroup(m_shadowPass.pipeline, 1);
     m_shadowPass.sbt.addHitShaderGroup(m_shadowPass.pipeline, 2);
+    //![shadow_pipeline]
 }
 
 void HybridRasterRt::initializeCompositing()
@@ -715,6 +717,7 @@ void HybridRasterRt::initializeMeshes()
 void HybridRasterRt::initializeAccelerationStructures()
 {
     auto initializeSphereBLAS = [this] {
+        //![sphere_blas]
         m_as.opaqueSpheresBlas = m_device.createAccelerationStructure(AccelerationStructureOptions{
                 .label = "OpaqueSphereBLAS",
                 .type = AccelerationStructureType::BottomLevel,
@@ -780,10 +783,12 @@ void HybridRasterRt::initializeAccelerationStructures()
         m_as.alphaSpheresASBuildOptions = {
             .buildGeometryInfos = { buildSphereTriangleGeometries(m_as.alphaSpheresBlas, AlphaSpheresCount, OpaqueSpheresCount * sizeof(VkTransformMatrixKHR)) },
         };
+        //![sphere_blas]
     };
     initializeSphereBLAS();
 
     auto initializePlaneBLAS = [this] {
+        //![plane_blas]
         m_as.opaquePlaneBlas = m_device.createAccelerationStructure(AccelerationStructureOptions{
                 .label = "PlaneBLAS",
                 .type = AccelerationStructureType::BottomLevel,
@@ -818,10 +823,12 @@ void HybridRasterRt::initializeAccelerationStructures()
                     },
             },
         };
+        //![plane_blas]
     };
     initializePlaneBLAS();
 
     auto initialTBLAS = [this] {
+        //![tlas_creation]
         m_as.tBlas = m_device.createAccelerationStructure(AccelerationStructureOptions{
                 .label = "TBLAS",
                 .type = AccelerationStructureType::TopLevel,
@@ -862,6 +869,7 @@ void HybridRasterRt::initializeAccelerationStructures()
                     },
             },
         };
+        //![tlas_creation]
     };
     initialTBLAS();
 
@@ -981,6 +989,7 @@ void HybridRasterRt::render()
     {
         // 1) We use a compute shader to update particles positions / BLAS transform data
         {
+            //![U][ComputeUpdate]
             commandRecorder.beginDebugLabel(DebugLabelOptions{
                     .label = "Compute - Particles Update",
                     .color = { 0.0f, 1.0f, 0.0f, 1.0f },
@@ -994,11 +1003,13 @@ void HybridRasterRt::render()
             computePass.end();
 
             commandRecorder.endDebugLabel();
+            //![U][ComputeUpdate]
         }
 
         // 2) We schedule BLAS rebuild
         // Build acceleration structures from updated Particles Transforms
         {
+            //![U][ASBuild]
             commandRecorder.beginDebugLabel(DebugLabelOptions{
                     .label = "Acceleration Structures Rebuild",
                     .color = { 1.0f, 0.0f, 0.0f, 1.0f },
@@ -1036,6 +1047,7 @@ void HybridRasterRt::render()
             commandRecorder.buildAccelerationStructures(m_as.tlASBuildOptions);
 
             commandRecorder.endDebugLabel();
+            //![U][ASBuild]
         }
 
         // 3) GBuffer fill
@@ -1199,6 +1211,7 @@ void HybridRasterRt::render()
         // 5) Shadow Raytracing Pass
         // Await BLAS rebuild completion and opaque GBuffer fill to issue RT shadow pass
         {
+            //![U][ShadowRTPass]
             commandRecorder.beginDebugLabel(DebugLabelOptions{
                     .label = "Shadow RT",
                     .color = { 0.5f, 1.0f, 0.5f, 1.0f },
@@ -1273,6 +1286,7 @@ void HybridRasterRt::render()
             rtPass.end();
 
             commandRecorder.endDebugLabel();
+            //![U][ShadowRTPass]
         }
 
         // 6) Compositing

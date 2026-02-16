@@ -1,0 +1,172 @@
+/*
+  This file is part of KDGpu.
+
+  SPDX-FileCopyrightText: 2024 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+
+  SPDX-License-Identifier: MIT
+
+  Contact KDAB at <info@kdab.com> for commercial licensing options.
+*/
+
+/*!
+\page depth_bias Depth Bias for Shadow Mapping
+\ingroup kdgpu-examples
+
+\brief Demonstrates depth bias to eliminate shadow acne and z-fighting in shadow mapping.
+
+\image html depth_bias.png
+
+This example shows how to use depth bias (also called "polygon offset") to solve z-fighting and shadow acne artifacts that occur when rendering shadows or coplanar geometry. Depth bias applies a small offset to fragment depth values during rasterization, ensuring consistent depth test results without modifying vertex positions. This is essential for shadow mapping, decals, and overlaid geometry.
+
+The example uses the \ref kdgpuexample_helper "KDGpuExample helper API" for simplified setup.
+
+\section depth_bias_overview Overview
+
+<b>What this example demonstrates:</b>
+- Configuring depth bias in pipeline rasterization state
+- Using `biasConstantFactor` for constant depth offset
+- Using `biasSlopeFactor` for slope-dependent offset
+- Eliminating z-fighting between coplanar surfaces
+- Common depth bias values for shadow mapping
+.
+<br/>
+<b>Use cases:</b>
+- Shadow mapping (eliminate shadow acne)
+- Decals on surfaces (prevent z-fighting)
+- Overlaid geometry (coplanar triangles)
+- CSG operations (constructive solid geometry)
+
+\section depth_bias_requirements Vulkan Requirements
+
+- <b>Vulkan Version</b>: 1.0+
+- <b>Extensions</b>: None (depth bias is core)
+- <b>Features</b>: `depthBias` (enabled by default on all devices)
+
+\section depth_bias_concepts Key Concepts
+
+<b>Z-Fighting:</b>
+
+When two surfaces occupy the same depth, floating-point precision errors cause flickering as the GPU can't consistently determine which is in front:
+```
+Surface A at z=5.0000001
+Surface B at z=5.0000002
+→ Depth buffer precision ~0.0001 → flickering!
+```
+
+This is "z-fighting" and is especially common with:
+- Shadow maps (shadow receiver and occluder at same depth)
+- Decals projected onto surfaces
+- Coplanar geometry (overlapping triangles)
+.
+<br/>
+<b>Depth Bias:</b>
+
+Depth bias adds an offset to fragment depth <b>during rasterization</b>, before depth testing:
+```
+finalDepth = fragmentDepth + bias
+bias = constantFactor + (slopeFactor × maxDepthSlope)
+```
+
+- `constantFactor`: Fixed offset in depth units
+- `slopeFactor`: Offset proportional to surface slope (steeper = more bias)
+- `clamp`: Maximum bias magnitude (prevents excessive offset)
+.
+<br/>
+Spec: https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkPipelineRasterizationStateCreateInfo.html
+
+<b>Shadow Acne:</b>
+
+In shadow mapping, shadow acne appears as incorrect self-shadowing:
+```
+1. Render depth from light perspective → shadow map
+2. Render scene, compare fragment depth to shadow map
+3. Precision errors cause surface to shadow itself → acne!
+```
+
+Depth bias pushes shadow map depth slightly away from light, preventing false self-shadowing.
+
+<b>Choosing Bias Values:</b>
+
+Too little bias → Shadow acne remains
+Too much bias → "Peter Panning" (shadows detach from objects)
+
+Typical values:
+- `constantFactor`: 1.0 to 4.0 (depth units)
+- `slopeFactor`: 1.0 to 2.0 (slope-dependent)
+- `clamp`: 0.0 (disabled) or small positive value
+.
+<br/>
+
+Slope factor is crucial for surfaces at grazing angles to light.
+
+\section depth_bias_implementation Implementation
+
+<b>Pipeline with Depth Bias:</b>
+
+\snippet depth_bias/depth_bias.cpp pipelines_creation
+
+Key configuration:
+- `depthBiasEnable = true`: Enables depth bias
+- `biasConstantFactor`: Constant depth offset
+- `biasSlopeFactor`: Slope-dependent offset (0 if not needed)
+- `biasClamp`: Maximum bias magnitude
+.
+<br/>
+The biased pipeline ensures consistent depth ordering.
+
+<b>Rendering Coplanar Geometry:</b>
+
+In this example:
+1. Triangle 1 rendered with no depth bias (standard pipeline)
+2. Triangle 2 rendered with depth bias (pushed forward/back)
+.
+<br/>
+Result: No z-fighting, consistent depth ordering.
+
+<b>For Shadow Mapping:</b>
+
+```cpp
+// When rendering shadow map:
+ .primitive = {
+        .depthBias{
+                .enabled = true,
+                .biasConstantFactor = 1.5f,
+                .biasSlopFactor = 1.75f,
+        },
+},
+```
+
+This pushes shadow map depth away from light, preventing self-shadowing.
+
+\section depth_bias_performance Performance Notes
+
+<b>Cost:</b>
+- Negligible GPU overhead (computed during rasterization)
+- No extra memory or bandwidth
+- Fully hardware-accelerated
+.
+<br/>
+<b>Depth Precision:</b>
+- Depth bias doesn't reduce precision
+- Careful tuning needed for wide depth ranges
+- Consider reverse-Z for better precision distribution
+.
+<br/>
+<b>Dynamic Bias:</b>
+- Can't change bias per-draw without pipeline switch
+- Alternative: Use dynamic state extension (VK_EXT_extended_dynamic_state2)
+- Or pre-create pipelines with different bias values
+
+\section depth_bias_seealso See Also
+
+- \subpage depth_texture_lookup - Sampling shadow maps
+- \subpage hello_triangle_msaa - Multi-sampled depth buffers
+- [Depth Bias Spec](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkPipelineRasterizationStateCreateInfo.html) - Official documentation
+- [Shadow Mapping](https://learnopengl.com/Advanced-Lighting/Shadows/Shadow-Mapping) - Shadow mapping tutorial
+
+\section depth_bias_further_reading Further Reading
+
+- [Shadow Acne Solutions](https://digitalrune.github.io/DigitalRune-Documentation/html/3f4d959e-9c98-4a97-8d85-7a73c26145d7.htm) - Comprehensive guide
+- [Cascaded Shadow Maps](https://docs.microsoft.com/en-us/windows/win32/dxtecharts/cascaded-shadow-maps) - Large-scale shadows
+- [Reverse-Z](https://developer.nvidia.com/content/depth-precision-visualized) - Precision optimization
+*/

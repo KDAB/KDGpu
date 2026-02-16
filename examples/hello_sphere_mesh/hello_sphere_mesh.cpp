@@ -21,13 +21,16 @@ using namespace KDGpu;
 
 void HelloSphereMesh::initializeScene()
 {
+    //![create_mesh_shader]
     // Create a mesh shader and fragment shader
     auto meshShaderPath = KDGpuExample::assetDir().file("shaders/examples/hello_sphere_mesh/hello_sphere_mesh.mesh.spv");
     auto meshShader = m_device.createShaderModule(KDGpuExample::readShaderFile(meshShaderPath));
 
     auto fragmentShaderPath = KDGpuExample::assetDir().file("shaders/examples/hello_sphere_mesh/hello_sphere_mesh.frag.spv");
     auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
+    //![create_mesh_shader]
 
+    //![create_pipeline]
     // Create a pipeline layout
     const PipelineLayoutOptions pipelineLayoutOptions = {};
     m_pipelineLayout = m_device.createPipelineLayout(pipelineLayoutOptions);
@@ -53,7 +56,7 @@ void HelloSphereMesh::initializeScene()
         }
     };
     m_pipeline = m_device.createGraphicsPipeline(pipelineOptions);
-    //![2]
+    //![create_pipeline]
 }
 
 void HelloSphereMesh::cleanupScene()
@@ -88,12 +91,14 @@ void HelloSphereMesh::render()
             },
     });
 
+    //![draw_mesh_shader]
     opaquePass.setPipeline(m_pipeline);
     opaquePass.drawMeshTasks(KDGpu::DrawMeshCommand{
             .workGroupX = 1,
             .workGroupY = 1,
             .workGroupZ = 1,
     });
+    //![draw_mesh_shader]
     renderImGuiOverlay(&opaquePass);
     opaquePass.end();
     m_commandBuffer = commandRecorder.finish();

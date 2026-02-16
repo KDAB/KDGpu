@@ -1,0 +1,150 @@
+/*
+  This file is part of KDGpu.
+
+  SPDX-FileCopyrightText: 2026 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+
+  SPDX-License-Identifier: MIT
+
+  Contact KDAB at <info@kdab.com> for commercial licensing options.
+*/
+
+/*!
+\page hello_triangle_apple Hello Triangle (Native Apple)
+\ingroup kdgpu-examples
+
+\brief Demonstrates integrating KDGpu into native Apple applications (macOS/iOS) using MoltenVK.
+
+This example shows how to use KDGpu in a real Apple application without the KDGpuExample helper framework. It handles platform-specific initialization including Metal layer setup, MoltenVK configuration, and native window integration. This is essential for integrating KDGpu into existing Objective-C or Swift applications.
+
+<a href="https://github.com/KDAB/toy-renderer/blob/main/examples/hello_triangle_apple/Renderer/KDGpuRenderer.cpp">Full Source: KDGpuRenderer.cpp</a>
+
+\section apple_overview Overview
+
+<b>What this example demonstrates:</b>
+- Manual KDGpu initialization on Apple platforms
+- Creating Vulkan surface from CAMetalLayer
+- MoltenVK-specific configuration and limitations
+- Integrating with native Objective-C/Swift applications
+- Platform-specific swapchain and device setup
+.
+<br/>
+
+<b>Use cases:</b>
+- Adding KDGpu to existing macOS/iOS applications
+- Custom render loops in native Apple frameworks (AppKit, UIKit)
+- Full control over initialization for production apps
+- Understanding platform-specific Vulkan requirements
+
+\section apple_requirements Vulkan Requirements
+
+- <b>Vulkan Version</b>: 1.0+ (via MoltenVK)
+- <b>Platform</b>: macOS 10.13+ or iOS 11+
+- <b>Extensions</b>:
+  - VK_KHR_surface (platform abstraction)
+  - VK_MVK_macos_surface (macOS) or VK_MVK_ios_surface (iOS)
+  - VK_KHR_portability_subset (MoltenVK portability)
+- <b>Metal</b>: Requires Metal 2.0+ support
+
+\section apple_concepts Key Concepts
+
+<b>MoltenVK:</b>
+
+MoltenVK is a Vulkan Portability implementation that layers Vulkan API over Apple's Metal graphics framework. It's the only way to use Vulkan on Apple platforms, translating Vulkan commands to Metal at runtime.
+
+Key characteristics:
+- Not full Vulkan conformance - implements "portability subset"
+- Some Vulkan features unavailable (geometry shaders, tessellation)
+- Performance very close to native Metal
+- Required for cross-platform Vulkan applications on Apple
+.
+<br/>
+
+Official MoltenVK docs: https://github.com/KhronosGroup/MoltenVK
+
+<b>CAMetalLayer:</b>
+
+On Apple platforms, rendering requires a CAMetalLayer - a Core Animation layer backed by Metal. The Vulkan surface is created from this Metal layer:
+
+```objc
+// Objective-C: Create Metal layer
+CAMetalLayer *metalLayer = [CAMetalLayer layer];
+metalLayer.device = MTLCreateSystemDefaultDevice();
+view.layer = metalLayer;
+```
+
+The Vulkan surface then wraps this Metal layer, allowing Vulkan commands to target the layer.
+
+<b>Portability Subset:</b>
+
+MoltenVK implements the VK_KHR_portability_subset extension, indicating it doesn't support all Vulkan features. Applications must:
+- Enable the extension during instance/device creation
+- Query feature availability before use
+- Handle missing features gracefully
+.
+<br/>
+
+Spec: https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_KHR_portability_subset.html
+
+\section apple_implementation Implementation
+
+<b>Manual KDGpu Initialization:</b>
+
+Unlike helper API examples, this manually creates Instance, Surface, Device, and Swapchain. See the KDGpuRenderer.cpp source file for the complete initialization implementation. Key Apple-specific steps include:
+1. <b>Enable portability extensions</b>: VK_KHR_portability_subset must be enabled
+2. <b>Create surface from Metal layer</b>: Use platform-specific surface creation
+3. <b>Query portability features</b>: Check which Vulkan features MoltenVK supports
+4. <b>Configure swapchain</b>: Apple platforms may have specific format/present mode requirements
+.
+<br/>
+
+<b>Frame Rendering:</b>
+
+The render loop handles swapchain acquisition, command recording, and presentation. See Renderer/KDGpuRenderer.cpp for implementation details.
+
+\section apple_platform Platform Considerations
+
+<b>macOS-Specific:</b>
+- Use VK_MVK_macos_surface extension
+- AppKit integration via NSView's CAMetalLayer
+- Full screen exclusive mode not available
+- Multiple GPU support (query correct Metal device)
+.
+<br/>
+
+<b>iOS-Specific:</b>
+- Use VK_MVK_ios_surface extension
+- UIKit integration via UIView's CAMetalLayer
+- Handle app lifecycle (background/foreground)
+- Respect memory constraints (mobile devices)
+.
+<br/>
+
+<b>MoltenVK Limitations:</b>
+- No geometry or tessellation shaders
+- Limited descriptor indexing support
+- Some image formats unavailable
+- Memory budget constraints
+- Shader translation overhead (compile SPIR-V to Metal at runtime)
+.
+<br/>
+
+<b>Performance Tips:</b>
+- Use Metal-native formats (BGRA8 for swap chain)
+- Minimize descriptor set updates (Metal has overhead)
+- Consider Metal Performance Shaders (MPS) for compute
+- Profile with Xcode Instruments Metal profiler
+
+\section apple_seealso See Also
+
+- \subpage hello_triangle_native - Cross-platform native API example
+- \subpage hello_triangle - Helper API version
+- [MoltenVK GitHub](https://github.com/KhronosGroup/MoltenVK) - Official MoltenVK repository
+- [VK_KHR_portability_subset](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_KHR_portability_subset.html) - Portability subset spec
+- [Metal Documentation](https://developer.apple.com/metal/) - Apple's Metal framework
+
+\section apple_further_reading Further Reading
+
+- [MoltenVK Runtime User Guide](https://github.com/KhronosGroup/MoltenVK/blob/master/Docs/MoltenVK_Runtime_UserGuide.md) - Configuration and troubleshooting
+- [Vulkan Portability Initiative](https://www.khronos.org/vulkan/portability-initiative) - Cross-platform Vulkan goals
+- [Metal Best Practices](https://developer.apple.com/documentation/metal/best_practices_for_metal) - Optimizing Metal performance
+*/

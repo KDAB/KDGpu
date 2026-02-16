@@ -23,10 +23,10 @@
 
 #include <glm/gtx/transform.hpp>
 
-//![1]
+//![stb_image_include]
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
-//![1]
+//![stb_image_include]
 
 #include <cmath>
 #include <fstream>
@@ -34,7 +34,7 @@
 
 using namespace KDGpu;
 
-//![2]
+//![image_data_struct]
 struct ImageData {
     uint32_t width{ 0 };
     uint32_t height{ 0 };
@@ -42,11 +42,11 @@ struct ImageData {
     DeviceSize byteSize{ 0 };
     Format format{ Format::R8G8B8A8_UNORM };
 };
-//![2]
+//![image_data_struct]
 
 namespace KDGpu {
 
-//![3]
+//![load_image_func]
 ImageData loadImage(KDUtils::File &file)
 {
     int texChannels;
@@ -76,7 +76,7 @@ ImageData loadImage(KDUtils::File &file)
         .byteSize = 4 * static_cast<DeviceSize>(_width) * static_cast<DeviceSize>(_height)
     };
 }
-//![3]
+//![load_image_func]
 
 } // namespace KDGpu
 
@@ -123,7 +123,8 @@ void TexturedQuad::initializeScene()
     }
 
     // Create a texture to hold the image data
-    //![4]
+    //![texture_setup]
+    //![load_texture_from_file]
     {
         // Load the image data and size
         auto imageFile = KDGpuExample::assetDir().file("textures/samuel-ferrara-1527pjeb6jg-unsplash.jpg");
@@ -141,12 +142,12 @@ void TexturedQuad::initializeScene()
         m_texture = m_device.createTexture(textureOptions);
 
         // Upload the texture data and transition to ShaderReadOnlyOptimal
-        // clang-format off
-        const std::vector<BufferTextureCopyRegion> regions = {{
-            .textureSubResource = { .aspectMask = TextureAspectFlagBits::ColorBit },
-            .textureExtent = { .width = image.width, .height = image.height, .depth = 1 }
-        }};
-        // clang-format on
+        const std::vector<BufferTextureCopyRegion> regions = {
+            {
+                    .textureSubResource = { .aspectMask = TextureAspectFlagBits::ColorBit },
+                    .textureExtent = { .width = image.width, .height = image.height, .depth = 1 },
+            },
+        };
         const TextureUploadOptions uploadOptions = {
             .destinationTexture = m_texture,
             .dstStages = PipelineStageFlagBit::AllGraphicsBit,
@@ -158,12 +159,15 @@ void TexturedQuad::initializeScene()
             .regions = regions
         };
         uploadTextureData(uploadOptions);
+        //![load_texture_from_file]
 
         // Create a view and sampler
+        //![create_texture_sampler]
         m_textureView = m_texture.createView();
         m_sampler = m_device.createSampler();
+        //![create_texture_sampler]
     }
-    //![4]
+    //![texture_setup]
 
     // Create a vertex shader and fragment shader (spir-v only for now)
     auto vertexShaderPath = KDGpuExample::assetDir().file("shaders/examples/textured_quad/textured_quad.vert.spv");
@@ -173,15 +177,15 @@ void TexturedQuad::initializeScene()
     auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
 
     // Create bind group layout consisting of a single binding holding a UBO
-    // clang-format off
     const BindGroupLayoutOptions bindGroupLayoutOptions = {
-        .bindings = {{
-            .binding = 0,
-            .resourceType = ResourceBindingType::CombinedImageSampler,
-            .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit)
-        }}
+        .bindings = {
+                {
+                        .binding = 0,
+                        .resourceType = ResourceBindingType::CombinedImageSampler,
+                        .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit),
+                },
+        },
     };
-    // clang-format on
     const BindGroupLayout bindGroupLayout = m_device.createBindGroupLayout(bindGroupLayoutOptions);
 
     // Create a pipeline layout (array of bind group layouts)
@@ -191,52 +195,50 @@ void TexturedQuad::initializeScene()
     m_pipelineLayout = m_device.createPipelineLayout(pipelineLayoutOptions);
 
     // Create a pipeline
-    // clang-format off
     const GraphicsPipelineOptions pipelineOptions = {
         .shaderStages = {
-            { .shaderModule = vertexShader, .stage = ShaderStageFlagBits::VertexBit },
-            { .shaderModule = fragmentShader, .stage = ShaderStageFlagBits::FragmentBit }
+                { .shaderModule = vertexShader, .stage = ShaderStageFlagBits::VertexBit },
+                { .shaderModule = fragmentShader, .stage = ShaderStageFlagBits::FragmentBit },
         },
         .layout = m_pipelineLayout,
-        .vertex = {
-            .buffers = {
-                { .binding = 0, .stride = sizeof(Vertex) }
-            },
-            .attributes = {
-                { .location = 0, .binding = 0, .format = Format::R32G32B32_SFLOAT }, // Position
-                { .location = 1, .binding = 0, .format = Format::R32G32_SFLOAT, .offset = sizeof(glm::vec3) } // TexCoord
-            }
-        },
+        .vertex = { .buffers = {
+                            { .binding = 0, .stride = sizeof(Vertex) },
+                    },
+                    .attributes = {
+                            { .location = 0, .binding = 0, .format = Format::R32G32B32_SFLOAT }, // Position
+                            { .location = 1, .binding = 0, .format = Format::R32G32_SFLOAT, .offset = sizeof(glm::vec3) }, // TexCoord
+                    } },
         .renderTargets = {
-            { .format = m_swapchainFormat }
+                { .format = m_swapchainFormat },
         },
         .depthStencil = {
-            .format = m_depthFormat,
-            .depthWritesEnabled = true,
-            .depthCompareOperation = CompareOperation::Less
+                .format = m_depthFormat,
+                .depthWritesEnabled = true,
+                .depthCompareOperation = CompareOperation::Less,
         },
-        //![5]
+        //![triangle_strip]
         .primitive = {
-            .topology = PrimitiveTopology::TriangleStrip
-        }
-        //![5]
+                .topology = PrimitiveTopology::TriangleStrip,
+        },
+        //![triangle_strip]
     };
-    // clang-format on
     m_pipeline = m_device.createGraphicsPipeline(pipelineOptions);
 
     // Create a bindGroup to hold the uniform containing the texture and sampler
-    // clang-format off
-    //![6]
+    //![bind_group_creation]
+    //![bind_texture_sampler]
     const BindGroupOptions bindGroupOptions = {
         .layout = bindGroupLayout,
-        .resources = {{
-            .binding = 0,
-            .resource = TextureViewSamplerBinding{ .textureView = m_textureView, .sampler = m_sampler }
-        }}
+        .resources = {
+                {
+                        .binding = 0,
+                        .resource = TextureViewSamplerBinding{ .textureView = m_textureView, .sampler = m_sampler },
+                },
+        },
     };
-    // clang-format on
     m_textureBindGroup = m_device.createBindGroup(bindGroupOptions);
-    //![6]
+    //![bind_texture_sampler]
+    //![bind_group_creation]
 }
 
 void TexturedQuad::cleanupScene()
@@ -259,7 +261,7 @@ void TexturedQuad::resize()
 {
 }
 
-//![7]
+//![render]
 void TexturedQuad::render()
 {
     auto commandRecorder = m_device.createCommandRecorder();
@@ -291,4 +293,4 @@ void TexturedQuad::render()
     };
     m_queue.submit(submitOptions);
 }
-//![7]
+//![render]

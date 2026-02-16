@@ -1,3 +1,4 @@
+//! [closest]
 #version 460 core
 #extension GL_EXT_ray_tracing : enable
 
@@ -9,3 +10,4 @@ void main()
     const vec3 barycentricCoords = vec3(1.0f - rayAttributes.x - rayAttributes.y, rayAttributes.x, rayAttributes.y);
     payload = vec4(barycentricCoords, 1.0);
 }
+//! [closest]

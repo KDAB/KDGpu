@@ -1,0 +1,208 @@
+/*
+  This file is part of KDGpu.
+
+  SPDX-FileCopyrightText: 2024 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+
+  SPDX-License-Identifier: MIT
+
+  Contact KDAB at <info@kdab.com> for commercial licensing options.
+*/
+
+/*!
+\page buffer_reference Buffer Device Address (GPU Pointers)
+\ingroup kdgpu-examples
+
+\brief Demonstrates VK_KHR_buffer_device_address for direct buffer access via GPU pointers in shaders.
+
+This example shows how to use buffer device addresses (also called "GPU pointers") to access buffers directly in shaders without descriptor sets.
+Traditional Vulkan requires binding buffers through descriptor sets.
+Buffer device address allows querying a 64-bit GPU virtual address and passing it to shaders via push constants or other buffers.
+This enables advanced techniques like GPU-driven rendering, dynamic resource selection, and raytracing acceleration structures.
+
+The example uses the \ref kdgpuexample_helper "KDGpuExample helper API" for simplified setup.
+
+\section buffer_reference_overview Overview
+
+<b>What this example demonstrates:</b>
+- Enabling VK_KHR_buffer_device_address feature
+- Querying 64-bit GPU addresses for buffers
+- Passing addresses to shaders via push constants
+- Using GLSL buffer reference syntax for pointer dereferencing
+- Accessing buffer data without descriptor sets
+.
+<br/>
+
+<b>Use cases:</b>
+- GPU-driven rendering (indirect draws with GPU-selected resources)
+- Ray tracing (acceleration structure references)
+- Mesh shading (direct vertex/index buffer access)
+- Sparse data structures (linked lists, trees on GPU)
+- Dynamic resource selection without descriptor indexing
+
+\section buffer_reference_requirements Vulkan Requirements
+
+- <b>Vulkan Version</b>: 1.2+ (buffer device address promoted to core)
+- <b>Extensions</b>: VK_KHR_buffer_device_address (core in 1.2)
+- <b>Features</b>: `bufferDeviceAddress`
+- <b>Shader</b>: SPIR-V 1.5+ or GLSL 460+ with `GL_EXT_buffer_reference`
+
+\section buffer_reference_concepts Key Concepts
+
+<b>Traditional Buffer Access:</b>
+
+```cpp
+// CPU: Bind buffer via descriptor set
+bindDescriptorSet(descriptorSetContainingBuffer);
+draw();
+```
+
+```
+// Shader: Access via descriptor binding
+layout(set = 0, binding = 0) buffer Data {
+    vec4 values[];
+} data;
+
+vec4 value = data.values[index];
+```
+
+Limitations:
+- Fixed number of bindings per set
+- Descriptor set updates required
+- Cannot dynamically select buffers at runtime
+.
+<br/>
+
+<b>Buffer Device Address:</b>
+
+```
+// CPU: Query GPU address
+uint64_t address = buffer.getAddress();
+
+// Pass to shader via push constant
+pushConstant(address);
+draw();
+```
+
+```
+// Shader: Use buffer reference (pointer)
+layout(buffer_reference, scalar) buffer Data {
+    vec4 values[];
+};
+
+layout(push_constant) uniform PushData {
+    Data dataPtr;  // 64-bit GPU pointer
+};
+
+vec4 value = dataPtr.values[index];  // Dereference pointer
+```
+
+Benefits:
+- No descriptor set needed
+- Unlimited buffer references
+- Runtime buffer selection
+- Required for ray tracing
+.
+<br/>
+
+Spec: https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_KHR_buffer_device_address.html
+
+<b>Buffer Reference Syntax:</b>
+
+GLSL buffer references are similar to C pointers:
+```
+#extension GL_EXT_buffer_reference : require
+
+layout(buffer_reference, scalar, buffer_reference_align = 16) buffer MyData {
+    vec4 color;
+    mat4 transform;
+};
+
+layout(push_constant) uniform Push {
+    MyData dataPtr;
+} push;
+
+void main() {
+    vec4 color = push.dataPtr.color;  // Dereference
+}
+```
+
+- `buffer_reference`: Declares a buffer reference type (pointer type)
+- `scalar`: Use scalar layout (C-like, no padding)
+- `buffer_reference_align`: Minimum alignment (typically 16 bytes)
+.
+<br/>
+
+<b>Safety Considerations:</b>
+
+Buffer device addresses are raw pointers:
+- <b>No bounds checking</b> - accessing out of bounds is undefined behavior
+- <b>No lifetime tracking</b> - using freed buffer address crashes
+- <b>No validation</b> - driver cannot catch errors easily
+- Programmer responsible for correctness
+
+\section buffer_reference_implementation Implementation
+
+<b>Feature Check:</b>
+
+\snippet buffer_reference/buffer_reference.cpp 1
+
+Always verify feature support before use. Missing feature causes validation errors or crashes.
+
+<b>Creating Addressable Buffer:</b>
+
+\snippet buffer_reference/buffer_reference.cpp 2
+
+The `ShaderDeviceAddressBit` flag enables address queries. Without this flag, `getDeviceAddress()` returns error.
+
+<b>Querying GPU Address:</b>
+
+\snippet buffer_reference/buffer_reference.cpp 3
+
+Returns a 64-bit virtual GPU address. This address is valid for the buffer's lifetime.
+
+<b>Push Constants with Address:</b>
+
+\snippet buffer_reference/buffer_reference.cpp 4
+
+Push constants are ideal for passing addresses (8 bytes). The render function queries the buffer device address and passes it to the shader via this push constant. No descriptor set binding is needed - the address is passed directly.
+
+\section buffer_reference_performance Performance Notes
+
+<b>Benefits:</b>
+- <b>CPU</b>: Eliminates descriptor set creation/updates for dynamic buffers
+- <b>CPU</b>: Reduces driver overhead for frequent buffer changes
+- <b>Memory</b>: No descriptor pool memory needed
+.
+<br/>
+<b>Costs:</b>
+- <b>GPU</b>: Pointer dereferencing may have small overhead vs. descriptors
+- <b>Cache</b>: Random access patterns may reduce cache efficiency
+.
+<br/>
+<b>Best Practices:</b>
+- Align buffer data to 16 bytes for best performance
+- Keep hot data tightly packed (cache-friendly)
+- Validate addresses in debug builds
+- Use for dynamic selection; descriptors still good for static bindings
+.
+<br/>
+<b>Ray Tracing Requirement:</b>
+- Acceleration structures <b>require</b> buffer device address
+- Shader binding table uses device addresses
+- Essential feature for ray tracing
+
+\section buffer_reference_seealso See Also
+
+- \ref bindgroup_indexing - Alternative: descriptor indexing
+- \ref hello_triangle_rt - Ray tracing using buffer device address
+- \ref hello_sphere_rt - More ray tracing examples
+- [VK_KHR_buffer_device_address](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_KHR_buffer_device_address.html) - Official spec
+- [GL_EXT_buffer_reference](https://github.com/KhronosGroup/GLSL/blob/main/extensions/ext/GLSL_EXT_buffer_reference.txt) - GLSL extension
+
+\section buffer_reference_further_reading Further Reading
+
+- [GPU-Driven Rendering](https://vkguide.dev/docs/gpudriven/gpu_driven_engines/) - Using device addresses
+- [Ray Tracing Tutorial](https://nvpro-samples.github.io/vk_raytracing_tutorial_KHR/) - Acceleration structures
+- [Vulkan Memory Model](https://www.khronos.org/blog/comparing-the-vulkan-spir-v-memory-model-to-cs) - Memory safety considerations
+
+*/

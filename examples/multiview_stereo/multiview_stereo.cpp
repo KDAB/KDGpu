@@ -27,8 +27,7 @@ using namespace KDGpu;
 
 void MultiViewStereo::initializeScene()
 {
-    //![1]
-
+    //![vertex_buffer]
     struct Vertex {
         glm::vec3 position;
         glm::vec3 color;
@@ -52,25 +51,25 @@ void MultiViewStereo::initializeScene()
         std::memcpy(bufferData, vertexData.data(), vertexData.size() * sizeof(Vertex));
         m_vertexBuffer.unmap();
     }
-    //![1]
+    //![vertex_buffer]
 
-    //![2]
+    //![shader_creation]
     // Create a vertex shader and fragment shader (spir-v only for now)
     auto vertexShaderPath = KDGpuExample::assetDir().file("shaders/examples/multiview/rotating_triangle.vert.spv");
     auto vertexShader = m_device.createShaderModule(KDGpuExample::readShaderFile(vertexShaderPath));
 
     auto fragmentShaderPath = KDGpuExample::assetDir().file("shaders/examples/multiview/rotating_triangle.frag.spv");
     auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
-    //![2]
+    //![shader_creation]
 
-    //![3]
+    //![pipeline_layout]
     // Create a pipeline layout (array of bind group layouts)
     m_pipelineLayout = m_device.createPipelineLayout(PipelineLayoutOptions{
             .pushConstantRanges = { m_pushConstantRange },
     });
-    //![3]
+    //![pipeline_layout]
 
-    //![4]
+    //![pipeline]
     m_pipeline = m_device.createGraphicsPipeline(GraphicsPipelineOptions{
             .shaderStages = {
                     { .shaderModule = vertexShader, .stage = ShaderStageFlagBits::VertexBit },
@@ -95,9 +94,7 @@ void MultiViewStereo::initializeScene()
             },
             .viewCount = 2, // We want to process and render 2 views at once
     });
-    //![4]
-
-    //![5]
+    //![pipeline]
 }
 
 void MultiViewStereo::cleanupScene()
@@ -109,7 +106,7 @@ void MultiViewStereo::cleanupScene()
     m_commandBuffer = {};
 }
 
-//![6]
+//![swapchain]
 void MultiViewStereo::recreateSwapChain()
 {
     const AdapterSwapchainProperties swapchainProperties = m_device.adapter()->swapchainProperties(m_surface);
@@ -173,7 +170,7 @@ void MultiViewStereo::recreateSwapChain()
 
     m_capabilitiesString = surfaceCapabilitiesToString(m_device.adapter()->swapchainProperties(m_surface).capabilities);
 }
-//![6]
+//![swapchain]
 
 void MultiViewStereo::updateScene()
 {
@@ -194,7 +191,7 @@ void MultiViewStereo::render()
     // Create a command encoder/recorder
     auto commandRecorder = m_device.createCommandRecorder();
 
-    //![7]
+    //![render]
     // MultiViewStereo OpaquePass
     auto opaquePass = commandRecorder.beginRenderPass(KDGpu::RenderPassCommandRecorderOptions{
             .colorAttachments = {
@@ -214,7 +211,7 @@ void MultiViewStereo::render()
     opaquePass.pushConstant(m_pushConstantRange, &rotationAngleRad);
     opaquePass.draw(DrawCommand{ .vertexCount = 3 });
     opaquePass.end();
-    //![7]
+    //![render]
 
     // End recording
     m_commandBuffer = commandRecorder.finish();

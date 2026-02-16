@@ -84,7 +84,7 @@ void writeImage(const std::string &path, const ImageData &image)
 
 using namespace KDGpu;
 
-//![7]
+//![offscreen_init]
 Offscreen::Offscreen()
     : m_api(std::make_unique<VulkanGraphicsApi>())
 {
@@ -102,7 +102,7 @@ Offscreen::Offscreen()
 
     createRenderTargets();
 }
-//![7]
+//![offscreen_init]
 
 Offscreen::~Offscreen()
 {
@@ -129,12 +129,12 @@ void Offscreen::initializeScene()
         m_pointTexture = m_device.createTexture(textureOptions);
 
         // Upload the texture data and transition to ShaderReadOnlyOptimal
-        // clang-format off
-        const std::vector<BufferTextureCopyRegion> regions = {{
-            .textureSubResource = { .aspectMask = TextureAspectFlagBits::ColorBit },
-            .textureExtent = { .width = image.width, .height = image.height, .depth = 1 }
-        }};
-        // clang-format on
+        const std::vector<BufferTextureCopyRegion> regions = {
+            {
+                    .textureSubResource = { .aspectMask = TextureAspectFlagBits::ColorBit },
+                    .textureExtent = { .width = image.width, .height = image.height, .depth = 1 },
+            },
+        };
         const TextureUploadOptions uploadOptions = {
             .destinationTexture = m_pointTexture,
             .dstStages = PipelineStageFlagBit::AllGraphicsBit,
@@ -145,15 +145,15 @@ void Offscreen::initializeScene()
             .newLayout = TextureLayout::ShaderReadOnlyOptimal,
             .regions = regions
         };
-        //![7]
+        //![upload_staging]
         m_stagingBuffers.emplace_back(m_queue.uploadTextureData(uploadOptions));
-        //![7]
+        //![upload_staging]
 
         // Create a view and sampler
         m_pointTextureView = m_pointTexture.createView();
-        //![1]
+        //![sampler_creation]
         m_pointSampler = m_device.createSampler(SamplerOptions{ .magFilter = FilterMode::Linear, .minFilter = FilterMode::Linear });
-        //![1]
+        //![sampler_creation]
     }
 
     // Create a vertex shader and fragment shader (spir-v only for now)
@@ -164,27 +164,30 @@ void Offscreen::initializeScene()
     auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
 
     // Create bind group layout consisting of a single binding holding a combined texture-sampler
-    // clang-format off
     const BindGroupLayoutOptions pointTextureBindGroupLayoutOptions = {
-        .bindings = {{
-            .binding = 0,
-            .resourceType = ResourceBindingType::CombinedImageSampler,
-            .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit)
-        }}
+        .bindings = {
+                {
+                        .binding = 0,
+                        .resourceType = ResourceBindingType::CombinedImageSampler,
+                        .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit),
+                },
+        },
     };
-    // clang-format on
     const BindGroupLayout pointTextureBindGroupLayout = m_device.createBindGroupLayout(pointTextureBindGroupLayoutOptions);
 
     // Create a bindGroup to hold the uniform containing the texture and sampler
-    // clang-format off
     const BindGroupOptions pointTextureBindGroupOptions = {
         .layout = pointTextureBindGroupLayout,
-        .resources = {{
-            .binding = 0,
-            .resource = TextureViewSamplerBinding{ .textureView = m_pointTextureView, .sampler = m_pointSampler }
-        }}
+        .resources = {
+                {
+                        .binding = 0,
+                        .resource = TextureViewSamplerBinding{
+                                .textureView = m_pointTextureView,
+                                .sampler = m_pointSampler,
+                        },
+                },
+        }
     };
-    // clang-format on
     m_pointTextureBindGroup = m_device.createBindGroup(pointTextureBindGroupOptions);
 
     // Create a buffer to hold the transformation matrix
@@ -201,23 +204,26 @@ void Offscreen::initializeScene()
     }
 
     // Create bind group layout consisting of a single binding holding a UBO for the transform
-    // clang-format off
     const BindGroupLayoutOptions transformBindGroupLayoutOptions = {
-        .bindings = {{
-            .binding = 0,
-            .resourceType = ResourceBindingType::UniformBuffer,
-            .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit)
-        }}
+        .bindings = {
+                {
+                        .binding = 0,
+                        .resourceType = ResourceBindingType::UniformBuffer,
+                        .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit),
+                },
+        }
     };
-    // clang-format on
     const BindGroupLayout transformBindGroupLayout = m_device.createBindGroupLayout(transformBindGroupLayoutOptions);
 
     const BindGroupOptions transformBindGroupOptions = {
         .layout = transformBindGroupLayout,
-        .resources = { { .binding = 0,
-                         .resource = UniformBufferBinding{ .buffer = m_projBuffer } } }
+        .resources = {
+                {
+                        .binding = 0,
+                        .resource = UniformBufferBinding{ .buffer = m_projBuffer },
+                },
+        },
     };
-    // clang-format on
     m_transformBindGroup = m_device.createBindGroup(transformBindGroupOptions);
 
     // Create a pipeline layout (array of bind group layouts)
@@ -227,52 +233,50 @@ void Offscreen::initializeScene()
     m_pipelineLayout = m_device.createPipelineLayout(pipelineLayoutOptions);
 
     // Create a pipeline
-    // clang-format off
-    //![5]
+    //![pipeline_options]
     const GraphicsPipelineOptions pipelineOptions = {
         .shaderStages = {
-            { .shaderModule = vertexShader, .stage = ShaderStageFlagBits::VertexBit },
-            { .shaderModule = fragmentShader, .stage = ShaderStageFlagBits::FragmentBit }
+                { .shaderModule = vertexShader, .stage = ShaderStageFlagBits::VertexBit },
+                { .shaderModule = fragmentShader, .stage = ShaderStageFlagBits::FragmentBit },
         },
         .layout = m_pipelineLayout,
         .vertex = {
-            .buffers = {
-                { .binding = 0, .stride = sizeof(Offscreen::Vertex) }
-            },
-            .attributes = {
-                { .location = 0, .binding = 0, .format = Format::R32G32_SFLOAT }, // Position
-                { .location = 1, .binding = 0, .format = Format::R32G32B32A32_SFLOAT, .offset = sizeof(glm::vec2) } // Color
-            }
-        },
-        .renderTargets = {{
-            .format = m_colorFormat,
-            .blending = {
-                .blendingEnabled = true,
-                .color = {
-                    .srcFactor = BlendFactor::SrcAlpha,
-                    .dstFactor = BlendFactor::OneMinusSrcAlpha
+                .buffers = { { .binding = 0, .stride = sizeof(Offscreen::Vertex) } },
+                .attributes = {
+                        { .location = 0, .binding = 0, .format = Format::R32G32_SFLOAT }, // Position
+                        { .location = 1, .binding = 0, .format = Format::R32G32B32A32_SFLOAT, .offset = sizeof(glm::vec2) } // Color
                 },
-                .alpha = {
-                    .srcFactor = BlendFactor::SrcAlpha,
-                    .dstFactor = BlendFactor::OneMinusSrcAlpha
-                }
-            }
-        }},
+        },
+        .renderTargets = {
+                {
+                        .format = m_colorFormat,
+                        .blending = {
+                                .blendingEnabled = true,
+                                .color = {
+                                        .srcFactor = BlendFactor::SrcAlpha,
+                                        .dstFactor = BlendFactor::OneMinusSrcAlpha,
+                                },
+                                .alpha = {
+                                        .srcFactor = BlendFactor::SrcAlpha,
+                                        .dstFactor = BlendFactor::OneMinusSrcAlpha,
+                                },
+                        },
+                },
+        },
         .depthStencil = {
-            .format = m_depthFormat,
-            .depthTestEnabled = false,
-            .depthWritesEnabled = false,
-            .depthCompareOperation = CompareOperation::Always
+                .format = m_depthFormat,
+                .depthTestEnabled = false,
+                .depthWritesEnabled = false,
+                .depthCompareOperation = CompareOperation::Always,
         },
         .primitive = {
-            .topology = PrimitiveTopology::PointList
+                .topology = PrimitiveTopology::PointList,
         },
         .multisample = {
-            .samples = m_samples
-        }
+                .samples = m_samples,
+        },
     };
-    //![5]
-    // clang-format on
+    //![pipeline_options]
     m_pipeline = m_device.createGraphicsPipeline(pipelineOptions);
 }
 
@@ -307,7 +311,7 @@ void Offscreen::resize(uint32_t width, uint32_t height)
     createRenderTargets();
 }
 
-//![6]
+//![set_data]
 void Offscreen::setData(const std::vector<Offscreen::Vertex> &data)
 {
     m_pointCount = data.size();
@@ -332,9 +336,9 @@ void Offscreen::setData(const std::vector<Offscreen::Vertex> &data)
     // at the end of each render function.
     m_stagingBuffers.emplace_back(m_queue.uploadBufferData(uploadOptions));
 }
-//![6]
+//![set_data]
 
-//![4]
+//![set_projection]
 void Offscreen::setProjection(float left, float right, float bottom, float top)
 {
     // NB: We flip bottom and top since Vulkan (and KDGpu) invert the y vs OpenGL
@@ -343,7 +347,7 @@ void Offscreen::setProjection(float left, float right, float bottom, float top)
     std::memcpy(bufferData, &m_proj, sizeof(glm::mat4));
     m_projBuffer.unmap();
 }
-//![4]
+//![set_projection]
 
 void Offscreen::releaseStagingBuffers()
 {
@@ -364,7 +368,7 @@ void Offscreen::render(const std::string &baseFilename)
     // Render the scene to the offscreen color texture target
     auto commandRecorder = m_device.createCommandRecorder();
 
-    //![9]
+    //![render_pass_msaa]
     auto renderPass = commandRecorder.beginRenderPass(KDGpu::RenderPassCommandRecorderOptions{
             .colorAttachments = {
                     {
@@ -378,7 +382,7 @@ void Offscreen::render(const std::string &baseFilename)
             },
             .samples = m_samples,
     });
-    //![9]
+    //![render_pass_msaa]
     renderPass.setPipeline(m_pipeline);
     renderPass.setBindGroup(0, m_pointTextureBindGroup);
     renderPass.setBindGroup(1, m_transformBindGroup);
@@ -391,13 +395,13 @@ void Offscreen::render(const std::string &baseFilename)
     // that we correctly serialize the operations performed on the GPU and also act to transition
     // the textures into the correct layout for each step. See the explanations in the
     // createRenderTargets() function for more information.
-    //![11]
+    //![copy_sequence]
     commandRecorder.textureMemoryBarrier(m_barriers[uint8_t(TextureBarriers::CopySrcPre)]);
     commandRecorder.textureMemoryBarrier(m_barriers[uint8_t(TextureBarriers::CopyDstPre)]);
     commandRecorder.copyTextureToTexture(m_copyOptions);
     commandRecorder.textureMemoryBarrier(m_barriers[uint8_t(TextureBarriers::CopyDstPost)]);
     commandRecorder.textureMemoryBarrier(m_barriers[uint8_t(TextureBarriers::CopySrcPost)]);
-    //![11]
+    //![copy_sequence]
 
     // Finish recording and submit
     m_commandBuffer = commandRecorder.finish();
@@ -459,7 +463,7 @@ void Offscreen::render(const std::string &baseFilename)
 
 void Offscreen::createRenderTargets()
 {
-    //![8]
+    //![render_targets_color]
     // Create a color texture to use as our color render target
     const TextureOptions msaaColorTextureOptions = {
         .type = TextureType::TextureType2D,
@@ -485,7 +489,7 @@ void Offscreen::createRenderTargets()
     };
     m_colorTexture = m_device.createTexture(colorTextureOptions);
     m_colorTextureView = m_colorTexture.createView();
-    //![8]
+    //![render_targets_color]
 
     // Create a depth texture to use for depth-correct rendering
     const TextureOptions depthTextureOptions = {
@@ -500,7 +504,7 @@ void Offscreen::createRenderTargets()
     m_depthTexture = m_device.createTexture(depthTextureOptions);
     m_depthTextureView = m_depthTexture.createView();
 
-    //![10]
+    //![cpu_texture]
     // Create a color texture that is host visible and in linear layout. We will copy into this.
     const TextureOptions cpuColorTextureOptions = {
         .type = TextureType::TextureType2D,
@@ -513,14 +517,14 @@ void Offscreen::createRenderTargets()
         .memoryUsage = MemoryUsage::CpuOnly
     };
     m_cpuColorTexture = m_device.createTexture(cpuColorTextureOptions);
-    //![10]
+    //![cpu_texture]
 
     // Setup the options for the memory barriers that will be used to serialize the
     // memory accesses and transition the textures into the correct layouts for each step.
     // These will be the same for every call to render() unless we have to resize and
     // hence recreate the textures we are rendering to and copying between.
 
-    //![12]
+    //![memory_barriers]
     // Insert a texture memory barrier to ensure the rendering to the color render target
     // is completed and to transition it into a layout suitable for copying from
     m_barriers[uint8_t(TextureBarriers::CopySrcPre)] = {
@@ -572,21 +576,21 @@ void Offscreen::createRenderTargets()
         .texture = m_colorTexture,
         .range = { .aspectMask = TextureAspectFlagBits::ColorBit }
     };
-    //![12]
+    //![memory_barriers]
 
     // Likewise, we can specify the copy operation parameters once here and reuse them many
     // times in calls to render().
-    // clang-format off
-    //![13]
+    //![copy_options]
     m_copyOptions = {
         .srcTexture = m_colorTexture,
         .srcLayout = TextureLayout::TransferSrcOptimal,
         .dstTexture = m_cpuColorTexture,
         .dstLayout = TextureLayout::TransferDstOptimal,
-        .regions = {{
-            .extent = { .width = m_width, .height = m_height, .depth = 1 }
-        }}
+        .regions = {
+                {
+                        .extent = { .width = m_width, .height = m_height, .depth = 1 },
+                },
+        }
     };
-    //![13]
-    // clang-format on
+    //![copy_options]
 }

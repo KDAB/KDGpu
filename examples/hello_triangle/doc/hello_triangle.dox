@@ -8,95 +8,127 @@
   Contact KDAB at <info@kdab.com> for commercial licensing options.
 */
 
-/**
-    @page hello_triangle Hello Triangle
-    @ingroup kdgpu-examples
+/*!
+\page hello_triangle Hello Triangle
+\ingroup kdgpu-examples
 
-    @brief This example creates a window, initializes the graphics API (Vulkan in this case), and performs rendering of a simple triangle.
+\brief This example creates a window, initializes the graphics API (Vulkan in this case), and performs rendering of a simple triangle.
 
-    This example makes use of the KDGpuExample helper API which simplifies example creation by hiding repetitive and common patterns such as Instance and Device initialize and Swapchain creation.
+\image html hello_triangle.png
 
-    To see what it's like to use KDGpu without the KDGpuExample API, check out the [Hello Triangle Native](#hello_triangle_native) example.
+This is the most basic KDGpu rendering example: a single rotating triangle on the screen. It demonstrates the fundamental graphics flow - initializing graphics resources, setting up a graphics pipeline, and submitting draw commands each frame. This example is the best starting point for understanding how to render with KDGpu.
 
-    @image html hello_triangle.png
+This example makes use of the KDGpuExample helper API which simplifies example creation by hiding repetitive and common patterns such as Instance and Device initialize and Swapchain creation.
 
-    Let's start with your first KDGpu application entrypoint!
+To see what it's like to use KDGpu without the KDGpuExample API, check out the \subpage hello_triangle_native example.
 
-       @snippet hello_triangle/main.cpp 0
+\section hello_triangle_overview Overview
 
-    Pretty simple, right? First, we instantiate a KDGui::GuiApplication, which is a singleton that our engine layer (instantiated two lines later) will attach to. The only curious thing here is the KDGpuExample::Engine::createEngineLayer call. Let's take a look at that HelloTriangle type: that's where the functionality specific to this example is found. HelloTriangle inherits from KDGpuExample::SimpleExampleEngineLayer. Here's the per-frame update logic:
+<b>What this example demonstrates:</b>
+- Creating a KDGpu graphics application with window
+- Setting up vertex and index buffers with geometry data
+- Creating a graphics pipeline with shaders
+- Binding pipeline state and buffers
+- Recording and submitting draw commands each frame
+- Rotating geometry using uniform buffers and matrix transforms
+.
+<br/>
 
-       @snippet hello_triangle/hello_triangle.cpp 1
+<b>Key concepts for beginners:</b>
+- <b>Vertex Buffer</b>: GPU memory containing vertex positions and attributes
+- <b>Index Buffer</b>: GPU memory telling GPU which vertices form triangles
+- <b>Uniform Buffer</b>: GPU memory for data that changes per-frame (like transforms)
+- <b>Graphics Pipeline</b>: GPU state including shaders, vertex layout, and rendering modes
+- <b>Command Recording</b>: Building a list of GPU commands to execute
+- <b>Draw Command</b>: GPU command to render vertices using current pipeline/buffers
+.
+<br/>
 
-    Some matrix math using the ``glm`` library to rotate the triangle a little each frame. We take care to have a rotation that is independent of the frame rate. Notice the ``map()`` call issued on the transform buffer, which returns a ``void*`` handle that is then used to memcpy the ``m_transform`` that was just calculated. ``unmap`` is then called to flush the transform buffer. No rendering so far. Let's take a look at some.
+<b>Vulkan concepts:</b>
+- VkBuffer: GPU-accessible memory for vertices, indices, uniforms
+- VkPipeline: Shader programs + GPU state (rasterization, depth testing, etc.)
+- VkCommandBuffer: Recording draw and compute commands
+- VkSwapchain: Queue of images for displaying to screen
+.
+<br/>
 
-    \section hello_triangle_rendering Rendering
+See [VkSwapchainKHR specs](https://registry.khronos.org/vulkan/specs/1.3-extensions/html/vkspec.html#_wsi_window_system_integration) and [Graphics Pipelines](https://registry.khronos.org/vulkan/specs/1.3-extensions/html/vkspec.html#pipelines-graphics) for technical details.
 
-       @snippet hello_triangle/hello_triangle.cpp 2
+Let's start with your first KDGpu application entrypoint!
 
-    We begin by creating a command recorder object which is then used to begin a render pass that will direct the rendering to the current [swapchain](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkSwapchainKHR.html) image.
+\section hello_triangle_initialization Initialization
 
-    Beginning a render pass returns a KDGpu::RenderPassCommandRecorder, which has many functions used to issue commands related to rendering. We use the pass recorder to bind a KDGpu::GraphicsPipeline to set the majority of the GPU state, followed by binding the vertex and index buffers that hold the geometry data. With all of the state set, we can issue a ``drawIndexed`` call to draw the 3 vertices of the triangle.
+Let's take a look at the initialization process that was necessary to get to the rendering stage. Starting at the top of ``initializeScene``:
 
-    Once all of our drawing commands are recorded, we call the ``renderImGuiOverlay`` helper function to draw the UI.
+<b>Vertex Data:</b>
 
-    To complete the frame, we have to end the renderpass and then tell the command recorder to finish. This returns a CommandBuffer that we then submit to a GPU Queue for execution.
+\snippet hello_triangle/hello_triangle.cpp initialize_scene
 
-    \section hello_triangle_initialization Initialization
+Here, we are creating geometry by manually writing out vertices.
 
-    Let's take a look at the initialization process that was necessary to get to the rendering stage. Starting at the top of ``initializeScene``:
+1. We create a buffer and then set it to be the ``destinationBuffer`` in the upload options.
+2. Then we call KDGpuExample::ExampleEngineLayer::uploadBufferData, which will construct a new KDGpu::UploadStagingBuffer in the engine's list of staging buffers for later reference.
+2.1. Creating a fence to mark when this buffer's lifetime ends is handled by KDGpu.
+3. Next, we need to initialize vertex indices. These will tell the GPU what order each of the vertices should be rendered in. In our case, with only one triangle, we just want to render each vertex in the order that they appear (this would not be the case if we had geometry which shared vertices).
+.
+<br/>
+<blockquote>
+    Specifying vertices and indexing them correctly to form a model with a bunch of correctly oriented triangles is a complex task usually handled by loading in model files.
+</blockquote>
 
-       @snippet hello_triangle/hello_triangle.cpp 3
+<b>Index Data:</b>
 
-    Here, we are creating geometry by manually writing out vertices. Note the last two calls:
+\snippet hello_triangle/hello_triangle.cpp index_buffer
 
-       @snippet hello_triangle/hello_triangle.cpp 4
-       @snippet hello_triangle/hello_triangle.cpp 5
+Once again, we use the graphics device to create a new buffer, set it as the destination, and then call ``uploadBuffer``. Note the different configuration bits.
 
-    We create a buffer and then set it to be the ``destinationBuffer`` in the upload options. Finally, we call KDGpuExample::ExampleEngineLayer::uploadBufferData, which will construct a new KDGpu::UploadStagingBuffer in the engine's list of staging buffers for later reference. Creating a fence to mark when this buffer's lifetime ends is handled by KDGpu.
+<b>Transformation Matrix as Uniform Buffer Object:</b>
 
-    Next, we need to initialize vertex indices. These will tell the GPU what order each of the vertices should be rendered in. In our case, with only one triangle, we just want to render each vertex in the order that they appear (this would not be the case if we had geometry which shared vertices).
+Now the transformation matrix:
 
-    <blockquote>
-        Specifying vertices and indexing them correctly to form a model with a bunch of correctly oriented triangles is a complex task usually handled by loading in model files.
-        TODO: include link to GLTF blog maybe?
-    </blockquote>
+\snippet hello_triangle/hello_triangle.cpp transform_buffer
 
-       @snippet hello_triangle/hello_triangle.cpp 6
+Here we are creating a uniform buffer that will hold this transformation matrix. You can find this uniform being picked up in the vertex shader code for this example.
+Notice how we decided to use mappable memory for this buffer. This allows us to write to it directly from the CPU without needing to create a staging buffer and perform a copy operation.
+This is ideal for data that changes every frame, such as our transformation matrix.
 
-    Once again, we use the graphics device to create a new buffer, set it as the destination, and then call ``uploadBuffer``. Note the different configuration bits.
+\snippet hello_triangle/hello_triangle.cpp update_transform
 
-    Now the transformation matrix:
+<b>Loading the shaders:</b>
 
-       @snippet hello_triangle/hello_triangle.cpp 6
+\snippet hello_triangle/hello_triangle.cpp shaders
 
-    Here we are creating a uniform buffer. A uniform buffer is a buffer containing data which is meant to be read in shader code. We configure its size to the size of a ``glm::mat4`` 4x4 matrix, and then create it using the graphics device. Then we create the transformation matrix (all ones) and copy it into the buffer and flush it afterwards. You can find this uniform being picked up in the vertex shader code for this example:
+A single call to the graphics device. Also check out that KDGpu::AssetPath.
 
-       @snippet hello_triangle/doc/shadersnippet.vert 1
+<b>The Graphics Pipeline:</b>
 
-    Speaking of shaders, lets look at how to load some:
+The next step is to initialize the render pipeline object. Before we can do that, though, we need to describe its memory layout.
 
-       @snippet hello_triangle/hello_triangle.cpp 8
+\snippet hello_triangle/hello_triangle.cpp pipeline_layout
 
-    A single call to the graphics device. Also check out that KDGpu::AssetPath.
+This is pretty much boilerplate. It would be more interesting if we had a more complex array of uniforms and buffers. In our case, we are describing the transformation of a single triangle, so we just initialize a bindgroup layout containing one uniform buffer and a pipeline layout containing the bindgroup layout.
 
-    The next step is to initialize the render pipeline object. Before we can do that, though, we need to describe its memory layout.
+Next, we create the render pipeline object, passing in our shaders and configuring the format to match its constituent elements. The vertex buffer layout is described to match the vertex array we wrote earlier, the render target format is the same as the swapchain (created under the hood by KDGpuExample) and the depth and stencil buffers are configured to match the depth texture format.
 
-       @snippet hello_triangle/hello_triangle.cpp 9
+\snippet hello_triangle/hello_triangle.cpp pipeline
 
-    This is pretty much boilerplate. It would be more interesting if we had a more complex array of uniforms and buffers. In our case, we are describing the transformation of a single triangle, so we just initialize a bindgroup layout containing one uniform buffer and a pipeline layout containing the bindgroup layout.
+After creating the pipeline we use the bind group layout to construct the actual bind group as well, attaching the transform buffer we made earlier.
 
-    Next, we create the render pipeline object, passing in our shaders and configuring the format to match its constituent elements. The vertex buffer layout is described to match the vertex array we wrote earlier, the render target format is the same as the swapchain (created under the hood by KDGpuExample) and the depth and stencil buffers are configured to match the depth texture format.
+\snippet hello_triangle/hello_triangle.cpp bindgroup
 
-       @snippet hello_triangle/hello_triangle.cpp 10
+\section hello_triangle_render Rendering
 
-    After creating the pipeline we use the bind group layout to construct the actual bind group as well, attaching the transform buffer we made earlier.
+Finally, we can look at the rendering code. This is where we record the commands that will be sent to the GPU each frame.
 
-       @snippet hello_triangle/hello_triangle.cpp 11
+- We begin by creating a command recorder object which is then used to begin a render pass that will direct the rendering to the current [swapchain](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkSwapchainKHR.html) image.
+- Beginning a render pass returns a KDGpu::RenderPassCommandRecorder, which has many functions used to issue commands related to rendering. We use the pass recorder to bind a KDGpu::GraphicsPipeline to set the majority of the GPU state, followed by binding the vertex and index buffers that hold the geometry data. With all of the state set, we can issue a ``drawIndexed`` call to draw the 3 vertices of the triangle.
+- Once all of our drawing commands are recorded, we call the ``renderImGuiOverlay`` helper function to draw the UI.
+- To complete the frame, we have to end the renderpass and then tell the command recorder to finish. This returns a CommandBuffer that we then submit to a GPU Queue for execution.
 
-    Last but not least, we construct the render pass options.
+\snippet hello_triangle/hello_triangle.cpp render
 
-       @snippet hello_triangle/hello_triangle.cpp 12
+\section hello_sphere_rt_seealso See Also
 
-    Notice that, unlike the other initializations, we aren't actually using the options to create anything. That's because the render pass options (namely the view, which contains the current swapchain image to render to) changes each frame. Therefore, we must re-construct the render pass object each frame as well, with the updated options. Given this new context about the initialization of the render pass, go back and read the [Render](#hello_triangle_rendering) section before continuing on to the next examples.
+- \ref hello_triangle_msaa - Rendering a triangle with multisample anti-aliasing (MSAA)
+
 */

@@ -36,7 +36,7 @@ DepthTextureLookup::DepthTextureLookup()
 
 void DepthTextureLookup::initializeScene()
 {
-    //![1]
+    //![create_scene_pass]
     // Scene Cube Pass
     {
         // Create a vertex shader and fragment shader (spir-v only for now)
@@ -70,9 +70,9 @@ void DepthTextureLookup::initializeScene()
                 .primitive = { .topology = PrimitiveTopology::TriangleList },
         });
     }
-    //![1]
+    //![create_scene_pass]
 
-    //![2]
+    //![create_depth_pass]
     // Depth Lookup Pass
     {
         // Create a sampler to be used when sampling the detph texture
@@ -121,7 +121,7 @@ void DepthTextureLookup::initializeScene()
                 },
         });
     }
-    //![2]
+    //![create_depth_pass]
 }
 
 void DepthTextureLookup::cleanupScene()
@@ -155,11 +155,9 @@ void DepthTextureLookup::resize()
 
 void DepthTextureLookup::render()
 {
-    //![4]
     auto commandRecorder = m_device.createCommandRecorder();
-    //![4]
 
-    //![5]
+    //![draw_cube]
     // Draw Cube
 
     static float angle = 0.0f;
@@ -186,9 +184,9 @@ void DepthTextureLookup::render()
     opaquePass.pushConstant(m_rotationPushConstantRange, &rotation);
     opaquePass.draw(DrawCommand{ .vertexCount = 36 });
     opaquePass.end();
-    //![5]
+    //![draw_cube]
 
-    //![6]
+    //![transition_depth]
     // Only process depth lookup pass fragments once we are sure scene cube fragments have written to the depth buffer
     // Transition the depthTexture to a correct readable layout
     commandRecorder.textureMemoryBarrier(TextureMemoryBarrierOptions{
@@ -204,7 +202,9 @@ void DepthTextureLookup::render()
                     .levelCount = 1,
             },
     });
+    //![transition_depth]
 
+    //![draw_depth]
     // Draw Quad that displays depth lookup
     auto depthLookupPass = commandRecorder.beginRenderPass(RenderPassCommandRecorderOptions{
             .colorAttachments = {
@@ -219,7 +219,9 @@ void DepthTextureLookup::render()
     depthLookupPass.setBindGroup(0, m_depthTextureBindGroup);
     depthLookupPass.draw(DrawCommand{ .vertexCount = 6 });
     depthLookupPass.end();
+    //![draw_depth]
 
+    //![transition_depth_back]
     // Layout gets reset when we resize as the depthTexture is recreated
     if (m_depthLayout == TextureLayout::Undefined)
         m_depthLayout = TextureLayout::DepthStencilAttachmentOptimal;
@@ -236,9 +238,9 @@ void DepthTextureLookup::render()
                     .levelCount = 1,
             },
     });
-    //![6]
+    //![transition_depth_back]
 
-    //![7]
+    //![overlay]
     auto overlayPass = commandRecorder.beginRenderPass(RenderPassCommandRecorderOptions{
             .colorAttachments = {
                     {
@@ -256,7 +258,7 @@ void DepthTextureLookup::render()
     });
     renderImGuiOverlay(&opaquePass);
     overlayPass.end();
-    //![7]
+    //![overlay]
 
     m_commandBuffer = commandRecorder.finish();
 

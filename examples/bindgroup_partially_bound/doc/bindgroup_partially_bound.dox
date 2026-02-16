@@ -8,77 +8,211 @@
   Contact KDAB at <info@kdab.com> for commercial licensing options.
 */
 
-/**
-    @page bindgroup_partially_bound BindGroup Partially Bound
-    @ingroup kdgpu-examples
+/*!
+\page bindgroup_partially_bound Partially Bound Descriptors
+\ingroup kdgpu-examples
 
-    @brief This example shows how to enable partially bound bindgroups.
+\brief Demonstrates partially bound descriptor sets for conditional resource access in shaders.
 
-    Partially bound BindGroups are BindGroups with one or more binding entries that have yet to be set.
-    Usually, if binding a bind group whose bindings have yet to be specified will lead to Validation warnings.
-    In some cases though, we might want our shader to only conditionally to access some bindings at run
-    time and having to specify all bindings might no be possible.
-    For these cases, we can enable the bindGroupBindingPartiallyBound feature on our Adapter and allocate
-    BindGroupLayouts with the ResourceBindingFlagBits::PartiallyBoundBit flag on bindings that don't always
-    have to be bound. The only thing one needs to ensure is that resources have been bound when the shader
-    finally accesses a partially bound bind group.
+This example shows how to use the `descriptorBindingPartiallyBound` feature to create descriptor sets where some bindings haven't been initialized yet. Normally, binding an incomplete descriptor set causes validation errors. Partially bound descriptors allow conditional resource access in shaders - you only need to populate bindings that the shader will actually use. This enables dynamic resource management, lazy loading, and optional shader features.
 
-    This example tries to demonstrate this very feature by:
-    - Defining a BindGroup for a single TextureViewSamplerBinding with nothing bound initially
-    - Updating the bind group at a later time with an actual texture.
+The example uses the \ref kdgpuexample_helper "KDGpuExample helper API" for simplified setup.
 
-    To do so, after the usual vertex data initialization, we initialize our shader resources.
+\section bindgroup_partially_bound_overview Overview
 
-    We start by allocating a texture and associated textureView.
+<b>What this example demonstrates:</b>
+- Enabling `descriptorBindingPartiallyBound` feature
+- Creating descriptor set layouts with `PartiallyBoundBit` flag
+- Binding descriptor sets with uninitialized bindings
+- Updating partially bound descriptors at runtime
+- Conditional resource access in shaders
+.
+<br/>
+<b>Use cases:</b>
+- Optional shader features (enable/disable via uniforms)
+- Lazy resource loading (populate descriptors on demand)
+- Conditional texture sampling (material variations)
+- Resource streaming (bind textures as they load)
+- Shader permutations without pipeline changes
 
-    @snippet bindgroup_partially_bound/bindgroup_partially_bound.cpp 1
+\section bindgroup_partially_bound_requirements Vulkan Requirements
 
-    Next, we allocate a BindGroupLayout for a CombinedImageSampler with the PartiallyBoundBit flag.
+- <b>Vulkan Version</b>: 1.2+ (descriptor indexing promoted to core)
+- <b>Extensions</b>: VK_EXT_descriptor_indexing (core in 1.2)
+- <b>Features</b>:
+  - `descriptorBindingPartiallyBound`
+- <b>Validation</b>: Only accessed bindings must be valid
 
-    @snippet bindgroup_partially_bound/bindgroup_partially_bound.cpp 2
+\section bindgroup_partially_bound_concepts Key Concepts
 
-    This is followed by allocating an empty bind group with the above BindGroupLayout as layout.
+<b>Traditional Descriptor Binding:</b>
 
-    @snippet bindgroup_partially_bound/bindgroup_partially_bound.cpp 3
+Normally, all bindings in a descriptor set must be initialized:
 
-    Then, we specify our PushConstantRanges.
+\code
+// Descriptor set layout:
+binding 0: Uniform buffer
+binding 1: Combined image sampler
 
-    @snippet bindgroup_partially_bound/bindgroup_partially_bound.cpp 4
+// Create descriptor set:
+resources = {
+    {binding 0, uniformBuffer},  // Must be provided!
+    {binding 1, texture}         // Must be provided!
+};
+\endcode
 
-    And finally we can create the Pipeline.
+Binding without initializing all resources causes validation error:
 
-    @snippet bindgroup_partially_bound/bindgroup_partially_bound.cpp 5
+\code
+VUID-vkCmdDraw-None-02699: Descriptor at binding 1 not initialized!
+\endcode
 
-    On each frame update, we will update a rotation matrix.
+<b>Partially Bound Descriptors:</b>
 
-    @snippet bindgroup_partially_bound/bindgroup_partially_bound.cpp 6
+With `PartiallyBoundBit`, uninitialized bindings are allowed:
 
-    As for the actual rendering, first we will conditionally bind our TextureViewSamplerBinding to the bind group.
-    Note that until we have rendered 1000 frames, our texture binding will remain unbound.
+\code
+// Layout with partially bound flag:
+binding 0: Uniform buffer (required)
+binding 1: Combined image sampler (PartiallyBoundBit - optional!)
 
-    @snippet bindgroup_partially_bound/bindgroup_partially_bound.cpp 7
+// Create descriptor set (binding 1 left empty):
+resources = {
+    {binding 0, uniformBuffer}  // Only provide binding 0
+};
 
-    Then we will simply bind the pipeline, buffers and bind groups and render. The information whether we use the
-    texture or not will be provided to the shader through the pushConstant.
+// Valid! Shader must not access binding 1, or update it before access
+```
 
-    @snippet bindgroup_partially_bound/bindgroup_partially_bound.cpp 8
+Shader:
+```glsl
+layout(set = 0, binding = 0) uniform Params {
+    bool useTexture;
+};
 
-    When it comes to our shader, the interesting lies in the fragment shader which will conditionally read from
-    our texture based on the useTexture field of the pushConstant.
+layout(set = 0, binding = 1) uniform sampler2D optionalTexture;
 
-    @code
-    layout(set = 0, binding = 0) uniform sampler2D colorTexture;
-
-    layout(push_constant) uniform PushConstants
-    {
-        layout(offset = 64) vec2 viewportSize;
-        bool useTexture;
+void main() {
+    if (params.useTexture) {
+        color = texture(optionalTexture, uv);  // Only access if bound!
+    } else {
+        color = baseColor;
     }
-    fragPushConstants;
+}
+\endcode
 
-    void main()
-    {
-        fragColor = fragPushConstants.useTexture ? texture(colorTexture, gl_FragCoord.xy / fragPushConstants.viewportSize) : vec4(color, 1.0);
-    }
-    @endcode
+Rules:
+- Uninitialized bindings <b>must not</b> be accessed
+- Accessing uninitialized binding causes undefined behavior (not validated!)
+- Programmer responsible for ensuring correctness
+.
+<br/>
+Spec: https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_EXT_descriptor_indexing.html
+
+<b>Update After Bind:</b>
+
+Partially bound is often used with "update after bind" to modify descriptors after binding:
+1. Bind descriptor set with empty binding
+2. Update binding later (before shader accesses it)
+3. Draw with updated binding
+
+\section bindgroup_partially_bound_implementation Implementation
+
+<b>Creating Texture:</b>
+
+\snippet bindgroup_partially_bound/bindgroup_partially_bound.cpp 1
+
+Texture created but not immediately bound to descriptor set.
+
+<b>Descriptor Layout with Partially Bound Flag:</b>
+
+\snippet bindgroup_partially_bound/bindgroup_partially_bound.cpp 2
+
+`ResourceBindingFlagBits::PartiallyBoundBit` marks binding 0 as optionally uninitialized.
+
+<b>Empty Descriptor Set:</b>
+
+\snippet bindgroup_partially_bound/bindgroup_partially_bound.cpp 3
+
+Created with no resources - valid because of `PartiallyBoundBit`.
+
+<b>Push Constants for Conditional Access:</b>
+
+\snippet bindgroup_partially_bound/bindgroup_partially_bound.cpp 4
+
+Push constants can control whether shader accesses the binding.
+
+<b>Pipeline Creation:</b>
+
+\snippet bindgroup_partially_bound/bindgroup_partially_bound.cpp 5
+
+Standard pipeline setup.
+
+<b>Runtime Descriptor Update:</b>
+
+On each frame update, we will update a rotation matrix.
+
+\snippet bindgroup_partially_bound/bindgroup_partially_bound.cpp 6
+
+Update binding before shader access. Can be done anytime before draw that uses it.
+
+As for the actual rendering, first we will conditionally bind our TextureViewSamplerBinding to the bind group.
+Note that until we have rendered 1000 frames, our texture binding will remain unbound.
+
+\snippet bindgroup_partially_bound/bindgroup_partially_bound.cpp 7
+
+Then we will simply bind the pipeline, buffers and bind groups and render. The information whether we use the
+texture or not will be provided to the shader through the pushConstant.
+
+\snippet bindgroup_partially_bound/bindgroup_partially_bound.cpp 8
+
+When it comes to our shader, the interesting part lies in the fragment shader which will conditionally read from
+our texture based on the useTexture field of the pushConstant.
+
+\code
+layout(set = 0, binding = 0) uniform sampler2D colorTexture;
+
+layout(push_constant) uniform PushConstants
+{
+    layout(offset = 64) vec2 viewportSize;
+    bool useTexture;
+}
+fragPushConstants;
+
+void main()
+{
+    fragColor = fragPushConstants.useTexture ? texture(colorTexture, gl_FragCoord.xy / fragPushConstants.viewportSize) : vec4(color, 1.0);
+}
+\endcode
+
+\section bindgroup_partially_bound_performance Performance Notes
+
+<b>Benefits:</b>
+- Reduced descriptor set allocations (no need for dummy resources)
+- Lazy resource loading (bind only when available)
+- Simplified resource management
+.
+<br/>
+<b>Costs:</b>
+- Programmer must ensure correctness (no validation for uninitialized access)
+- Debugging harder (uninitialized access is UB, not an error)
+.
+<br/>
+<b>Best Practices:</b>
+- Use push constants or specialization constants to control access
+- Document which bindings are optional
+- Assert in debug builds that required bindings are populated
+- Consider `descriptorBindingUpdateAfterBind` for dynamic updates
+
+\section bindgroup_partially_bound_seealso See Also
+
+- \ref bindgroup_indexing - Descriptor arrays and indexing
+- \ref dynamic_ubo - Dynamic uniform buffer offsets
+- [VK_EXT_descriptor_indexing](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_EXT_descriptor_indexing.html) - Official spec
+
+\section bindgroup_partially_bound_further_reading Further Reading
+
+- [Update After Bind](https://docs.vulkan.org/samples/latest/samples/extensions/descriptor_indexing/README.html#_update_after_bind_streaming_descriptors_concurrently) - Vulkan guide
+.
+<br/>
 */

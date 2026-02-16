@@ -8,38 +8,165 @@
   Contact KDAB at <info@kdab.com> for commercial licensing options.
 */
 
-/**
-    @page hello_triangle_overlap Hello Triangle with CPU/GPU overlap
-    @ingroup kdgpu-examples
+/*!
+\page hello_triangle_overlap Hello Triangle with Frame Overlap
+\ingroup kdgpu-examples
 
-    @brief This example shows how to let GPU processes from previous frames continue to run while preparing the next one.
+\brief Demonstrates triple-buffered rendering for optimal CPU/GPU parallelism and maximum frame rate.
 
-    This example is visually identical to the [Hello Triangle](#hello_triangle), but with increased performance. Try building and running both and comparing the framerates.
+This example is visually identical to \subpage hello_triangle but achieves significantly higher performance through proper frame synchronization. By allowing the CPU to prepare the next frame while the GPU renders the previous one, we eliminate idle time on both processors. This is a fundamental technique for real-time rendering applications.
 
-    What's happening? In this example, the CPU is able to continue processing the draw commands for the next frame while the GPU is still working on the previous frame. The KDGpuExample::AdvancedExampleEngineLayer is handling this in the background, for the most part (previous examples such as [Hello Triangle](#hello_triangle) were inheriting from KDGpuExample::SimpleExampleEngineLayer instead).
+The example uses the \ref kdgpuexample_helper "KDGpuExample helper API" with the AdvancedExampleEngineLayer base class that manages multiple in-flight frames.
 
-    \section overlap_engine_types AdvancedExampleEngineLayer vs. SimpleExampleEngineLayer
+\section overlap_overview Overview
 
-    This is a brief summary of the behind-the-scenes functionality added to the AdvancedExampleEngineLayer which allows for CPU/GPU overlap. In order to understand this summary, as well as the way the SimpleExampleEngineLayer was working in other examples, please read [Hello Triangle](#hello_triangle) and then [Hello Triangle Native](#hello_triangle_native).
+<b>What this example demonstrates:</b>
+- Triple-buffered rendering with independent frames "in-flight"
+- Fence-based CPU/GPU synchronization for frame pacing
+- Per-frame command buffers and synchronization primitives
+- Eliminating GPU bubbles and CPU stalls for maximum throughput
+.
+<br/>
 
-    The KDGpuExample::SimpleExampleEngineLayer makes the following call at the end of each frame: ``m_device.waitUntilIdle()``. This is effectively identical to ``wait``ing on a fence. Doing so throttles performance. The CPU is blocked, and once it's running again the GPU has nothing to do while the CPU prepares the next frame's resources.
+<b>Performance benefit:</b>
+- Simple blocking: CPU waits for GPU → both idle 50% of the time
+- Frame overlap: CPU and GPU work in parallel → both utilized continuously
+- Typical improvement: 50-100% higher frame rate
 
-    So let's get rid of it. Unfortunately, this opens a can of worms. The CPU will speed ahead of the GPU, requesting more and more frames be rendered. As this continues, the number of frames until the current frame is rendered increases. This creates latency (and other issues) and is not desirable for interactive, real-time simulations such as games. The ideal solution is to create a small range of frames (often called a "flight") in which the CPU and GPU can operate simulaneously.
+\section overlap_requirements Vulkan Requirements
 
-    KDGpuExample::AdvancedExampleEngineLayer removes the ``waitUntilIdle`` call and uses a circular flight of fences to synchronize the CPU and GPU. Each entry in the flight represents a frame. Each frame is drawing to a different swapchain image, and each one only waits on its own fence. As a result, the CPU can move ahead until it comes back to the frame the GPU is rendering. AdvancedExampleEngineLayer uses two frames per flight.
+- <b>Vulkan Version</b>: 1.0+
+- <b>Extensions</b>: None (core synchronization)
+- <b>Synchronization Primitives</b>: VkFence and VkSemaphore
 
-    \section overlap_code_changes Changes needed to migrate to AdvancedExampleEngineLayer
+\section overlap_concepts Key Concepts
 
-    This snippet of the render loop contains all then necessary code changes/new code:
+<b>The Problem with Blocking:</b>
 
-       @snippet hello_triangle_overlap/hello_triangle.cpp 1
+In \subpage hello_triangle (SimpleExampleEngineLayer), the CPU calls `device.waitUntilIdle()` after submitting each frame. This creates a timeline like:
 
-    Note all the uses of ``m_inFlightIndex``. It needs to be passed to the helper ``renderImGuiOverlay`` so that the function can properly use the current frame's resources. In the submit options, we only submit the current frame's command buffers. We attach the current frame's ``m_renderCompleteSemaphores`` semaphore to be signalled when this frame's render is completed, and we only wait on the current frame's fence. The last element is the ``waitSemaphores``. We also wait on the current frame's ``m_presentCompleteSemaphores`` semaphore if the last instance of this frame was presented (determined by ``m_waitForPresentation``). The presentation semaphores have already been set as the signal semaphore for swapchain image acquisition by the AdvancedExampleEngineLayer.
+\code
+Frame 1: CPU prepares | CPU waits | GPU renders | idle
+Frame 2:                                          CPU prepares | CPU waits | GPU renders | idle
+Frame 3:                                                                                   CPU prepares | ...
+\endcode
 
-    And the last change is to clean up the command buffers on ``cleanupScene``.
+The GPU is idle while the CPU prepares, and the CPU is idle while the GPU renders. Both processors run at ~50% utilization.
 
-       @snippet hello_triangle_overlap/hello_triangle.cpp 2
+<b>Triple-Buffered Frame Overlap:</b>
 
-    Pretty minimal changes for such a large performance increase! If you skipped the previous section to get here, please look at [Hello Triangle](#hello_triangle) and then [Hello Triangle Native](#hello_triangle_native) in order to understand why the CPU/GPU overlap is possible.
+By maintaining multiple frames "in-flight" simultaneously, we overlap CPU and GPU work:
 
+\code
+Frame 1: CPU prepares | GPU renders |
+Frame 2:                CPU prepares | GPU renders |
+Frame 3:                               CPU prepares | GPU renders |
+Frame 4:                                              CPU prepares | GPU renders |
+\endcode
+
+The CPU prepares frame N+1 while the GPU renders frame N. Both processors stay busy.
+
+<b>Why "Double-Buffered"?</b>
+
+We maintain 2 independent sets of resources (buffers, command buffers, fences):
+1. Frame N-1: GPU is rendering
+2. Frame N: CPU is preparing
+.
+<br/>
+
+This ensures we never access resources currently in use by the GPU.
+
+<b>Fences vs Semaphores:</b>
+
+Vulkan provides two synchronization primitives:
+- <b>Fence</b> (VkFence): CPU-GPU synchronization. CPU can wait on a fence to know when GPU work completes.
+- <b>Semaphore</b> (VkSemaphore): GPU-GPU synchronization. GPU waits on semaphores between queue submissions.
+.
+<br/>
+
+This example uses:
+- <b>Per-frame fences</b>: CPU waits to ensure frame N-2 finished before reusing its resources for frame N+1
+- <b>Present semaphores</b>: GPU waits for swapchain image acquisition before rendering
+- <b>Render semaphores</b>: Presentation waits for rendering to complete
+.
+<br/>
+
+For more on synchronization: https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkFence.html
+
+\section overlap_implementation Implementation
+
+<b>AdvancedExampleEngineLayer vs SimpleExampleEngineLayer:</b>
+
+The key difference is removing `device.waitUntilIdle()` and managing per-frame resources:
+
+- <b>SimpleExampleEngineLayer</b>: Blocks after every frame, single command buffer
+- <b>AdvancedExampleEngineLayer</b>: Manages multiple in-flight frames, per-frame resources
+.
+<br/>
+
+To see what AdvancedExampleEngineLayer does behind the scenes, study \subpage hello_triangle_native which manually implements all synchronization.
+
+<b>Frame Overlap Synchronization:</b>
+
+The render function uses per-frame indices to manage independent frame resources:
+
+\snippet hello_triangle_overlap/hello_triangle.cpp frame_overlap_sync
+
+Key points:
+- `m_inFlightIndex`: Current frame slot (0, 1, (or 2 for triple-buffering))
+- `m_commandBuffers[m_inFlightIndex]`: This frame's command buffer (each frame has its own)
+- `m_frameFences[m_inFlightIndex]`: Signal this fence when GPU finishes this frame
+- `m_presentCompleteSemaphores[m_inFlightIndex]`: Wait for swapchain image acquisition
+- `m_renderCompleteSemaphores[m_currentSwapchainImageIndex]`: Signal when rendering completes
+.
+<br/>
+
+<b>Frame Lifecycle:</b>
+
+Each frame goes through this cycle:
+
+1. <b>Acquire</b>: Get next swapchain image (signals present semaphore)
+2. <b>Wait</b>: CPU waits on frame fence from N-2 frames ago (ensure that frame finished)
+3. <b>Record</b>: CPU records command buffer for current frame N
+4. <b>Submit</b>: GPU begins executing commands (waits on present semaphore, signals render semaphore and fence)
+5. <b>Present</b>: Display frame on screen (waits on render semaphore)
+.
+<br/>
+
+By the time we reach frame N, frame N-2 has definitely completed (fence wait), so we can safely reuse its resources.
+
+<b>Resource Management:</b>
+
+Each frame needs independent resources:
+
+\code{.cpp}
+// In AdvancedExampleEngineLayer:
+std::array<CommandBuffer, FRAMES_IN_FLIGHT> m_commandBuffers;
+std::array<Fence, FRAMES_IN_FLIGHT> m_frameFences;
+std::array<Semaphore, FRAMES_IN_FLIGHT> m_presentCompleteSemaphores;
+
+// Swapchain images typically have their own semaphores:
+std::array<Semaphore, SWAPCHAIN_IMAGES> m_renderCompleteSemaphores;
+\endcode
+
+\section overlap_performance Performance Notes
+
+- <b>Latency vs Throughput</b>: Double/Triple-buffering increases throughput (FPS) but adds 1-2 frames of input latency. For competitive games, consider double-buffering.
+- <b>CPU-bound vs GPU-bound</b>: Frame overlap only helps when both CPU and GPU have work to do. If GPU-bound, overlap won't improve FPS.
+- <b>Frame pacing</b>: Fences prevent unlimited buffering. Without them, CPU could queue dozens of frames, causing massive latency.
+- <b>VSync interaction</b>: With VSync enabled, you may not see FPS improvement but will have smoother frame times.
+
+\section overlap_seealso See Also
+
+- \subpage hello_triangle - Simple blocking version for comparison
+- \subpage hello_triangle_native - Manual synchronization implementation without helper API
+- [Vulkan Synchronization Guide](https://docs.vulkan.org/guide/latest/synchronization.html) - Comprehensive synchronization overview
+- [VkFence](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkFence.html) - CPU-GPU synchronization
+- [VkSemaphore](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkSemaphore.html) - GPU-GPU synchronization
+
+\section overlap_further_reading Further Reading
+
+- [Frame Pipelining](https://www.sctheblog.com/blog/vulkan-synchronization/) - Blog on Vulkan Synchronization and frame pipelining
+- [Vulkan Synchronization Primer](https://www.khronos.org/blog/understanding-vulkan-synchronization) - Khronos blog on synchronization
+- [CPU-GPU Parallelism](https://developer.nvidia.com/blog/parallelforall/how-overlap-data-transfers-cuda-cc/) - NVIDIA guide to overlapping compute and transfer
 */

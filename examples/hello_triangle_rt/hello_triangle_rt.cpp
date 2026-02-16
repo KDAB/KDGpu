@@ -49,6 +49,7 @@ void HelloTriangleRt::createRayTracingPipeline()
     auto rayTracingMissShader = m_device.createShaderModule(readShaderFile(rayTracingMissShaderPath));
     auto rayTracingClosestShader = m_device.createShaderModule(readShaderFile(rayTracingClosestShaderPath));
 
+    //![bindgroup_layout]
     // Create bind group layout consisting of an acceleration structure and an image to write out to
     const BindGroupLayoutOptions rtBindGroupLayoutOptions = {
         .bindings = {
@@ -70,6 +71,7 @@ void HelloTriangleRt::createRayTracingPipeline()
     };
 
     m_rtBindGroupLayout = m_device.createBindGroupLayout(rtBindGroupLayoutOptions);
+    //![bindgroup_layout]
 
     // Create a pipeline layout (array of bind group layouts)
     const PipelineLayoutOptions pipelineLayoutOptions = {
@@ -78,6 +80,7 @@ void HelloTriangleRt::createRayTracingPipeline()
     };
     m_pipelineLayout = m_device.createPipelineLayout(pipelineLayoutOptions);
 
+    //![rt_pipeline]
     // Create a raytracing pipeline
     const RayTracingPipelineOptions pipelineOptions{
         .shaderStages = {
@@ -115,10 +118,12 @@ void HelloTriangleRt::createRayTracingPipeline()
         .maxRecursionDepth = 1,
     };
     m_pipeline = m_device.createRayTracingPipeline(pipelineOptions);
+    //![rt_pipeline]
 }
 
 void HelloTriangleRt::createShaderBindingTable()
 {
+    //![sbt]
     // Create Shader Binding Table
     // This basically allows use to create a selection of ShaderGroups we want to use for a specific trace call
     // e.g which rayGen, which Miss, which Hit group we want to use
@@ -132,6 +137,7 @@ void HelloTriangleRt::createShaderBindingTable()
     m_sbt.addRayGenShaderGroup(m_pipeline, 0); // So index 0 in our SBT for GenShaders references ShaderGroup 0 of the Pipeline
     m_sbt.addMissShaderGroup(m_pipeline, 1); // So index 0 in our SBT for MissShaders references ShaderGroup 1 of the Pipeline
     m_sbt.addHitShaderGroup(m_pipeline, 2); // So index 0 in our SBT for HitShaders references ShaderGroup 2 of the Pipeline
+    //![sbt]
 }
 
 void HelloTriangleRt::createAccelerationStructures()
@@ -154,7 +160,8 @@ void HelloTriangleRt::createAccelerationStructures()
     };
     std::memcpy(m_vertexBuffer.map(), vertices.data(), vertices.size() * sizeof(Vertex));
 
-    const AccelerationStructureGeometryTrianglesData triangleDataGeometry{
+    //![blas_creation]
+    const AccelerationStructureGeometryTrianglesData triangleDataGeometry = {
         .vertexFormat = Format::R32G32B32_SFLOAT,
         .vertexData = m_vertexBuffer,
         .vertexStride = sizeof(Vertex),
@@ -173,7 +180,9 @@ void HelloTriangleRt::createAccelerationStructures()
                     },
             },
     });
+    //![blas_creation]
 
+    //![tlas_creation]
     const AccelerationStructureGeometryInstancesData triGeometryInstance{
         .data = {
                 AccelerationStructureGeometryInstance{
@@ -203,10 +212,12 @@ void HelloTriangleRt::createAccelerationStructures()
                     },
             },
     });
+    //![tlas_creation]
 
     // Note: the geometries provided to create the AccelerationStructures were only used to compute
     // their size. Geometries will only be effectively linked to our AccelerationStructures when we build them below.
 
+    //![build_as]
     // Build acceleration structures
     {
         auto commandRecorder = m_device.createCommandRecorder();
@@ -266,6 +277,7 @@ void HelloTriangleRt::createAccelerationStructures()
         });
         m_queue.waitUntilIdle();
     }
+    //![build_as]
 }
 
 void HelloTriangleRt::createBindGroups()
@@ -319,11 +331,9 @@ void HelloTriangleRt::cleanupScene()
     m_sbt = {};
 }
 
-//![1]
 void HelloTriangleRt::updateScene()
 {
 }
-//![1]
 
 void HelloTriangleRt::resize()
 {
@@ -331,7 +341,6 @@ void HelloTriangleRt::resize()
     m_swapchainImageLayouts = std::vector<KDGpu::TextureLayout>(m_swapchain.textures().size(), KDGpu::TextureLayout::Undefined);
 }
 
-//![2]
 void HelloTriangleRt::render()
 {
     auto commandRecorder = m_device.createCommandRecorder();
@@ -363,6 +372,7 @@ void HelloTriangleRt::render()
                 },
         });
 
+        //![trace_rays]
         auto rtPass = commandRecorder.beginRayTracingPass();
         rtPass.setPipeline(m_pipeline);
         rtPass.setBindGroup(0, m_rtBindGroup);
@@ -380,6 +390,7 @@ void HelloTriangleRt::render()
         });
 
         rtPass.end();
+        //![trace_rays]
 
         // Transition Image to ColorAttachmentOptimal Layout
         commandRecorder.textureMemoryBarrier(TextureMemoryBarrierOptions{
@@ -429,4 +440,3 @@ void HelloTriangleRt::render()
     m_queue.submit(submitOptions);
     //![13]
 }
-//![2]

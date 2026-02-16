@@ -57,6 +57,7 @@ void RenderToTextureSubpass::initializeScene()
     m_filterPosData.resize(sizeof(float));
 }
 
+//![create_render_pass]
 void RenderToTextureSubpass::createRenderPass()
 {
     // attachment 1: color attachment(used as output for subpass 1 and input for subpass 2)
@@ -110,6 +111,7 @@ void RenderToTextureSubpass::createRenderPass()
 
     m_renderPass = m_device.createRenderPass(renderPassInfo);
 }
+//![create_render_pass]
 
 void RenderToTextureSubpass::initializeMainScene()
 {
@@ -411,6 +413,7 @@ void RenderToTextureSubpass::resize()
     updateColorBindGroup();
 }
 
+//![render]
 void RenderToTextureSubpass::render()
 {
     auto commandRecorder = m_device.createCommandRecorder();
@@ -461,3 +464,4 @@ void RenderToTextureSubpass::render()
     };
     m_queue.submit(submitOptions);
 }
+//![render]

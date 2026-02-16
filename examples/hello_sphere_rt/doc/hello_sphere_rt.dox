@@ -1,0 +1,208 @@
+/*
+  This file is part of KDGpu.
+
+  SPDX-FileCopyrightText: 2024 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+
+  SPDX-License-Identifier: MIT
+
+  Contact KDAB at <info@kdab.com> for commercial licensing options.
+*/
+
+/*!
+\page hello_sphere_rt Hello Sphere Ray Tracing
+\ingroup kdgpu-examples
+
+\brief Demonstrates custom intersection shaders for procedural ray tracing against spheres.
+
+\image html hello_sphere_rt.png
+
+This example shows advanced ray tracing with custom intersection shaders that define ray-primitive intersection tests in shader code. Unlike \ref hello_triangle_rt which uses built-in triangle intersection, this example traces rays against axis-aligned bounding boxes (AABBs) and performs sphere-ray intersection analytically in an intersection shader. This technique enables ray tracing of procedural geometry like spheres, tori, fractals, and implicit surfaces without storing triangle meshes.
+
+The example does <b>not</b> use the KDGpuExample helper API, demonstrating low-level ray tracing setup.
+
+\section hello_sphere_rt_overview Overview
+
+<b>What this example demonstrates:</b>
+- Creating acceleration structures with AABB primitives
+- Custom intersection shaders for procedural geometry
+- Analytic sphere-ray intersection (quadratic equation solving)
+- Ray tracing pipeline with procedural hit groups
+- Shader binding table (SBT) for custom intersections
+.
+<br/>
+
+<b>Use cases:</b>
+- Procedural geometry (spheres, ellipsoids, tori)
+- Implicit surfaces (metaballs, signed distance functions)
+- Volume rendering (clouds, smoke, fog)
+- Fractals and mathematical shapes
+- Mixed procedural/triangle rendering
+
+\section hello_sphere_rt_requirements Vulkan Requirements
+
+- <b>Vulkan Version</b>: 1.2+
+- <b>Extensions</b>:
+  - VK_KHR_ray_tracing_pipeline
+  - VK_KHR_acceleration_structure
+  - VK_KHR_buffer_device_address
+- <b>Features</b>:
+  - `rayTracingPipeline`
+  - `accelerationStructure`
+  - `bufferDeviceAddress`
+- <b>Shader</b>: SPIR-V 1.4+ with ray tracing and intersection shader support
+
+\section hello_sphere_rt_concepts Key Concepts
+
+<b>Custom Intersection Shaders:</b>
+
+Built-in triangle intersection is fast but limited. Intersection shaders let you define custom ray-primitive tests in shader code. When a ray hits an AABB, the intersection shader is invoked to perform precise intersection testing.
+
+Spec: https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_KHR_ray_tracing_pipeline.html
+
+<b>AABB Geometry:</b>
+
+Procedural primitives use AABBs (axis-aligned bounding boxes) instead of triangles.
+The AABB is a conservative bound - ray traversal tests ray-AABB intersection first (fast), then invokes the intersection shader only if the ray hits the AABB.
+
+For spheres:
+
+```cpp
+AABB sphereAABB = {
+    .min = center - vec3(radius),
+    .max = center + vec3(radius)
+};
+```
+
+<b>Procedural Hit Groups:</b>
+
+Ray tracing shader groups for procedural geometry use `RayTracingShaderGroupType::ProceduralHit` which contains an intersection shader plus closest-hit shader (and optional any-hit).
+
+\section hello_sphere_rt_implementation Implementation
+
+\subsection hello_sphere_rt_pipelines Ray Tracing Pipeline
+
+First, we need to create a ray tracing pipeline.
+Unlike graphics pipelines, ray tracing pipelines can contain multiple shader stages for different purposes: ray generation, miss, closest hit, and intersection.
+
+\snippet hello_sphere_rt/hello_sphere_rt.cpp create_rt_shaders
+
+Our ray tracing generation shader will expect a BindGroup that provides the TBLAS as well as a writable image into which we can store the rendering of our ray tracing work.
+
+\snippet hello_sphere_rt/hello_sphere_rt.cpp create_rt_bindgroup_layout
+
+These stages are then organized into shader groups.
+In this example, we have a general group for ray generation, another for the miss shader, and a procedural hit group that combines the closest hit and intersection shaders.
+
+\snippet hello_sphere_rt/hello_sphere_rt.cpp create_rt_pipeline
+
+The `ProceduralHit` group combines intersection and closest-hit shaders for custom geometry.
+
+\section hello_sphere_rt_shaders Ray Tracing Shaders
+
+The pipeline uses four GLSL shaders, all located under `assets/shaders/examples/hello_sphere_rt/`.
+
+\subsection hello_sphere_rt_shader_raygen Ray Generation — raygen.rgen
+
+The ray generation shader runs once per pixel. It reconstructs a world-space ray from the pixel's NDC coordinates using the inverse view-projection matrix, then calls `traceRayEXT` against the TLAS. The result written by whichever hit/miss shader fires is stored back into the output image with `imageStore`.
+
+\snippet hello_sphere_rt/raygen.rgen raygen
+
+\subsection hello_sphere_rt_shader_intersection Intersection — intersection.rint
+
+This shader is the heart of the procedural geometry technique. It is invoked for every AABB that the ray touches.
+The shader reads the corresponding `SphereData` entry (center + radius) indexed by `gl_PrimitiveID`, solves the quadratic ray-sphere equation, and, if there is a real positive root, reports the intersection distance with `reportIntersectionEXT`.
+If the discriminant is negative the ray misses the sphere and the shader returns silently, letting the traversal continue.
+
+\snippet hello_sphere_rt/intersection.rint intersection
+
+\subsection hello_sphere_rt_shader_closest Closest Hit — closest.rchit
+
+Once the traversal has committed the closest intersection for a given ray, the closest-hit shader runs.
+It looks up the `SphereData` entry again, computes the world-space hit point from `gl_WorldRayOriginEXT + gl_HitTEXT * gl_WorldRayDirectionEXT`, derives the surface normal, and applies a simple Lambertian (diffuse) shading model before writing the result into the ray payload.
+
+\snippet hello_sphere_rt/closest.rchit closest
+
+\subsection hello_sphere_rt_shader_miss Miss — miss.rmiss
+
+If no geometry is hit the miss shader fires and fills the payload with a flat dark-gray background colour.
+
+\snippet hello_sphere_rt/miss.rmiss miss
+
+\subsection hello_sphere_rt_as Acceleration Structures
+
+Ray tracing is performed against acceleration structures rather than raw vertex data.
+We create a Bottom Level Acceleration Structure (BLAS) for the geometry (the spheres' AABBs) and a Top Level Acceleration Structure (TLAS) that instances the BLAS.
+
+\snippet hello_sphere_rt/hello_sphere_rt.cpp blas_data
+
+\snippet hello_sphere_rt/hello_sphere_rt.cpp blas_creation
+
+Key points:
+- `AccelerationStructureGeometryAabbsData`: AABB buffer with tightly packed `{minX, minY, minZ, maxX, maxY, maxZ}` floats
+- Each AABB = 24 bytes (6 floats)
+.
+<br/>
+
+Once the structures are created, they must be built on the GPU.
+
+\snippet hello_sphere_rt/hello_sphere_rt.cpp build_as
+
+AS build happens on GPU via command buffer.
+
+\subsection hello_sphere_rt_sbt Shader Binding Table (SBT)
+
+The [Shader Binding Table](https://docs.vulkan.org/spec/latest/chapters/raytracing.html#shader-binding-table) connects the trace calls in the shaders to the actual shader groups in the pipeline.
+
+\snippet hello_sphere_rt/hello_sphere_rt.cpp shader_binding_table
+
+SBT layout must match pipeline shader group layout with proper alignment.
+
+\section hello_sphere_rt_rendering Rendering
+
+The rendering process involves transitioning the swapchain image to a general layout so it can be used as a storage image by the ray tracing shaders, and then issuing a `traceRays` call.
+
+\snippet hello_sphere_rt/hello_sphere_rt.cpp render
+
+The `traceRays` call uses the regions from our SBT to know which shaders to execute for each ray.
+
+\section hello_sphere_rt_performance Performance Notes
+
+<b>Custom Intersection Cost:</b>
+- More expensive than triangle intersection (GPU triangle units idle)
+- Sphere intersection: ~10-50 cycles (vs ~5 for triangles)
+- Complex SDFs can be 100+ cycles
+.
+<br/>
+
+<b>Optimization Tips:</b>
+- Keep AABBs tight (reduce false positives)
+- Early-exit intersection tests when possible
+- Simplify math (avoid sqrt, transcendentals where possible)
+- Mix procedural and triangles (use triangles when efficient)
+.
+<br/>
+
+<b>When to Use Procedural:</b>
+- Geometry is naturally implicit (spheres, SDFs)
+- Tessellation would be too expensive
+- Dynamic/animated procedural shapes
+- Memory-constrained (no vertex buffers)
+
+\section hello_sphere_rt_seealso See Also
+
+- \ref hello_triangle_rt - Triangle ray tracing basics
+- \ref hybrid_raster_rt - Mixing rasterization and ray tracing
+- \ref buffer_reference - Buffer device address for AS references
+- [Ray Tracing In Vulkan](https://www.khronos.org/blog/ray-tracing-in-vulkan) - Official Vulkan blog
+- [Ray Tracing Guide](https://docs.vulkan.org/guide/latest/extensions/ray_tracing.html) - Official Vulkan documentation
+- [NVIDIA Ray Tracing Tutorial](https://nvpro-samples.github.io/vk_raytracing_tutorial_KHR/) - Advanced techniques
+
+\section hello_sphere_rt_further_reading Further Reading
+
+- [Ray-Sphere Intersection](https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-sphere-intersection) - Math derivation
+- [Signed Distance Functions](https://iquilezles.org/articles/distfunctions/) - SDFs for procedural geometry
+- [Procedural Geometry](https://www.shadertoy.com/) - ShaderToy examples
+.
+<br/>
+For more technical details on ray tracing in Vulkan, see the [Vulkan Ray Tracing Guide](https://docs.vulkan.org/guide/latest/extensions/ray_tracing.html).
+*/

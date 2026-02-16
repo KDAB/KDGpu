@@ -36,13 +36,13 @@ struct Vertex {
 };
 static_assert(sizeof(Vertex) == 3 * sizeof(float));
 
-//![4]
+//![particle_struct]
 struct ParticleData {
     glm::vec4 position;
     glm::vec4 velocity;
     glm::vec4 color;
 };
-//![4]
+//![particle_struct]
 static_assert(sizeof(ParticleData) == 12 * sizeof(float));
 
 std::vector<ParticleData> initializeParticles(const size_t particlesCount)
@@ -78,7 +78,7 @@ void ComputeParticles::initializeScene()
     auto initializeBuffers = [this]() {
         // Create a buffer to hold particles data (will be used as per Instance data)
         {
-            //![1]
+            //![particles_buffer]
             const BufferOptions particlesBufferOptions = {
                 .size = ParticlesCount * sizeof(ParticleData),
                 .usage = BufferUsageFlagBits::VertexBufferBit | BufferUsageFlagBits::StorageBufferBit,
@@ -86,12 +86,12 @@ void ComputeParticles::initializeScene()
             };
             const std::vector<ParticleData> particles = initializeParticles(ParticlesCount);
             m_particleDataBuffer = m_device.createBuffer(particlesBufferOptions, particles.data());
-            //![1]
+            //![particles_buffer]
         }
 
         // Create a buffer to hold the triangle vertex data
         {
-            //![2]
+            //![vertex_buffer]
             const BufferOptions triangleBufferOptions = {
                 .size = 3 * sizeof(Vertex),
                 .usage = BufferUsageFlagBits::VertexBufferBit,
@@ -104,7 +104,7 @@ void ComputeParticles::initializeScene()
             vertexData[1] = { { r * std::cos(11.0f * M_PI / 6.0f), -r * std::sin(11.0f * M_PI / 6.0f), 0.0f } }; // Bottom-right
             vertexData[2] = { { 0.0f, -r, 0.0f } }; // Top
             m_triangleVertexBuffer = m_device.createBuffer(triangleBufferOptions, vertexData.data());
-            //![2]
+            //![vertex_buffer]
         }
     };
 
@@ -114,23 +114,22 @@ void ComputeParticles::initializeScene()
 
     auto initializeComputePipeline = [this]() {
         // Create a compute shader (spir-v only for now)
-        //![5]
+        //![compute_shader]
         auto computeShaderPath = KDGpuExample::assetDir().file("shaders/examples/compute_particles/particles.comp.spv");
         auto computeShader = m_device.createShaderModule(KDGpuExample::readShaderFile(computeShaderPath));
-        //![5]
+        //![compute_shader]
 
+        //![compute_pipeline]
         // Create bind group layout consisting of a single binding holding a SSBO
-        // clang-format off
-        //
-        //![6]
         const BindGroupLayoutOptions bindGroupLayoutOptions = {
-            .bindings = {{
-                .binding = 0,
-                .resourceType = ResourceBindingType::StorageBuffer,
-                .shaderStages = ShaderStageFlags(ShaderStageFlagBits::ComputeBit)
-            }}
+            .bindings = {
+                    {
+                            .binding = 0,
+                            .resourceType = ResourceBindingType::StorageBuffer,
+                            .shaderStages = ShaderStageFlags(ShaderStageFlagBits::ComputeBit),
+                    },
+            },
         };
-        // clang-format on
         m_computeBindGroupLayout = m_device.createBindGroupLayout(bindGroupLayoutOptions);
 
         // Create a pipeline layout (array of bind group layouts)
@@ -138,19 +137,17 @@ void ComputeParticles::initializeScene()
             .bindGroupLayouts = { m_computeBindGroupLayout }
         };
         m_computePipelineLayout = m_device.createPipelineLayout(pipelineLayoutOptions);
-        //![6]
 
-        // Create a bindGroup to hold the UBO with the transform
-        // clang-format off
-        //![7]
-        const BindGroupOptions bindGroupOptions {
+        // Create a bindGroup to hold the Particles SSBO
+        const BindGroupOptions bindGroupOptions{
             .layout = m_computeBindGroupLayout,
-            .resources = {{
-                .binding = 0,
-                .resource = StorageBufferBinding{ .buffer = m_particleDataBuffer }
-            }}
+            .resources = {
+                    {
+                            .binding = 0,
+                            .resource = StorageBufferBinding{ .buffer = m_particleDataBuffer },
+                    },
+            },
         };
-        // clang-format on
         m_particleBindGroup = m_device.createBindGroup(bindGroupOptions);
 
         const ComputePipelineOptions pipelineOptions{
@@ -168,7 +165,7 @@ void ComputeParticles::initializeScene()
         };
 
         m_computePipeline = m_device.createComputePipeline(pipelineOptions);
-        //![7]
+        //![compute_pipeline]
     };
 
     auto initializeGraphicsPipeline = [this]() {
@@ -191,7 +188,7 @@ void ComputeParticles::initializeScene()
                 { .shaderModule = fragmentShader, .stage = ShaderStageFlagBits::FragmentBit }
             },
             .layout = m_graphicsPipelineLayout,
-            //![8]
+            //![vertex_format]
             .vertex = {
                 .buffers = {
                     { .binding = 0, .stride = sizeof(Vertex) },
@@ -203,7 +200,7 @@ void ComputeParticles::initializeScene()
                     { .location = 2, .binding = 1, .format = Format::R32G32B32A32_SFLOAT, .offset = 2 * sizeof(glm::vec4) } // Particle Color
                 }
             },
-            //![8]
+            //![vertex_format]
             .renderTargets = {
                 { .format = m_swapchainFormat }
             },
@@ -261,7 +258,7 @@ void ComputeParticles::renderSingleCommandBuffer()
 {
     // Prepare Command Buffers
 
-    //![9]
+    //![dispatch_compute_shader]
     auto commandRecorder = m_device.createCommandRecorder();
     {
         // Compute
@@ -274,20 +271,19 @@ void ComputeParticles::renderSingleCommandBuffer()
 
         // Barrier to force waiting for compute commands SSBO writes to have completed
         // before vertex shaders tries to read per instance vertex attributes
-
-        // clang-format off
-        commandRecorder.memoryBarrier(MemoryBarrierOptions {
+        commandRecorder.memoryBarrier(MemoryBarrierOptions{
                 .srcStages = PipelineStageFlags(PipelineStageFlagBit::ComputeShaderBit),
                 .dstStages = PipelineStageFlags(PipelineStageFlagBit::VertexInputBit),
                 .memoryBarriers = {
-                            {
+                        {
                                 .srcMask = AccessFlags(AccessFlagBit::ShaderWriteBit),
-                                .dstMask = AccessFlags(AccessFlagBit::VertexAttributeReadBit)
-                            }
-                }
+                                .dstMask = AccessFlags(AccessFlagBit::VertexAttributeReadBit),
+                        },
+                },
         });
-        // clang-format on
+        //![dispatch_compute_shader]
 
+        //![dispatch_draw]
         // Render
         auto opaquePass = commandRecorder.beginRenderPass(RenderPassCommandRecorderOptions{
                 .colorAttachments = {
@@ -307,6 +303,7 @@ void ComputeParticles::renderSingleCommandBuffer()
         opaquePass.draw(DrawCommand{ .vertexCount = 3, .instanceCount = ParticlesCount });
         renderImGuiOverlay(&opaquePass);
         opaquePass.end();
+        //![dispatch_draw]
     }
     m_graphicsAndComputeCommands = commandRecorder.finish();
 
@@ -317,7 +314,6 @@ void ComputeParticles::renderSingleCommandBuffer()
         .signalSemaphores = { m_renderCompleteSemaphores[m_currentSwapchainImageIndex] }
     };
     m_queue.submit(submitOptions);
-    //![9]
 }
 
 void ComputeParticles::renderMultipleCommandBuffers()

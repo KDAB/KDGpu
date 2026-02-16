@@ -1,0 +1,68 @@
+/*
+  This file is part of KDGpu.
+
+  SPDX-FileCopyrightText: 2024 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+
+  SPDX-License-Identifier: MIT
+
+  Contact KDAB at <info@kdab.com> for commercial licensing options.
+*/
+
+/*!
+\page render_to_texture_subpass Render to Texture with Subpasses
+\ingroup kdgpu-examples
+
+\brief Demonstrates Vulkan subpasses for efficient multi-pass rendering on tile-based GPUs.
+
+\image html render_to_texture_subpass.png
+
+This example shows how to use subpasses within a single render pass to perform multi-pass rendering (like post-processing) while keeping intermediate data in on-chip tile memory.
+
+Unlike \ref render_to_texture which uses separate render passes, subpasses allow tile-based deferred renderers (TBDR) to avoid expensive round-trips to main memory.
+
+This is crucial for mobile GPU efficiency but also benefits desktop GPUs.
+
+The example uses the \ref kdgpuexample_helper "KDGpuExample helper API" for simplified setup.
+
+<b>Key Benefit:</b> Subpasses keep data in fast on-chip memory, avoiding expensive main memory transfers. This provides 50-75% bandwidth savings on mobile GPUs.
+
+<b>Use cases:</b> Mobile rendering, deferred shading, post-processing on mobile, multi-stage effects.
+
+\section render_to_texture_subpass_renderpass Render Pass Configuration
+
+We define a render pass with two subpasses:
+1.  <b>Subpass 0</b>: Renders the main scene (a rotating triangle) into an intermediate color attachment.
+2.  <b>Subpass 1</b>: Performs a post-processing effect (grayscale/blur) by reading from the first attachment as an <b>input attachment</b> and writing to the final swapchain image.
+
+\snippet render_to_texture_subpass/render_to_texture_subpass.cpp create_render_pass
+
+\section render_to_texture_subpass_dependencies Subpass Dependencies
+
+Dependencies are crucial here. We must specify that Subpass 1 depends on Subpass 0's writes to the color attachment. By using `PipelineStageFlagBit::ColorAttachmentOutputBit` for the source and `PipelineStageFlagBit::FragmentShaderBit` for the destination, we ensure the data is ready before the post-process shader tries to read it.
+
+\section render_to_texture_subpass_shader Input Attachments
+
+In the GLSL shader for Subpass 1, we access the data from Subpass 0 using a special `subpassInput` type instead of a standard `sampler2D`:
+
+```glsl
+layout(input_attachment_index = 0, set = 0, binding = 0) uniform subpassInput inputColor;
+
+void main() {
+    vec3 color = subpassLoad(inputColor).rgb;
+    // apply post-processing...
+}
+```
+
+For more information, see the Vulkan documentation on [Subpasses](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkSubpassDescription.html).
+
+\section render_to_texture_subpass_draw Draw Call Submission
+
+\snippet render_to_texture_subpass/render_to_texture_subpass.cpp render
+
+Compare this to \ref render_to_texture, where the two passes are separate `beginRenderPass` / `end()` calls on separate `commandRecorder` invocations:
+
+- In `render_to_texture`, both the scene and the post-process pass are begun independently with `commandRecorder.beginRenderPass(...)`, and an explicit `commandRecorder.textureMemoryBarrier(...)` is inserted between them to transition the intermediate texture from `ColorAttachmentOptimal` to `ShaderReadOnlyOptimal`.
+- Here, all attachments — including both the intermediate color texture and the final swapchain image — are declared upfront in a **single** `beginRenderPass` call. Between the two subpasses,  `opaquePass.nextSubpass()` is called instead of ending and restarting the render pass.
+- No barrier is needed between the subpasses. The `SubpassDependenciesDescriptions` declared in `createRenderPass()` tells the driver exactly when and how to synchronize access to attachment 0, so it can keep the data in tile memory rather than flushing it to main memory.
+
+*/

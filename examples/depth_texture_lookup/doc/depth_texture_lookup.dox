@@ -8,52 +8,173 @@
   Contact KDAB at <info@kdab.com> for commercial licensing options.
 */
 
-/**
-    @page depth_texture_lookup Depth Texture Lookup
-    @ingroup kdgpu-examples
+/*!
+\page depth_texture_lookup Depth Texture Sampling
+\ingroup kdgpu-examples
 
-    @brief This example shows how to use multiple render passes to fill the depth buffer and subsequently sample from it.
+\brief Demonstrates sampling from depth textures in shaders for advanced depth-based effects.
 
-    First, we start by preparing resources for 3 render passes.
+\image html depth_texture_lookup.png
 
-    The first render pass will render a cube to the swapchain color attachment and a depth attachment.
-    We request attachments to be cleared when we begin this render pass.
+This example shows how to render depth to a texture, then sample from it in subsequent passes. Depth texture sampling enables effects like soft shadows (shadow mapping), depth-of-field, screen-space ambient occlusion (SSAO), edge detection, and depth-aware post-processing. The example renders a cube to populate the depth buffer, samples and visualizes the depth values, then continues rendering.
 
-    @snippet depth_texture_lookup/depth_texture_lookup.cpp 1
+The example uses the \ref kdgpuexample_helper "KDGpuExample helper API" for simplified setup.
 
-    The second render pass will clear the color attachment and sample from the previously filled depth buffer.
-    Note that this render pass has no depth attachment.
-    A BindGroup that can hold a CombinedImageSampler is allocated in order to feed the depth texture to the shader.
+\section depth_texture_lookup_overview Overview
 
-    @snippet depth_texture_lookup/depth_texture_lookup.cpp 2
+<b>What this example demonstrates:</b>
+- Creating depth textures with sampled usage
+- Multi-pass rendering with depth buffer reuse
+- Sampling depth textures in fragment shaders
+- Depth texture format considerations
+- Attachment load/store operations across passes
+.
+<br/>
+<b>Use cases:</b>
+- Shadow mapping (sampling shadow depth map)
+- Screen-space ambient occlusion (SSAO)
+- Depth-of-field post-processing
+- Edge detection based on depth discontinuities
+- Depth visualization and debugging
 
-    Next we prepare our last render pass which will use the color and depth attachments but won't clear any of these attachments.
-    This pass will only be used to render the ImGui overlay.
+\section depth_texture_lookup_requirements Vulkan Requirements
 
-    @snippet depth_texture_lookup/depth_texture_lookup.cpp 3
+- <b>Vulkan Version</b>: 1.0+
+- <b>Extensions</b>: None (depth sampling is core)
+- <b>Format Features</b>: Depth format must support SampledBit
+- <b>Formats</b>: D32_SFLOAT, D24_UNORM_S8_UINT, or D16_UNORM
 
-    \section depth_texture_lookup_rendering Rendering
+\section depth_texture_lookup_concepts Key Concepts
 
-    The rendering follows the same order as that of the render passes resources creation detailed above.
+<b>Depth Texture Formats:</b>
 
-    First we begin by updating the TextureView for the color attachment of each RenderPass options.
+Depth formats store per-pixel depth values (distance from camera):
+- `D32_SFLOAT`: 32-bit float, highest precision, 4 bytes/pixel
+- `D24_UNORM_S8_UINT`: 24-bit depth + 8-bit stencil, common, 4 bytes/pixel
+- `D16_UNORM`: 16-bit depth, lower precision, 2 bytes/pixel, mobile-friendly
+.
+<br/>
 
-    @snippet depth_texture_lookup/depth_texture_lookup.cpp 4
+When sampling depth:
+- Use `D32_SFLOAT` for best precision (shadow mapping)
+- Combined depth-stencil formats require special sampler configuration
+- Values are normalized [0, 1]: 0 = near plane, 1 = far plane
+.
+<br/>
 
-    Then we start recording commands for the first RenderPass which draws a cube and fills up the depth attachment.
+Spec: https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkFormat.html
 
-    @snippet depth_texture_lookup/depth_texture_lookup.cpp 5
+<b>Depth Sampling:</b>
 
-    Next, we record commands for the depth lookup render pass which will draw a full screen quad and sample from the depth attachment.
+Unlike color textures, depth textures are sampled differently:
 
-    Note that in order to be able to sample from the depth attachment we first have to transition the depth attachment texture from the DepthStencilAttachmentOptimal layout to the ShaderReadOnlyOptimal layout.
+\code
+layout(set = 0, binding = 0) uniform sampler2D depthTexture;
 
-    We don't update the bind group for this pass every frame but rather only when we know the depth texture has changed, which is every time the swapchain has been resized.
+void main() {
+    float depth = texture(depthTexture, uv).r;  // Single channel
+    // depth is in [0, 1]: 0 = near, 1 = far (in NDC space)
+}
+\endcode
 
-    Subsequently, after having recorded the draw commands, we will transition back to the appropriate layout for the render pass that follows.
+For combined depth-stencil, sampler must specify aspect:
+- `imageAspect = ImageAspectFlagBits::DepthBit` to sample depth
+- `imageAspect = ImageAspectFlagBits::StencilBit` to sample stencil
+.
+<br/>
 
-    @snippet depth_texture_lookup/depth_texture_lookup.cpp 6
+<b>Image Layout Transitions:</b>
 
-    Lastly, we begin the overlay render pass and record the commands that draw up the overlay.
+Depth textures use different layouts for different operations:
+- `DepthStencilAttachmentOptimal`: Optimal for depth testing
+- `ShaderReadOnlyOptimal`: Optimal for sampling in shaders
+- `DepthReadOnlyStencilAttachmentOptimal`: Read depth, write stencil
+.
+<br/>
 
+Transitions happen at render pass boundaries via load/store ops.
+
+\section depth_texture_lookup_implementation Implementation
+
+<b>Create Pass 1 to render Cube with Depth:</b>
+
+\snippet depth_texture_lookup/depth_texture_lookup.cpp create_scene_pass
+
+Key configuration:
+- Color and depth attachments cleared at pass start
+- Depth writes enabled in pipeline
+- Depth test performs Less comparison
+- Result: Depth buffer contains distance values
+.
+<br/>
+
+<b>Create Pass 2 to sample Depth Texture:</b>
+
+\snippet depth_texture_lookup/depth_texture_lookup.cpp create_depth_pass
+
+Key points:
+- <b>No depth attachment</b> in this pass (depth testing disabled)
+- Color cleared to visualize depth values
+- `CombinedImageSampler` binding provides depth texture to shader
+- Shader samples depth and converts to grayscale for visualization
+.
+<br/>
+
+<b>Rendering with Depth:</b>
+
+We first render the scene to fill the depth buffer:
+
+\snippet depth_texture_lookup/depth_texture_lookup.cpp draw_cube
+
+Next we transition the depth texture to sample from it:
+
+\snippet depth_texture_lookup/depth_texture_lookup.cpp transition_depth
+
+Then we can draw our depth buffer:
+
+\snippet depth_texture_lookup/depth_texture_lookup.cpp draw_depth
+
+We transition back the depth buffer to a suitable layout for the next frame:
+
+\snippet depth_texture_lookup/depth_texture_lookup.cpp transition_depth_back
+
+To render the overlay, the final pass continues rendering on top of previous passes with depth testing enabled. It uses `loadOperation = Load` to preserve existing color and depth data from previous passes. This demonstrates chaining multiple rendering passes that depend on each other's output.
+
+\snippet depth_texture_lookup/depth_texture_lookup.cpp overlay
+
+\section depth_texture_lookup_performance Performance Notes
+
+<b>Depth Texture Cost:</b>
+- Memory: 1920×1080 D32: ~8MB, D24S8: ~8MB, D16: ~4MB
+- Sampling bandwidth: Similar to color textures
+- On tile-based GPUs, avoid unnecessary depth texture creation (use subpasses)
+.
+<br/>
+
+<b>Layout Transitions:</b>
+- Transitioning between attachment and sampled layouts has cost
+- Minimize transitions by batching shadow map renders
+- On mobile, keep depth on-chip when possible
+.
+<br/>
+
+<b>Optimization Tips:</b>
+- Use D16_UNORM on mobile for bandwidth savings
+- For shadow maps, lower resolution depth (1024×1024 often sufficient)
+- Consider reverse-Z for better precision distribution
+- Use comparison samplers for shadow mapping (hardware PCF)
+
+\section depth_texture_lookup_seealso See Also
+
+- \ref depth_bias - Depth bias for shadow mapping
+- \ref render_to_texture - General render-to-texture techniques
+- \ref hello_triangle_msaa - Multi-sampled depth buffers
+- [Depth Formats](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkFormat.html) - Format specifications
+- [Shadow Mapping](https://learnopengl.com/Advanced-Lighting/Shadows/Shadow-Mapping) - Shadow mapping tutorial
+
+\section depth_texture_lookup_further_reading Further Reading
+
+- [Reverse-Z](https://developer.nvidia.com/content/depth-precision-visualized) - Improved depth precision
+- [PCF Shadow Filtering](https://developer.nvidia.com/gpugems/gpugems/part-ii-lighting-and-shadows/chapter-11-shadow-map-antialiasing) - Hardware shadow filtering
+- [SSAO Techniques](https://learnopengl.com/Advanced-Lighting/SSAO) - Screen-space ambient occlusion
 */

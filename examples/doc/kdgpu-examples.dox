@@ -8,23 +8,77 @@
   Contact KDAB at <info@kdab.com> for commercial licensing options.
 */
 
-/**
-    @page kdgpu-examples KDGpu Examples
+/*!
+    \page kdgpu-examples KDGpu Examples
 
-    \section kdgpuexample_examples Examples using the KDGpuExample helper API
+    \brief A collection of examples demonstrating Vulkan rendering techniques and features using KDGpu.
 
-    - @subpage hello_triangle
-    - @subpage hello_triangle_msaa
-    - @subpage hello_triangle_overlap
-    - @subpage dynamic_ubo
-    - @subpage multiview
-    - @subpage textured_quad
-    - @subpage render_to_texture
-    - @subpage compute_particles
-    - @subpage depth_texture_lookup
+    These examples are organized by complexity, from basic triangle rendering to advanced techniques like ray tracing and order-independent transparency. Most examples use the \subpage kdgpuexample_helper "KDGpuExample Helper API" to reduce boilerplate and focus on the specific technique being demonstrated.
 
-    \section native_examples Examples using the Native API
+    Examples assume you understand basic 3D graphics concepts (vertices, shaders, coordinate systems, matrix math, texture sampling, depth testing) but not necessarily Vulkan-specific APIs.
 
-    - @subpage hello_triangle_native
-    - @subpage offscreen_rendering
+    \section beginner_examples Beginner Examples
+
+    These examples introduce fundamental rendering concepts and the KDGpu API. Start here if you're new to KDGpu or Vulkan.
+
+    - \subpage hello_triangle - Your first triangle using the KDGpuExample helper API
+    - \subpage hello_triangle_native - Raw KDGpu API showing all initialization steps without helper abstractions
+    - \subpage hello_triangle_hlsl - Using HLSL shaders instead of GLSL with DXC compilation
+    - \subpage textured_quad - Texture loading, sampling, and applying textures to geometry
+    - \subpage hello_triangle_overlap - Triple-buffered rendering with fence synchronization for frame overlap
+    - \subpage hello_triangle_apple - Platform-specific initialization for macOS using MoltenVK
+
+    \section intermediate_examples Intermediate Examples
+
+    These examples demonstrate multi-pass rendering, anti-aliasing, compute shaders, and descriptor management.
+
+    \subsection msaa_examples Multi-Sample Anti-Aliasing (MSAA)
+    - \subpage hello_triangle_msaa - Multi-sample anti-aliasing for smooth edges
+    - \subpage hello_triangle_msaa_dynamic_rendering - MSAA with VK_KHR_dynamic_rendering extension
+
+    \subsection multipass_examples Multi-Pass Rendering
+    - \subpage render_to_texture - Off-screen rendering to texture for multi-pass effects
+    - \subpage render_to_texture_subpass - Efficient subpass-based rendering for tile-based GPUs
+    - \subpage render_to_texture_subpass_dynamic_rendering - Subpasses with dynamic rendering
+    - \subpage depth_texture_lookup - Sampling depth textures in shaders for advanced effects
+    - \subpage depth_bias - Depth bias for shadow mapping and z-fighting prevention
+
+    \subsection ubo_compute_examples Uniform Buffers and Compute
+    - \subpage dynamic_ubo - Dynamic uniform buffer offsets for efficient per-object data
+    - \subpage compute_particles - GPU particle simulation using compute shaders
+    - \subpage offscreen_rendering - Headless rendering to image files without a window
+
+    \subsection descriptor_examples Descriptor Management
+    - \subpage bindgroup_indexing - Descriptor array indexing with nonUniformEXT qualifier
+    - \subpage bindgroup_partially_bound - Partially bound descriptor sets for flexible resource binding
+    - \subpage host_image_copy_texture - Host-side image copying with VK_EXT_host_image_copy
+
+    \subsection multiview_examples Multi-View Rendering
+    - \subpage multiview - Multi-view rendering for VR and stereo rendering
+    - \subpage multiview_stereo - Stereo swapchains for VR headsets and 3D displays
+
+    \section advanced_examples Advanced Examples
+
+    These examples showcase modern rendering techniques including mesh shaders, ray tracing, order-independent transparency, and XR.
+
+    \subsection modern_pipeline_examples Modern Pipeline Features
+    - \subpage hello_sphere_mesh - Mesh shaders for GPU-driven geometry generation
+    - \subpage buffer_reference - GPU pointers with VK_KHR_buffer_device_address
+
+    \subsection raytracing_examples Ray Tracing
+    - \subpage hello_triangle_rt - Introduction to ray tracing with acceleration structures
+    - \subpage hello_sphere_rt - Procedural geometry with ray tracing intersection shaders
+    - \subpage hybrid_raster_rt - Hybrid rasterization and ray tracing pipeline
+
+    \subsection advanced_rendering_examples Advanced Rendering Techniques
+    - \subpage compute_oit_transparency - Order-independent transparency using per-pixel linked lists
+    - \subpage wireframe_geometry - Single-pass wireframe rendering with barycentric coordinates
+
+    \subsection xr_examples XR (Extended Reality)
+    - \subpage hello_xr - OpenXR integration with compositor layers and passthrough
+    - \subpage hello_xr_multiview - XR rendering with multi-view for efficient stereo rendering
+
+    \section helper_info About the Helper API
+
+    See \subpage kdgpuexample_helper for details about the KDGpuExample helper API used by most examples, and when to use the native API instead.
 */

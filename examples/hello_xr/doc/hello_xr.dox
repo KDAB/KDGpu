@@ -1,0 +1,83 @@
+/*
+  This file is part of KDGpu.
+
+  SPDX-FileCopyrightText: 2026 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+
+  SPDX-License-Identifier: MIT
+
+  Contact KDAB at <info@kdab.com> for commercial licensing options.
+*/
+
+/*!
+\page hello_xr Hello XR (OpenXR VR Application)
+\ingroup kdgpu-examples
+
+\brief Demonstrates OpenXR integration for cross-platform VR rendering with multiple compositor layers.
+
+This example shows complete OpenXR/Vulkan integration for virtual reality applications. OpenXR is the industry-standard cross-platform VR API supporting all major headsets (Quest, Index, Vive, etc.). The example renders a 3D scene with multiple layer types: passthrough (real-world view), projection (3D scene), quad layers (flat UI panels), and cylinder layers (curved UI). This demonstrates the full OpenXR compositor system and device-independent VR input handling.
+
+\section hello_xr_overview Overview
+
+<b>What this demonstrates:</b> OpenXR initialization, VR compositor layers (passthrough/projection/quad/cylinder), device-independent input actions, per-eye view matrices, stereo rendering, ImGui VR overlays.
+
+<b>Use cases:</b> VR games, VR training simulations, architectural visualization, VR tools.
+
+\section hello_xr_requirements Requirements
+
+- <b>Vulkan Version</b>: 1.0+
+- <b>Extensions</b>: VK_KHR_multiview recommended
+- <b>Runtime</b>: OpenXR runtime (SteamVR, Oculus, Windows MR)
+- <b>Hardware</b>: VR headset
+
+\section hello_xr_concepts Key Concepts
+
+<b>OpenXR:</b> Cross-platform VR API abstracting hardware differences. Single codebase works on Quest, Index, Vive, etc.
+
+<b>Compositor Layers:</b> Different layer types combine for final VR output. Passthrough shows real world, projection renders 3D scene, quads/cylinders add UI overlays.
+
+The example uses several compositor layers to render the scene:
+- <b>Passthrough Layer</b>: Displays the real-world view from the headset's cameras.
+- <b>Projection Layer</b>: Renders the 3D scene (triangles).
+- <b>Quad Layer</b>: Renders an ImGui overlay as a flat quad in the 3D space.
+- <b>Cylinder Layer</b>: Renders an ImGui overlay as a cylinder around the user.
+
+## OpenXR Layers Initialization
+In OpenXR, we define different layers that the compositor will blend together.
+\snippet hello_xr.cpp XrLayers
+
+## OpenXR Actions
+Actions allow us to handle input from various VR controllers in a device-independent way.
+
+\snippet hello_xr.cpp XrActions
+
+## View Matrix Calculation
+In VR, we need to calculate a separate view and projection matrix for each eye.
+
+\snippet projection_layer.cpp XrViewMatrices
+
+## Rendering the Scene
+The scene is rendered for each eye using the corresponding view and projection matrices.
+
+\snippet projection_layer.cpp XrRenderView
+
+\section hello_xr_vulkan_integration Vulkan Integration
+
+<b>Vulkan and OpenXR:</b> OpenXR abstracts VR hardware but uses native graphics APIs (Vulkan, D3D, etc.) for rendering. KDGpu's OpenXR integration:
+- Creates Vulkan swapchains for each OpenXR swapchain
+- Handles per-eye rendering with multiview or separate passes
+- Manages frame timing and synchronization with the VR runtime
+.
+<br/>
+
+<b>Key Vulkan Features Used:</b>
+- [VK_KHR_multiview](https://registry.khronos.org/vulkan/specs/1.3-extensions/html/vkspec.html#VK_KHR_multiview) - Efficient stereo rendering
+- [Swapchains](https://registry.khronos.org/vulkan/specs/1.3-extensions/html/vkspec.html#VkSwapchainCreateInfoKHR) - Frame buffer management
+- [Semaphores and Fences](https://registry.khronos.org/vulkan/specs/1.3-extensions/html/vkspec.html#synchronization-semaphores) - Frame synchronization
+
+\section hello_xr_further Further Reading
+
+- [OpenXR Specification](https://registry.khronos.org/OpenXR/specs/1.0/html/xrspec.html)
+- [Vulkan Multiview Extension](https://registry.khronos.org/vulkan/specs/1.3-extensions/html/vkspec.html#VK_KHR_multiview)
+- [OpenXR-Vulkan Integration Guide](https://registry.khronos.org/OpenXR/specs/1.0/html/xrspec.html#_vulkan)
+
+*/

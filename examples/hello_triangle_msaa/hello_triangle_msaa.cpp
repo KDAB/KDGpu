@@ -164,9 +164,11 @@ void HelloTriangleMSAA::initializeScene()
             .depthCompareOperation = CompareOperation::Less
         },
         //![3]
+        //![pipeline_multisample]
         .multisample = {
             .samples = samples
         }
+        //![pipeline_multisample]
         //![3]
         };
     };
@@ -240,6 +242,7 @@ void HelloTriangleMSAA::resize()
     createRenderTarget();
 }
 //![4]
+//![create_render_target]
 void HelloTriangleMSAA::createRenderTarget()
 {
 
@@ -256,12 +259,14 @@ void HelloTriangleMSAA::createRenderTarget()
     m_msaaTexture = m_device.createTexture(options);
     m_msaaTextureView = m_msaaTexture.createView();
 }
+//![create_render_target]
 
 bool HelloTriangleMSAA::isMsaaEnabled() const
 {
     return m_samples.get() != SampleCountFlagBits::Samples1Bit;
 }
 
+//![set_sample_count]
 void HelloTriangleMSAA::setMsaaSampleCount(SampleCountFlagBits samples)
 {
     if (samples == m_samples.get())
@@ -281,6 +286,7 @@ void HelloTriangleMSAA::setMsaaSampleCount(SampleCountFlagBits samples)
     // we must also refresh the view(s) we handle, and reattach them
     createRenderTarget();
 }
+//![set_sample_count]
 
 void HelloTriangleMSAA::drawMsaaSettings(ImGuiContext *ctx)
 {
@@ -348,6 +354,7 @@ void HelloTriangleMSAA::render()
             // configure for multisampling
             .samples = m_samples.get(),
     });
+    //![configure_msaa_resolve]
 
     opaquePass.setPipeline(m_pipelines[m_currentPipelineIndex]);
     opaquePass.setVertexBuffer(0, m_buffer);

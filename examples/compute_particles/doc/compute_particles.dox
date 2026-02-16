@@ -8,82 +8,203 @@
   Contact KDAB at <info@kdab.com> for commercial licensing options.
 */
 
-/**
-    @page compute_particles Compute Particles
-    @ingroup kdgpu-examples
+/*!
+\page compute_particles Compute Particles
+\ingroup kdgpu-examples
 
-    @brief This example shows how to transform data in parallel on the GPU.
+\brief Demonstrates GPU compute shaders for parallel particle simulation and instanced rendering.
 
-    This example shows how to transform data in parallel by uploading a buffer of data to the GPU and running a shader on all the items in the buffer. We do this every frame and draw the results to the screen using instanced rendering.
+\image html compute_particles.png
 
-    If you look at the code for this example, you may notice that the ``updateScene`` function is empty. That's because *all* the per-frame logic is occurring on the GPU, per-particle, with the following shader:
+This example shows how to leverage compute shaders to simulate thousands of particles entirely on the GPU, then render them using instanced draws. All particle updates (position, velocity, color) happen in parallel on the GPU - the CPU does no per-frame particle work. This is fundamental for GPU-driven rendering, physics simulations, and particle systems.
 
-    @snippet compute_particles/doc/shadersnippet.comp 1
+The example uses the \ref kdgpuexample_helper "KDGpuExample helper API" for simplified setup.
 
-    \section compute_particles_initialization Initialization
+\section compute_particles_overview Overview
 
-    Our "particles" are a set of triangles with color and position information. They share their shape in common. The information that is unique to each triangle is the position, color, and velocity. We pack that data into a struct.
+<b>What this example demonstrates:</b>
+- Compute shaders for data-parallel processing
+- Storage buffers (SSBO) for large read-write GPU data
+- Compute-to-graphics pipeline synchronization
+- Instanced rendering with per-instance data
+- GPU work groups and dispatch dimensions
+.
+<br/>
+<b>Performance benefit:</b>
+- 1024 particles updated in parallel on GPU
+- Zero CPU work per particle per frame
+- Efficient instance rendering (3 vertices × 1024 instances)
+- Typical: 100-1000× faster than CPU particle updates
 
-    @snippet compute_particles/compute_particles.cpp 4
+\section compute_particles_requirements Vulkan Requirements
 
-    You may recognize this from a moment ago. An identical struct was created in the shader so that the GPU can receive this data properly.
+- <b>Vulkan Version</b>: 1.0+
+- <b>Extensions</b>: None (compute shaders are core)
+- <b>Device Features</b>: Compute shader support (universal on modern GPUs)
+- <b>Limits</b>: Max work group size, max compute shared memory
 
-    Next, we create a buffer of ``ParticleData``. Notice that it has been declared a storage buffer with the ``StorageBufferBit``. A storage buffer is able to be much larger than a uniform buffer and is writable by the GPU.
+\section compute_particles_concepts Key Concepts
 
-    @snippet compute_particles/compute_particles.cpp 1
+<b>Compute Shaders:</b>
 
-    We also create a small buffer with the common information between each triangle: the vertices.
+Compute shaders are general-purpose GPU programs that operate on arbitrary data, not just graphics. Unlike vertex/fragment shaders tied to the graphics pipeline, compute shaders process data in parallel work groups:
 
-    @snippet compute_particles/compute_particles.cpp 2
+```glsl
+layout(local_size_x = 256) in;  // Work group size
 
-    Next, we begin creating the compute pipeline. The first step is to load in the ``.comp`` compute shader, shown in the introduction:
+void main() {
+    uint index = gl_GlobalInvocationID.x;  // Particle index
+    // Update particle[index]...
+}
+```
 
-    @snippet compute_particles/compute_particles.cpp 5
+Key concepts:
+- <b>Work Group</b>: Batch of invocations (threads) executing together
+- <b>Local Size</b>: Invocations per work group (e.g., 256)
+- <b>Dispatch</b>: Number of work groups to execute (e.g., 1024/256 = 4)
+- <b>Global ID</b>: Unique invocation index across all work groups
 
-    Then we create bind group options, a bind group, pipeline layout options, and finally the pipeline layout meant to hold the storage buffer we originally created.
+For 1024 particles with local_size_x=256:
+- Dispatch 4 work groups
+- Each work group processes 256 particles
+- Total: 4 × 256 = 1024 invocations
 
-    @snippet compute_particles/compute_particles.cpp 6
+Spec: https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkComputePipelineCreateInfo.html
 
-    Now we can instantiate the pipeline elements. First we create the bind group, using a ``StorageBufferBinding`` resource in the creation options. Then we create the compute pipeline with KDGpu::ComputePipelineOptions, which is far simpler than the usual graphics pipeline options.
+<b>Storage Buffers (SSBO):</b>
 
-    @snippet compute_particles/compute_particles.cpp 7
+Storage buffers are large, read-write GPU buffers accessible from shaders. Unlike uniform buffers (read-only, size-limited), SSBOs can be:
+- <b>Large</b>: Megabytes to gigabytes (vs ~64KB UBO limit)
+- <b>Writable</b>: Shaders can modify data
+- <b>Structured</b>: Arrays of structs with arbitrary layouts
+- <b>Shared</b>: Read by compute, written by compute, read by graphics
 
-    The next step is the initialization of the graphics pipeline. This pipeline will be used in a second pass to draw a triangle at a position and color according to the data in the storage buffer. It is initialized in largely the same way as graphics pipelines in previous examples. Let's take a look at the pipeline options' ``vertex`` field, which is new.
+\snippet compute_particles/compute_particles.cpp particle_struct
 
-    @snippet compute_particles/compute_particles.cpp 8
+This struct exists identically in both C++ and shader code, allowing seamless GPU-CPU data sharing.
 
-    There are two bindings: the common data (the vertices for every triangle) and the per-particle data. The first binding has one RGB attribute (a vec3) and the per-particle data has position and color. Notice that the offset of the particle color is two vec4s! We are skipping over the ``velocity`` field of ``ParticleData`` because only the compute shader needs that information.
+<b>Instanced Rendering:</b>
 
-    Additionally, the input rate of the per-particle information is marked ``Instance``. That means that the GPU will only move to the next item in that buffer after it finishes drawing all the vertices in the vertex buffer. The default rate is ``Vertex``, which would tell the GPU that there was a different ``ParticleData`` for every vertex.
+After compute updates particle data, graphics pass renders one triangle per particle using instancing. Instancing draws the same geometry (3 vertices) multiple times with per-instance data (position, color):
+- Base geometry: Triangle shape (3 vertices)
+- Per-instance: Particle position/color (1024 instances)
+- Result: 1024 triangles with one draw call
 
-    \section compute_particles_perframe Per-Frame Logic
+Spec: https://www.khronos.org/opengl/wiki/Vertex_Specification#Instanced_arrays
 
-    Each frame we don't run any CPU instructions except to queue new jobs on the GPU. We can achieve this either by using a single command buffer with a memory barrier inserted between the compute and rendering commands, or we can use two command buffers with semaphores.
+\section compute_particles_implementation Implementation
 
-    Here is what the first approach looks like:
+<b>Creating the Storage Buffer:</b>
 
-    @snippet compute_particles/compute_particles.cpp 9
+\snippet compute_particles/compute_particles.cpp particles_buffer
 
-    The new command is ``dispatchCompute``. In its arguments we specify the work group size to be 256. It is also found in the shader code:
+Key flags:
+- `StorageBufferBit`: Accessible as SSBO in shaders
+- `VertexBufferBit`: Also used as vertex buffer for instanced rendering
+- `CpuToGpu`: CPU initializes data, GPU updates it
 
-    @snippet compute_particles/doc/shadersnippet.comp 2
+<b>Vertex Buffer for Shared Triangle:</b>
 
-    <blockquote>
-        TODO: explain meaning of work groups and reasoning for 256 maybe
-    </blockquote>
+\snippet compute_particles/compute_particles.cpp vertex_buffer
 
-    The memory barrier inserted afterwards provides assurance that the compute shader will have completed before rendering begins. Within the memory barrier options, we describe the stages of the pipeline that come before and after the barrier using KDGpu::PipelineStageFlagBit. We also create the memory barrier object itself, which has two bitmasks describing the access that the previous commands had to the buffer and the access that the succeeding commands will have to the buffer. In this case, the compute shader was writing (`ShaderWriteBit`) and the graphics shader will read the buffer as vertex attributes (``VertexAttributeReadBit``).
+This is the base triangle shape rendered for each particle. All particles share this geometry.
 
-    The second available approach (not used by default for this example) is to use two separate command buffers.
+The shader:
+1. Reads particle data (position, velocity, color)
+2. Updates position based on velocity
+3. Bounces particles off screen boundaries
+4. Writes back to same buffer
 
-    @snippet compute_particles/compute_particles.cpp 10
+All 1024 particles processed in parallel! See the compute shader source for implementation details.
 
-    Note the additional ``m_computeSemaphoreComplete``, which was initialized at program start with ``m_device.createGpuSemaphore();`` and will live until the end of the program.
+All 1024 particles processed in parallel!
 
-    This approach is entirely identical in terms of the executed commands, but uses a different synchronization method. For more information on semaphores, check out the [Hello Triangle Native](#hello_triangle_native) example.
+<b>Loading Compute Shader:</b>
 
-    <blockquote>
-        TODO: maybe benchmark these and talk about performance differences?
-    </blockquote>
+\snippet compute_particles/compute_particles.cpp compute_shader
 
+Compute shaders have `.comp` extension and run on compute queue (same as graphics on most hardware).
+
+<b>Compute Pipeline Setup:</b>
+
+\snippet compute_particles/compute_particles.cpp compute_pipeline
+
+Note: Compute pipelines are much simpler than graphics pipelines - just shader + layout!
+
+The shader uses a specialization constant for work group size (256), allowing runtime configuration.
+
+<b>Graphics Pipeline with Instancing:</b>
+
+\snippet compute_particles/compute_particles.cpp vertex_format
+
+Two vertex buffers:
+- <b>Binding 0</b>: Triangle geometry (Vertex rate - advances per vertex)
+- <b>Binding 1</b>: Particle data (Instance rate - advances per instance)
+
+The `inputRate = VertexRate::Instance` tells the GPU to use one particle data entry per instance, not per vertex.
+
+<b>Dispatching Compute and Memory Barrier:</b>
+
+\snippet compute_particles/compute_particles.cpp dispatch_compute_shader
+
+Critical steps:
+1. <b>Dispatch compute</b>: 1024 particles / 256 per work group = 4 work groups
+2. <b>Memory barrier</b>: Ensures compute writes complete before graphics reads
+   - `srcStages = ComputeShaderBit`: Wait for compute to finish
+   - `dstStages = VertexInputBit`: Before vertex shader reads
+   - `srcMask = ShaderWriteBit`: Compute wrote to buffer
+   - `dstMask = VertexAttributeReadBit`: Graphics will read as vertex data
+   .
+   <br/>
+
+Without the barrier, graphics might read stale particle data (race condition)!
+
+Spec: https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkMemoryBarrier.html
+
+<b>Instanced Draw:</b>
+
+\snippet compute_particles/compute_particles.cpp dispatch_draw
+
+GPU draws 3 vertices × 1024 instances = 3072 vertices total, but data for only 3 vertices (+1024 particles) loaded.
+
+\section compute_particles_performance Performance Notes
+
+<b>Compute Performance:</b>
+- <b>Work Group Size</b>: 256 is good for most GPUs (multiples of 32/64 for warp efficiency)
+- <b>Memory Access</b>: Sequential access pattern (particle[i]) is cache-friendly
+- <b>ALU vs Memory</b>: This shader is compute-bound (simple math), not memory-bound
+- <b>Occupancy</b>: Small local size may limit GPU occupancy - try 512 or 1024
+.
+<br/>
+<b>Graphics Performance:</b>
+- <b>Instancing</b>: 1024 instances in one draw vs 1024 draws = massive CPU savings
+- <b>Vertex Reuse</b>: 3-vertex triangle reused 1024 times (good cache hit rate)
+- <b>Per-Instance Data</b>: Reading from SSBO is fast on modern GPUs
+- <b>Overdraw</b>: Particles may overlap - consider depth sorting or alpha blending
+.
+<br/>
+<b>Scaling:</b>
+- Easy to scale to 100K+ particles by increasing particle count
+- Ensure dispatch dimensions stay within limits (65535 work groups)
+- For huge counts, consider GPU frustum culling and indirect draws
+.
+<br/>
+<b>Memory Barriers:</b>
+- Barriers have small cost but are essential for correctness
+- Could optimize with separate compute/graphics queues (advanced)
+- Pipeline barriers are cheaper than full device waitIdle
+
+\section compute_particles_seealso See Also
+
+- \subpage dynamic_ubo - Dynamic uniform buffers for per-object data
+- \subpage compute_oit_transparency - Advanced compute shader usage
+- [Compute Shaders](https://www.khronos.org/opengl/wiki/Compute_Shader) - Comprehensive guide
+- [Vulkan Compute Guide](https://docs.vulkan.org/tutorial/latest/11_Compute_Shader.html) - Official Vulkan compute overview
+- [Dispatch Commands](https://docs.vulkan.org/spec/latest/chapters/dispatch.html) - Compute dispatch
+- [Memory Barriers](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkMemoryBarrier.html) - Synchronization primitives
+
+\section compute_particles_further_reading Further Reading
+
+- [GPU Computing Gems](https://developer.nvidia.com/gpugems/gpugems3/part-vi-gpu-computing) - NVIDIA GPU computing techniques
+- [Work Group Size Optimization](https://developer.nvidia.com/blog/cuda-pro-tip-occupancy-api-simplifies-launch-configuration/) - Choosing optimal sizes
 */

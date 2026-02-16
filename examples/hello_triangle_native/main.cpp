@@ -109,7 +109,7 @@ std::shared_ptr<spdlog::logger> createLogger(const std::string &name)
 
 int main()
 {
-    //![0]
+    //![1]
     KDGpu::Logger::setLoggerFactory(createLogger);
     auto appLogger = createLogger("app");
     appLogger->set_level(spdlog::level::info);
@@ -134,11 +134,11 @@ int main()
                                          app.quit();
                                  })
             .release();
-    //![0]
-
-    SurfaceOptions surfaceOptions{};
+    //![1]
 
     //![2]
+    SurfaceOptions surfaceOptions{};
+
 #if defined(KDGUI_PLATFORM_WIN32)
     auto win32Window = dynamic_cast<Win32PlatformWindow *>(window.platformWindow());
     if (win32Window != nullptr) {

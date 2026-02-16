@@ -14,6 +14,7 @@ struct AlphaFragment {
 };
 
 // Alpha
+//![alpha_frag_layout]
 layout(std430, set = 0, binding = 0) coherent buffer AlphaFragments
 {
     uint nextIdx;
@@ -23,6 +24,7 @@ layout(std430, set = 0, binding = 0) coherent buffer AlphaFragments
 alphaFragments;
 
 layout(set = 0, binding = 1, r32ui) uniform coherent uimage2D alphaHeadPointer;
+//![alpha_frag_layout]
 
 vec4 adsModel(vec4 color)
 {
@@ -57,6 +59,7 @@ vec4 adsModel(vec4 color)
     return lightedColor;
 }
 
+//![alpha_frag_main]
 void main()
 {
     // Get next free entry in fragments buffers
@@ -77,3 +80,4 @@ void main()
         alphaFragments.fragments[nodeIdx].next = previousHeadIdx;
     }
 }
+//![alpha_frag_main]

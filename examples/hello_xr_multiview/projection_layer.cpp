@@ -306,6 +306,7 @@ void ProjectionLayer::initializeScene()
         },
         .viewCount = viewCount()
     };
+    //![U][XrMultiviewPipeline]
     // clang-format on
     m_pipeline = m_device->createGraphicsPipeline(pipelineOptions);
 
@@ -513,6 +514,7 @@ void ProjectionLayer::updateViewUbo()
 
 void ProjectionLayer::renderView()
 {
+    //![U][XrMultiviewRender]
     m_fence.wait();
     m_fence.reset();
 
@@ -568,4 +570,5 @@ void ProjectionLayer::renderView()
         .signalFence = m_fence
     };
     m_queue->submit(submitOptions);
+    //![U][XrMultiviewRender]
 }

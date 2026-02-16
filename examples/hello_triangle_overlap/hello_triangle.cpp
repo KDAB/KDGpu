@@ -179,6 +179,7 @@ void HelloTriangle::render()
     const DrawIndexedCommand drawCmd = { .indexCount = 3 };
     opaquePass.drawIndexed(drawCmd);
     //![1]
+    //![frame_overlap_sync]
     renderImGuiOverlay(&opaquePass, m_inFlightIndex);
     opaquePass.end();
     m_commandBuffers[m_inFlightIndex] = commandRecorder.finish();
@@ -189,6 +190,7 @@ void HelloTriangle::render()
         .signalSemaphores = { m_renderCompleteSemaphores[m_currentSwapchainImageIndex] },
         .signalFence = m_frameFences[m_inFlightIndex] // Signal Fence once submission and execution is complete
     };
+    //![frame_overlap_sync]
     //![1]
     m_queue.submit(submitOptions);
 }

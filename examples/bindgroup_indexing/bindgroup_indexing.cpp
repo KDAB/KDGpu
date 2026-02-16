@@ -166,7 +166,8 @@ void BindGroupIndexing::initializeScene()
                         .shaderStages = ShaderStageFlagBits::VertexBit,
                         // As far as the shader is concerned, it has no idea how many UBOs are in the array
                         .flags = { ResourceBindingFlagBits::VariableBindGroupEntriesCountBit },
-                } }
+                },
+        }
     };
     const BindGroupLayoutOptions ssboBindGroupLayoutOptions = {
         .bindings = {

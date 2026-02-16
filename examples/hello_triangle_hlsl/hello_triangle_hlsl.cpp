@@ -112,11 +112,13 @@ void HelloTriangle::initializeScene()
 
     // Create a vertex shader and fragment shader
     //![8]
+    //![load_hlsl_shaders]
     auto vsShaderPath = KDGpuExample::assetDir().file("shaders/examples/hello_triangle_hlsl/hello_triangle.vs.spv");
     auto vsShader = m_device.createShaderModule(KDGpuExample::readShaderFile(vsShaderPath));
 
     auto psShaderPath = KDGpuExample::assetDir().file("shaders/examples/hello_triangle_hlsl/hello_triangle.ps.spv");
     auto psShader = m_device.createShaderModule(KDGpuExample::readShaderFile(psShaderPath));
+    //![load_hlsl_shaders]
     //![8]
 
     //![9]

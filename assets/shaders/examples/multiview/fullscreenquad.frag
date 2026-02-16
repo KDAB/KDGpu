@@ -8,12 +8,16 @@ layout(location = 0) out vec4 fragColor;
 
 layout(set = 0, binding = 0) uniform sampler2DArray colorTexture;
 
-layout(push_constant) uniform PushConstants {
+//! [push_constant_layer]
+layout(push_constant) uniform PushConstants
+{
     int arrayLayer;
-} pushConstants;
+}
+pushConstants;
 
 void main()
 {
     vec3 color = texture(colorTexture, vec3(texCoord, pushConstants.arrayLayer)).rgb;
     fragColor = vec4(color, 1.0);
 }
+//! [push_constant_layer]

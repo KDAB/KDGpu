@@ -25,6 +25,7 @@ void HelloXrMultiview::onAttached()
     if (!m_isInitialized)
         return;
 
+    //![U][XrMultiviewLayers]
     // Create a projection layer to render the 3D scene
     const XrProjectionLayerOptions projectionLayerOptions = {
         .device = &m_device,
@@ -64,6 +65,7 @@ void HelloXrMultiview::onAttached()
     m_cylinderImguiLayer->position = { 1.0f, 0.2f, 0.0f };
     m_cylinderImguiLayer->radius = 2.0f;
     m_cylinderImguiLayer->centralAngle = 1.0f; // 1 radians = 57.3 degrees
+    //![U][XrMultiviewLayers]
 
     // Create an action set and actions
     m_actionSet = m_xrInstance.createActionSet({ .name = "default", .localizedName = "Default" });

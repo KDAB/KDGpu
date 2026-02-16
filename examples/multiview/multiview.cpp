@@ -69,7 +69,7 @@ void MultiView::resize()
     updateFinalPassBindGroup();
 }
 
-//![3]
+//![offscreen_texturearray]
 void MultiView::createMultiViewOffscreenTextures()
 {
     m_multiViewColorOutput = m_device.createTexture(TextureOptions{
@@ -100,7 +100,7 @@ void MultiView::createMultiViewOffscreenTextures()
             .viewType = ViewType::ViewType2DArray,
     });
 }
-//![3]
+//![offscreen_texturearray]
 
 void MultiView::initializeMultiViewPass()
 {
@@ -135,13 +135,12 @@ void MultiView::initializeMultiViewPass()
     auto fragmentShaderPath = KDGpuExample::assetDir().file("shaders/examples/multiview/rotating_triangle.frag.spv");
     auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
 
-    //![4]
     // Create a pipeline layout (array of bind group layouts)
     m_mvPipelineLayout = m_device.createPipelineLayout(PipelineLayoutOptions{
             .pushConstantRanges = { m_mvPushConstantRange },
     });
-    //![4]
 
+    //![multiview_pipeline]
     m_mvPipeline = m_device.createGraphicsPipeline(GraphicsPipelineOptions{
             .shaderStages = {
                     { .shaderModule = vertexShader, .stage = ShaderStageFlagBits::VertexBit },
@@ -166,6 +165,7 @@ void MultiView::initializeMultiViewPass()
             },
             .viewCount = 2,
     });
+    //![multiview_pipeline]
 }
 
 void MultiView::initializeFullScreenPass()
@@ -194,6 +194,7 @@ void MultiView::initializeFullScreenPass()
     auto fragmentShaderPath = KDGpuExample::assetDir().file("shaders/examples/multiview/fullscreenquad.frag.spv");
     auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
 
+    //![fullscreen_pipeline]
     // Create a pipeline
     m_fsqPipeline = m_device.createGraphicsPipeline(GraphicsPipelineOptions{
             .shaderStages = {
@@ -208,12 +209,12 @@ void MultiView::initializeFullScreenPass()
             .renderTargets = { { .format = m_swapchainFormat } },
             .depthStencil = { .format = m_depthFormat, .depthWritesEnabled = true, .depthCompareOperation = CompareOperation::Less },
     });
+    //![fullscreen_pipeline]
 
     // Create a sampler we can use to sample from the color texture in the final pass
     m_multiViewColorOutputSampler = m_device.createSampler();
 }
 
-//![7]
 void MultiView::updateFinalPassBindGroup()
 {
     // Create a bindGroup to hold the Offscreen Color Texture
@@ -228,7 +229,6 @@ void MultiView::updateFinalPassBindGroup()
             },
     });
 }
-//![7]
 
 void MultiView::render()
 {
@@ -241,7 +241,7 @@ void MultiView::render()
     // Create a command encoder/recorder
     auto commandRecorder = m_device.createCommandRecorder();
 
-    //![6]
+    //![render_multiview]
     // MultiView Pass
     auto mvPass = commandRecorder.beginRenderPass(RenderPassCommandRecorderOptions{
             .colorAttachments = {
@@ -257,7 +257,7 @@ void MultiView::render()
     mvPass.pushConstant(m_mvPushConstantRange, &rotationAngleRad);
     mvPass.draw(DrawCommand{ .vertexCount = 3 });
     mvPass.end();
-    //![6]
+    //![render_multiview]
 
     // Wait for writes to multiview texture to have been completed
     // Transition it to a shader read only layout
@@ -275,7 +275,7 @@ void MultiView::render()
             },
     });
 
-    //![8]
+    //![render_fullscreen]
     // FullScreen Pass
     auto fsqPass = commandRecorder.beginRenderPass(RenderPassCommandRecorderOptions{
             .colorAttachments = {
@@ -316,7 +316,7 @@ void MultiView::render()
     renderImGuiOverlay(&fsqPass);
 
     fsqPass.end();
-    //![8]
+    //![render_fullscreen]
 
     // End recording
     m_commandBuffer = commandRecorder.finish();

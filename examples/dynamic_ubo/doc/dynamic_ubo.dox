@@ -8,32 +8,175 @@
   Contact KDAB at <info@kdab.com> for commercial licensing options.
 */
 
-/**
-    @page dynamic_ubo Dynamic Uniform Buffer
-    @ingroup kdgpu-examples
+/*!
+\page dynamic_ubo Dynamic Uniform Buffer
+\ingroup kdgpu-examples
 
-    @brief This example draws multiple triangles, storing their transforms in a single contiguous buffer
+\brief Demonstrates dynamic uniform buffer offsets for efficiently rendering multiple objects with different transforms from a single buffer.
 
-    This example showcases how raw data can be written to uniform buffers and then be indexed with bind groups. In this case it is used to store the transformation matrices of four triangles and render each one using the same index and vertex buffers. The only input that's necessary is the index of the object's transform matrix in the buffer. Take a look at the following render code:
+\image html dynamic_ubo.png
 
-    @snippet dynamic_ubo/dynamic_ubo_triangles.cpp 1
+This example shows how to use dynamic uniform buffer (UBO) bindings to render multiple objects without creating separate descriptor sets for each.
+By storing multiple transforms in one contiguous buffer and using dynamic offsets when binding, we can efficiently render many objects with minimal descriptor management overhead.
+This is essential for rendering scenes with hundreds or thousands of objects.
 
-    ``entityCount`` is 4, corresponding to the triangles. During this process of creating the draw commands for each triangle, only the offset of the bindgroup is changed.
+The example uses the \ref kdgpuexample_helper "KDGpuExample helper API" for simplified setup.
 
-    This buffer of transforms is modified every frame in ``updateScene``:
+\section dynamic_ubo_overview Overview
 
-    @snippet dynamic_ubo/dynamic_ubo_triangles.cpp 2
+<b>What this example demonstrates:</b>
+- Dynamic uniform buffer offsets for per-object data
+- Alignment requirements (minUniformBufferOffsetAlignment)
+- Single buffer with multiple transforms
+- Efficient descriptor reuse across draw calls
+- Instanced rendering alternative
+.
+<br/>
 
-    In order to achieve this, all of the buffers must be mapped to CPU address space: the vertex buffer, index buffer, and transform uniform buffer. We do not use ``uploadBufferData`` like we did in the previous examples for most of these buffers. Instead, we use the map, memcpy, and unmap pattern. Uploading the index data looks like this:
+<b>Performance benefit:</b>
+- One descriptor set binding for N objects (instead of N bindings)
+- Reduced descriptor set switching overhead
+- Better cache locality with contiguous buffer
+- Minimal CPU-side per-object work
 
-    @snippet dynamic_ubo/dynamic_ubo_triangles.cpp 3
+\section dynamic_ubo_requirements Vulkan Requirements
 
-    Additionally, we must configure the bind group format to hold a dynamic uniform buffer by setting the resource type to KDGpu::ResourceBindingType::DynamicUniformBuffer
+- <b>Vulkan Version</b>: 1.0+
+- <b>Extensions</b>: None (dynamic UBOs are core functionality)
+- <b>Device Limits</b>: minUniformBufferOffsetAlignment (typically 16-256 bytes)
 
-    @snippet dynamic_ubo/dynamic_ubo_triangles.cpp 4
+\section dynamic_ubo_concepts Key Concepts
 
-    And the bind group itself needs to contain a KDGpu::DynamicUniformBufferBinding instead of a KDGpu::UniformBufferBinding.
+<b>Dynamic Uniform Buffers:</b>
 
-    @snippet dynamic_ubo/dynamic_ubo_triangles.cpp 5
+Vulkan provides two types of uniform buffer bindings:
+- <b>Static UBO</b>: Offset fixed at descriptor set creation time
+- <b>Dynamic UBO</b>: Offset specified at bind time (vkCmdBindDescriptorSets)
+.
+<br/>
 
+Dynamic UBOs allow binding different regions of the same buffer without creating multiple descriptor sets.
+This is perfect for per-object data like transform matrices.
+
+<b>Alignment Requirements:</b>
+
+Dynamic UBO offsets must be aligned to `minUniformBufferOffsetAlignment`, a device-specific value (typically 16 or 256 bytes).
+Even if your data is smaller (e.g., 64-byte mat4), you must stride by the alignment requirement:
+
+```cpp
+// Wrong: may crash or produce incorrect results
+offset = objectIndex * sizeof(mat4);  // 64 bytes
+
+// Correct: aligned to device requirement
+offset = objectIndex * alignedSize;    // e.g., 256 bytes
+```
+
+Spec: https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkPhysicalDeviceLimits.html
+
+<b>Use Cases:</b>
+- Per-object transforms in a scene
+- Per-material parameters
+- Per-light data arrays
+- Skeletal animation bone matrices
+- Any homogeneous per-item data
+
+\section dynamic_ubo_implementation Implementation
+
+<b>Computing Aligned Stride:</b>
+
+\snippet dynamic_ubo/dynamic_ubo_triangles.cpp dynamic_ubo_alignment
+
+Key points:
+- Query `minUniformBufferOffsetAlignment` from device limits
+- Round up data size to alignment boundary
+- Allocate buffer with: `objectCount * alignedStride`
+- Wasted bytes are unavoidable but small
+.
+<br/>
+
+Example: With 256-byte alignment and 64-byte mat4:
+- Stride = 256 bytes
+- Waste = 192 bytes per object (75% wasted)
+- For 1000 objects: 250 KB total, 187 KB wasted
+- Still more efficient than 1000 descriptor sets!
+.
+<br/>
+
+<b>Bind Group Layout Configuration:</b>
+
+\snippet dynamic_ubo/dynamic_ubo_triangles.cpp dynamic_ubo_layout
+
+Use `ResourceBindingType::DynamicUniformBuffer` instead of `UniformBuffer`. This tells Vulkan you'll provide offsets at draw time.
+
+<b>Bind Group with Dynamic Binding:</b>
+
+\snippet dynamic_ubo/dynamic_ubo_triangles.cpp dynamic_ubo_bind_group
+
+The `size` field specifies size of ONE entry (the aligned stride), not the entire buffer. Vulkan uses this with the dynamic offset to compute actual buffer region.
+
+<b>Per-Frame Update:</b>
+
+\snippet dynamic_ubo/dynamic_ubo_triangles.cpp update_dynamic_ubo
+
+Map the entire buffer once, update all transforms, unmap. Each transform is written at `i * alignedStride` offset.
+
+<b>Rendering with Dynamic Offsets:</b>
+
+\snippet dynamic_ubo/dynamic_ubo_triangles.cpp render_with_dynamic_ubo
+
+The critical call is `setBindGroup` with the dynamic offset:
+
+```cpp
+opaquePass.setBindGroup(0, m_transformBindGroup, {}, std::array{ i * m_dynamicUBOByteStride });
+```
+
+This selects which object's transform the shader sees, without changing descriptor sets.
+
+\section dynamic_ubo_performance Performance Notes
+
+<b>When to Use Dynamic UBOs:</b>
+- <b>Good</b>: 10-10,000 objects with small per-object data (transforms, colors)
+- <b>Good</b>: Data updated frequently (every frame)
+- <b>Bad</b>: Huge per-object data (>256 bytes) - use storage buffers instead
+- <b>Bad</b>: Very sparse updates - static descriptor sets may be better
+.
+<br/>
+
+<b>Memory Overhead:</b>
+- Alignment waste can be significant for small data
+- For 64-byte data with 256-byte alignment: 75% wasted
+- For 256-byte data with 256-byte alignment: 0% wasted
+- Pack multiple data items to reduce waste
+.
+<br/>
+
+<b>CPU Performance:</b>
+- Much faster than updating/binding N descriptor sets
+- Single vkCmdBindDescriptorSets with offset vs N calls
+- Reduces driver validation overhead
+.
+<br/>
+
+<b>GPU Performance:</b>
+- Contiguous buffer improves cache locality
+- Uniform buffer access is very fast
+- No performance difference from static UBOs
+.
+<br/>
+
+<b>Alternatives:</b>
+- <b>Push Constants</b>: For very small data (<128 bytes), fastest but limited size
+- <b>Storage Buffers</b>: For large/variable-size data, no alignment waste but slower access
+- <b>Instanced Rendering</b>: For identical geometry with per-instance data
+- <b>Indirect Drawing</b>: For GPU-driven rendering with buffers
+
+\section dynamic_ubo_seealso See Also
+
+- \ref hello_triangle - Basic uniform buffer usage
+- \ref compute_particles - Storage buffers for larger data
+- [minUniformBufferOffsetAlignment](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkPhysicalDeviceLimits.html) - Alignment requirement
+
+\section dynamic_ubo_further_reading Further Reading
+
+- [Dynamic Uniform Buffers](https://docs.vulkan.org/guide/latest/descriptor_dynamic_offset.html)
 */

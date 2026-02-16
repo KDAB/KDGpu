@@ -28,7 +28,6 @@ using namespace KDGpu;
 
 void DepthBias::initializeScene()
 {
-    //![3]
     struct Vertex {
         glm::vec3 position;
         glm::vec3 color;
@@ -65,9 +64,7 @@ void DepthBias::initializeScene()
             .usage = BufferUsageFlagBits::VertexBufferBit | BufferUsageFlagBits::TransferDstBit,
             .memoryUsage = MemoryUsage::GpuOnly
         };
-        //![4]
         m_buffer = m_device.createBuffer(bufferOptions);
-        //![4]
         const BufferUploadOptions uploadOptions = {
             .destinationBuffer = m_buffer,
             .dstStages = PipelineStageFlagBit::VertexAttributeInputBit,
@@ -75,14 +72,10 @@ void DepthBias::initializeScene()
             .data = vertexData.data(),
             .byteSize = dataByteSize
         };
-        //![5]
         uploadBufferData(uploadOptions);
-        //![5]
     }
-    //![3]
 
     // Create a buffer to hold the transformation matrix
-    //![7]
     {
         const BufferOptions bufferOptions = {
             .label = "Transformation Buffer",
@@ -98,29 +91,25 @@ void DepthBias::initializeScene()
         std::memcpy(bufferData, &m_transform, sizeof(glm::mat4));
         m_transformBuffer.unmap();
     }
-    //![7]
 
     // Create a vertex shader and fragment shader
-    //![8]
     auto vertexShaderPath = KDGpuExample::assetDir().file("shaders/examples/hello_triangle/hello_triangle.vert.spv");
     auto vertexShader = m_device.createShaderModule(KDGpuExample::readShaderFile(vertexShaderPath));
 
     auto fragmentShaderPath = KDGpuExample::assetDir().file("shaders/examples/hello_triangle/hello_triangle.frag.spv");
     auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
-    //![8]
 
-    //![9]
     // Create bind group layout consisting of a single binding holding a UBO
-    // clang-format off
     const BindGroupLayoutOptions bindGroupLayoutOptions = {
         .label = "Transform Bind Group",
-        .bindings = {{
-            .binding = 0,
-            .resourceType = ResourceBindingType::UniformBuffer,
-            .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit)
-        }}
+        .bindings = {
+                {
+                        .binding = 0,
+                        .resourceType = ResourceBindingType::UniformBuffer,
+                        .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit),
+                },
+        },
     };
-    // clang-format on
     const BindGroupLayout bindGroupLayout = m_device.createBindGroupLayout(bindGroupLayoutOptions);
 
     // Create a pipeline layout (array of bind group layouts)
@@ -129,13 +118,9 @@ void DepthBias::initializeScene()
         .bindGroupLayouts = { bindGroupLayout }
     };
     m_pipelineLayout = m_device.createPipelineLayout(pipelineLayoutOptions);
-    //![9]
 
-    // Create a pipeline
-    // clang-format off
-    //![10]
-
-    // clang-format on
+    //![pipelines_creation]
+    // Create pipelines for front and back triangles
     m_pipelineFront = m_device.createGraphicsPipeline(GraphicsPipelineOptions{
             .label = "TriangleFront",
             .shaderStages = {
@@ -188,22 +173,20 @@ void DepthBias::initializeScene()
                     },
             },
     });
-    //![10]
+    //![pipelines_creation]
 
     // Create a bindGroup to hold the UBO with the transform
-    // clang-format off
-    //![11]
     const BindGroupOptions bindGroupOptions = {
         .label = "Transform Bind Group",
         .layout = bindGroupLayout,
-        .resources = {{
-            .binding = 0,
-            .resource = UniformBufferBinding{ .buffer = m_transformBuffer }
-        }}
+        .resources = {
+                {
+                        .binding = 0,
+                        .resource = UniformBufferBinding{ .buffer = m_transformBuffer },
+                },
+        },
     };
-    // clang-format on
     m_transformBindGroup = m_device.createBindGroup(bindGroupOptions);
-    //![11]
 }
 
 void DepthBias::cleanupScene()
@@ -218,7 +201,6 @@ void DepthBias::cleanupScene()
     m_commandBuffer = {};
 }
 
-//![1]
 void DepthBias::updateScene()
 {
     // Each frame we want to rotate the triangle a little
@@ -236,13 +218,11 @@ void DepthBias::updateScene()
     std::memcpy(bufferData, &m_transform, sizeof(glm::mat4));
     m_transformBuffer.unmap();
 }
-//![1]
 
 void DepthBias::resize()
 {
 }
 
-//![2]
 void DepthBias::render()
 {
     auto commandRecorder = m_device.createCommandRecorder();
@@ -280,13 +260,10 @@ void DepthBias::render()
     opaquePass.end();
     m_commandBuffer = commandRecorder.finish();
 
-    //![13]
     const SubmitOptions submitOptions = {
         .commandBuffers = { m_commandBuffer },
         .waitSemaphores = { m_presentCompleteSemaphores[m_inFlightIndex] },
         .signalSemaphores = { m_renderCompleteSemaphores[m_currentSwapchainImageIndex] }
     };
     m_queue.submit(submitOptions);
-    //![13]
 }
-//![2]

@@ -1,3 +1,4 @@
+//! [miss]
 #version 460 core
 #extension GL_EXT_ray_tracing : enable
 
@@ -7,3 +8,4 @@ void main()
 {
     payload = vec4(vec3(0.3), 1.0);
 }
+//! [miss]

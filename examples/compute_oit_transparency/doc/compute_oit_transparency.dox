@@ -1,0 +1,121 @@
+/*
+  This file is part of KDGpu.
+
+  SPDX-FileCopyrightText: 2024 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+
+  SPDX-License-Identifier: MIT
+
+  Contact KDAB at <info@kdab.com> for commercial licensing options.
+*/
+
+/*!
+    \page compute_oit_transparency Order Independent Transparency (OIT) with Compute
+    \ingroup kdgpu-examples
+
+    \brief Demonstrates order-independent transparency using per-pixel linked lists and compute-based particle simulation.
+
+    \image html compute_oit_transparency.png
+
+    This example solves the transparency rendering problem where traditional alpha blending requires sorting objects back-to-front. Order-independent transparency (OIT) allows rendering transparent objects in any order by storing all fragments per-pixel in a linked list, then sorting and blending them in a final pass. This technique combines fragment shaders to build linked lists, storage buffers for fragment data, and compute shaders for particle updates.
+
+    The example uses the \ref kdgpuexample_helper "KDGpuExample helper API" for simplified setup.
+
+    <b>Key technique:</b> Per-pixel linked list with atomic operations for lock-free fragment insertion, followed by in-shader sorting and blending.
+
+    <b>Use cases:</b> Complex transparent scenes (particles, glass), effects, volumetric rendering, avoiding CPU sort overhead.
+
+    \section compute_oit_transparency_approach The Approach
+
+    This example uses a <b>per-pixel linked list</b>:
+    1.  <b>Particle Update</b>: A compute shader updates particle positions each frame.
+    2.  <b>Clear</b>: The linked list buffer and the "head pointer" image is cleared to prepare for the new frame.
+    3.  <b>Fragment Storage</b>: Transparent objects are rendered. Their fragment shader uses atomic operations to insert fragment data (color, depth, next pointer) into a global linked list storage buffer and updates a 2D image storing the head-node index for each pixel.
+    4.  <b>Compositing</b>: A full-screen pass reads the linked list for each pixel, sorts the fragments by depth, and blends them front-to-back into the final image.
+
+    \section compute_oit_transparency_data Data Structures
+
+    Each particle carries position, velocity, and color. The RGBA color's alpha channel controls transparency for all spheres.
+
+    \snippet compute_oit_transparency/compute_oit_transparency.cpp particle_data
+
+    Each fragment stored in the linked list contains its color, depth, and the index of the next node. The buffer is sized dynamically as described in \ref compute_oit_transparency_alpha.
+
+    \snippet compute_oit_transparency/compute_oit_transparency.cpp alpha_fragment_struct
+
+    \section compute_oit_transparency_initialization Initialization
+
+    The example initializes several nested structures to manage the different passes: \c m_particles, \c m_alpha, \c m_compositing, \c m_cubeMesh, \c m_sphereMesh, and \c m_global.
+
+    \subsection compute_oit_transparency_particles Particle Simulation
+
+    A compute shader updates particle positions every frame. The storage buffer binding layout uses a single SSBO bound at stage `ComputeBit`. A <b>specialization constant</b> is used to bake the local workgroup X size (256) into the shader at pipeline-creation time, matching the dispatch calculation `ParticlesCount / 256`:
+
+    \snippet compute_oit_transparency/compute_oit_transparency.cpp compute_pipeline
+
+    <br/>
+    Each frame, the compute pass dispatches enough workgroups to cover all particles:
+
+    \snippet compute_oit_transparency/compute_oit_transparency.cpp dispatch_particles
+
+    \subsection compute_oit_transparency_alpha Alpha Pass (Linked List Generation)
+
+    The alpha pass bind group layout exposes two fragment-stage bindings: a `StorageBuffer` for the per-pixel linked list nodes, and a `StorageImage` (R32_UINT) for the head-pointer texture:
+
+    \snippet compute_oit_transparency/compute_oit_transparency.cpp alpha_bindings
+
+    <br/>
+    On the shader side, those same two bindings are declared as a `coherent` SSBO (with an atomic counter in the first field) and a `coherent uimage2D`:
+
+    \snippet compute_oit_transparency/alpha.frag alpha_frag_layout
+
+    <br/>
+    Both resources are sized to the window dimensions and (re)created on every resize. Up to 8 transparent fragments are budgeted per pixel; the buffer is padded by one `vec4` to store the global atomic counter at offset 0:
+
+    \snippet compute_oit_transparency/compute_oit_transparency.cpp head_pointers_texture
+
+    \snippet compute_oit_transparency/compute_oit_transparency.cpp linked_list_buffer
+
+    <br/>
+    In the alpha pass itself, the storage buffer and head pointer image are cleared, layout transitions and memory barriers are inserted to guarantee write visibility, and then the sphere and cube meshes are drawn using instanced rendering:
+
+    \snippet compute_oit_transparency/compute_oit_transparency.cpp alpha_pass
+
+    <br/>
+    The corresponding fragment shader performs the lock-free insertion.
+    - It atomically increments the global node counter to claim a slot
+    - Writes the alpha fragment color and depth into that slot
+    - Records the previous head pointer in the alpha fragment struct (allowing linked list traversal later)
+    - Then atomically swaps the head pointer for the current pixel so the new node points to the previous head — forming the linked list one fragment at a time:
+
+    \snippet compute_oit_transparency/alpha.frag alpha_frag_main
+
+    \subsection compute_oit_transparency_compositing Compositing Pass
+
+    After the alpha pass, barriers ensure all fragment writes to the SSBO and head-pointer image are visible to the compositing fragment shader. A full-screen quad (6 vertices, no vertex buffer) reads the linked list and blends the sorted fragments into the swapchain image:
+
+    \snippet compute_oit_transparency/compute_oit_transparency.cpp compositing_pass
+
+    <br/>
+    For each fragment of the full screen quad, the compositing fragment shader traverses the per-pixel linked list.
+    - It does so by first retrieving the head pointer for the given fragment coordinges in the head pointer image.
+    - Then since each Alpha Fragment stores a `next` pointers, it collects up to 32 fragment indices into a local array.
+    - Next it runs an insertion sort by depth (front-to-back), then blends the sorted colors using `mix()` with each fragment's own alpha:
+
+    \snippet compute_oit_transparency/compositing.frag compositing_frag_main
+
+    \section compute_oit_transparency_vulkan_reqs Vulkan Requirements
+
+    - <b>Vulkan Version</b>: 1.0+ (compute shaders are core)
+    - <b>Extensions</b>: None required (atomic operations are core)
+    - <b>Features</b>: Compute shader support, atomic operations on storage buffers, image atomics
+    .
+    <br/>
+
+    See [VkShaderStageFlagBits - Compute Shader](https://registry.khronos.org/vulkan/specs/1.3-extensions/html/vkspec.html#VkShaderStageFlagBits) and [Atomic Operations](https://registry.khronos.org/vulkan/specs/1.3-extensions/html/vkspec.html#synchronization-atomics)
+
+    \section compute_oit_transparency_further Further Reading
+
+    - [Order Independent Transparency with Fragment Linked Lists](https://www.cs.cornell.edu/~bkovacs/resources/TUBudapest-Barta-Pal.pdf) - Paper
+    - [Atomic Operation Memory Model](https://registry.khronos.org/vulkan/specs/latest/html/vkspec.html#memory-model-atomic-operation)
+    - [Image Atomics](https://docs.vulkan.org/guide/latest/atomics.html)
+*/
