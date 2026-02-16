@@ -1,26 +1,147 @@
 /*
   This file is part of KDGpu.
 
-  SPDX-FileCopyrightText: 2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+  SPDX-FileCopyrightText: 2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info\kdab.com>
 
   SPDX-License-Identifier: MIT
 
-  Contact KDAB at <info@kdab.com> for commercial licensing options.
+  Contact KDAB at <info\kdab.com> for commercial licensing options.
 */
 
-/**
-    @page hello_triangle_hlsl Hello Triangle HLSL
-    @ingroup kdgpu-examples
+/*!
+\page hello_triangle_hlsl Hello Triangle HLSL
+\ingroup kdgpu-examples
 
-    @brief This example shows how to use HLSL shader that will be compiled with DXC.
+\brief Demonstrates using HLSL shaders compiled to SPIR-V with the DirectX Shader Compiler (DXC).
 
-    This example showcases the minimal changes needed to use HLSL shaders instead of the usual GLSL. Read the [Hello Triangle](#hello_triangle) example to see the differences.
+This example shows how to use HLSL (High-Level Shading Language) shaders instead of GLSL in your KDGpu applications. While Vulkan natively uses SPIR-V bytecode, you can write shaders in either GLSL or HLSL and compile them to SPIR-V. This is particularly useful for developers familiar with DirectX or sharing shader code between D3D12 and Vulkan.
 
-    The main difference is to set the path in the hello_triangle_hlsl.cpp to the proper shader.
+The example uses the \ref kdgpuexample_helper "KDGpuExample helper API" for simplified setup. For comparison, see \subpage hello_triangle which uses GLSL shaders.
 
-       @snippet hello_triangle_hlsl/hello_triangle_hlsl.cpp 8
+\section hlsl_overview Overview
 
-    To compile the shaders, the shaders need to be added to the assets directory where, within the CMakeLists.txt file the shaders will automatically be compiled into Spir-V with the use of DXC when the code is compiled.
+<b>What this example demonstrates:</b>
+- Compiling HLSL shaders to SPIR-V using DXC (DirectX Shader Compiler)
+- Loading and using SPIR-V modules compiled from HLSL
+- HLSL syntax differences from GLSL (semantics, entry points, register bindings)
+.
+<br/>
 
-      @snippet ../../cmake/CompileShader.cmake 1
+<b>When to use HLSL:</b>
+- You're porting shaders from DirectX to Vulkan
+- Your team is more familiar with HLSL syntax
+- You want to share shader code between D3D12 and Vulkan backends
+- You prefer HLSL's semantic annotations over GLSL's location qualifiers
+
+\section hlsl_requirements Vulkan Requirements
+
+- <b>Vulkan Version</b>: 1.0+
+- <b>Extensions</b>: None (SPIR-V is Vulkan's native shader format)
+- <b>Build Tools</b>: DXC (DirectX Shader Compiler) for compiling HLSL to SPIR-V
+
+\section hlsl_concepts Key Concepts
+
+<b>HLSL vs GLSL:</b>
+
+HLSL and GLSL have different syntax for shader inputs, outputs, and resource bindings:
+
+- <b>Entry Points</b>: HLSL uses C-style functions with arbitrary names; GLSL uses `void main()`
+- <b>Semantics</b>: HLSL uses semantics like `SV_Position`, `COLOR0`; GLSL uses `layout(location = N)`
+- <b>Register Bindings</b>: HLSL uses `register(t0)`, `register(b0)`; GLSL uses `layout(binding = 0)`
+- <b>Shader Stages</b>: HLSL uses file extensions `.vs`, `.ps`; GLSL uses `.vert`, `.frag`
+.
+<br/>
+
+<b>DXC Compilation:</b>
+
+The DirectX Shader Compiler (DXC) is the modern HLSL compiler that can target SPIR-V. It replaces the older FXC compiler and supports Shader Model 6.0+. DXC can compile HLSL source code directly to SPIR-V bytecode that Vulkan understands.
+
+For more on SPIR-V: https://www.khronos.org/spir/
+
+\section hlsl_implementation Implementation
+
+The rendering code is identical to \subpage hello_triangle - the only difference is loading HLSL-compiled shaders instead of GLSL-compiled ones:
+
+\snippet hello_triangle_hlsl/hello_triangle_hlsl.cpp load_hlsl_shaders
+
+Note that the loaded files are still `.spv` (SPIR-V bytecode) - the HLSL source has already been compiled to SPIR-V at build time.
+
+<b>Build-Time Shader Compilation:</b>
+
+The CMake build system automatically compiles HLSL shaders using DXC when you build the project. The CompileShader CMake module detects `.hlsl` files and invokes DXC:
+
+DXC is invoked with these key arguments:
+- `-spirv`: Generate SPIR-V output instead of DXIL
+- `-T <profile>`: Target shader profile (e.g., `vs_6_0` for vertex shader, `ps_6_0` for pixel/fragment shader)
+- `-E <entry>`: Entry point function name
+- `-fspv-target-env=vulkan1.0`: Target Vulkan 1.0 SPIR-V environment
+.
+<br/>
+
+<b>HLSL Shader Example:</b>
+
+Here's what a simple HLSL vertex shader looks like (compare to GLSL):
+
+\code
+// HLSL vertex shader
+struct VSInput {
+    float3 position : POSITION;
+    float3 color : COLOR0;
+};
+
+struct VSOutput {
+    float4 position : SV_Position;
+    float3 color : COLOR0;
+};
+
+cbuffer Transform : register(b0) {
+    float4x4 transform;
+};
+
+VSOutput main(VSInput input) {
+    VSOutput output;
+    output.position = mul(transform, float4(input.position, 1.0));
+    output.color = input.color;
+    return output;
+}
+\endcode
+
+Equivalent GLSL:
+
+\code
+// GLSL vertex shader
+#version 450
+
+layout(location = 0) in vec3 position;
+layout(location = 1) in vec3 color;
+
+layout(location = 0) out vec3 fragColor;
+
+layout(binding = 0) uniform Transform {
+    mat4 transform;
+};
+
+void main() {
+    gl_Position = transform * vec4(position, 1.0);
+    fragColor = color;
+}
+\endcode
+
+\section hlsl_performance Performance Notes
+
+- SPIR-V bytecode from HLSL and GLSL performs identically - they both compile to the same intermediate representation
+- DXC produces well-optimized SPIR-V output comparable to glslang
+- Choose HLSL vs GLSL based on team expertise and codebase requirements, not performance
+
+\section hlsl_seealso See Also
+
+- \subpage hello_triangle - The same example using GLSL shaders
+- [HLSL to SPIR-V Feature Mapping](https://github.com/microsoft/DirectXShaderCompiler/blob/main/docs/SPIR-V.rst) - Official DXC documentation
+- [DXC GitHub Repository](https://github.com/microsoft/DirectXShaderCompiler) - DirectX Shader Compiler source and documentation
+- [SPIR-V Specification](https://www.khronos.org/registry/spir-v/) - Vulkan's shader bytecode format
+
+\section hlsl_further_reading Further Reading
+
+- [HLSL Programming Guide (Microsoft)](https://docs.microsoft.com/en-us/windows/win32/direct3dhlsl/dx-graphics-hlsl) - Complete HLSL language reference
+- [Vulkan SPIR-V Guide](https://docs.vulkan.org/guide/latest/spirv.html) - How SPIR-V works in Vulkan
 */

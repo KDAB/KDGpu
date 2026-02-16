@@ -8,29 +8,168 @@
   Contact KDAB at <info@kdab.com> for commercial licensing options.
 */
 
-/**
-    @page hello_triangle_msaa Hello Triangle MSAA
-    @ingroup kdgpu-examples
+/*!
+\page hello_triangle_msaa Hello Triangle MSAA
+\ingroup kdgpu-examples
 
-    @brief This example shows how to enable multisample anti-aliasing.
+\brief Demonstrates multi-sample anti-aliasing (MSAA) for smooth edges and improved image quality.
 
-    This example showcases the minimal changes needed to enable multisample anti-aliasing. Read the [Hello Triangle](#hello_triangle) example to see the differences.
+This example introduces multi-sample anti-aliasing, a hardware-accelerated technique for reducing jagged edges (aliasing) on geometry. MSAA samples each pixel multiple times and resolves the samples into a final color, dramatically improving visual quality with modest performance cost. Compare this to \subpage hello_triangle to see the difference.
 
-    The first place to look is ``createRenderTarget``, where the MSAA texture and view are initialized. This function is called on initialization and on window resize.
+The example uses the \ref kdgpuexample_helper "KDGpuExample helper API" for simplified setup.
 
-       @snippet hello_triangle_msaa/hello_triangle_msaa.cpp 4
+\image html hello_triangle_msaa.png
 
-    This creates a texture and a view with the correct multisampling configuration and new dimensions, which we will attach to the render pass option struct (KDGpu::RenderPassCommandRecorderOptions). This texture is able to hold more information (samples) per texel. Additionally, we need to configure the render pass option struct to multisample, passing in the same number of samples we did for the texture above.
+\section msaa_overview Overview
 
-       @snippet hello_triangle_msaa/hello_triangle_msaa.cpp 2
+<b>What this example demonstrates:</b>
+- Creating multi-sampled textures for rendering
+- Configuring graphics pipelines for MSAA
+- Resolving multi-sampled images to regular textures
+- Dynamically switching between MSAA sample counts (1x, 2x, 4x, 8x)
+.
+<br/>
 
-    Notice that the render pass options contains two separate entries: one for ``view`` and one for ``resolveView``. The ``view`` is set to the multisample texture, which has extra sampling information. During an MSAA pass, though, the multisampled texture needs to have its extra information "resolved" into a final, regular texture: the ``resolveView``.
+<b>Visual impact:</b>
+- <b>Without MSAA (1x)</b>: Jagged, stair-stepped edges on triangle
+- <b>With MSAA (4x/8x)</b>: Smooth, anti-aliased edges
 
-    Also configure the graphics pipeline (KDGpu::GraphicsPipelineOptions) to multisample:
+\section msaa_requirements Vulkan Requirements
 
-       @snippet hello_triangle_msaa/hello_triangle_msaa.cpp 3
+- <b>Vulkan Version</b>: 1.0+
+- <b>Extensions</b>: None (MSAA is core functionality)
+- <b>Device Features</b>: Sample counts supported by device (query via VkPhysicalDeviceProperties)
+.
+<br/>
 
-     Lastly, on each frame, update the ``resolveView`` with the swapchain view that we want to render to.
+All Vulkan devices support at least 1x (no MSAA) and typically 2x/4x. Many support 8x or higher.
 
-       @snippet hello_triangle_msaa/hello_triangle_msaa.cpp 1
+\section msaa_concepts Key Concepts
+
+<b>What is Anti-Aliasing?</b>
+
+When rendering geometry to a pixel grid, edges that don't align with pixel boundaries appear jagged or "aliased" - the stair-step effect. Anti-aliasing techniques smooth these edges by sampling multiple points within each pixel and averaging the results.
+
+<b>Multi-Sample Anti-Aliasing (MSAA):</b>
+
+MSAA is a hardware-accelerated anti-aliasing method:
+
+1. <b>Render to multi-sampled texture</b>: Instead of 1 color per pixel, store N samples (2x, 4x, 8x, etc.)
+2. <b>Fragment shader runs once per pixel</b>: Shading cost doesn't increase (unlike supersampling)
+3. <b>Coverage mask</b>: Hardware determines which samples each triangle covers
+4. <b>Resolve operation</b>: Average the N samples to produce final pixel color
+.
+<br/>
+
+MSAA only anti-aliases geometry edges - textures and shader-computed patterns aren't affected. For those, you need supersampling (SSAA) or other techniques.
+
+<b>Sample Counts (VkSampleCountFlagBits):</b>
+
+- <b>1x (Samples1Bit)</b>: No MSAA - standard aliased rendering
+- <b>2x (Samples2Bit)</b>: 2 samples per pixel - minimal smoothing, low cost
+- <b>4x (Samples4Bit)</b>: 4 samples per pixel - good quality/performance balance (most common)
+- <b>8x (Samples8Bit)</b>: 8 samples per pixel - high quality, higher cost
+- <b>16x/32x/64x</b>: Device-dependent, diminishing returns
+.
+<br/>
+
+For more on MSAA: https://www.khronos.org/opengl/wiki/Multisampling
+
+\section msaa_implementation Implementation
+
+<b>Creating the Multi-Sampled Texture:</b>
+
+Multi-sampled textures are created similarly to regular textures, but with a `samples` parameter set to the desired sample count (2, 4, 8, etc.) instead of 1. Key differences:
+- `samples`: Set to desired sample count instead of 1
+- `usage`: TextureUsageFlagBits::ColorAttachmentBit - used as render target
+- <b>Memory cost</b>: N samples means N× memory (4x MSAA = 4× texture memory)
+.
+<br/>
+
+The multi-sampled texture stores intermediate rendering with multiple samples per pixel.
+
+\snippet hello_triangle_msaa/hello_triangle_msaa.cpp create_render_target
+
+<b>Configuring the Render Pass for MSAA:</b>
+
+The render pass configuration is set up with appropriate attachments and sample counts. Critical MSAA setup:
+- <b>view</b>: Multi-sampled texture where rendering happens
+- <b>resolveView</b>: Regular texture (swapchain image) where resolved result goes
+- <b>samples</b>: Must match the multi-sampled texture's sample count
+.
+<br/>
+
+The resolve operation happens automatically at the end of the render pass, averaging the multi-sampled data into the final image.
+
+<b>Pipeline Multisample Configuration:</b>
+
+The pipeline must be configured for the same sample count as the render target. Vulkan does not allow mismatches between pipeline and render pass sample counts.
+
+\snippet hello_triangle_msaa/hello_triangle_msaa.cpp pipeline_multisample
+
+<b>Resolve Operation:</b>
+
+The resolve happens implicitly when the render pass ends. Vulkan averages the N samples at each pixel location and writes the result to the `resolveView`. This is extremely efficient - done by dedicated hardware on the GPU.
+
+From the spec: https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkResolveModeFlagBits.html
+
+\snippet hello_triangle_msaa/hello_triangle_msaa.cpp configure_msaa_resolve
+
+<b>Dynamic Sample Count:</b>
+
+This example creates pipelines for all supported sample counts and switches between them via UI. When changing sample counts:
+1. Recreate the multi-sampled texture with new sample count
+2. Switch to pipeline configured for that sample count
+3. Update render pass configuration
+.
+<br/>
+
+The helper API populates `m_supportedSampleCounts` by querying device limits.
+
+\snippet hello_triangle_msaa/hello_triangle_msaa.cpp set_sample_count
+
+\section msaa_performance Performance Notes
+
+<b>Memory Cost:</b>
+- MSAA increases color/depth buffer memory by the sample count multiplier
+- 4x MSAA = 4× memory, 8x MSAA = 8× memory
+- Resolved output (swapchain) is still single-sampled
+.
+<br/>
+
+<b>Bandwidth Cost:</b>
+- Rendering writes N samples per pixel (higher bandwidth)
+- Resolve operation adds bandwidth cost (read multi-sampled, write single-sampled)
+- On tile-based GPUs (mobile), resolve cost is lower due to on-chip storage
+.
+<br/>
+
+<b>Shading Cost:</b>
+- <b>MSAA</b>: Fragment shader runs once per pixel (good)
+- <b>Supersampling (SSAA)</b>: Fragment shader runs once per sample (N× cost)
+- MSAA is much more performant than SSAA
+.
+<br/>
+
+<b>Recommended Settings:</b>
+- <b>Desktop</b>: 4x MSAA is standard, 8x for high-end
+- <b>Mobile</b>: 2x or 4x MSAA (bandwidth limited)
+- <b>VR</b>: Often disabled or 2x (need high frame rates)
+.
+<br/>
+
+<b>Tile-Based Deferred Rendering (TBDR):</b>
+Mobile GPUs (Arm Mali, Qualcomm Adreno, Apple) use TBDR architecture. MSAA is very efficient on TBDR because multi-sampled data stays on-chip (tile memory) and only the resolved result goes to main memory.
+
+\section msaa_seealso See Also
+
+- \subpage hello_triangle - Non-MSAA version for comparison
+- \subpage hello_triangle_msaa_dynamic_rendering - MSAA with VK_KHR_dynamic_rendering extension
+- [VkSampleCountFlagBits](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkSampleCountFlagBits.html) - Sample count enum values
+- [Resolve Attachments](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkAttachmentDescription.html) - Render pass resolve operations
+
+\section msaa_further_reading Further Reading
+
+- [A Quick Overview of MSAA](https://therealmjp.github.io/posts/msaa-overview/) - In-depth MSAA explanation
+- [Anti-Aliasing Techniques](https://en.wikipedia.org/wiki/Spatial_anti-aliasing) - Comparison of MSAA, SSAA, FXAA, TAA
 */

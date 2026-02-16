@@ -62,6 +62,7 @@ HelloSphereRt::HelloSphereRt()
 
 void HelloSphereRt::createRayTracingPipeline()
 {
+    //![create_rt_shaders]
     // Create raytracing shaders
     auto rayTracingGenShaderPath = KDGpuExample::assetDir().file("shaders/examples/hello_sphere_rt/raygen.spv");
     auto rayTracingMissShaderPath = KDGpuExample::assetDir().file("shaders/examples/hello_sphere_rt/miss.spv");
@@ -72,7 +73,9 @@ void HelloSphereRt::createRayTracingPipeline()
     auto rayTracingMissShader = m_device.createShaderModule(readShaderFile(rayTracingMissShaderPath));
     auto rayTracingClosestShader = m_device.createShaderModule(readShaderFile(rayTracingClosestShaderPath));
     auto rayTracingIntersectionShader = m_device.createShaderModule(readShaderFile(rayTracingIntersectionShaderPath));
+    //![create_rt_shaders]
 
+    //![create_rt_bindgroup_layout]
     // Create bind group layout consisting of an acceleration structure and an image to write out to
     const BindGroupLayoutOptions rtBindGroupLayoutOptions = {
         .bindings = {
@@ -92,6 +95,7 @@ void HelloSphereRt::createRayTracingPipeline()
                 },
         },
     };
+    //![create_rt_bindgroup_layout]
     const BindGroupLayoutOptions cameraBindGroupLayoutOptions = {
         .bindings = {
                 {
@@ -126,6 +130,7 @@ void HelloSphereRt::createRayTracingPipeline()
     };
     m_pipelineLayout = m_device.createPipelineLayout(pipelineLayoutOptions);
 
+    //![create_rt_pipeline]
     // Create a raytracing pipeline
     const RayTracingPipelineOptions pipelineOptions{
         .shaderStages = {
@@ -167,10 +172,12 @@ void HelloSphereRt::createRayTracingPipeline()
         .layout = m_pipelineLayout,
     };
     m_pipeline = m_device.createRayTracingPipeline(pipelineOptions);
+    //![create_rt_pipeline]
 }
 
 void HelloSphereRt::createShaderBindingTable()
 {
+    //![shader_binding_table]
     // Create Shader Binding Table
     // This basically allows use to create a selection of ShaderGroups we want to use for a specific trace call
     // e.g which rayGen, which Miss, which Hit group we want to use
@@ -184,12 +191,14 @@ void HelloSphereRt::createShaderBindingTable()
     m_sbt.addRayGenShaderGroup(m_pipeline, 0);
     m_sbt.addMissShaderGroup(m_pipeline, 1);
     m_sbt.addHitShaderGroup(m_pipeline, 2);
+    //![shader_binding_table]
 }
 
 void HelloSphereRt::createAccelerationStructures()
 {
+    //![blas_data]
     const size_t SphereCount = 1024;
-
+    // ... omitting some code for brevity in my thought, but I'll replace everything needed
     struct SphereData {
         glm::vec4 positionAndRadius;
         glm::vec4 color;
@@ -198,6 +207,8 @@ void HelloSphereRt::createAccelerationStructures()
 
     std::vector<SphereData> spheres(SphereCount);
     std::vector<VkAabbPositionsKHR> aabbs(SphereCount);
+    // ...
+    //![blas_data]
 
     std::random_device rd; // Will be used to obtain a seed for the random number engine
     std::mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
@@ -254,6 +265,7 @@ void HelloSphereRt::createAccelerationStructures()
         .stride = sizeof(VkAabbPositionsKHR),
     };
 
+    //![blas_creation]
     // Create Acceleration Structures (the BoundingVolumes we will ray trace against)
 
     // We will have SphereCount aabbGeometry
@@ -290,10 +302,12 @@ void HelloSphereRt::createAccelerationStructures()
                     },
             },
     });
+    //![blas_creation]
 
     // Note: the geometries provided to create the AccelerationStructures were only used to compute
     // their size. Geometries will only be effectively linked to our AccelerationStructures when we build them below.
 
+    //![build_as]
     // Build acceleration structures
     {
         auto commandRecorder = m_device.createCommandRecorder();
@@ -366,6 +380,7 @@ void HelloSphereRt::createAccelerationStructures()
         });
         m_queue.waitUntilIdle();
     }
+    //![build_as]
 }
 
 void HelloSphereRt::createBindGroups()
@@ -469,7 +484,7 @@ void HelloSphereRt::cleanupScene()
     m_sbt = {};
 }
 
-//![1]
+//![update_scene]
 void HelloSphereRt::updateScene()
 {
     static float angle = 0.0f;
@@ -485,7 +500,7 @@ void HelloSphereRt::updateScene()
     std::memcpy(cameraData, rawCameraData.data(), 2 * sizeof(glm::mat4));
     m_cameraUBOBuffer.unmap();
 }
-//![1]
+//![update_scene]
 
 void HelloSphereRt::resize()
 {
@@ -493,16 +508,15 @@ void HelloSphereRt::resize()
     m_swapchainImageLayouts = std::vector<KDGpu::TextureLayout>(m_swapchain.textures().size(), KDGpu::TextureLayout::Undefined);
 }
 
-//![2]
 void HelloSphereRt::render()
 {
+    //![render]
     auto commandRecorder = m_device.createCommandRecorder();
 
     if (!m_swapchainImageLayouts.empty()) {
-        // Transition Image to Presentation Layout
         const Handle<Texture_t> outputImage = m_swapchain.textures()[m_currentSwapchainImageIndex];
 
-        // Transition Image to General Layout
+        // Transition Swapchain Image to General Layout
         commandRecorder.textureMemoryBarrier(TextureMemoryBarrierOptions{
                 .srcStages = KDGpu::PipelineStageFlags(KDGpu::PipelineStageFlagBit::TopOfPipeBit),
                 .srcMask = KDGpu::AccessFlagBit::None,
@@ -551,7 +565,7 @@ void HelloSphereRt::render()
         rtPass.end();
         commandRecorder.endDebugLabel();
 
-        // Transition Image to ColorAttachment Layout
+        // Transition Swapchain Image to ColorAttachment Layout
         commandRecorder.textureMemoryBarrier(TextureMemoryBarrierOptions{
                 .srcStages = KDGpu::PipelineStageFlags(KDGpu::PipelineStageFlagBit::RayTracingShaderBit),
                 .srcMask = KDGpu::AccessFlagBit::ShaderReadBit | KDGpu::AccessFlagBit::ShaderWriteBit,
@@ -572,6 +586,7 @@ void HelloSphereRt::render()
         });
 
         // Create a GraphicsRenderPass to draw the imgui overlay
+        // Implicitly Transition Swapchain Image to Presentation Layout
         auto opaquePass = commandRecorder.beginRenderPass(RenderPassCommandRecorderOptions{
                 .colorAttachments = {
                         {
@@ -595,14 +610,13 @@ void HelloSphereRt::render()
     }
 
     m_commandBuffer = commandRecorder.finish();
+    //![render]
 
-    //![13]
     const SubmitOptions submitOptions = {
         .commandBuffers = { m_commandBuffer },
         .waitSemaphores = { m_presentCompleteSemaphores[m_inFlightIndex] },
         .signalSemaphores = { m_renderCompleteSemaphores[m_currentSwapchainImageIndex] }
     };
     m_queue.submit(submitOptions);
-    //![13]
 }
 //![2]

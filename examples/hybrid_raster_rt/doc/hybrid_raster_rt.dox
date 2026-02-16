@@ -1,0 +1,198 @@
+/*
+  This file is part of KDGpu.
+
+  SPDX-FileCopyrightText: 2024 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+
+  SPDX-License-Identifier: MIT
+
+  Contact KDAB at <info@kdab.com> for commercial licensing options.
+*/
+
+/*!
+\page hybrid_raster_rt Hybrid Rasterization and Ray Tracing
+\ingroup kdgpu-examples
+
+\brief Demonstrates combining rasterization and ray tracing for efficient mixed-mode rendering.
+
+\image html hybrid_raster_rt.png
+
+This advanced example shows hybrid rendering that leverages both rasterization (for primary visibility and alpha blending) and ray tracing (for shadows).
+- The scene contains opaque objects, alpha-blended spheres, and a ground plane.
+- Rasterization fills a G-buffer with world positions, normals, and colors.
+- An OIT (order-independent transparency) fragment linked list handles alpha blending.
+- Ray tracing then shoots shadow rays from G-buffer positions to determine lighting.
+.
+<br/>
+This architecture represents modern game rendering where rasterization handles base rendering and ray tracing adds realistic lighting and shadows.
+
+\section hybrid_raster_rt_overview Overview
+
+<b>What this demonstrates:</b>
+
+Combining rasterization and ray tracing, G-buffer generation, OIT for alpha blending, ray traced shadows, acceleration structure rebuilds, compute particle updates, multi-pass compositing.
+
+<b>Use cases:</b>
+
+Modern game engines, hybrid pipelines, ray traced shadows/reflections on rasterized geometry, performance-quality balance.
+
+\section hybrid_raster_rt_requirements Requirements
+
+- <b>Vulkan Version</b>: 1.2+
+- <b>Extensions</b>: VK_KHR_ray_tracing_pipeline, VK_KHR_acceleration_structure
+- <b>Features</b>: rayTracingPipeline, accelerationStructure, bufferDeviceAddress
+
+\section hybrid_raster_rt_concepts Why Hybrid?
+
+Rasterization: Fast primary visibility
+Ray Tracing: Accurate shadows/reflections
+Combine: Performance + Quality
+
+The scene is composed of:
+- An Opaque Ground Plane
+- Multiple Alpha Blended Spheres
+- Multiple Opaque Spheres
+
+## Algorithm Overview
+
+1. <b>Compute Animation</b>: The sphere's positions and velocities are updated using a compute shader.
+2. <b>GBuffer Z-Fill</b>: A depth-only pre-pass is performed for opaque meshes.
+3. <b>GBuffer OIT Fill</b>: For alpha-blended meshes, we use a fragment linked list to store color and depth information.
+4. <b>GBuffer Opaque Fill</b>: Record WorldPosition, WorldNormals, and Color for the opaque meshes.
+5. <b>Acceleration Structure Rebuild</b>: AccelerationStructures are updated or rebuilt based on the new sphere positions.
+6. <b>Ray Tracing Shadows</b>: For each world position recorded in the GBuffer, we compute a ray to the light source. Any intersection means the point is in shadow.
+7. <b>Compositing</b>:
+    - Final color for opaque areas is retrieved from the GBuffer.
+    - Alpha fragments are sorted by depth and blended against the opaque background.
+    - Shadow information from the Ray Tracing pass is applied to modify the final color.
+
+\section hybrid_raster_rt_blas BLAS Generation
+
+Each distinct mesh (opaque spheres, alpha spheres, ground plane) gets its own Bottom-Level Acceleration Structure (BLAS).
+
+<b>Sphere BLAS (opaque and alpha):</b>
+
+The same sphere mesh is shared across all sphere instances.
+
+One BLAS entry per sphere is created:
+- each referencing the shared vertex buffer but with a per-sphere transform read from `blasTransformBuffer` (written each frame by the compute shader).
+.
+<br/>
+
+`PreferFastBuild` is chosen over `PreferFastTrace` because the spheres move every frame.
+
+\snippet hybrid_raster_rt/hybrid_raster_rt.cpp sphere_blas
+
+<b>Ground plane BLAS:</b>
+
+The plane is static, so its BLAS is built only once (on the first frame).
+
+\snippet hybrid_raster_rt/hybrid_raster_rt.cpp plane_blas
+
+<b>TLAS:</b>
+- The Top-Level Acceleration Structure references all three BLAS as instances.
+- The two sphere BLAS use `TriangleFacingCullDisable` so both sides of every sphere triangle are visible.
+- The opaque spheres carry `ForceOpaque` (skips any-hit) while the alpha spheres carry `ForceNoOpaque` (enables any-hit for transparency):
+
+\snippet hybrid_raster_rt/hybrid_raster_rt.cpp tlas_creation
+
+\section hybrid_raster_rt_shadow_pipeline Shadow Ray Tracing Pipeline
+
+The shadow pass uses four shaders and a two-hit-group SBT.
+
+Two separate hit shaders handle the two BLAS types differently:
+- opaque geometry uses the closest-hit shader
+- alpha geometry uses the any-hit shader to accumulate a hit counter rather than short-circuit on the first intersection:
+
+\snippet hybrid_raster_rt/hybrid_raster_rt.cpp shadow_pipeline
+
+\section hybrid_raster_rt_impl_detail Per-Frame Render Passes
+
+\subsection hybrid_raster_rt_compute Compute Animation
+
+The sphere's positions and velocities are updated using a compute shader.
+
+\snippet hybrid_raster_rt/hybrid_raster_rt.cpp ComputeUpdate
+
+\subsection hybrid_raster_rt_asbuild Acceleration Structure Rebuild
+
+After the compute pass writes new per-sphere transforms into `blasTransformBuffer`, a buffer barrier ensures the AS build sees the updated data.
+
+Dynamic BLAS are rebuilt every frame; the static plane BLAS is only built once:
+
+\snippet hybrid_raster_rt/hybrid_raster_rt.cpp ASBuild
+
+\subsection hybrid_raster_rt_shadow_pass Shadow Ray Tracing Pass
+
+For each pixel, the ray generation shader reads the G-Buffer world position and fires a shadow ray towards the light.
+
+The pipeline waits for both the TLAS rebuild and the G-Buffer opaque fill before issuing the trace:
+
+\snippet hybrid_raster_rt/hybrid_raster_rt.cpp ShadowRTPass
+
+\section hybrid_raster_rt_shaders Shadow Shaders
+
+All shadow shaders are under `assets/shaders/examples/hybrid_raster_rt/`.
+
+\subsection hybrid_raster_rt_shader_rgen Ray Generation — shadow.rgen
+
+For each launched pixel the shader samples the G-Buffer world position.
+If the position is valid (non-zero), it fires a shadow ray toward the light source.
+The `tMin` is set to the maximum possible sphere diameter (4.0) to avoid self-intersection against the sphere the world position lies on.
+The result is the accumulated `hitCounter` value written to the shadow image:
+
+\snippet hybrid_raster_rt/shadow.rgen shadow_rgen
+
+\subsection hybrid_raster_rt_shader_rchit Closest Hit — shadow.rchit
+
+For opaque geometry the closest-hit shader is invoked on the first solid intersection.
+It sets `hitCounter` to 3 (a non-zero sentinel meaning "fully in shadow") to signal that the ray was blocked:
+
+\snippet hybrid_raster_rt/shadow.rchit shadow_rchit
+
+\subsection hybrid_raster_rt_shader_rahit Any Hit — shadow.rahit
+
+For alpha geometry the any-hit shader fires on every intersected triangle rather than only the nearest one.
+It increments `hitCounter` each time, allowing the compositing pass to use the count as a shadow intensity:
+
+\snippet hybrid_raster_rt/shadow.rahit shadow_rahit
+
+\subsection hybrid_raster_rt_shader_rmiss Miss — shadow.rmiss
+
+If the ray reaches `tMax` without hitting anything, the miss shader fires and resets `hitCounter` to 0 (fully lit):
+
+\snippet hybrid_raster_rt/shadow.rmiss shadow_rmiss
+
+\section hybrid_raster_rt_performance Performance Characteristics
+
+<b>Rasterization phase:</b> Linear in triangle count, excellent cache locality, highly optimized on all GPUs.
+
+<b>Ray tracing phase:</b> Relatively predictable cost - one ray per pixel for shadows. More complex for reflections (many rays per pixel).
+
+<b>Hybrid benefits:</b> Rasterization provides fast primary shading; ray tracing adds quality without per-pixel overhead of full ray tracing.
+
+\section hybrid_raster_rt_spec Vulkan Specifications
+
+Key extensions and features used:
+
+- [VK_KHR_ray_tracing_pipeline](https://registry.khronos.org/vulkan/specs/1.3-extensions/html/vkspec.html#VK_KHR_ray_tracing_pipeline) - Ray tracing shader execution
+- [VK_KHR_acceleration_structure](https://registry.khronos.org/vulkan/specs/1.3-extensions/html/vkspec.html#VK_KHR_acceleration_structure) - Acceleration structures for ray tracing
+- [VK_KHR_buffer_device_address](https://registry.khronos.org/vulkan/specs/1.3-extensions/html/vkspec.html#VK_KHR_buffer_device_address) - Device pointers for shader table access
+- [Shader Binding Table](https://registry.khronos.org/vulkan/specs/1.3-extensions/html/vkspec.html#shader-binding-table) - Ray tracing shader organization
+- [G-Buffer rendering](https://registry.khronos.org/vulkan/specs/1.3-extensions/html/vkspec.html#render-pass) - Multi-pass deferred rendering
+
+\section hybrid_raster_rt_further Further Reading
+
+- [Ray Tracing In Vulkan](https://www.khronos.org/blog/ray-tracing-in-vulkan) - Official Vulkan blog
+- [NVIDIA RT Best Practices](https://developer.nvidia.com/blog/best-practices-using-nvidia-rtx-ray-tracing/) - Ray Tracing Best Practices
+- [Ray Tracing Gems](https://www.realtimerendering.com/raytracinggems/) - Free book on ray tracing
+
+
+\section hybrid_raster_rt_seealso See Also
+
+- \ref hello_triangle_rt - Ray tracing with triangle geometry
+- \ref hello_sphere_rt - Ray tracing with custom intersections
+- \ref render_to_texture - Multi-pass rendering fundamentals
+- \ref compute_oit_transparency - Order-independent transparency techniques
+- \ref compute_particles - GPU particle simulation with compute shaders
+
+*/

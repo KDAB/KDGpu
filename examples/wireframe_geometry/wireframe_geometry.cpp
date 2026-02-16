@@ -30,11 +30,13 @@ using namespace KDGpu;
 
 namespace {
 
+//![vertex_struct]
 struct Vertex {
     glm::vec3 position;
     glm::vec3 normal;
     float excludeEdge; // Set to 1.0 to exclude edge opposite this vertex from the wireframe, 0.0 to include
 };
+//![vertex_struct]
 static_assert(sizeof(Vertex) == 7 * sizeof(float));
 
 std::vector<Vertex> initializeCubeMesh()
@@ -194,58 +196,60 @@ void WireframeGeometry::initializeScene()
         std::memcpy(m_transformBufferData, &m_transform, sizeof(glm::mat4));
     }
 
-    // Create a vertex shader and fragment shader
+    //![shader_loading]
+    // Create a vertex, geometry and fragment shader
     auto vertexShaderPath = KDGpuExample::assetDir().file("shaders/examples/wireframe_geometry/wireframe_geometry.vert.spv");
     auto vertexShader = m_device.createShaderModule(KDGpuExample::readShaderFile(vertexShaderPath));
-
     auto geometryShaderPath = KDGpuExample::assetDir().file("shaders/examples/wireframe_geometry/wireframe_geometry.geom.spv");
     auto geometryShader = m_device.createShaderModule(KDGpuExample::readShaderFile(geometryShaderPath));
 
     auto fragmentShaderPath = KDGpuExample::assetDir().file("shaders/examples/wireframe_geometry/wireframe_geometry.frag.spv");
     auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
+    //![shader_loading]
 
     // Bind group layout set 0: camera UBO (vertex shader)
     // Bind group layout set 1: material UBO (fragment shader)
     // Bind group layout set 2: model transform UBO (vertex shader)
 
-    // clang-format off
     const BindGroupLayoutOptions bindGroupLayoutOptionsSet0 = {
         .label = "Scene Data Bind Group Layout",
-        .bindings = {{
-            .binding = 0, // Camera UBO
-            .resourceType = ResourceBindingType::UniformBuffer,
-            .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit)
-        },{
-            .binding = 1, // Viewport UBO
-            .resourceType = ResourceBindingType::UniformBuffer,
-            .shaderStages = ShaderStageFlags(ShaderStageFlagBits::GeometryBit)
-        }}
+        .bindings = {
+                {
+                        .binding = 0, // Camera UBO
+                        .resourceType = ResourceBindingType::UniformBuffer,
+                        .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit),
+                },
+                {
+                        .binding = 1, // Viewport UBO
+                        .resourceType = ResourceBindingType::UniformBuffer,
+                        .shaderStages = ShaderStageFlags(ShaderStageFlagBits::GeometryBit),
+                },
+        }
     };
-    // clang-format on
     const BindGroupLayout bindGroupLayoutSet0 = m_device.createBindGroupLayout(bindGroupLayoutOptionsSet0);
 
-    // clang-format off
     const BindGroupLayoutOptions bindGroupLayoutOptionsSet1 = {
         .label = "Material Bind Group Layout",
-        .bindings = {{
-            .binding = 0,
-            .resourceType = ResourceBindingType::UniformBuffer,
-            .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit)
-        }}
+        .bindings = {
+                {
+                        .binding = 0,
+                        .resourceType = ResourceBindingType::UniformBuffer,
+                        .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit),
+                },
+        }
     };
-    // clang-format on
     const BindGroupLayout bindGroupLayoutSet1 = m_device.createBindGroupLayout(bindGroupLayoutOptionsSet1);
 
-    // clang-format off
     const BindGroupLayoutOptions bindGroupLayoutOptionsSet2 = {
         .label = "Transform Bind Group",
-        .bindings = {{
-            .binding = 0,
-            .resourceType = ResourceBindingType::UniformBuffer,
-            .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit)
-        }}
+        .bindings = {
+                {
+                        .binding = 0,
+                        .resourceType = ResourceBindingType::UniformBuffer,
+                        .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit),
+                },
+        }
     };
-    // clang-format on
     const BindGroupLayout bindGroupLayoutSet2 = m_device.createBindGroupLayout(bindGroupLayoutOptionsSet2);
 
     // Create a pipeline layout (array of bind group layouts)
@@ -256,81 +260,80 @@ void WireframeGeometry::initializeScene()
     m_pipelineLayout = m_device.createPipelineLayout(pipelineLayoutOptions);
 
     // Create a pipeline
-    // clang-format off
     const GraphicsPipelineOptions pipelineOptions = {
         .label = "Wireframe Geometry Shader Pipeline",
         .shaderStages = {
-            { .shaderModule = vertexShader, .stage = ShaderStageFlagBits::VertexBit },
-            { .shaderModule = geometryShader, .stage = ShaderStageFlagBits::GeometryBit },
-            { .shaderModule = fragmentShader, .stage = ShaderStageFlagBits::FragmentBit }
+                { .shaderModule = vertexShader, .stage = ShaderStageFlagBits::VertexBit },
+                { .shaderModule = geometryShader, .stage = ShaderStageFlagBits::GeometryBit },
+                { .shaderModule = fragmentShader, .stage = ShaderStageFlagBits::FragmentBit },
         },
         .layout = m_pipelineLayout,
         .vertex = {
-            .buffers = {
-                { .binding = 0, .stride = sizeof(Vertex) }
-            },
-            .attributes = {
-                { .location = 0, .binding = 0, .format = Format::R32G32B32_SFLOAT }, // Position
-                { .location = 1, .binding = 0, .format = Format::R32G32B32_SFLOAT, .offset = offsetof(Vertex, normal) }, // Normal
-                { .location = 2, .binding = 0, .format = Format::R32_SFLOAT, .offset = offsetof(Vertex, excludeEdge) } // ExcludeEdge
-            }
+                .buffers = {
+                        { .binding = 0, .stride = sizeof(Vertex) },
+                },
+                .attributes = {
+                        { .location = 0, .binding = 0, .format = Format::R32G32B32_SFLOAT }, // Position
+                        { .location = 1, .binding = 0, .format = Format::R32G32B32_SFLOAT, .offset = offsetof(Vertex, normal) }, // Normal
+                        { .location = 2, .binding = 0, .format = Format::R32_SFLOAT, .offset = offsetof(Vertex, excludeEdge) }, // ExcludeEdge
+                },
         },
         .renderTargets = {
-            { .format = m_swapchainFormat }
+                { .format = m_swapchainFormat },
         },
         .depthStencil = {
-            .format = m_depthFormat,
-            .depthWritesEnabled = true,
-            .depthCompareOperation = CompareOperation::Less
+                .format = m_depthFormat,
+                .depthWritesEnabled = true,
+                .depthCompareOperation = CompareOperation::Less,
         },
         .multisample = {
-            .samples = m_samples.get()
+                .samples = m_samples.get(),
         },
     };
-    // clang-format on
     m_pipeline = m_device.createGraphicsPipeline(pipelineOptions);
 
     // Create bind groups for the camera UBO, material UBO and transform UBO
     {
-        // clang-format off
         const BindGroupOptions bindGroupOptions = {
             .label = "Scene Data Bind Group",
             .layout = bindGroupLayoutSet0,
-            .resources = {{
-                .binding = 0,
-                .resource = UniformBufferBinding{ .buffer = m_cameraBuffer }
-            }, {
-                .binding = 1,
-                .resource = UniformBufferBinding{ .buffer = m_viewportBuffer }
-            }}
+            .resources = {
+                    {
+                            .binding = 0,
+                            .resource = UniformBufferBinding{ .buffer = m_cameraBuffer },
+                    },
+                    {
+                            .binding = 1,
+                            .resource = UniformBufferBinding{ .buffer = m_viewportBuffer },
+                    },
+            }
         };
-        // clang-format on
         m_cameraBindGroup = m_device.createBindGroup(bindGroupOptions);
     }
     {
-        // clang-format off
         const BindGroupOptions bindGroupOptions = {
             .label = "Material Bind Group",
             .layout = bindGroupLayoutSet1,
-            .resources = {{
-                .binding = 0,
-                .resource = UniformBufferBinding{ .buffer = m_materialBuffer }
-            }}
+            .resources = {
+                    {
+                            .binding = 0,
+                            .resource = UniformBufferBinding{ .buffer = m_materialBuffer },
+                    },
+            },
         };
-        // clang-format on
         m_materialBindGroup = m_device.createBindGroup(bindGroupOptions);
     }
     {
-        // clang-format off
         const BindGroupOptions bindGroupOptions = {
             .label = "Transform Bind Group",
             .layout = bindGroupLayoutSet2,
-            .resources = {{
-                .binding = 0,
-                .resource = UniformBufferBinding{ .buffer = m_transformBuffer }
-            }}
+            .resources = {
+                    {
+                            .binding = 0,
+                            .resource = UniformBufferBinding{ .buffer = m_transformBuffer },
+                    },
+            }
         };
-        // clang-format on
         m_transformBindGroup = m_device.createBindGroup(bindGroupOptions);
     }
 

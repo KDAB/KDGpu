@@ -1,6 +1,7 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
+//! [frag_shader]
 layout(location = 0) in vec2 texCoord;
 
 layout(location = 0) out vec4 fragColor;
@@ -12,3 +13,4 @@ void main()
     vec3 color = texture(colorTexture, texCoord).rgb;
     fragColor = vec4(color, 1.0);
 }
+//! [frag_shader]

@@ -402,6 +402,7 @@ void ProjectionLayer::cleanup()
 // have waited for the fence to be signaled in the renderView() function.
 void ProjectionLayer::updateScene()
 {
+    //![U][XrViewMatrices]
     // Update the camera data for each view
     m_cameraData.resize(m_viewState.viewCount());
     m_viewProjections.resize(m_viewState.viewCount());
@@ -429,6 +430,7 @@ void ProjectionLayer::updateScene()
         m_viewProjections[viewIndex] = m_cameraData[viewIndex].projection * m_cameraData[viewIndex].view;
         // clang-format on
     }
+    //![U][XrViewMatrices]
 
     // Scale the triangle up and down
     const float s = scale();
@@ -497,6 +499,7 @@ void ProjectionLayer::updateViewUbo()
 
 void ProjectionLayer::renderView()
 {
+    //![U][XrRenderView]
     //  Update the scene and camera data once per frame
     if (m_currentViewIndex == 0) {
         updateTransformUbo();
@@ -546,4 +549,5 @@ void ProjectionLayer::renderView()
         .commandBuffers = { m_commandBuffers[m_currentViewIndex] },
     };
     m_queue->submit(submitOptions);
+    //![U][XrRenderView]
 }

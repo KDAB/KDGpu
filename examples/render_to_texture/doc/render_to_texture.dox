@@ -8,72 +8,175 @@
   Contact KDAB at <info@kdab.com> for commercial licensing options.
 */
 
-/**
-    @page render_to_texture Render to Texture
-    @ingroup kdgpu-examples
+/*!
+\page render_to_texture Render to Texture
+\ingroup kdgpu-examples
 
-    @brief This example renders a colorful triangle and then post-processes it.
+\brief Demonstrates multi-pass rendering by rendering to an off-screen texture and applying post-processing effects.
 
-    This example demonstrates how to render a scene onto a texture, and then to sample from it in another pass.
+\image html render_to_texture.png
 
-    \section render_to_texture_initialization Initialization
+This example shows the fundamental technique of render-to-texture: rendering a scene to an off-screen framebuffer, then using that render as input to subsequent rendering passes. This enables post-processing effects, deferred rendering, reflection/shadow maps, and many other advanced techniques. The example renders a triangle to texture, then applies a post-processing shader with an animated filter.
 
-    There are a couple function calls at the beginning of ``initializeScene``: ``initializeMainScene`` and ``initializePostProcess``. The former initializes a vertex, index, and transformation matrix buffers, as well as the pipeline, in a similar fashion to the previous examples. This pipeline will be used in the first pass to render the actual geometry to the texture. ``initializePostProcess`` initializes the second pipeline, which will be used to draw the texture onto a quad covering the whole screen. Because it's drawn onto a quad, this pipeline also has geometry buffers, except there is no index buffer and the vertices are for a quad instead of one triangle.
+The example uses the \ref kdgpuexample_helper "KDGpuExample helper API" for simplified setup.
 
-    The post process pass also needs a sampler:
+\section render_to_texture_overview Overview
 
-    <blockquote>
-    TODO: this snippet is broken for no reason
-    </blockquote>
+<b>What this example demonstrates:</b>
+- Creating off-screen render targets (color + depth textures)
+- Multi-pass rendering architecture
+- Sampling from rendered textures in subsequent passes
+- Image layout transitions for different texture uses
+- Full-screen quad rendering for post-processing
+- Push constants for per-draw parameters
+.
+<br/>
 
-    @snippet render_to_texture/render_to_texture.cpp 1
+<b>Use cases:</b>
+- Post-processing effects (bloom, blur, tone mapping, color grading)
+- Deferred rendering (G-buffer generation)
+- Shadow mapping and reflection maps
+- Screen-space effects (SSAO, SSR)
+- Render-to-cubemap for environment mapping
 
-    Which will be passed into a bind group on initialization and on resize:
+\section render_to_texture_requirements Vulkan Requirements
 
-    @snippet render_to_texture/render_to_texture.cpp 8
+- <b>Vulkan Version</b>: 1.0+
+- <b>Extensions</b>: None (multi-pass rendering is core)
+- <b>Texture Features</b>: SampledBit + ColorAttachmentBit support
 
-    We will also be using post processing shaders for this pass. The fragment shader also expects a push constant- a fraction. We will be passing in sine wave values into this, and the fragment shader will create an oscillating red line, on the right of which it will apply its post processing and on the left of which it render the original image.
+\section render_to_texture_concepts Key Concepts
 
-    @snippet render_to_texture/render_to_texture.cpp 3
+<b>Multi-Pass Rendering:</b>
 
-    Additionally, we lay out a bind group for this pipeline which contains a ``CombinedImageSampler``. That's the layout for the bind group shown previously.
+Instead of rendering directly to the swapchain, we render to intermediate textures that become inputs to later passes:
+- <b>Pass 1</b>: Render scene → Off-screen color texture
+- <b>Pass 2</b>: Sample color texture → Apply effects → Render to swapchain
+.
+<br/>
 
-    @snippet render_to_texture/render_to_texture.cpp 4
+This architecture enables effects impossible in single-pass rendering.
 
-    The pipeline needs to also accept the push constant, which will be the position of the red line filter.
+<b>Image Layouts:</b>
 
-    @snippet render_to_texture/render_to_texture.cpp 5
+Vulkan textures have different layouts optimized for specific uses:
+- `ColorAttachmentOptimal`: Optimal for rendering to (as framebuffer attachment)
+- `ShaderReadOnlyOptimal`: Optimal for sampling from in shaders
+- `PresentSrc`: Required for presenting to screen
+.
+<br/>
 
-    The final pipeline configuration should look very familiar, with the exception of the new ``primitive`` entry. This provides an easy default alternative to having an index buffer. ``TriangleStrip`` will cause the vertices to be interpreted as a series of triangles sharing one side, which is ideal for drawing a quad.
+Transitions between layouts happen automatically at render pass boundaries or via explicit barriers.
 
-    @snippet render_to_texture/render_to_texture.cpp 6
+Spec: https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkImageLayout.html
 
-    This post-process pass will be configured in a member variable called ``m_finalPassOptions``, with similar settings to pass options seen in previous examples. The configuration for the first pass, which does the actual rendering to the texture, is notable:
+<b>Full-Screen Quad:</b>
 
-    @snippet render_to_texture/render_to_texture.cpp 2
+Post-processing typically renders a full-screen quad (two triangles covering viewport) that samples from the input texture. Using triangle strip topology with 4 vertices is efficient:
+```
+Vertices: (-1,1), (1,1), (-1,-1), (1,-1)
+Strip draws: v0-v1-v2 (triangle 1), v1-v2-v3 (triangle 2)
+```
 
-    Note that the view is constant. It is always the view for the render target texture.
+\section render_to_texture_implementation Implementation
 
-    Lets take a look at where that texture and view were created:
+<b>Creating Off-Screen Render Target:</b>
 
-    @snippet render_to_texture/render_to_texture.cpp 7
+\snippet render_to_texture/render_to_texture.cpp offscreen_texture
 
-    <blockquote>
-    TODO: multiview is probably more advanced than render to texture, so they should be re-ordered and reference each other in the opposite direction
-    </blockquote>
+Key configuration:
+- `usage`: ColorAttachmentBit (render to) + SampledBit (sample from)
+- `extent`: Match swapchain size for 1:1 correspondence
+- `memoryUsage`: GpuOnly for best performance
+- Depth texture similar, but with DepthStencilAttachmentBit
+.
+<br/>
 
-    This should look similar to depth texture creation in previous examples (such as [Hello Triangle Native](#hello_triangle_native) and particularly [Multiview](#multiview)). Just note that ``usage`` includes the ``ColorAttachmentBit`` and ``SampledBit``. This is identical to how we created the multiview texture.
+<b>First Pass - Render Scene:</b>
 
-    \section render_to_texture_perframe Per-Frame Logic
+\snippet render_to_texture/render_to_texture.cpp first_pass
 
-    We've got an update loop in this example, part of which populates a variable ``m_filterPosData`` with the sine wave value that determines the location of the red line:
+This pass renders the main scene (triangle) to `m_colorOutputView` instead of swapchain. The color texture accumulates the rendering.
 
-    @snippet render_to_texture/render_to_texture.cpp 9
+<b>Sampler for Texture Access:</b>
 
-    And finally, lets look at the bulk of the ``render`` method:
+\snippet render_to_texture/render_to_texture.cpp sampler_creation
 
-    @snippet render_to_texture/render_to_texture.cpp 10
+Default sampler provides linear filtering and repeat wrapping. For post-processing, you might want clamp-to-edge wrapping.
 
-    Notice that only the fullscreen pass uses the swapchain view, because the first is rendering to the texture.
+<b>Bind Group with Rendered Texture:</b>
 
+\snippet render_to_texture/render_to_texture.cpp color_bind_group
+
+The `CombinedImageSampler` binding makes the first pass's output texture available to the post-process shader.
+
+<b>Post-Process Pipeline with Push Constants:</b>
+
+\snippet render_to_texture/render_to_texture.cpp shader_loading
+\snippet render_to_texture/render_to_texture.cpp bind_group_layout
+\snippet render_to_texture/render_to_texture.cpp pipeline_layout
+
+Push constants allow passing small amounts of data (filter position) without creating uniform buffers. Limit is typically 128 bytes.
+
+<b>Triangle Strip for Full-Screen Quad:</b>
+
+\snippet render_to_texture/render_to_texture.cpp triangle_strip
+
+`PrimitiveTopology::TriangleStrip` draws connected triangles efficiently - perfect for quads.
+
+<b>Animated Filter Position:</b>
+
+\snippet render_to_texture/render_to_texture.cpp filter_animation
+
+Sine wave creates animated line that divides original/processed regions.
+
+<b>Render Loop - Two Passes:</b>
+
+\snippet render_to_texture/render_to_texture.cpp render_loop
+
+Pass 1 always targets the off-screen texture. Pass 2 samples from it and renders to the swapchain for display.
+
+\section render_to_texture_performance Performance Notes
+
+<b>Memory Cost:</b>
+- Each off-screen texture requires full screen resolution of memory
+- 1920×1080 RGBA8: ~8MB per texture
+- Add depth buffer: +4MB (D24 or D32)
+- Multiple render targets multiply cost
+.
+<br/>
+
+<b>Bandwidth:</b>
+- Writing to off-screen: Full bandwidth
+- Reading in next pass: Full bandwidth again
+- Total: 2× bandwidth vs single-pass
+- Tile-based GPUs (mobile) can optimize this with on-chip tile memory
+.
+<br/>
+
+<b>Pipeline Barriers:</b>
+- Layout transitions have small cost
+- Render pass boundaries handle most transitions automatically
+- Explicit barriers needed for fine control
+.
+<br/>
+
+<b>Optimization Tips:</b>
+- Match render target resolution to needs (don't over-sample)
+- Reuse render targets across frames when possible
+- On mobile, use subpasses instead of separate passes (see \subpage render_to_texture_subpass)
+- Consider half-resolution for expensive effects (bloom, SSAO)
+
+\section render_to_texture_seealso See Also
+
+- \subpage render_to_texture_subpass - Efficient subpass-based rendering for tile-based GPUs
+- \subpage depth_texture_lookup - Sampling depth textures specifically
+- \subpage hello_triangle_msaa - Multi-sampled render targets
+- [Vulkan Render Pass Guide](https://docs.vulkan.org/spec/latest/chapters/renderpass.html) - Official render pass documentation
+- [Image Layouts](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkImageLayout.html) - Layout transition reference
+
+\section render_to_texture_further_reading Further Reading
+
+- [Post-Processing Effects](https://learnopengl.com/Advanced-OpenGL/Framebuffers) - Common post-process techniques
+- [Deferred Rendering](http://www.realtimerendering.com/blog/deferred-lighting-approaches/) - G-buffer architecture
 */

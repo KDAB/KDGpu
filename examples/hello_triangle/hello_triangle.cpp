@@ -28,7 +28,7 @@ using namespace KDGpu;
 
 void HelloTriangle::initializeScene()
 {
-    //![3]
+    //![initialize_scene]
     struct Vertex {
         glm::vec3 position;
         glm::vec3 color;
@@ -56,9 +56,8 @@ void HelloTriangle::initializeScene()
             .usage = BufferUsageFlagBits::VertexBufferBit | BufferUsageFlagBits::TransferDstBit,
             .memoryUsage = MemoryUsage::GpuOnly
         };
-        //![4]
+
         m_buffer = m_device.createBuffer(bufferOptions);
-        //![4]
         const BufferUploadOptions uploadOptions = {
             .destinationBuffer = m_buffer,
             .dstStages = PipelineStageFlagBit::VertexAttributeInputBit,
@@ -66,14 +65,12 @@ void HelloTriangle::initializeScene()
             .data = vertexData.data(),
             .byteSize = dataByteSize
         };
-        //![5]
         uploadBufferData(uploadOptions);
-        //![5]
     }
-    //![3]
+    //![initialize_scene]
 
     // Create a buffer to hold the geometry index data
-    //![6]
+    //![index_buffer]
     {
         std::array<uint32_t, 3> indexData = { 0, 1, 2 };
         const DeviceSize dataByteSize = indexData.size() * sizeof(uint32_t);
@@ -93,10 +90,10 @@ void HelloTriangle::initializeScene()
         };
         uploadBufferData(uploadOptions);
     }
-    //![6]
+    //![index_buffer]
 
     // Create a buffer to hold the transformation matrix
-    //![7]
+    //![transform_buffer]
     {
         const BufferOptions bufferOptions = {
             .label = "Transformation Buffer",
@@ -111,74 +108,69 @@ void HelloTriangle::initializeScene()
         m_transformBufferData = m_transformBuffer.map();
         std::memcpy(m_transformBufferData, &m_transform, sizeof(glm::mat4));
     }
-    //![7]
+    //![transform_buffer]
 
     // Create a vertex shader and fragment shader
-    //![8]
+    //![shaders]
     auto vertexShaderPath = KDGpuExample::assetDir().file("shaders/examples/hello_triangle/hello_triangle.vert.spv");
     auto vertexShader = m_device.createShaderModule(KDGpuExample::readShaderFile(vertexShaderPath));
 
     auto fragmentShaderPath = KDGpuExample::assetDir().file("shaders/examples/hello_triangle/hello_triangle.frag.spv");
     auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
-    //![8]
+    //![shaders]
 
-    //![9]
+    //![pipeline_layout]
     // Create bind group layout consisting of a single binding holding a UBO
-    // clang-format off
     const BindGroupLayoutOptions bindGroupLayoutOptions = {
         .label = "Transform Bind Group",
-        .bindings = {{
-            .binding = 0,
-            .resourceType = ResourceBindingType::UniformBuffer,
-            .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit)
-        }}
+        .bindings = {
+                {
+                        .binding = 0,
+                        .resourceType = ResourceBindingType::UniformBuffer,
+                        .shaderStages = ShaderStageFlags(ShaderStageFlagBits::VertexBit),
+                },
+        },
     };
-    // clang-format on
     const BindGroupLayout bindGroupLayout = m_device.createBindGroupLayout(bindGroupLayoutOptions);
 
     // Create a pipeline layout (array of bind group layouts)
     const PipelineLayoutOptions pipelineLayoutOptions = {
         .label = "Triangle",
-        .bindGroupLayouts = { bindGroupLayout }
+        .bindGroupLayouts = { bindGroupLayout },
     };
     m_pipelineLayout = m_device.createPipelineLayout(pipelineLayoutOptions);
-    //![9]
+    //![pipeline_layout]
 
+    //![pipeline]
     // Create a pipeline
-    // clang-format off
-    //![10]
     const GraphicsPipelineOptions pipelineOptions = {
         .label = "Triangle",
         .shaderStages = {
-            { .shaderModule = vertexShader, .stage = ShaderStageFlagBits::VertexBit },
-            { .shaderModule = fragmentShader, .stage = ShaderStageFlagBits::FragmentBit }
-        },
+                { .shaderModule = vertexShader, .stage = ShaderStageFlagBits::VertexBit },
+                { .shaderModule = fragmentShader, .stage = ShaderStageFlagBits::FragmentBit } },
         .layout = m_pipelineLayout,
         .vertex = {
-            .buffers = {
-                { .binding = 0, .stride = sizeof(Vertex) }
-            },
-            .attributes = {
-                { .location = 0, .binding = 0, .format = Format::R32G32B32_SFLOAT }, // Position
-                { .location = 1, .binding = 0, .format = Format::R32G32B32_SFLOAT, .offset = sizeof(glm::vec3) } // Color
-            }
+                .buffers = {
+                        { .binding = 0, .stride = sizeof(Vertex) },
+                },
+                .attributes = {
+                        { .location = 0, .binding = 0, .format = Format::R32G32B32_SFLOAT }, // Position
+                        { .location = 1, .binding = 0, .format = Format::R32G32B32_SFLOAT, .offset = sizeof(glm::vec3) }, // Color
+                },
         },
-        .renderTargets = {
-            { .format = m_swapchainFormat }
-        },
+        .renderTargets = { { .format = m_swapchainFormat } },
         .depthStencil = {
-            .format = m_depthFormat,
-            .depthWritesEnabled = true,
-            .depthCompareOperation = CompareOperation::Less
-        }
+                .format = m_depthFormat,
+                .depthWritesEnabled = true,
+                .depthCompareOperation = CompareOperation::Less,
+        },
     };
-    // clang-format on
     m_pipeline = m_device.createGraphicsPipeline(pipelineOptions);
-    //![10]
+    //![pipeline]
 
     // Create a bindGroup to hold the UBO with the transform
     // clang-format off
-    //![11]
+    //![bindgroup]
     const BindGroupOptions bindGroupOptions = {
         .label = "Transform Bind Group",
         .layout = bindGroupLayout,
@@ -189,7 +181,7 @@ void HelloTriangle::initializeScene()
     };
     // clang-format on
     m_transformBindGroup = m_device.createBindGroup(bindGroupOptions);
-    //![11]
+    //![bindgroup]
 }
 
 void HelloTriangle::cleanupScene()
@@ -204,7 +196,7 @@ void HelloTriangle::cleanupScene()
     m_commandBuffer = {};
 }
 
-//![1]
+//![update_transform]
 void HelloTriangle::updateScene()
 {
     // Each frame we want to rotate the triangle a little
@@ -219,13 +211,13 @@ void HelloTriangle::updateScene()
     m_transform = glm::rotate(m_transform, glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
     std::memcpy(m_transformBufferData, &m_transform, sizeof(glm::mat4));
 }
-//![1]
+//![update_transform]
 
 void HelloTriangle::resize()
 {
 }
 
-//![2]
+//![render]
 void HelloTriangle::render()
 {
     auto commandRecorder = m_device.createCommandRecorder();
@@ -253,13 +245,11 @@ void HelloTriangle::render()
     opaquePass.end();
     m_commandBuffer = commandRecorder.finish();
 
-    //![13]
     const SubmitOptions submitOptions = {
         .commandBuffers = { m_commandBuffer },
         .waitSemaphores = { m_presentCompleteSemaphores[m_inFlightIndex] },
         .signalSemaphores = { m_renderCompleteSemaphores[m_currentSwapchainImageIndex] }
     };
     m_queue.submit(submitOptions);
-    //![13]
 }
-//![2]
+//![render]

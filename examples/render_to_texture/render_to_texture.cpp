@@ -200,23 +200,23 @@ void RenderToTexture::initializePostProcess()
     // Create a color texture we can render to in the 1st pass
     createOffscreenTexture();
 
-    //![1]
+    //![sampler_creation]
     // Create a sampler we can use to sample from the color texture in the final pass
     m_colorOutputSampler = m_device.createSampler();
-    //![1]
+    //![sampler_creation]
 
     // Create a vertex shader and fragment shader (spir-v only for now)
-    //![3]
+    //![shader_loading]
     auto vertexShaderPath = KDGpuExample::assetDir().file("shaders/examples/render_to_texture/desaturate.vert.spv");
     auto vertexShader = m_device.createShaderModule(KDGpuExample::readShaderFile(vertexShaderPath));
 
     auto fragmentShaderPath = KDGpuExample::assetDir().file("shaders/examples/render_to_texture/desaturate.frag.spv");
     auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
-    //![3]
+    //![shader_loading]
 
     // Create bind group layout consisting of a single binding holding the texture the 1st pass rendered to
     // clang-format off
-    //![4]
+    //![bind_group_layout]
     const BindGroupLayoutOptions bindGroupLayoutOptions = {
         .bindings = {{
             .binding = 0,
@@ -224,18 +224,18 @@ void RenderToTexture::initializePostProcess()
             .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit)
         }}
     };
-    //![4]
+    //![bind_group_layout]
     // clang-format on
     m_colorBindGroupLayout = m_device.createBindGroupLayout(bindGroupLayoutOptions);
 
     // Create a pipeline layout (array of bind group layouts)
     // clang-format off
-    //![5]
+    //![pipeline_layout]
     const PipelineLayoutOptions pipelineLayoutOptions = {
         .bindGroupLayouts = { m_colorBindGroupLayout },
         .pushConstantRanges = { m_filterPosPushConstantRange }
     };
-    //![5]
+    //![pipeline_layout]
     // clang-format on
     m_postProcessPipelineLayout = m_device.createPipelineLayout(pipelineLayoutOptions);
 
@@ -264,11 +264,11 @@ void RenderToTexture::initializePostProcess()
             .depthWritesEnabled = true,
             .depthCompareOperation = CompareOperation::Less
         },
-        //![6]
+        //![triangle_strip]
         .primitive = {
             .topology = PrimitiveTopology::TriangleStrip
         }
-        //![6]
+        //![triangle_strip]
     };
     // clang-format on
     m_postProcessPipeline = m_device.createGraphicsPipeline(pipelineOptions);
@@ -277,7 +277,7 @@ void RenderToTexture::initializePostProcess()
     updateColorBindGroup();
 }
 
-//![7]
+//![offscreen_texture]
 void RenderToTexture::createOffscreenTexture()
 {
     const TextureOptions colorTextureOptions = {
@@ -291,9 +291,9 @@ void RenderToTexture::createOffscreenTexture()
     m_colorOutput = m_device.createTexture(colorTextureOptions);
     m_colorOutputView = m_colorOutput.createView();
 }
-//![7]
+//![offscreen_texture]
 
-//![8]
+//![color_bind_group]
 void RenderToTexture::updateColorBindGroup()
 {
     // Create a bindGroup to hold the Offscreen Color Texture
@@ -308,7 +308,7 @@ void RenderToTexture::updateColorBindGroup()
     // clang-format on
     m_colorBindGroup = m_device.createBindGroup(bindGroupOptions);
 }
-//![8]
+//![color_bind_group]
 
 void RenderToTexture::drawControls(ImGuiContext *ctx)
 {
@@ -357,11 +357,11 @@ void RenderToTexture::updateScene()
     std::memcpy(bufferData, &m_transform, sizeof(glm::mat4));
     m_transformBuffer.unmap();
 
-    //![9]
+    //![filter_animation]
     const float t = engine()->simulationTime().count() / 1.0e9;
     m_filterPos = 0.5f * (std::sin(t) + 1.0f);
     std::memcpy(m_filterPosData.data(), &m_filterPos, sizeof(float));
-    //![9]
+    //![filter_animation]
 }
 
 void RenderToTexture::resize()
@@ -377,8 +377,8 @@ void RenderToTexture::render()
 {
     auto commandRecorder = m_device.createCommandRecorder();
 
-    //![10]
-    //![2]
+    //![render_loop]
+    //![first_pass]
     // Pass 1: Color pass
     auto opaquePass = commandRecorder.beginRenderPass(KDGpu::RenderPassCommandRecorderOptions{
             .colorAttachments = {
@@ -391,13 +391,13 @@ void RenderToTexture::render()
                     .view = m_depthTextureView,
             },
     });
-    //![2]
     opaquePass.setPipeline(m_pipeline);
     opaquePass.setVertexBuffer(0, m_buffer);
     opaquePass.setIndexBuffer(m_indexBuffer);
     opaquePass.setBindGroup(0, m_transformBindGroup);
     opaquePass.drawIndexed(DrawIndexedCommand{ .indexCount = 3 });
     opaquePass.end();
+    //![first_pass]
 
     // Wait for Pass1 writes to offscreen texture to have been completed
     // Transition it to a shader read only layout
@@ -450,7 +450,7 @@ void RenderToTexture::render()
     finalPass.draw(DrawCommand{ .vertexCount = 4 });
     renderImGuiOverlay(&finalPass);
     finalPass.end();
-    //![10]
+    //![render_loop]
 
     // Finalize the command recording
     m_commandBuffer = commandRecorder.finish();

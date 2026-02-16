@@ -10,109 +10,136 @@
 
 /*!
 
-    @page hello_triangle_native Hello Triangle Native
-    @ingroup kdgpu-examples
+\page hello_triangle_native Hello Triangle Native API
+\ingroup kdgpu-examples
 
-    @brief This example creates a window, initializes the graphics API (Vulkan in this case), and performs rendering of a simple triangle.
+\brief Demonstrates complete manual setup of Vulkan without the KDGpuExample helper API.
 
-    This example is a demonstration of the control over vulkan that's possible without the KDGpuExample helper API. To see what parts of this example are abstracted/simplified by KDGpuExample, check out the [Hello Triangle](#hello_triangle) example.
+This example shows the full native Vulkan initialization process that KDGpuExample abstracts away: creating instances, selecting adapters, querying capabilities, creating surfaces, configuring swapchains, and managing synchronization. This is your "hello world" for understanding what's happening under the hood. Compare this to \ref hello_triangle to see the difference between native and helper API approaches.
 
-    <blockquote>
-        This example demonstrates the patterns that KDGpuExample normally handles for you, so this is more complex than the [Hello Triangle](#hello_triangle) example. It is expected that you read that example first in order to understand this example in full.
-    </blockquote>
+<b>Read \ref hello_triangle first</b> - that example explains rendering concepts. This example focuses on the additional setup complexity.
 
-    @image html hello_triangle_native.png
+\image html hello_triangle_native.png
 
-    \section native_initialization Initialization
+\section hello_triangle_native_overview Overview
 
-    @snippet hello_triangle_native/main.cpp 0
+<b>What this example demonstrates:</b>
+- Creating Vulkan API instance without helpers
+- Platform-specific surface creation (Windows/Linux/macOS)
+- Adapter (GPU) selection and capability queries
+- Queue family selection for graphics operations
+- Swapchain configuration from scratch
+- Depth buffer creation and format selection
+- Full manual resource lifecycle management
+.
+<br/>
 
-    Unlike in the [Hello Triangle](#hello_triangle) example, we have to instantiate a vulkan API object, and then use that to create a vulkan instance. We must also create a KDGui ``Window`` with dimensions, a title, and a quit handler. The handler which will store a reference to our ``app`` and quit it when it's called. KDGui will call this handler when the windowing system requests the window to close.
+<b>Use cases:</b>
+- Learning Vulkan fundamentals without abstractions
+- Fine-grained control over initialization
+- Custom platform integration
+- Understanding what KDGpuExample does for you
 
-    Next, we're going to need a vulkan surface. Requesting that requires different approaches on different operating systems:
+\section hello_triangle_native_requirements Vulkan Requirements
 
-    @snippet hello_triangle_native/main.cpp 2
+- <b>Vulkan Version</b>: 1.0+
+- <b>Extensions</b>: VK_KHR_surface, platform-specific surface extensions
+- <b>Platform</b>: Windows (Win32), Linux (Xcb/Wayland), macOS (Metal)
 
-    These are implementation details, but it's good to break things down to understand where the application has dependency on different operating system functions. And look: even the OS-specific operations are simple helper functions and types.
+\section native_initialization Initialization
 
-    Next, lets look at *hardware* specific code. Unlike the OS specific code, this is going to have to be determined at runtime. First, we look for an adapter of a certain type. Available types can be found at KDGpu::AdapterDeviceType.
+\snippet hello_triangle_native/main.cpp 1
 
-    @snippet hello_triangle_native/main.cpp 4
+Unlike in the [Hello Triangle](#hello_triangle) example, we have to instantiate a vulkan API object, and then use that to create a vulkan instance. We must also create a KDGui ``Window`` with dimensions, a title, and a quit handler. The handler which will store a reference to our ``app`` and quit it when it's called. KDGui will call this handler when the windowing system requests the window to close.
 
-    We can then query that adapter for features (KDGpu::AdapterFeatures) and properties (KDGpu::AdapterProperties). Features are things like multiview, precise occlusion queries, and other GPU-specific features. Properties are things like the device's ID and the latest vulkan API version that it supports.
+Next, we're going to need a vulkan surface. Requesting that requires different approaches on different operating systems:
 
-    @snippet hello_triangle_native/main.cpp 5
+\snippet hello_triangle_native/main.cpp 2
 
-    Next, we can query the available families of command queues. Command queues are interfaces on which you can submit lists of GPU commands, and the types of GPU commands you can submit to a queue depends on the family you're using. For example, submitting a draw call won't work if the only queue you have access to is a compute queue. In order to ensure the hardware supports the queue family you want, bitwise OR ``|`` all the KDGpu::QueueFlagBits that correspond to the family like so:
+These are implementation details, but it's good to break things down to understand where the application has dependency on different operating system functions. And look: even the OS-specific operations are simple helper functions and types.
 
-    @snippet hello_triangle_native/main.cpp 6
+Next, lets look at *hardware* specific code. Unlike the OS specific code, this is going to have to be determined at runtime. First, we look for an adapter of a certain type. Available types can be found at KDGpu::AdapterDeviceType.
 
-    And the last of the hardware queries: we can query the swapchain's properties. Explore KDGpu::AdapterSwapchainProperties to see these in greater detail. The most important check here is whether or not the swapchain supports presentation for the given surface and queue type. Under the hood, this calls ``vkGetPhysicalDeviceSurfacePresentModesKHR``, which enumerates "presentation modes." These are basically things like v-sync on, v-sync off, or hybrid. If the swapchain does not have any of these presentation modes, then it does not support presentation and your graphical app will fail or be unable to show anything on-screen.
+\snippet hello_triangle_native/main.cpp 4
 
-    @snippet hello_triangle_native/main.cpp 7
+We can then query that adapter for features (KDGpu::AdapterFeatures) and properties (KDGpu::AdapterProperties). Features are things like multiview, precise occlusion queries, and other GPU-specific features. Properties are things like the device's ID and the latest vulkan API version that it supports.
 
-    Next, we must create the swapchain. For the most part, this is just propagating values that we queried earlier into the options structs for the swapchain.
+\snippet hello_triangle_native/main.cpp 5
 
-    @snippet hello_triangle_native/main.cpp 8
+Next, we can query the available families of command queues. Command queues are interfaces on which you can submit lists of GPU commands, and the types of GPU commands you can submit to a queue depends on the family you're using. For example, submitting a draw call won't work if the only queue you have access to is a compute queue. In order to ensure the hardware supports the queue family you want, bitwise OR ``|`` all the KDGpu::QueueFlagBits that correspond to the family like so:
 
-    However, note the depth texture portion. This provides a level of control which was not available when using KDGpuExample.
+\snippet hello_triangle_native/main.cpp 6
 
-    @snippet hello_triangle_native/main.cpp 3
+And the last of the hardware queries: we can query the swapchain's properties. Explore KDGpu::AdapterSwapchainProperties to see these in greater detail. The most important check here is whether or not the swapchain supports presentation for the given surface and queue type. Under the hood, this calls ``vkGetPhysicalDeviceSurfacePresentModesKHR``, which enumerates "presentation modes." These are basically things like v-sync on, v-sync off, or hybrid. If the swapchain does not have any of these presentation modes, then it does not support presentation and your graphical app will fail or be unable to show anything on-screen.
 
-    The last difference between this example and [Hello Triangle](#hello_triangle) is that we must initialize some GPU synchronization primitives. These will be used to ensure that the steps of the render loop execute in the correct order. See the synchronization section for more details.
+\snippet hello_triangle_native/main.cpp 7
 
-    @snippet hello_triangle_native/main.cpp 9
+Next, we must create the swapchain. For the most part, this is just propagating values that we queried earlier into the options structs for the swapchain.
 
-    \section native_perframe Per-Frame Render Logic
+\snippet hello_triangle_native/main.cpp 8
 
-    Our render loop begins like so:
+However, note the depth texture portion. This provides a level of control which was not available when using KDGpuExample.
 
-    @snippet hello_triangle_native/main.cpp 10
+\snippet hello_triangle_native/main.cpp 3
 
-    The window's visible status will change based on updates from the OS/window manager.
+The last difference between this example and [Hello Triangle](#hello_triangle) is that we must initialize some GPU synchronization primitives. These will be used to ensure that the steps of the render loop execute in the correct order. See the synchronization section for more details.
 
-    Our first task on each frame is to acquire the swapchain image to render to. Doing this requires that the swapchain size and format respects the current state of the presentation target. So, we use ``getNextImageIndex`` and make sure it's up to date:
+\snippet hello_triangle_native/main.cpp 9
 
-    @snippet hello_triangle_native/main.cpp 11
+\section native_perframe Per-Frame Render Logic
 
-    The reason for the ``imageAvailableSemaphore`` is explained in the synchronization section.
+Our render loop begins like so:
 
-    After this point, the render loop is pretty much identical to the render loop in [Hello Triangle](#hello_triangle). However, the queue submission involves synchronization primitives which are fully exposed to us, so we can use this code as an example that shows what's actually going on in the KDGpuExample API.
+\snippet hello_triangle_native/main.cpp 10
 
-    \section native_synchronization Synchronization
+The window's visible status will change based on updates from the OS/window manager.
 
-    In KDGpuExample examples, there is often a section at the end of each render which looks something like this:
+Our first task on each frame is to acquire the swapchain image to render to. Doing this requires that the swapchain size and format respects the current state of the presentation target. So, we use ``getNextImageIndex`` and make sure it's up to date:
 
-    @snippet hello_triangle/hello_triangle.cpp 13
+\snippet hello_triangle_native/main.cpp 11
 
-    What are the wait and signal semaphore arguments? When submitting queues of commands to the GPU, it is sometimes necessary for a set of commands to be executed before or after another set of commands. In Vulkan, command queues are not implicitly completed in the order they were submitted. Instead, it is necessary to explicitly define dependency between two sets of GPU commands. This is achieved with [semaphores](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkSemaphore.html). We initialized some KDGpu::GpuSemaphore primitives earlier, and we will continue to use them each frame. Their destructors will clean up the Vulkan resources at the end of the program. Let's look at the steps of the pipeline which are declared as dependent using semaphores:
+The reason for the ``imageAvailableSemaphore`` is explained in the synchronization section.
 
-    @snippet hello_triangle_native/main.cpp 12
+After this point, the render loop is pretty much identical to the render loop in [Hello Triangle](#hello_triangle). However, the queue submission involves synchronization primitives which are fully exposed to us, so we can use this code as an example that shows what's actually going on in the KDGpuExample API.
 
-    The acquisition of the swapchain image has a related semaphore (``imageAvailableSemaphore``). KDGpu will pass this to the GPU so that, when it finds that the swapchain is available, it will mark this semaphore as signalled.
+\section native_synchronization Synchronization
 
-    When submitting our draw commands, we put the ``imageAvailableSemaphore`` in the ``waitSemaphores`` argument, which KDGpu will attach to the queue submission so that the GPU will not try to draw anything until the swapchain image is available. Then, just as we attached the ``imageAvailableSemaphore`` to the swapchain query, we also attach the ``renderCompleteSemaphore`` to be signalled when the draw commands are completed. (We will come back to the signal fence).
+Device synchronization is critical in Vulkan. When submitting queues of commands to the GPU, it is necessary to explicitly define dependencies between sets of GPU commands. This is achieved with [semaphores](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkSemaphore.html). We initialized KDGpu::GpuSemaphore primitives earlier to manage this synchronization. Let's look at the steps of the pipeline which are declared as dependent using semaphores:
 
-    @snippet hello_triangle_native/main.cpp 13
+\snippet hello_triangle_native/main.cpp 12
 
-    Then we present the rendered scene to the surface. KDGpu has neatly coupled this into the KDGpu::Queue class, so you can just call ``present`` on the same queue you ``submit``ted. We wait for the ``renderCompleteSemaphore`` so that don't draw an unfinished render to the screen.
+The acquisition of the swapchain image has a related semaphore (``imageAvailableSemaphore``). KDGpu will pass this to the GPU so that, when it finds that the swapchain is available, it will mark this semaphore as signalled.
 
-    @snippet hello_triangle_native/main.cpp 14
+When submitting our draw commands, we put the ``imageAvailableSemaphore`` in the ``waitSemaphores`` argument, which KDGpu will attach to the queue submission so that the GPU will not try to draw anything until the swapchain image is available. Then, just as we attached the ``imageAvailableSemaphore`` to the swapchain query, we also attach the ``renderCompleteSemaphore`` to be signalled when the draw commands are completed. (We will come back to the signal fence).
 
-    The last thing that happens is we wait for the render (but not the presentation) to complete before allowing the loop to continue to the next iteration. Doing this requires a KDGpu::Fence. A fence is a synchronization primitive, just like a semaphore, but it exists in CPU address space, so it is meant to be used to block CPU processes. We created one earlier:
+\snippet hello_triangle_native/main.cpp 13
 
-    @snippet hello_triangle_native/main.cpp 15
+Then we present the rendered scene to the surface. KDGpu has neatly coupled this into the KDGpu::Queue class, so you can just call ``present`` on the same queue you ``submitted``. We wait for the ``renderCompleteSemaphore`` so that don't draw an unfinished render to the screen.
 
-    We start each loop by resetting the fence to its unsignalled state:
+\snippet hello_triangle_native/main.cpp 14
 
-    @snippet hello_triangle_native/main.cpp 17
+The last thing that happens is we wait for the presentation to complete before allowing the loop to continue to the next iteration.
+<br/>
+Doing this requires a KDGpu::Fence. A fence is a synchronization primitive, just like a semaphore, but it exists in CPU address space, so it is meant to be used to block CPU processes.
+<br/>
+We created one earlier:
 
-    And when submitting the render commands we set it as the ``signalFence`` so that it will be signalled when rendering has completed:
+\snippet hello_triangle_native/main.cpp 15
 
-    @snippet hello_triangle_native/main.cpp 16
+We start each loop by resetting the fence to its unsignalled state:
 
-    Finally, after submitting our commands and requesting presentation, we call ``wait`` on the fence to block the main thread until the GPU has completed rendering.
+\snippet hello_triangle_native/main.cpp 17
 
-    @snippet hello_triangle_native/main.cpp 18
+We issue the rendering commands and then submit them to the GPU. Command submission will signal a GPU semaphore that presentation can wait upon (synchronization of commands at the GPU level).
+
+We will want to know when presentation is complete. To do so, we set the ``signalFence`` so that it will be signalled when presenting has completed:
+
+\snippet hello_triangle_native/main.cpp 16
+
+Finally, after submitting our commands and requesting presentation, we call ``wait`` on the fence to block the main thread until the GPU has completed rendering.
+
+This ensures that we don't start the next frame until the current frame is fully rendered and presented.
+
+\snippet hello_triangle_native/main.cpp 18
 
 */

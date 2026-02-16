@@ -1,20 +1,24 @@
 #version 450
 
+//![postprocess_input_decl]
 layout(location = 0) in vec2 texCoord;
 layout(input_attachment_index = 0, binding = 0) uniform subpassInput inputColor;
+//![postprocess_input_decl]
 
 layout(location = 0) out vec4 fragColor;
 
-layout(push_constant) uniform PushConstants {
+layout(push_constant) uniform PushConstants
+{
     float filterPosition;
-} pushConstants;
-
+}
+pushConstants;
 
 float luminance(vec3 color)
 {
     return 0.2126 * color.r + 0.7152 * color.g + 0.0722 * color.b;
 }
 
+//![postprocess_main]
 void main()
 {
     vec3 color = subpassLoad(inputColor).rgb;
@@ -26,6 +30,7 @@ void main()
     } else if (texCoord.s < pushConstants.filterPosition - lineWidth) {
         fragColor = vec4(color, 1.0);
     } else {
-        fragColor = vec4( 0.0, 0.0, 1.0, 1.0 );
+        fragColor = vec4(0.0, 0.0, 1.0, 1.0);
     }
 }
+//![postprocess_main]

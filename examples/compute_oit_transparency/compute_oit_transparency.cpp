@@ -43,12 +43,14 @@ struct Vertex {
 };
 static_assert(sizeof(Vertex) == 6 * sizeof(float));
 
+//![particle_data]
 struct ParticleData {
     glm::vec4 positionAndRadius;
     glm::vec4 velocity;
     glm::vec4 color;
 };
 static_assert(sizeof(ParticleData) == 12 * sizeof(float));
+//![particle_data]
 
 std::vector<ParticleData> initializeParticlesBuffer(const size_t particlesCount)
 {
@@ -227,6 +229,7 @@ void ComputeOitTransparency::initializeParticles()
     };
     initializeBuffers();
 
+    //![compute_pipeline]
     auto initializeComputePipeline = [this]() -> void {
         // Create a compute shader (spir-v only for now)
         auto computeShaderPath = KDGpuExample::assetDir().file("shaders/examples/compute_oit_transparency/particles.comp.spv");
@@ -273,6 +276,7 @@ void ComputeOitTransparency::initializeParticles()
         });
     };
     initializeComputePipeline();
+    //![compute_pipeline]
 }
 
 void ComputeOitTransparency::initializeAlpha()
@@ -282,6 +286,7 @@ void ComputeOitTransparency::initializeAlpha()
         .depthStencilAttachment = {}
     };
 
+    //![alpha_bindings]
     m_alpha.alphaBindGroupLayout = m_device.createBindGroupLayout(BindGroupLayoutOptions{
             .bindings = {
                     {
@@ -296,6 +301,7 @@ void ComputeOitTransparency::initializeAlpha()
                     },
             },
     });
+    //![alpha_bindings]
 
     m_alpha.alphaLinkedListBindGroup = m_device.createBindGroup(BindGroupOptions{
             .layout = m_alpha.alphaBindGroupLayout,
@@ -490,6 +496,17 @@ void ComputeOitTransparency::resize()
     m_alpha.renderPassOptions->framebufferHeight = m_window->height();
     m_alpha.renderPassOptions->framebufferArrayLayers = 1;
 
+    //![alpha_fragment_struct]
+    struct FragmentInfo {
+        glm::vec4 color;
+        float depth;
+        int32_t next;
+        float _pad[2];
+    };
+    static_assert(sizeof(FragmentInfo) == 8 * sizeof(float));
+    //![alpha_fragment_struct]
+
+    //![head_pointers_texture]
     // Recreated fragmentHeadsPointer texture
     m_alpha.fragmentHeadsPointer = m_device.createTexture(KDGpu::TextureOptions{
             .label = "fragmentHeadPointers",
@@ -509,17 +526,11 @@ void ComputeOitTransparency::resize()
             },
     });
     m_alpha.fragmentHeadsPointerLayout = TextureLayout::Undefined;
+    //![head_pointers_texture]
 
+    //![linked_list_buffer]
     // Recreate fragmentsLinkedList SSBO
     const size_t MaxFragmentCount = std::max(m_window->width(), uint32_t(1)) * std::max(m_window->height(), uint32_t(1)) * 8;
-
-    struct FragmentInfo {
-        glm::vec4 color;
-        float depth;
-        int32_t next;
-        float _pad[2];
-    };
-    static_assert(sizeof(FragmentInfo) == 8 * sizeof(float));
 
     // vec4 to hold nextId + array of structs
     m_alpha.fragmentLinkedListBufferByteSize = sizeof(float) * 4 + MaxFragmentCount * sizeof(FragmentInfo);
@@ -530,6 +541,7 @@ void ComputeOitTransparency::resize()
                     KDGpu::BufferUsageFlagBits::TransferDstBit,
             .memoryUsage = KDGpu::MemoryUsage::GpuOnly,
     });
+    //![linked_list_buffer]
 
     m_alpha.alphaLinkedListBindGroup.update(KDGpu::BindGroupEntry{
             .binding = 0,
@@ -556,7 +568,8 @@ void ComputeOitTransparency::render()
 {
     auto commandRecorder = m_device.createCommandRecorder();
     {
-        // Compute
+        //![dispatch_particles]
+        // Particles
         {
             auto computePass = commandRecorder.beginComputePass();
             computePass.setPipeline(m_particles.computePipeline);
@@ -565,7 +578,9 @@ void ComputeOitTransparency::render()
             computePass.dispatchCompute(ComputeCommand{ .workGroupX = ParticlesCount / LocalWorkGroupXSize });
             computePass.end();
         }
+        //![dispatch_particles]
 
+        //![alpha_pass]
         // Alpha
         {
             // Wait for SSBO writes completion by ComputeShader
@@ -661,7 +676,9 @@ void ComputeOitTransparency::render()
 
             alphaPass.end();
         }
+        //![alpha_pass]
 
+        //![compositing_pass]
         // Compositing
         {
             // Wait until fragment Heads pointer image writes have been completed
@@ -706,6 +723,7 @@ void ComputeOitTransparency::render()
             compositingPass.draw(DrawCommand{ .vertexCount = 6 });
             compositingPass.end();
         }
+        //![compositing_pass]
     }
     m_global.commandBuffer = commandRecorder.finish();
 

@@ -64,6 +64,7 @@ KDGpuRenderer::KDGpuRenderer(const KDGpu::SurfaceOptions &options, const std::st
     : _api(std::make_unique<VulkanGraphicsApi>())
     , _pathToShaderFolder(pathToShaderFolder)
 {
+    //![U][AppleKDGpuInit]
     KDGpu::Logger::setLoggerFactory(createLogger);
     _logger = createLogger("app");
     _logger->set_level(spdlog::level::info);
@@ -82,6 +83,7 @@ KDGpuRenderer::KDGpuRenderer(const KDGpu::SurfaceOptions &options, const std::st
     createSwapchain();
     createBuffers();
     createPipeline();
+    //![U][AppleKDGpuInit]
 }
 
 void KDGpuRenderer::createSwapchain()
@@ -234,6 +236,7 @@ void KDGpuRenderer::createPipeline()
 
 void KDGpuRenderer::frame()
 {
+    //![U][AppleKDGpuFrame]
     _frameInFlightFence.reset();
 
     uint32_t currentImageIndex = 0;
@@ -318,6 +321,7 @@ void KDGpuRenderer::frame()
 
     // Wait for frame to have completed its execution
     _frameInFlightFence.wait();
+    //![U][AppleKDGpuFrame]
 }
 
 void KDGpuRenderer::resize(uint32_t width, uint32_t height)

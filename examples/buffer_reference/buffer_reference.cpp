@@ -42,12 +42,14 @@ BufferReference::BufferReference()
 
 void BufferReference::initializeScene()
 {
+    //![1]
     // Check that our device actually supports the Vulkan Descriptor Indexing features
     const AdapterFeatures &features = m_device.adapter()->features();
     if (!features.bufferDeviceAddress) {
         SPDLOG_CRITICAL("Buffer Device Address is not supported, can't run this example");
         exit(0);
     }
+    //![1]
 
     using Vertex = glm::vec3;
 
@@ -92,6 +94,7 @@ void BufferReference::initializeScene()
         uploadBufferData(uploadOptions);
     }
 
+    //![2]
     // Create a buffer that can be referenced by its address that will hold vertex colors
     {
         const DeviceSize dataByteSize = 3 * sizeof(glm::vec4);
@@ -102,6 +105,7 @@ void BufferReference::initializeScene()
         };
         m_vertexColorsBuffer = m_device.createBuffer(bufferOptions);
     }
+    //![2]
 
     // Create a vertex shader and fragment shader
     auto vertexShaderPath = KDGpuExample::assetDir().file("shaders/examples/buffer_reference/buffer_reference.vert.spv");
@@ -110,6 +114,7 @@ void BufferReference::initializeScene()
     auto fragmentShaderPath = KDGpuExample::assetDir().file("shaders/examples/buffer_reference/buffer_reference.frag.spv");
     auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
 
+    //![3]
     // Create Push Constant that will hold the address of our vertexColorBuffer
     m_pushConstants = PushConstantRange{
         .offset = 0,
@@ -123,6 +128,7 @@ void BufferReference::initializeScene()
         .pushConstantRanges = { m_pushConstants }
     };
     m_pipelineLayout = m_device.createPipelineLayout(pipelineLayoutOptions);
+    //![3]
 
     // Create a pipeline
     m_pipeline = m_device.createGraphicsPipeline(GraphicsPipelineOptions{
@@ -217,6 +223,7 @@ void BufferReference::render()
     // Draw
     opaquePass.draw(DrawCommand{ .vertexCount = 3 });
     opaquePass.end();
+    //![4]
     m_commandBuffer = commandRecorder.finish();
 
     const SubmitOptions submitOptions = {

@@ -29,6 +29,7 @@ void HelloXr::onAttached()
     if (!m_isInitialized)
         return;
 
+    //![U][XrLayers]
     const XrPassthroughLayerOptions passthroughLayerOptions = {
         .device = &m_device,
         .queue = &m_queue,
@@ -81,8 +82,10 @@ void HelloXr::onAttached()
         ImGui::SetCurrentContext(ctx);
         drawEditCylinderUi();
     });
+    //![U][XrLayers]
 
     // Create an action set and actions
+    //![U][XrActions]
     m_actionSet = m_xrInstance.createActionSet({ .name = "default", .localizedName = "Default" });
     m_toggleRotateYAction = m_actionSet.createAction({ .name = "rotatey",
                                                        .localizedName = "RotateY",
@@ -150,6 +153,7 @@ void HelloXr::onAttached()
     if (m_session.attachActionSets(attachOptions) != KDXr::AttachActionSetsResult::Success) {
         SPDLOG_LOGGER_ERROR(m_logger, "Failed to attach action set.");
     }
+    //![U][XrActions]
 }
 
 void HelloXr::onDetached()

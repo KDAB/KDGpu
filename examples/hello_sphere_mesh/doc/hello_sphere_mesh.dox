@@ -1,0 +1,184 @@
+/*
+  This file is part of KDGpu.
+
+  SPDX-FileCopyrightText: 2024 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+
+  SPDX-License-Identifier: MIT
+
+  Contact KDAB at <info@kdab.com> for commercial licensing options.
+*/
+
+/*!
+\page hello_sphere_mesh Hello Sphere Mesh Shader
+\ingroup kdgpu-examples
+
+\brief Demonstrates modern mesh shaders for GPU-driven geometry generation.
+
+\image html hello_sphere_mesh.png
+
+This example shows mesh shaders, the modern replacement for vertex+geometry+tessellation shaders. Mesh shaders generate geometry directly on the GPU using a compute-like programming model, processing groups of triangles ("meshlets") in parallel. This enables advanced techniques like GPU-driven culling, LOD selection, and procedural geometry while being significantly more efficient than geometry shaders. The example procedurally generates a sphere entirely on the GPU.
+
+The example uses the \ref kdgpuexample_helper "KDGpuExample helper API" for simplified setup.
+
+\section hello_sphere_mesh_overview Overview
+
+<b>What this example demonstrates:</b>
+- Enabling VK_EXT_mesh_shader extension
+- Creating mesh shader pipelines (no vertex input state)
+- Dispatching mesh shader workgroups with drawMeshTasks
+- Generating vertices and primitives in mesh shader
+- Procedural geometry generation on GPU
+.
+<br/>
+
+<b>Use cases:</b>
+- GPU-driven rendering (culling, LOD)
+- Procedural geometry (spheres, terrain)
+- Geometry amplification
+- Modern rendering pipelines
+- Replacing geometry shaders (much faster)
+
+\section hello_sphere_mesh_requirements Vulkan Requirements
+
+- <b>Vulkan Version</b>: 1.0+ with extension
+- <b>Extensions</b>: VK_EXT_mesh_shader
+- <b>Features</b>: `meshShader`, `taskShader` (optional)
+- <b>Limits</b>: Check `maxMeshOutputVertices`, `maxMeshOutputPrimitives`
+
+\section hello_sphere_mesh_concepts Key Concepts
+
+<b>Traditional Pipeline:</b>
+
+```
+Vertex Shader (per-vertex)
+  ↓
+[Tessellation] (optional)
+  ↓
+[Geometry Shader] (per-primitive, slow!)
+  ↓
+Rasterization
+```
+
+Problems:
+- Geometry shaders are slow (serialized processing)
+- Limited control over geometry processing
+- Poor GPU utilization
+.
+<br/>
+
+<b>Mesh Shader Pipeline:</b>
+
+```
+[Task Shader] (optional, culling/LOD)
+  ↓
+Mesh Shader (generates meshlets in parallel)
+  ↓
+Rasterization
+```
+
+Benefits:
+- Compute-like parallelism (workgroups)
+- Direct control over output
+- Much faster than geometry shaders
+- Enables GPU-driven rendering
+.
+<br/>
+
+Spec: https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_EXT_mesh_shader.html
+
+<b>Meshlets:</b>
+
+Meshlets are small groups of triangles (typically 64-256 vertices, 128-384 triangles):
+- Large meshes split into meshlets
+- Each meshlet processed by one mesh shader workgroup
+- Enables efficient GPU-driven culling per-meshlet
+- Better cache locality
+.
+<br/>
+
+<b>Mesh Shader Programming Model:</b>
+
+```glsl
+#extension GL_EXT_mesh_shader : require
+
+layout(local_size_x = 32) in;  // Workgroup size
+layout(triangles, max_vertices = 64, max_primitives = 42) out;
+
+void main() {
+    uint tid = gl_LocalInvocationIndex;
+
+    // Generate vertices (parallel):
+    if (tid < vertexCount) {
+        gl_MeshVerticesEXT[tid].gl_Position = computePosition(tid);
+    }
+
+    // Generate indices (parallel):
+    if (tid < primitiveCount) {
+        gl_PrimitiveTriangleIndicesEXT[tid] = uvec3(i0, i1, i2);
+    }
+
+    // Set output counts:
+    SetMeshOutputsEXT(vertexCount, primitiveCount);
+}
+```
+
+\section hello_sphere_mesh_implementation Implementation
+
+<b>Loading Mesh Shader:</b>
+
+\snippet hello_sphere_mesh/hello_sphere_mesh.cpp create_mesh_shader
+
+Note `ShaderStageFlagBits::MeshBit` for mesh shader stage.
+
+<b>Mesh Shader Pipeline:</b>
+
+\snippet hello_sphere_mesh/hello_sphere_mesh.cpp create_pipeline
+
+Key differences:
+- <b>No vertex input state</b> (no vertex buffers/attributes)
+- Mesh shader replaces vertex shader
+- Everything else similar to graphics pipeline
+.
+<br/>
+
+<b>Dispatching Mesh Shader:</b>
+
+\snippet hello_sphere_mesh/hello_sphere_mesh.cpp draw_mesh_shader
+
+`drawMeshTasks()` dispatches workgroups to mesh shader. Each workgroup generates one meshlet.
+
+For this example: 1 workgroup generates entire sphere procedurally.
+
+\section hello_sphere_mesh_performance Performance Notes
+
+<b>Performance Gains:</b>
+- <b>vs Geometry Shaders</b>: 5-10× faster (parallel processing)
+- <b>vs Vertex Shaders</b>: Comparable, but enables GPU-driven techniques
+- <b>GPU Culling</b>: Can cull meshlets before rasterization
+.
+<br/>
+
+<b>Best Practices:</b>
+- Meshlets: 64-256 vertices, 128-384 triangles (vendor-specific sweet spot)
+- Use task shaders for coarse culling before mesh shader
+- Keep mesh shader simple (expensive stage)
+- Pre-compute meshlet data offline when possible
+.
+<br/>
+
+<b>Hardware Support:</b>
+- <b>NVIDIA</b>: Turing+ (RTX 2000+), excellent support
+- <b>AMD</b>: RDNA 2+ (RX 6000+), good support
+- <b>Intel</b>: Arc series, good support
+- <b>Mobile</b>: Limited; check vendor documentation
+
+\section hello_sphere_mesh_seealso See Also
+
+- \subpage wireframe_geometry - Geometry shaders (older technique)
+- [Mesh Shaders Guide](https://docs.vulkan.org/spec/latest/chapters/shaders.html#shaders-mesh) - Official Vulkan guide
+- [NVIDIA Mesh Shaders](https://developer.nvidia.com/blog/introduction-turing-mesh-shaders/) - Turing architecture
+
+\section hello_sphere_mesh_further_reading Further Reading
+
+- [Nanite](https://advances.realtimerendering.com/s2021/Karis_Nanite_SIGGRAPH_Advances_2021_final.pdf) - UE5 Nanite using meshlets
+*/

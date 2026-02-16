@@ -8,82 +8,237 @@
   Contact KDAB at <info@kdab.com> for commercial licensing options.
 */
 
-/**
-    @page bindgroup_indexing BindGroup Indexing
-    @ingroup kdgpu-examples
+/*!
+\page bindgroup_indexing Descriptor Indexing with Bindless Rendering
+\ingroup kdgpu-examples
 
-    @brief This example shows how to enable bindgroup indexing. Bind group indexing is actually a set of features that encompasses:
-    - The ability to define for a given BindGroup binding an array of resources
-    - The ability to have that array be of variable length (at least as seen from the shader)
-    - The ability to have the shader index into this array using non constant or non uniform backed indices.
+\brief Demonstrates VK_EXT_descriptor_indexing for accessing descriptor arrays with dynamic indices in shaders.
 
-    This example tries to demonstrate those features by:
-    - Defining a BindGroup compose of an array of N UBOs. Each UBO holds a rotation matrix around the Z axis
-    - Using the shader to count frame and index into the right rotation UBO based on an angle computed
+This example shows how to use descriptor indexing (also called "bindless rendering") to access arrays of resources using non-uniform indices in shaders. Traditional Vulkan requires binding specific descriptors before each draw call; descriptor indexing allows binding large arrays once and indexing into them dynamically in shaders. This dramatically reduces CPU overhead and enables efficient material systems, texture atlases, and data-driven rendering.
 
-    To do so, after the usual vertex data initialization, we initialize our shader resources.
+The example uses the \ref kdgpuexample_helper "KDGpuExample helper API" for simplified setup.
 
-    We start by allocating an array of UBOs.
-    @snippet bindgroup_indexing/bindgroup_indexing.cpp 1
+\section bindgroup_indexing_overview Overview
 
-    Next, we allocate a SSBO. It will be used as a way for the vertex shader to compute a frame count value.
+<b>What this example demonstrates:</b>
+- Enabling VK_EXT_descriptor_indexing extension and required features
+- Creating descriptor sets with large arrays of uniform buffers
+- Using `nonuniformEXT` qualifier in shaders for dynamic indexing
+- Drawing multiple objects with different materials/transforms
+- Variable-length descriptor arrays sized at runtime
 
-    @snippet bindgroup_indexing/bindgroup_indexing.cpp 2
+<b>Use cases:</b>
+- Material systems (hundreds/thousands of materials in one array)
+- Texture streaming and mega-textures
+- GPU-driven rendering (indirect draws selecting resources)
+- Bindless vertex/index buffers
+- Efficient multi-material rendering
 
-    We need to create a graphics pipeline suitable to work with those resources.
-    To create an array of resources for a given binding, we specify a count. Additionally we specify the flag VariableBindGroupEntriesCountBit
-    to indicate that our shader will not expect a fixed size array of resources.
+\section bindgroup_indexing_requirements Vulkan Requirements
 
-    @snippet bindgroup_indexing/bindgroup_indexing.cpp 3
+- <b>Vulkan Version</b>: 1.2+ (descriptor indexing promoted to core)
+- <b>Extensions</b>: VK_EXT_descriptor_indexing (core in 1.2)
+- <b>Features</b>:
+  - `shaderUniformBufferArrayNonUniformIndexing`
+  - `runtimeDescriptorArray`
+  - `descriptorBindingVariableDescriptorCount`
+  - `descriptorBindingPartiallyBound` (optional but recommended)
+- <b>Shader</b>: SPIR-V 1.3+ or GLSL 450+ with `GL_EXT_nonuniform_qualifier`
 
-    Next we can proceed with the actual BindGroup generator. We start with the variable length array BindGroup where we indicate the maximum length our array will ever have.
+\section bindgroup_indexing_concepts Key Concepts
 
-    @snippet bindgroup_indexing/bindgroup_indexing.cpp 4
+<b>Traditional Descriptor Binding:</b>
 
-    Then we continue with a second BindGroup to hold our frame count Storage buffer.
+\code
+// Draw 3 objects with different materials:
+for (int i = 0; i < 3; i++) {
+    bindDescriptorSet(materialDescriptorSets[i]);  // CPU overhead!
+    draw(object[i]);
+}
+\endcode
 
-    @snippet bindgroup_indexing/bindgroup_indexing.cpp 5
+Every material requires a descriptor set bind, which has CPU cost.
 
-    As for the actual rendering, we simply bind the pipeline, buffers and bind groups.
+<b>Descriptor Indexing / Bindless:</b>
 
-    @snippet bindgroup_indexing/bindgroup_indexing.cpp 6
+\code
+// Bind array of ALL materials once:
+bindDescriptorSet(allMaterialsArray);  // One bind for all!
 
-    When it comes to our shader, we do a few things. We start by defining the extension:
+// Draw all objects with different material indices:
+for (int i = 0; i < 3; i++) {
+    // Index is computed in shader or passed via push constant
+    draw(object[i]);
+}
+\endcode
 
-    @code
-    #extension GL_EXT_nonuniform_qualifier : enable
-    @endcode
+Shader:
+\code
+layout(set = 0, binding = 0) uniform Material {
+    mat4 transform;
+} materials[16];  // Array of materials/transforms
 
-    Then we declare our bind groups and push constant blocks.
+void main() {
+    // Index computed from frame time/angle:
+    uint index = computeIndex();
+    mat4 transform = materials[nonuniformEXT(index)].transform;
+}
+\endcode
 
-    @code
-    layout(set = 0, binding = 0) uniform Transform
-    {
-        mat4 modelMatrix;
-    } transforms[];
+Benefits:
+- Massively reduced bind calls
+- GPU-driven resource selection
+- Simplified render loop
 
-    layout(set = 1, binding = 0) coherent buffer FrameCounter
-    {
-        uint primitiveProcessingCount;
-    } frameCounter;
+Spec: https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_EXT_descriptor_indexing.html
 
-    layout(push_constant) uniform PushConstants {
-        uint transformsCount;
-    } pushConstants;
-    @endcode
+<b>NonUniform Indexing:</b>
 
-    And we can finally perform a non uniform indexing into the Transform bind group.
+The `nonuniformEXT` qualifier tells the compiler that the index can vary between shader invocations (non-uniform control flow). Without this:
+- Index must be compile-time constant, or
+- Index must be uniform across all invocations in a subgroup
+.
+<br/>
 
-    @code
-    uint frameIdx = (frameCounter.primitiveProcessingCount / 3);
+With `nonuniformEXT`:
+- Each triangle/pixel can use different index
+- Enables material-per-object, texture-per-pixel selection
+- May have small performance cost on some hardware
+.
+<br/>
 
-    float angle =  mod(float(frameIdx), 360.0); // value between 0 and 359
-    const float angleStep = 360.0 / float(pushConstants.transformsCount);
+<b>Variable-Length Arrays:</b>
 
-    // Select the right index based on current angle and steps between transforms
-    // angle [0, 359] and angleStep (e.g 45)
-    const uint transformIdx = uint(angle / angleStep);
+Traditional Vulkan requires compile-time array sizes. Descriptor indexing allows:
 
-    gl_Position = transforms[transformIdx].modelMatrix * vec4(vertexPosition, 1.0);
-    @endcode
+\code
+layout(set = 0, binding = 0) uniform Transforms {
+    mat4 matrix;
+} transforms[];  // Variable length!
+\endcode
+
+The size is determined at runtime by `descriptorCount` in `VkDescriptorSetLayoutBinding`.
+
+\section bindgroup_indexing_implementation Implementation
+
+<b>Allocating Descriptor Array Buffers:</b>
+
+\snippet bindgroup_indexing/bindgroup_indexing.cpp 1
+
+This example creates an array of uniform buffers, each holding a rotation matrix. The shader will index into this array.
+
+<b>Storage Buffer for Frame Counter:</b>
+
+\snippet bindgroup_indexing/bindgroup_indexing.cpp 2
+
+A storage buffer (SSBO) tracks frame count, which the vertex shader uses to compute rotation angles.
+
+<b>Descriptor Set Layout with Variable Array:</b>
+
+\snippet bindgroup_indexing/bindgroup_indexing.cpp 3
+
+Key configuration:
+- `count = TransformsCount`: Array of N buffers
+- `VariableBindGroupEntriesCountBit`: Variable-length array in shader
+- Shader can access as `uniform Transforms {} transforms[]`
+.
+<br/>
+
+<b>Creating Descriptor Array:</b>
+
+\snippet bindgroup_indexing/bindgroup_indexing.cpp 4
+
+The descriptor set binds all array elements at once.
+
+<b>Storage Buffer Bind Group:</b>
+
+\snippet bindgroup_indexing/bindgroup_indexing.cpp 5
+
+Separate bind group for the frame counter buffer.
+
+<b>Rendering with Descriptor Arrays:</b>
+
+\snippet bindgroup_indexing/bindgroup_indexing.cpp 6
+
+Bind pipeline, vertex buffer, and both descriptor sets. Then draw - the shader dynamically selects which transform to use based on computed angle.
+
+When it comes to our shader, we do a few things. We start by defining the extension:
+
+\code
+#extension GL_EXT_nonuniform_qualifier : enable
+\endcode
+
+Then we declare our bind groups and push constant blocks.
+
+\code
+layout(set = 0, binding = 0) uniform Transform
+{
+    mat4 modelMatrix;
+} transforms[];
+
+layout(set = 1, binding = 0) coherent buffer FrameCounter
+{
+    uint primitiveProcessingCount;
+} frameCounter;
+
+layout(push_constant) uniform PushConstants {
+    uint transformsCount;
+} pushConstants;
+\endcode
+
+And we can finally perform a non uniform indexing into the Transform bind group.
+
+\code
+uint frameIdx = (frameCounter.primitiveProcessingCount / 3);
+
+float angle =  mod(float(frameIdx), 360.0); // value between 0 and 359
+const float angleStep = 360.0 / float(pushConstants.transformsCount);
+
+// Select the right index based on current angle and steps between transforms
+// angle [0, 359] and angleStep (e.g 45)
+const uint transformIdx = uint(angle / angleStep);
+
+gl_Position = transforms[transformIdx].modelMatrix * vec4(vertexPosition, 1.0);
+\endcode
+
+\section bindgroup_indexing_performance Performance Notes
+
+<b>Benefits:</b>
+- <b>CPU</b>: 10-100× reduction in descriptor set binds (major bottleneck in complex scenes)
+- <b>CPU</b>: Simplified render loop (bind once, draw many)
+- <b>Memory</b>: No need to duplicate descriptors per-object
+.
+<br/>
+<b>Costs:</b>
+- <b>GPU</b>: NonUniform indexing may reduce SIMD efficiency (divergent execution)
+- <b>Memory</b>: All descriptors in array must be valid or use `descriptorBindingPartiallyBound`
+- <b>Cache</b>: Scattered resource access may reduce cache hit rate
+.
+<br/>
+<b>Best Practices:</b>
+- Group draws by similar resource usage to improve cache coherency
+- Use partially bound arrays to avoid allocating unused descriptors
+- Profile: gains depend on CPU/GPU balance (CPU-bound benefits most)
+- Consider indirect draws for fully GPU-driven rendering
+.
+<br/>
+<b>Hardware Considerations:</b>
+- NVIDIA: Excellent support, minimal overhead
+- AMD: Good support, watch for subgroup divergence
+- Mobile: Varies; check vendor documentation
+- Intel: Good in recent GPUs
+
+\section bindgroup_indexing_seealso See Also
+
+- \subpage bindgroup_partially_bound - Using partially bound descriptor arrays
+- \subpage buffer_reference - GPU pointers (VK_KHR_buffer_device_address)
+- \subpage dynamic_ubo - Dynamic uniform buffer offsets (simpler alternative)
+- [VK_EXT_descriptor_indexing](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_EXT_descriptor_indexing.html) - Official specification
+- [GL_EXT_nonuniform_qualifier](https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GL_EXT_nonuniform_qualifier.txt) - GLSL extension spec
+
+\section bindgroup_indexing_further_reading Further Reading
+
+- [GPU-Driven Rendering](https://vkguide.dev/docs/gpudriven/gpu_driven_engines/) - Modern rendering techniques
+- [Descriptor Indexing Best Practices](https://docs.vulkan.org/samples/latest/samples/extensions/descriptor_indexing/README.html) - Vulkan guide
+
 */

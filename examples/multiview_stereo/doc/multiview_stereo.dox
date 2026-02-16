@@ -8,42 +8,94 @@
   Contact KDAB at <info@kdab.com> for commercial licensing options.
 */
 
-/**
-    @page multiview-stereo MultiviewStereo
-    @ingroup kdgpu-examples
+/*!
+\page multiview_stereo Multiview Stereo Swapchain
+\ingroup kdgpu-examples
 
-    @brief This example shows how to render to a stereo swapchain using the multiview extension.
+\brief Demonstrates rendering directly to stereo swapchain layers using multiview for native VR display.
 
-    This example uses the multiview extension to process the same vertices multiple times and render simultaneously to two image layers of a stereo swapchain.
-    This is useful in VR applications where it is necessary to render the same scene twice from different cameras. When a multiview render pass happens, the different renderings will be sent to a 2D array texture.
-    In the shaders, you can differentiate between which pass you are rendering with ``gl_ViewIndex``.
+This example extends \ref multiview by rendering directly to a stereo swapchain with 2 array layers (left/right eye). Unlike the basic multiview example which renders to texture then displays side-by-side, this demonstrates native stereoscopic output for VR headsets that support stereo swapchains. This is the most efficient path for VR rendering on supported hardware.
 
-    \section multiview_stereo_initialization Initialization
+The example uses the \ref kdgpuexample_helper "KDGpuExample helper API" for simplified setup.
 
-    We first by initializing a vertex buffer with 3 vertices to make up a triangle.
+\section multiview_stereo_overview Overview
 
-    @snippet multiview_stereo/multiview_stereo.cpp 1
+<b>What this example demonstrates:</b>
+- Creating stereo swapchains with 2 image layers
+- Rendering directly to swapchain layers with multiview
+- Per-view transformations using gl_ViewIndex
+- Stereo rendering without intermediate render targets
+.
+<br/>
 
-    Next we load a shader that will make use of gl_ViewIndex to rotate the triangle either clockwise or counter-clockwise.
+<b>Use cases:</b>
+- Native VR headset rendering
+- Stereoscopic 3D displays
+- Head-mounted displays (HMDs)
+- Auto-stereoscopic displays
 
-    @snippet multiview_stereo/multiview_stereo.cpp 2
+\section multiview_stereo_requirements Vulkan Requirements
 
-    We will use a push constant to send a rotation angle to the shader.
+- <b>Vulkan Version</b>: 1.1+ (multiview core)
+- <b>Extensions</b>: VK_KHR_multiview (core in 1.1)
+- <b>Features</b>: `multiview`
+- <b>Swapchain</b>: Must support array layers (check `maxImageArrayLayers`)
 
-    @snippet multiview_stereo/multiview_stereo.cpp 3
+\section multiview_stereo_concepts Key Concepts
 
-    Then we can create a pipeline and prepare RenderPassCommandRecorderOptions options for later recording.
+<b>Stereo Swapchains:</b>
 
-    @snippet multiview_stereo/multiview_stereo.cpp 4
+Normal swapchains have single-layer images. Stereo swapchains have array layers:
+```
+// Normal swapchain:
+imageArrayLayers = 1  // Single 2D image
 
-    @snippet multiview_stereo/multiview_stereo.cpp 5
+// Stereo swapchain:
+imageArrayLayers = 2  // 2D array with 2 layers (left/right)
+```
 
-    Since we want to render to a stereo swapchain, we need to override the Swapchain creation function to request 2 imageLayers
+Multiview render pass writes to both layers simultaneously. The display system presents each layer to the corresponding eye.
 
-    @snippet multiview_stereo/multiview_stereo.cpp 6
+<b>Direct vs Indirect Stereo:</b>
 
-    Finally, the recording of render commands go as follow:
+Indirect (multiview example):
+1. Render to texture array (2 layers)
+2. Copy/display both layers side-by-side
+3. Extra copy, extra memory
+.
+<br/>
 
-    @snippet multiview_stereo/multiview_stereo.cpp 7
+Direct (this example):
+1. Render directly to stereo swapchain layers
+2. Display presents layers natively
+3. Most efficient for VR
+
+Spec: https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkSwapchainCreateInfoKHR.html
+
+\section multiview_stereo_initialization Initialization
+
+We first by initializing a vertex buffer with 3 vertices to make up a triangle.
+
+\snippet multiview_stereo/multiview_stereo.cpp vertex_buffer
+
+Next we load a shader that will make use of gl_ViewIndex to rotate the triangle either clockwise or counter-clockwise.
+
+\snippet multiview_stereo/multiview_stereo.cpp shader_creation
+
+We will use a push constant to send a rotation angle to the shader.
+
+\snippet multiview_stereo/multiview_stereo.cpp pipeline_layout
+
+Then we can create a pipeline. Note the `viewCount` parameter which tells how many views we will be rendering to for multiview rendering.
+
+\snippet multiview_stereo/multiview_stereo.cpp pipeline
+
+Since we want to render to a stereo swapchain, we need to override the Swapchain creation function to request 2 imageLayers
+
+\snippet multiview_stereo/multiview_stereo.cpp swapchain
+
+Finally, the recording of render commands go as follow:
+
+\snippet multiview_stereo/multiview_stereo.cpp render
 
 */

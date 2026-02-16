@@ -174,12 +174,12 @@ void BindGroupPartiallyBound::initializeScene()
         m_texture = m_device.createTexture(textureOptions);
 
         // Upload the texture data and transition to ShaderReadOnlyOptimal
-        // clang-format off
-        const std::vector<BufferTextureCopyRegion> regions = {{
-            .textureSubResource = { .aspectMask = TextureAspectFlagBits::ColorBit },
-            .textureExtent = { .width = image.width, .height = image.height, .depth = 1 }
-        }};
-        // clang-format on
+        const std::vector<BufferTextureCopyRegion> regions = {
+            {
+                    .textureSubResource = { .aspectMask = TextureAspectFlagBits::ColorBit },
+                    .textureExtent = { .width = image.width, .height = image.height, .depth = 1 },
+            },
+        };
         const TextureUploadOptions uploadOptions = {
             .destinationTexture = m_texture,
             .dstStages = PipelineStageFlagBit::AllGraphicsBit,
@@ -215,6 +215,7 @@ void BindGroupPartiallyBound::initializeScene()
                             .resourceType = ResourceBindingType::CombinedImageSampler,
                             .shaderStages = ShaderStageFlagBits::FragmentBit,
                             .flags = { ResourceBindingFlagBits::PartiallyBoundBit },
+                            // No resource set at this point
                     },
             },
     });

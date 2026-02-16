@@ -1,0 +1,131 @@
+/*
+  This file is part of KDGpu.
+
+  SPDX-FileCopyrightText: 2026 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+
+  SPDX-License-Identifier: MIT
+
+  Contact KDAB at <info@kdab.com> for commercial licensing options.
+*/
+
+/*!
+\page hello_xr_multiview Hello XR Multiview
+\ingroup kdgpu-examples
+\brief Combines OpenXR virtual reality rendering with the <b>Vulkan Multiview</b> extension to render both eyes simultaneously with a single set of draw calls, significantly improving VR performance.
+
+\section hello_xr_multiview_overview Overview
+
+Virtual reality applications must render two separate views (left and right eye) for stereoscopic 3D. The naive approach duplicates all rendering commands—issuing every draw call twice with different camera matrices. This doubles CPU overhead and wastes time on redundant state changes.
+
+The <b>Multiview</b> extension (Vulkan 1.1) solves this by broadcasting a single set of draw calls to multiple layers of an image array. Each layer represents one eye's view. The GPU automatically replicates geometry processing, while shaders use `gl_ViewIndex` to access per-view data (like different projection matrices). This cuts CPU overhead nearly in half while maintaining full stereo rendering quality.
+
+This example extends \ref hello_xr by adding multiview optimization. Instead of rendering each eye separately, the projection layer uses multiview to render both eyes efficiently. For VR applications with complex scenes and many draw calls, multiview provides substantial performance improvements—especially important for maintaining the 90+ Hz refresh rates required for comfortable VR.
+
+\section hello_xr_multiview_vulkan_reqs Vulkan Requirements
+
+- <b>Vulkan Version</b>: 1.1 or later (for multiview core support)
+- <b>Required Extensions</b>:
+  - `VK_KHR_multiview` (core in Vulkan 1.1)
+- <b>Required Features</b>:
+  - `multiview`: Enables rendering to multiple views with one draw call
+  - `multiviewGeometryShader` (optional): Allows geometry shaders with multiview
+  - `multiviewTessellationShader` (optional): Allows tessellation with multiview
+- <b>OpenXR</b>: Requires OpenXR runtime with multiview composition layer support
+
+\section hello_xr_multiview_concepts Key Concepts
+
+<b>Multiview Rendering</b>:
+Multiview broadcasts each draw command to multiple layers of an image array attachment. Instead of:
+
+```cpp
+for (int eye = 0; eye < 2; eye++) {
+    bindCamera(eye);
+    drawScene(); // 100+ draw calls
+}
+```
+
+You do:
+
+```cpp
+bindBothCameras();
+drawScene(); // 100+ draw calls, automatically rendered to both layers
+```
+
+<b>View Index</b>:
+
+Shaders receive `gl_ViewIndex` (GLSL) or `SV_ViewID` (HLSL), an integer [0, viewCount) identifying which layer is being rendered. Use this to index into arrays of view/projection matrices:
+```glsl
+gl_Position = viewProjection[gl_ViewIndex] * vec4(inPosition, 1.0);
+```
+
+<b>Image Arrays</b>:
+Multiview requires array textures (2D array images). Each layer is a separate image accessed by index. OpenXR swapchains provide these automatically for multiview projection layers.
+
+<b>Multiview vs Instanced Rendering</b>:
+Both can render multiple views, but multiview is more efficient:
+- <b>Multiview</b>: Single vertex shader invocation per vertex, geometry broadcast to layers by hardware
+- <b>Instanced Rendering</b>: Multiple vertex shader invocations (one per view), manual layering in geometry shader
+.
+<br/>
+
+Multiview has lower overhead and better hardware support for VR use cases.
+
+\section hello_xr_multiview_impl Implementation Details
+
+<b>OpenXR Multiview Configuration</b>:
+The projection layer must request multiview support from the OpenXR runtime. This enables the runtime to provide multiview swapchains:
+
+\snippet hello_xr_multiview.cpp XrMultiviewLayers
+
+<b>Multiview Graphics Pipeline</b>:
+The pipeline options specify `viewCount` to inform Vulkan how many views will be rendered. This metadata enables driver optimizations:
+
+\snippet projection_layer.cpp XrMultiviewPipeline
+
+<b>Multiview Render Pass</b>:
+Legacy render passes also need the view count. With KDGpu's render pass options:
+
+\snippet projection_layer.cpp XrMultiviewRenderPass
+
+<b>Unified Rendering</b>:
+All draw calls are issued once. The shader uses `gl_ViewIndex` to select the appropriate matrices and render to the correct layer:
+
+\snippet projection_layer.cpp XrMultiviewRender
+
+The shader binds an array of `ViewProjection` structures (one per eye) and indexes by `gl_ViewIndex`. Each draw call automatically renders to all views without CPU-side loops.
+
+\section hello_xr_multiview_perf Performance Notes
+
+<b>CPU Reduction</b>: Multiview nearly halves CPU rendering overhead by eliminating redundant:
+- Command buffer recording (one recording for both eyes)
+- State changes (bind once instead of twice per draw)
+- Draw call submission overhead
+.
+<br/>
+
+For scenes with 1000+ draw calls, this is a massive win.
+
+<b>GPU Impact</b>: GPU work remains the same—vertex shading, rasterization, and fragment shading still happen twice (once per eye). However, improved cache locality and reduced driver overhead often yield measurable GPU gains too.
+
+<b>Bandwidth</b>: Writes to both eye textures simultaneously may increase memory bandwidth. On tile-based GPUs (mobile), this is mitigated by on-chip tile memory.
+
+<b>Best Practices</b>:
+- Use uniform buffer arrays for per-view data (matrices, frustum planes)
+- Ensure shaders index `gl_ViewIndex` efficiently (avoid divergent branches)
+- Consider late vertex shader output for shared geometry processing
+- Profile with VR-specific tools (RenderDoc, NSight, vendor profilers)
+.
+<br/>
+
+\see \ref hello_xr for basic OpenXR integration without multiview
+\see \ref multiview for multiview with standard (non-XR) rendering
+\see \ref multiview_stereo for multiview stereo rendering to window
+
+\section hello_xr_multiview_further Further Reading
+
+- [Vulkan Multiview Spec](https://registry.khronos.org/vulkan/specs/1.3-extensions/html/vkspec.html#features-multiview)
+- [OpenXR Multiview Composition Layers](https://registry.khronos.org/OpenXR/specs/1.0/html/xrspec.html#XR_KHR_composition_layer_equirect2)
+- [Multiview Performance Best Practices](https://developer.arm.com/documentation/102479/0100/Multiview)
+- [NVIDIA VR Best Practices](https://developer.nvidia.com/blog/vr-sli-accelerating-opengl-virtual-reality/)
+
+*/

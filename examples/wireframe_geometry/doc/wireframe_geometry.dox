@@ -1,0 +1,165 @@
+/*
+  This file is part of KDGpu.
+
+  SPDX-FileCopyrightText: 2025 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+
+  SPDX-License-Identifier: MIT
+
+  Contact KDAB at <info@kdab.com> for commercial licensing options.
+*/
+
+/*!
+\page wireframe_geometry Wireframe Geometry Shader
+\ingroup kdgpu-examples
+
+\brief Demonstrates high-quality wireframe rendering using geometry shaders and barycentric coordinates.
+
+\image html wireframe_geometry.png
+
+This example shows advanced wireframe rendering that produces smooth, anti-aliased lines of constant pixel width regardless of camera distance. Traditional `VK_POLYGON_MODE_LINE` produces jagged wireframes and can't overlay on solid fills. This technique uses geometry shaders to compute barycentric coordinates and fragment shaders to calculate distance-to-edge, enabling anti-aliased wireframes with controllable thickness that can overlay solid geometry.
+
+The example uses the \ref kdgpuexample_helper "KDGpuExample helper API" for simplified setup.
+
+\section wireframe_geometry_overview Overview
+
+<b>What this example demonstrates:</b>
+- Geometry shaders for per-triangle processing
+- Barycentric coordinates for edge distance calculation
+- Anti-aliased wireframe lines using fwidth()
+- Constant pixel-width lines independent of depth
+- Wireframe overlay on solid geometry
+- Viewport-aware thickness control
+.
+<br/>
+
+<b>Use cases:</b>
+- CAD/modeling applications
+- Debugging geometry
+- Technical visualization
+- Stylized rendering (toon shading + wireframe)
+- Mesh inspection tools
+
+\section wireframe_geometry_requirements Vulkan Requirements
+
+- <b>Vulkan Version</b>: 1.0+
+- <b>Extensions</b>: None
+- <b>Features</b>: `geometryShader` (check device support)
+- <b>Limits</b>: Check `maxGeometryOutputVertices`
+
+\section wireframe_geometry_concepts Key Concepts
+
+<b>Traditional Wireframe Problems:</b>
+
+Using `VK_POLYGON_MODE_LINE`:
+- Lines are jagged (no anti-aliasing)
+- Line width in clip space (thicker when closer)
+- Can't combine with solid fill in single pass
+- Limited line width support (often max 1.0)
+.
+<br/>
+
+<b>Geometry Shader Wireframe:</b>
+
+Solution:
+1. Render triangles normally (solid fill)
+2. Geometry shader computes barycentric coords for each vertex
+3. Fragment shader calculates distance to nearest edge
+4. If distance < threshold, draw wire color; else solid color
+5. Use `fwidth()` for anti-aliasing
+.
+<br/>
+
+Result: Smooth, anti-aliased wireframes of constant pixel width.
+
+<b>Barycentric Coordinates:</b>
+
+For a triangle with vertices A, B, C, barycentric coords (u, v, w) satisfy:
+- Point `P = u*A + v*B + w*C`
+- `u + v + w = 1`
+- Distance to edge opposite vertex = corresponding coordinate
+.
+<br/>
+
+Example: u = 0 means point is on edge BC.
+
+Geometry shader assigns:
+- Vertex 0: (1, 0, 0)
+- Vertex 1: (0, 1, 0)
+- Vertex 2: (0, 0, 1)
+.
+<br/>
+
+Fragment interpolates these → distance to each edge.
+
+<b>Anti-Aliasing with fwidth():</b>
+
+`fwidth(x)` returns rate of change of x across pixels:
+```
+float edgeDist = min(min(baryCoord.x, baryCoord.y), baryCoord.z);
+float delta = fwidth(edgeDist);  // Rate of change
+float alpha = smoothstep(lineWidth - delta, lineWidth + delta, edgeDist);
+```
+
+This creates smooth 1-pixel anti-aliased edges.
+
+Spec: https://registry.khronos.org/OpenGL/specs/gl/GLSLangSpec.4.60.html#built-in-functions (fwidth)
+
+\section wireframe_geometry_implementation Implementation
+
+<b>Per-Vertex Data:</b>
+
+\snippet wireframe_geometry/wireframe_geometry.cpp vertex_struct
+
+The `excludeEdge` flag allows hiding specific edges (e.g., for quad diagonals).
+
+<b>Shader Wireframe Calculation:</b>
+
+\snippet wireframe_geometry/wireframe_geometry.cpp shader_loading
+
+Key steps:
+1. Calculate minimum distance to any edge
+2. Use `fwidth()` for anti-aliasing kernel size
+3. `smoothstep()` creates smooth transition
+4. Mix wireframe and solid colors
+.
+<br/>
+
+<b>Viewport Matrix for Constant Width:</b>
+
+Pass viewport dimensions to maintain constant pixel width regardless of depth. The geometry shader can transform edge distances from clip space to screen space.
+
+\section wireframe_geometry_performance Performance Notes
+
+<b>Geometry Shader Cost:</b>
+- <b>GPU</b>: Geometry shaders are typically slower than vertex/fragment
+- <b>Throughput</b>: Lower than modern mesh shaders
+- <b>Mobile</b>: Often unsupported or very slow
+.
+<br/>
+
+<b>Optimization Tips:</b>
+- Use only when visual quality justifies cost
+- Consider compute-based alternatives for high-performance needs
+- On mobile, use `VK_POLYGON_MODE_LINE` if acceptable
+- Batch wireframe draws separately from solid geometry
+.
+<br/>
+
+<b>Alternative Techniques:</b>
+- <b>Mesh shaders</b>: Modern replacement for geometry shaders (faster)
+- <b>Compute shaders</b>: Generate wireframe geometry on GPU
+- <b>Instancing</b>: Draw lines as instanced quads
+- <b>Conservative rasterization</b>: Hardware edge detection
+
+\section wireframe_geometry_seealso See Also
+
+- \ref hello_sphere_mesh - Mesh shaders (modern alternative)
+- [Single-Pass Wireframe](https://developer.download.nvidia.com/SDK/10/direct3d/Source/SolidWireframe/Doc/SolidWireframe.pdf) - NVIDIA technique paper
+- [Geometry Shaders](https://www.khronos.org/opengl/wiki/Geometry_Shader) - OpenGL wiki
+
+\section wireframe_geometry_further_reading Further Reading
+
+- [Barycentric Coordinates](https://en.wikipedia.org/wiki/Barycentric_coordinate_system) - Mathematical explanation
+- [fwidth() Derivatives](https://www.ronja-tutorials.com/post/046-fwidth/)
+- [Optimized Wireframe](https://fauder.github.io/posts/2025/10/17/optimized-wireframe-rendering-part-iii/) - Fixing NVIDIA Wireframe Shortcomings
+*/

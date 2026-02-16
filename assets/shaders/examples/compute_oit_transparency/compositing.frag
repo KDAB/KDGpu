@@ -40,6 +40,7 @@ void swap(inout uint a, inout uint b)
     b = tmp;
 }
 
+//![compositing_frag_main]
 void main()
 {
     // Retrieve all Alpha Fragments
@@ -72,3 +73,4 @@ void main()
 
     fragColor = blendedColor;
 }
+//![compositing_frag_main]
