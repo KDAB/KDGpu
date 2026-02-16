@@ -38,7 +38,7 @@ struct SamplerOptions {
 
     bool normalizedCoordinates{ true };
 
-    Handle<YCbCrConversion_t> yCbCrConversion{};
+    OptionalHandle<YCbCrConversion_t> yCbCrConversion{};
 };
 
 } // namespace KDGpu

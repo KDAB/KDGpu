@@ -37,11 +37,11 @@ struct RayTracingPipelineOptions {
     std::string_view label;
     std::vector<ShaderStage> shaderStages;
     std::vector<RayTracingShaderGroupOptions> shaderGroups;
-    Handle<PipelineLayout_t> layout;
+    RequiredHandle<PipelineLayout_t> layout;
     uint32_t maxRecursionDepth{ 0 }; // 0 will default to maxRecursionDepthLimit
 
     // Optional pipeline cache to speed up pipeline creation
-    Handle<PipelineCache_t> pipelineCache;
+    OptionalHandle<PipelineCache_t> pipelineCache;
 };
 
 } // namespace KDGpu

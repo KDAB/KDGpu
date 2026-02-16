@@ -25,7 +25,7 @@ struct RenderPass_t;
 struct PipelineCache_t;
 
 struct ShaderStage {
-    Handle<ShaderModule_t> shaderModule;
+    RequiredHandle<ShaderModule_t> shaderModule;
     ShaderStageFlagBits stage;
     std::string entryPoint{ "main" };
     std::vector<SpecializationConstant> specializationConstants;
@@ -167,7 +167,7 @@ struct DynamicOutputAttachmentLocations {
 struct GraphicsPipelineOptions {
     std::string_view label;
     std::vector<ShaderStage> shaderStages;
-    Handle<PipelineLayout_t> layout;
+    RequiredHandle<PipelineLayout_t> layout;
     VertexOptions vertex;
     std::vector<RenderTargetOptions> renderTargets;
     DepthStencilOptions depthStencil;
@@ -178,11 +178,11 @@ struct GraphicsPipelineOptions {
 
     // Explicit RenderPass Usage (incompatible with dynamic rendering)
     // Use implicit RenderPass if none specified
-    Handle<RenderPass_t> renderPass;
+    OptionalHandle<RenderPass_t> renderPass;
     uint32_t subpassIndex{ 0 };
 
     // Optional pipeline cache to speed up pipeline creation
-    Handle<PipelineCache_t> pipelineCache;
+    OptionalHandle<PipelineCache_t> pipelineCache;
 
     // Only available if DynamicRendering feature is available and enabled
     struct DynamicRendering {

@@ -79,7 +79,7 @@ public:
      * @warning This operation requires external synchronization if any of the caches (this
      * cache or any source caches) are being used concurrently for pipeline creation.
      */
-    bool merge(const std::vector<Handle<PipelineCache_t>> &sources) const;
+    bool merge(const std::vector<RequiredHandle<PipelineCache_t>> &sources) const;
 
 private:
     explicit PipelineCache(GraphicsApi *api, const Handle<Device_t> &device, const PipelineCacheOptions &options);

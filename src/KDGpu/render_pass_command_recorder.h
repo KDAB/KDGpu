@@ -94,15 +94,15 @@ public:
 
     operator Handle<RenderPassCommandRecorder_t>() const noexcept { return m_renderPassCommandRecorder; }
 
-    void setPipeline(const Handle<GraphicsPipeline_t> &pipeline);
+    void setPipeline(const RequiredHandle<GraphicsPipeline_t> &pipeline);
 
     // TODO: Add overload for setting many vertex buffers at once
-    void setVertexBuffer(uint32_t index, const Handle<Buffer_t> &buffer, DeviceSize offset = 0);
-    void setIndexBuffer(const Handle<Buffer_t> &buffer, DeviceSize offset = 0, IndexType indexType = IndexType::Uint32);
+    void setVertexBuffer(uint32_t index, const RequiredHandle<Buffer_t> &buffer, DeviceSize offset = 0);
+    void setIndexBuffer(const RequiredHandle<Buffer_t> &buffer, DeviceSize offset = 0, IndexType indexType = IndexType::Uint32);
 
     void setBindGroup(uint32_t group,
-                      const Handle<BindGroup_t> &bindGroup,
-                      const Handle<PipelineLayout_t> &pipelineLayout = Handle<PipelineLayout_t>(),
+                      const RequiredHandle<BindGroup_t> &bindGroup,
+                      const OptionalHandle<PipelineLayout_t> &pipelineLayout = Handle<PipelineLayout_t>(),
                       std::span<const uint32_t> dynamicBufferOffsets = {});
 
     void setViewport(const Viewport &viewport);
@@ -127,7 +127,7 @@ public:
     void drawMeshTasksIndirect(const DrawMeshIndirectCommand &drawCommand);
     void drawMeshTasksIndirect(std::span<const DrawMeshIndirectCommand> drawCommands);
 
-    void pushConstant(const PushConstantRange &constantRange, const void *data, const Handle<PipelineLayout_t> &pipelineLayout = {});
+    void pushConstant(const PushConstantRange &constantRange, const void *data, const OptionalHandle<PipelineLayout_t> &pipelineLayout = {});
     void pushBindGroup(uint32_t group,
                        std::span<const BindGroupEntry> bindGroupEntries,
                        const Handle<PipelineLayout_t> &pipelineLayout = Handle<PipelineLayout_t>());

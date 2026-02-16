@@ -239,6 +239,11 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Android")
     target_compile_definitions(KDGpu PUBLIC VK_USE_PLATFORM_ANDROID_KHR=1)
 endif()
 
+if(${KDGPU_BUILD_IN_STRICT_MODE})
+    target_compile_definitions(KDGpu PUBLIC KDGPU_STRICT_MODE)
+    target_compile_options(KDGpu PRIVATE -Wall -Wpedantic)
+endif()
+
 # Require >=C++20 for us and downstream projects
 target_compile_features(KDGpu PUBLIC cxx_std_20)
 

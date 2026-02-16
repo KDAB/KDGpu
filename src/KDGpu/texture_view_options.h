@@ -22,7 +22,7 @@ struct TextureViewOptions {
     ViewType viewType{ ViewType::ViewType2D };
     Format format{ Format::UNDEFINED };
     TextureSubresourceRange range{};
-    Handle<YCbCrConversion_t> yCbCrConversion{};
+    OptionalHandle<YCbCrConversion_t> yCbCrConversion{};
 };
 
 } // namespace KDGpu

@@ -42,7 +42,7 @@ std::vector<uint8_t> VulkanPipelineCache::getData() const
     return data;
 }
 
-bool VulkanPipelineCache::merge(const std::vector<Handle<PipelineCache_t>> &srcHandles) const
+bool VulkanPipelineCache::merge(const std::vector<RequiredHandle<PipelineCache_t>> &srcHandles) const
 {
     if (srcHandles.empty())
         return false;

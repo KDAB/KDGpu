@@ -49,14 +49,14 @@ RayTracingPassCommandRecorder &RayTracingPassCommandRecorder::operator=(RayTraci
     return *this;
 }
 
-void RayTracingPassCommandRecorder::setPipeline(const Handle<RayTracingPipeline_t> &pipeline)
+void RayTracingPassCommandRecorder::setPipeline(const RequiredHandle<RayTracingPipeline_t> &pipeline)
 {
     auto *apiRayTracingPassCommandRecorder = m_api->resourceManager()->getRayTracingPassCommandRecorder(m_rayTracingCommandRecorder);
     apiRayTracingPassCommandRecorder->setPipeline(pipeline);
 }
 
-void RayTracingPassCommandRecorder::setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroup,
-                                                 const Handle<PipelineLayout_t> &pipelineLayout,
+void RayTracingPassCommandRecorder::setBindGroup(uint32_t group, const RequiredHandle<BindGroup_t> &bindGroup,
+                                                 const OptionalHandle<PipelineLayout_t> &pipelineLayout,
                                                  std::span<const uint32_t> dynamicBufferOffsets)
 {
     auto *apiRayTracingPassCommandRecorder = m_api->resourceManager()->getRayTracingPassCommandRecorder(m_rayTracingCommandRecorder);

@@ -11,6 +11,7 @@
 #pragma once
 
 #include <KDFoundation/hashutils.h>
+#include <cassert>
 
 namespace KDGpu {
 
@@ -66,6 +67,36 @@ bool operator<(const KDGpu::Handle<T> &lhs, const KDGpu::Handle<T> &rhs)
     return lhs.index() < rhs.index();
 }
 
+template<typename T>
+class RequiredHandle : public Handle<T>
+{
+public:
+#ifdef KDGPU_STRICT_MODE
+    RequiredHandle() = delete;
+#endif
+    using Handle<T>::Handle;
+
+    RequiredHandle(const Handle<T> &handle)
+        : Handle<T>(handle.index(), handle.generation())
+    {
+#ifdef KDGPU_STRICT_MODE
+        assert(this->isValid());
+#endif
+    }
+
+    template<typename U, typename = std::enable_if_t<!std::is_same_v<U, Handle<T>> && std::is_convertible_v<U, Handle<T>>>>
+    RequiredHandle(const U &obj)
+        : Handle<T>(Handle<T>(obj))
+    {
+#ifdef KDGPU_STRICT_MODE
+        assert(this->isValid());
+#endif
+    }
+};
+
+template<typename T>
+using OptionalHandle = Handle<T>;
+
 } // namespace KDGpu
 
 namespace std {
@@ -73,6 +104,19 @@ namespace std {
 template<typename T>
 struct hash<KDGpu::Handle<T>> {
     size_t operator()(const KDGpu::Handle<T> &handle) const
+    {
+        uint64_t hash = 0;
+
+        KDFoundation::hash_combine(hash, handle.index());
+        KDFoundation::hash_combine(hash, handle.generation());
+
+        return hash;
+    }
+};
+
+template<typename T>
+struct hash<KDGpu::RequiredHandle<T>> {
+    size_t operator()(const KDGpu::RequiredHandle<T> &handle) const
     {
         uint64_t hash = 0;
 

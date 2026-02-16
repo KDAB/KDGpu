@@ -30,7 +30,7 @@ struct BindGroupLayout_t;
 
 struct PipelineLayoutOptions {
     std::string_view label;
-    std::vector<Handle<BindGroupLayout_t>> bindGroupLayouts;
+    std::vector<RequiredHandle<BindGroupLayout_t>> bindGroupLayouts;
     std::vector<PushConstantRange> pushConstantRanges;
 };
 

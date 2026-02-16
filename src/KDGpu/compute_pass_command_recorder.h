@@ -63,10 +63,10 @@ public:
 
     operator Handle<ComputePassCommandRecorder_t>() const noexcept { return m_computePassCommandRecorder; }
 
-    void setPipeline(const Handle<ComputePipeline_t> &pipeline);
+    void setPipeline(const RequiredHandle<ComputePipeline_t> &pipeline);
 
-    void setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroup,
-                      const Handle<PipelineLayout_t> &pipelineLayout = Handle<PipelineLayout_t>(),
+    void setBindGroup(uint32_t group, const RequiredHandle<BindGroup_t> &bindGroup,
+                      const OptionalHandle<PipelineLayout_t> &pipelineLayout = Handle<PipelineLayout_t>(),
                       std::span<const uint32_t> dynamicBufferOffsets = {});
 
     void dispatchCompute(const ComputeCommand &command);
@@ -78,7 +78,7 @@ public:
     void pushConstant(const PushConstantRange &constantRange, const void *data);
     void pushBindGroup(uint32_t group,
                        std::span<const BindGroupEntry> bindGroupEntries,
-                       const Handle<PipelineLayout_t> &pipelineLayout = Handle<PipelineLayout_t>());
+                       const OptionalHandle<PipelineLayout_t> &pipelineLayout = Handle<PipelineLayout_t>());
 
     void end();
 

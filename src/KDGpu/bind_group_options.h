@@ -28,10 +28,10 @@ struct BindGroupEntry { // An entry into a BindGroup ( == a descriptor in a desc
 
 struct BindGroupOptions {
     std::string_view label;
-    Handle<BindGroupLayout_t> layout;
+    RequiredHandle<BindGroupLayout_t> layout;
     std::vector<BindGroupEntry> resources;
     uint32_t maxVariableArrayLength{ 0 };
-    Handle<BindGroupPool_t> bindGroupPool;
+    OptionalHandle<BindGroupPool_t> bindGroupPool;
     bool implicitFree{ true }; // If true, the bind group will be automatically freed when going out of scope. If false, BindGroup will not be released against the Pool (even if going out of scope). The Pool will have to be reset or destroyed for underlying BindGroup to be released.
 };
 

@@ -36,7 +36,7 @@ struct KDGPU_EXPORT VulkanPipelineCache {
     Handle<Device_t> deviceHandle;
 
     std::vector<uint8_t> getData() const;
-    bool merge(const std::vector<Handle<PipelineCache_t>> &srcHandles) const;
+    bool merge(const std::vector<RequiredHandle<PipelineCache_t>> &srcHandles) const;
 };
 
 } // namespace KDGpu

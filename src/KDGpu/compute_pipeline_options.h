@@ -22,18 +22,18 @@ struct ShaderModule_t;
 struct PipelineCache_t;
 
 struct ComputeShaderStage {
-    Handle<ShaderModule_t> shaderModule;
+    RequiredHandle<ShaderModule_t> shaderModule;
     std::string entryPoint{ "main" };
     std::vector<SpecializationConstant> specializationConstants;
 };
 
 struct ComputePipelineOptions {
     std::string_view label;
-    Handle<PipelineLayout_t> layout;
+    RequiredHandle<PipelineLayout_t> layout;
     ComputeShaderStage shaderStage;
 
     // Optional pipeline cache to speed up pipeline creation
-    Handle<PipelineCache_t> pipelineCache;
+    OptionalHandle<PipelineCache_t> pipelineCache;
 };
 
 } // namespace KDGpu

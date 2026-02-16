@@ -23,7 +23,7 @@ struct ResourceBindingLayout {
     ResourceBindingType resourceType;
     ShaderStageFlags shaderStages;
     ResourceBindingFlags flags{ ResourceBindingFlagBits::None };
-    std::vector<Handle<Sampler_t>> immutableSamplers;
+    std::vector<RequiredHandle<Sampler_t>> immutableSamplers;
 
     friend bool operator==(const ResourceBindingLayout &, const ResourceBindingLayout &) = default;
 };

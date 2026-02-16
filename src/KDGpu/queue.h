@@ -35,10 +35,10 @@ struct Swapchain_t;
 struct Texture_t;
 
 struct SubmitOptions {
-    std::vector<Handle<CommandBuffer_t>> commandBuffers;
-    std::vector<Handle<GpuSemaphore_t>> waitSemaphores;
-    std::vector<Handle<GpuSemaphore_t>> signalSemaphores;
-    Handle<Fence_t> signalFence;
+    std::vector<RequiredHandle<CommandBuffer_t>> commandBuffers;
+    std::vector<RequiredHandle<GpuSemaphore_t>> waitSemaphores;
+    std::vector<RequiredHandle<GpuSemaphore_t>> signalSemaphores;
+    OptionalHandle<Fence_t> signalFence;
 };
 
 /**
@@ -46,7 +46,7 @@ struct SubmitOptions {
     @headerfile queue.h <KDGpu/queue.h>
 */
 struct SwapchainPresentInfo {
-    Handle<Swapchain_t> swapchain;
+    RequiredHandle<Swapchain_t> swapchain;
     uint32_t imageIndex;
 };
 
@@ -55,9 +55,9 @@ struct SwapchainPresentInfo {
     @headerfile queue.h <KDGpu/queue.h>
 */
 struct PresentOptions {
-    std::vector<Handle<GpuSemaphore_t>> waitSemaphores;
+    std::vector<RequiredHandle<GpuSemaphore_t>> waitSemaphores;
     std::vector<SwapchainPresentInfo> swapchainInfos;
-    std::vector<Handle<Fence_t>> signalFence; // Per Swapchain
+    std::vector<OptionalHandle<Fence_t>> signalFence; // Per Swapchain
 };
 
 /**

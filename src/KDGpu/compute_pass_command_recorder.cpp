@@ -48,14 +48,14 @@ ComputePassCommandRecorder &ComputePassCommandRecorder::operator=(ComputePassCom
     return *this;
 }
 
-void ComputePassCommandRecorder::setPipeline(const Handle<ComputePipeline_t> &pipeline)
+void ComputePassCommandRecorder::setPipeline(const RequiredHandle<ComputePipeline_t> &pipeline)
 {
     auto *apiComputePassCommandRecorder = m_api->resourceManager()->getComputePassCommandRecorder(m_computePassCommandRecorder);
     apiComputePassCommandRecorder->setPipeline(pipeline);
 }
 
-void ComputePassCommandRecorder::setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroup,
-                                              const Handle<PipelineLayout_t> &pipelineLayout,
+void ComputePassCommandRecorder::setBindGroup(uint32_t group, const RequiredHandle<BindGroup_t> &bindGroup,
+                                              const OptionalHandle<PipelineLayout_t> &pipelineLayout,
                                               std::span<const uint32_t> dynamicBufferOffsets)
 {
     auto *apiComputePassCommandRecorder = m_api->resourceManager()->getComputePassCommandRecorder(m_computePassCommandRecorder);
@@ -94,7 +94,7 @@ void ComputePassCommandRecorder::pushConstant(const PushConstantRange &constantR
 
 void ComputePassCommandRecorder::pushBindGroup(uint32_t group,
                                                std::span<const BindGroupEntry> bindGroupEntries,
-                                               const Handle<PipelineLayout_t> &pipelineLayout)
+                                               const OptionalHandle<PipelineLayout_t> &pipelineLayout)
 {
     auto *apiComputePassCommandRecorder = m_api->resourceManager()->getComputePassCommandRecorder(m_computePassCommandRecorder);
     apiComputePassCommandRecorder->pushBindGroup(group, bindGroupEntries, pipelineLayout);

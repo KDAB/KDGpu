@@ -41,8 +41,8 @@ struct RenderPass_t;
 // can properly transition the image non-destructively.
 
 struct ColorAttachment {
-    Handle<TextureView_t> view;
-    Handle<TextureView_t> resolveView;
+    RequiredHandle<TextureView_t> view;
+    OptionalHandle<TextureView_t> resolveView;
     AttachmentLoadOperation loadOperation{ AttachmentLoadOperation::Clear };
     AttachmentStoreOperation storeOperation{ AttachmentStoreOperation::Store };
     ColorClearValue clearValue;
@@ -52,8 +52,8 @@ struct ColorAttachment {
 };
 
 struct DepthStencilAttachment {
-    Handle<TextureView_t> view;
-    Handle<TextureView_t> resolveView;
+    OptionalHandle<TextureView_t> view;
+    OptionalHandle<TextureView_t> resolveView;
     AttachmentLoadOperation depthLoadOperation{ AttachmentLoadOperation::Clear };
     AttachmentStoreOperation depthStoreOperation{ AttachmentStoreOperation::Store };
     float depthClearValue{ 1.0f };
@@ -78,8 +78,8 @@ struct RenderPassCommandRecorderOptions {
     uint32_t framebufferArrayLayers{ 0 }; // Default to first color attachment arrayLayer
 };
 struct Attachment {
-    Handle<TextureView_t> view;
-    Handle<TextureView_t> resolveView;
+    RequiredHandle<TextureView_t> view;
+    OptionalHandle<TextureView_t> resolveView;
 
     // only set for color
     struct ColorOperations {
@@ -98,7 +98,7 @@ struct Attachment {
     std::optional<DepthStencilOperations> depth;
 };
 struct RenderPassCommandRecorderWithRenderPassOptions {
-    Handle<RenderPass_t> renderPass;
+    RequiredHandle<RenderPass_t> renderPass;
     std::vector<Attachment> attachments;
     SampleCountFlagBits samples{ SampleCountFlagBits::Samples1Bit };
     uint32_t viewCount{ 1 };

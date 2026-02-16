@@ -59,7 +59,7 @@ std::vector<uint8_t> PipelineCache::getData() const
     return vulkanPipelineCache->getData();
 }
 
-bool PipelineCache::merge(const std::vector<Handle<PipelineCache_t>> &sources) const
+bool PipelineCache::merge(const std::vector<RequiredHandle<PipelineCache_t>> &sources) const
 {
     if (!isValid())
         return false;

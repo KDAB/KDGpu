@@ -49,26 +49,26 @@ RenderPassCommandRecorder &RenderPassCommandRecorder::operator=(RenderPassComman
     return *this;
 }
 
-void RenderPassCommandRecorder::setPipeline(const Handle<GraphicsPipeline_t> &pipeline)
+void RenderPassCommandRecorder::setPipeline(const RequiredHandle<GraphicsPipeline_t> &pipeline)
 {
     auto *apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->setPipeline(pipeline);
 }
 
-void RenderPassCommandRecorder::setVertexBuffer(uint32_t index, const Handle<Buffer_t> &buffer, DeviceSize offset)
+void RenderPassCommandRecorder::setVertexBuffer(uint32_t index, const RequiredHandle<Buffer_t> &buffer, DeviceSize offset)
 {
     auto *apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->setVertexBuffer(index, buffer, offset);
 }
 
-void RenderPassCommandRecorder::setIndexBuffer(const Handle<Buffer_t> &buffer, DeviceSize offset, IndexType indexType)
+void RenderPassCommandRecorder::setIndexBuffer(const RequiredHandle<Buffer_t> &buffer, DeviceSize offset, IndexType indexType)
 {
     auto *apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->setIndexBuffer(buffer, offset, indexType);
 }
 
-void RenderPassCommandRecorder::setBindGroup(uint32_t group, const Handle<BindGroup_t> &bindGroup,
-                                             const Handle<PipelineLayout_t> &pipelineLayout,
+void RenderPassCommandRecorder::setBindGroup(uint32_t group, const RequiredHandle<BindGroup_t> &bindGroup,
+                                             const OptionalHandle<PipelineLayout_t> &pipelineLayout,
                                              std::span<const uint32_t> dynamicBufferOffsets)
 {
     auto *apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
@@ -179,7 +179,7 @@ void RenderPassCommandRecorder::pushConstant(const PushConstantRange &constantRa
 
 void RenderPassCommandRecorder::pushBindGroup(uint32_t group,
                                               std::span<const BindGroupEntry> bindGroupEntries,
-                                              const Handle<PipelineLayout_t> &pipelineLayout)
+                                              const OptionalHandle<PipelineLayout_t> &pipelineLayout)
 {
     auto *apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->pushBindGroup(group, bindGroupEntries, pipelineLayout);

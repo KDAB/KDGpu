@@ -66,11 +66,11 @@ public:
 
     operator Handle<RayTracingPassCommandRecorder_t>() const noexcept { return m_rayTracingCommandRecorder; }
 
-    void setPipeline(const Handle<RayTracingPipeline_t> &pipeline);
+    void setPipeline(const RequiredHandle<RayTracingPipeline_t> &pipeline);
 
     void setBindGroup(uint32_t group,
-                      const Handle<BindGroup_t> &bindGroup,
-                      const Handle<PipelineLayout_t> &pipelineLayout = Handle<PipelineLayout_t>(),
+                      const RequiredHandle<BindGroup_t> &bindGroup,
+                      const OptionalHandle<PipelineLayout_t> &pipelineLayout = OptionalHandle<PipelineLayout_t>(),
                       std::span<const uint32_t> dynamicBufferOffsets = {});
 
     void traceRays(const RayTracingCommand &rayTracingCommand);

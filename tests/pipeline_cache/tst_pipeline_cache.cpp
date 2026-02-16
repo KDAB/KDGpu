@@ -295,7 +295,7 @@ TEST_SUITE("PipelineCache")
             CHECK(srcCache.getData().size() > 0);
 
             // WHEN
-            std::vector<Handle<PipelineCache_t>> sources = { srcCache.handle() };
+            std::vector<RequiredHandle<PipelineCache_t>> sources = { srcCache.handle() };
             dstCache.merge(sources);
 
             // THEN
@@ -320,7 +320,7 @@ TEST_SUITE("PipelineCache")
             populateCacheWithPipeline(srcCache2, adapter, device);
             populateCacheWithPipeline(srcCache3, adapter, device);
 
-            std::vector<Handle<PipelineCache_t>> sources = {
+            std::vector<RequiredHandle<PipelineCache_t>> sources = {
                 srcCache1.handle(),
                 srcCache2.handle(),
                 srcCache3.handle()
@@ -341,7 +341,7 @@ TEST_SUITE("PipelineCache")
             CHECK(dstCache.isValid());
 
             // WHEN
-            std::vector<Handle<PipelineCache_t>> sources;
+            std::vector<RequiredHandle<PipelineCache_t>> sources;
             dstCache.merge(sources);
 
             // THEN
