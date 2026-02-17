@@ -12,6 +12,7 @@
 
 #include <KDGpu/queue.h>
 #include <KDGpu/vulkan/vulkan_resource_manager.h>
+#include <KDGpu/vulkan/vulkan_formatters.h>
 
 namespace KDGpu {
 
@@ -29,7 +30,6 @@ void VulkanQueue::waitUntilIdle()
 
 void VulkanQueue::submit(const SubmitOptions &options)
 {
-    constexpr size_t MaxWaitSemaphore = 10;
     // TODO: Do we need to expose the wait stage flags to the public API or is waiting
     // for the semaphores at the top of the pipeline good enough?
     const uint32_t waitSemaphoreCount = static_cast<uint32_t>(options.waitSemaphores.size());
@@ -87,12 +87,10 @@ void VulkanQueue::submit(const SubmitOptions &options)
         submitInfo.pCommandBuffers = m_vkCommandBuffers.data();
     }
 
-    // TODO: Support fences
-    // Make sure the fence is ready for use and submit
-    // VkFence inFlightFences[] = { frameFence };
-    // vkResetFences(renderer()->vulkanDevice()->device(), 1, inFlightFences);
-
-    VkResult result = vkQueueSubmit(queue, 1, &submitInfo, vkFenceToSignal);
+    const VkResult result = vkQueueSubmit(queue, 1, &submitInfo, vkFenceToSignal);
+    if (result != VK_SUCCESS) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Queue Submission failed {}", result);
+    }
 }
 
 namespace {

@@ -24,34 +24,34 @@ struct Sampler_t;
 struct AccelerationStructure_t;
 
 struct TextureViewSamplerBinding {
-    Handle<TextureView_t> textureView{};
-    Handle<Sampler_t> sampler{};
+    Handle<TextureView_t> textureView;
+    Handle<Sampler_t> sampler;
     TextureLayout layout{ TextureLayout::ShaderReadOnlyOptimal };
 };
 
 struct TextureViewBinding {
-    Handle<TextureView_t> textureView{};
+    Handle<TextureView_t> textureView;
     TextureLayout layout{ TextureLayout::ShaderReadOnlyOptimal };
 };
 
 struct InputAttachmentBinding {
-    Handle<TextureView_t> textureView{};
+    Handle<TextureView_t> textureView;
     TextureLayout layout{ TextureLayout::ShaderReadOnlyOptimal };
 };
 
 struct SamplerBinding {
-    Handle<Sampler_t> sampler{};
+    Handle<Sampler_t> sampler;
 };
 
 struct ImageBinding {
-    Handle<TextureView_t> textureView{};
+    Handle<TextureView_t> textureView;
     TextureLayout layout{ TextureLayout::General };
 };
 
 struct UniformBufferBinding {
     static constexpr uint32_t WholeSize = 0xffffffff;
 
-    Handle<Buffer_t> buffer{};
+    Handle<Buffer_t> buffer;
     uint32_t offset{ 0 };
     uint32_t size{ WholeSize };
 };
@@ -59,20 +59,20 @@ struct UniformBufferBinding {
 struct StorageBufferBinding {
     static constexpr uint32_t WholeSize = 0xffffffff;
 
-    Handle<Buffer_t> buffer{};
+    Handle<Buffer_t> buffer;
     uint32_t offset{ 0 };
     uint32_t size{ WholeSize };
 };
 
 struct DynamicUniformBufferBinding {
     static constexpr uint32_t WholeSize = 0xffffffff;
-    Handle<Buffer_t> buffer{};
+    Handle<Buffer_t> buffer;
     uint32_t offset{ 0 };
     uint32_t size{ WholeSize };
 };
 
 struct AccelerationStructureBinding {
-    Handle<AccelerationStructure_t> accelerationStructure{};
+    Handle<AccelerationStructure_t> accelerationStructure;
 };
 
 class BindingResource
@@ -145,8 +145,6 @@ public:
 
 private:
     union Resource {
-        Resource() { std::memset(this, 0, sizeof(Resource)); }
-
         TextureViewSamplerBinding combineTextureViewSampler;
         TextureViewBinding textureView;
         ImageBinding image;
@@ -156,7 +154,7 @@ private:
         DynamicUniformBufferBinding dynamicUniformBuffer;
         AccelerationStructureBinding accelerationStructure;
         InputAttachmentBinding inputAttachment;
-    } m_resource;
+    } m_resource{};
     ResourceBindingType m_type;
 };
 

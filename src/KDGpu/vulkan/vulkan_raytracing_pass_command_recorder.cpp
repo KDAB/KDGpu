@@ -77,9 +77,6 @@ VkStridedDeviceAddressRegionKHR buildVkStridedDeviceAddressRegion(
     VkStridedDeviceAddressRegionKHR vkRegion{};
     if (region.buffer.isValid()) {
         VulkanBuffer *vulkanBuffer = vulkanResourceManager->getBuffer(region.buffer);
-        VkBufferDeviceAddressInfo addressInfo = { VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO };
-        addressInfo.buffer = vulkanBuffer->buffer;
-
         vkRegion.deviceAddress = vulkanBuffer->bufferDeviceAddress() + region.offset;
         vkRegion.size = region.size;
         vkRegion.stride = region.stride;

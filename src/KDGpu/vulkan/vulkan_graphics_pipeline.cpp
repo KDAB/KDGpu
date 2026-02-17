@@ -20,9 +20,9 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VkPipeline _pipeline,
                                                const Handle<PipelineLayout_t> &_pipelineLayoutHandle,
                                                bool _dynamicRendering)
     : pipeline(_pipeline)
+    , enabledDynamicState(_enabledDynamicState)
     , vulkanResourceManager(_vulkanResourceManager)
     , renderPassHandle(_renderPassHandle)
-    , enabledDynamicState(_enabledDynamicState)
     , deviceHandle(_deviceHandle)
     , pipelineLayoutHandle(_pipelineLayoutHandle)
     , dynamicRendering(_dynamicRendering)

@@ -83,8 +83,6 @@ std::vector<uint64_t> VulkanTimestampQueryRecorder::queryResults()
     std::vector<uint64_t> finalResults;
     finalResults.reserve(results.size());
 
-    VulkanAdapter *adapter = vulkanResourceManager->getAdapter(vulkanDevice->adapterHandle);
-
     for (const QueryResult &r : results) {
         const uint64_t v = r.available == 0 ? 0 : r.result;
         finalResults.emplace_back(v);

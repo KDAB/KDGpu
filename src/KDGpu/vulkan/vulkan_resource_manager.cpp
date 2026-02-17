@@ -2911,8 +2911,6 @@ VulkanRenderPassCommandRecorder *VulkanResourceManager::getRenderPassCommandReco
 
 void VulkanResourceManager::deleteRenderPassCommandRecorder(const Handle<RenderPassCommandRecorder_t> &handle)
 {
-    VulkanRenderPassCommandRecorder *vulkanCommandPassRecorder = m_renderPassCommandRecorders.get(handle);
-
     m_renderPassCommandRecorders.remove(handle);
 }
 
@@ -2920,8 +2918,6 @@ Handle<ComputePassCommandRecorder_t> VulkanResourceManager::createComputePassCom
                                                                                              const Handle<CommandRecorder_t> &commandRecorderHandle,
                                                                                              const ComputePassCommandRecorderOptions &)
 {
-    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
-
     VulkanCommandRecorder *vulkanCommandRecorder = m_commandRecorders.get(commandRecorderHandle);
     if (!vulkanCommandRecorder) {
         SPDLOG_LOGGER_ERROR(Logger::logger(), "Could not find a valid command recorder");
@@ -2936,8 +2932,6 @@ Handle<ComputePassCommandRecorder_t> VulkanResourceManager::createComputePassCom
 
 void VulkanResourceManager::deleteComputePassCommandRecorder(const Handle<ComputePassCommandRecorder_t> &handle)
 {
-    VulkanComputePassCommandRecorder *vulkanCommandPassRecorder = m_computePassCommandRecorders.get(handle);
-
     m_computePassCommandRecorders.remove(handle);
 }
 
@@ -2948,8 +2942,6 @@ VulkanComputePassCommandRecorder *VulkanResourceManager::getComputePassCommandRe
 
 void VulkanResourceManager::deleteRayTracingPassCommandRecorder(const Handle<RayTracingPassCommandRecorder_t> &handle)
 {
-    VulkanRayTracingPassCommandRecorder *vulkanCommandPassRecorder = m_rayTracingPassCommandRecorders.get(handle);
-
     m_rayTracingPassCommandRecorders.remove(handle);
 }
 
@@ -2962,8 +2954,6 @@ Handle<RayTracingPassCommandRecorder_t> VulkanResourceManager::createRayTracingP
                                                                                                    const Handle<CommandRecorder_t> &commandRecorderHandle,
                                                                                                    const RayTracingPassCommandRecorderOptions &)
 {
-    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
-
     VulkanCommandRecorder *vulkanCommandRecorder = m_commandRecorders.get(commandRecorderHandle);
     if (!vulkanCommandRecorder) {
         SPDLOG_LOGGER_ERROR(Logger::logger(), "Could not find a valid command recorder");

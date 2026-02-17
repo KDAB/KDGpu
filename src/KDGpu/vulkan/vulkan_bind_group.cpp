@@ -33,11 +33,6 @@ void VulkanBindGroup::update(const BindGroupEntry &entry)
 {
     VulkanDevice *vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
 
-    VkDescriptorBufferInfo bufferInfo{};
-
-    VkDescriptorImageInfo imageInfo{};
-    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-
     if (descriptorSet == VK_NULL_HANDLE) {
         // If the descriptor set is null, we cannot update it.
         // This can happen if the pool has been reset and our BindGroup kept alive

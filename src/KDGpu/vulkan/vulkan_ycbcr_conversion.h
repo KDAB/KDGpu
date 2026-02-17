@@ -25,8 +25,8 @@ struct KDGPU_EXPORT VulkanYCbCrConversion {
     explicit VulkanYCbCrConversion(VkSamplerYcbcrConversionKHR _yCbCrConversion,
                                    const Handle<Device_t> &_deviceHandle);
 
-    Handle<Device_t> deviceHandle;
     VkSamplerYcbcrConversionKHR yCbCrConversion{ VK_NULL_HANDLE };
+    Handle<Device_t> deviceHandle;
 #endif
 };
 
