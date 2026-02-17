@@ -233,7 +233,7 @@ void ComputeOitTransparency::initializeParticles()
         auto computeShader = m_device.createShaderModule(KDGpuExample::readShaderFile(computeShaderPath));
 
         // Create bind group layout consisting of a single binding holding a SSBO
-        const BindGroupLayout bindGroupLayout = m_device.createBindGroupLayout(BindGroupLayoutOptions{
+        m_particles.bindGroupLayout = m_device.createBindGroupLayout(BindGroupLayoutOptions{
                 .bindings = {
                         {
                                 .binding = 0,
@@ -245,11 +245,11 @@ void ComputeOitTransparency::initializeParticles()
 
         // Create a pipeline layout (array of bind group layouts)
         m_particles.computePipelineLayout = m_device.createPipelineLayout(PipelineLayoutOptions{
-                .bindGroupLayouts = { bindGroupLayout } });
+                .bindGroupLayouts = { m_particles.bindGroupLayout } });
 
         // Create a bindGroup to hold the UBO with the transform
         m_particles.particleBindGroup = m_device.createBindGroup(BindGroupOptions{
-                .layout = bindGroupLayout,
+                .layout = m_particles.bindGroupLayout,
                 .resources = {
                         {
                                 .binding = 0,

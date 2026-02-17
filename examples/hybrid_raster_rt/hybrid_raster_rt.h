@@ -46,6 +46,7 @@ private:
     struct Particles {
         KDGpu::Buffer particleDataBuffer;
         KDGpu::Buffer blasTransformBuffer;
+        KDGpu::BindGroupLayout bindGroupLayout;
         KDGpu::PipelineLayout computePipelineLayout;
         KDGpu::ComputePipeline computePipeline;
         KDGpu::BindGroup particleBindGroup;

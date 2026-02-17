@@ -39,6 +39,7 @@ private:
     KDGpu::GraphicsPipeline m_graphicsPipeline;
     KDGpu::PipelineLayout m_graphicsPipelineLayout;
     KDGpu::PipelineLayout m_computePipelineLayout;
+    KDGpu::BindGroupLayout m_computeBindGroupLayout;
     KDGpu::CommandBuffer m_graphicsCommands;
     KDGpu::CommandBuffer m_computeCommands;
     KDGpu::CommandBuffer m_graphicsAndComputeCommands;

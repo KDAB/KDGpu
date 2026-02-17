@@ -131,11 +131,11 @@ void ComputeParticles::initializeScene()
             }}
         };
         // clang-format on
-        const BindGroupLayout bindGroupLayout = m_device.createBindGroupLayout(bindGroupLayoutOptions);
+        m_computeBindGroupLayout = m_device.createBindGroupLayout(bindGroupLayoutOptions);
 
         // Create a pipeline layout (array of bind group layouts)
         const PipelineLayoutOptions pipelineLayoutOptions = {
-            .bindGroupLayouts = { bindGroupLayout }
+            .bindGroupLayouts = { m_computeBindGroupLayout }
         };
         m_computePipelineLayout = m_device.createPipelineLayout(pipelineLayoutOptions);
         //![6]
@@ -144,7 +144,7 @@ void ComputeParticles::initializeScene()
         // clang-format off
         //![7]
         const BindGroupOptions bindGroupOptions {
-            .layout = bindGroupLayout,
+            .layout = m_computeBindGroupLayout,
             .resources = {{
                 .binding = 0,
                 .resource = StorageBufferBinding{ .buffer = m_particleDataBuffer }
@@ -233,6 +233,7 @@ void ComputeParticles::cleanupScene()
     m_particleDataBuffer = {};
     m_triangleVertexBuffer = {};
     m_particleBindGroup = {};
+    m_computeBindGroupLayout = {};
     m_computeSemaphoreComplete = {};
     m_graphicsCommands = {};
     m_computeCommands = {};
