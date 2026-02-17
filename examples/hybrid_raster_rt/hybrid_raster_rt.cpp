@@ -431,20 +431,6 @@ void HybridRasterRt::initializeCompositing()
                         .depthCompareOperation = CompareOperation::Less,
                 },
         });
-
-        m_compositing.renderPassOptions = {
-            .colorAttachments = {
-                    {
-                            .view = {}, // Not setting the swapchain texture view just yet
-                            .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
-                            .initialLayout = TextureLayout::Undefined,
-                            .finalLayout = TextureLayout::ColorAttachmentOptimal,
-                    },
-            },
-            .depthStencilAttachment = {
-                    .view = m_depthTextureView,
-            },
-        };
     };
     initializeGraphicsPipeline();
 }
@@ -488,24 +474,6 @@ void HybridRasterRt::initializeLightDisplay()
                         .topology = PrimitiveTopology::LineList,
                 },
         });
-
-        m_lightDisplayPass.renderPassOptions = {
-            .colorAttachments = {
-                    {
-                            .view = {}, // Not setting the swapchain texture view just yet
-                            .loadOperation = AttachmentLoadOperation::Load,
-                            .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
-                            .initialLayout = TextureLayout::ColorAttachmentOptimal,
-                            .finalLayout = TextureLayout::PresentSrc,
-                    },
-            },
-            .depthStencilAttachment = {
-                    .view = m_depthTextureView,
-                    .depthLoadOperation = AttachmentLoadOperation::Load,
-                    .stencilLoadOperation = AttachmentLoadOperation::Load,
-                    .initialLayout = TextureLayout::DepthStencilAttachmentOptimal,
-            },
-        };
     };
     initializeGraphicsPipeline();
 }
@@ -966,10 +934,6 @@ void HybridRasterRt::resize()
     // Recreated GBuffer textures
     m_gbuffer.resize(&m_device, m_swapchainExtent);
 
-    // Swapchain might have been resized and texture views recreated. Ensure we update the PassOptions accordingly
-    m_compositing.renderPassOptions.depthStencilAttachment.view = m_depthTextureView;
-    m_lightDisplayPass.renderPassOptions.depthStencilAttachment.view = m_depthTextureView;
-
     // Specify framebuffer dimensions when it cannot be deduced from the color attachments
     m_zfillPass.renderPassOptions = RenderPassCommandRecorderOptions{
         .colorAttachments = {},
@@ -1093,7 +1057,7 @@ void HybridRasterRt::render()
                         .color = { 0.0f, 1.0f, 0.0f, 1.0f },
                 });
 
-                auto opaquePass = commandRecorder.beginRenderPass(m_zfillPass.renderPassOptions);
+                auto opaquePass = commandRecorder.beginRenderPass(*m_zfillPass.renderPassOptions);
 
                 // Draw Opaque Spheres
                 opaquePass.setPipeline(m_sphereMesh.zFillGraphicsPipeline);
@@ -1187,7 +1151,7 @@ void HybridRasterRt::render()
                 // Wait until depth buffer has been filled (implicit since referenced by the RenderPass)
 
                 // Render Alpha meshes to fragment list
-                auto alphaPass = commandRecorder.beginRenderPass(m_alphaPass.renderPassOptions);
+                auto alphaPass = commandRecorder.beginRenderPass(*m_alphaPass.renderPassOptions);
 
                 // Draw Alpha Spheres
                 alphaPass.setPipeline(m_sphereMesh.alphaFillGraphicsPipeline);
@@ -1210,7 +1174,7 @@ void HybridRasterRt::render()
                         .color = { 0.0f, 1.0f, 1.0f, 1.0f },
                 });
 
-                auto opaquePass = commandRecorder.beginRenderPass(m_opaquePass.renderPassOptions);
+                auto opaquePass = commandRecorder.beginRenderPass(*m_opaquePass.renderPassOptions);
 
                 // Draw Opaque Spheres
                 opaquePass.setPipeline(m_sphereMesh.opaqueFillGraphicsPipeline);
@@ -1378,9 +1342,20 @@ void HybridRasterRt::render()
             });
 
             // Render Compositing full screen quad to screen
-            m_compositing.renderPassOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex);
 
-            auto compositingPass = commandRecorder.beginRenderPass(m_compositing.renderPassOptions);
+            RenderPassCommandRecorder compositingPass = commandRecorder.beginRenderPass(RenderPassCommandRecorderOptions{
+                    .colorAttachments = {
+                            {
+                                    .view = m_swapchainViews.at(m_currentSwapchainImageIndex),
+                                    .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
+                                    .initialLayout = TextureLayout::Undefined,
+                                    .finalLayout = TextureLayout::ColorAttachmentOptimal,
+                            },
+                    },
+                    .depthStencilAttachment = {
+                            .view = m_depthTextureView,
+                    },
+            });
             compositingPass.setPipeline(m_compositing.graphicsPipeline);
             compositingPass.setBindGroup(0, m_gbuffer.opaqueNormalDepthBindGroup);
             compositingPass.setBindGroup(1, m_gbuffer.alphaLinkedListBindGroup);
@@ -1398,9 +1373,23 @@ void HybridRasterRt::render()
                     .color = { 1.0f, 0.5f, 0.5f, 1.0f },
             });
 
-            m_lightDisplayPass.renderPassOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex);
-
-            auto lightDisplayPass = commandRecorder.beginRenderPass(m_lightDisplayPass.renderPassOptions);
+            RenderPassCommandRecorder lightDisplayPass = commandRecorder.beginRenderPass(RenderPassCommandRecorderOptions{
+                    .colorAttachments = {
+                            {
+                                    .view = m_swapchainViews.at(m_currentSwapchainImageIndex),
+                                    .loadOperation = AttachmentLoadOperation::Load,
+                                    .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
+                                    .initialLayout = TextureLayout::ColorAttachmentOptimal,
+                                    .finalLayout = TextureLayout::PresentSrc,
+                            },
+                    },
+                    .depthStencilAttachment = {
+                            .view = m_depthTextureView,
+                            .depthLoadOperation = AttachmentLoadOperation::Load,
+                            .stencilLoadOperation = AttachmentLoadOperation::Load,
+                            .initialLayout = TextureLayout::DepthStencilAttachmentOptimal,
+                    },
+            });
             lightDisplayPass.setPipeline(m_lightDisplayPass.graphicsPipeline);
             lightDisplayPass.setBindGroup(0, m_global.cameraBindGroup);
             lightDisplayPass.pushConstant(m_global.lightPosPushConstant, &m_global.lightPos);

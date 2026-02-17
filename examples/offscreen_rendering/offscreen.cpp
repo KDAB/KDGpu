@@ -363,7 +363,22 @@ void Offscreen::render(const std::string &baseFilename)
 
     // Render the scene to the offscreen color texture target
     auto commandRecorder = m_device.createCommandRecorder();
-    auto renderPass = commandRecorder.beginRenderPass(m_renderPassOptions);
+
+    //![9]
+    auto renderPass = commandRecorder.beginRenderPass(KDGpu::RenderPassCommandRecorderOptions{
+            .colorAttachments = {
+                    {
+                            .view = m_msaaColorTextureView,
+                            .resolveView = m_colorTextureView,
+                            .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
+                    },
+            },
+            .depthStencilAttachment = {
+                    .view = m_depthTextureView,
+            },
+            .samples = m_samples,
+    });
+    //![9]
     renderPass.setPipeline(m_pipeline);
     renderPass.setBindGroup(0, m_pointTextureBindGroup);
     renderPass.setBindGroup(1, m_transformBindGroup);
@@ -484,24 +499,6 @@ void Offscreen::createRenderTargets()
     };
     m_depthTexture = m_device.createTexture(depthTextureOptions);
     m_depthTextureView = m_depthTexture.createView();
-
-    // clang-format off
-    //![9]
-    m_renderPassOptions = {
-        .colorAttachments = {
-            {
-                .view = m_msaaColorTextureView,
-                .resolveView = m_colorTextureView,
-                .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f }
-            }
-        },
-        .depthStencilAttachment = {
-            .view = m_depthTextureView,
-        },
-        .samples = m_samples
-    };
-    //![9]
-    // clang-format on
 
     //![10]
     // Create a color texture that is host visible and in linear layout. We will copy into this.

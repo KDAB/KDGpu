@@ -341,20 +341,6 @@ void ComputeOitTransparency::initializeCompositing()
                         .depthCompareOperation = CompareOperation::Less,
                 },
         });
-
-        m_compositing.renderPassOptions = {
-            .colorAttachments = {
-                    {
-                            .view = {}, // Not setting the swapchain texture view just yet
-                            .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
-                            .initialLayout = TextureLayout::Undefined,
-                            .finalLayout = TextureLayout::PresentSrc,
-                    },
-            },
-            .depthStencilAttachment = {
-                    .view = m_depthTextureView,
-            },
-        };
     };
     initializeGraphicsPipeline();
 }
@@ -499,13 +485,10 @@ void ComputeOitTransparency::updateScene()
 
 void ComputeOitTransparency::resize()
 {
-    // Swapchain might have been resized and texture views recreated. Ensure we update the PassOptions accordingly
-    m_compositing.renderPassOptions.depthStencilAttachment.view = m_depthTextureView;
-
     // Set FrameBuffer size to use for the Alpha pass which has no color attachment (hence we can't retrieve the framebuffer dimensions from the attachment)
-    m_alpha.renderPassOptions.framebufferWidth = m_window->width();
-    m_alpha.renderPassOptions.framebufferHeight = m_window->height();
-    m_alpha.renderPassOptions.framebufferArrayLayers = 1;
+    m_alpha.renderPassOptions->framebufferWidth = m_window->width();
+    m_alpha.renderPassOptions->framebufferHeight = m_window->height();
+    m_alpha.renderPassOptions->framebufferArrayLayers = 1;
 
     // Recreated fragmentHeadsPointer texture
     m_alpha.fragmentHeadsPointer = m_device.createTexture(KDGpu::TextureOptions{
@@ -659,7 +642,7 @@ void ComputeOitTransparency::render()
             });
 
             // Render Alpha meshes to fragment list
-            auto alphaPass = commandRecorder.beginRenderPass(m_alpha.renderPassOptions);
+            auto alphaPass = commandRecorder.beginRenderPass(*m_alpha.renderPassOptions);
 
             // Draw Spheres
             alphaPass.setPipeline(m_sphereMesh.graphicsPipeline);
@@ -705,8 +688,19 @@ void ComputeOitTransparency::render()
             });
 
             // Render Compositing full screen quad to screen
-            m_compositing.renderPassOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex);
-            auto compositingPass = commandRecorder.beginRenderPass(m_compositing.renderPassOptions);
+            auto compositingPass = commandRecorder.beginRenderPass(RenderPassCommandRecorderOptions{
+                    .colorAttachments = {
+                            {
+                                    .view = m_swapchainViews.at(m_currentSwapchainImageIndex),
+                                    .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
+                                    .initialLayout = TextureLayout::Undefined,
+                                    .finalLayout = TextureLayout::PresentSrc,
+                            },
+                    },
+                    .depthStencilAttachment = {
+                            .view = m_depthTextureView,
+                    },
+            });
             compositingPass.setPipeline(m_compositing.graphicsPipeline);
             compositingPass.setBindGroup(0, m_alpha.alphaLinkedListBindGroup);
             compositingPass.draw(DrawCommand{ .vertexCount = 6 });

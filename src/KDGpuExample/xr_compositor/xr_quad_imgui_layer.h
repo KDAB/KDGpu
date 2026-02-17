@@ -65,12 +65,10 @@ protected:
 
     void recreateImGuiOverlay();
     void updateImGuiOverlay();
-    void setupRenderPassOptions();
 
     std::unique_ptr<ImGuiItem> m_imguiOverlay;
     std::vector<std::function<void(ImGuiContext *)>> m_imGuiOverlayDrawFunctions;
 
-    KDGpu::RenderPassCommandRecorderOptions m_imguiPassOptions;
     KDGpu::Fence m_fence;
     KDGpu::CommandBuffer m_commandBuffer;
 };

@@ -334,26 +334,6 @@ void WireframeGeometry::initializeScene()
         m_transformBindGroup = m_device.createBindGroup(bindGroupOptions);
     }
 
-    // Most of the render pass is the same between frames. The only thing that changes, is which image
-    // of the swapchain we wish to render to. So set up what we can here, and in the render loop we will
-    // just update the color texture view.
-    // clang-format off
-    m_opaquePassOptions = {
-        .colorAttachments = {
-            {
-                .view = m_msaaTextureView, // We render to a multisampled texture, not directly to the swapchain image
-                .resolveView = {}, // Not setting the swapchain texture view just yet
-                .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
-                .finalLayout = TextureLayout::PresentSrc
-            }
-        },
-        .depthStencilAttachment = {
-            .view = m_depthTextureView,
-        },
-        .samples = m_samples.get()
-    };
-    // clang-format on
-
     // Create a multisample texture into which we will render. The pipeline will then resolve the
     // multi-sampled texture into the current swapchain image.
     createRenderTarget();
@@ -387,10 +367,6 @@ void WireframeGeometry::cleanupScene()
 
 void WireframeGeometry::createRenderTarget()
 {
-    // Reset depthTextureView as depthStencilAttachment view as it might
-    // have been recreated following a resize
-    m_opaquePassOptions.depthStencilAttachment.view = m_depthTextureView;
-
     const TextureOptions options = {
         .type = TextureType::TextureType2D,
         .format = m_swapchainFormat,
@@ -403,9 +379,6 @@ void WireframeGeometry::createRenderTarget()
     };
     m_msaaTexture = m_device.createTexture(options);
     m_msaaTextureView = m_msaaTexture.createView();
-
-    if (isMsaaEnabled())
-        m_opaquePassOptions.colorAttachments[0].view = m_msaaTextureView;
 }
 
 bool WireframeGeometry::isMsaaEnabled() const
@@ -505,8 +478,20 @@ void WireframeGeometry::render()
 {
     auto commandRecorder = m_device.createCommandRecorder();
 
-    m_opaquePassOptions.colorAttachments[0].resolveView = m_swapchainViews.at(m_currentSwapchainImageIndex);
-    auto opaquePass = commandRecorder.beginRenderPass(m_opaquePassOptions);
+    auto opaquePass = commandRecorder.beginRenderPass(KDGpu::RenderPassCommandRecorderOptions{
+            .colorAttachments = {
+                    {
+                            .view = m_msaaTextureView, // We render to a multisampled texture, not directly to the swapchain image
+                            .resolveView = m_swapchainViews.at(m_currentSwapchainImageIndex),
+                            .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
+                            .finalLayout = TextureLayout::PresentSrc,
+                    },
+            },
+            .depthStencilAttachment = {
+                    .view = m_depthTextureView,
+            },
+            .samples = m_samples.get(),
+    });
 
     opaquePass.setPipeline(m_pipeline);
     opaquePass.setVertexBuffer(0, m_vertexBuffer);

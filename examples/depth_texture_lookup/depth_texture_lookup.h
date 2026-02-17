@@ -36,7 +36,6 @@ private:
     // Scene Cube Pass
     KDGpu::PipelineLayout m_sceneCubePipelineLayout;
     KDGpu::GraphicsPipeline m_sceneCubePipeline;
-    KDGpu::RenderPassCommandRecorderOptions m_sceneCubePassOptions;
     KDGpu::PushConstantRange m_rotationPushConstantRange;
 
     // Depth Lookup Pass
@@ -45,10 +44,6 @@ private:
     KDGpu::BindGroupLayout m_depthLookupBindGroupLayout;
     KDGpu::PipelineLayout m_depthLookupPipelineLayout;
     KDGpu::GraphicsPipeline m_depthLookupPipeline;
-    KDGpu::RenderPassCommandRecorderOptions m_depthLookupPassOptions;
-
-    // ImGui Overlay Pass
-    KDGpu::RenderPassCommandRecorderOptions m_overlayPassOptions;
 
     KDGpu::CommandBuffer m_commandBuffer;
     KDGpu::TextureLayout m_depthLayout = KDGpu::TextureLayout::Undefined;

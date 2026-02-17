@@ -98,16 +98,6 @@ void MultiViewStereo::initializeScene()
     //![4]
 
     //![5]
-    m_opaquePassOptions = {
-        .colorAttachments = {
-                { .view = {}, // Not setting the swapchain texture view just yet
-                  .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
-                  .finalLayout = TextureLayout::PresentSrc },
-        },
-        .depthStencilAttachment = { .view = m_depthTextureView },
-        .viewCount = 2, // Enables multiview rendering
-    };
-    //![5]
 }
 
 void MultiViewStereo::cleanupScene()
@@ -192,8 +182,6 @@ void MultiViewStereo::updateScene()
 
 void MultiViewStereo::resize()
 {
-    // Swapchain might have been resized and texture views recreated. Ensure we update the PassOptions accordingly
-    m_opaquePassOptions.depthStencilAttachment.view = m_depthTextureView;
 }
 
 void MultiViewStereo::render()
@@ -208,9 +196,19 @@ void MultiViewStereo::render()
 
     //![7]
     // MultiViewStereo OpaquePass
-    m_opaquePassOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex);
-
-    auto opaquePass = commandRecorder.beginRenderPass(m_opaquePassOptions);
+    auto opaquePass = commandRecorder.beginRenderPass(KDGpu::RenderPassCommandRecorderOptions{
+            .colorAttachments = {
+                    {
+                            .view = m_swapchainViews.at(m_currentSwapchainImageIndex),
+                            .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
+                            .finalLayout = TextureLayout::PresentSrc,
+                    },
+            },
+            .depthStencilAttachment = {
+                    .view = m_depthTextureView,
+            },
+            .viewCount = 2, // We want to process and render 2 views at once
+    });
     opaquePass.setPipeline(m_pipeline);
     opaquePass.setVertexBuffer(0, m_vertexBuffer);
     opaquePass.pushConstant(m_pushConstantRange, &rotationAngleRad);

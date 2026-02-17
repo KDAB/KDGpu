@@ -63,13 +63,8 @@ void MultiView::updateScene()
 
 void MultiView::resize()
 {
-    // Swapchain might have been resized and texture views recreated. Ensure we update the PassOptions accordingly
-    m_fsqPassOptions.depthStencilAttachment.view = m_depthTextureView;
-
+    // Swapchain might have been resized and texture views recreated.
     createMultiViewOffscreenTextures();
-
-    m_mvPassOptions.colorAttachments[0].view = m_multiViewColorOutputView;
-    m_mvPassOptions.depthStencilAttachment.view = m_multiViewDepthView;
 
     updateFinalPassBindGroup();
 }
@@ -171,18 +166,6 @@ void MultiView::initializeMultiViewPass()
             },
             .viewCount = 2,
     });
-
-    //![5]
-    m_mvPassOptions = {
-        .colorAttachments = {
-                { .view = m_multiViewColorOutputView,
-                  .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
-                  .finalLayout = TextureLayout::ColorAttachmentOptimal },
-        },
-        .depthStencilAttachment = { .view = m_multiViewDepthView },
-        .viewCount = 2, // Enables multiview rendering
-    };
-    //![5]
 }
 
 void MultiView::initializeFullScreenPass()
@@ -226,15 +209,6 @@ void MultiView::initializeFullScreenPass()
             .depthStencil = { .format = m_depthFormat, .depthWritesEnabled = true, .depthCompareOperation = CompareOperation::Less },
     });
 
-    // Prepare pass options
-    m_fsqPassOptions = {
-        .colorAttachments = {
-                { .view = {}, // Not setting the swapchain texture view just yet
-                  .clearValue = { 0.0f, 0.0f, 0.0f, 1.0f },
-                  .finalLayout = TextureLayout::PresentSrc } },
-        .depthStencilAttachment = { .view = m_depthTextureView }
-    };
-
     // Create a sampler we can use to sample from the color texture in the final pass
     m_multiViewColorOutputSampler = m_device.createSampler();
 }
@@ -269,7 +243,15 @@ void MultiView::render()
 
     //![6]
     // MultiView Pass
-    auto mvPass = commandRecorder.beginRenderPass(m_mvPassOptions);
+    auto mvPass = commandRecorder.beginRenderPass(RenderPassCommandRecorderOptions{
+            .colorAttachments = {
+                    { .view = m_multiViewColorOutputView,
+                      .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
+                      .finalLayout = TextureLayout::ColorAttachmentOptimal },
+            },
+            .depthStencilAttachment = { .view = m_multiViewDepthView },
+            .viewCount = 2, // Enables multiview rendering
+    });
     mvPass.setPipeline(m_mvPipeline);
     mvPass.setVertexBuffer(0, m_vertexBuffer);
     mvPass.pushConstant(m_mvPushConstantRange, &rotationAngleRad);
@@ -295,8 +277,16 @@ void MultiView::render()
 
     //![8]
     // FullScreen Pass
-    m_fsqPassOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex);
-    auto fsqPass = commandRecorder.beginRenderPass(m_fsqPassOptions);
+    auto fsqPass = commandRecorder.beginRenderPass(RenderPassCommandRecorderOptions{
+            .colorAttachments = {
+                    {
+                            .view = m_swapchainViews.at(m_currentSwapchainImageIndex),
+                            .clearValue = { 0.0f, 0.0f, 0.0f, 1.0f },
+                            .finalLayout = TextureLayout::PresentSrc,
+                    },
+            },
+            .depthStencilAttachment = { .view = m_depthTextureView },
+    });
     fsqPass.setPipeline(m_fsqPipeline);
     fsqPass.setBindGroup(0, m_fsqTextureBindGroup);
 

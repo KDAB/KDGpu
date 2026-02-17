@@ -53,22 +53,7 @@ void HelloSphereMesh::initializeScene()
         }
     };
     m_pipeline = m_device.createGraphicsPipeline(pipelineOptions);
-
-    // Most of the render pass is the same between frames. The only thing that changes, is which image
-    // of the swapchain we wish to render to. So set up what we can here, and in the render loop we will
-    // just update the color texture view.
-    m_opaquePassOptions = {
-        .colorAttachments = {
-                {
-                        .view = {}, // Not setting the swapchain texture view just yet
-                        .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
-                        .finalLayout = TextureLayout::PresentSrc,
-                },
-        },
-        .depthStencilAttachment = {
-                .view = m_depthTextureView,
-        }
-    };
+    //![2]
 }
 
 void HelloSphereMesh::cleanupScene()
@@ -84,16 +69,24 @@ void HelloSphereMesh::updateScene()
 
 void HelloSphereMesh::resize()
 {
-    // Swapchain might have been resized and texture views recreated. Ensure we update the PassOptions accordingly
-    m_opaquePassOptions.depthStencilAttachment.view = m_depthTextureView;
 }
 
 void HelloSphereMesh::render()
 {
     auto commandRecorder = m_device.createCommandRecorder();
 
-    m_opaquePassOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex);
-    auto opaquePass = commandRecorder.beginRenderPass(m_opaquePassOptions);
+    auto opaquePass = commandRecorder.beginRenderPass(KDGpu::RenderPassCommandRecorderOptions{
+            .colorAttachments = {
+                    {
+                            .view = m_swapchainViews.at(m_currentSwapchainImageIndex),
+                            .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
+                            .finalLayout = TextureLayout::PresentSrc,
+                    },
+            },
+            .depthStencilAttachment = {
+                    .view = m_depthTextureView,
+            },
+    });
 
     opaquePass.setPipeline(m_pipeline);
     opaquePass.drawMeshTasks(KDGpu::DrawMeshCommand{

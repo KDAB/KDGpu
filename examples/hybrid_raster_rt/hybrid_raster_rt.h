@@ -88,32 +88,29 @@ private:
     } m_gbuffer;
 
     struct DepthFillPass {
-        KDGpu::RenderPassCommandRecorderOptions renderPassOptions;
+        std::optional<KDGpu::RenderPassCommandRecorderOptions> renderPassOptions;
     } m_zfillPass;
 
     struct AlphaFillPass {
-        KDGpu::RenderPassCommandRecorderOptions renderPassOptions;
+        std::optional<KDGpu::RenderPassCommandRecorderOptions> renderPassOptions;
     } m_alphaPass;
 
     struct OpaquePass {
-        KDGpu::RenderPassCommandRecorderOptions renderPassOptions;
+        std::optional<KDGpu::RenderPassCommandRecorderOptions> renderPassOptions;
     } m_opaquePass;
 
     struct LightDisplayPass {
-        KDGpu::RenderPassCommandRecorderOptions renderPassOptions;
         KDGpu::PipelineLayout graphicsPipelineLayout;
         KDGpu::GraphicsPipeline graphicsPipeline;
     } m_lightDisplayPass;
 
     struct ShadowPass {
-        KDGpu::RayTracingPassCommandRecorderOptions rtPassOptions;
         KDGpu::PipelineLayout pipelineLayout;
         KDGpu::RayTracingPipeline pipeline;
         KDGpu::RayTracingShaderBindingTable sbt;
     } m_shadowPass;
 
     struct Compositing {
-        KDGpu::RenderPassCommandRecorderOptions renderPassOptions;
         KDGpu::PipelineLayout graphicsPipelineLayout;
         KDGpu::GraphicsPipeline graphicsPipeline;
     } m_compositing;

@@ -53,8 +53,6 @@ XrQuadImGuiLayer::XrQuadImGuiLayer(const XrQuadLayerOptions &options)
     });
 
     registerImGuiOverlayDrawFunction(drawMouseCursor);
-
-    (void)backgroundColor.valueChanged().connect([this]() { setupRenderPassOptions(); });
 }
 
 XrQuadImGuiLayer::~XrQuadImGuiLayer()
@@ -64,8 +62,6 @@ XrQuadImGuiLayer::~XrQuadImGuiLayer()
 void XrQuadImGuiLayer::initialize()
 {
     XrQuadLayer::initialize();
-
-    setupRenderPassOptions();
 
     // Use a fence to stop us trampling on frames in flight
     m_fence = m_device->createFence({ .label = "ImGui Fence" });
@@ -89,9 +85,18 @@ void XrQuadImGuiLayer::renderQuad()
     auto commandRecorder = m_device->createCommandRecorder();
 
     // Set up the render pass using the current color and depth texture views
-    m_imguiPassOptions.colorAttachments[0].view = m_colorSwapchain.textureViews[m_currentColorImageIndex];
-    m_imguiPassOptions.depthStencilAttachment.view = m_depthSwapchain.textureViews[m_currentDepthImageIndex];
-    auto imguiPass = commandRecorder.beginRenderPass(m_imguiPassOptions);
+    auto imguiPass = commandRecorder.beginRenderPass(RenderPassCommandRecorderOptions{
+            .colorAttachments = {
+                    {
+                            .view = m_colorSwapchain.textureViews[m_currentColorImageIndex], // Not setting the swapchain texture view just yet
+                            .clearValue = backgroundColor(),
+                            .finalLayout = TextureLayout::ColorAttachmentOptimal,
+                    },
+            },
+            .depthStencilAttachment = {
+                    .view = {} // Not setting the depth texture view just yet
+            },
+    });
 
     renderImGuiOverlay(&imguiPass, m_currentColorImageIndex);
 
@@ -159,24 +164,6 @@ ImGuiItem &XrQuadImGuiLayer::overlay()
 {
     assert(m_imguiOverlay);
     return *m_imguiOverlay;
-}
-
-void XrQuadImGuiLayer::setupRenderPassOptions()
-{
-    // clang-format off
-    m_imguiPassOptions = {
-        .colorAttachments = {
-            {
-                .view = {}, // Not setting the swapchain texture view just yet
-                .clearValue = backgroundColor(),
-                .finalLayout = TextureLayout::ColorAttachmentOptimal
-            }
-        },
-        .depthStencilAttachment = {
-            .view = {} // Not setting the depth texture view just yet
-        }
-    };
-    // clang-format on
 }
 
 void XrQuadImGuiLayer::drawMouseCursor(ImGuiContext *ctx)

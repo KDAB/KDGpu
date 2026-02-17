@@ -361,25 +361,6 @@ void ProjectionLayer::initializeScene()
     // clang-format on
     m_cameraBindGroup = m_device->createBindGroup(cameraBindGroupOptions);
 
-    // Most of the render pass is the same between frames. The only thing that changes, is which image
-    // of the swapchain we wish to render to. So set up what we can here, and in the render loop we will
-    // just update the color texture view.
-    // clang-format off
-    m_opaquePassOptions = {
-        .colorAttachments = {
-            {
-                .view = {}, // Not setting the swapchain texture view just yet
-                .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
-                .finalLayout = TextureLayout::ColorAttachmentOptimal
-            }
-        },
-        .depthStencilAttachment = {
-            .view = {} // Not setting the depth texture view just yet
-        },
-        .viewCount = viewCount()
-    };
-    // clang-format on
-
     // We will use a fence to synchronize CPU and GPU. When we render image for each view (eye), we
     // shall wait for the fence to be signaled before we update any shared resources such as a view
     // matrix UBO (not used yet). An alternative would be to index into an array of such matrices.
@@ -544,9 +525,21 @@ void ProjectionLayer::renderView()
     auto commandRecorder = m_device->createCommandRecorder();
 
     // Set up the render pass using the current color and depth texture views
-    m_opaquePassOptions.colorAttachments[0].view = m_colorSwapchains[0].textureViews[m_currentColorImageIndex];
-    m_opaquePassOptions.depthStencilAttachment.view = m_depthSwapchains[0].textureViews[m_currentDepthImageIndex];
-    auto opaquePass = commandRecorder.beginRenderPass(m_opaquePassOptions);
+    //![U][XrMultiviewRenderPass]
+    auto opaquePass = commandRecorder.beginRenderPass(KDGpu::RenderPassCommandRecorderOptions{
+            .colorAttachments = {
+                    {
+                            .view = m_colorSwapchains[0].textureViews[m_currentColorImageIndex],
+                            .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
+                            .finalLayout = TextureLayout::ColorAttachmentOptimal,
+                    },
+            },
+            .depthStencilAttachment = {
+                    .view = m_depthSwapchains[0].textureViews[m_currentDepthImageIndex],
+            },
+            .viewCount = viewCount(),
+    });
+    //![U][XrMultiviewRenderPass]
 
     // Draw the main triangle
     opaquePass.setPipeline(m_pipeline);

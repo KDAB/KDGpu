@@ -124,24 +124,6 @@ void HelloTriangle::initializeScene()
     };
     // clang-format on
     m_pipeline = m_device.createGraphicsPipeline(pipelineOptions);
-
-    // Most of the render pass is the same between frames. The only thing that changes, is which image
-    // of the swapchain we wish to render to. So set up what we can here, and in the render loop we will
-    // just update the color texture view.
-    // clang-format off
-    m_opaquePassOptions = {
-        .colorAttachments = {
-            {
-                .view = {}, // Not setting the swapchain texture view just yet
-                .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
-                .finalLayout = TextureLayout::PresentSrc
-            }
-        },
-        .depthStencilAttachment = {
-            .view = m_depthTextureView,
-        }
-    };
-    // clang-format on
 }
 
 void HelloTriangle::cleanupScene()
@@ -171,16 +153,24 @@ void HelloTriangle::updateScene()
 
 void HelloTriangle::resize()
 {
-    // Swapchain might have been resized and texture views recreated. Ensure we update the PassOptions accordingly
-    m_opaquePassOptions.depthStencilAttachment.view = m_depthTextureView;
 }
 
 void HelloTriangle::render()
 {
     auto commandRecorder = m_device.createCommandRecorder();
 
-    m_opaquePassOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex);
-    auto opaquePass = commandRecorder.beginRenderPass(m_opaquePassOptions);
+    auto opaquePass = commandRecorder.beginRenderPass(RenderPassCommandRecorderOptions{
+            .colorAttachments = {
+                    {
+                            .view = m_swapchainViews.at(m_currentSwapchainImageIndex), // Not setting the swapchain texture view just yet
+                            .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
+                            .finalLayout = TextureLayout::PresentSrc,
+                    },
+            },
+            .depthStencilAttachment = {
+                    .view = m_depthTextureView,
+            },
+    });
 
     opaquePass.setPipeline(m_pipeline);
     opaquePass.setVertexBuffer(0, m_buffer);

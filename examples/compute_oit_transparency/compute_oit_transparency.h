@@ -47,7 +47,7 @@ private:
         KDGpu::Buffer fragmentLinkedListBuffer;
         KDGpu::Texture fragmentHeadsPointer;
         KDGpu::TextureView fragmentHeadsPointerView;
-        KDGpu::RenderPassCommandRecorderOptions renderPassOptions;
+        std::optional<KDGpu::RenderPassCommandRecorderOptions> renderPassOptions;
         size_t fragmentLinkedListBufferByteSize;
         KDGpu::BindGroupLayout alphaBindGroupLayout;
         KDGpu::BindGroup alphaLinkedListBindGroup;
@@ -55,7 +55,6 @@ private:
     } m_alpha;
 
     struct Compositing {
-        KDGpu::RenderPassCommandRecorderOptions renderPassOptions;
         KDGpu::PipelineLayout graphicsPipelineLayout;
         KDGpu::GraphicsPipeline graphicsPipeline;
     } m_compositing;

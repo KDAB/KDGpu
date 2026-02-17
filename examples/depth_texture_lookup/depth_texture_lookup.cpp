@@ -69,21 +69,6 @@ void DepthTextureLookup::initializeScene()
                 .depthStencil = { .format = m_depthFormat, .depthWritesEnabled = true, .depthCompareOperation = CompareOperation::Less },
                 .primitive = { .topology = PrimitiveTopology::TriangleList },
         });
-
-        // Most of the render pass is the same between frames. The only thing that changes, is which image
-        // of the swapchain we wish to render to. So set up what we can here, and in the render loop we will
-        // just update the color texture view.
-        m_sceneCubePassOptions = {
-            .colorAttachments = {
-                    {
-                            .view = {}, // Not setting the swapchain texture view just yet
-                            .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
-                    },
-            },
-            .depthStencilAttachment = {
-                    .view = m_depthTextureView,
-            },
-        };
     }
     //![1]
 
@@ -135,40 +120,8 @@ void DepthTextureLookup::initializeScene()
                         },
                 },
         });
-
-        // Most of the render pass is the same between frames. The only thing that changes, is which image
-        // of the swapchain we wish to render to. So set up what we can here, and in the render loop we will
-        // just update the color texture view.
-        m_depthLookupPassOptions = {
-            .colorAttachments = {
-                    {
-                            .view = {}, // Not setting the swapchain texture view just yet
-                            .loadOperation = AttachmentLoadOperation::Load, // Don't clear color
-                            .initialLayout = TextureLayout::ColorAttachmentOptimal,
-                    },
-            },
-        };
     }
     //![2]
-
-    //![3]
-    // ImGui Overlay Pass
-    {
-        m_overlayPassOptions = {
-            .colorAttachments = {
-                    { .view = {}, // Not setting the swapchain texture view just yet
-                      .loadOperation = AttachmentLoadOperation::Load, // Don't clear color
-                      .initialLayout = TextureLayout::ColorAttachmentOptimal,
-                      .finalLayout = TextureLayout::PresentSrc },
-            },
-            .depthStencilAttachment = {
-                    .view = m_depthTextureView,
-                    .depthLoadOperation = AttachmentLoadOperation::Load, // Load the depth buffer as is, don't clear it
-                    .initialLayout = TextureLayout::DepthStencilAttachmentOptimal,
-            },
-        };
-    }
-    //![3]
 }
 
 void DepthTextureLookup::cleanupScene()
@@ -191,10 +144,6 @@ void DepthTextureLookup::updateScene()
 
 void DepthTextureLookup::resize()
 {
-    // Swapchain might have been resized and texture views recreated. Ensure we update the PassOptions accordingly
-    m_sceneCubePassOptions.depthStencilAttachment.view = m_depthTextureView;
-    m_overlayPassOptions.depthStencilAttachment.view = m_depthTextureView;
-
     // Update the depth texture view on the bind group
     m_depthTextureBindGroup.update(BindGroupEntry{
             .binding = 0,
@@ -208,10 +157,6 @@ void DepthTextureLookup::render()
 {
     //![4]
     auto commandRecorder = m_device.createCommandRecorder();
-
-    m_sceneCubePassOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex);
-    m_depthLookupPassOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex);
-    m_overlayPassOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex);
     //![4]
 
     //![5]
@@ -226,7 +171,17 @@ void DepthTextureLookup::render()
 
     glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(1.0f, 1.0f, 1.0f));
 
-    auto opaquePass = commandRecorder.beginRenderPass(m_sceneCubePassOptions);
+    auto opaquePass = commandRecorder.beginRenderPass(RenderPassCommandRecorderOptions{
+            .colorAttachments = {
+                    {
+                            .view = m_swapchainViews.at(m_currentSwapchainImageIndex),
+                            .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
+                    },
+            },
+            .depthStencilAttachment = {
+                    .view = m_depthTextureView,
+            },
+    });
     opaquePass.setPipeline(m_sceneCubePipeline);
     opaquePass.pushConstant(m_rotationPushConstantRange, &rotation);
     opaquePass.draw(DrawCommand{ .vertexCount = 36 });
@@ -251,7 +206,15 @@ void DepthTextureLookup::render()
     });
 
     // Draw Quad that displays depth lookup
-    auto depthLookupPass = commandRecorder.beginRenderPass(m_depthLookupPassOptions);
+    auto depthLookupPass = commandRecorder.beginRenderPass(RenderPassCommandRecorderOptions{
+            .colorAttachments = {
+                    {
+                            .view = m_swapchainViews.at(m_currentSwapchainImageIndex),
+                            .loadOperation = AttachmentLoadOperation::Load, // Don't clear color
+                            .initialLayout = TextureLayout::ColorAttachmentOptimal,
+                    },
+            },
+    });
     depthLookupPass.setPipeline(m_depthLookupPipeline);
     depthLookupPass.setBindGroup(0, m_depthTextureBindGroup);
     depthLookupPass.draw(DrawCommand{ .vertexCount = 6 });
@@ -276,7 +239,21 @@ void DepthTextureLookup::render()
     //![6]
 
     //![7]
-    auto overlayPass = commandRecorder.beginRenderPass(m_overlayPassOptions);
+    auto overlayPass = commandRecorder.beginRenderPass(RenderPassCommandRecorderOptions{
+            .colorAttachments = {
+                    {
+                            .view = m_swapchainViews.at(m_currentSwapchainImageIndex),
+                            .loadOperation = AttachmentLoadOperation::Load, // Don't clear color
+                            .initialLayout = TextureLayout::ColorAttachmentOptimal,
+                            .finalLayout = TextureLayout::PresentSrc,
+                    },
+            },
+            .depthStencilAttachment = {
+                    .view = m_depthTextureView,
+                    .depthLoadOperation = AttachmentLoadOperation::Load, // Load the depth buffer as is, don't clear it
+                    .initialLayout = TextureLayout::DepthStencilAttachmentOptimal,
+            },
+    });
     renderImGuiOverlay(&opaquePass);
     overlayPass.end();
     //![7]

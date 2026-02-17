@@ -57,7 +57,8 @@
                 "CMAKE_BUILD_TYPE": "Debug",
                 "KDGPU_BUILD_TESTS": "ON",
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
-                "CMAKE_VERBOSE_MAKEFILE": "ON"
+                "CMAKE_VERBOSE_MAKEFILE": "ON",
+                "KDGPU_BUILD_IN_STRICT_MODE": "ON"
             },
             "environment": {
                 "KDGPUEXAMPLE_ASSET_PATH": "${sourceDir}/build/Debug/assets"

@@ -294,13 +294,13 @@ void ImGuiRenderer::recordCommands(KDGpu::RenderPassCommandRecorder *recorder,
 
     // Bind the pipeline
     if (currentRenderPass) {
-        m_pipelineInfo.renderPass = currentRenderPass->handle();
-        m_pipelineInfo.subpassIndex = lastSubpassIndex;
+        m_pipelineInfo->renderPass = currentRenderPass->handle();
+        m_pipelineInfo->subpassIndex = lastSubpassIndex;
     }
-    m_pipelineInfo.dynamicRendering.enabled = dynamicRendering;
+    m_pipelineInfo->dynamicRendering.enabled = dynamicRendering;
 
     if (!m_pipeline.isValid())
-        m_pipeline = m_device->createGraphicsPipeline(m_pipelineInfo);
+        m_pipeline = m_device->createGraphicsPipeline(*m_pipelineInfo);
     recorder->setPipeline(m_pipeline);
 
     // Bind the descriptor set

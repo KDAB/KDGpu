@@ -37,7 +37,6 @@ private:
         .shaderStages = KDGpu::ShaderStageFlags(KDGpu::ShaderStageFlagBits::VertexBit)
     };
 
-    KDGpu::RenderPassCommandRecorderOptions m_opaquePassOptions;
     KDGpu::CommandBuffer m_commandBuffer;
 
     const KDGpu::Format m_mvColorFormat{ KDGpu::Format::R8G8B8A8_UNORM };

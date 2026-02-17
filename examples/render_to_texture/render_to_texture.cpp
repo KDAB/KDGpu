@@ -44,39 +44,7 @@ void RenderToTexture::initializeScene()
     // Pass 1: Render main scene into the color texture
     // Pass 2: Render a full screen quad that samples from the color texture from pass 1
 
-    // clang-format off
-    //![2]
-    m_opaquePassOptions = {
-        .colorAttachments = {
-            {
-                .view = m_colorOutputView, // We always render to the color texture
-                .clearValue = { 0.0f, 0.0f, 0.0f, 1.0f },
-            }
-        },
-        .depthStencilAttachment = {
-            .view = m_depthTextureView
-        }
-    };
-    //![2]
-    // clang-format on
-
-    // Most of the render pass is the same between frames. The only thing that changes, is which image
-    // of the swapchain we wish to render to. So set up what we can here, and in the render loop we will
-    // just update the color texture view.
-    // clang-format off
-    m_finalPassOptions = {
-        .colorAttachments = {
-            {
-                .view = {}, // Not setting the swapchain texture view just yet
-                .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
-                .finalLayout = TextureLayout::PresentSrc
-            }
-        },
-        .depthStencilAttachment = {
-            .view = m_depthTextureView
-        }
-    };
-    // clang-format on
+    // Options will be created inline in the render() function
 
     m_filterPosData.resize(sizeof(float));
 }
@@ -401,15 +369,8 @@ void RenderToTexture::resize()
     // Recreate Offscreen Color Texture and View with new size
     createOffscreenTexture();
 
-    // Update OpaquePassOptions to reference new views
-    m_opaquePassOptions.colorAttachments[0].view = m_colorOutputView;
-    m_opaquePassOptions.depthStencilAttachment.view = m_depthTextureView;
-
     // We need to update the ColorBindGroup so that it also references the new colorOutputView
     updateColorBindGroup();
-
-    // Update FinalPass to reference new depthView (colorAttachment is handled in render)
-    m_finalPassOptions.depthStencilAttachment.view = m_depthTextureView;
 }
 
 void RenderToTexture::render()
@@ -417,8 +378,20 @@ void RenderToTexture::render()
     auto commandRecorder = m_device.createCommandRecorder();
 
     //![10]
+    //![2]
     // Pass 1: Color pass
-    auto opaquePass = commandRecorder.beginRenderPass(m_opaquePassOptions);
+    auto opaquePass = commandRecorder.beginRenderPass(KDGpu::RenderPassCommandRecorderOptions{
+            .colorAttachments = {
+                    {
+                            .view = m_colorOutputView, // We always render to the color texture
+                            .clearValue = { 0.0f, 0.0f, 0.0f, 1.0f },
+                    },
+            },
+            .depthStencilAttachment = {
+                    .view = m_depthTextureView,
+            },
+    });
+    //![2]
     opaquePass.setPipeline(m_pipeline);
     opaquePass.setVertexBuffer(0, m_buffer);
     opaquePass.setIndexBuffer(m_indexBuffer);
@@ -458,8 +431,18 @@ void RenderToTexture::render()
     });
 
     // Pass 2: Post process
-    m_finalPassOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex);
-    auto finalPass = commandRecorder.beginRenderPass(m_finalPassOptions);
+    auto finalPass = commandRecorder.beginRenderPass(KDGpu::RenderPassCommandRecorderOptions{
+            .colorAttachments = {
+                    {
+                            .view = m_swapchainViews.at(m_currentSwapchainImageIndex),
+                            .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
+                            .finalLayout = TextureLayout::PresentSrc,
+                    },
+            },
+            .depthStencilAttachment = {
+                    .view = m_depthTextureView,
+            },
+    });
     finalPass.setPipeline(m_postProcessPipeline);
     finalPass.setVertexBuffer(0, m_fullScreenQuad);
     finalPass.setBindGroup(0, m_colorBindGroup);

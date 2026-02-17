@@ -30,7 +30,6 @@ private:
     KDGpu::Buffer m_indexBuffer;
     KDGpu::GraphicsPipeline m_pipeline;
     KDGpu::PipelineLayout m_pipelineLayout;
-    KDGpu::RenderPassCommandRecorderOptions m_opaquePassOptions;
     KDGpu::CommandBuffer m_commandBuffer;
     KDGpu::Buffer m_transformDynamicUBOBuffer;
     KDGpu::BindGroup m_transformBindGroup;

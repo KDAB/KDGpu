@@ -69,6 +69,7 @@ option(KDGPU_BUILD_EXAMPLES "Build examples" ON)
 option(KDGPU_BUILD_KDGPUKDGUI "Build KDGpuKDGui" ON)
 option(KDGPU_BUILD_KDGPUUTILS "Build KDGpuUtils" ON)
 option(KDGPU_FETCH_VULKAN_SDK_FROM_VCPKG "Fetch Vulkan SDK from vcpkg" OFF)
+option(KDGPU_BUILD_IN_STRICT_MODE "Build with strict options" OFF)
 cmake_dependent_option(
     KDGPU_BUILD_KDGPUEXAMPLE
     "Build KDGpuExample"
@@ -100,6 +101,7 @@ option(KDGPU_CODE_COVERAGE "Code Coverage" OFF)
 
 add_feature_info(KDGpuKDGui ${KDGPU_BUILD_KDGPUKDGUI} "Build KDGpuKDGui")
 add_feature_info(KDGpuExample ${KDGPU_BUILD_KDGPUEXAMPLE} "Build KDGpuExample")
+add_feature_info(KDGpuStrictMode ${KDGPU_BUILD_IN_STRICT_MODE} "Build KDGpu Strict Mode")
 
 option(KDGPU_BUILD_KDXR "Build KDXr" ON)
 add_feature_info(OpenXR ${KDGPU_BUILD_KDXR} "Enable support for OpenXR")

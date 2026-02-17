@@ -17,20 +17,39 @@
 
 using namespace KDGpu;
 
+namespace {
+
+template<typename T>
+struct FakeHandle : public Handle<T> {
+    using Handle<T>::Handle; // Inherit constructors
+
+    FakeHandle(uint32_t index, uint32_t generation)
+        : Handle<T>(index, generation)
+    {
+    }
+};
+
+} // namespace
+
 TEST_SUITE("VulkanRenderPassKey")
 {
+    FakeHandle<TextureView_t> fakeHandle{ 1, 1 }; // Just a dummy handle to create different keys
+
     TEST_CASE("VulkanRenderPassKeyColorAttachment")
     {
         SUBCASE("Check Different Keys for different loadOperations")
         {
             // GIVEN
             ColorAttachment a{
+                .view = fakeHandle,
                 .loadOperation = AttachmentLoadOperation::Clear,
             };
             ColorAttachment b{
+                .view = fakeHandle,
                 .loadOperation = AttachmentLoadOperation::Load,
             };
             ColorAttachment c{
+                .view = fakeHandle,
                 .loadOperation = AttachmentLoadOperation::DontCare,
             };
 
@@ -49,9 +68,11 @@ TEST_SUITE("VulkanRenderPassKey")
         {
             // GIVEN
             ColorAttachment a{
+                .view = fakeHandle,
                 .storeOperation = AttachmentStoreOperation::Store,
             };
             ColorAttachment b{
+                .view = fakeHandle,
                 .storeOperation = AttachmentStoreOperation::DontCare,
             };
 
@@ -67,9 +88,11 @@ TEST_SUITE("VulkanRenderPassKey")
         {
             // GIVEN
             ColorAttachment a{
+                .view = fakeHandle,
                 .initialLayout = TextureLayout::ColorAttachmentOptimal,
             };
             ColorAttachment b{
+                .view = fakeHandle,
                 .initialLayout = TextureLayout::General,
             };
 
@@ -85,9 +108,11 @@ TEST_SUITE("VulkanRenderPassKey")
         {
             // GIVEN
             ColorAttachment a{
+                .view = fakeHandle,
                 .finalLayout = TextureLayout::ColorAttachmentOptimal,
             };
             ColorAttachment b{
+                .view = fakeHandle,
                 .finalLayout = TextureLayout::PresentSrc,
             };
 
@@ -103,9 +128,11 @@ TEST_SUITE("VulkanRenderPassKey")
         {
             // GIVEN
             ColorAttachment a{
+                .view = fakeHandle,
                 .finalLayout = TextureLayout::ColorAttachmentOptimal,
             };
             ColorAttachment b{
+                .view = fakeHandle,
                 .finalLayout = TextureLayout::ColorAttachmentOptimal,
             };
 
@@ -121,9 +148,11 @@ TEST_SUITE("VulkanRenderPassKey")
         {
             // GIVEN
             ColorAttachment a{
+                .view = fakeHandle,
                 .finalLayout = TextureLayout::ColorAttachmentOptimal,
             };
             ColorAttachment b{
+                .view = fakeHandle,
                 .finalLayout = TextureLayout::ColorAttachmentOptimal,
             };
 
@@ -142,12 +171,15 @@ TEST_SUITE("VulkanRenderPassKey")
         {
             // GIVEN
             DepthStencilAttachment a{
+                .view = fakeHandle,
                 .depthLoadOperation = AttachmentLoadOperation::Clear,
             };
             DepthStencilAttachment b{
+                .view = fakeHandle,
                 .depthLoadOperation = AttachmentLoadOperation::Load,
             };
             DepthStencilAttachment c{
+                .view = fakeHandle,
                 .depthLoadOperation = AttachmentLoadOperation::DontCare,
             };
 
@@ -166,9 +198,11 @@ TEST_SUITE("VulkanRenderPassKey")
         {
             // GIVEN
             DepthStencilAttachment a{
+                .view = fakeHandle,
                 .depthStoreOperation = AttachmentStoreOperation::Store,
             };
             DepthStencilAttachment b{
+                .view = fakeHandle,
                 .depthStoreOperation = AttachmentStoreOperation::DontCare,
             };
             // WHEN
@@ -183,12 +217,15 @@ TEST_SUITE("VulkanRenderPassKey")
         {
             // GIVEN
             DepthStencilAttachment a{
+                .view = fakeHandle,
                 .stencilLoadOperation = AttachmentLoadOperation::Clear,
             };
             DepthStencilAttachment b{
+                .view = fakeHandle,
                 .stencilLoadOperation = AttachmentLoadOperation::Load,
             };
             DepthStencilAttachment c{
+                .view = fakeHandle,
                 .stencilLoadOperation = AttachmentLoadOperation::DontCare,
             };
 
@@ -207,9 +244,11 @@ TEST_SUITE("VulkanRenderPassKey")
         {
             // GIVEN
             DepthStencilAttachment a{
+                .view = fakeHandle,
                 .stencilStoreOperation = AttachmentStoreOperation::Store,
             };
             DepthStencilAttachment b{
+                .view = fakeHandle,
                 .stencilStoreOperation = AttachmentStoreOperation::DontCare,
             };
             // WHEN
@@ -224,9 +263,11 @@ TEST_SUITE("VulkanRenderPassKey")
         {
             // GIVEN
             DepthStencilAttachment a{
+                .view = fakeHandle,
                 .initialLayout = TextureLayout::Undefined,
             };
             DepthStencilAttachment b{
+                .view = fakeHandle,
                 .initialLayout = TextureLayout::General,
             };
 
@@ -242,9 +283,11 @@ TEST_SUITE("VulkanRenderPassKey")
         {
             // GIVEN
             DepthStencilAttachment a{
+                .view = fakeHandle,
                 .finalLayout = TextureLayout::ColorAttachmentOptimal,
             };
             DepthStencilAttachment b{
+                .view = fakeHandle,
                 .finalLayout = TextureLayout::DepthStencilAttachmentOptimal,
             };
 
@@ -260,9 +303,11 @@ TEST_SUITE("VulkanRenderPassKey")
         {
             // GIVEN
             DepthStencilAttachment a{
+                .view = fakeHandle,
                 .finalLayout = TextureLayout::ColorAttachmentOptimal,
             };
             DepthStencilAttachment b{
+                .view = fakeHandle,
                 .finalLayout = TextureLayout::ColorAttachmentOptimal,
             };
 
@@ -278,9 +323,11 @@ TEST_SUITE("VulkanRenderPassKey")
         {
             // GIVEN
             DepthStencilAttachment a{
+                .view = fakeHandle,
                 .finalLayout = TextureLayout::ColorAttachmentOptimal,
             };
             DepthStencilAttachment b{
+                .view = fakeHandle,
                 .finalLayout = TextureLayout::ColorAttachmentOptimal,
             };
 
@@ -303,10 +350,12 @@ TEST_SUITE("VulkanRenderPassKey")
             VulkanRenderPassKey a(RenderPassCommandRecorderOptions{
                                           .colorAttachments = {
                                                   {
+                                                          .view = fakeHandle,
                                                           .loadOperation = AttachmentLoadOperation::Load,
                                                   },
                                           },
                                           .depthStencilAttachment = {
+                                                  .view = fakeHandle,
                                                   .depthLoadOperation = AttachmentLoadOperation::Load,
                                           },
                                   },
@@ -315,10 +364,12 @@ TEST_SUITE("VulkanRenderPassKey")
             VulkanRenderPassKey b(RenderPassCommandRecorderOptions{
                                           .colorAttachments = {
                                                   {
+                                                          .view = fakeHandle,
                                                           .loadOperation = AttachmentLoadOperation::Clear,
                                                   },
                                           },
                                           .depthStencilAttachment = {
+                                                  .view = fakeHandle,
                                                   .depthLoadOperation = AttachmentLoadOperation::Clear,
                                           },
                                   },

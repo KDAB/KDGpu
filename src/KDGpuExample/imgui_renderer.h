@@ -102,7 +102,7 @@ private:
     KDGpu::ShaderModule m_vertexShader;
     KDGpu::ShaderModule m_fragmentShader;
     KDGpu::GraphicsPipeline m_pipeline;
-    KDGpu::GraphicsPipelineOptions m_pipelineInfo;
+    std::optional<KDGpu::GraphicsPipelineOptions> m_pipelineInfo;
     KDGpu::PipelineLayout m_pipelineLayout;
 
     float m_oldScaleFactor = 1.0f;

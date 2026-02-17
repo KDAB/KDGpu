@@ -61,8 +61,6 @@ private:
 
     KDGpu::Sampler m_multiViewColorOutputSampler;
 
-    KDGpu::RenderPassCommandRecorderOptions m_mvPassOptions;
-    KDGpu::RenderPassCommandRecorderOptions m_fsqPassOptions;
     KDGpu::CommandBuffer m_commandBuffer;
 
     const KDGpu::Format m_mvColorFormat{ KDGpu::Format::R8G8B8A8_UNORM };

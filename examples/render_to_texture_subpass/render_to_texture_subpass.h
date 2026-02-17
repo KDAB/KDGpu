@@ -68,6 +68,5 @@ private:
     KDGpu::Texture m_colorOutput;
     KDGpu::TextureView m_colorOutputView;
     KDGpu::Sampler m_colorOutputSampler;
-    KDGpu::RenderPassCommandRecorderWithRenderPassOptions m_renderPassOptions;
     KDGpu::CommandBuffer m_commandBuffer;
 };

@@ -41,7 +41,6 @@ private:
     KDGpu::Buffer m_indexBuffer;
     KDGpu::PipelineLayout m_pipelineLayout;
     KDGpu::GraphicsPipeline m_pipeline;
-    KDGpu::RenderPassCommandRecorderOptions m_opaquePassOptions;
     KDGpu::CommandBuffer m_commandBuffer;
 
     std::vector<KDGpu::Buffer> m_transformBuffers;

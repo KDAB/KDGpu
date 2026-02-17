@@ -38,6 +38,5 @@ private:
     KDGpu::BindGroup m_textureBindGroup;
     KDGpu::PipelineLayout m_pipelineLayout;
     KDGpu::GraphicsPipeline m_pipeline;
-    KDGpu::RenderPassCommandRecorderOptions m_opaquePassOptions;
     KDGpu::CommandBuffer m_commandBuffer;
 };

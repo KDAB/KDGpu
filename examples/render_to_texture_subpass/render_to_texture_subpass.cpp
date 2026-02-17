@@ -54,31 +54,6 @@ void RenderToTextureSubpass::initializeScene()
     initializeMainScene();
     initializePostProcess();
 
-    // Set up the options for the 2 render passes:
-    // Pass 1: Render main scene into the color texture
-    // Pass 2: Render a full screen quad that samples from the color texture from pass 1
-
-    // clang-format off
-    m_renderPassOptions = {
-        .renderPass = m_renderPass.handle(),
-        .attachments = {
-             {
-                .view = m_colorOutputView, // We always render to the color texture
-                .color = Attachment::ColorOperations {
-                    .clearValue = ColorClearValue{ 0.0f, 0.0f, 0.0f, 1.0f },
-                },
-            },
-            {
-                .view = {}, // Not setting the swapchain texture view just yet
-                .color = Attachment::ColorOperations {
-                    .clearValue = ColorClearValue{ 0.3f, 0.3f, 0.3f, 1.0f },
-                    .layout = TextureLayout::ColorAttachmentOptimal,
-                },
-            }
-        },
-    };
-    // clang-format on
-
     m_filterPosData.resize(sizeof(float));
 }
 
@@ -432,9 +407,6 @@ void RenderToTextureSubpass::resize()
     // Recreate Offscreen Color Texture and View with new size
     createOffscreenTexture();
 
-    // Update OpaquePassOptions to reference new views
-    m_renderPassOptions.attachments[0].view = m_colorOutputView;
-
     // We need to update the ColorBindGroup so that it also references the new colorOutputView
     updateColorBindGroup();
 }
@@ -444,9 +416,24 @@ void RenderToTextureSubpass::render()
     auto commandRecorder = m_device.createCommandRecorder();
 
     // Pass 1: Color pass
-    m_renderPassOptions.attachments[1].view = m_swapchainViews.at(m_currentSwapchainImageIndex);
-
-    auto opaquePass = commandRecorder.beginRenderPass(m_renderPassOptions);
+    auto opaquePass = commandRecorder.beginRenderPass(RenderPassCommandRecorderWithRenderPassOptions{
+            .renderPass = m_renderPass.handle(),
+            .attachments = {
+                    {
+                            .view = m_colorOutputView, // We always render to the color texture
+                            .color = Attachment::ColorOperations{
+                                    .clearValue = ColorClearValue{ 0.0f, 0.0f, 0.0f, 1.0f },
+                            },
+                    },
+                    {
+                            .view = m_swapchainViews.at(m_currentSwapchainImageIndex),
+                            .color = Attachment::ColorOperations{
+                                    .clearValue = ColorClearValue{ 0.3f, 0.3f, 0.3f, 1.0f },
+                                    .layout = TextureLayout::ColorAttachmentOptimal,
+                            },
+                    },
+            },
+    });
     opaquePass.setPipeline(m_pipeline);
     opaquePass.setVertexBuffer(0, m_buffer);
     opaquePass.setIndexBuffer(m_indexBuffer);

@@ -52,8 +52,6 @@ XrCylinderImGuiLayer::XrCylinderImGuiLayer(const XrCylinderLayerOptions &options
     });
 
     registerImGuiOverlayDrawFunction(drawMouseCursor);
-
-    (void)backgroundColor.valueChanged().connect([this]() { setupRenderPassOptions(); });
 }
 
 XrCylinderImGuiLayer::~XrCylinderImGuiLayer()
@@ -63,8 +61,6 @@ XrCylinderImGuiLayer::~XrCylinderImGuiLayer()
 void XrCylinderImGuiLayer::initialize()
 {
     XrCylinderLayer::initialize();
-
-    setupRenderPassOptions();
 
     // Use a fence to stop us trampling on frames in flight
     m_fence = m_device->createFence({ .label = "ImGui Fence" });
@@ -88,9 +84,18 @@ void XrCylinderImGuiLayer::renderCylinder()
     auto commandRecorder = m_device->createCommandRecorder();
 
     // Set up the render pass using the current color and depth texture views
-    m_imguiPassOptions.colorAttachments[0].view = m_colorSwapchain.textureViews[m_currentColorImageIndex];
-    m_imguiPassOptions.depthStencilAttachment.view = m_depthSwapchain.textureViews[m_currentDepthImageIndex];
-    auto imguiPass = commandRecorder.beginRenderPass(m_imguiPassOptions);
+    auto imguiPass = commandRecorder.beginRenderPass(KDGpu::RenderPassCommandRecorderOptions{
+            .colorAttachments = {
+                    {
+                            .view = m_colorSwapchain.textureViews[m_currentColorImageIndex], // Not setting the swapchain texture view just yet
+                            .clearValue = backgroundColor(),
+                            .finalLayout = TextureLayout::ColorAttachmentOptimal,
+                    },
+            },
+            .depthStencilAttachment = {
+                    .view = m_depthSwapchain.textureViews[m_currentDepthImageIndex], // Not setting the depth texture view just yet
+            },
+    });
 
     renderImGuiOverlay(&imguiPass, m_currentColorImageIndex);
 
@@ -158,24 +163,6 @@ ImGuiItem &XrCylinderImGuiLayer::overlay()
 {
     assert(m_imguiOverlay);
     return *m_imguiOverlay;
-}
-
-void XrCylinderImGuiLayer::setupRenderPassOptions()
-{
-    // clang-format off
-    m_imguiPassOptions = {
-        .colorAttachments = {
-            {
-                .view = {}, // Not setting the swapchain texture view just yet
-                .clearValue = backgroundColor(),
-                .finalLayout = TextureLayout::ColorAttachmentOptimal
-            }
-        },
-        .depthStencilAttachment = {
-            .view = {} // Not setting the depth texture view just yet
-        }
-    };
-    // clang-format on
 }
 
 void XrCylinderImGuiLayer::drawMouseCursor(ImGuiContext *ctx)

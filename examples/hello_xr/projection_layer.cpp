@@ -356,24 +356,6 @@ void ProjectionLayer::initializeScene()
     };
     // clang-format on
     m_cameraBindGroup = m_device->createBindGroup(cameraBindGroupOptions);
-
-    // Most of the render pass is the same between frames. The only thing that changes, is which image
-    // of the swapchain we wish to render to. So set up what we can here, and in the render loop we will
-    // just update the color texture view.
-    // clang-format off
-    m_opaquePassOptions = {
-        .colorAttachments = {
-            {
-                .view = {}, // Not setting the swapchain texture view just yet
-                .clearValue = { 0.3f, 0.3f, 0.3f, 0.0f },
-                .finalLayout = TextureLayout::ColorAttachmentOptimal
-            }
-        },
-        .depthStencilAttachment = {
-            .view = {} // Not setting the depth texture view just yet
-        }
-    };
-    // clang-format on
 }
 
 void ProjectionLayer::cleanupScene()
@@ -524,9 +506,18 @@ void ProjectionLayer::renderView()
     auto commandRecorder = m_device->createCommandRecorder();
 
     // Set up the render pass using the current color and depth texture views
-    m_opaquePassOptions.colorAttachments[0].view = m_colorSwapchains[m_currentViewIndex].textureViews[m_currentColorImageIndex];
-    m_opaquePassOptions.depthStencilAttachment.view = m_depthSwapchains[m_currentViewIndex].textureViews[m_currentDepthImageIndex];
-    auto opaquePass = commandRecorder.beginRenderPass(m_opaquePassOptions);
+    auto opaquePass = commandRecorder.beginRenderPass(KDGpu::RenderPassCommandRecorderOptions{
+            .colorAttachments = {
+                    {
+                            .view = m_colorSwapchains[m_currentViewIndex].textureViews[m_currentColorImageIndex],
+                            .clearValue = { 0.3f, 0.3f, 0.3f, 0.0f },
+                            .finalLayout = TextureLayout::ColorAttachmentOptimal,
+                    },
+            },
+            .depthStencilAttachment = {
+                    .view = m_depthSwapchains[m_currentViewIndex].textureViews[m_currentDepthImageIndex],
+            },
+    });
 
     // Draw the main triangle
     opaquePass.setPipeline(m_pipeline);

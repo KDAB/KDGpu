@@ -100,6 +100,5 @@ private:
 
     KDGpu::GraphicsPipeline m_pipeline;
     KDGpu::PipelineLayout m_pipelineLayout;
-    KDGpu::RenderPassCommandRecorderOptions m_renderPassOptions;
     KDGpu::CommandBuffer m_commandBuffer;
 };

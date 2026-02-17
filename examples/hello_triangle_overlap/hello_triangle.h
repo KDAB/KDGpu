@@ -34,7 +34,6 @@ private:
     KDGpu::Buffer m_indexBuffer;
     KDGpu::GraphicsPipeline m_pipeline;
     KDGpu::PipelineLayout m_pipelineLayout;
-    KDGpu::RenderPassCommandRecorderOptions m_opaquePassOptions;
     const KDGpu::PushConstantRange m_transformPushConstantRange{ .offset = 0,
                                                                  .size = 16 * sizeof(float),
                                                                  .shaderStages = KDGpu::ShaderStageFlags(KDGpu::ShaderStageFlagBits::VertexBit) };
