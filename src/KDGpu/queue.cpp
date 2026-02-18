@@ -36,32 +36,6 @@ namespace KDGpu {
 */
 
 /**
-    @class Queue
-    @brief Queue is used to submit commands for execution and optionally present content
-    @ingroup public
-    @headerfile queue.h <KDGpu/queue.h>
-
-    @code{.cpp}
-    using namespace KDGpu;
-
-    Adapter *selectedAdapter = instance.selectAdapter(AdapterDeviceType::Default);
-    Device device = selectedAdapter->createDevice();
-    Queue queue = device.queues()[0];
-
-    CommandRecorder commandRecorder = device.createCommandRecorder();
-    ...
-    const CommandBuffer commands = commandRecorder.finish();
-
-    queue.submit(SubmitOptions{
-                .commandBuffers = { commands },
-    });
-
-    @endcode
-
-    @sa Device::queues
- */
-
-/**
     @fn Queue::handle()
     @brief Returns the handle used to retrieve the underlying API specific Queue
     @sa ResourceManager

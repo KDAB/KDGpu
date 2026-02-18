@@ -21,10 +21,70 @@ struct Device_t;
 struct Buffer_t;
 struct BufferOptions;
 
-/**
- * @brief Buffer
- * @ingroup public
- */
+/*!
+    \class Buffer
+    \brief Represents a GPU memory buffer for storing vertex, index, uniform data, etc.
+    \ingroup public
+    \headerfile buffer.h <KDGpu/buffer.h>
+
+    <b>Vulkan equivalent:</b> [VkBuffer](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkBuffer.html)
+
+    Buffer represents a linear allocation of GPU memory that can store vertices, indices, uniform data,
+    storage buffers, or any other structured data needed by shaders.
+
+    <b>Key features:</b>
+    - CPU-visible mapping for reading/writing buffer contents
+    - Various usage flags (vertex, index, uniform, storage, transfer)
+    - Memory placement control (CPU, GPU, or CPU->GPU)
+    - Buffer device addresses for bindless rendering
+    .
+    <br/>
+
+    <b>Lifetime:</b> Buffers are created by Device and must remain valid while referenced by GPU commands.
+    They use RAII and clean up automatically when destroyed.
+
+    ## Usage
+
+    <b>Creating a vertex buffer:</b>
+
+    \snippet kdgpu_doc_snippets.cpp buffer_vertex_creation
+
+    <b>Creating an index buffer :</b>
+
+    \snippet kdgpu_doc_snippets.cpp buffer_index_creation
+
+    <b>Creating a uniform buffer(updated frequently) :</b>
+
+    \snippet kdgpu_doc_snippets.cpp buffer_uniform_creation
+
+    <b>Creating a storage buffer(shader read / write):</b>
+
+    \snippet kdgpu_doc_snippets.cpp buffer_storage_creation
+
+    <b>Memory usage patterns:</b>
+
+    \snippet kdgpu_doc_snippets.cpp buffer_memory_usage_patterns
+
+    <b>Mapping and unmapping:</b>
+
+    \snippet kdgpu_doc_snippets.cpp buffer_mapping_unmapping
+
+    <b>Buffer device addresses (for bindless):</b>
+
+    \snippet kdgpu_doc_snippets.cpp buffer_device_address
+
+    ## Vulkan mapping:
+    - Buffer creation->vkCreateBuffer() + vkAllocateMemory() + vkBindBufferMemory()
+    - Buffer::map()->vkMapMemory() - Buffer::unmap()->vkUnmapMemory()
+    - Buffer::flush()->vkFlushMappedMemoryRanges()
+    - Buffer::invalidate()->vkInvalidateMappedMemoryRanges()
+    - Buffer::bufferDeviceAddress()->vkGetBufferDeviceAddress()
+
+    ## See also:
+    \sa Device, BufferOptions, Queue, BufferOptions, BindGroup
+    \sa \ref kdgpu_api_overview
+    \sa \ref kdgpu_vulkan_mapping
+*/
 class KDGPU_EXPORT Buffer
 {
 public:

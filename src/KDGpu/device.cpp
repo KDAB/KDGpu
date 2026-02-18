@@ -18,22 +18,6 @@
 namespace KDGpu {
 
 /**
-    @class Device
-    @brief Device is our main entry point to create Graphics Resources
-    @ingroup public
-    @headerfile device.h <KDGpu/device.h>
-
-    @code{.cpp}
-    using namespace KDGpu;
-
-    Adapter *selectedAdapter = instance.selectAdapter(AdapterDeviceType::Default);
-    Device device = selectedAdapter->createDevice();
-    @endcode
-
-    @sa Adapter::createDevice
- */
-
-/**
     @fn Device::handle()
     @brief Returns the handle used to retrieve the underlying API specific Device
 

@@ -1,0 +1,577 @@
+/*
+  This file is part of KDGpu.
+
+  SPDX-FileCopyrightText: 2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+
+  SPDX-License-Identifier: MIT
+
+  Contact KDAB at <info@kdab.com> for commercial licensing options.
+*/
+
+/*!
+\page kdgpu_vulkan_mapping KDGpu to Vulkan API Mapping
+\brief Complete reference mapping KDGpu classes to their Vulkan equivalents
+
+\tableofcontents
+
+\section vulkan_mapping_intro Introduction
+
+This page provides a comprehensive mapping between KDGpu classes and their Vulkan counterparts. For each KDGpu class, you'll find:
+- The corresponding Vulkan type(s)
+- Key Vulkan functions used internally
+- Links to Vulkan specification details
+
+\section vulkan_mapping_core Core Instance & Device API
+
+<table>
+<tr>
+<th>KDGpu Class</th>
+<th>Vulkan Type</th>
+<th>Vulkan Creation Function</th>
+<th>Vulkan Spec Link</th>
+</tr>
+
+<tr>
+<td>\ref KDGpu::Instance "Instance"</td>
+<td>`VkInstance`</td>
+<td>`vkCreateInstance()`</td>
+<td>[VkInstance](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkInstance.html)</td>
+</tr>
+
+<tr>
+<td>\ref KDGpu::Adapter "Adapter"</td>
+<td>`VkPhysicalDevice`</td>
+<td>`vkEnumeratePhysicalDevices()`</td>
+<td>[VkPhysicalDevice](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkPhysicalDevice.html)</td>
+</tr>
+
+<tr>
+<td>\ref KDGpu::Device "Device"</td>
+<td>`VkDevice`</td>
+<td>`vkCreateDevice()`</td>
+<td>[VkDevice](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkDevice.html)</td>
+</tr>
+
+<tr>
+<td>\ref KDGpu::Queue "Queue"</td>
+<td>`VkQueue`</td>
+<td>`vkGetDeviceQueue()`</td>
+<td>[VkQueue](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkQueue.html)</td>
+</tr>
+
+<tr>
+<td>\ref KDGpu::Surface "Surface"</td>
+<td>`VkSurfaceKHR`</td>
+<td>Platform-specific (e.g., `vkCreateXcbSurfaceKHR()`)</td>
+<td>[VkSurfaceKHR](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkSurfaceKHR.html)</td>
+</tr>
+
+</table>
+
+\section vulkan_mapping_resources GPU Resources
+
+<table>
+<tr>
+<th>KDGpu Class</th>
+<th>Vulkan Type</th>
+<th>Vulkan Creation Function</th>
+<th>Vulkan Spec Link</th>
+</tr>
+
+<tr>
+<td>\ref KDGpu::Buffer "Buffer"</td>
+<td>`VkBuffer` + `VkDeviceMemory`</td>
+<td>`vkCreateBuffer()` + `vkAllocateMemory()`</td>
+<td>[VkBuffer](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkBuffer.html)</td>
+</tr>
+
+<tr>
+<td>\ref KDGpu::Texture "Texture"</td>
+<td>`VkImage` + `VkDeviceMemory`</td>
+<td>`vkCreateImage()` + `vkAllocateMemory()`</td>
+<td>[VkImage](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkImage.html)</td>
+</tr>
+
+<tr>
+<td>\ref KDGpu::TextureView "TextureView"</td>
+<td>`VkImageView`</td>
+<td>`vkCreateImageView()`</td>
+<td>[VkImageView](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkImageView.html)</td>
+</tr>
+
+<tr>
+<td>\ref KDGpu::Sampler "Sampler"</td>
+<td>`VkSampler`</td>
+<td>`vkCreateSampler()`</td>
+<td>[VkSampler](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkSampler.html)</td>
+</tr>
+
+</table>
+
+\section vulkan_mapping_pipelines Pipelines & Shaders
+
+<table>
+<tr>
+<th>KDGpu Class</th>
+<th>Vulkan Type</th>
+<th>Vulkan Creation Function</th>
+<th>Vulkan Spec Link</th>
+</tr>
+
+<tr>
+<td>\ref KDGpu::ShaderModule "ShaderModule"</td>
+<td>`VkShaderModule`</td>
+<td>`vkCreateShaderModule()`</td>
+<td>[VkShaderModule](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkShaderModule.html)</td>
+</tr>
+
+<tr>
+<td>\ref KDGpu::GraphicsPipeline "GraphicsPipeline"</td>
+<td>`VkPipeline` (Graphics)</td>
+<td>`vkCreateGraphicsPipelines()`</td>
+<td>[Graphics Pipelines](https://registry.khronos.org/vulkan/specs/1.3-extensions/html/vkspec.html#pipelines-graphics)</td>
+</tr>
+
+<tr>
+<td>\ref KDGpu::ComputePipeline "ComputePipeline"</td>
+<td>`VkPipeline` (Compute)</td>
+<td>`vkCreateComputePipelines()`</td>
+<td>[Compute Pipelines](https://registry.khronos.org/vulkan/specs/1.3-extensions/html/vkspec.html#pipelines-compute)</td>
+</tr>
+
+<tr>
+<td>\ref KDGpu::RayTracingPipeline "RayTracingPipeline"</td>
+<td>`VkPipeline` (Ray Tracing)</td>
+<td>`vkCreateRayTracingPipelinesKHR()`</td>
+<td>[Ray Tracing Pipelines](https://registry.khronos.org/vulkan/specs/1.3-extensions/html/vkspec.html#pipelines-ray-tracing)</td>
+</tr>
+
+<tr>
+<td>\ref KDGpu::PipelineLayout "PipelineLayout"</td>
+<td>`VkPipelineLayout`</td>
+<td>`vkCreatePipelineLayout()`</td>
+<td>[VkPipelineLayout](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkPipelineLayout.html)</td>
+</tr>
+
+<tr>
+<td>\ref KDGpu::PipelineCache "PipelineCache"</td>
+<td>`VkPipelineCache`</td>
+<td>`vkCreatePipelineCache()`</td>
+<td>[VkPipelineCache](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkPipelineCache.html)</td>
+</tr>
+
+<tr>
+<td>\ref KDGpu::RenderPass "RenderPass"</td>
+<td>`VkRenderPass`</td>
+<td>`vkCreateRenderPass()` or `vkCreateRenderPass2()`</td>
+<td>[VkRenderPass](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkRenderPass.html)</td>
+</tr>
+
+</table>
+
+\section vulkan_mapping_descriptors Descriptors & Resource Bindings
+
+<table>
+<tr>
+<th>KDGpu Class</th>
+<th>Vulkan Type</th>
+<th>Vulkan Creation Function</th>
+<th>Vulkan Spec Link</th>
+</tr>
+
+<tr>
+<td>\ref KDGpu::BindGroupLayout "BindGroupLayout"</td>
+<td>`VkDescriptorSetLayout`</td>
+<td>`vkCreateDescriptorSetLayout()`</td>
+<td>[VkDescriptorSetLayout](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkDescriptorSetLayout.html)</td>
+</tr>
+
+<tr>
+<td>\ref KDGpu::BindGroupPool "BindGroupPool"</td>
+<td>`VkDescriptorPool`</td>
+<td>`vkCreateDescriptorPool()`</td>
+<td>[VkDescriptorPool](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkDescriptorPool.html)</td>
+</tr>
+
+<tr>
+<td>\ref KDGpu::BindGroup "BindGroup"</td>
+<td>`VkDescriptorSet`</td>
+<td>`vkAllocateDescriptorSets()`</td>
+<td>[VkDescriptorSet](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkDescriptorSet.html)</td>
+</tr>
+
+</table>
+
+\section vulkan_mapping_commands Command Recording & Submission
+
+<table>
+<tr>
+<th>KDGpu Class</th>
+<th>Vulkan Type</th>
+<th>Vulkan Creation Function</th>
+<th>Vulkan Spec Link</th>
+</tr>
+
+<tr>
+<td>\ref KDGpu::CommandBuffer "CommandBuffer"</td>
+<td>`VkCommandBuffer`</td>
+<td>`vkAllocateCommandBuffers()`</td>
+<td>[VkCommandBuffer](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkCommandBuffer.html)</td>
+</tr>
+
+<tr>
+<td>\ref KDGpu::CommandRecorder "CommandRecorder"</td>
+<td>`VkCommandBuffer` + `VkCommandPool`</td>
+<td>`vkAllocateCommandBuffers()` + `vkBeginCommandBuffer()`</td>
+<td>[Command Buffers](https://registry.khronos.org/vulkan/specs/1.3-extensions/html/vkspec.html#commandbuffers)</td>
+</tr>
+
+<tr>
+<td>\ref KDGpu::RenderPassCommandRecorder "RenderPassCommandRecorder"</td>
+<td>`VkCommandBuffer` (in render pass)</td>
+<td>`vkCmdBeginRenderPass()`</td>
+<td>[Render Pass](https://registry.khronos.org/vulkan/specs/1.3-extensions/html/vkspec.html#renderpass)</td>
+</tr>
+
+<tr>
+<td>\ref KDGpu::ComputePassCommandRecorder "ComputePassCommandRecorder"</td>
+<td>`VkCommandBuffer` (compute commands)</td>
+<td>N/A (uses existing command buffer)</td>
+<td>[Compute Commands](https://registry.khronos.org/vulkan/specs/1.3-extensions/html/vkspec.html#dispatch)</td>
+</tr>
+
+<tr>
+<td>\ref KDGpu::RayTracingPassCommandRecorder "RayTracingPassCommandRecorder"</td>
+<td>`VkCommandBuffer` (ray tracing commands)</td>
+<td>N/A (uses existing command buffer)</td>
+<td>[Ray Tracing Commands](https://registry.khronos.org/vulkan/specs/1.3-extensions/html/vkspec.html#ray-tracing)</td>
+</tr>
+
+</table>
+
+\section vulkan_mapping_sync Synchronization
+
+<table>
+<tr>
+<th>KDGpu Class</th>
+<th>Vulkan Type</th>
+<th>Vulkan Creation Function</th>
+<th>Vulkan Spec Link</th>
+</tr>
+
+<tr>
+<td>\ref KDGpu::Fence "Fence"</td>
+<td>`VkFence`</td>
+<td>`vkCreateFence()`</td>
+<td>[VkFence](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkFence.html)</td>
+</tr>
+
+<tr>
+<td>\ref KDGpu::GpuSemaphore "GpuSemaphore"</td>
+<td>`VkSemaphore`</td>
+<td>`vkCreateSemaphore()`</td>
+<td>[VkSemaphore](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkSemaphore.html)</td>
+</tr>
+
+</table>
+
+\section vulkan_mapping_presentation Presentation
+
+<table>
+<tr>
+<th>KDGpu Class</th>
+<th>Vulkan Type</th>
+<th>Vulkan Creation Function</th>
+<th>Vulkan Spec Link</th>
+</tr>
+
+<tr>
+<td>\ref KDGpu::Swapchain "Swapchain"</td>
+<td>`VkSwapchainKHR`</td>
+<td>`vkCreateSwapchainKHR()`</td>
+<td>[VkSwapchainKHR](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkSwapchainKHR.html)</td>
+</tr>
+
+</table>
+
+\section vulkan_mapping_raytracing Ray Tracing (KHR Extensions)
+
+<table>
+<tr>
+<th>KDGpu Class</th>
+<th>Vulkan Type</th>
+<th>Vulkan Creation Function</th>
+<th>Vulkan Spec Link</th>
+</tr>
+
+<tr>
+<td>\ref KDGpu::AccelerationStructure "AccelerationStructure"</td>
+<td>`VkAccelerationStructureKHR`</td>
+<td>`vkCreateAccelerationStructureKHR()`</td>
+<td>[VkAccelerationStructureKHR](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkAccelerationStructureKHR.html)</td>
+</tr>
+
+<tr>
+<td>\ref KDGpu::RayTracingShaderBindingTable "RayTracingShaderBindingTable"</td>
+<td>`VkBuffer` (shader binding table)</td>
+<td>`vkCreateBuffer()` + manual layout</td>
+<td>[Shader Binding Table](https://registry.khronos.org/vulkan/specs/1.3-extensions/html/vkspec.html#shader-binding-table)</td>
+</tr>
+
+</table>
+
+\section vulkan_mapping_queries Queries
+
+<table>
+<tr>
+<th>KDGpu Class</th>
+<th>Vulkan Type</th>
+<th>Vulkan Creation Function</th>
+<th>Vulkan Spec Link</th>
+</tr>
+
+<tr>
+<td>\ref KDGpu::TimestampQueryRecorder "TimestampQueryRecorder"</td>
+<td>`VkQueryPool` (timestamp queries)</td>
+<td>`vkCreateQueryPool()`</td>
+<td>[VkQueryPool](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkQueryPool.html)</td>
+</tr>
+
+</table>
+
+\section vulkan_mapping_other Other
+
+<table>
+<tr>
+<th>KDGpu Class</th>
+<th>Vulkan Type</th>
+<th>Vulkan Creation Function</th>
+<th>Vulkan Spec Link</th>
+</tr>
+
+<tr>
+<td>\ref KDGpu::YCbCrConversion "YCbCrConversion"</td>
+<td>`VkSamplerYcbcrConversion`</td>
+<td>`vkCreateSamplerYcbcrConversion()`</td>
+<td>[VkSamplerYcbcrConversion](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkSamplerYcbcrConversion.html)</td>
+</tr>
+
+</table>
+
+\section vulkan_mapping_function_correspondence Function Correspondence
+
+This section maps common KDGpu operations to their Vulkan function equivalents.
+
+\subsection vulkan_mapping_buffer_ops Buffer Operations
+
+<table>
+<tr><th>KDGpu Operation</th><th>Vulkan Functions</th></tr>
+<tr>
+<td>`device.createBuffer(options)`</td>
+<td>`vkCreateBuffer()` + `vkGetBufferMemoryRequirements()` + `vkAllocateMemory()` + `vkBindBufferMemory()`</td>
+</tr>
+<tr>
+<td>`buffer.map()`</td>
+<td>`vkMapMemory()`</td>
+</tr>
+<tr>
+<td>`buffer.unmap()`</td>
+<td>`vkUnmapMemory()`</td>
+</tr>
+<tr>
+<td>`buffer.flush()`</td>
+<td>`vkFlushMappedMemoryRanges()`</td>
+</tr>
+<tr>
+<td>`buffer.invalidate()`</td>
+<td>`vkInvalidateMappedMemoryRanges()`</td>
+</tr>
+</table>
+
+\subsection vulkan_mapping_texture_ops Texture Operations
+
+<table>
+<tr><th>KDGpu Operation</th><th>Vulkan Functions</th></tr>
+<tr>
+<td>`device.createTexture(options)`</td>
+<td>`vkCreateImage()` + `vkGetImageMemoryRequirements()` + `vkAllocateMemory()` + `vkBindImageMemory()`</td>
+</tr>
+<tr>
+<td>`texture.createView(options)`</td>
+<td>`vkCreateImageView()`</td>
+</tr>
+</table>
+
+\subsection vulkan_mapping_pipeline_ops Pipeline Operations
+
+<table>
+<tr><th>KDGpu Operation</th><th>Vulkan Functions</th></tr>
+<tr>
+<td>`device.createGraphicsPipeline(options)`</td>
+<td>`vkCreateGraphicsPipelines()`</td>
+</tr>
+<tr>
+<td>`device.createComputePipeline(options)`</td>
+<td>`vkCreateComputePipelines()`</td>
+</tr>
+<tr>
+<td>`device.createShaderModule(spirvCode)`</td>
+<td>`vkCreateShaderModule()`</td>
+</tr>
+</table>
+
+\subsection vulkan_mapping_command_ops Command Recording
+
+<table>
+<tr><th>KDGpu Operation</th><th>Vulkan Functions</th></tr>
+<tr>
+<td>`recorder.beginRenderPass(options)`</td>
+<td>`vkCmdBeginRenderPass()` or `vkCmdBeginRendering()` (dynamic rendering)</td>
+</tr>
+<tr>
+<td>`passRecorder.setPipeline(pipeline)`</td>
+<td>`vkCmdBindPipeline()`</td>
+</tr>
+<tr>
+<td>`passRecorder.setVertexBuffer(index, buffer)`</td>
+<td>`vkCmdBindVertexBuffers()`</td>
+</tr>
+<tr>
+<td>`passRecorder.setIndexBuffer(buffer)`</td>
+<td>`vkCmdBindIndexBuffer()`</td>
+</tr>
+<tr>
+<td>`passRecorder.setBindGroup(index, bindGroup)`</td>
+<td>`vkCmdBindDescriptorSets()`</td>
+</tr>
+<tr>
+<td>`passRecorder.draw(drawCommand)`</td>
+<td>`vkCmdDraw()`</td>
+</tr>
+<tr>
+<td>`passRecorder.drawIndexed(drawCommand)`</td>
+<td>`vkCmdDrawIndexed()`</td>
+</tr>
+<tr>
+<td>`passRecorder.end()`</td>
+<td>`vkCmdEndRenderPass()` or `vkCmdEndRendering()`</td>
+</tr>
+<tr>
+<td>`recorder.finish()`</td>
+<td>`vkEndCommandBuffer()`</td>
+</tr>
+</table>
+
+\subsection vulkan_mapping_sync_ops Synchronization
+
+<table>
+<tr><th>KDGpu Operation</th><th>Vulkan Functions</th></tr>
+<tr>
+<td>`queue.submit(submitOptions)`</td>
+<td>`vkQueueSubmit()` or `vkQueueSubmit2()`</td>
+</tr>
+<tr>
+<td>`queue.waitUntilIdle()`</td>
+<td>`vkQueueWaitIdle()`</td>
+</tr>
+<tr>
+<td>`device.waitUntilIdle()`</td>
+<td>`vkDeviceWaitIdle()`</td>
+</tr>
+<tr>
+<td>`fence.wait()`</td>
+<td>`vkWaitForFences()`</td>
+</tr>
+<tr>
+<td>`fence.reset()`</td>
+<td>`vkResetFences()`</td>
+</tr>
+</table>
+
+\section vulkan_mapping_examples Usage Examples
+
+\subsection vulkan_mapping_example_buffer Buffer Creation Comparison
+
+<b>Raw Vulkan:</b>
+
+\code{.cpp}
+VkBufferCreateInfo bufferInfo = {
+    .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+    .size = 1024,
+    .usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+    .sharingMode = VK_SHARING_MODE_EXCLUSIVE
+};
+
+VkBuffer buffer;
+vkCreateBuffer(device, &bufferInfo, nullptr, &buffer);
+
+VkMemoryRequirements memReqs;
+vkGetBufferMemoryRequirements(device, buffer, &memReqs);
+
+VkMemoryAllocateInfo allocInfo = {
+    .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+    .allocationSize = memReqs.size,
+    .memoryTypeIndex = findMemoryType(memReqs.memoryTypeBits, properties)
+};
+
+VkDeviceMemory memory;
+vkAllocateMemory(device, &allocInfo, nullptr, &memory);
+vkBindBufferMemory(device, buffer, memory, 0);
+
+// ... use buffer ...
+
+vkDestroyBuffer(device, buffer, nullptr);
+vkFreeMemory(device, memory, nullptr);
+\endcode
+
+<b>KDGpu:</b>
+
+\code{.cpp}
+KDGpu::Buffer buffer = device.createBuffer(KDGpu::BufferOptions{
+    .size = 1024,
+    .usage = KDGpu::BufferUsageFlagBits::VertexBufferBit,
+    .memoryUsage = KDGpu::MemoryUsage::CpuToGpu
+});
+
+// ... use buffer ...
+
+// Automatic cleanup when buffer goes out of scope
+\endcode
+
+\subsection vulkan_mapping_example_pipeline Pipeline Creation Comparison
+
+<b>Raw Vulkan:</b>
+
+\code{.cpp}
+// 50+ lines of pipeline state setup omitted for brevity
+VkGraphicsPipelineCreateInfo pipelineInfo = { /* ... */ };
+VkPipeline pipeline;
+vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline);
+
+// ... use pipeline ...
+
+vkDestroyPipeline(device, pipeline, nullptr);
+\endcode
+
+<b>KDGpu:</b>
+
+\code{.cpp}
+KDGpu::GraphicsPipeline pipeline = device.createGraphicsPipeline(KDGpu::GraphicsPipelineOptions{
+    .shaderStages = { vertexStage, fragmentStage },
+    .layout = pipelineLayout,
+    .renderPass = renderPass,
+    // ... other options with sensible defaults
+});
+
+// ... use pipeline ...
+
+// Automatic cleanup
+\endcode
+
+\section vulkan_mapping_see_also See Also
+
+- \ref kdgpu_api_overview - KDGpu API overview
+- \ref kdgpu_handle_ownership - Resource ownership model
+- [Vulkan Specification](https://registry.khronos.org/vulkan/specs/1.3-extensions/html/vkspec.html)
+
+*/

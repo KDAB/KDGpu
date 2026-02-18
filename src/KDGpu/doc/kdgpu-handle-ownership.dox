@@ -1,0 +1,323 @@
+/*
+  This file is part of KDGpu.
+
+  SPDX-FileCopyrightText: 2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+
+  SPDX-License-Identifier: MIT
+
+  Contact KDAB at <info@kdab.com> for commercial licensing options.
+*/
+
+/*!
+\page kdgpu_handle_ownership KDGpu Handle-Based Ownership Model
+\brief Understanding KDGpu's resource management and ownership
+
+\tableofcontents
+
+\section handle_intro Introduction
+
+KDGpu uses a handle-based resource management system that provides safe, efficient access to GPU resources while preventing common errors like use-after-free and resource leaks. This system is inspired by modern entity-component-system (ECS) architectures.
+
+\section handle_design Handle Design
+
+\subsection handle_structure Handle Structure
+
+Every KDGpu resource (Buffer, Texture, Pipeline, etc.) contains an opaque `Handle<T>` that uniquely identifies the underlying Vulkan resource:
+
+\code{.cpp}
+template<typename T>
+class Handle {
+    uint32_t m_index;      // Index into resource pool
+    uint32_t m_generation; // Generation counter for validation
+public:
+    bool isValid() const;
+    uint32_t index() const;
+    uint32_t generation() const;
+};
+\endcode
+
+<b>Key components:</b>
+- <b>Index</b>: Slot in the resource pool where this resource lives
+- <b>Generation</b>: Counter that increments when the slot is reused, allowing detection of stale handles
+
+\subsection handle_types Handle Types
+
+KDGpu provides two handle variants:
+
+- `RequiredHandle<T>`: A handle that MUST be valid (wrapper around Handle<T>)
+- `OptionalHandle<T>`: An alias for Handle<T> that MAY be invalid
+
+<br/>
+\code{.cpp}
+// Required handle - must always be valid
+RequiredHandle<Texture_t> textureHandle = texture.handle();
+
+// Optional handle - can be invalid
+OptionalHandle<RenderPass_t> renderPassHandle; // Default constructed = invalid
+\endcode
+
+\subsection handle_implicit_conversion Implicit Conversion to Handles
+
+KDGpu resources provide implicit conversion operators to their handle types, making code more readable by allowing resources to be passed directly where handles are expected:
+
+\snippet kdgpu_doc_snippets.cpp explicit_vs_impplicit_handles
+
+
+This implicit conversion:
+- Reduces boilerplate code and improves readability
+- Is type-safe (only converts to the correct handle type)
+- Does not affect performance (zero-cost abstraction)
+- Still allows explicit `.handle()` calls when needed for clarity
+
+\section handle_ownership Resource Ownership
+
+\subsection handle_ownership_model Ownership Model
+
+<b>KDGpu Resources follow the expect Vulkan ownship:</b>
+- Instance owns: Adapters
+- Adapter owns: Nothing (references Instance resources)
+- Device owns: All created resources (Buffers, Textures, Pipelines, CommandRecorders, etc.)
+
+<br/>
+\note This means that you must be careful about destruction order. Textures, Buffers, Pipelines ... must be released prior to the device.
+
+<b>Lifetime rules:</b>
+1. Resources live until their owner is destroyed or the resource is explicitly moved
+2. Resources use RAII - destruction is automatic
+3. Resources cannot be copied, only moved (enforced by deleted copy constructors)
+
+\subsection handle_resource_creation Resource Creation
+
+Resources are always created through factory methods on their owner:
+
+\snippet kdgpu_doc_snippets.cpp handle_ownership_basic_creation
+
+Each `create*()` method:
+1. Allocates a slot in the internal resource pool
+2. Creates the underlying Vulkan resource
+3. Returns a KDGpu wrapper object containing the handle
+4. Registers cleanup for automatic destruction
+
+\section handle_validity Handle Validity
+
+\subsection handle_checking Checking Validity
+
+Every KDGpu resource has an `isValid()` method:
+
+\snippet kdgpu_doc_snippets.cpp handle_is_valid
+
+A handle becomes invalid when:
+- Default constructed (never initialized)
+- Moved from (ownership transferred)
+- Underlying resource was destroyed
+
+\subsection handle_stale_detection Stale Handle Detection
+
+The generation counter prevents use of stale handles:
+
+\snippet kdgpu_doc_snippets.cpp handle_ownership_explicit_release
+
+\section handle_move Move Semantics
+
+\subsection handle_move_only Move-Only Resources
+
+All KDGpu resources are move-only:
+
+\snippet kdgpu_doc_snippets.cpp handle_ownership_move_semantics
+
+\snippet kdgpu_doc_snippets.cpp handle_ownership_no_copy
+
+\subsection handle_storage Storing Resources
+
+Use `std::vector` or other STL containers for collections:
+
+\snippet kdgpu_doc_snippets.cpp handle_ownership_container
+
+\section handle_pool Resource Pools
+
+\subsection handle_pool_architecture Pool Architecture
+
+Internally, KDGpu uses a pool allocator pattern:
+
+\code{.cpp}
+// Simplified internal structure
+template<typename VulkanResource, typename KDGpuResource>
+class Pool {
+    std::vector<VulkanResource> resources;
+    std::vector<uint32_t> generations;
+    std::vector<uint32_t> freeList;
+
+public:
+    Handle<T> allocate(const Options& opts);
+    void free(Handle<T> handle);
+    VulkanResource* get(Handle<T> handle);
+};
+\endcode
+
+<b>Benefits:</b>
+- O(1) allocation and deallocation
+- Automatic handle validation via generation counters
+- Cache-friendly memory layout
+- Minimal memory overhead per resource
+
+\section handle_vulkan Vulkan Resource Mapping
+
+\subsection handle_vulkan_lifecycle Vulkan Lifecycle
+
+When you create a KDGpu resource, here's what happens:
+
+\code{.cpp}
+// 1. User calls KDGpu API
+KDGpu::Buffer buffer = device.createBuffer(options);
+
+// 2. Internally:
+//    a. Allocate pool slot → get index and generation
+//    b. Call vkCreateBuffer() → get VkBuffer handle
+//    c. If memory is needed, call vkAllocateMemory() and vkBindBufferMemory()
+//    d. Allocates a VulkanBuffer to store VkBuffer
+//    e. Store VulkanBuffer in pool[index]
+//    f. Return Handle<Buffer_t> to user wrapped in Buffer object
+\endcode
+
+When the KDGpu resource is destroyed:
+
+\snippet kdgpu_doc_snippets.cpp handle_ownership_destruction
+
+\subsection handle_vulkan_access Accessing Vulkan Handles
+
+For advanced use cases, KDGpu provides access to the underlying Vulkan handles through the GraphicsApi:
+
+\snippet kdgpu_doc_snippets.cpp access_underlying_vulkan_resource
+
+<b>Warning:</b> Direct access to Vulkan resources bypasses KDGpu's safety mechanisms. Only use this for:
+- Interoperability with other Vulkan libraries
+- Performance-critical paths after profiling
+- Debugging and introspection
+
+\section handle_best_practices Best Practices
+
+\subsection handle_practices_dos Do's
+
+✓ Store resources in class members or STL containers
+
+\snippet kdgpu_doc_snippets.cpp handle_ownership_member_variable
+
+✓ Check `isValid()` after default construction
+
+\snippet kdgpu_doc_snippets.cpp handle_ownership_optional
+
+✓ Use move semantics for resource transfer
+
+\snippet kdgpu_doc_snippets.cpp handle_ownership_factory_function
+
+✓ Let resources destruct automatically via RAII
+
+\snippet kdgpu_doc_snippets.cpp handle_ownership_command_buffers
+
+\subsection handle_practices_donts Don'ts
+
+\snippet kdgpu_doc_snippets.cpp handle_ownership_best_practices
+
+\subsection handle_practices_examples Anti-Pattern Examples
+
+✗ Don't cache bare handles without the owning object
+
+\code{.cpp}
+// BAD: Handle outlives the resource
+Handle<Buffer_t> handle;
+{
+    KDGpu::Buffer buffer = device.createBuffer(options);
+    handle = buffer.handle();
+} // buffer destroyed, handle is now stale
+
+// GOOD: Keep the resource alive
+KDGpu::Buffer buffer = device.createBuffer(options);
+Handle<Buffer_t> handle = buffer.handle(); // Both alive together
+\endcode
+
+✗ Don't use handles after moving the resource
+
+\code{.cpp}
+// BAD
+KDGpu::Buffer buffer1 = device.createBuffer(options);
+Handle<Buffer_t> handle = buffer1.handle();
+KDGpu::Buffer buffer2 = std::move(buffer1);
+// handle now refers to buffer2, not buffer1!
+
+// GOOD: Re-get handle after move
+Handle<Buffer_t> handle = buffer2.handle();
+\endcode
+
+✗ Don't manually delete or free resources
+
+\code{.cpp}
+// BAD: No manual memory management needed
+// delete &buffer; // NO!
+// vkDestroyBuffer(...); // NO!
+
+// GOOD: Let RAII handle it
+{
+    KDGpu::Buffer buffer = device.createBuffer(options);
+} // Automatic cleanup
+\endcode
+
+\section handle_comparison Comparison with Other APIs
+
+\subsection handle_vs_vulkan vs. Raw Vulkan
+
+<table>
+<tr><th>Aspect</th><th>Vulkan</th><th>KDGpu</th></tr>
+<tr>
+  <td>Resource Lifetime</td>
+  <td>Need to keep VkHandle around and call vkDestroy* functions</td>
+  <td>Move-only RAII objects with handle-based ref</td>
+</tr>
+<tr>
+  <td>Handle Validation</td>
+  <td>VK_NULL_HANDLE check only</td>
+  <td>Generation-based stale handle detection</td>
+</tr>
+<tr>
+  <td>Memory Management</td>
+  <td>Manual (or use VMA separately)</td>
+  <td>Integrated with pool allocation</td>
+</tr>
+<tr>
+  <td>API Simplicity</td>
+  <td>(verbose)</td>
+  <td>Higher-level abstractions</td>
+</tr>
+</table>
+
+\subsection handle_vs_vkhpp vs. Vulkan-Hpp
+
+<table>
+<tr><th>Aspect</th><th>Vulkan-Hpp</th><th>KDGpu</th></tr>
+<tr>
+  <td>Resource Lifetime</td>
+  <td>vk::UniqueHandle with std::unique_ptr semantics</td>
+  <td>Move-only RAII objects with handle-based ref</td>
+</tr>
+<tr>
+  <td>Handle Validation</td>
+  <td>nullptr check only</td>
+  <td>Generation-based stale handle detection</td>
+</tr>
+<tr>
+  <td>Memory Management</td>
+  <td>Manual (or use VMA separately)</td>
+  <td>Integrated with pool allocation</td>
+</tr>
+<tr>
+  <td>API Simplicity</td>
+  <td>1:1 with Vulkan (verbose)</td>
+  <td>Higher-level abstractions</td>
+</tr>
+</table>
+
+\section handle_see_also See Also
+
+- \ref KDGpu::Handle "Handle<T>" - Core handle template
+- \ref kdgpu_api_overview - KDGpu API overview
+- \ref kdgpu_vulkan_mapping - Vulkan mapping reference
+*/

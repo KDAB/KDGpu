@@ -51,12 +51,17 @@ markdown_extensions:
 nav:
   - Home: 'index.md'
   - Getting Started:
+    - KDGpu Overview: 'kdgpu_getting_started.md'
     - Installation: 'INSTALL.md'
     - Using KDGpu: 'using-kdgpu/index.md'
-  - Classes:
-    - Public API: 'group__public.md'
-    - Graphics Interface: 'group__api.md'
-    - Vulkan Implementation: 'group__vulkan.md'
-    - KDGpuExample Helper API: 'group__kdgpuexample.md'
+  - API:
+    - API Architecture: 'kdgpu_api_overview.md'
+    - Handle Ownership: 'kdgpu_handle_ownership.md'
+    - Vulkan Mapping: 'kdgpu_vulkan_mapping.md'
+    - Classes:
+      - Public API: 'group__public.md'
+      - Graphics Interface: 'group__api.md'
+      - Vulkan Implementation: 'group__vulkan.md'
+      - KDGpuExample Helper API: 'group__kdgpuexample.md'
   - Examples: 'kdgpu-examples.md'
   - License: 'license.md'

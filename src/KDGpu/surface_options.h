@@ -39,6 +39,19 @@ typedef void CAMetalLayer;
 
 namespace KDGpu {
 
+/*!
+\struct SurfaceOptions
+\brief Configuration options for creating a Surface
+\ingroup public
+\headerfile surface_options.h <KDGpu/surface_options.h>
+
+## Usage
+
+\snippet kdgpu_doc_snippets.cpp instance_surface
+
+## See also:
+\sa Instance, Instance::createInstance()
+*/
 struct SurfaceOptions {
 #if defined(KDGPU_PLATFORM_WIN32)
     HWND hWnd;
