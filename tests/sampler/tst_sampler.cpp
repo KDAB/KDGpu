@@ -51,7 +51,7 @@ TEST_SUITE("Sampler")
             CHECK(s.isValid());
         }
 
-        SUBCASE("Move constructor & move assigment")
+        SUBCASE("Move constructor & move assignment")
         {
             // GIVEN
             const SamplerOptions samplerOptions{};

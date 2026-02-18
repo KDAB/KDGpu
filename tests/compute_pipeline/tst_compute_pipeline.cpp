@@ -95,7 +95,7 @@ TEST_SUITE("ComputePipeline")
             CHECK(c.isValid());
         }
 
-        SUBCASE("Move constructor & move assigment")
+        SUBCASE("Move constructor & move assignment")
         {
             // GIVEN
             PipelineLayoutOptions pipelineLayoutOptions{};

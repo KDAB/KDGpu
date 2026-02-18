@@ -334,7 +334,7 @@ TEST_SUITE("BindGroupLayout")
             CHECK(a != b);
         }
 
-        SUBCASE("Compare with unitialize BindGroupLayouts")
+        SUBCASE("Compare with uninitialized BindGroupLayouts")
         {
             // GIVEN
             const BindGroupLayoutOptions bindGroupLayoutOptions = {

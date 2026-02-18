@@ -82,7 +82,7 @@ TEST_SUITE("Shader_Module")
             CHECK(s.isValid());
         }
 
-        SUBCASE("Move constructor & move assigment")
+        SUBCASE("Move constructor & move assignment")
         {
             // GIVEN
             const auto shaderPath = assetPath() + "/shaders/tests/compute_pipeline/empty_compute.comp.spv";
