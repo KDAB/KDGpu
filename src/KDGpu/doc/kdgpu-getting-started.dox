@@ -1,0 +1,183 @@
+/*
+  This file is part of KDGpu.
+
+  SPDX-FileCopyrightText: 2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+
+  SPDX-License-Identifier: MIT
+
+  Contact KDAB at <info@kdab.com> for commercial licensing options.
+*/
+
+/*!
+\page kdgpu_getting_started Getting Started with KDGpu
+\brief Your guide to understanding and using the KDGpu graphics API
+
+\tableofcontents
+
+\section getting_started_intro What is KDGpu?
+
+KDGpu is a modern, type-safe C++ wrapper for the Vulkan graphics API. It provides a clean, high-level interface that reduces boilerplate code while maintaining full control over GPU operations and excellent performance.
+
+<b>Key benefits:</b>
+- <b>Simplified API</b>: Less verbose than raw Vulkan while keeping the same power and flexibility
+- <b>Type Safety</b>: Strong typing prevents common errors at compile time
+- <b>Automatic Resource Management</b>: RAII-based objects to manage GPU resource lifetimes, handles to reference objects safely
+- <b>Zero Overhead</b>: Thin wrapper with no runtime performance cost
+- <b>Familiar Concepts</b>: API structure closely mirrors Vulkan for easy learning
+
+\section getting_started_who Who Should Use KDGpu?
+
+KDGpu is ideal for:
+- <b>Graphics Developers</b> who want Vulkan power without the verbosity
+- <b>Game Engine Developers</b> building modern rendering systems
+- <b>Technical Artists</b> creating compute-based tools and effects
+- <b>Researchers</b> implementing GPU-accelerated algorithms
+- <b>Educators</b> teaching modern graphics programming concepts
+
+<br/>
+If you need direct GPU access with modern C++ ergonomics, KDGpu is for you.
+
+\section getting_started_example Quick Start Example
+
+A KDGpu application typically follows these steps:
+1. create a \ref KDGpu::VulkanGraphicsApi "VulkanGraphicsApi"
+2. use it to create an \ref KDGpu::Instance "Instance"
+3. select an \ref KDGpu::Adapter "Adapter" (physical GPU)
+4. create a \ref KDGpu::Device "Device" and obtain a \ref KDGpu::Queue "Queue"
+5. upload geometry data to a \ref KDGpu::Buffer "Buffer"
+6. compile SPIR-V shaders into \ref KDGpu::ShaderModule "ShaderModule" objects
+7. build a \ref KDGpu::GraphicsPipeline "GraphicsPipeline" with a \ref KDGpu::PipelineLayout "PipelineLayout"
+8. record commands with a \ref CommandRecorder (begin render pass → set pipeline → bind buffers → draw → end)
+9. submit the resulting CommandBuffer to the queue
+.
+<br/>
+For a complete, runnable example see \ref hello_triangle.
+
+\section getting_started_concepts Core Concepts
+
+Before diving into KDGpu development, familiarize yourself with these fundamental concepts:
+
+\subsection getting_started_concepts_handles Handles and Resource Management
+
+KDGpu uses a handle-based system for GPU resources.
+
+When you create a GPU resource through a KDGpu frontend object
+<b>e.g</b>:
+```
+KDGpu::Buffer buffer = device.createBuffer(/* ... */);
+```
+
+KDGpu allocates an underlying Vulkan wrapper object (`VulkanBuffer`) in an internal pool and returns a lightweight \ref KDGpu::Handle "Handle" that references it.
+
+The frontend `buffer` object owns the pool entry and manages its lifetime, while the Handle is a small, cheaply copyable token you pass around the rest of your code to safely reference that Vulkan wrapper.
+
+When the owning frontend object is destroyed, the pool entry is released and all existing Handles to it become invalid — preventing use-after-free bugs without requiring manual reference counting.
+
+<b>Handles provide:</b>
+- <b>Safe references</b>: Prevent use-after-free bugs
+- <b>Lightweight copying</b>: Handles are small and efficient to pass around
+.
+<br/>
+
+Learn more: \ref kdgpu_handle_ownership
+
+\subsection getting_started_concepts_device Device as Factory
+
+The \ref KDGpu::Device "Device" is your factory for all GPU resources. Everything you create comes from the device — buffers, textures, pipelines, samplers, bind groups, and command recorders all originate from `Device` method calls.
+
+\subsection getting_started_concepts_pipelines Pipelines Define GPU Work
+
+Pipelines encapsulate the complete GPU rendering or compute state:
+
+- <b>\ref KDGpu::GraphicsPipeline "Graphics Pipelines"</b>: Define how geometry is rendered (shaders, blending, rasterization)
+- <b>\ref KDGpu::ComputePipeline "Compute Pipelines"</b>: Define GPU compute operations (shaders, workgroup size)
+- <b>\ref KDGpu::RayTracingPipeline "Ray Tracing Pipelines"</b>: Define ray tracing behavior (ray generation, hit shaders)
+
+<br/>
+
+\subsection getting_started_concepts_commands Command Recording
+
+GPU work is recorded into command buffers and submitted to queues. A \ref KDGpu::CommandRecorder "CommandRecorder" records render passes, compute passes, and resource copy operations.
+The finished \ref KDGpu::CommandBuffer "CommandBuffer" is submitted to a \ref KDGpu::Queue "Queue" for execution.
+
+\section getting_started_learn Learning Path
+
+Follow this recommended path to master KDGpu:
+
+\subsection getting_started_learn_step1 Step 1: Understand the API Architecture
+
+Start with the API overview to understand how KDGpu is organized and how it maps to Vulkan concepts.
+
+<b>Read:</b> \ref kdgpu_api_overview
+
+This page covers:
+- Overall API architecture and class organization
+- The rendering pipeline from instance to presentation
+- How different components work together
+
+\subsection getting_started_learn_step2 Step 2: Learn Resource Management
+
+Understanding how KDGpu manages resources is crucial for writing correct, leak-free code.
+
+<b>Read:</b> \ref kdgpu_handle_ownership
+
+This page covers:
+- How handles work internally
+- Resource lifetime management
+- Pool-based allocation strategies
+- RAII patterns in KDGpu
+
+\subsection getting_started_learn_step3 Step 3: Master Vulkan Mapping
+
+If you're familiar with Vulkan or need to reference Vulkan documentation, understand how KDGpu maps to Vulkan.
+
+<b>Read:</b> \ref kdgpu_vulkan_mapping
+
+This page provides:
+- Complete KDGpu to Vulkan type mappings
+- Function call equivalents
+- Links to Vulkan specification
+
+\subsection getting_started_learn_step4 Step 4: Explore the Class Documentation
+
+Browse the detailed class documentation to learn about specific features and usage patterns.
+
+<b>Key classes to explore:</b>
+- \ref KDGpu::Instance "Instance" - Application-wide Vulkan instance
+- \ref KDGpu::Adapter "Adapter" - Physical GPU device selection
+- \ref KDGpu::Device "Device" - Logical device and resource factory
+- \ref KDGpu::Buffer "Buffer" - GPU memory buffers
+- \ref KDGpu::Texture "Texture" - Image and texture resources
+- \ref KDGpu::GraphicsPipeline "GraphicsPipeline" - Graphics rendering pipeline
+- \ref KDGpu::CommandRecorder "CommandRecorder" - Command buffer recording
+- \ref KDGpu::Queue "Queue" - Command submission and execution
+
+\subsection getting_started_learn_step5 Step 5: Study the Examples
+
+Practical \ref kdgpu-examples "examples" demonstrate real-world usage patterns and best practices.
+
+Check out the KDGpu examples repository for complete, runnable applications showing:
+- Basic triangle rendering
+- Texture mapping
+- Compute shaders
+- Multi-pass rendering
+- Ray tracing
+- And more...
+
+\section getting_started_next Next Steps
+
+You now have the foundational knowledge to start developing with KDGpu. Here's what to do next:
+
+1. <b>Read the core documentation</b>: Work through the \ref kdgpu_api_overview, \ref kdgpu_handle_ownership, and \ref kdgpu_vulkan_mapping pages
+2. <b>Study the \ref kdgpu-examples</b>: Look at complete applications in the examples repository
+3. <b>Build something small</b>: Start with a simple triangle or quad renderer
+4. <b>Explore advanced features</b>: Experiment with compute shaders, ray tracing, or multi-pass rendering
+5. <b>Join the community</b>: Connect with other KDGpu developers and share your work
+
+Welcome to KDGpu development!
+
+\sa \ref kdgpu_api_overview
+\sa \ref kdgpu_handle_ownership
+\sa \ref kdgpu_vulkan_mapping
+\sa \ref kdgpu-examples
+*/

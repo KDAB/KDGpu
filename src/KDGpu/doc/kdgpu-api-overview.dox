@@ -1,0 +1,106 @@
+/*
+  This file is part of KDGpu.
+
+  SPDX-FileCopyrightText: 2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+
+  SPDX-License-Identifier: MIT
+
+  Contact KDAB at <info@kdab.com> for commercial licensing options.
+*/
+
+/*!
+\page kdgpu_api_overview KDGpu API Overview
+\brief Comprehensive overview of the KDGpu graphics API and its mapping to Vulkan
+
+\tableofcontents
+
+\section kdgpu_api_intro Introduction
+
+KDGpu is a modern, type-safe C++ wrapper around the Vulkan graphics API. It provides a simplified, high-level interface while maintaining complete control over the underlying Vulkan resources. KDGpu's design philosophy focuses on:
+
+- <b>Type Safety</b>: Strong typing through handles and enums
+- <b>Resource Management</b>: Handle-based ownership model with automatic resource cleanup
+- <b>Simplicity</b>: Reduced boilerplate compared to raw Vulkan
+- <b>Performance</b>: Zero-cost abstractions over Vulkan
+- <b>Familiarity</b>: API structure closely mirrors Vulkan concepts
+
+\section kdgpu_api_architecture API Architecture
+
+The KDGpu API is organized into several logical groups:
+
+\subsection kdgpu_api_arch_core Core Instance & Device Management
+- \ref KDGpu::Instance "Instance" - Application-wide Vulkan instance ([VkInstance](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkInstance.html))
+- \ref KDGpu::Adapter "Adapter" - Physical GPU device ([VkPhysicalDevice](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkPhysicalDevice.html))
+- \ref KDGpu::Device "Device" - Logical device for GPU operations ([VkDevice](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkDevice.html))
+- \ref KDGpu::Queue "Queue" - Command submission queue ([VkQueue](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkQueue.html))
+- \ref KDGpu::Surface "Surface" - Window surface for presenting ([VkSurfaceKHR](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkSurfaceKHR.html))
+
+\subsection kdgpu_api_arch_resources GPU Resources
+- \ref KDGpu::Buffer "Buffer" - GPU memory buffer ([VkBuffer](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkBuffer.html))
+- \ref KDGpu::Texture "Texture" - Image/texture resource ([VkImage](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkImage.html))
+- \ref KDGpu::TextureView "TextureView" - View into a texture ([VkImageView](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkImageView.html))
+- \ref KDGpu::Sampler "Sampler" - Texture sampling configuration ([VkSampler](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkSampler.html))
+
+\subsection kdgpu_api_arch_pipelines Pipelines & Shaders
+- \ref KDGpu::GraphicsPipeline "GraphicsPipeline" - Graphics rendering pipeline ([VkPipeline](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkPipeline.html))
+- \ref KDGpu::ComputePipeline "ComputePipeline" - Compute shader pipeline ([VkPipeline](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkPipeline.html))
+- \ref KDGpu::RayTracingPipeline "RayTracingPipeline" - Ray tracing pipeline ([VkPipeline](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkPipeline.html))
+- \ref KDGpu::ShaderModule "ShaderModule" - SPIR-V shader module ([VkShaderModule](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkShaderModule.html))
+- \ref KDGpu::PipelineLayout "PipelineLayout" - Pipeline resource layout ([VkPipelineLayout](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkPipelineLayout.html))
+- \ref KDGpu::PipelineCache "PipelineCache" - Pipeline creation cache ([VkPipelineCache](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkPipelineCache.html))
+- \ref KDGpu::RenderPass "RenderPass" - Render pass configuration ([VkRenderPass](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkRenderPass.html))
+
+\subsection kdgpu_api_arch_descriptors Descriptors & Bindings
+- \ref KDGpu::BindGroup "BindGroup" - Resource descriptor set ([VkDescriptorSet](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkDescriptorSet.html))
+- \ref KDGpu::BindGroupLayout "BindGroupLayout" - Descriptor set layout ([VkDescriptorSetLayout](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkDescriptorSetLayout.html))
+- \ref KDGpu::BindGroupPool "BindGroupPool" - Descriptor set pool ([VkDescriptorPool](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkDescriptorPool.html))
+
+\subsection kdgpu_api_arch_commands Command Recording
+- \ref KDGpu::CommandBuffer "CommandBuffer" - Recorded GPU commands ([VkCommandBuffer](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkCommandBuffer.html))
+- \ref KDGpu::CommandRecorder "CommandRecorder" - Records GPU commands ([VkCommandBuffer](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkCommandBuffer.html))
+- \ref KDGpu::RenderPassCommandRecorder "RenderPassCommandRecorder" - Records rendering commands
+- \ref KDGpu::ComputePassCommandRecorder "ComputePassCommandRecorder" - Records compute commands
+- \ref KDGpu::RayTracingPassCommandRecorder "RayTracingPassCommandRecorder" - Records ray tracing commands
+
+\subsection kdgpu_api_arch_sync Synchronization
+- \ref KDGpu::Fence "Fence" - CPU-GPU synchronization ([VkFence](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkFence.html))
+- \ref KDGpu::GpuSemaphore "GpuSemaphore" - GPU-GPU synchronization ([VkSemaphore](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkSemaphore.html))
+
+\subsection kdgpu_api_arch_presentation Presentation
+- \ref KDGpu::Swapchain "Swapchain" - Image presentation chain ([VkSwapchainKHR](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkSwapchainKHR.html))
+
+\subsection kdgpu_api_arch_raytracing Ray Tracing (Extensions)
+- \ref KDGpu::AccelerationStructure "AccelerationStructure" - Ray tracing acceleration structure ([VkAccelerationStructureKHR](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkAccelerationStructureKHR.html))
+- \ref KDGpu::RayTracingShaderBindingTable "RayTracingShaderBindingTable" - Ray tracing shader binding table
+
+\subsection kdgpu_api_arch_queries Query Operations
+- \ref KDGpu::TimestampQueryRecorder "TimestampQueryRecorder" - GPU timestamp queries ([VkQueryPool](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkQueryPool.html))
+
+\section kdgpu_api_ownership Resource Ownership Model
+
+KDGpu uses a handle-based resource management system. See \ref kdgpu_handle_ownership for details.
+
+<b>Key principles:</b>
+- Frontend KDGpu resources (e.g. Texture, Buffer) are wrappers around Vulkan resources
+- Frontend KDGpu resources use handles to safely reference underlying Vulkan wrapped resources
+- Resources lifetime is RAII-based, automatically cleaned up when owning objects are destroyed
+- Move semantics: Resources can be moved but not copied
+- Reference invalidation: Handles become invalid when resources are destroyed
+
+\section kdgpu_api_initialization Basic Initialization Flow
+
+Here's a minimal example showing how to initialize KDGpu for rendering:
+
+\snippet kdgpu_doc_snippets.cpp api_overview_initialization
+
+\section kdgpu_api_typical_usage Typical Usage Pattern
+
+\snippet kdgpu_doc_snippets.cpp api_overview_basic_structure
+
+\section kdgpu_api_see_also See Also
+
+- \ref kdgpu_handle_ownership - Detailed explanation of KDGpu's ownership model
+- \ref kdgpu_vulkan_mapping - Complete class-to-Vulkan mapping table
+- \ref kdgpu-examples - Example applications
+
+*/

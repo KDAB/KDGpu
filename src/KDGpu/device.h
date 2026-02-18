@@ -59,6 +59,79 @@ struct RayTracingPipelineOptions;
 struct RenderPassOptions;
 struct PipelineCacheOptions;
 
+/*!
+    \class Device
+    \brief Represents a logical GPU device - the primary object for creating GPU resources
+    \ingroup public
+    \headerfile device.h <KDGpu/device.h>
+
+    <b>Vulkan equivalent:</b> [VkDevice](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkDevice.html)
+
+    The Device is the central object in KDGpu applications. It represents a logical connection to
+    a physical GPU (Adapter) and is the factory for creating all GPU resources: buffers, textures,
+    pipelines, command recorders, and synchronization objects.
+
+    <b>Key responsibilities:</b>
+    - Create GPU resources (buffers, textures, images)
+    - Create pipelines (graphics, compute, ray tracing)
+    - Create shaders and pipeline layouts
+    - Create command recorders for GPU work
+    - Create synchronization primitives (fences, semaphores)
+    - Create descriptor sets (bind groups)
+    - Manage queues for submitting GPU commands
+    .
+    <br/>
+
+    <b>Lifetime:</b> The Device should live for the entire time you need to render. All resources
+    created from the device become invalid when the device is destroyed or moved. Typically you
+    create one device at startup and keep it until shutdown.
+
+    ## Usage
+
+    <b>Creating a device:</b>
+
+    \snippet kdgpu_doc_snippets.cpp device_creation
+
+    <b>Accessing queues:</b>
+
+    \snippet kdgpu_doc_snippets.cpp device_queue
+
+    <b>Creating buffers:</b>
+
+    \snippet kdgpu_doc_snippets.cpp device_create_buffer
+
+    <b>Creating textures:</b>
+
+    \snippet kdgpu_doc_snippets.cpp device_create_texture
+
+    <b>Wait for GPU completion:</b>
+
+    \snippet kdgpu_doc_snippets.cpp device_wait_idle
+
+    <b>Multiple queues:</b>
+
+    \snippet kdgpu_doc_snippets.cpp device_multi_queue
+
+    ## Vulkan mapping:
+    - Device::createBuffer() -> vkCreateBuffer() + vkAllocateMemory() + vkBindBufferMemory()
+    - Device::createTexture() -> vkCreateImage() + vkAllocateMemory() + vkBindImageMemory()
+    - Device::createGraphicsPipeline() -> vkCreateGraphicsPipelines()
+    - Device::createComputePipeline() -> vkCreateComputePipelines()
+    - Device::createShaderModule() -> vkCreateShaderModule()
+    - Device::createCommandRecorder() -> vkAllocateCommandBuffers()
+    - Device::createFence() -> vkCreateFence()
+    - Device::createGpuSemaphore() -> vkCreateSemaphore()
+    - Device::waitUntilIdle() -> vkDeviceWaitIdle()
+    .
+    <br/>
+
+    \note KDGpu will try to request some device extensions by default KDGpu::getDefaultRequestedDeviceExtensions
+
+    ## See also:
+    \sa Adapter, DeviceOptions, Queue, Buffer, Texture, GraphicsPipeline, CommandRecorder
+    \sa \ref kdgpu_api_overview
+    \sa \ref kdgpu_vulkan_mapping
+ */
 class KDGPU_EXPORT Device
 {
 public:

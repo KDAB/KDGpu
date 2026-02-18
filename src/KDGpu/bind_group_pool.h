@@ -20,6 +20,55 @@ struct BindGroupPool_t;
 struct BindGroupPoolOptions;
 struct Device_t;
 
+/*!
+    \class BindGroupPool
+    \brief Memory pool for allocating bind groups (descriptor sets)
+    \ingroup public
+    \headerfile bind_group_pool.h <KDGpu/bind_group_pool.h>
+
+    <b>Vulkan equivalent:</b> [VkDescriptorPool](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkDescriptorPool.html)
+
+    BindGroupPool (known as descriptor pool in Vulkan) is a memory pool from which bind groups (descriptor sets)
+    are allocated. It pre-allocates GPU memory for a certain number of descriptors of various types, providing
+    efficient allocation and deallocation of bind groups.
+
+    <b>Key features:</b>
+    - Pre-allocated memory for descriptor sets
+    - Configurable resource limits (uniform buffers, samplers, storage buffers, etc.)
+    - Efficient allocation and reset operations
+    - Track allocated bind group count
+    - Optional: KDGpu can manage a default pool for you
+
+    <b>Lifetime:</b> Pools are created by Device and typically live for the entire rendering session.
+    All bind groups allocated from a pool become invalid when the pool is destroyed or reset.
+
+    <b>Basic pool creation:</b>
+
+    \snippet kdgpu_doc_snippets.cpp bindgrouppool_creation
+
+    <b>Using pool with bind groups:</b>
+
+    \snippet kdgpu_doc_snippets.cpp bindgrouppool_allocate
+
+    <b>Resetting pool:</b>
+
+    \snippet kdgpu_doc_snippets.cpp bindgrouppool_reset
+
+    <b>Per-frame pooling strategy:</b>
+
+    \snippet kdgpu_doc_snippets.cpp bindgrouppool_per_frame
+
+    <b>Pool capacity limits:</b>
+
+    \snippet kdgpu_doc_snippets.cpp bindgrouppool_limits
+    - BindGroupPool creation -> vkCreateDescriptorPool()
+    - BindGroupPool::reset() -> vkResetDescriptorPool()
+    - Bind group allocation from pool -> vkAllocateDescriptorSets()
+
+    \sa BindGroup, BindGroupLayout, Device
+    \sa \ref kdgpu_api_overview
+    \sa \ref kdgpu_vulkan_mapping
+*/
 class KDGPU_EXPORT BindGroupPool
 {
 public:

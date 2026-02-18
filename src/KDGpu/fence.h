@@ -26,9 +26,60 @@ struct FenceOptions {
     ExternalFenceHandleTypeFlags externalFenceHandleType{ ExternalFenceHandleTypeFlagBits::None };
 };
 
-/**
- * @brief Fence
- * @ingroup public
+/*!
+    \class Fence
+    \brief Synchronization primitive for CPU-GPU synchronization
+    \ingroup public
+    \headerfile fence.h <KDGpu/fence.h>
+
+    <b>Vulkan equivalent:</b> [VkFence](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkFence.html)
+
+    Fence is used to synchronize CPU and GPU execution. The GPU signals a fence when it completes work,
+    and the CPU can wait for that signal. This is essential for knowing when GPU operations have finished.
+
+    <b>Key features:</b>
+    - CPU-side waiting for GPU completion
+    - Signaling when GPU work is done
+    - Resetting for reuse
+    - Checking status without blocking
+    .
+    <br/>
+
+    <b>Lifetime:</b> Fences are created by Device and should remain valid while GPU work that signals
+    them is in flight. They use RAII and clean up automatically.
+
+    ## Usage
+
+    <b>Basic fence usage:</b>
+
+    \snippet kdgpu_doc_snippets.cpp fence_creation
+
+    <b>Submit and wait:</b>
+
+    \snippet kdgpu_doc_snippets.cpp fence_submit_wait
+
+    <b>Checking status:</b>
+
+    \snippet kdgpu_doc_snippets.cpp fence_status
+
+    <b>CPU-GPU synchronization:</b>
+
+    \snippet kdgpu_doc_snippets.cpp fence_cpu_gpu_sync
+
+    <b>Resetting fences:</b>
+
+    \snippet kdgpu_doc_snippets.cpp fence_reset
+
+    ## Vulkan mapping:
+    - Fence creation -> vkCreateFence()
+    - Fence::wait() -> vkWaitForFences()
+    - Fence::reset() -> vkResetFences()
+    - Fence::status() -> vkGetFenceStatus()
+
+    ## See also:
+    \sa FenceOptions, Queue, GpuSemaphore, Device
+    \sa \ref kdgpu_api_overview
+    \sa \ref kdgpu_vulkan_mapping
  */
 class KDGPU_EXPORT Fence
 {

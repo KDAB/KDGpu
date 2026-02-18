@@ -41,9 +41,10 @@ struct SubmitOptions {
     OptionalHandle<Fence_t> signalFence;
 };
 
-/**
-    @ingroup public
-    @headerfile queue.h <KDGpu/queue.h>
+/*!n    \struct SwapchainPresentInfo
+    \brief Specifies a swapchain and image index for presentation
+    \ingroup public
+    \headerfile queue.h <KDGpu/queue.h>
 */
 struct SwapchainPresentInfo {
     RequiredHandle<Swapchain_t> swapchain;
@@ -125,6 +126,65 @@ struct UploadStagingBuffer {
     CommandBuffer commandBuffer;
 };
 
+/*!
+    \class Queue
+    \brief Represents a GPU command queue for submitting work to the device
+    \ingroup public
+    \headerfile queue.h <KDGpu/queue.h>
+
+    <b>Vulkan equivalent:</b> [VkQueue](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkQueue.html)
+
+    Queue is the interface for submitting command buffers to the GPU for execution. Every Device has
+    one or more queues that support different types of operations (graphics, compute, transfer).
+
+    <b>Key responsibilities:</b>
+    - Submit command buffers for GPU execution
+    - Present rendered images to swapchains
+    - Synchronize CPU and GPU with fences and semaphores
+    - Upload data to buffers and textures
+    - Wait for GPU operations to complete
+    .
+    <br/>
+
+    <b>Lifetime:</b> Queue objects are created by Device and remain valid for the lifetime of the device.
+    You typically retrieve queues from the device and copy them.
+
+    \note Unlike most other KDGpu resources, Queue instances can be copied around.
+
+    ## Usage
+
+    <b>Basic queue usage:</b>
+
+    \snippet kdgpu_doc_snippets.cpp queue_submit
+
+    <b>Synchronization with fences:</b>
+
+    \snippet kdgpu_doc_snippets.cpp queue_submit_fence
+
+    <b>GPU-to-GPU synchronization with semaphores:</b>
+
+    \snippet kdgpu_doc_snippets.cpp queue_submit_semaphore
+
+    <b>Presenting to swapchains:</b>
+
+    \snippet kdgpu_doc_snippets.cpp queue_present
+
+    <b>Queue capabilities:</b>
+
+    \snippet kdgpu_doc_snippets.cpp queue_wait_idle
+
+    ## Vulkan mapping:
+    - Queue::submit()->vkQueueSubmit()
+    - Queue::present()->vkQueuePresentKHR()
+    - Queue::waitUntilIdle()->vkQueueWaitIdle()
+    - Queue::uploadBufferData()->staging buffer + vkCmdCopyBuffer()
+    - Queue::uploadTextureData()->staging buffer + vkCmdCopyBufferToImage()
+
+    ## See also:
+    \sa SubmitOptions, PresentOptions, Device, CommandRecorder, CommandBuffer, Fence, GpuSemaphore, Swapchain
+    \sa \ref kdgpu_api_overview
+    \sa \ref kdgpu_vulkan_mapping
+*/
 class KDGPU_EXPORT Queue
 {
 public:

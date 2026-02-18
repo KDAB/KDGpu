@@ -11,11 +11,27 @@ set(DOXYGEN_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR})
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.cmake ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/mkdocs/mkdocs.yml.cmake ${CMAKE_CURRENT_BINARY_DIR}/mkdocs/mkdocs.yml)
 
+# Build documentation snippets to verify they compile
+add_library(
+    kdgpu-doc-snippets OBJECT
+    ${CMAKE_SOURCE_DIR}/src/KDGpu/doc/kdgpu_doc_snippets.cpp
+)
+target_link_libraries(
+    kdgpu-doc-snippets
+    PRIVATE KDGpu
+)
+set_target_properties(
+    kdgpu-doc-snippets
+    PROPERTIES CXX_STANDARD 20
+               CXX_STANDARD_REQUIRED ON
+               POSITION_INDEPENDENT_CODE ON
+)
+
 # Step 1: Run Doxygen
 add_custom_command(
     OUTPUT ${DOXYGEN_OUTPUT_DIR}/xml/index.xml
     COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile kdgpu-doc-snippets
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     COMMENT "Running Doxygen..."
 )

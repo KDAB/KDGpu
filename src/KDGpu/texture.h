@@ -89,9 +89,85 @@ struct HostLayoutTransition {
     TextureSubresourceRange range{};
 };
 
-/**
- * @brief Texture
- * @ingroup public
+/*!
+    \class Texture
+    \brief Represents a GPU texture/image for rendering, sampling, and storage
+    \ingroup public
+    \headerfile texture.h <KDGpu/texture.h>
+
+    <b>Vulkan equivalent:</b> [VkImage](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkImage.html)
+
+    Texture represents a multidimensional image on the GPU that can be used as a render target,
+    sampled in shaders, or used for general storage. Textures can be 1D, 2D, 3D, or cube maps.
+
+    <b>Key features:</b>
+    - 1D, 2D, 3D, and cube map support
+    - Mipmapping and multisampling
+    - Various formats (color, depth, stencil, compressed)
+    - Multiple usage modes (color attachment, depth, sampled, storage)
+    - CPU-accessible mapping for linear textures
+    .
+    <br/>
+
+    <b>Lifetime:</b> Textures are created by Device and must remain valid while referenced by pipelines,
+    descriptor sets, or GPU commands. They use RAII and clean up automatically.
+
+    ## Usage
+
+    <b>Creating a 2D color texture:</b>
+
+    \snippet kdgpu_doc_snippets.cpp texture_2d_creation
+
+    <b>Creating a depth texture:</b>
+
+    \snippet kdgpu_doc_snippets.cpp texture_depth_buffer
+
+    <b>Creating a render target texture:</b>
+
+    \snippet kdgpu_doc_snippets.cpp texture_render_target
+
+    <b>Creating a cube map texture:</b>
+
+    \snippet kdgpu_doc_snippets.cpp texture_cubemap
+
+    <b>Creating a texture with mipmaps:</b>
+
+    \snippet kdgpu_doc_snippets.cpp texture_mipmaps
+
+    <b>Creating a multisampled texture (MSAA):</b>
+
+    \snippet kdgpu_doc_snippets.cpp texture_multisampled
+
+    <b>Resolving MSAA texture to non-MSAA texture:</b>
+
+    \snippet kdgpu_doc_snippets.cpp texture_resolve
+
+    <b>Creating a storage image for compute shaders:</b>
+
+    \snippet kdgpu_doc_snippets.cpp texture_storage_image
+
+    <b>Creating texture views for sampling:</b>
+
+    \snippet kdgpu_doc_snippets.cpp texture_views
+
+    <b>Uploading texture data:</b>
+
+    \snippet kdgpu_doc_snippets.cpp texture_upload
+
+    <b>Common texture formats:</b>
+
+    \snippet kdgpu_doc_snippets.cpp texture_formats
+
+    ## Vulkan mapping:
+    - Texture creation -> vkCreateImage() + vkAllocateMemory() + vkBindImageMemory()
+    - Texture::createView() -> vkCreateImageView()
+    - Texture::generateMipMaps() -> vkCmdBlitImage() for each mip level
+    - Texture::map() -> vkMapMemory() (for linear tiling)
+
+    ## See also:
+    \sa TextureView, Device, TextureOptions, Sampler
+    \sa \ref kdgpu_api_overview
+    \sa \ref kdgpu_vulkan_mapping
  */
 class KDGPU_EXPORT Texture
 {

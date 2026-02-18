@@ -139,9 +139,71 @@ struct ClearDepthStencilTexture {
     std::vector<TextureSubresourceRange> ranges;
 };
 
-/**
- * @brief CommandRecorder
- * @ingroup public
+/*!
+    \class CommandRecorder
+    \brief Records GPU commands into a command buffer for submission
+    \ingroup public
+    \headerfile command_recorder.h <KDGpu/command_recorder.h>
+
+    <b>Vulkan equivalent:</b> [VkCommandBuffer](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkCommandBuffer.html) (in recording state)
+
+    CommandRecorder is the primary interface for recording GPU work. It provides methods to begin
+    render passes, perform transfers, set barriers, and more. When finished, it produces a CommandBuffer
+    that can be submitted to a Queue.
+
+    <b>Key features:</b>
+    - Begin render, compute, and ray tracing passes
+    - Copy buffers and textures
+    - Pipeline barriers and synchronization
+    - Clear operations
+    - Secondary command buffer execution
+    - Debug labels and markers
+
+    <br/>
+    <b>Lifetime:</b> Create a CommandRecorder when you need to record work, then call finish() to get
+    the CommandBuffer. The recorder itself can be discarded after finish().
+
+    ## Usage
+
+    <b>Basic command recording:</b>
+
+    \snippet kdgpu_doc_snippets.cpp commandrecorder_creation
+
+    <b>Recording render passes:</b>
+
+    \snippet kdgpu_doc_snippets.cpp commandrecorder_render_pass
+
+    <b>Compute pass recording:</b>
+
+    \snippet kdgpu_doc_snippets.cpp commandrecorder_compute_pass
+
+    <b>Buffer copies:</b>
+
+    \snippet kdgpu_doc_snippets.cpp commandrecorder_copy_buffer
+
+    <b>Texture copies:</b>
+
+    \snippet kdgpu_doc_snippets.cpp commandrecorder_copy_texture
+
+    <b>Submitting commands:</b>
+
+    \snippet kdgpu_doc_snippets.cpp commandrecorder_submit
+
+    <b>Recorder reuse:</b>
+
+    \snippet kdgpu_doc_snippets.cpp commandrecorder_reuse
+
+    ## Vulkan mapping:
+    - CommandRecorder creation -> vkAllocateCommandBuffers() + vkBeginCommandBuffer()
+    - CommandRecorder::finish() -> vkEndCommandBuffer()
+    - CommandRecorder::copyBuffer() -> vkCmdCopyBuffer()
+    - CommandRecorder::textureMemoryBarrier() -> vkCmdPipelineBarrier()
+    - CommandRecorder::beginRenderPass() -> vkCmdBeginRenderPass()
+
+    ## See also:
+    \sa CommandRecorderOptions, CommandBuffer, RenderPassCommandRecorder, ComputePassCommandRecorder, Queue, Device
+    \sa \ref kdgpu_api_overview
+    \sa \ref kdgpu_vulkan_mapping
  */
 class KDGPU_EXPORT CommandRecorder
 {
