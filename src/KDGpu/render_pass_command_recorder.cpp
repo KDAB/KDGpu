@@ -191,7 +191,7 @@ void RenderPassCommandRecorder::nextSubpass()
     apiRenderPassCommandRecorder->nextSubpass();
 }
 
-void RenderPassCommandRecorder::setInputAttachmentMapping(std::span<const uint32_t> colorAttachmentIndices,
+void RenderPassCommandRecorder::setInputAttachmentMapping(std::span<const std::optional<uint32_t>> colorAttachmentIndices,
                                                           std::optional<uint32_t> depthAttachmentIndex,
                                                           std::optional<uint32_t> stencilAttachmentIndex)
 {
@@ -199,7 +199,7 @@ void RenderPassCommandRecorder::setInputAttachmentMapping(std::span<const uint32
     apiRenderPassCommandRecorder->setInputAttachmentMapping(colorAttachmentIndices, depthAttachmentIndex, stencilAttachmentIndex);
 }
 
-void RenderPassCommandRecorder::setOutputAttachmentMapping(std::span<const uint32_t> remappedOutputs)
+void RenderPassCommandRecorder::setOutputAttachmentMapping(std::span<const std::optional<uint32_t>> remappedOutputs)
 {
     auto *apiRenderPassCommandRecorder = m_api->resourceManager()->getRenderPassCommandRecorder(m_renderPassCommandRecorder);
     apiRenderPassCommandRecorder->setOutputAttachmentMapping(remappedOutputs);

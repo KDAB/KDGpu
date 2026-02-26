@@ -61,10 +61,10 @@ struct KDGPU_EXPORT VulkanRenderPassCommandRecorder {
     void pushConstant(const PushConstantRange &constantRange, const void *data, const Handle<PipelineLayout_t> &pipelineLayout = {}) const;
     void pushBindGroup(uint32_t group, std::span<const BindGroupEntry> bindGroupEntries, const Handle<PipelineLayout_t> &pipelineLayout = {}) const;
     void nextSubpass() const;
-    void setInputAttachmentMapping(std::span<const uint32_t> colorAttachmentIndices,
+    void setInputAttachmentMapping(std::span<const std::optional<uint32_t>> colorAttachmentIndices,
                                    std::optional<uint32_t> depthAttachmentIndex,
                                    std::optional<uint32_t> stencilAttachmentIndex) const;
-    void setOutputAttachmentMapping(std::span<const uint32_t> remappedOutputs) const;
+    void setOutputAttachmentMapping(std::span<const std::optional<uint32_t>> remappedOutputs) const;
     void end() const;
 
     // NOLINTBEGIN(misc-non-private-member-variables-in-classes)

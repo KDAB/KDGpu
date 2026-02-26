@@ -1921,8 +1921,8 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
                 inputColorLocations.push_back(mapping.enabled ? mapping.remappedIndex : VK_ATTACHMENT_UNUSED);
             }
 
-            inputAttachmentLocations.pDepthInputAttachmentIndex = (options.dynamicRendering.dynamicInputLocations->inputDepthAttachment.enabled) ? &inputDepthLocation : nullptr;
-            inputAttachmentLocations.pStencilInputAttachmentIndex = (options.dynamicRendering.dynamicInputLocations->inputStencilAttachment.enabled) ? &inputStencilLocation : nullptr;
+            inputAttachmentLocations.pDepthInputAttachmentIndex = &inputDepthLocation;
+            inputAttachmentLocations.pStencilInputAttachmentIndex = &inputStencilLocation;
             inputAttachmentLocations.colorAttachmentCount = inputColorLocations.size();
             inputAttachmentLocations.pColorAttachmentInputIndices = inputColorLocations.data();
             addToChain(&inputAttachmentLocations);

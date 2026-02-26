@@ -136,12 +136,12 @@ public:
 
     // Remap Dynamic Rendering attachments to input attachments for the following draw calls
     // (e.g RenderTarget Color[0] -> Input[2])
-    void setInputAttachmentMapping(std::span<const uint32_t> colorAttachmentIndices,
+    void setInputAttachmentMapping(std::span<const std::optional<uint32_t>> colorAttachmentIndices,
                                    std::optional<uint32_t> depthAttachmentIndex,
                                    std::optional<uint32_t> stencilAttachmentIndex);
 
     // Remap Fragment Outputs for the following draw calls [e.g RenderTarget Color[0] -> Output[2]]
-    void setOutputAttachmentMapping(std::span<const uint32_t> remappedOutputs);
+    void setOutputAttachmentMapping(std::span<const std::optional<uint32_t>> remappedOutputs);
 
     void end();
 
