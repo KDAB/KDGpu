@@ -33,3 +33,7 @@ add_subdirectory(wireframe_geometry)
 if(KDGPU_HLSL_SUPPORT)
     add_subdirectory(hello_triangle_hlsl)
 endif()
+
+if(KDGPU_SLANG_SUPPORT)
+    add_subdirectory(hello_triangle_slang)
+endif()

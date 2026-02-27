@@ -24,6 +24,7 @@
     - \subpage hello_triangle - Your first triangle using the KDGpuExample helper API
     - \subpage hello_triangle_native - Raw KDGpu API showing all initialization steps without helper abstractions
     - \subpage hello_triangle_hlsl - Using HLSL shaders instead of GLSL with DXC compilation
+    - \subpage hello_triangle_slang - Using Slang shaders instead of GLSL with Slang compilation
     - \subpage textured_quad - Texture loading, sampling, and applying textures to geometry
     - \subpage hello_triangle_overlap - Triple-buffered rendering with fence synchronization for frame overlap
     - \subpage hello_triangle_apple - Platform-specific initialization for macOS using MoltenVK
