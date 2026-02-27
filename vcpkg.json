@@ -82,6 +82,16 @@
                 },
                 "vulkan-sdk-components"
             ]
+        },
+        "slang": {
+            "description": "Enable Slang shader support",
+            "supports": "(windows & !arm32 & !uwp & !xbox) | (linux & x64)",
+            "dependencies": [
+                {
+                    "name": "shader-slang",
+                    "host": true
+                }
+            ]
         }
     },
     "configuration": {

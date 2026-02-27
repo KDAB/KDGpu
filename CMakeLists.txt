@@ -61,6 +61,14 @@ endif()
 include(FeatureSummary)
 include(CMakeDependentOption)
 
+set(USE_LOCAL_VULKAN_SDK OFF)
+set(KDGPU_FETCH_VULKAN_SDK_FROM_VCPKG_DEFAULT ON)
+if(NOT "$ENV{VULKAN_SDK}" STREQUAL "")
+    set(USE_LOCAL_VULKAN_SDK ON)
+    set(KDGPU_FETCH_VULKAN_SDK_FROM_VCPKG_DEFAULT OFF)
+    message(STATUS "Using Vulkan SDK from environment variable VULKAN_SDK: $ENV{VULKAN_SDK}")
+endif()
+
 option(KDGPU_BUILD_SHARED_LIBS "Build shared libraries" ON)
 set(BUILD_SHARED_LIBS ${KDGPU_BUILD_SHARED_LIBS})
 
@@ -68,7 +76,7 @@ option(KDGPU_BUILD_TESTS "Build tests" ON)
 option(KDGPU_BUILD_EXAMPLES "Build examples" ON)
 option(KDGPU_BUILD_KDGPUKDGUI "Build KDGpuKDGui" ON)
 option(KDGPU_BUILD_KDGPUUTILS "Build KDGpuUtils" ON)
-option(KDGPU_FETCH_VULKAN_SDK_FROM_VCPKG "Fetch Vulkan SDK from vcpkg" OFF)
+option(KDGPU_FETCH_VULKAN_SDK_FROM_VCPKG "Fetch Vulkan SDK from vcpkg" ${KDGPU_FETCH_VULKAN_SDK_FROM_VCPKG_DEFAULT})
 option(KDGPU_BUILD_IN_STRICT_MODE "Build with strict options" OFF)
 cmake_dependent_option(
     KDGPU_BUILD_KDGPUEXAMPLE
@@ -96,7 +104,24 @@ endif()
 
 set(KDGPU_BUILD_ASSETS "KDGPU_BUILD_TESTS OR KDGPU_BUILD_EXAMPLES")
 
-option(KDGPU_HLSL_SUPPORT "Try to find and use the dxc HLSL to SPIR-V compiler" OFF)
+find_program(DXC_EXECUTABLE dxc HINTS "$ENV{VULKAN_SDK}/bin")
+find_program(SLANGC_EXECUTABLE slangc HINTS "$ENV{VULKAN_SDK}/bin")
+set(DXC_EXECUTABLE_FOUND OFF)
+set(SLANGC_EXECUTABLE_FOUND OFF)
+
+if(DXC_EXECUTABLE)
+    set(DXC_EXECUTABLE_FOUND ON)
+endif()
+
+if(SLANGC_EXECUTABLE)
+    set(SLANGC_EXECUTABLE_FOUND ON)
+endif()
+
+message(STATUS "DXC executable: Found: ${DXC_EXECUTABLE_FOUND} ${DXC_EXECUTABLE}")
+message(STATUS "Slang executable: Found: ${SLANGC_EXECUTABLE_FOUND} ${SLANGC_EXECUTABLE}")
+
+option(KDGPU_HLSL_SUPPORT "Try to find and use the dxc HLSL to SPIR-V compiler" ${DXC_EXECUTABLE_FOUND})
+option(KDGPU_SLANG_SUPPORT "Try to find and use the Slang to SPIR-V compiler" ${SLANGC_EXECUTABLE_FOUND})
 option(KDGPU_CODE_COVERAGE "Code Coverage" OFF)
 
 add_feature_info(KDGpuKDGui ${KDGPU_BUILD_KDGPUKDGUI} "Build KDGpuKDGui")
@@ -129,15 +154,19 @@ if(KDGPU_BUILD_TESTS)
     list(APPEND VCPKG_MANIFEST_FEATURES "testing")
 endif()
 
-if(KDGPU_HLSL_SUPPORT)
+if(KDGPU_HLSL_SUPPORT AND NOT DXC_EXECUTABLE)
     list(APPEND VCPKG_MANIFEST_FEATURES "hlsl")
+endif()
+
+if(KDGPU_SLANG_SUPPORT AND NOT SLANGC_EXECUTABLE)
+    list(APPEND VCPKG_MANIFEST_FEATURES "slang")
 endif()
 
 if(KDGPU_BUILD_KDXR)
     list(APPEND VCPKG_MANIFEST_FEATURES "openxr")
 endif()
 
-if("$ENV{VULKAN_SDK}" STREQUAL "" AND KDGPU_FETCH_VULKAN_SDK_FROM_VCPKG)
+if(NOT USE_LOCAL_VULKAN_SDK AND KDGPU_FETCH_VULKAN_SDK_FROM_VCPKG)
     # Use vcpkg to fetch Vulkan SDK when env variable VULKAN_SDK is not set
     list(APPEND VCPKG_MANIFEST_FEATURES "vulkan-sdk")
 endif()
@@ -180,6 +209,7 @@ add_subdirectory(src)
 
 # Feature Summary
 add_feature_info(KDGpu-DXC ${KDGPU_HLSL_SUPPORT} "HLSL Shader Support")
+add_feature_info(KDGpu-Slang ${KDGPU_SLANG_SUPPORT} "Slang Shader Support")
 add_feature_info(KDGpu-Assets ${KDGPU_BUILD_ASSETS} "Build Assets")
 if(KDGPU_BUILD_ASSETS)
     add_subdirectory(assets)
