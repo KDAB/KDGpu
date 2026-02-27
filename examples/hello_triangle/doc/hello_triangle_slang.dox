@@ -1,0 +1,112 @@
+/*
+  This file is part of KDGpu.
+
+  SPDX-FileCopyrightText: 2026 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+
+  SPDX-License-Identifier: MIT
+
+  Contact KDAB at <info@kdab.com> for commercial licensing options.
+*/
+
+/*!
+\page hello_triangle_slang Hello Triangle Slang
+\ingroup kdgpu-examples
+
+\brief Demonstrates using Slang shaders compiled to SPIR-V with the Slang compiler (slangc).
+
+This example shows how to use Slang shaders instead of GLSL in your KDGpu applications. Slang is a shading language developed by NVIDIA that is designed to be a modern and expressive alternative to GLSL and HLSL, while still compiling to SPIR-V for use with Vulkan.
+
+The example uses the \ref kdgpuexample_helper "KDGpuExample helper API" for simplified setup. For comparison, see \ref hello_triangle which uses GLSL shaders, or \ref hello_triangle_hlsl which uses HLSL shaders.
+
+\section slang_overview Overview
+
+<b>What this example demonstrates:</b>
+- Compiling Slang shaders to SPIR-V using slangc (Slang compiler)
+- Loading and using SPIR-V modules compiled from Slang
+- Slang syntax and its similarities to HLSL
+- Using Slang shader stage attributes
+.
+<br/>
+
+<b>When to use Slang:</b>
+- You want a modern, expressive shading language with strong type safety
+- You want to share shader code across multiple backends (Vulkan, D3D12, Metal, CUDA)
+- You prefer explicit shader stage annotations over file-extension conventions
+- You want to use advanced Slang features like generics and interfaces in shaders
+
+\section slang_requirements Vulkan Requirements
+
+- <b>Vulkan Version</b>: 1.0+
+- <b>Extensions</b>: None (SPIR-V is Vulkan's native shader format)
+- <b>Build Tools</b>: slangc (Slang compiler) for compiling Slang to SPIR-V
+
+\section slang_concepts Key Concepts
+
+<b>Slang vs GLSL:</b>
+
+Slang and GLSL have different syntax for shader inputs, outputs, and resource bindings:
+
+- <b>Entry Points</b>: Slang uses C-style functions annotated with `[shader("vertex")]` / `[shader("fragment")]`; GLSL uses `void main()`
+- <b>Semantics</b>: Slang uses semantics like `SV_Position`, `COLOR0` (similar to HLSL); GLSL uses `layout(location = N)`
+- <b>Resource Bindings</b>: Slang uses `[[vk::binding(N)]]` attributes; GLSL uses `layout(binding = N)`
+- <b>Shader Stages</b>: Slang uses `[shader("vertex")]` / `[shader("fragment")]` annotations; GLSL uses separate files with `.vert` / `.frag` extensions
+.
+<br/>
+
+<b>slangc Compilation:</b>
+
+The Slang compiler (`slangc`) compiles Slang source code directly to SPIR-V bytecode that Vulkan understands.
+
+It is invoked per-stage with `-stage vertex` or `-stage fragment`.
+
+For more on Slang: https://shader-slang.com/
+
+\section slang_implementation Implementation
+
+The rendering code is identical to \subpage hello_triangle — the only difference is loading Slang-compiled shaders instead of GLSL-compiled ones:
+
+\snippet hello_triangle/hello_triangle.cpp shaders_slang
+
+Note that the loaded files are still `.spv` (SPIR-V bytecode) — the Slang source has already been compiled to SPIR-V at build time.
+
+<b>Build-Time Shader Compilation:</b>
+
+The CMake build system automatically compiles Slang shaders using slangc when you build the project.
+
+The `KDGpu_CompileSlangShaderSet` CMake function handles this, invoking slangc with:
+- `-target spirv`: Generate SPIR-V output
+- `-stage vertex` / `-stage fragment`: Specify the shader stage
+- `-o`: Output file path
+.
+<br/>
+
+<b>Slang Shader Example:</b>
+
+Here's what the Slang vertex shader looks like (compare to GLSL and HLSL):
+
+\code
+[[vk::binding(0)]]
+cbuffer Transform { float4x4 model; };
+
+struct VSInput { float3 position : POSITION; float3 color : COLOR0; };
+struct VSOutput { float4 position : SV_Position; float3 color : COLOR0; };
+
+[shader("vertex")]
+VSOutput vertexMain(VSInput input)
+{
+    VSOutput output;
+    output.position = mul(model, float4(input.position, 1.0f));
+    output.color = input.color;
+    return output;
+}
+\endcode
+
+\section slang_seealso See Also
+
+- \subpage hello_triangle - The same example using GLSL shaders
+- \subpage hello_triangle_hlsl - The same example using HLSL shaders
+- [Slang Language Documentation](https://shader-slang.com/slang/user-guide/) - Official Slang language reference
+- [Slang GitHub Repository](https://github.com/shader-slang/slang) - Slang compiler source and documentation
+- [SPIR-V Specification](https://www.khronos.org/registry/spir-v/) - Vulkan's shader bytecode format
+
+*/

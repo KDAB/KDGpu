@@ -34,3 +34,16 @@ if(KDGPU_HLSL_SUPPORT)
     )
     target_compile_definitions(kdgpu_hello_triangle_hlsl PRIVATE USE_HLSL_SHADERS)
 endif()
+
+if(KDGPU_SLANG_SUPPORT)
+    add_kdgpu_example(
+        NAME
+        kdgpu_hello_triangle_slang
+        SOURCES
+        main.cpp
+        hello_triangle.cpp
+        LIBS
+        KDGpu::KDGpuExample
+    )
+    target_compile_definitions(kdgpu_hello_triangle_slang PRIVATE USE_SLANG_SHADERS)
+endif()

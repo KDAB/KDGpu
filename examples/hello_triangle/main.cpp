@@ -22,7 +22,15 @@ using namespace KDGpuExample;
 int main()
 {
     GuiApplication app;
-    app.applicationName = "Hello Triangle";
+
+#ifdef USE_HLSL_SHADERS
+    app.applicationName = "Hello Triangle (HLSL)";
+#elif defined(USE_SLANG_SHADERS)
+    app.applicationName = "Hello Triangle (Slang)";
+#else
+    app.applicationName = "Hello Triangle (GLSL)";
+#endif
+
     Engine engine;
     auto exampleLayer = engine.createEngineLayer<HelloTriangle>();
     engine.running = true;
