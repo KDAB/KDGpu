@@ -197,7 +197,7 @@ add_library(
     KDGpu::KDGpu ALIAS KDGpu
 )
 
-set(KDGPU_PUBLIC_LIBS spdlog::spdlog Vulkan::Vulkan GPUOpen::VulkanMemoryAllocator)
+set(KDGPU_PUBLIC_LIBS spdlog::spdlog Vulkan::Vulkan GPUOpen::VulkanMemoryAllocator KDUtils::KDUtils)
 
 set(KDGPU_EXPORT_TARGETS KDGpu)
 
