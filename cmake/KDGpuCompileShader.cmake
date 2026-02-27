@@ -160,3 +160,37 @@ function(KDGpu_CompileHLSLShaderSet target name)
         COMMENT "Target to compile a shader set using dxc"
     )
 endfunction()
+
+# Compile a shader using slangc
+function(
+    KDGpu_CompileSlangShader
+    target
+    shader
+    output
+    stage
+)
+    find_program(SLANGC_EXECUTABLE slangc REQUIRED)
+    add_custom_command(
+        OUTPUT ${output}
+        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${shader}
+        COMMAND ${SLANGC_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/${shader} -target spirv -stage ${stage} -o ${output}
+        COMMENT "Compile Slang shader ${shader} using slangc"
+    )
+    add_custom_target(
+        ${target}
+        DEPENDS ${output}
+        COMMENT "Target to compile a slang shader"
+    )
+endfunction()
+
+# Compiles a shader set (vertex + fragment) using slangc
+function(KDGpu_CompileSlangShaderSet target name)
+    kdgpu_compileslangshader(${target}VertexShader ${name}.vert.slang ${name}.vert.spv vertex)
+    kdgpu_compileslangshader(${target}FragmentShader ${name}.frag.slang ${name}.frag.spv fragment)
+
+    add_custom_target(
+        ${target}Shaders ALL
+        DEPENDS ${target}VertexShader ${target}FragmentShader
+        COMMENT "Target to compile a shader set using slangc"
+    )
+endfunction()
