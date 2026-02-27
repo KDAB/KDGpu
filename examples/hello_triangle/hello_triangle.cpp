@@ -111,13 +111,23 @@ void HelloTriangle::initializeScene()
     //![transform_buffer]
 
     // Create a vertex shader and fragment shader
-    //![shaders]
+#ifdef USE_HLSL_SHADERS
+    //![shaders_hlsl]
+    auto vertexShaderPath = KDGpuExample::assetDir().file("shaders/examples/hello_triangle_hlsl/hello_triangle.vs.spv");
+    auto vertexShader = m_device.createShaderModule(KDGpuExample::readShaderFile(vertexShaderPath));
+
+    auto fragmentShaderPath = KDGpuExample::assetDir().file("shaders/examples/hello_triangle_hlsl/hello_triangle.ps.spv");
+    auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
+    //![shaders_hlsl]
+#else
+    //![shaders_glsl]
     auto vertexShaderPath = KDGpuExample::assetDir().file("shaders/examples/hello_triangle/hello_triangle.vert.spv");
     auto vertexShader = m_device.createShaderModule(KDGpuExample::readShaderFile(vertexShaderPath));
 
     auto fragmentShaderPath = KDGpuExample::assetDir().file("shaders/examples/hello_triangle/hello_triangle.frag.spv");
     auto fragmentShader = m_device.createShaderModule(KDGpuExample::readShaderFile(fragmentShaderPath));
-    //![shaders]
+    //![shaders_glsl]
+#endif
 
     //![pipeline_layout]
     // Create bind group layout consisting of a single binding holding a UBO
