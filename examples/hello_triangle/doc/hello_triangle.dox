@@ -96,7 +96,7 @@ This is ideal for data that changes every frame, such as our transformation matr
 
 <b>Loading the shaders:</b>
 
-\snippet hello_triangle/hello_triangle.cpp shaders
+\snippet hello_triangle/hello_triangle.cpp shaders_glsl
 
 A single call to the graphics device. Also check out that KDGpu::AssetPath.
 

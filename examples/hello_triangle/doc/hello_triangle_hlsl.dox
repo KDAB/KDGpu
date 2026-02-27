@@ -62,7 +62,7 @@ For more on SPIR-V: https://www.khronos.org/spir/
 
 The rendering code is identical to \subpage hello_triangle - the only difference is loading HLSL-compiled shaders instead of GLSL-compiled ones:
 
-\snippet hello_triangle_hlsl/hello_triangle_hlsl.cpp load_hlsl_shaders
+\snippet hello_triangle/hello_triangle.cpp shaders_hlsl
 
 Note that the loaded files are still `.spv` (SPIR-V bytecode) - the HLSL source has already been compiled to SPIR-V at build time.
 

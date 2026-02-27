@@ -82,10 +82,6 @@ if(TARGET KDGpu::KDGpuExample)
     add_subdirectory(host_image_copy_texture)
     add_subdirectory(wireframe_geometry)
 
-    if(KDGPU_HLSL_SUPPORT)
-        add_subdirectory(hello_triangle_hlsl)
-    endif()
-
     if(APPLE)
         add_subdirectory(hello_triangle_apple)
     endif()
