@@ -23,7 +23,10 @@
 #include <KDGpu/vulkan/vulkan_fence.h>
 #include <KDGpu/vulkan/vulkan_framebuffer.h>
 #include <KDGpu/vulkan/vulkan_gpu_semaphore.h>
+#include <KDGpu/vulkan/vulkan_timeline_semaphore.h>
 #include <KDGpu/vulkan/vulkan_graphics_pipeline.h>
+
+#include <KDGpu/timeline_semaphore.h>
 #include <KDGpu/vulkan/vulkan_instance.h>
 #include <KDGpu/vulkan/vulkan_pipeline_layout.h>
 #include <KDGpu/vulkan/vulkan_queue.h>
@@ -139,6 +142,10 @@ public:
     Handle<GpuSemaphore_t> createGpuSemaphore(const Handle<Device_t> &deviceHandle, const GpuSemaphoreOptions &options);
     void deleteGpuSemaphore(const Handle<GpuSemaphore_t> &handle);
     [[nodiscard]] VulkanGpuSemaphore *getGpuSemaphore(const Handle<GpuSemaphore_t> &handle) const;
+
+    Handle<TimelineSemaphore_t> createTimelineSemaphore(const Handle<Device_t> &deviceHandle, const TimelineSemaphoreOptions &options);
+    void deleteTimelineSemaphore(const Handle<TimelineSemaphore_t> &handle);
+    [[nodiscard]] VulkanTimelineSemaphore *getTimelineSemaphore(const Handle<TimelineSemaphore_t> &handle) const;
 
     Handle<CommandRecorder_t> createCommandRecorder(const Handle<Device_t> &deviceHandle, const CommandRecorderOptions &options);
     void deleteCommandRecorder(const Handle<CommandRecorder_t> &handle);
@@ -285,6 +292,7 @@ private:
     Pool<VulkanComputePipeline, ComputePipeline_t> m_computePipelines{ 64 };
     Pool<VulkanRayTracingPipeline, RayTracingPipeline_t> m_rayTracingPipelines{ 64 };
     Pool<VulkanGpuSemaphore, GpuSemaphore_t> m_gpuSemaphores{ 32 };
+    Pool<VulkanTimelineSemaphore, TimelineSemaphore_t> m_timelineSemaphores{ 32 };
     Pool<VulkanCommandRecorder, CommandRecorder_t> m_commandRecorders{ 32 };
     Pool<VulkanRenderPassCommandRecorder, RenderPassCommandRecorder_t> m_renderPassCommandRecorders{ 32 };
     Pool<VulkanComputePassCommandRecorder, ComputePassCommandRecorder_t> m_computePassCommandRecorders{ 32 };

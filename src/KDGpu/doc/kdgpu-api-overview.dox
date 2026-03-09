@@ -65,6 +65,7 @@ The KDGpu API is organized into several logical groups:
 \subsection kdgpu_api_arch_sync Synchronization
 - \ref KDGpu::Fence "Fence" - CPU-GPU synchronization ([VkFence](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkFence.html))
 - \ref KDGpu::GpuSemaphore "GpuSemaphore" - GPU-GPU synchronization ([VkSemaphore](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkSemaphore.html))
+- \ref KDGpu::TimelineSemaphore "TimelineSemaphore" - GPU-GPU and CPU-GPU synchronization ([VkSemaphore](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkSemaphore.html))
 
 \subsection kdgpu_api_arch_presentation Presentation
 - \ref KDGpu::Swapchain "Swapchain" - Image presentation chain ([VkSwapchainKHR](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkSwapchainKHR.html))

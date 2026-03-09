@@ -489,6 +489,11 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
     swapchainMaintenanceFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SWAPCHAIN_MAINTENANCE_1_FEATURES_KHR;
     addToChain(&swapchainMaintenanceFeatures);
 #endif
+#if VK_KHR_timeline_semaphore
+    VkPhysicalDeviceTimelineSemaphoreFeaturesKHR timelineSemaphoreFeatures{};
+    timelineSemaphoreFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TIMELINE_SEMAPHORE_FEATURES_KHR;
+    addToChain(&timelineSemaphoreFeatures);
+#endif
 
     vkGetPhysicalDeviceFeatures2(physicalDevice, &deviceFeatures2);
     const VkPhysicalDeviceFeatures &deviceFeatures = deviceFeatures2.features;
@@ -642,6 +647,9 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
 
 #if VK_KHR_swapchain_maintenance1
     features.swapchainMaintenance1 = swapchainMaintenanceFeatures.swapchainMaintenance1;
+#endif
+#if VK_KHR_timeline_semaphore
+    features.timelineSemaphore = timelineSemaphoreFeatures.timelineSemaphore;
 #endif
 
     return features;

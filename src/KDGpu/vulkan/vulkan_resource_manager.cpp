@@ -676,6 +676,13 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     }
 #endif
 
+#if VK_KHR_timeline_semaphore
+    VkPhysicalDeviceTimelineSemaphoreFeaturesKHR timelineSemaphoreFeatures{};
+    timelineSemaphoreFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TIMELINE_SEMAPHORE_FEATURES_KHR;
+    timelineSemaphoreFeatures.timelineSemaphore = options.requestedFeatures.timelineSemaphore;
+    addToChain(&timelineSemaphoreFeatures);
+#endif
+
     VkDeviceCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     createInfo.pNext = &physicalDeviceFeatures2;
@@ -2242,19 +2249,42 @@ VulkanRayTracingPipeline *VulkanResourceManager::getRayTracingPipeline(const Han
     return m_rayTracingPipelines.get(handle);
 }
 
-Handle<GpuSemaphore_t> VulkanResourceManager::createGpuSemaphore(const Handle<Device_t> &deviceHandle, const GpuSemaphoreOptions &options)
+template<typename SemaphoreOptionType>
+std::pair<VkSemaphore, HandleOrFD> createSemaphore(VulkanDevice *vulkanDevice, const SemaphoreOptionType &options)
 {
-    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
+    VkBaseOutStructure *chainCurrent{ nullptr };
+    auto addToChain = [&chainCurrent](auto *next) {
+        auto *n = reinterpret_cast<VkBaseOutStructure *>(next);
+        chainCurrent->pNext = n;
+        chainCurrent = n;
+    };
 
     VkSemaphoreCreateInfo semaphoreInfo = {};
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+    // Start the chain
+    chainCurrent = reinterpret_cast<VkBaseOutStructure *>(&semaphoreInfo);
+
     VkExportSemaphoreCreateInfo exportSemaphoreCreateInfo = {};
     if (options.externalSemaphoreHandleType != ExternalSemaphoreHandleTypeFlagBits::None) {
         exportSemaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO;
         exportSemaphoreCreateInfo.pNext = nullptr;
         exportSemaphoreCreateInfo.handleTypes = externalSemaphoreHandleTypeToVkExternalSemaphoreHandleType(options.externalSemaphoreHandleType);
-        semaphoreInfo.pNext = &exportSemaphoreCreateInfo;
+        addToChain(&exportSemaphoreCreateInfo);
     }
+
+#if VK_KHR_timeline_semaphore
+    VkSemaphoreTypeCreateInfo semaphoreTypeInfo = {};
+    if constexpr (std::is_same_v<SemaphoreOptionType, TimelineSemaphoreOptions>) {
+        semaphoreTypeInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO;
+        semaphoreTypeInfo.pNext = nullptr;
+        semaphoreTypeInfo.semaphoreType = VK_SEMAPHORE_TYPE_TIMELINE;
+        semaphoreTypeInfo.initialValue = options.initialValue;
+        addToChain(&semaphoreTypeInfo);
+    }
+#else
+    assert(false);
+#endif
 
     VkSemaphore vkSemaphore{ VK_NULL_HANDLE };
     if (auto result = vkCreateSemaphore(vulkanDevice->device, &semaphoreInfo, nullptr, &vkSemaphore); result != VK_SUCCESS) {
@@ -2297,6 +2327,17 @@ Handle<GpuSemaphore_t> VulkanResourceManager::createGpuSemaphore(const Handle<De
 #endif
     }
 
+    return { vkSemaphore, externalSemaphoreHandle };
+}
+
+Handle<GpuSemaphore_t> VulkanResourceManager::createGpuSemaphore(const Handle<Device_t> &deviceHandle, const GpuSemaphoreOptions &options)
+{
+    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
+
+    VkSemaphore vkSemaphore{ VK_NULL_HANDLE };
+    HandleOrFD externalSemaphoreHandle{};
+    std::tie(vkSemaphore, externalSemaphoreHandle) = createSemaphore(vulkanDevice, options);
+
     setObjectName(vulkanDevice, VK_OBJECT_TYPE_SEMAPHORE, vulkanHandleToUint64(vkSemaphore), options.label);
 
     const auto vulkanGpuSemaphoreHandle = m_gpuSemaphores.emplace(VulkanGpuSemaphore(
@@ -2321,6 +2362,40 @@ void VulkanResourceManager::deleteGpuSemaphore(const Handle<GpuSemaphore_t> &han
 VulkanGpuSemaphore *VulkanResourceManager::getGpuSemaphore(const Handle<GpuSemaphore_t> &handle) const
 {
     return m_gpuSemaphores.get(handle);
+}
+
+Handle<TimelineSemaphore_t> VulkanResourceManager::createTimelineSemaphore(const Handle<Device_t> &deviceHandle, const TimelineSemaphoreOptions &options)
+{
+#if VK_KHR_timeline_semaphore
+    VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
+
+    VkSemaphore vkSemaphore{ VK_NULL_HANDLE };
+    HandleOrFD externalSemaphoreHandle{};
+    std::tie(vkSemaphore, externalSemaphoreHandle) = createSemaphore(vulkanDevice, options);
+
+    setObjectName(vulkanDevice, VK_OBJECT_TYPE_SEMAPHORE, vulkanHandleToUint64(vkSemaphore), options.label);
+
+    return m_timelineSemaphores.emplace(VulkanTimelineSemaphore(vkSemaphore,
+                                                                this,
+                                                                deviceHandle,
+                                                                externalSemaphoreHandle));
+#else
+    SPDLOG_LOGGER_ERROR(Logger::logger(), "Timeline Semaphore not supported by this Vulkan SDK");
+    return {};
+#endif
+}
+
+void VulkanResourceManager::deleteTimelineSemaphore(const Handle<TimelineSemaphore_t> &handle)
+{
+    VulkanTimelineSemaphore *vulkanSemaphore = m_timelineSemaphores.get(handle);
+    VulkanDevice *vulkanDevice = m_devices.get(vulkanSemaphore->deviceHandle);
+    vkDestroySemaphore(vulkanDevice->device, vulkanSemaphore->semaphore, nullptr);
+    m_timelineSemaphores.remove(handle);
+}
+
+VulkanTimelineSemaphore *VulkanResourceManager::getTimelineSemaphore(const Handle<TimelineSemaphore_t> &handle) const
+{
+    return m_timelineSemaphores.get(handle);
 }
 
 Handle<CommandRecorder_t> VulkanResourceManager::createCommandRecorder(const Handle<Device_t> &deviceHandle, const CommandRecorderOptions &options)

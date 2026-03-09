@@ -26,6 +26,7 @@ set(SOURCES
     fence.cpp
     graphics_pipeline.cpp
     gpu_semaphore.cpp
+    timeline_semaphore.cpp
     instance.cpp
     pipeline_cache.cpp
     pipeline_layout.cpp
@@ -60,6 +61,7 @@ set(SOURCES
     vulkan/vulkan_fence.cpp
     vulkan/vulkan_framebuffer.cpp
     vulkan/vulkan_gpu_semaphore.cpp
+    vulkan/vulkan_timeline_semaphore.cpp
     vulkan/vulkan_graphics_api.cpp
     vulkan/vulkan_graphics_pipeline.cpp
     vulkan/vulkan_instance.cpp
@@ -113,6 +115,7 @@ set(HEADERS
     graphics_pipeline_options.h
     gpu_core.h
     gpu_semaphore.h
+    timeline_semaphore.h
     instance.h
     handle.h
     memory_barrier.h
@@ -168,6 +171,7 @@ set(HEADERS
     vulkan/vulkan_formatters.h
     vulkan/vulkan_framebuffer.h
     vulkan/vulkan_gpu_semaphore.h
+    vulkan/vulkan_timeline_semaphore.h
     vulkan/vulkan_graphics_api.h
     vulkan/vulkan_graphics_pipeline.h
     vulkan/vulkan_instance.h

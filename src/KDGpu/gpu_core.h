@@ -1154,6 +1154,12 @@ enum class FenceStatus {
     Error = 2
 };
 
+enum class TimelineSemaphoreWaitResult {
+    Success = 0,
+    Timeout = 1,
+    Error = 2
+};
+
 enum class ExternalSemaphoreHandleTypeFlagBits : uint32_t {
     None = 0,
     OpaqueFD = 0x00000001,
