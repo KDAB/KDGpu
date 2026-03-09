@@ -120,6 +120,7 @@ struct AdapterFeatures {
     bool dynamicRendering{ false };
     bool dynamicRenderingLocalRead{ false };
     bool swapchainMaintenance1{ false };
+    bool timelineSemaphore{ false };
 };
 
 /*! @} */

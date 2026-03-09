@@ -13,6 +13,7 @@
 #include <KDGpu/queue.h>
 #include <KDGpu/vulkan/vulkan_resource_manager.h>
 #include <KDGpu/vulkan/vulkan_formatters.h>
+#include <KDGpu/vulkan/vulkan_enums.h>
 
 namespace KDGpu {
 
@@ -30,37 +31,70 @@ void VulkanQueue::waitUntilIdle()
 
 void VulkanQueue::submit(const SubmitOptions &options)
 {
-    // TODO: Do we need to expose the wait stage flags to the public API or is waiting
-    // for the semaphores at the top of the pipeline good enough?
-    const uint32_t waitSemaphoreCount = static_cast<uint32_t>(options.waitSemaphores.size());
-    m_vkWaitSemaphores.clear();
-    m_vkWaitStageFlags.clear();
-    m_vkWaitSemaphores.reserve(waitSemaphoreCount);
-    m_vkWaitStageFlags.reserve(waitSemaphoreCount);
-    for (uint32_t i = 0; i < waitSemaphoreCount; ++i) {
-        auto vulkanSemaphore = vulkanResourceManager->getGpuSemaphore(options.waitSemaphores[i]);
+    const uint32_t waitBinaryCount = static_cast<uint32_t>(options.waitSemaphores.size());
+    const uint32_t waitTimelineCount = static_cast<uint32_t>(options.waitTimelineSemaphores.size());
+    std::vector<VkSemaphore> vkWaitSemaphores;
+    vkWaitSemaphores.reserve(waitBinaryCount + waitTimelineCount);
+
+    std::vector<VkPipelineStageFlags> vkWaitStageFlags;
+    vkWaitStageFlags.reserve(waitBinaryCount + waitTimelineCount);
+
+    const uint32_t signalTimelineCount = static_cast<uint32_t>(options.signalTimelineSemaphores.size());
+    const uint32_t signalBinaryCount = static_cast<uint32_t>(options.signalSemaphores.size());
+    std::vector<VkSemaphore> vkSignalSemaphores;
+    vkSignalSemaphores.reserve(signalBinaryCount + signalTimelineCount);
+
+    // Even if signal/wait values are meaningless for binary semaphores, we will still need to provide a value
+    // (which the implementation will ignore) since VkTimelineSemaphoreSubmitInfo requires that the wait and signal semaphore value vectors
+    //  are the same length as the corresponding semaphore vectors in VkSubmitInfo.
+    std::vector<uint64_t> vkWaitSemaphoreValues;
+    vkWaitSemaphoreValues.reserve(waitBinaryCount + waitTimelineCount);
+    std::vector<uint64_t> vkSignalSemaphoreValues;
+    vkSignalSemaphoreValues.reserve(signalBinaryCount + signalTimelineCount);
+
+    // Fill Wait and Signal Binary Semaphores
+    for (const BinarySemaphoreSubmitWaitInfo &waitInfo : options.waitSemaphores) {
+        VulkanGpuSemaphore *vulkanSemaphore = vulkanResourceManager->getGpuSemaphore(waitInfo.semaphore);
         if (vulkanSemaphore) {
-            m_vkWaitSemaphores.emplace_back(vulkanSemaphore->semaphore);
-            m_vkWaitStageFlags.emplace_back(VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
+            vkWaitSemaphores.emplace_back(vulkanSemaphore->semaphore);
+            vkWaitStageFlags.emplace_back(pipelineStageFlagsToVkPipelineStageFlagBits(waitInfo.waitStages));
+            vkWaitSemaphoreValues.emplace_back(0);
+        }
+    }
+    for (const RequiredHandle<GpuSemaphore_t> &signalSemaphoreHandle : options.signalSemaphores) {
+        VulkanGpuSemaphore *vulkanSemaphore = vulkanResourceManager->getGpuSemaphore(signalSemaphoreHandle);
+        if (vulkanSemaphore) {
+            vkSignalSemaphores.emplace_back(vulkanSemaphore->semaphore);
+            vkSignalSemaphoreValues.emplace_back(0);
         }
     }
 
-    const uint32_t signalSemaphoreCount = static_cast<uint32_t>(options.signalSemaphores.size());
-    m_vkSignalSemaphores.clear();
-    m_vkSignalSemaphores.reserve(signalSemaphoreCount);
-    for (uint32_t i = 0; i < signalSemaphoreCount; ++i) {
-        auto vulkanSemaphore = vulkanResourceManager->getGpuSemaphore(options.signalSemaphores[i]);
-        if (vulkanSemaphore)
-            m_vkSignalSemaphores.emplace_back(vulkanSemaphore->semaphore);
+#if VK_KHR_timeline_semaphore
+    // Fill Wait and Signal Timeline Semaphores
+    for (const TimelineSemaphoreSubmitWaitInfo &waitInfo : options.waitTimelineSemaphores) {
+        VulkanTimelineSemaphore *vulkanSemaphore = vulkanResourceManager->getTimelineSemaphore(waitInfo.semaphore);
+        if (vulkanSemaphore) {
+            vkWaitSemaphores.emplace_back(vulkanSemaphore->semaphore);
+            vkWaitStageFlags.emplace_back(pipelineStageFlagsToVkPipelineStageFlagBits(waitInfo.waitStages));
+            vkWaitSemaphoreValues.emplace_back(waitInfo.value);
+        }
     }
+    for (const TimelineSemaphoreSubmitSignalInfo &signalInfo : options.signalTimelineSemaphores) {
+        VulkanTimelineSemaphore *vulkanSemaphore = vulkanResourceManager->getTimelineSemaphore(signalInfo.semaphore);
+        if (vulkanSemaphore) {
+            vkSignalSemaphores.emplace_back(vulkanSemaphore->semaphore);
+            vkSignalSemaphoreValues.emplace_back(signalInfo.value);
+        }
+    }
+#endif
 
+    std::vector<VkCommandBuffer> vkCommandBuffers;
     const uint32_t commandBufferCount = static_cast<uint32_t>(options.commandBuffers.size());
-    m_vkCommandBuffers.clear();
-    m_vkCommandBuffers.reserve(commandBufferCount);
-    for (uint32_t i = 0; i < commandBufferCount; ++i) {
-        auto vulkanCommandBuffer = vulkanResourceManager->getCommandBuffer(options.commandBuffers[i]);
+    vkCommandBuffers.reserve(commandBufferCount);
+    for (const auto &commandBufferHandle : options.commandBuffers) {
+        VulkanCommandBuffer *vulkanCommandBuffer = vulkanResourceManager->getCommandBuffer(commandBufferHandle);
         if (vulkanCommandBuffer)
-            m_vkCommandBuffers.emplace_back(vulkanCommandBuffer->commandBuffer);
+            vkCommandBuffers.emplace_back(vulkanCommandBuffer->commandBuffer);
     }
 
     VkFence vkFenceToSignal{ VK_NULL_HANDLE };
@@ -70,22 +104,27 @@ void VulkanQueue::submit(const SubmitOptions &options)
 
     VkSubmitInfo submitInfo = {};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    submitInfo.waitSemaphoreCount = m_vkWaitSemaphores.size();
-    if (!m_vkWaitSemaphores.empty()) {
-        submitInfo.pWaitSemaphores = m_vkWaitSemaphores.data();
-    }
+    submitInfo.waitSemaphoreCount = static_cast<uint32_t>(vkWaitSemaphores.size());
+    submitInfo.pWaitSemaphores = vkWaitSemaphores.data();
+    submitInfo.pWaitDstStageMask = vkWaitStageFlags.data();
+    submitInfo.signalSemaphoreCount = static_cast<uint32_t>(vkSignalSemaphores.size());
+    submitInfo.pSignalSemaphores = vkSignalSemaphores.data();
+    submitInfo.commandBufferCount = vkCommandBuffers.size();
+    submitInfo.pCommandBuffers = vkCommandBuffers.data();
 
-    submitInfo.pWaitDstStageMask = m_vkWaitStageFlags.data();
-
-    submitInfo.signalSemaphoreCount = m_vkSignalSemaphores.size();
-    if (!m_vkSignalSemaphores.empty()) {
-        submitInfo.pSignalSemaphores = m_vkSignalSemaphores.data();
+#if VK_KHR_timeline_semaphore
+    // Chain VkTimelineSemaphoreSubmitInfo when any timeline semaphores are used
+    VkTimelineSemaphoreSubmitInfo timelineInfo = {};
+    if (waitTimelineCount > 0 || signalTimelineCount > 0) {
+        timelineInfo.sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO;
+        timelineInfo.pNext = nullptr;
+        timelineInfo.waitSemaphoreValueCount = static_cast<uint32_t>(vkWaitSemaphoreValues.size());
+        timelineInfo.pWaitSemaphoreValues = vkWaitSemaphoreValues.data();
+        timelineInfo.signalSemaphoreValueCount = static_cast<uint32_t>(vkSignalSemaphoreValues.size());
+        timelineInfo.pSignalSemaphoreValues = vkSignalSemaphoreValues.data();
+        submitInfo.pNext = &timelineInfo;
     }
-
-    submitInfo.commandBufferCount = m_vkCommandBuffers.size();
-    if (!m_vkCommandBuffers.empty()) {
-        submitInfo.pCommandBuffers = m_vkCommandBuffers.data();
-    }
+#endif
 
     const VkResult result = vkQueueSubmit(queue, 1, &submitInfo, vkFenceToSignal);
     if (result != VK_SUCCESS) {
@@ -119,37 +158,37 @@ auto mapVkResultToPresentResult = [](const VkResult r) {
 PresentResult VulkanQueue::present(const PresentOptions &options)
 {
     const uint32_t waitSemaphoreCount = static_cast<uint32_t>(options.waitSemaphores.size());
-    m_presentVkWaitSemaphores.clear();
-    m_presentVkWaitSemaphores.reserve(waitSemaphoreCount);
+    std::vector<VkSemaphore> presentVkWaitSemaphores;
+    presentVkWaitSemaphores.reserve(waitSemaphoreCount);
     for (uint32_t i = 0; i < waitSemaphoreCount; ++i) {
         auto vulkanSemaphore = vulkanResourceManager->getGpuSemaphore(options.waitSemaphores.at(i));
         if (vulkanSemaphore)
-            m_presentVkWaitSemaphores.push_back(vulkanSemaphore->semaphore);
+            presentVkWaitSemaphores.push_back(vulkanSemaphore->semaphore);
     }
 
     const uint32_t swapchainCount = static_cast<uint32_t>(options.swapchainInfos.size());
-    m_swapchains.clear();
-    m_imageIndices.clear();
-    m_swapchains.reserve(swapchainCount);
-    m_imageIndices.reserve(swapchainCount);
+    std::vector<VkSwapchainKHR> swapchains;
+    std::vector<uint32_t> imageIndices;
+    swapchains.reserve(swapchainCount);
+    imageIndices.reserve(swapchainCount);
     for (uint32_t i = 0; i < swapchainCount; ++i) {
         auto vulkanSwapchain = vulkanResourceManager->getSwapchain(options.swapchainInfos.at(i).swapchain);
         if (vulkanSwapchain) {
-            m_swapchains.push_back(vulkanSwapchain->swapchain);
-            m_imageIndices.push_back(options.swapchainInfos.at(i).imageIndex);
+            swapchains.push_back(vulkanSwapchain->swapchain);
+            imageIndices.push_back(options.swapchainInfos.at(i).imageIndex);
         }
     }
 
     m_presentResults.clear();
-    m_presentResults.resize(m_swapchains.size());
+    m_presentResults.resize(swapchains.size());
 
     VkPresentInfoKHR presentInfo = {};
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-    presentInfo.waitSemaphoreCount = static_cast<uint32_t>(m_presentVkWaitSemaphores.size());
-    presentInfo.pWaitSemaphores = m_presentVkWaitSemaphores.data();
-    presentInfo.swapchainCount = static_cast<uint32_t>(m_swapchains.size());
-    presentInfo.pSwapchains = m_swapchains.data();
-    presentInfo.pImageIndices = m_imageIndices.data();
+    presentInfo.waitSemaphoreCount = static_cast<uint32_t>(presentVkWaitSemaphores.size());
+    presentInfo.pWaitSemaphores = presentVkWaitSemaphores.data();
+    presentInfo.swapchainCount = static_cast<uint32_t>(swapchains.size());
+    presentInfo.pSwapchains = swapchains.data();
+    presentInfo.pImageIndices = imageIndices.data();
     presentInfo.pResults = m_presentResults.data();
 
 #if VK_KHR_swapchain_maintenance1

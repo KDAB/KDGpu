@@ -143,7 +143,10 @@ std::vector<const char *> getDefaultRequestedDeviceExtensions()
         VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
 #endif
 #if VK_KHR_dynamic_rendering_local_read
-        VK_KHR_DYNAMIC_RENDERING_LOCAL_READ_EXTENSION_NAME
+        VK_KHR_DYNAMIC_RENDERING_LOCAL_READ_EXTENSION_NAME,
+#endif
+#if VK_KHR_timeline_semaphore
+        VK_KHR_TIMELINE_SEMAPHORE_EXTENSION_NAME,
 #endif
     };
 

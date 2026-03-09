@@ -35,16 +35,7 @@ struct KDGPU_EXPORT VulkanQueue {
     VkQueue queue{ VK_NULL_HANDLE };
     VulkanResourceManager *vulkanResourceManager{ nullptr };
 
-    // Submission
-    std::vector<VkSemaphore> m_vkWaitSemaphores;
-    std::vector<VkPipelineStageFlags> m_vkWaitStageFlags;
-    std::vector<VkSemaphore> m_vkSignalSemaphores;
-    std::vector<VkCommandBuffer> m_vkCommandBuffers;
-
     // Presentation
-    std::vector<VkSemaphore> m_presentVkWaitSemaphores;
-    std::vector<VkSwapchainKHR> m_swapchains;
-    std::vector<uint32_t> m_imageIndices;
     std::vector<VkResult> m_presentResults;
 };
 

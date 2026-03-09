@@ -18,6 +18,7 @@
 #include <KDGpu/compute_pipeline.h>
 #include <KDGpu/fence.h>
 #include <KDGpu/gpu_semaphore.h>
+#include <KDGpu/timeline_semaphore.h>
 #include <KDGpu/graphics_pipeline.h>
 #include <KDGpu/handle.h>
 #include <KDGpu/pipeline_layout.h>
@@ -177,6 +178,8 @@ public:
     [[nodiscard]] CommandRecorder createCommandRecorder(const CommandRecorderOptions &options = CommandRecorderOptions());
 
     [[nodiscard]] GpuSemaphore createGpuSemaphore(const GpuSemaphoreOptions &options = GpuSemaphoreOptions());
+
+    [[nodiscard]] TimelineSemaphore createTimelineSemaphore(const TimelineSemaphoreOptions &options = TimelineSemaphoreOptions());
 
     [[nodiscard]] BindGroupLayout createBindGroupLayout(const BindGroupLayoutOptions &options);
 

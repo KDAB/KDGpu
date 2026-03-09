@@ -155,6 +155,11 @@ GpuSemaphore Device::createGpuSemaphore(const GpuSemaphoreOptions &options)
     return GpuSemaphore(m_api, m_device, options);
 }
 
+TimelineSemaphore Device::createTimelineSemaphore(const TimelineSemaphoreOptions &options)
+{
+    return TimelineSemaphore(m_api, m_device, options);
+}
+
 BindGroupLayout Device::createBindGroupLayout(const BindGroupLayoutOptions &options)
 {
     return BindGroupLayout(m_api, m_device, options);

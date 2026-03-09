@@ -18,6 +18,8 @@
 #include <KDGpu/handle.h>
 #include <KDGpu/queue_description.h>
 #include <KDGpu/kdgpu_export.h>
+#include <KDGpu/gpu_semaphore.h>
+#include <KDGpu/timeline_semaphore.h>
 
 #include <vector>
 
@@ -31,13 +33,56 @@ struct CommandBuffer_t;
 struct Device_t;
 struct Fence_t;
 struct GpuSemaphore_t;
+struct TimelineSemaphore_t;
 struct Swapchain_t;
 struct Texture_t;
 
+/**
+    @ingroup public
+    @headerfile queue.h <KDGpu/queue.h>
+*/
+struct BinarySemaphoreSubmitWaitInfo {
+
+    // Implicit Conversion from GpuSemaphore needed to backward compatibility
+    BinarySemaphoreSubmitWaitInfo(const GpuSemaphore &_semaphore)
+        : semaphore(_semaphore.handle())
+    {
+    }
+
+    BinarySemaphoreSubmitWaitInfo(const Handle<GpuSemaphore_t> &_semaphore)
+        : semaphore(_semaphore)
+    {
+    }
+
+    RequiredHandle<GpuSemaphore_t> semaphore;
+    PipelineStageFlags waitStages{ PipelineStageFlagBit::TopOfPipeBit };
+};
+
+/**
+    @ingroup public
+    @headerfile queue.h <KDGpu/queue.h>
+*/
+struct TimelineSemaphoreSubmitWaitInfo {
+    RequiredHandle<TimelineSemaphore_t> semaphore;
+    uint64_t value{ 0 };
+    PipelineStageFlags waitStages{ PipelineStageFlagBit::TopOfPipeBit };
+};
+
+/**
+    @ingroup public
+    @headerfile queue.h <KDGpu/queue.h>
+*/
+struct TimelineSemaphoreSubmitSignalInfo {
+    RequiredHandle<TimelineSemaphore_t> semaphore;
+    uint64_t value{ 0 };
+};
+
 struct SubmitOptions {
     std::vector<RequiredHandle<CommandBuffer_t>> commandBuffers;
-    std::vector<RequiredHandle<GpuSemaphore_t>> waitSemaphores;
+    std::vector<BinarySemaphoreSubmitWaitInfo> waitSemaphores;
     std::vector<RequiredHandle<GpuSemaphore_t>> signalSemaphores;
+    std::vector<TimelineSemaphoreSubmitWaitInfo> waitTimelineSemaphores;
+    std::vector<TimelineSemaphoreSubmitSignalInfo> signalTimelineSemaphores;
     OptionalHandle<Fence_t> signalFence;
 };
 
@@ -181,7 +226,7 @@ struct UploadStagingBuffer {
     - Queue::uploadTextureData()->staging buffer + vkCmdCopyBufferToImage()
 
     ## See also:
-    \sa SubmitOptions, PresentOptions, Device, CommandRecorder, CommandBuffer, Fence, GpuSemaphore, Swapchain
+    \sa SubmitOptions, PresentOptions, Device, CommandRecorder, CommandBuffer, Fence, GpuSemaphore, TimelineSemaphore, Swapchain
     \sa \ref kdgpu_api_overview
     \sa \ref kdgpu_vulkan_mapping
 */
