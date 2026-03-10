@@ -76,15 +76,9 @@ option(KDGPU_BUILD_TESTS "Build tests" ON)
 option(KDGPU_BUILD_EXAMPLES "Build examples" ON)
 option(KDGPU_BUILD_KDGPUKDGUI "Build KDGpuKDGui" ON)
 option(KDGPU_BUILD_KDGPUUTILS "Build KDGpuUtils" ON)
+option(KDGPU_BUILD_KDGPUEXAMPLE "Build KDGpuExample" ON)
 option(KDGPU_FETCH_VULKAN_SDK_FROM_VCPKG "Fetch Vulkan SDK from vcpkg" ${KDGPU_FETCH_VULKAN_SDK_FROM_VCPKG_DEFAULT})
 option(KDGPU_BUILD_IN_STRICT_MODE "Build with strict options" OFF)
-cmake_dependent_option(
-    KDGPU_BUILD_KDGPUEXAMPLE
-    "Build KDGpuExample"
-    ON
-    KDGPU_BUILD_EXAMPLES
-    OFF
-)
 
 # Ensure KDGpuKDGui, KDGpuUtils and KDGpuExample are ON when examples are ON
 if(KDGPU_BUILD_EXAMPLES)
