@@ -61,12 +61,27 @@ endif()
 include(FeatureSummary)
 include(CMakeDependentOption)
 
+# The Vulkan SDK can be provided either as:
+# - System Packages
+# - LunarG SDK
+# - From vpckg
+
 set(USE_LOCAL_VULKAN_SDK OFF)
 set(KDGPU_FETCH_VULKAN_SDK_FROM_VCPKG_DEFAULT ON)
+
 if(NOT "$ENV{VULKAN_SDK}" STREQUAL "")
+    # LunarG Vulkan SDK
     set(USE_LOCAL_VULKAN_SDK ON)
     set(KDGPU_FETCH_VULKAN_SDK_FROM_VCPKG_DEFAULT OFF)
-    message(STATUS "Using Vulkan SDK from environment variable VULKAN_SDK: $ENV{VULKAN_SDK}")
+    message(STATUS "Using Vulkan SDK (LunarG) from environment variable VULKAN_SDK: $ENV{VULKAN_SDK}")
+elseif(EXISTS "/usr/include/vulkan/vulkan.h" OR EXISTS "/usr/local/include/vulkan/vulkan.h")
+    # System Vulkan SDK
+    set(USE_LOCAL_VULKAN_SDK ON)
+    set(KDGPU_FETCH_VULKAN_SDK_FROM_VCPKG_DEFAULT OFF)
+    message(STATUS "Using Vulkan SDK from system packages")
+else()
+    # vcpkg Vulkan SDK
+    message(STATUS "Using Vulkan SDK from vcpkg")
 endif()
 
 option(KDGPU_BUILD_SHARED_LIBS "Build shared libraries" ON)
