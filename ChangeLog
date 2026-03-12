@@ -3,6 +3,10 @@
   - Use vcpkg for dependency management
   - Fix Device initialization when using RenderDoc
   - Fix synchronization issue with presentation
+  - Add support for Timeline Semaphores
+  - Add support for Pipeline Caching
+  - Slang shader compilation support
+  - Introduce Required/OptionalHandle types for more explicit API
 - v0.9.3
   - Fix hash collision in AttachmentKey
   - Release Framebuffers when referenced TextureViews are destroyed
