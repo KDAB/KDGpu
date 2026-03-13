@@ -97,6 +97,16 @@ option(KDGPU_BUILD_IN_STRICT_MODE "Build with strict options" OFF)
 
 # Ensure KDGpuKDGui, KDGpuUtils and KDGpuExample are ON when examples are ON
 if(KDGPU_BUILD_EXAMPLES)
+    message(STATUS "examples requires KDGpuExample, enabling this feature.")
+    set(KDGPU_BUILD_KDGPUEXAMPLE
+        ON
+        CACHE BOOL "Build KDGpuExample" FORCE
+    )
+endif()
+
+# Ensure KDGpuKDGui, KDGpuUtils are ON when KDGpuExample is ON
+if(KDGPU_BUILD_KDGPUEXAMPLE)
+    message(STATUS "KDGpuExample requires KDGpuKDGui and KDGpuUtils, enabling those features.")
     set(KDGPU_BUILD_KDGPUKDGUI
         ON
         CACHE BOOL "Build KDGpuKDGui" FORCE
@@ -104,10 +114,6 @@ if(KDGPU_BUILD_EXAMPLES)
     set(KDGPU_BUILD_KDGPUUTILS
         ON
         CACHE BOOL "Build KDGpuUtils" FORCE
-    )
-    set(KDGPU_BUILD_KDGPUEXAMPLE
-        ON
-        CACHE BOOL "Build KDGpuExample" FORCE
     )
 endif()
 
