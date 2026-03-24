@@ -54,6 +54,12 @@ std::vector<const char *> getDefaultRequestedInstanceExtensions()
 #if VK_KHR_win32_surface
         VK_KHR_WIN32_SURFACE_EXTENSION_NAME,
 #endif
+#if VK_KHR_surface_maintenance1
+        VK_KHR_SURFACE_MAINTENANCE_1_EXTENSION_NAME,
+#endif
+#if VK_KHR_get_surface_capabilities2
+        VK_KHR_GET_SURFACE_CAPABILITIES_2_EXTENSION_NAME,
+#endif
 #if defined(KDGPU_PLATFORM_APPLE)
         VK_EXT_METAL_SURFACE_EXTENSION_NAME,
         VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME,
