@@ -241,7 +241,6 @@ std::vector<QueueDescription> VulkanDevice::getQueues(ResourceManager *resourceM
     queueDescriptions.clear();
     queueDescriptions.reserve(queueCount);
 
-    uint32_t i = 0;
     for (const auto &queueRequest : queueRequests) {
         const uint32_t queueCountForFamily = queueRequest.count;
         for (uint32_t j = 0; j < queueCountForFamily; ++j) {
@@ -257,8 +256,6 @@ std::vector<QueueDescription> VulkanDevice::getQueues(ResourceManager *resourceM
                 .queueTypeIndex = queueRequest.queueTypeIndex
             };
             queueDescriptions.push_back(queueDescription);
-
-            ++i;
         }
     }
 
