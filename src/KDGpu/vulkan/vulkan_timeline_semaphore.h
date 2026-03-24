@@ -39,7 +39,7 @@ struct KDGPU_EXPORT VulkanTimelineSemaphore {
     HandleOrFD m_externalSemaphoreHandle;
 
     uint64_t value() const;
-    void signal(uint64_t value);
+    void signal(uint64_t value) const;
     TimelineSemaphoreWaitResult wait(uint64_t value) const;
     HandleOrFD externalSemaphoreHandle() const;
 };

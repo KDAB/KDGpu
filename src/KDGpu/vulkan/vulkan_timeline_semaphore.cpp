@@ -33,15 +33,23 @@ uint64_t VulkanTimelineSemaphore::value() const
     uint64_t counterValue = 0;
 #if VK_KHR_timeline_semaphore
     VulkanDevice *vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
+    if (vulkanDevice->vkGetSemaphoreCounterValueKHR == nullptr) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Timeline semaphore counter value retrieval is not supported by the device");
+        return 0;
+    }
     vulkanDevice->vkGetSemaphoreCounterValueKHR(vulkanDevice->device, semaphore, &counterValue);
 #endif
     return counterValue;
 }
 
-void VulkanTimelineSemaphore::signal(uint64_t value)
+void VulkanTimelineSemaphore::signal(uint64_t value) const
 {
 #if VK_KHR_timeline_semaphore
     VulkanDevice *vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
+    if (vulkanDevice->vkSignalSemaphoreKHR == nullptr) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Timeline semaphore signal is not supported by the device");
+        return;
+    }
     VkSemaphoreSignalInfo signalInfo = {};
     signalInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SIGNAL_INFO;
     signalInfo.pNext = nullptr;
@@ -55,6 +63,10 @@ TimelineSemaphoreWaitResult VulkanTimelineSemaphore::wait(uint64_t value) const
 {
 #if VK_KHR_timeline_semaphore
     VulkanDevice *vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
+    if (vulkanDevice->vkWaitSemaphoresKHR == nullptr) {
+        SPDLOG_LOGGER_ERROR(Logger::logger(), "Timeline semaphore wait is not supported by the device");
+        return TimelineSemaphoreWaitResult::Error;
+    }
     VkSemaphoreWaitInfo waitInfo = {};
     waitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO;
     waitInfo.pNext = nullptr;

@@ -172,7 +172,8 @@ struct KDGPU_EXPORT VulkanDevice {
     PFN_vkCmdSetRenderingAttachmentLocationsKHR vkCmdSetRenderingAttachmentLocationsKHR{ nullptr };
     PFN_vkCmdSetRenderingInputAttachmentIndicesKHR vkCmdSetRenderingInputAttachmentIndicesKHR{ nullptr };
 #endif
-#if VK_KHR_dynamic_rendering
+
+#if VK_KHR_timeline_semaphore
     PFN_vkGetSemaphoreCounterValueKHR vkGetSemaphoreCounterValueKHR{ nullptr };
     PFN_vkWaitSemaphoresKHR vkWaitSemaphoresKHR{ nullptr };
     PFN_vkSignalSemaphoreKHR vkSignalSemaphoreKHR{ nullptr };
