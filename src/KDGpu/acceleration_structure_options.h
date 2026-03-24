@@ -11,6 +11,7 @@
 #pragma once
 
 #include <span>
+#include <array>
 
 #include <KDGpu/gpu_core.h>
 #include <KDGpu/handle.h>
@@ -40,11 +41,11 @@ struct AccelerationStructureGeometryAabbsData {
 };
 
 struct AccelerationStructureGeometryInstance {
-    float transform[3][4]{
-        1.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f
-    };
+    std::array<std::array<float, 4>, 3> transform = { {
+            { { 1.0f, 0.0f, 0.0f, 0.0f } },
+            { { 0.0f, 1.0f, 0.0f, 0.0f } },
+            { { 0.0f, 0.0f, 1.0f, 0.0f } },
+    } };
     uint32_t instanceCustomIndex : 24 = 0;
     uint32_t mask : 8 = 0xFF;
     uint32_t instanceShaderBindingTableRecordOffset : 24 = 0;

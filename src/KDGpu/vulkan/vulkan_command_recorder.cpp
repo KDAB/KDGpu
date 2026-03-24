@@ -603,7 +603,7 @@ void VulkanCommandRecorder::buildAccelerationStructures(const BuildAccelerationS
                             .accelerationStructureReference = vulkanDevice->vkGetAccelerationStructureDeviceAddressKHR(vulkanDevice->device, &deviceAddressInfoKhr)
                         };
 
-                        memcpy(instanceKhr.transform.matrix, element.transform, sizeof(float) * 4 * 3);
+                        memcpy(instanceKhr.transform.matrix, element.transform.data(), sizeof(float) * 4 * 3);
 
                         array.push_back(instanceKhr);
                     }
