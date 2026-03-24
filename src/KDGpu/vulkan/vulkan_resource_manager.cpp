@@ -234,7 +234,7 @@ Handle<Instance_t> VulkanResourceManager::createInstance(const InstanceOptions &
         if (hasExtension(availableExtensions, requestedExtension)) {
             requestedInstanceExtensions.push_back(requestedExtension);
         } else {
-            SPDLOG_LOGGER_WARN(Logger::logger(), "Unable to find default requested extension {}", requestedExtension);
+            SPDLOG_LOGGER_WARN(Logger::logger(), "Unable to find default requested instance extension {}", requestedExtension);
         }
     }
 
@@ -242,7 +242,7 @@ Handle<Instance_t> VulkanResourceManager::createInstance(const InstanceOptions &
         if (hasExtension(availableExtensions, userExtension)) {
             requestedInstanceExtensions.push_back(userExtension.c_str());
         } else {
-            SPDLOG_LOGGER_WARN(Logger::logger(), "Unable to find user requested extensions {}", userExtension);
+            SPDLOG_LOGGER_WARN(Logger::logger(), "Unable to find user requested instance extensions {}", userExtension);
         }
     }
 
@@ -744,24 +744,7 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
 
     const bool hasVulkan12 = apiVersion >= VK_API_VERSION_1_2;
     const bool hasVulkan11 = apiVersion >= VK_API_VERSION_1_1;
-
-    if (!hasVulkan12 && hasVulkan11) {
-        SPDLOG_LOGGER_INFO(Logger::logger(), "Vulkan 1.2 is unavailable, falling back to Vulkan 1.1...");
-        std::vector<const char *> vulkan11Extensions = {
-            VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,
-            VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME,
-            VK_KHR_UNIFORM_BUFFER_STANDARD_LAYOUT_EXTENSION_NAME,
-            VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME
-        };
-        for (const char *requestedVulkan11Extension : vulkan11Extensions) {
-            if (hasExtension(availableDeviceExtensions, requestedVulkan11Extension)) {
-                requestedDeviceExtensions.push_back(requestedVulkan11Extension);
-            } else {
-                SPDLOG_LOGGER_WARN(Logger::logger(), "Unable to find default requested Vulkan 1.1 extension {}", requestedVulkan11Extension);
-            }
-        }
-
-    } else if (!hasVulkan12 && !hasVulkan11) {
+    if (!hasVulkan12 && !hasVulkan11) {
         throw std::runtime_error("At least Vulkan 1.1 is required!");
     }
 

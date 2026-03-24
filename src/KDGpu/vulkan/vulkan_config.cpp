@@ -77,7 +77,7 @@ std::vector<const char *> getDefaultRequestedInstanceExtensions()
 }
 
 //
-// Device Config
+// Device Config (assuming Vulkan 1.2)
 //
 std::vector<const char *> getDefaultRequestedDeviceExtensions()
 {
@@ -150,6 +150,20 @@ std::vector<const char *> getDefaultRequestedDeviceExtensions()
 #endif
 #if VK_KHR_dynamic_rendering_local_read
         VK_KHR_DYNAMIC_RENDERING_LOCAL_READ_EXTENSION_NAME,
+#endif
+
+// Extensions needed for Vulkan 1.1 features that are core in 1.2
+#if VK_EXT_descriptor_indexing
+        VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,
+#endif
+#if VK_KHR_create_renderpass2
+        VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME,
+#endif
+#if VK_KHR_uniform_buffer_standard_layout
+        VK_KHR_UNIFORM_BUFFER_STANDARD_LAYOUT_EXTENSION_NAME,
+#endif
+#if VK_KHR_buffer_device_address
+        VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME,
 #endif
 #if VK_KHR_timeline_semaphore
         VK_KHR_TIMELINE_SEMAPHORE_EXTENSION_NAME,
