@@ -214,6 +214,12 @@ struct UploadStagingBuffer {
 
     \snippet kdgpu_doc_snippets.cpp queue_present
 
+    <b>Presenting and signalling a fence:</b>
+
+    The swapchainMaintenance1 feature allows to signal a fence when a swapchain is presented. This can make it simpler to wait for presentation completeness than using a Queue::waitUntilIdle() or having per swapchain image semaphores.
+
+    \snippet kdgpu_doc_snippets.cpp queue_present_with_fence
+
     <b>Queue capabilities:</b>
 
     \snippet kdgpu_doc_snippets.cpp queue_wait_idle

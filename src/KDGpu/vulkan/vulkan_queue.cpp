@@ -216,8 +216,8 @@ PresentResult VulkanQueue::present(const PresentOptions &options)
     }
 #else
     if (!options.signalFence.empty()) {
-        // We have fences to signal but the extension isn't available
-        SPDLOG_LOGGER_WARN(Logger::logger(), "PresentOptions included signal fences but VK_EXT_swapchain_maintenance1 is not available, ignoring fences");
+        // We have fences to signal but the extension isn't available on the SDK
+        SPDLOG_LOGGER_WARN(Logger::logger(), "PresentOptions included signal fences but VK_KHR_swapchain_maintenance1 is not available with current Vulkan SDK, ignoring fences");
     }
 #endif
 

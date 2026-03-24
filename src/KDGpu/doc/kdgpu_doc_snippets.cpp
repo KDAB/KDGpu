@@ -1755,6 +1755,28 @@ void queue_examples(KDGpu::Device &device)
     });
     //! [queue_present]
 
+    //! [queue_present_with_fence]
+
+    // If the device supports the swapchainMaintenance1 feature, it is possible to signal a fence when presentation is completed.
+    // This can help simplifying the synchronization.
+
+    KDGpu::Fence presentFence = device.createFence(KDGpu::FenceOptions{ .createSignalled = false });
+
+    queue.present(KDGpu::PresentOptions{
+            .waitSemaphores = { semaphoreA },
+            .swapchainInfos = {
+                    {
+                            .swapchain = swapchain,
+                            .imageIndex = imageIndex,
+                    },
+            },
+            .signalFence = { presentFence },
+    });
+
+    fence.wait();
+    // Presentation has completed at this point
+    //! [queue_present_with_fence]
+
     //! [queue_wait_idle]
     queue.waitUntilIdle(); // Block until queue is empty
     //! [queue_wait_idle]

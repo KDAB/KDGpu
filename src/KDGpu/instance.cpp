@@ -128,6 +128,9 @@ AdapterAndDevice Instance::createDefaultDevice(const Surface &surface,
     const bool supportsPresentation = selectedAdapter->supportsPresentation(surface, 0); // Query about the 1st queue type
     SPDLOG_LOGGER_INFO(Logger::logger(), "Queue family 0 supports presentation: {}", supportsPresentation);
 
+    const bool supportsPresensationFence = selectedAdapter->features().swapchainMaintenance1;
+    SPDLOG_LOGGER_INFO(Logger::logger(), "Queue supports presentation with Fence to signal: {}", supportsPresensationFence);
+
     const auto adapterExtensions = selectedAdapter->extensions();
     SPDLOG_LOGGER_INFO(Logger::logger(), "Supported adapter extensions:");
     for (const auto &extension : adapterExtensions) {
