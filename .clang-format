@@ -19,6 +19,7 @@ AlwaysBreakTemplateDeclarations: true
 BreakBeforeBinaryOperators: None
 
 SpaceBeforeCpp11BracedList: false
+SpaceInEmptyBraces: Never
 BreakBeforeBraces: Custom
 BraceWrapping:
     AfterClass: true
