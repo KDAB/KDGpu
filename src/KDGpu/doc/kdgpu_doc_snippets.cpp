@@ -2011,26 +2011,26 @@ void handle_ownership_examples()
     // They illustrate handle semantics and RAII patterns.
 
     //! [handle_ownership_basic_creation]
-    // Handle is created and manages GPU resource lifetime
+    // Resource is created and manages GPU resource lifetime
     // KDGpu::Buffer buffer = device.createBuffer(options);
     // Resource exists until 'buffer' goes out of scope
     //! [handle_ownership_basic_creation]
 
     //! [handle_ownership_move_semantics]
-    // Handles support move semantics (no copying)
+    // Resources support move semantics (no copying)
     // KDGpu::Buffer buffer1 = device.createBuffer(options);
     // KDGpu::Buffer buffer2 = std::move(buffer1); // Ownership transferred
     // buffer1 is now invalid, buffer2 owns the resource
     //! [handle_ownership_move_semantics]
 
     //! [handle_ownership_no_copy]
-    // Handles cannot be copied (deleted copy constructor/assignment)
+    // Resources cannot be copied (deleted copy constructor/assignment)
     // KDGpu::Buffer buffer1 = device.createBuffer(options);
     // KDGpu::Buffer buffer2 = buffer1; // ERROR: Won't compile
     //! [handle_ownership_no_copy]
 
     //! [handle_ownership_destruction]
-    // Resource automatically destroyed when handle goes out of scope
+    // Resource automatically destroyed when going out of scope
     // {
     //     KDGpu::Buffer buffer = device.createBuffer(options);
     //     // ... use buffer ...
@@ -2045,7 +2045,7 @@ void handle_ownership_examples()
     //! [handle_ownership_explicit_release]
 
     //! [handle_ownership_container]
-    // Handles can be stored in containers
+    // Resources can be stored in containers
     // std::vector<KDGpu::Buffer> buffers;
     // buffers.push_back(device.createBuffer(options1));
     // buffers.push_back(device.createBuffer(options2));
@@ -2053,7 +2053,7 @@ void handle_ownership_examples()
     //! [handle_ownership_container]
 
     //! [handle_ownership_member_variable]
-    // Handles as class members
+    // Resources as class members
     // class Mesh {
     //   KDGpu::Buffer m_vertexBuffer;
     //   KDGpu::Buffer m_indexBuffer;
@@ -2189,10 +2189,10 @@ void api_overview_examples()
 // =============================================================================
 // Handles Documentation Examples (kdgpu-handle-ownership.dox)
 // =============================================================================
-void explicit_vs_impplicit_handles()
+void explicit_vs_implicit_handles()
 {
     KDGpu::Device device;
-    //! [explicit_vs_impplicit_handles]
+    //! [explicit_vs_implicit_handles]
     KDGpu::Texture texture = device.createTexture(KDGpu::TextureOptions{
             /* ... */
     });

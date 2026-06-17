@@ -60,7 +60,7 @@ OptionalHandle<RenderPass_t> renderPassHandle; // Default constructed = invalid
 
 KDGpu resources provide implicit conversion operators to their handle types, making code more readable by allowing resources to be passed directly where handles are expected:
 
-\snippet kdgpu_doc_snippets.cpp explicit_vs_impplicit_handles
+\snippet kdgpu_doc_snippets.cpp explicit_vs_implicit_handles
 
 
 This implicit conversion:
@@ -73,7 +73,7 @@ This implicit conversion:
 
 \subsection handle_ownership_model Ownership Model
 
-<b>KDGpu Resources follow the expect Vulkan ownship:</b>
+<b>KDGpu Resources follow the expected Vulkan ownership:</b>
 - Instance owns: Adapters
 - Adapter owns: Nothing (references Instance resources)
 - Device owns: All created resources (Buffers, Textures, Pipelines, CommandRecorders, etc.)
@@ -106,7 +106,7 @@ Every KDGpu resource has an `isValid()` method:
 
 \snippet kdgpu_doc_snippets.cpp handle_is_valid
 
-A handle becomes invalid when:
+A resource becomes invalid when:
 - Default constructed (never initialized)
 - Moved from (ownership transferred)
 - Underlying resource was destroyed
@@ -185,7 +185,7 @@ When the KDGpu resource is destroyed:
 
 \subsection handle_vulkan_access Accessing Vulkan Handles
 
-For advanced use cases, KDGpu provides access to the underlying Vulkan handles through the GraphicsApi:
+For advanced use cases, KDGpu provides access to the underlying Vulkan resources through the GraphicsApi:
 
 \snippet kdgpu_doc_snippets.cpp access_underlying_vulkan_resource
 
