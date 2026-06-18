@@ -84,11 +84,16 @@ The first place to look is ``mkPipelineOptions``, where the dynamicRendering fla
 
    \snippet hello_triangle_msaa_dynamic_rendering/hello_triangle_msaa_dynamic_rendering.cpp 1
 
+We create the texture and a view with the correct multisampling configuration and new dimensions.
+
+   \snippet hello_triangle_msaa_dynamic_rendering/hello_triangle_msaa_dynamic_rendering.cpp 2
+
+
 Next, we create the texture and a view with the correct multisampling configuration and new dimensions, which we will attach to the render pass option struct. Note that we use the type KDGpu::RenderPassCommandRecorderWithDynamicRenderingOptions instead of KDGpu::RenderPassCommandRecorderOptions.
 Whilst using RenderPassCommandRecorderOptions would lead to an internal implicit RenderPass being created to hold the attachment specifications, using KDGpu::RenderPassCommandRecorderWithDynamicRenderingOptions will use Vulkan's dynamic rendering extension to more efficiently and conveniently specify
 these information. Internally this means we don't have to maintain RenderPasses, Framebuffers ...
 
-   \snippet hello_triangle_msaa_dynamic_rendering/hello_triangle_msaa_dynamic_rendering.cpp 2
+   \snippet hello_triangle_msaa_dynamic_rendering/hello_triangle_msaa_dynamic_rendering.cpp 6
 
 The rendering submission itself doesn't change much. The noticeable change is we call renderImGuiOverlayDynamic instead of renderImGuiOverlay to render the ImGui overlay. That is so that we use a version that has a pipeline compatible with dynamic rendering.
 

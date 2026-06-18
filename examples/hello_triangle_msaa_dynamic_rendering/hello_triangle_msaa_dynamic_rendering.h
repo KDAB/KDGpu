@@ -44,7 +44,6 @@ private:
     KDGpu::Texture m_msaaTexture;
     KDGpu::TextureView m_msaaTextureView;
     KDGpu::PipelineLayout m_pipelineLayout;
-    KDGpu::RenderPassCommandRecorderWithDynamicRenderingOptions m_commandRecorderOptions;
     KDGpu::CommandBuffer m_commandBuffer;
 
     std::vector<KDGpu::GraphicsPipeline> m_pipelines;

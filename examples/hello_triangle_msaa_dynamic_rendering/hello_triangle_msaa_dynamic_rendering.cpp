@@ -197,29 +197,6 @@ void HelloTriangleMSAAWithDynamicRendering::initializeScene()
     m_requestedSampleCountIndex = m_supportedSampleCounts.size() - 1;
     m_currentPipelineIndex = m_requestedSampleCountIndex;
 
-    // Most of the render pass is the same between frames. The only thing that changes, is which image
-    // of the swapchain we wish to render to. So set up what we can here, and in the render loop we will
-    // just update the color texture view.
-    // clang-format off
-    //![2]
-    m_commandRecorderOptions = RenderPassCommandRecorderWithDynamicRenderingOptions {
-        .colorAttachments = {
-            {
-                .view = m_msaaTextureView, // The multisampled view which will change on resize.
-                .resolveView = {}, // Not setting the swapchain texture view just yet. That's handled at render.
-                .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
-                .finalLayout = TextureLayout::PresentSrc
-            }
-        },
-        .depthStencilAttachment = {
-            .view = m_depthTextureView,
-        },
-        // configure for multisampling
-        .samples = m_samples.get()
-    };
-    //![2]
-    // clang-format on
-
     // Create a multisample texture into which we will render. The pipeline will then resolve the
     // multi-sampled texture into the current swapchain image.
     createRenderTarget();
@@ -265,12 +242,9 @@ void HelloTriangleMSAAWithDynamicRendering::resize()
     createRenderTarget();
 }
 
+//! [2]
 void HelloTriangleMSAAWithDynamicRendering::createRenderTarget()
 {
-    // Reset depthTextureView as depthStencilAttachment view as it might
-    // have been recreated following a resize
-    m_commandRecorderOptions.depthStencilAttachment.view = m_depthTextureView;
-
     const TextureOptions options = {
         .type = TextureType::TextureType2D,
         .format = m_swapchainFormat,
@@ -283,10 +257,8 @@ void HelloTriangleMSAAWithDynamicRendering::createRenderTarget()
     };
     m_msaaTexture = m_device.createTexture(options);
     m_msaaTextureView = m_msaaTexture.createView();
-
-    if (isMsaaEnabled())
-        m_commandRecorderOptions.colorAttachments[0].view = m_msaaTextureView;
 }
+//! [2]
 
 bool HelloTriangleMSAAWithDynamicRendering::isMsaaEnabled() const
 {
@@ -311,9 +283,6 @@ void HelloTriangleMSAAWithDynamicRendering::setMsaaSampleCount(SampleCountFlagBi
 
     // we must also refresh the view(s) we handle, and reattach them
     createRenderTarget();
-
-    // update the samples option that will configure the render pass
-    m_commandRecorderOptions.samples = samples;
 }
 
 void HelloTriangleMSAAWithDynamicRendering::drawMsaaSettings(ImGuiContext *ctx)
@@ -364,14 +333,6 @@ void HelloTriangleMSAAWithDynamicRendering::drawMsaaSettings(ImGuiContext *ctx)
 
 void HelloTriangleMSAAWithDynamicRendering::render()
 {
-    if (isMsaaEnabled()) {
-        // When using MSAA, we update the resolveView instead of the view
-        m_commandRecorderOptions.colorAttachments[0].resolveView = m_swapchainViews.at(m_currentSwapchainImageIndex);
-    } else {
-        m_commandRecorderOptions.colorAttachments[0].resolveView = {};
-        m_commandRecorderOptions.colorAttachments[0].view = m_swapchainViews.at(m_currentSwapchainImageIndex);
-    }
-
     auto commandRecorder = m_device.createCommandRecorder();
 
     // We need to perform a layout transition since dynamic rendering doesn't perform implicit initial layout transition
@@ -391,8 +352,27 @@ void HelloTriangleMSAAWithDynamicRendering::render()
     });
     //![3]
 
+    //![6]
+    const auto renderPassOptions = RenderPassCommandRecorderWithDynamicRenderingOptions{
+        .colorAttachments = {
+                {
+                        // When using MSAA, we update the resolveView instead of the view
+                        .view = isMsaaEnabled() ? m_msaaTextureView : m_swapchainViews.at(m_currentSwapchainImageIndex),
+                        .resolveView = isMsaaEnabled() ? m_swapchainViews.at(m_currentSwapchainImageIndex) : Handle<TextureView_t>{},
+                        .clearValue = { 0.3f, 0.3f, 0.3f, 1.0f },
+                        .finalLayout = TextureLayout::PresentSrc,
+                } },
+        .depthStencilAttachment = {
+                .view = m_depthTextureView,
+        },
+        // configure for multisampling
+        .samples = m_samples.get(),
+    };
+    //![6]
+
     //![4]
-    auto opaquePass = commandRecorder.beginRenderPass(m_commandRecorderOptions);
+    auto opaquePass = commandRecorder.beginRenderPass(renderPassOptions);
+
     opaquePass.setPipeline(m_pipelines[m_currentPipelineIndex]);
     opaquePass.setVertexBuffer(0, m_buffer);
     opaquePass.setIndexBuffer(m_indexBuffer);
