@@ -2849,7 +2849,7 @@ void renderpass_command_recorder_examples(KDGpu::Device *device, KDGpu::CommandR
         };
 
         // Begin render pass
-        auto renderPass = commandRecorder->beginRenderPass(renderOptions);
+        KDGpu::DynamicRenderPassCommandRecorder renderPass = commandRecorder->beginRenderPass(renderOptions);
 
         // Record rendering commands...
         renderPass.setPipeline(pipeline);
@@ -2880,7 +2880,7 @@ void renderpass_command_recorder_examples(KDGpu::Device *device, KDGpu::CommandR
             .samples = KDGpu::SampleCountFlagBits::Samples4Bit,
         };
 
-        auto msaaRenderPass = commandRecorder->beginRenderPass(msaaOptions);
+        KDGpu::DynamicRenderPassCommandRecorder msaaRenderPass = commandRecorder->beginRenderPass(msaaOptions);
         // Render with MSAA...
         msaaRenderPass.end();
         //! [renderpass_msaa_resolve]
@@ -2900,7 +2900,7 @@ void renderpass_command_recorder_examples(KDGpu::Device *device, KDGpu::CommandR
             .viewCount = 2, // Render to 2 views simultaneously
         };
 
-        auto multiviewRenderPass = commandRecorder->beginRenderPass(multiviewOptions);
+        KDGpu::DynamicRenderPassCommandRecorder multiviewRenderPass = commandRecorder->beginRenderPass(multiviewOptions);
         // The vertex shader will run once per view using gl_ViewIndex
         multiviewRenderPass.end();
         //! [renderpass_multiview]
@@ -2909,7 +2909,7 @@ void renderpass_command_recorder_examples(KDGpu::Device *device, KDGpu::CommandR
     KDGpu::RenderPassCommandRecorderWithDynamicRenderingOptions renderOptions{};
     {
         //! [renderpass_viewport_scissor]
-        auto renderPass = commandRecorder->beginRenderPass(renderOptions);
+        KDGpu::DynamicRenderPassCommandRecorder renderPass = commandRecorder->beginRenderPass(renderOptions);
 
         // Set dynamic viewport
         KDGpu::Viewport viewport{
@@ -2935,7 +2935,7 @@ void renderpass_command_recorder_examples(KDGpu::Device *device, KDGpu::CommandR
 
     {
         //! [renderpass_draw_variants]
-        auto renderPass = commandRecorder->beginRenderPass(renderOptions);
+        KDGpu::DynamicRenderPassCommandRecorder renderPass = commandRecorder->beginRenderPass(renderOptions);
         renderPass.setPipeline(pipeline);
 
         // Simple draw (non-indexed)
@@ -2973,7 +2973,7 @@ void renderpass_command_recorder_examples(KDGpu::Device *device, KDGpu::CommandR
 
     {
         //! [renderpass_push_constants]
-        auto renderPass = commandRecorder->beginRenderPass(renderOptions);
+        KDGpu::DynamicRenderPassCommandRecorder renderPass = commandRecorder->beginRenderPass(renderOptions);
         renderPass.setPipeline(pipeline);
 
         // Upload small amounts of data directly to shaders (faster than UBO for small data)
@@ -3000,7 +3000,7 @@ void renderpass_command_recorder_examples(KDGpu::Device *device, KDGpu::CommandR
 
     {
         //! [renderpass_stencil_reference]
-        auto renderPass = commandRecorder->beginRenderPass(renderOptions);
+        KDGpu::DynamicRenderPassCommandRecorder renderPass = commandRecorder->beginRenderPass(renderOptions);
         renderPass.setPipeline(pipeline.handle());
 
         // Set stencil reference value dynamically (for stencil masking/testing)
@@ -3041,7 +3041,7 @@ void renderpass_command_recorder_examples(KDGpu::Device *device, KDGpu::CommandR
             },
         };
 
-        auto mrtRenderPass = commandRecorder->beginRenderPass(mrtOptions);
+        KDGpu::DynamicRenderPassCommandRecorder mrtRenderPass = commandRecorder->beginRenderPass(mrtOptions);
         // Fragment shader outputs to multiple render targets
         mrtRenderPass.end();
         //! [renderpass_multiple_attachments]

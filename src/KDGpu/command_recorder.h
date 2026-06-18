@@ -14,6 +14,7 @@
 #include <KDGpu/handle.h>
 #include <KDGpu/compute_pass_command_recorder.h>
 #include <KDGpu/render_pass_command_recorder.h>
+#include <KDGpu/dynamic_render_pass_command_recorder.h>
 #include <KDGpu/raytracing_pass_command_recorder.h>
 #include <KDGpu/timestamp_query_recorder.h>
 #include <KDGpu/timestamp_query_recorder_options.h>
@@ -221,9 +222,32 @@ public:
 
     operator Handle<CommandRecorder_t>() const noexcept { return m_commandRecorder; }
 
+    /*!
+        \brief Begin a render pass using legacy VkRenderPass with implicit VkFramebuffer
+        \param options Configuration for the render pass
+        \return RenderPassCommandRecorder for recording rendering commands
+        \deprecated Consider using DynamicRenderPassCommandRecorder with RenderPassCommandRecorderWithDynamicRenderingOptions for new code (Vulkan 1.3+ on Desktop Platforms)
+        \sa DynamicRenderPassCommandRecorder, RenderPassCommandRecorderWithDynamicRenderingOptions
+    */
     RenderPassCommandRecorder beginRenderPass(const RenderPassCommandRecorderOptions &options) const;
+
+    /*!
+        \brief Begin a render pass using an explicit pre-created VkRenderPass
+        \param options Configuration including pre-created VkRenderPass and VkFramebuffer
+        \return RenderPassCommandRecorder for recording rendering commands
+        \deprecated Consider using DynamicRenderPassCommandRecorder with RenderPassCommandRecorderWithDynamicRenderingOptions for new code (Vulkan 1.3+ on Desktop Platforms)
+        \sa DynamicRenderPassCommandRecorder, RenderPassCommandRecorderWithDynamicRenderingOptions, RenderPass
+    */
     RenderPassCommandRecorder beginRenderPass(const RenderPassCommandRecorderWithRenderPassOptions &options) const;
-    RenderPassCommandRecorder beginRenderPass(const RenderPassCommandRecorderWithDynamicRenderingOptions &options) const;
+
+    /*!
+        \brief Begin a render pass using modern dynamic rendering (Vulkan 1.3)
+        \param options Configuration for dynamic rendering
+        \return DynamicRenderPassCommandRecorder for recording rendering commands
+        \brief Recommended API for modern applications
+        \sa DynamicRenderPassCommandRecorder, RenderPassCommandRecorderWithDynamicRenderingOptions
+    */
+    DynamicRenderPassCommandRecorder beginRenderPass(const RenderPassCommandRecorderWithDynamicRenderingOptions &options) const;
 
     [[nodiscard]] ComputePassCommandRecorder beginComputePass(const ComputePassCommandRecorderOptions &options = {}) const;
     [[nodiscard]] RayTracingPassCommandRecorder beginRayTracingPass(const RayTracingPassCommandRecorderOptions &options = {}) const;

@@ -37,7 +37,8 @@ struct ImGuiContext;
 
 namespace KDGpu {
 class RenderPassCommandRecorder;
-}
+class DynamicRenderPassCommandRecorder;
+} // namespace KDGpu
 
 namespace KDGpuExample {
 
@@ -79,7 +80,7 @@ protected:
                                     uint32_t inFlightIndex = 0,
                                     KDGpu::RenderPass *currentRenderPass = nullptr,
                                     int lastSubpassIndex = 0);
-    virtual void renderImGuiOverlayDynamic(KDGpu::RenderPassCommandRecorder *recorder,
+    virtual void renderImGuiOverlayDynamic(KDGpu::DynamicRenderPassCommandRecorder *recorder,
                                            uint32_t inFlightIndex = 0);
     void registerImGuiOverlayDrawFunction(const std::function<void(ImGuiContext *)> &func);
     void clearImGuiOverlayDrawFunctions();

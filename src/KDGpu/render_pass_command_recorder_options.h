@@ -93,11 +93,12 @@ struct DepthStencilAttachment {
     \ingroup public
     \headerfile render_pass_command_recorder_options.h <KDGpu/render_pass_command_recorder_options.h>
 
-    This struct is maintained for compatibility but RenderPassCommandRecorderWithDynamicRenderingOptions
-    is preferred for new code on desktop platforms. It uses dynamic rendering which was promoted to Vulkan 1.3 core.
+    This struct is maintained for compatibility with RenderPassCommandRecorder.
+    For new code, use RenderPassCommandRecorderWithDynamicRenderingOptions with DynamicRenderPassCommandRecorder instead.
+    It uses dynamic rendering which was promoted to Vulkan 1.3 core.
 
-    \deprecated Use RenderPassCommandRecorderWithDynamicRenderingOptions for new code
-    \sa RenderPassCommandRecorderWithDynamicRenderingOptions
+    \deprecated Use DynamicRenderPassCommandRecorder with RenderPassCommandRecorderWithDynamicRenderingOptions for new code
+    \sa RenderPassCommandRecorder, DynamicRenderPassCommandRecorder, RenderPassCommandRecorderWithDynamicRenderingOptions
 */
 struct RenderPassCommandRecorderOptions {
     std::vector<ColorAttachment> colorAttachments; ///< Color render targets
@@ -141,18 +142,20 @@ struct Attachment {
     \ingroup public
     \headerfile render_pass_command_recorder_options.h <KDGpu/render_pass_command_recorder_options.h>
 
-    This option requires a pre-created RenderPass object with subpass dependencies.
+    This option is used with RenderPassCommandRecorder for legacy VkRenderPass/VkFramebuffer rendering.
     The VkRenderPass/VkFramebuffer model has been superseded by dynamic rendering in Vulkan 1.3.
+
+    This option requires a pre-created RenderPass object with subpass dependencies.
 
     \note VkRenderPass and subpasses were deprecated in Vulkan 1.3 in favor of dynamic rendering
     (VK_KHR_dynamic_rendering, now core). For new applications, prefer
-    RenderPassCommandRecorderWithDynamicRenderingOptions which offers more flexibility
-    and simpler API usage.
+    DynamicRenderPassCommandRecorder with RenderPassCommandRecorderWithDynamicRenderingOptions
+    which offers more flexibility and simpler API usage.
 
     In Vulkan terms, this maps to vkCmdBeginRenderPass() with a VkRenderPass and VkFramebuffer.
 
-    \deprecated Use RenderPassCommandRecorderWithDynamicRenderingOptions for new code
-    \sa RenderPassCommandRecorderWithDynamicRenderingOptions, RenderPass
+    \deprecated Use DynamicRenderPassCommandRecorder with RenderPassCommandRecorderWithDynamicRenderingOptions for new code
+    \sa RenderPassCommandRecorder, DynamicRenderPassCommandRecorder, RenderPassCommandRecorderWithDynamicRenderingOptions, RenderPass
 */
 struct RenderPassCommandRecorderWithRenderPassOptions {
     RequiredHandle<RenderPass_t> renderPass; ///< Pre-created RenderPass defining attachments and subpasses
@@ -168,6 +171,8 @@ struct RenderPassCommandRecorderWithRenderPassOptions {
     \brief Modern render pass options using dynamic rendering (recommended)
     \ingroup public
     \headerfile render_pass_command_recorder_options.h <KDGpu/render_pass_command_recorder_options.h>
+
+    Use this option with DynamicRenderPassCommandRecorder for modern dynamic rendering.
 
     Dynamic rendering allows you to specify render targets directly when beginning a render pass,
     without pre-creating VkRenderPass and VkFramebuffer objects. This approach was introduced
@@ -197,8 +202,8 @@ struct RenderPassCommandRecorderWithRenderPassOptions {
 
     In Vulkan, this maps to vkCmdBeginRendering() from VK_KHR_dynamic_rendering (Vulkan 1.3 core).
 
-    \sa ColorAttachment, DepthStencilAttachment, RenderPassCommandRecorder
-    \sa CommandRecorder::beginRenderPass()
+    \sa DynamicRenderPassCommandRecorder, ColorAttachment, DepthStencilAttachment
+    \sa RenderPassCommandRecorder (legacy VkRenderPass-based API)
  */
 struct RenderPassCommandRecorderWithDynamicRenderingOptions {
     std::vector<ColorAttachment> colorAttachments; ///< Color render targets (can be empty for depth-only passes)

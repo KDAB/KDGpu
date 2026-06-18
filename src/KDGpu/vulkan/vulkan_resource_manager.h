@@ -42,6 +42,7 @@
 #include <KDGpu/vulkan/vulkan_acceleration_structure.h>
 #include <KDGpu/vulkan/vulkan_raytracing_pipeline.h>
 #include <KDGpu/vulkan/vulkan_raytracing_pass_command_recorder.h>
+#include <KDGpu/vulkan/vulkan_dynamic_render_pass_command_recorder.h>
 #include <KDGpu/vulkan/vulkan_ycbcr_conversion.h>
 #include <KDGpu/vulkan/vulkan_pipeline_cache.h>
 
@@ -157,11 +158,14 @@ public:
     Handle<RenderPassCommandRecorder_t> createRenderPassCommandRecorder(const Handle<Device_t> &deviceHandle,
                                                                         const Handle<CommandRecorder_t> &commandRecorderHandle,
                                                                         const RenderPassCommandRecorderWithRenderPassOptions &options);
-    Handle<RenderPassCommandRecorder_t> createRenderPassCommandRecorder(const Handle<Device_t> &deviceHandle,
-                                                                        const Handle<CommandRecorder_t> &commandRecorderHandle,
-                                                                        const RenderPassCommandRecorderWithDynamicRenderingOptions &options);
     void deleteRenderPassCommandRecorder(const Handle<RenderPassCommandRecorder_t> &handle);
     [[nodiscard]] VulkanRenderPassCommandRecorder *getRenderPassCommandRecorder(const Handle<RenderPassCommandRecorder_t> &handle) const;
+
+    Handle<DynamicRenderPassCommandRecorder_t> createDynamicRenderPassCommandRecorder(const Handle<Device_t> &deviceHandle,
+                                                                                      const Handle<CommandRecorder_t> &commandRecorderHandle,
+                                                                                      const RenderPassCommandRecorderWithDynamicRenderingOptions &options);
+    void deleteDynamicRenderPassCommandRecorder(const Handle<DynamicRenderPassCommandRecorder_t> &handle);
+    [[nodiscard]] VulkanDynamicRenderPassCommandRecorder *getDynamicRenderPassCommandRecorder(const Handle<DynamicRenderPassCommandRecorder_t> &handle) const;
 
     Handle<ComputePassCommandRecorder_t> createComputePassCommandRecorder(const Handle<Device_t> &deviceHandle,
                                                                           const Handle<CommandRecorder_t> &commandRecorderHandle,
@@ -295,6 +299,7 @@ private:
     Pool<VulkanTimelineSemaphore, TimelineSemaphore_t> m_timelineSemaphores{ 32 };
     Pool<VulkanCommandRecorder, CommandRecorder_t> m_commandRecorders{ 32 };
     Pool<VulkanRenderPassCommandRecorder, RenderPassCommandRecorder_t> m_renderPassCommandRecorders{ 32 };
+    Pool<VulkanDynamicRenderPassCommandRecorder, DynamicRenderPassCommandRecorder_t> m_dynamicRenderPassCommandRecorders{ 32 };
     Pool<VulkanComputePassCommandRecorder, ComputePassCommandRecorder_t> m_computePassCommandRecorders{ 32 };
     Pool<VulkanRayTracingPassCommandRecorder, RayTracingPassCommandRecorder_t> m_rayTracingPassCommandRecorders{ 32 };
     Pool<VulkanCommandBuffer, CommandBuffer_t> m_commandBuffers{ 128 };

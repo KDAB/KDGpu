@@ -185,7 +185,7 @@ void ExampleEngineLayer::renderImGuiOverlay(RenderPassCommandRecorder *recorder,
     m_imguiOverlay->render(recorder, extent, inFlightIndex, currentRenderPass, lastSubpassIndex);
 }
 
-void ExampleEngineLayer::renderImGuiOverlayDynamic(KDGpu::RenderPassCommandRecorder *recorder,
+void ExampleEngineLayer::renderImGuiOverlayDynamic(KDGpu::DynamicRenderPassCommandRecorder *recorder,
                                                    uint32_t inFlightIndex)
 {
     // Updates the geometry buffers used by ImGui and records the commands needed to

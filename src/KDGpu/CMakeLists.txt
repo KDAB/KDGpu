@@ -35,6 +35,8 @@ set(SOURCES
     raytracing_pipeline.cpp
     raytracing_shader_binding_table.cpp
     render_pass_command_recorder.cpp
+    render_pass_command_recorder_base.cpp
+    dynamic_render_pass_command_recorder.cpp
     render_pass.cpp
     sampler.cpp
     shader_module.cpp
@@ -72,6 +74,8 @@ set(SOURCES
     vulkan/vulkan_raytracing_pipeline.cpp
     vulkan/vulkan_render_pass.cpp
     vulkan/vulkan_render_pass_command_recorder.cpp
+    vulkan/vulkan_render_pass_command_recorder_base.cpp
+    vulkan/vulkan_dynamic_render_pass_command_recorder.cpp
     vulkan/vulkan_resource_manager.cpp
     vulkan/vulkan_sampler.cpp
     vulkan/vulkan_shader_module.cpp
@@ -131,7 +135,10 @@ set(HEADERS
     raytracing_pipeline_options.h
     raytracing_shader_binding_table.h
     render_pass_command_recorder.h
+    render_pass_command_recorder_base.h
     render_pass_command_recorder_options.h
+    render_pass_draw_commands.h
+    dynamic_render_pass_command_recorder.h
     render_pass.h
     render_pass_options.h
     resource_manager.h
@@ -182,6 +189,8 @@ set(HEADERS
     vulkan/vulkan_raytracing_pipeline.h
     vulkan/vulkan_render_pass.h
     vulkan/vulkan_render_pass_command_recorder.h
+    vulkan/vulkan_render_pass_command_recorder_base.h
+    vulkan/vulkan_dynamic_render_pass_command_recorder.h
     vulkan/vulkan_resource_manager.h
     vulkan/vulkan_sampler.h
     vulkan/vulkan_shader_module.h

@@ -25,6 +25,7 @@ class Device;
 struct Extent2D;
 class Queue;
 class RenderPassCommandRecorder;
+class DynamicRenderPassCommandRecorder;
 class RenderPass;
 } // namespace KDGpu
 
@@ -65,7 +66,7 @@ public:
                 KDGpu::RenderPass *currentRenderPass = nullptr,
                 int lastSubpassIndex = 0);
 
-    void renderDynamic(KDGpu::RenderPassCommandRecorder *recorder,
+    void renderDynamic(KDGpu::DynamicRenderPassCommandRecorder *recorder,
                        const KDGpu::Extent2D &extent,
                        uint32_t inFlightIndex = 0);
 

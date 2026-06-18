@@ -61,7 +61,7 @@ void ImGuiItem::render(KDGpu::RenderPassCommandRecorder *recorder, const KDGpu::
         m_renderer->recordCommands(recorder, extent, inFlightIndex, currentRenderPass, lastSubpassIndex);
 }
 
-void ImGuiItem::renderDynamic(KDGpu::RenderPassCommandRecorder *recorder,
+void ImGuiItem::renderDynamic(KDGpu::DynamicRenderPassCommandRecorder *recorder,
                               const KDGpu::Extent2D &extent,
                               uint32_t inFlightIndex)
 {

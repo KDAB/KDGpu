@@ -29,7 +29,7 @@
 namespace KDGpu {
 class Device;
 class Queue;
-class RenderPassCommandRecorder;
+class RenderPassCommandRecorderBase;
 class RenderPass;
 } // namespace KDGpu
 
@@ -60,7 +60,7 @@ public:
     void cleanup();
 
     bool updateGeometryBuffers(uint32_t inFlightIndex);
-    void recordCommands(KDGpu::RenderPassCommandRecorder *recorder,
+    void recordCommands(KDGpu::RenderPassCommandRecorderBase *recorder,
                         KDGpu::Extent2D extent,
                         uint32_t inFlightIndex,
                         KDGpu::RenderPass *currentRenderPass = nullptr,

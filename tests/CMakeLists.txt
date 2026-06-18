@@ -88,6 +88,7 @@ add_subdirectory(graphics_pipeline)
 add_subdirectory(pipelinelayout)
 add_subdirectory(fence)
 add_subdirectory(render_pass_command_recorder)
+add_subdirectory(dynamic_render_pass_command_recorder)
 add_subdirectory(gpu_semaphore)
 add_subdirectory(timeline_semaphore)
 add_subdirectory(shader_module)
@@ -120,12 +121,16 @@ if(KDGPU_CODE_COVERAGE)
     if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         find_program(LLVM_COV_PATH llvm-cov)
         if(LLVM_COV_PATH)
-            set(GCOVR_ADDITIONAL_ARGS --gcov-executable "${LLVM_COV_PATH} gcov" --gcov-ignore-parse-errors
-                                      --print-summary
+            set(GCOVR_ADDITIONAL_ARGS
+                --gcov-executable
+                "${LLVM_COV_PATH} gcov"
+                --gcov-ignore-parse-errors
+                --gcov-ignore-errors=no_working_dir_found
+                --print-summary
             )
         endif()
     else()
-        set(GCOVR_ADDITIONAL_ARGS --gcov-ignore-parse-errors --print-summary)
+        set(GCOVR_ADDITIONAL_ARGS --gcov-ignore-parse-errors --gcov-ignore-errors=no_working_dir_found --print-summary)
     endif()
 
     setup_target_for_coverage_gcovr_html(

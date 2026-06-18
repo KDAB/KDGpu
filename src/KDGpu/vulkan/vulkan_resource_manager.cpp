@@ -2802,13 +2802,13 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
     vkCmdBeginRenderPass(vkCommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
     const auto vulkanRenderPassCommandRecorderHandle = m_renderPassCommandRecorders.emplace(
-            VulkanRenderPassCommandRecorder(vkCommandBuffer, renderPassInfo.renderArea, this, deviceHandle, false));
+            VulkanRenderPassCommandRecorder(vkCommandBuffer, renderPassInfo.renderArea, this, deviceHandle));
     return vulkanRenderPassCommandRecorderHandle;
 }
 
-Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassCommandRecorder(const Handle<Device_t> &deviceHandle,
-                                                                                           const Handle<CommandRecorder_t> &commandRecorderHandle,
-                                                                                           const RenderPassCommandRecorderWithDynamicRenderingOptions &options)
+Handle<DynamicRenderPassCommandRecorder_t> VulkanResourceManager::createDynamicRenderPassCommandRecorder(const Handle<Device_t> &deviceHandle,
+                                                                                                         const Handle<CommandRecorder_t> &commandRecorderHandle,
+                                                                                                         const RenderPassCommandRecorderWithDynamicRenderingOptions &options)
 {
 #if VK_KHR_dynamic_rendering
     VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
@@ -2953,9 +2953,9 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
 
     vulkanDevice->vkCmdBeginRenderingKHR(vkCommandBuffer, &renderingInfo);
 
-    const auto vulkanRenderPassCommandRecorderHandle = m_renderPassCommandRecorders.emplace(
-            VulkanRenderPassCommandRecorder(vkCommandBuffer, renderingInfo.renderArea, this, deviceHandle, true));
-    return vulkanRenderPassCommandRecorderHandle;
+    const auto vulkanDynamicRenderPassCommandRecorderHandle = m_dynamicRenderPassCommandRecorders.emplace(
+            VulkanDynamicRenderPassCommandRecorder(vkCommandBuffer, renderingInfo.renderArea, this, deviceHandle));
+    return vulkanDynamicRenderPassCommandRecorderHandle;
 #else
     SPDLOG_LOGGER_ERROR(Logger::logger(), "Dynamic Rendering not supported by this Vulkan SDK");
     return {};
@@ -2970,6 +2970,16 @@ VulkanRenderPassCommandRecorder *VulkanResourceManager::getRenderPassCommandReco
 void VulkanResourceManager::deleteRenderPassCommandRecorder(const Handle<RenderPassCommandRecorder_t> &handle)
 {
     m_renderPassCommandRecorders.remove(handle);
+}
+
+VulkanDynamicRenderPassCommandRecorder *VulkanResourceManager::getDynamicRenderPassCommandRecorder(const Handle<DynamicRenderPassCommandRecorder_t> &handle) const
+{
+    return m_dynamicRenderPassCommandRecorders.get(handle);
+}
+
+void VulkanResourceManager::deleteDynamicRenderPassCommandRecorder(const Handle<DynamicRenderPassCommandRecorder_t> &handle)
+{
+    m_dynamicRenderPassCommandRecorders.remove(handle);
 }
 
 Handle<ComputePassCommandRecorder_t> VulkanResourceManager::createComputePassCommandRecorder(const Handle<Device_t> &deviceHandle,

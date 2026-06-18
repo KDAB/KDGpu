@@ -272,13 +272,16 @@ bool ImGuiRenderer::updateGeometryBuffers(uint32_t inFlightIndex)
     return m_mesh->vertexCount != 0;
 }
 
-void ImGuiRenderer::recordCommands(KDGpu::RenderPassCommandRecorder *recorder,
+#include <KDGpu/render_pass_command_recorder_base.h>
+
+void ImGuiRenderer::recordCommands(KDGpu::RenderPassCommandRecorderBase *recorder,
                                    KDGpu::Extent2D extent,
                                    uint32_t inFlightIndex,
                                    KDGpu::RenderPass *currentRenderPass,
                                    int lastSubpassIndex,
                                    bool dynamicRendering)
 {
+    (void)inFlightIndex;
     ImDrawData *imDrawData = ImGui::GetDrawData();
 
     assert((dynamicRendering && !currentRenderPass) ||
