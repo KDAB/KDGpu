@@ -9,6 +9,12 @@
 cmake_minimum_required(VERSION 3.12)
 project(KDGpu-Tests)
 
+# Mark doctest headers as system includes to suppress third-party warnings
+# (e.g. <ciso646> deprecation in C++20 from doctest.h)
+if(TARGET doctest::doctest)
+    set_target_properties(doctest::doctest PROPERTIES SYSTEM TRUE)
+endif()
+
 # Build a test program
 function(add_kdgpu_test NAME SOURCES)
     set(TARGET_NAME test_kdgpu_${NAME})
