@@ -99,6 +99,9 @@
             "kind": "git",
             "baseline": "61092ca859d11d616e9db065b1cf4a42ca67d128",
             "repository": "https://github.com/microsoft/vcpkg"
-        }
+        },
+        "overlay-ports": [
+            "./ports"
+        ]
     }
 }
