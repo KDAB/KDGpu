@@ -16,8 +16,6 @@
 
 #include <KDGui/gui_application.h>
 
-#include <set>
-
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest.h>
 
@@ -30,6 +28,8 @@ TEST_SUITE("Instance")
     TEST_CASE("Vulkan")
     {
         // GIVEN
+        GuiApplication app;
+
         std::unique_ptr<GraphicsApi> api = std::make_unique<VulkanGraphicsApi>();
 
         // WHEN
@@ -109,7 +109,6 @@ TEST_SUITE("Instance")
         SUBCASE("Can create Surface")
         {
             // GIVEN
-            GuiApplication app;
             View v;
 
             // WHEN
@@ -123,7 +122,6 @@ TEST_SUITE("Instance")
         SUBCASE("Can create Default Device and Adapter")
         {
             // GIVEN
-            GuiApplication app;
             View v;
             const SurfaceOptions surfaceOptions = View::surfaceOptions(&v);
             Surface s = instance.createSurface(surfaceOptions);
