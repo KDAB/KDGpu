@@ -350,6 +350,35 @@ void HelloTriangleMSAAWithDynamicRendering::render()
                     .aspectMask = TextureAspectFlagBits::ColorBit,
             },
     });
+
+    commandRecorder.textureMemoryBarrier(TextureMemoryBarrierOptions{
+            .srcStages = PipelineStageFlagBit::TopOfPipeBit,
+            .srcMask = AccessFlagBit::None,
+            .dstStages = PipelineStageFlagBit::EarlyFragmentTestBit,
+            .dstMask = AccessFlagBit::DepthStencilAttachmentReadBit | KDGpu::AccessFlagBit::DepthStencilAttachmentWriteBit,
+            .oldLayout = TextureLayout::Undefined,
+            .newLayout = TextureLayout::DepthStencilAttachmentOptimal,
+            .texture = m_depthTexture,
+            .range = TextureSubresourceRange{
+                    .aspectMask = TextureAspectFlagBits::DepthBit | TextureAspectFlagBits::StencilBit,
+            },
+    });
+
+    if (isMsaaEnabled()) {
+        commandRecorder.textureMemoryBarrier(TextureMemoryBarrierOptions{
+                .srcStages = PipelineStageFlagBit::TopOfPipeBit,
+                .srcMask = AccessFlagBit::None,
+                .dstStages = PipelineStageFlagBit::ColorAttachmentOutputBit,
+                .dstMask = AccessFlagBit::ColorAttachmentWriteBit,
+                .oldLayout = TextureLayout::Undefined,
+                .newLayout = TextureLayout::ColorAttachmentOptimal,
+                .texture = m_msaaTexture,
+                .range = TextureSubresourceRange{
+                        .aspectMask = TextureAspectFlagBits::ColorBit,
+                },
+        });
+    }
+
     //![3]
 
     //![6]
