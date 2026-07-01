@@ -18,6 +18,7 @@ namespace KDGpu {
 struct YCbCrConversion_t;
 
 struct TextureViewOptions {
+    /// \note The caller is responsible for ensuring the string referenced by \c label outlives this options object.
     std::string_view label;
     ViewType viewType{ ViewType::ViewType2D };
     Format format{ Format::UNDEFINED };

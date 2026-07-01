@@ -15,6 +15,7 @@
 namespace KDGpu {
 
 struct BindGroupPoolOptions {
+    /// \note The caller is responsible for ensuring the string referenced by \c label outlives this options object.
     std::string_view label;
     uint16_t uniformBufferCount{ 0 };
     uint16_t dynamicUniformBufferCount{ 0 };

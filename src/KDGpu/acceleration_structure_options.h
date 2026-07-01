@@ -60,6 +60,7 @@ struct AccelerationStructureGeometryInstancesData {
 using AccelerationStructureGeometry = std::variant<AccelerationStructureGeometryTrianglesData, AccelerationStructureGeometryAabbsData, AccelerationStructureGeometryInstancesData>;
 
 struct AccelerationStructureOptions {
+    /// \note The caller is responsible for ensuring the string referenced by \c label outlives this options object.
     std::string_view label;
     AccelerationStructureType type{ AccelerationStructureType::TopLevel };
     AccelerationStructureFlags flags{ AccelerationStructureFlagBits::None };

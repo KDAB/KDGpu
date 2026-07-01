@@ -216,6 +216,7 @@ struct RenderPassCommandRecorderWithDynamicRenderingOptions {
 };
 
 struct DebugLabelOptions {
+    /// \note The caller is responsible for ensuring the string referenced by \c label outlives this options object.
     std::string_view label;
     float color[4];
 };

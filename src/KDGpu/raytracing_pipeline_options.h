@@ -34,6 +34,7 @@ struct RayTracingShaderGroupOptions {
 };
 
 struct RayTracingPipelineOptions {
+    /// \note The caller is responsible for ensuring the string referenced by \c label outlives this options object.
     std::string_view label;
     std::vector<ShaderStage> shaderStages;
     std::vector<RayTracingShaderGroupOptions> shaderGroups;

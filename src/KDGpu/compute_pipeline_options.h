@@ -28,6 +28,7 @@ struct ComputeShaderStage {
 };
 
 struct ComputePipelineOptions {
+    /// \note The caller is responsible for ensuring the string referenced by \c label outlives this options object.
     std::string_view label;
     RequiredHandle<PipelineLayout_t> layout;
     ComputeShaderStage shaderStage;

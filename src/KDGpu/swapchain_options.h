@@ -20,6 +20,7 @@ struct Swapchain_t;
 struct Surface_t;
 
 struct SwapchainOptions {
+    /// \note The caller is responsible for ensuring the string referenced by \c label outlives this options object.
     std::string_view label;
     Handle<Surface_t> surface;
     Format format{ Format::B8G8R8A8_UNORM };

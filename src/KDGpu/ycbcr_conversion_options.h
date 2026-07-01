@@ -15,6 +15,7 @@
 namespace KDGpu {
 
 struct YCbCrConversionOptions {
+    /// \note The caller is responsible for ensuring the string referenced by \c label outlives this options object.
     std::string_view label;
     Format format;
     SamplerYCbCrModelConversion model{ SamplerYCbCrModelConversion::RgbIdentity };

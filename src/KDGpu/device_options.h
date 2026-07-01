@@ -27,6 +27,7 @@ struct QueueRequest {
 };
 
 struct DeviceOptions {
+    /// \note The caller is responsible for ensuring the string referenced by \c label outlives this options object.
     std::string_view label;
     // Version we want the device to use, can be less than the apiVersion requested for the instance
     uint32_t apiVersion{ KDGPU_MAKE_API_VERSION(0, 1, 2, 0) };

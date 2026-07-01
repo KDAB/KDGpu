@@ -27,6 +27,7 @@ struct BindGroupEntry { // An entry into a BindGroup ( == a descriptor in a desc
 };
 
 struct BindGroupOptions {
+    /// \note The caller is responsible for ensuring the string referenced by \c label outlives this options object.
     std::string_view label;
     RequiredHandle<BindGroupLayout_t> layout;
     std::vector<BindGroupEntry> resources;

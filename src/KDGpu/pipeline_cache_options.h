@@ -17,6 +17,7 @@
 namespace KDGpu {
 
 struct PipelineCacheOptions {
+    /// \note The caller is responsible for ensuring the string referenced by \c label outlives this options object.
     std::string_view label;
     std::span<const uint8_t> initialData; // Initial cache data to populate from previous runs
 };

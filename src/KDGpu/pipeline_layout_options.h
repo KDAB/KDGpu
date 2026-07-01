@@ -29,6 +29,7 @@ struct PushConstantRange {
 struct BindGroupLayout_t;
 
 struct PipelineLayoutOptions {
+    /// \note The caller is responsible for ensuring the string referenced by \c label outlives this options object.
     std::string_view label;
     std::vector<RequiredHandle<BindGroupLayout_t>> bindGroupLayouts;
     std::vector<PushConstantRange> pushConstantRanges;

@@ -32,6 +32,7 @@ struct ResourceBindingLayout {
 // will be able to subsequently allocate the actual bind group (descriptor set). Before
 // the bind group can be used we will need to populate it with the specified bindings.
 struct BindGroupLayoutOptions {
+    /// \note The caller is responsible for ensuring the string referenced by \c label outlives this options object.
     std::string_view label;
     std::vector<ResourceBindingLayout> bindings;
     BindGroupLayoutFlags flags{ BindGroupLayoutFlagBits::None };

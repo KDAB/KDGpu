@@ -165,6 +165,7 @@ struct DynamicOutputAttachmentLocations {
 };
 
 struct GraphicsPipelineOptions {
+    /// \note The caller is responsible for ensuring the string referenced by \c label outlives this options object.
     std::string_view label;
     std::vector<ShaderStage> shaderStages;
     RequiredHandle<PipelineLayout_t> layout;

@@ -17,6 +17,7 @@ namespace KDGpu {
 
 struct YCbCrConversion_t;
 struct SamplerOptions {
+    /// \note The caller is responsible for ensuring the string referenced by \c label outlives this options object.
     std::string_view label;
     FilterMode magFilter{ FilterMode::Nearest };
     FilterMode minFilter{ FilterMode::Nearest };
