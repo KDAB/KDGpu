@@ -3527,6 +3527,20 @@ Handle<BindGroupLayout_t> VulkanResourceManager::createBindGroupLayout(const Han
 
     std::vector<VkSampler> immutableSamplers;
 
+    // Fill immutableSamplers vector
+    for (uint32_t j = 0; j < bindingLayoutCount; ++j) {
+        const auto &bindingLayout = options.bindings.at(j);
+
+        if (!bindingLayout.immutableSamplers.empty()) {
+            for (Handle<Sampler_t> samplerH : bindingLayout.immutableSamplers) {
+                VulkanSampler *s = m_samplers.get(samplerH);
+                assert(s);
+                immutableSamplers.emplace_back(s->sampler);
+            }
+        }
+    }
+
+    size_t lastImmutableSamplersOffset = 0;
     for (uint32_t j = 0; j < bindingLayoutCount; ++j) {
         const auto &bindingLayout = options.bindings.at(j);
 
@@ -3538,15 +3552,12 @@ Handle<BindGroupLayout_t> VulkanResourceManager::createBindGroupLayout(const Han
         vkBindingLayout.pImmutableSamplers = nullptr;
 
         if (!bindingLayout.immutableSamplers.empty()) {
+            // If we have immutableSamples then we must have as many entries as the number of descriptors and they must be of the appropriate type
             assert(bindingLayout.resourceType == ResourceBindingType::Sampler || bindingLayout.resourceType == ResourceBindingType::CombinedImageSampler);
-            immutableSamplers.reserve(bindingLayout.immutableSamplers.size());
-            const size_t lastImmutableSamplersOffset = immutableSamplers.size();
-            for (Handle<Sampler_t> samplerH : bindingLayout.immutableSamplers) {
-                VulkanSampler *s = m_samplers.get(samplerH);
-                immutableSamplers.push_back(s->sampler);
-            }
-            vkBindingLayout.pImmutableSamplers = immutableSamplers.data() + lastImmutableSamplersOffset;
-        };
+            assert(bindingLayout.count == bindingLayout.immutableSamplers.size());
+            vkBindingLayout.pImmutableSamplers = immutableSamplers.data() + lastImmutableSamplersOffset; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            lastImmutableSamplersOffset += bindingLayout.immutableSamplers.size();
+        }
 
         vkBindingLayouts.emplace_back(vkBindingLayout);
 

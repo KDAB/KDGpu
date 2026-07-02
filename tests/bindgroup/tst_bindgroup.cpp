@@ -1067,4 +1067,131 @@ TEST_SUITE("BindGroup")
 
         // THEN -> No validation errors (BindGroups are released against the BindGroupPool they were created with)
     }
+
+    TEST_CASE("BindGroupLayout with ImmutableSamplers")
+    {
+        SUBCASE("Multiple bindings with immutable samplers")
+        {
+            // GIVEN
+            const SamplerOptions samplerOptions = {};
+            Sampler sampler1 = device.createSampler(samplerOptions);
+            Sampler sampler2 = device.createSampler(samplerOptions);
+            Sampler sampler3 = device.createSampler(samplerOptions);
+            Sampler sampler4 = device.createSampler(samplerOptions);
+
+            // THEN
+            REQUIRE(sampler1.isValid());
+            REQUIRE(sampler2.isValid());
+            REQUIRE(sampler3.isValid());
+            REQUIRE(sampler4.isValid());
+
+            // WHEN
+            const BindGroupLayoutOptions bindGroupLayoutOptions = {
+                .bindings = {
+                        // First binding with 2 immutable samplers
+                        {
+                                .binding = 0,
+                                .count = 2,
+                                .resourceType = ResourceBindingType::Sampler,
+                                .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit),
+                                .immutableSamplers = { sampler1.handle(), sampler2.handle() },
+                        },
+                        // Second binding with 2 immutable samplers
+                        {
+                                .binding = 1,
+                                .count = 2,
+                                .resourceType = ResourceBindingType::Sampler,
+                                .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit),
+                                .immutableSamplers = { sampler3.handle(), sampler4.handle() },
+                        },
+                }
+            };
+
+            BindGroupLayout bindGroupLayout = device.createBindGroupLayout(bindGroupLayoutOptions);
+
+            // THEN - The layout should be valid (no validation errors)
+            CHECK(bindGroupLayout.isValid());
+        }
+
+        SUBCASE("Mix of bindings with and without immutable samplers")
+        {
+            // GIVEN
+            const SamplerOptions samplerOptions = {};
+            Sampler sampler1 = device.createSampler(samplerOptions);
+            Sampler sampler2 = device.createSampler(samplerOptions);
+            Sampler sampler3 = device.createSampler(samplerOptions);
+
+            // THEN
+            REQUIRE(sampler1.isValid());
+            REQUIRE(sampler2.isValid());
+            REQUIRE(sampler3.isValid());
+
+            // WHEN
+            const TextureOptions textureOptions = {
+                .type = TextureType::TextureType2D,
+                .format = Format::R8G8B8A8_SNORM,
+                .extent = { 256, 256, 1 },
+                .mipLevels = 1,
+                .usage = TextureUsageFlagBits::SampledBit,
+                .memoryUsage = MemoryUsage::GpuOnly
+            };
+            Texture texture = device.createTexture(textureOptions);
+            TextureView textureView = texture.createView(TextureViewOptions{
+                    .viewType = ViewType::ViewType2D,
+                    .format = Format::R8G8B8A8_SNORM,
+                    .range = { .aspectMask = TextureAspectFlagBits::ColorBit } });
+
+            // THEN
+            REQUIRE(texture.isValid());
+            REQUIRE(textureView.isValid());
+
+            // WHEN
+            BufferOptions uboOptions = {
+                .size = 16 * sizeof(float),
+                .usage = BufferUsageFlagBits::UniformBufferBit,
+                .memoryUsage = MemoryUsage::CpuToGpu
+            };
+            auto ubo = device.createBuffer(uboOptions);
+
+            // THEN
+            REQUIRE(ubo.isValid());
+
+            // WHEN
+            const BindGroupLayoutOptions bindGroupLayoutOptions = {
+                .bindings = {
+                        // Sampler with immutable samplers
+                        {
+                                .binding = 0,
+                                .count = 2,
+                                .resourceType = ResourceBindingType::Sampler,
+                                .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit),
+                                .immutableSamplers = { sampler1.handle(), sampler2.handle() },
+                        },
+                        // UBO without immutable samplers
+                        { .binding = 1,
+                          .count = 1,
+                          .resourceType = ResourceBindingType::UniformBuffer,
+                          .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit) },
+                        // Combined image sampler with immutable sampler
+                        {
+                                .binding = 2,
+                                .count = 1,
+                                .resourceType = ResourceBindingType::CombinedImageSampler,
+                                .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit),
+                                .immutableSamplers = { sampler3.handle() },
+                        },
+                        // Sampled texture without immutable samplers
+                        { .binding = 3,
+                          .count = 1,
+                          .resourceType = ResourceBindingType::SampledImage,
+                          .shaderStages = ShaderStageFlags(ShaderStageFlagBits::FragmentBit) },
+                }
+            };
+
+            BindGroupLayout bindGroupLayout = device.createBindGroupLayout(bindGroupLayoutOptions);
+
+            // THEN - The layout should be valid  (no validation errors)]
+            CHECK(bindGroupLayout.isValid());
+        }
+    }
 }
