@@ -11,7 +11,10 @@
 #pragma once
 
 #include <KDGpu/gpu_core.h>
+#include <KDGpu/handle.h>
 #include <KDGpu/ycbcr_conversion.h>
+
+#include <string_view>
 
 namespace KDGpu {
 
@@ -39,7 +42,7 @@ struct SamplerOptions {
 
     bool normalizedCoordinates{ true };
 
-    OptionalHandle<YCbCrConversion_t> yCbCrConversion{};
+    OptionalHandle<YCbCrConversion_t> yCbCrConversion;
 };
 
 } // namespace KDGpu

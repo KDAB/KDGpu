@@ -53,7 +53,7 @@ GpuSemaphore &GpuSemaphore::operator=(GpuSemaphore &&other) noexcept
 
 HandleOrFD GpuSemaphore::externalSemaphoreHandle() const
 {
-    auto apiSemaphore = m_api->resourceManager()->getGpuSemaphore(m_gpuSemaphore);
+    auto *apiSemaphore = m_api->resourceManager()->getGpuSemaphore(m_gpuSemaphore);
     return apiSemaphore->externalSemaphoreHandle();
 }
 

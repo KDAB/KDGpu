@@ -55,7 +55,7 @@ struct ColorAttachment {
     OptionalHandle<TextureView_t> resolveView; ///< Optional resolve target for MSAA (leave empty for non-MSAA)
     AttachmentLoadOperation loadOperation{ AttachmentLoadOperation::Clear }; ///< How to handle existing data (Clear, Load, or DontCare)
     AttachmentStoreOperation storeOperation{ AttachmentStoreOperation::Store }; ///< Whether to store results (Store or DontCare)
-    ColorClearValue clearValue; ///< Clear color if loadOperation is Clear
+    ColorClearValue clearValue{}; ///< Clear color if loadOperation is Clear
     TextureLayout initialLayout{ TextureLayout::Undefined }; ///< Layout before render pass (Undefined if discarding contents)
     TextureLayout layout{ TextureLayout::ColorAttachmentOptimal }; ///< Layout during rendering
     TextureLayout finalLayout{ TextureLayout::ColorAttachmentOptimal }; ///< Layout after render pass (e.g., PresentSrc for swapchain)

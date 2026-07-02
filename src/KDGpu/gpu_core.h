@@ -21,6 +21,7 @@
 using HANDLE = void *;
 
 // clang-format off
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
 #define KDGPU_MAKE_API_VERSION(variant, major, minor, patch) \
     ((((uint32_t)(variant)) << 29) | (((uint32_t)(major)) << 22) | (((uint32_t)(minor)) << 12) | ((uint32_t)(patch)))
 
@@ -28,6 +29,7 @@ using HANDLE = void *;
 #define KDGPU_API_VERSION_MAJOR(version) (((uint32_t)(version) >> 22U) & 0x7FU)
 #define KDGPU_API_VERSION_MINOR(version) (((uint32_t)(version) >> 12U) & 0x3FFU)
 #define KDGPU_API_VERSION_PATCH(version) ((uint32_t)(version) & 0xFFFU)
+// NOLINTEND(cppcoreguidelines-macro-usage)
 // clang-format on
 
 namespace KDGpu {
@@ -44,11 +46,11 @@ namespace KDGpu {
 
 constexpr uint32_t maxAdapterNameSize = 256U;
 constexpr uint32_t UuidSize = 16U;
-constexpr uint32_t remainingArrayLayers = (~0U);
-constexpr uint32_t remainingMipLevels = (~0U);
-constexpr uint32_t IgnoreQueueType = (~0U);
-constexpr uint64_t WholeSize = (~0ULL);
-constexpr uint32_t ExternalSubpass = ~(0U);
+constexpr uint32_t remainingArrayLayers = ~0U;
+constexpr uint32_t remainingMipLevels = ~0U;
+constexpr uint32_t IgnoreQueueType = ~0U;
+constexpr uint64_t WholeSize = ~0ULL;
+constexpr uint32_t ExternalSubpass = ~0U;
 
 using DeviceSize = uint64_t;
 using SampleMask = uint32_t;
@@ -116,6 +118,7 @@ struct Rect2D {
     friend bool operator==(const Rect2D &, const Rect2D &) = default;
 };
 
+// NOLINTBEGIN(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays, cppcoreguidelines-pro-type-union-access)
 union ColorClearValue {
     float float32[4];
     int32_t int32[4];
@@ -123,6 +126,7 @@ union ColorClearValue {
 
     friend bool operator==(const ColorClearValue &, const ColorClearValue &);
 };
+// NOLINTEND(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays, cppcoreguidelines-pro-type-union-access)
 
 inline bool operator==(const ColorClearValue &lhs, const ColorClearValue &rhs)
 {
@@ -140,8 +144,8 @@ struct DepthStencilClearValue {
 struct Viewport {
     float x{ 0.0f };
     float y{ 0.0f };
-    float width;
-    float height;
+    float width{ 0.0f };
+    float height{ 0.0f };
     float minDepth{ 0.0f };
     float maxDepth{ 1.0f };
 
@@ -878,7 +882,7 @@ enum class StencilOperation {
     MaxEnum = 0x7fffffff
 };
 
-enum ColorComponentFlagBits {
+enum class ColorComponentFlagBits {
     RedBit = 0x00000001,
     GreenBit = 0x00000002,
     BlueBit = 0x00000004,
@@ -1001,7 +1005,7 @@ enum class MipmapFilterMode {
 };
 
 namespace MipmapLodClamping {
-constexpr float NoClamping = float(0x7fffffff);
+constexpr float NoClamping = static_cast<float>(0x7fffffff);
 }
 
 enum class AccessFlagBit : uint64_t {
@@ -1199,7 +1203,7 @@ enum class ExternalMemoryHandleTypeFlagBits : uint32_t {
 };
 using ExternalMemoryHandleTypeFlags = KDGpu::Flags<ExternalMemoryHandleTypeFlagBits>;
 
-enum ResolveModeFlagBits : uint32_t {
+enum class ResolveModeFlagBits : uint32_t {
     None = 0,
     SampleZero = 0x00000001,
     Average = 0x00000002,

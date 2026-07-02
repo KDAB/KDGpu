@@ -25,7 +25,7 @@ Swapchain::Swapchain(GraphicsApi *api, const Handle<Device_t> &device, const Swa
     , m_swapchain(m_api->resourceManager()->createSwapchain(m_device, options))
 {
     // Fetch the textures owned by the swapchain
-    auto apiSwapchain = m_api->resourceManager()->getSwapchain(m_swapchain);
+    auto *apiSwapchain = m_api->resourceManager()->getSwapchain(m_swapchain);
     const auto textureHandles = apiSwapchain->getTextures();
     const uint32_t textureCount = textureHandles.size();
     m_textures.reserve(textureCount);
@@ -63,7 +63,7 @@ Swapchain::~Swapchain()
 
 AcquireImageResult Swapchain::getNextImageIndex(uint32_t &imageIndex, const Handle<GpuSemaphore_t> &semaphore)
 {
-    auto apiSwapchain = m_api->resourceManager()->getSwapchain(m_swapchain);
+    auto *apiSwapchain = m_api->resourceManager()->getSwapchain(m_swapchain);
     return apiSwapchain->getNextImageIndex(imageIndex, semaphore);
 }
 

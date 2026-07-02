@@ -15,9 +15,11 @@
 #include <KDGpu/vulkan/vulkan_queue.h>
 #include <KDGpu/vulkan/vulkan_resource_manager.h>
 
+#include <algorithm>
+
 // NOLINTBEGIN(readability-function-cognitive-complexity)
 
-#if defined(KDGPU_PLATFORM_WIN32)
+#ifdef KDGPU_PLATFORM_WIN32
 // Avoid having to define VK_USE_PLATFORM_WIN32_KHR which would result in windows.h being included when vulkan.h is included
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
@@ -38,21 +40,18 @@ VulkanDevice::VulkanDevice(VkDevice _device,
     , requestedFeatures(_requestedFeatures)
     , vulkanResourceManager(_vulkanResourceManager)
     , adapterHandle(_adapterHandle)
+    , allocator(createMemoryAllocator())
     , isOwned(_isOwned)
 {
     VulkanAdapter *vulkanAdapter = vulkanResourceManager->getAdapter(adapterHandle);
-    VulkanInstance *vulkanInstance = vulkanResourceManager->getInstance(vulkanAdapter->instanceHandle);
-
-    // Create an allocator for the device
-    allocator = createMemoryAllocator();
+    const VulkanInstance *vulkanInstance = vulkanResourceManager->getInstance(vulkanAdapter->instanceHandle);
 
     // Resize the vector of command pools to have one for each queue family
     const auto queueTypes = vulkanAdapter->queryQueueTypes();
     const auto queueTypeCount = queueTypes.size();
-    commandPools.resize(queueTypeCount);
-    for (uint32_t i = 0; i < queueTypeCount; ++i)
-        commandPools[i] = VK_NULL_HANDLE;
+    commandPools.resize(queueTypeCount, VK_NULL_HANDLE);
 
+// NOLINTBEGIN(cppcoreguidelines-pro-type-cstyle-cast)
 #if VK_EXT_debug_utils
     const auto instanceExtensions = vulkanInstance->extensions();
     for (const auto &extension : instanceExtensions) {
@@ -71,9 +70,8 @@ VulkanDevice::VulkanDevice(VkDevice _device,
         const auto adapterExtensions = vulkanAdapter->extensions();
         for (const auto &extension : adapterExtensions) {
             if (extension.name == VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME) {
-                PFN_vkCmdPipelineBarrier2KHR vkCmdPipelineBarrier2KHR = PFN_vkCmdPipelineBarrier2KHR(
+                this->vkCmdPipelineBarrier2 = PFN_vkCmdPipelineBarrier2KHR(
                         vkGetDeviceProcAddr(device, "vkCmdPipelineBarrier2KHR"));
-                this->vkCmdPipelineBarrier2 = vkCmdPipelineBarrier2KHR;
                 break;
             }
         }
@@ -85,24 +83,20 @@ VulkanDevice::VulkanDevice(VkDevice _device,
         const auto adapterExtensions = vulkanAdapter->extensions();
         for (const auto &extension : adapterExtensions) {
             if (extension.name == VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME) {
-                PFN_vkCmdBuildAccelerationStructuresKHR vkCmdBuildAccelerationStructuresKHR = PFN_vkCmdBuildAccelerationStructuresKHR(
+                this->vkCmdBuildAccelerationStructuresKHR = PFN_vkCmdBuildAccelerationStructuresKHR(
                         vkGetDeviceProcAddr(device, "vkCmdBuildAccelerationStructuresKHR"));
-                this->vkCmdBuildAccelerationStructuresKHR = vkCmdBuildAccelerationStructuresKHR;
 
-                PFN_vkGetAccelerationStructureDeviceAddressKHR vkGetAccelerationStructureDeviceAddressKHR = PFN_vkGetAccelerationStructureDeviceAddressKHR(
+                this->vkGetAccelerationStructureDeviceAddressKHR = PFN_vkGetAccelerationStructureDeviceAddressKHR(
                         vkGetDeviceProcAddr(device, "vkGetAccelerationStructureDeviceAddressKHR"));
-                this->vkGetAccelerationStructureDeviceAddressKHR = vkGetAccelerationStructureDeviceAddressKHR;
 
-                PFN_vkCreateAccelerationStructureKHR vkCreateAccelerationStructureKHR = PFN_vkCreateAccelerationStructureKHR(
+                this->vkCreateAccelerationStructureKHR = PFN_vkCreateAccelerationStructureKHR(
                         vkGetDeviceProcAddr(device, "vkCreateAccelerationStructureKHR"));
-                this->vkCreateAccelerationStructureKHR = vkCreateAccelerationStructureKHR;
-                PFN_vkDestroyAccelerationStructureKHR vkDestroyAccelerationStructureKHR = PFN_vkDestroyAccelerationStructureKHR(
-                        vkGetDeviceProcAddr(device, "vkDestroyAccelerationStructureKHR"));
-                this->vkDestroyAccelerationStructureKHR = vkDestroyAccelerationStructureKHR;
 
-                PFN_vkGetAccelerationStructureBuildSizesKHR vkGetAccelerationStructureBuildSizesKHR = PFN_vkGetAccelerationStructureBuildSizesKHR(
+                this->vkDestroyAccelerationStructureKHR = PFN_vkDestroyAccelerationStructureKHR(
+                        vkGetDeviceProcAddr(device, "vkDestroyAccelerationStructureKHR"));
+
+                this->vkGetAccelerationStructureBuildSizesKHR = PFN_vkGetAccelerationStructureBuildSizesKHR(
                         vkGetDeviceProcAddr(device, "vkGetAccelerationStructureBuildSizesKHR"));
-                this->vkGetAccelerationStructureBuildSizesKHR = vkGetAccelerationStructureBuildSizesKHR;
                 break;
             }
         }
@@ -114,17 +108,14 @@ VulkanDevice::VulkanDevice(VkDevice _device,
         const auto adapterExtensions = vulkanAdapter->extensions();
         for (const auto &extension : adapterExtensions) {
             if (extension.name == VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME) {
-                PFN_vkCreateRayTracingPipelinesKHR vkCreateRayTracingPipelinesKHR = PFN_vkCreateRayTracingPipelinesKHR(
+                this->vkCreateRayTracingPipelinesKHR = PFN_vkCreateRayTracingPipelinesKHR(
                         vkGetDeviceProcAddr(device, "vkCreateRayTracingPipelinesKHR"));
-                this->vkCreateRayTracingPipelinesKHR = vkCreateRayTracingPipelinesKHR;
 
-                PFN_vkCmdTraceRaysKHR vkCmdTraceRaysKHR = PFN_vkCmdTraceRaysKHR(
+                this->vkCmdTraceRaysKHR = PFN_vkCmdTraceRaysKHR(
                         vkGetDeviceProcAddr(device, "vkCmdTraceRaysKHR"));
-                this->vkCmdTraceRaysKHR = vkCmdTraceRaysKHR;
 
-                PFN_vkGetRayTracingShaderGroupHandlesKHR vkGetRayTracingShaderGroupHandlesKHR = PFN_vkGetRayTracingShaderGroupHandlesKHR(
+                this->vkGetRayTracingShaderGroupHandlesKHR = PFN_vkGetRayTracingShaderGroupHandlesKHR(
                         vkGetDeviceProcAddr(device, "vkGetRayTracingShaderGroupHandlesKHR"));
-                this->vkGetRayTracingShaderGroupHandlesKHR = vkGetRayTracingShaderGroupHandlesKHR;
                 break;
             }
         }
@@ -136,10 +127,8 @@ VulkanDevice::VulkanDevice(VkDevice _device,
         const auto adapterExtensions = vulkanAdapter->extensions();
         for (const auto &extension : adapterExtensions) {
             if (extension.name == VK_EXT_MESH_SHADER_EXTENSION_NAME) {
-                PFN_vkCmdDrawMeshTasksEXT vkCmdDrawMeshTasksEXT = PFN_vkCmdDrawMeshTasksEXT(vkGetDeviceProcAddr(device, "vkCmdDrawMeshTasksEXT"));
-                this->vkCmdDrawMeshTasksEXT = vkCmdDrawMeshTasksEXT;
-                PFN_vkCmdDrawMeshTasksIndirectEXT vkCmdDrawMeshTasksIndirectEXT = PFN_vkCmdDrawMeshTasksIndirectEXT(vkGetDeviceProcAddr(device, "vkCmdDrawMeshTasksIndirectEXT"));
-                this->vkCmdDrawMeshTasksIndirectEXT = vkCmdDrawMeshTasksIndirectEXT;
+                this->vkCmdDrawMeshTasksEXT = PFN_vkCmdDrawMeshTasksEXT(vkGetDeviceProcAddr(device, "vkCmdDrawMeshTasksEXT"));
+                this->vkCmdDrawMeshTasksIndirectEXT = PFN_vkCmdDrawMeshTasksIndirectEXT(vkGetDeviceProcAddr(device, "vkCmdDrawMeshTasksIndirectEXT"));
                 break;
             }
         }
@@ -225,7 +214,11 @@ VulkanDevice::VulkanDevice(VkDevice _device,
         this->vkSignalSemaphoreKHR = (PFN_vkSignalSemaphoreKHR)vkGetDeviceProcAddr(device, "vkSignalSemaphoreKHR");
     }
 #endif
+    // NOLINTEND(cppcoreguidelines-pro-type-cstyle-cast)
 }
+
+// TODO: Could be used as an opportunity to check that device associated resources have all been released
+VulkanDevice::~VulkanDevice() = default;
 
 std::vector<QueueDescription> VulkanDevice::getQueues(ResourceManager *resourceManager,
                                                       const std::vector<QueueRequest> &queueRequests,
@@ -248,14 +241,12 @@ std::vector<QueueDescription> VulkanDevice::getQueues(ResourceManager *resourceM
             vkGetDeviceQueue(device, queueRequest.queueTypeIndex, j, &vkQueue);
             const auto queueHandle = vulkanResourceManager->insertQueue(VulkanQueue{ vkQueue, vulkanResourceManager });
 
-            QueueDescription queueDescription{
-                .queue = queueHandle,
-                .flags = queueTypes[queueRequest.queueTypeIndex].flags,
-                .timestampValidBits = queueTypes[queueRequest.queueTypeIndex].timestampValidBits,
-                .minImageTransferGranularity = queueTypes[queueRequest.queueTypeIndex].minImageTransferGranularity,
-                .queueTypeIndex = queueRequest.queueTypeIndex
-            };
-            queueDescriptions.push_back(queueDescription);
+            queueDescriptions.emplace_back(QueueDescription{
+                    .queue = queueHandle,
+                    .flags = queueTypes[queueRequest.queueTypeIndex].flags,
+                    .timestampValidBits = queueTypes[queueRequest.queueTypeIndex].timestampValidBits,
+                    .minImageTransferGranularity = queueTypes[queueRequest.queueTypeIndex].minImageTransferGranularity,
+                    .queueTypeIndex = queueRequest.queueTypeIndex });
         }
     }
 
@@ -270,7 +261,7 @@ void VulkanDevice::waitUntilIdle() const
 VmaAllocator VulkanDevice::getOrCreateExternalMemoryAllocator(ExternalMemoryHandleTypeFlags externalMemoryHandleType)
 {
     VmaAllocator allocator = VK_NULL_HANDLE;
-    auto it = std::find_if(externalAllocators.begin(), externalAllocators.end(), [externalMemoryHandleType](const auto &typeAndAllocator) {
+    auto it = std::ranges::find_if(externalAllocators, [externalMemoryHandleType](const auto &typeAndAllocator) {
         return (typeAndAllocator.externalMemoryHandleType & externalMemoryHandleType) == externalMemoryHandleType;
     });
     if (it == externalAllocators.end()) {
@@ -284,8 +275,8 @@ VmaAllocator VulkanDevice::getOrCreateExternalMemoryAllocator(ExternalMemoryHand
 
 VmaAllocator VulkanDevice::createMemoryAllocator(ExternalMemoryHandleTypeFlags externalMemoryHandleType) const
 {
-    VulkanAdapter *vulkanAdapter = vulkanResourceManager->getAdapter(adapterHandle);
-    VulkanInstance *vulkanInstance = vulkanResourceManager->getInstance(vulkanAdapter->instanceHandle);
+    const VulkanAdapter *vulkanAdapter = vulkanResourceManager->getAdapter(adapterHandle);
+    const VulkanInstance *vulkanInstance = vulkanResourceManager->getInstance(vulkanAdapter->instanceHandle);
 
     VmaAllocatorCreateInfo allocatorInfo = {};
     allocatorInfo.vulkanApiVersion = apiVersion;
@@ -329,8 +320,8 @@ void VulkanDevice::fillWriteBindGroupDataForBindGroupEntry(WriteBindGroupData &w
     switch (entry.resource.type()) {
     case ResourceBindingType::CombinedImageSampler: {
         const TextureViewSamplerBinding &textureViewBinding = entry.resource.textureViewSamplerBinding();
-        VulkanTextureView *textView = vulkanResourceManager->getTextureView(textureViewBinding.textureView);
-        VulkanSampler *sampler = vulkanResourceManager->getSampler(textureViewBinding.sampler);
+        const VulkanTextureView *textView = vulkanResourceManager->getTextureView(textureViewBinding.textureView);
+        const VulkanSampler *sampler = vulkanResourceManager->getSampler(textureViewBinding.sampler);
         assert(textView != nullptr);
         writeBindGroupData.imageInfo.imageView = textView->imageView;
         writeBindGroupData.imageInfo.imageLayout = textureLayoutToVkImageLayout(textureViewBinding.layout);
@@ -346,7 +337,7 @@ void VulkanDevice::fillWriteBindGroupDataForBindGroupEntry(WriteBindGroupData &w
     }
     case ResourceBindingType::SampledImage: {
         const TextureViewBinding &textureViewBinding = entry.resource.textureViewBinding();
-        VulkanTextureView *textView = vulkanResourceManager->getTextureView(textureViewBinding.textureView);
+        const VulkanTextureView *textView = vulkanResourceManager->getTextureView(textureViewBinding.textureView);
         assert(textView != nullptr);
         writeBindGroupData.imageInfo.imageView = textView->imageView;
         writeBindGroupData.imageInfo.imageLayout = textureLayoutToVkImageLayout(textureViewBinding.layout);
@@ -358,7 +349,7 @@ void VulkanDevice::fillWriteBindGroupDataForBindGroupEntry(WriteBindGroupData &w
     }
     case ResourceBindingType::Sampler: {
         const SamplerBinding &samplerBinding = entry.resource.samplerBinding();
-        VulkanSampler *sampler = vulkanResourceManager->getSampler(samplerBinding.sampler);
+        const VulkanSampler *sampler = vulkanResourceManager->getSampler(samplerBinding.sampler);
         assert(sampler != nullptr);
         writeBindGroupData.imageInfo.sampler = sampler->sampler;
 
@@ -369,7 +360,7 @@ void VulkanDevice::fillWriteBindGroupDataForBindGroupEntry(WriteBindGroupData &w
     }
     case ResourceBindingType::StorageImage: {
         const ImageBinding &imageBinding = entry.resource.imageBinding();
-        VulkanTextureView *textView = vulkanResourceManager->getTextureView(imageBinding.textureView);
+        const VulkanTextureView *textView = vulkanResourceManager->getTextureView(imageBinding.textureView);
         assert(textView != nullptr);
         writeBindGroupData.imageInfo.imageView = textView->imageView;
         writeBindGroupData.imageInfo.imageLayout = textureLayoutToVkImageLayout(imageBinding.layout);
@@ -381,7 +372,7 @@ void VulkanDevice::fillWriteBindGroupDataForBindGroupEntry(WriteBindGroupData &w
     }
     case ResourceBindingType::UniformBuffer: {
         const UniformBufferBinding &bufferBinding = entry.resource.uniformBufferBinding();
-        VulkanBuffer *buffer = vulkanResourceManager->getBuffer(bufferBinding.buffer);
+        const VulkanBuffer *buffer = vulkanResourceManager->getBuffer(bufferBinding.buffer);
         assert(buffer != nullptr);
         writeBindGroupData.bufferInfo.buffer = buffer->buffer; // VkBuffer
         writeBindGroupData.bufferInfo.offset = bufferBinding.offset;
@@ -394,7 +385,7 @@ void VulkanDevice::fillWriteBindGroupDataForBindGroupEntry(WriteBindGroupData &w
     }
     case ResourceBindingType::StorageBuffer: {
         const StorageBufferBinding &bufferBinding = entry.resource.storageBufferBinding();
-        VulkanBuffer *buffer = vulkanResourceManager->getBuffer(bufferBinding.buffer);
+        const VulkanBuffer *buffer = vulkanResourceManager->getBuffer(bufferBinding.buffer);
         assert(buffer != nullptr);
         writeBindGroupData.bufferInfo.buffer = buffer->buffer; // VkBuffer
         writeBindGroupData.bufferInfo.offset = bufferBinding.offset;
@@ -407,7 +398,7 @@ void VulkanDevice::fillWriteBindGroupDataForBindGroupEntry(WriteBindGroupData &w
     }
     case ResourceBindingType::DynamicUniformBuffer: {
         const DynamicUniformBufferBinding &bufferBinding = entry.resource.dynamicUniformBufferBinding();
-        VulkanBuffer *buffer = vulkanResourceManager->getBuffer(bufferBinding.buffer);
+        const VulkanBuffer *buffer = vulkanResourceManager->getBuffer(bufferBinding.buffer);
         assert(buffer != nullptr);
         writeBindGroupData.bufferInfo.buffer = buffer->buffer; // VkBuffer
         writeBindGroupData.bufferInfo.offset = bufferBinding.offset;
@@ -420,7 +411,7 @@ void VulkanDevice::fillWriteBindGroupDataForBindGroupEntry(WriteBindGroupData &w
     }
     case ResourceBindingType::AccelerationStructure: {
         const AccelerationStructureBinding &bufferBinding = entry.resource.accelerationStructure();
-        VulkanAccelerationStructure *buffer = vulkanResourceManager->getAccelerationStructure(bufferBinding.accelerationStructure);
+        const VulkanAccelerationStructure *buffer = vulkanResourceManager->getAccelerationStructure(bufferBinding.accelerationStructure);
         assert(buffer != nullptr);
 
         writeBindGroupData.accelerationStructureKhr.accelerationStructureCount = 1;
@@ -433,7 +424,7 @@ void VulkanDevice::fillWriteBindGroupDataForBindGroupEntry(WriteBindGroupData &w
     }
     case ResourceBindingType::InputAttachment: {
         const InputAttachmentBinding &inputAttachmentBinding = entry.resource.inputAttachmentBinding();
-        VulkanTextureView *textView = vulkanResourceManager->getTextureView(inputAttachmentBinding.textureView);
+        const VulkanTextureView *textView = vulkanResourceManager->getTextureView(inputAttachmentBinding.textureView);
         assert(textView != nullptr);
         writeBindGroupData.imageInfo.imageView = textView->imageView;
         writeBindGroupData.imageInfo.imageLayout = textureLayoutToVkImageLayout(inputAttachmentBinding.layout);

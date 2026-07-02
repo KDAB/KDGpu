@@ -12,16 +12,18 @@
 
 #include <KDGpu/bind_group_description.h>
 #include <KDGpu/bind_group_layout.h>
+#include <KDGpu/handle.h>
 
 #include <string_view>
 #include <vector>
+#include <cstdint>
 
 namespace KDGpu {
 
 struct BindGroupPool_t;
 
 struct BindGroupEntry { // An entry into a BindGroup ( == a descriptor in a descriptor set)
-    uint32_t binding;
+    uint32_t binding{ 0 };
     BindingResource resource;
     uint32_t arrayElement{ 0 };
 };

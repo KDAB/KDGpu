@@ -13,6 +13,7 @@
 #include <KDGpu/gpu_core.h>
 
 #include <vector>
+#include <string_view>
 
 namespace KDGpu {
 
@@ -23,7 +24,7 @@ struct BufferOptions {
     BufferUsageFlags usage;
     MemoryUsage memoryUsage;
     SharingMode sharingMode{ SharingMode::Exclusive };
-    std::vector<uint32_t> queueTypeIndices{};
+    std::vector<uint32_t> queueTypeIndices;
     ExternalMemoryHandleTypeFlags externalMemoryHandleType{ ExternalMemoryHandleTypeFlagBits::None };
 };
 

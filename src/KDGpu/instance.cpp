@@ -54,14 +54,12 @@ namespace KDGpu {
     @brief Convenience function to check whether the Instance is actually referencing a valid API specific resource
  */
 
-Instance::Instance()
-{
-}
+Instance::Instance() = default;
 
 Instance::Instance(GraphicsApi *api, const InstanceOptions &options)
+    : m_api(api)
 {
     // Create an instance using the underlying API
-    m_api = api;
     m_instance = m_api->resourceManager()->createInstance(options);
 }
 
@@ -114,7 +112,7 @@ AdapterAndDevice Instance::createDefaultDevice(const Surface &surface,
         return {};
     }
 
-    auto queueTypes = selectedAdapter->queueTypes();
+    const auto &queueTypes = selectedAdapter->queueTypes();
     const bool hasGraphicsAndCompute = queueTypes[0].supportsFeature(QueueFlags(QueueFlagBits::GraphicsBit) | QueueFlags(QueueFlagBits::ComputeBit));
     SPDLOG_LOGGER_INFO(Logger::logger(), "Queue family 0 graphics and compute support: {}", hasGraphicsAndCompute);
 
@@ -179,7 +177,7 @@ std::vector<Adapter *> Instance::adapters() const
         // TODO: If we could look up a handle from a value, we would not need to pass m_instance into
         // queryAdapters(). It is needed so the adapter can store the instance handle for later use
         // when a device needs it to create a VMA allocator.
-        auto adapterHandles = apiInstance->queryAdapters(m_instance);
+        const auto &adapterHandles = apiInstance->queryAdapters(m_instance);
         const auto adapterCount = static_cast<uint32_t>(adapterHandles.size());
         m_adapters.reserve(adapterCount);
         for (uint32_t adapterIndex = 0; adapterIndex < adapterCount; ++adapterIndex)
@@ -190,8 +188,9 @@ std::vector<Adapter *> Instance::adapters() const
 
     std::vector<Adapter *> adapterPtrs;
     adapterPtrs.resize(m_adapters.size());
-    for (size_t i = 0, m = m_adapters.size(); i < m; ++i)
-        adapterPtrs[i] = m_adapters.data() + i;
+    for (size_t i = 0, m = m_adapters.size(); i < m; ++i) {
+        adapterPtrs[i] = m_adapters.data() + i; // NOLINT(cppcoreguidelines-do-not-use-pointer-arithmetic)
+    }
 
     return adapterPtrs;
 }

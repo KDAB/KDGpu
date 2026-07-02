@@ -59,7 +59,7 @@ Buffer::~Buffer()
 void *Buffer::map()
 {
     if (!m_mapped && isValid()) {
-        auto apiBuffer = m_api->resourceManager()->getBuffer(m_buffer);
+        auto *apiBuffer = m_api->resourceManager()->getBuffer(m_buffer);
         m_mapped = apiBuffer->map();
     }
     return m_mapped;
@@ -69,32 +69,32 @@ void Buffer::unmap()
 {
     if (!m_mapped)
         return;
-    auto apiBuffer = m_api->resourceManager()->getBuffer(m_buffer);
+    auto *apiBuffer = m_api->resourceManager()->getBuffer(m_buffer);
     apiBuffer->unmap();
     m_mapped = nullptr;
 }
 
 void Buffer::invalidate()
 {
-    auto apiBuffer = m_api->resourceManager()->getBuffer(m_buffer);
+    auto *apiBuffer = m_api->resourceManager()->getBuffer(m_buffer);
     apiBuffer->invalidate();
 }
 
 void Buffer::flush()
 {
-    auto apiBuffer = m_api->resourceManager()->getBuffer(m_buffer);
+    auto *apiBuffer = m_api->resourceManager()->getBuffer(m_buffer);
     apiBuffer->flush();
 }
 
 MemoryHandle Buffer::externalMemoryHandle() const
 {
-    auto apiBuffer = m_api->resourceManager()->getBuffer(m_buffer);
+    auto *apiBuffer = m_api->resourceManager()->getBuffer(m_buffer);
     return apiBuffer->externalMemoryHandle();
 }
 
 BufferDeviceAddress Buffer::bufferDeviceAddress() const
 {
-    auto apiBuffer = m_api->resourceManager()->getBuffer(m_buffer);
+    auto *apiBuffer = m_api->resourceManager()->getBuffer(m_buffer);
     return apiBuffer->bufferDeviceAddress();
 }
 

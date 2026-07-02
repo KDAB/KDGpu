@@ -69,9 +69,6 @@ struct ShaderStage;
 class KDGPU_EXPORT VulkanResourceManager
 {
 public:
-    VulkanResourceManager();
-    ~VulkanResourceManager();
-
     Handle<Instance_t> createInstance(const InstanceOptions &options);
     Handle<Instance_t> createInstanceFromExistingVkInstance(VkInstance vkInstance);
     void deleteInstance(const Handle<Instance_t> &handle);
@@ -278,6 +275,7 @@ private:
                                                                    const VmaAllocationInfo &allocationInfo,
                                                                    ExternalMemoryHandleTypeFlags handleType);
 
+    // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
     Pool<VulkanInstance, Instance_t> m_instances{ 1 };
     Pool<VulkanAdapter, Adapter_t> m_adapters{ 1 };
     Pool<VulkanDevice, Device_t> m_devices{ 1 };
@@ -316,6 +314,7 @@ private:
         uint32_t count;
     };
     std::vector<TimestampQueryBucket> m_timestampQueryBuckets;
+    // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 };
 
 } // namespace KDGpu

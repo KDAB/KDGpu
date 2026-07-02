@@ -26,14 +26,14 @@ namespace KDGpu {
     @headerfile adapter_swapchain_properties.h <KDGpu/adapter_swapchain_properties.h>
  */
 struct SurfaceCapabilities {
-    uint32_t minImageCount;
-    uint32_t maxImageCount;
+    uint32_t minImageCount{ 0 };
+    uint32_t maxImageCount{ 0 };
     Extent2D currentExtent;
     Extent2D minImageExtent;
     Extent2D maxImageExtent;
-    uint32_t maxImageArrayLayers;
+    uint32_t maxImageArrayLayers{ 0 };
     SurfaceTransformFlags supportedTransforms;
-    SurfaceTransformFlagBits currentTransform;
+    SurfaceTransformFlagBits currentTransform{ SurfaceTransformFlagBits::IdentityBit };
     CompositeAlphaFlags supportedCompositeAlpha;
     TextureUsageFlags supportedUsageFlags;
 };
@@ -45,9 +45,8 @@ inline uint32_t getSuitableImageCount(const SurfaceCapabilities &capabilities)
 {
     if (capabilities.maxImageCount != 0) {
         return std::min(capabilities.minImageCount + 1, capabilities.maxImageCount);
-    } else {
-        return capabilities.minImageCount + 1;
     }
+    return capabilities.minImageCount + 1;
 }
 
 /**

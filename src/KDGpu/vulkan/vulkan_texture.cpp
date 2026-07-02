@@ -208,21 +208,21 @@ void VulkanTexture::copyTextureToTextureHost(const TextureToTextureCopyHost &cop
 
 void *VulkanTexture::map()
 {
-    auto vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
+    auto *vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
     vmaMapMemory(vulkanDevice->allocator, allocation, &mapped);
     return mapped;
 }
 
 void VulkanTexture::unmap()
 {
-    auto vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
+    auto *vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
     vmaUnmapMemory(vulkanDevice->allocator, allocation);
     mapped = nullptr;
 }
 
 SubresourceLayout VulkanTexture::getSubresourceLayout(const TextureSubresource &subresource) const
 {
-    auto vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
+    auto *vulkanDevice = vulkanResourceManager->getDevice(deviceHandle);
     VkImageSubresource vkSubresource = {
         .aspectMask = textureAspectFlagsToVkImageAspectFlags(subresource.aspectMask),
         .mipLevel = subresource.mipLevel,

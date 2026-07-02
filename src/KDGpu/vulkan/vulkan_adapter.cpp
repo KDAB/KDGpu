@@ -34,7 +34,7 @@ std::vector<TextureLayout> toTextureLayouts(size_t count, VkImageLayout *layouts
     out.reserve(count);
 
     for (size_t i = 0; i < count; ++i) {
-        out.emplace_back(vkImageLayoutToTextureLayout(layouts[i]));
+        out.emplace_back(vkImageLayoutToTextureLayout(layouts[i])); // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     }
     return out;
 }
@@ -68,25 +68,26 @@ std::vector<Extension> VulkanAdapter::extensions() const
     extensions.reserve(extensionCount);
     for (const auto &vkExtension : vkExtensions) {
         extensions.emplace_back(Extension{
-                .name = vkExtension.extensionName,
+                .name = std::string(std::string_view(vkExtension.extensionName)),
                 .version = vkExtension.specVersion });
     }
 
     return extensions;
 }
 
-AdapterProperties VulkanAdapter::queryAdapterProperties()
+AdapterProperties VulkanAdapter::queryAdapterProperties() const
 {
     VkBaseOutStructure *chainCurrent{ nullptr };
     auto addToChain = [&chainCurrent](auto *next) {
-        auto n = reinterpret_cast<VkBaseOutStructure *>(next);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+        auto *n = reinterpret_cast<VkBaseOutStructure *>(next);
         chainCurrent->pNext = n;
         chainCurrent = n;
     };
 
     VkPhysicalDeviceProperties2 deviceProperties2{};
     deviceProperties2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
-    chainCurrent = reinterpret_cast<VkBaseOutStructure *>(&deviceProperties2);
+    chainCurrent = reinterpret_cast<VkBaseOutStructure *>(&deviceProperties2); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
 
     VkPhysicalDeviceMultiviewProperties multiViewProperties{};
     multiViewProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTIVIEW_PROPERTIES;
@@ -137,25 +138,8 @@ AdapterProperties VulkanAdapter::queryAdapterProperties()
         .vendorID = deviceProperties.vendorID,
         .deviceID = deviceProperties.deviceID,
         .deviceType = vkPhysicalDeviceTypeToAdapterDeviceType(deviceProperties.deviceType),
-        .deviceName = deviceProperties.deviceName,
-        .pipelineCacheUUID = {
-                deviceProperties.pipelineCacheUUID[0],
-                deviceProperties.pipelineCacheUUID[1],
-                deviceProperties.pipelineCacheUUID[2],
-                deviceProperties.pipelineCacheUUID[3],
-                deviceProperties.pipelineCacheUUID[4],
-                deviceProperties.pipelineCacheUUID[5],
-                deviceProperties.pipelineCacheUUID[6],
-                deviceProperties.pipelineCacheUUID[7],
-                deviceProperties.pipelineCacheUUID[8],
-                deviceProperties.pipelineCacheUUID[9],
-                deviceProperties.pipelineCacheUUID[10],
-                deviceProperties.pipelineCacheUUID[11],
-                deviceProperties.pipelineCacheUUID[12],
-                deviceProperties.pipelineCacheUUID[13],
-                deviceProperties.pipelineCacheUUID[14],
-                deviceProperties.pipelineCacheUUID[15],
-        },
+        .deviceName = std::string(std::string_view(deviceProperties.deviceName)),
+        .pipelineCacheUUID = std::to_array(deviceProperties.pipelineCacheUUID),
         .limits = {
                 .maxImageDimension1D = limits.maxImageDimension1D,
                 .maxImageDimension2D = limits.maxImageDimension2D,
@@ -209,17 +193,9 @@ AdapterProperties VulkanAdapter::queryAdapterProperties()
                 .maxFragmentDualSrcAttachments = limits.maxFragmentDualSrcAttachments,
                 .maxFragmentCombinedOutputResources = limits.maxFragmentCombinedOutputResources,
                 .maxComputeSharedMemorySize = limits.maxComputeSharedMemorySize,
-                .maxComputeWorkGroupCount = {
-                        limits.maxComputeWorkGroupCount[0],
-                        limits.maxComputeWorkGroupCount[1],
-                        limits.maxComputeWorkGroupCount[2],
-                },
+                .maxComputeWorkGroupCount = std::to_array(limits.maxComputeWorkGroupCount),
                 .maxComputeWorkGroupInvocations = limits.maxComputeWorkGroupInvocations,
-                .maxComputeWorkGroupSize = {
-                        limits.maxComputeWorkGroupSize[0],
-                        limits.maxComputeWorkGroupSize[1],
-                        limits.maxComputeWorkGroupSize[2],
-                },
+                .maxComputeWorkGroupSize = std::to_array(limits.maxComputeWorkGroupSize),
                 .subPixelPrecisionBits = limits.subPixelPrecisionBits,
                 .subTexelPrecisionBits = limits.subTexelPrecisionBits,
                 .mipmapPrecisionBits = limits.mipmapPrecisionBits,
@@ -228,14 +204,8 @@ AdapterProperties VulkanAdapter::queryAdapterProperties()
                 .maxSamplerLodBias = limits.maxSamplerLodBias,
                 .maxSamplerAnisotropy = limits.maxSamplerAnisotropy,
                 .maxViewports = limits.maxViewports,
-                .maxViewportDimensions = {
-                        limits.maxViewportDimensions[0],
-                        limits.maxViewportDimensions[1],
-                },
-                .viewportBoundsRange = {
-                        limits.viewportBoundsRange[0],
-                        limits.viewportBoundsRange[1],
-                },
+                .maxViewportDimensions = std::to_array(limits.maxViewportDimensions),
+                .viewportBoundsRange = std::to_array(limits.viewportBoundsRange),
                 .viewportSubPixelBits = limits.viewportSubPixelBits,
                 .minMemoryMapAlignment = limits.minMemoryMapAlignment,
                 .minTexelBufferOffsetAlignment = limits.minTexelBufferOffsetAlignment,
@@ -251,16 +221,20 @@ AdapterProperties VulkanAdapter::queryAdapterProperties()
                 .maxFramebufferWidth = limits.maxFramebufferWidth,
                 .maxFramebufferHeight = limits.maxFramebufferHeight,
                 .maxFramebufferLayers = limits.maxFramebufferLayers,
+                // NOLINTBEGIN(cppcoreguidelines-narrowing-conversions, bugprone-narrowing-conversions)
                 .framebufferColorSampleCounts = SampleCountFlags::fromInt(limits.framebufferColorSampleCounts),
                 .framebufferDepthSampleCounts = SampleCountFlags::fromInt(limits.framebufferDepthSampleCounts),
                 .framebufferStencilSampleCounts = SampleCountFlags::fromInt(limits.framebufferStencilSampleCounts),
                 .framebufferNoAttachmentsSampleCounts = SampleCountFlags::fromInt(limits.framebufferNoAttachmentsSampleCounts),
+                // NOLINTEND(cppcoreguidelines-narrowing-conversions, bugprone-narrowing-conversions)
                 .maxColorAttachments = limits.maxColorAttachments,
+                // NOLINTBEGIN(cppcoreguidelines-narrowing-conversions, bugprone-narrowing-conversions)
                 .sampledImageColorSampleCounts = SampleCountFlags::fromInt(limits.sampledImageColorSampleCounts),
                 .sampledImageIntegerSampleCounts = SampleCountFlags::fromInt(limits.sampledImageIntegerSampleCounts),
                 .sampledImageDepthSampleCounts = SampleCountFlags::fromInt(limits.sampledImageDepthSampleCounts),
                 .sampledImageStencilSampleCounts = SampleCountFlags::fromInt(limits.sampledImageStencilSampleCounts),
                 .storageImageSampleCounts = SampleCountFlags::fromInt(limits.storageImageSampleCounts),
+                // NOLINTEND(cppcoreguidelines-narrowing-conversions, bugprone-narrowing-conversions)
                 .maxSampleMaskWords = limits.maxSampleMaskWords,
                 .timestampComputeAndGraphics = static_cast<bool>(limits.timestampComputeAndGraphics),
                 .timestampPeriod = limits.timestampPeriod,
@@ -268,14 +242,8 @@ AdapterProperties VulkanAdapter::queryAdapterProperties()
                 .maxCullDistances = limits.maxCullDistances,
                 .maxCombinedClipAndCullDistances = limits.maxCombinedClipAndCullDistances,
                 .discreteQueuePriorities = limits.discreteQueuePriorities,
-                .pointSizeRange = {
-                        limits.pointSizeRange[0],
-                        limits.pointSizeRange[1],
-                },
-                .lineWidthRange = {
-                        limits.lineWidthRange[0],
-                        limits.lineWidthRange[1],
-                },
+                .pointSizeRange = std::to_array(limits.pointSizeRange),
+                .lineWidthRange = std::to_array(limits.lineWidthRange),
                 .pointSizeGranularity = limits.pointSizeGranularity,
                 .lineWidthGranularity = limits.lineWidthGranularity,
                 .strictLines = static_cast<bool>(limits.strictLines),
@@ -341,32 +309,16 @@ AdapterProperties VulkanAdapter::queryAdapterProperties()
         .meshShaderProperties = {
 #if VK_EXT_mesh_shader
                 .maxTaskWorkGroupTotalCount = meshShaderProperties.maxMeshWorkGroupTotalCount,
-                .maxTaskWorkGroupCount = {
-                        meshShaderProperties.maxMeshWorkGroupCount[0],
-                        meshShaderProperties.maxMeshWorkGroupCount[1],
-                        meshShaderProperties.maxMeshWorkGroupCount[2],
-                },
+                .maxTaskWorkGroupCount = std::to_array(meshShaderProperties.maxMeshWorkGroupCount),
                 .maxTaskWorkGroupInvocations = meshShaderProperties.maxTaskWorkGroupInvocations,
-                .maxTaskWorkGroupSize = {
-                        meshShaderProperties.maxTaskWorkGroupSize[0],
-                        meshShaderProperties.maxTaskWorkGroupSize[1],
-                        meshShaderProperties.maxTaskWorkGroupSize[2],
-                },
+                .maxTaskWorkGroupSize = std::to_array(meshShaderProperties.maxTaskWorkGroupSize),
                 .maxTaskPayloadSize = meshShaderProperties.maxTaskPayloadSize,
                 .maxTaskSharedMemorySize = meshShaderProperties.maxTaskSharedMemorySize,
                 .maxTaskPayloadAndSharedMemorySize = meshShaderProperties.maxTaskPayloadAndSharedMemorySize,
                 .maxMeshWorkGroupTotalCount = meshShaderProperties.maxMeshWorkGroupTotalCount,
-                .maxMeshWorkGroupCount = {
-                        meshShaderProperties.maxMeshWorkGroupCount[0],
-                        meshShaderProperties.maxMeshWorkGroupCount[1],
-                        meshShaderProperties.maxMeshWorkGroupCount[2],
-                },
+                .maxMeshWorkGroupCount = std::to_array(meshShaderProperties.maxMeshWorkGroupCount),
                 .maxMeshWorkGroupInvocations = meshShaderProperties.maxMeshWorkGroupInvocations,
-                .maxMeshWorkGroupSize = {
-                        meshShaderProperties.maxMeshWorkGroupSize[0],
-                        meshShaderProperties.maxMeshWorkGroupSize[1],
-                        meshShaderProperties.maxMeshWorkGroupSize[2],
-                },
+                .maxMeshWorkGroupSize = std::to_array(meshShaderProperties.maxMeshWorkGroupSize),
                 .maxMeshSharedMemorySize = meshShaderProperties.maxMeshSharedMemorySize,
                 .maxMeshPayloadAndSharedMemorySize = meshShaderProperties.maxMeshPayloadAndSharedMemorySize,
                 .maxMeshOutputMemorySize = meshShaderProperties.maxMeshOutputMemorySize,
@@ -405,14 +357,15 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
 {
     VkBaseOutStructure *chainCurrent{ nullptr };
     auto addToChain = [&chainCurrent](auto *next) {
-        auto n = reinterpret_cast<VkBaseOutStructure *>(next);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+        auto *n = reinterpret_cast<VkBaseOutStructure *>(next);
         chainCurrent->pNext = n;
         chainCurrent = n;
     };
 
     VkPhysicalDeviceFeatures2 deviceFeatures2{};
     deviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-    chainCurrent = reinterpret_cast<VkBaseOutStructure *>(&deviceFeatures2);
+    chainCurrent = reinterpret_cast<VkBaseOutStructure *>(&deviceFeatures2); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
 
     VkPhysicalDeviceMultiviewFeatures multiViewFeatures{};
     multiViewFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTIVIEW_FEATURES;
@@ -655,12 +608,12 @@ AdapterFeatures VulkanAdapter::queryAdapterFeatures()
     return features;
 }
 
-AdapterSwapchainProperties VulkanAdapter::querySwapchainProperties(const Handle<Surface_t> &surfaceHandle)
+AdapterSwapchainProperties VulkanAdapter::querySwapchainProperties(const Handle<Surface_t> &surfaceHandle) const
 {
     AdapterSwapchainProperties properties = {};
 
     // Get the capabilities
-    VulkanSurface *surface = vulkanResourceManager->getSurface(surfaceHandle);
+    const VulkanSurface *surface = vulkanResourceManager->getSurface(surfaceHandle);
     assert(surface != nullptr && surface->surface != VK_NULL_HANDLE);
     VkSurfaceCapabilitiesKHR capabilities;
     vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface->surface, &capabilities);
@@ -668,14 +621,16 @@ AdapterSwapchainProperties VulkanAdapter::querySwapchainProperties(const Handle<
     properties.capabilities = {
         .minImageCount = capabilities.minImageCount,
         .maxImageCount = capabilities.maxImageCount,
-        .currentExtent = { capabilities.currentExtent.width, capabilities.currentExtent.height },
-        .minImageExtent = { capabilities.minImageExtent.width, capabilities.minImageExtent.height },
-        .maxImageExtent = { capabilities.maxImageExtent.width, capabilities.maxImageExtent.height },
+        .currentExtent = { .width = capabilities.currentExtent.width, .height = capabilities.currentExtent.height },
+        .minImageExtent = { .width = capabilities.minImageExtent.width, .height = capabilities.minImageExtent.height },
+        .maxImageExtent = { .width = capabilities.maxImageExtent.width, .height = capabilities.maxImageExtent.height },
         .maxImageArrayLayers = capabilities.maxImageArrayLayers,
+        // NOLINTBEGIN(cppcoreguidelines-narrowing-conversions, bugprone-narrowing-conversions)
         .supportedTransforms = SurfaceTransformFlags::fromInt(capabilities.supportedTransforms),
         .currentTransform = vkSurfaceTransformFlagBitsKHRToSurfaceTransformFlagBits(capabilities.currentTransform),
         .supportedCompositeAlpha = CompositeAlphaFlags::fromInt(capabilities.supportedCompositeAlpha),
         .supportedUsageFlags = TextureUsageFlags::fromInt(capabilities.supportedUsageFlags)
+        // NOLINTEND(cppcoreguidelines-narrowing-conversions, bugprone-narrowing-conversions)
     };
 
     // Get the supported formats and colorspaces
@@ -689,10 +644,11 @@ AdapterSwapchainProperties VulkanAdapter::querySwapchainProperties(const Handle<
 
     std::vector<SurfaceFormat> formats;
     formats.reserve(formatCount);
-    for (uint32_t i = 0; i < formatCount; ++i) {
+    for (const VkSurfaceFormatKHR &vkFormat : vkFormats) {
         formats.emplace_back(SurfaceFormat{
-                vkFormatToFormat(vkFormats[i].format),
-                vkColorSpaceKHRToColorSpace(vkFormats[i].colorSpace) });
+                .format = vkFormatToFormat(vkFormat.format),
+                .colorSpace = vkColorSpaceKHRToColorSpace(vkFormat.colorSpace),
+        });
     }
     properties.formats = std::move(formats);
 
@@ -707,8 +663,8 @@ AdapterSwapchainProperties VulkanAdapter::querySwapchainProperties(const Handle<
 
     std::vector<PresentMode> presentModes;
     presentModes.reserve(presentModeCount);
-    for (uint32_t i = 0; i < presentModeCount; ++i)
-        presentModes.emplace_back(vkPresentModeKHRToPresentMode(vkPresentModes[i]));
+    for (const VkPresentModeKHR vkPresentMode : vkPresentModes)
+        presentModes.emplace_back(vkPresentModeKHRToPresentMode(vkPresentMode));
     properties.presentModes = std::move(presentModes);
 
     return properties;
@@ -723,25 +679,26 @@ std::vector<AdapterQueueType> VulkanAdapter::queryQueueTypes()
 
     queueTypes.clear();
     queueTypes.reserve(queueFamilyCount);
-    for (uint32_t i = 0; i < queueFamilyCount; ++i) {
-        const auto &queueFamily = queueFamilies[i];
+    for (const VkQueueFamilyProperties &queueFamily : queueFamilies) {
         queueTypes.emplace_back(
                 AdapterQueueType{
-                        .flags = QueueFlags::fromInt(queueFamily.queueFlags),
+                        .flags = QueueFlags::fromInt(queueFamily.queueFlags), // NOLINT(cppcoreguidelines-narrowing-conversionsm, bugprone-narrowing-conversions)
                         .availableQueues = queueFamily.queueCount,
                         .timestampValidBits = queueFamily.timestampValidBits,
                         .minImageTransferGranularity = {
                                 .width = queueFamily.minImageTransferGranularity.width,
                                 .height = queueFamily.minImageTransferGranularity.height,
-                                .depth = queueFamily.minImageTransferGranularity.depth } });
+                                .depth = queueFamily.minImageTransferGranularity.depth,
+                        },
+                });
     }
 
     return queueTypes;
 }
 
-bool VulkanAdapter::supportsPresentation(const Handle<Surface_t> surfaceHandle, uint32_t queueTypeIndex)
+bool VulkanAdapter::supportsPresentation(const Handle<Surface_t> &surfaceHandle, uint32_t queueTypeIndex) const
 {
-    VulkanSurface vulkanSurface = *vulkanResourceManager->getSurface(surfaceHandle);
+    const VulkanSurface vulkanSurface = *vulkanResourceManager->getSurface(surfaceHandle);
     VkBool32 canPresent = false;
     vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, queueTypeIndex, vulkanSurface.surface, &canPresent);
     return canPresent;
@@ -782,9 +739,9 @@ std::vector<DrmFormatModifierProperties> VulkanAdapter::drmFormatModifierPropert
         std::ranges::transform(vkModifierProperties, std::back_inserter(modifierProperties),
                                [](const VkDrmFormatModifierPropertiesEXT &props) {
                                    return DrmFormatModifierProperties{
-                                       props.drmFormatModifier,
-                                       props.drmFormatModifierPlaneCount,
-                                       FormatFeatureFlags::fromInt(props.drmFormatModifierTilingFeatures)
+                                       .formatModifier = props.drmFormatModifier,
+                                       .planeCount = props.drmFormatModifierPlaneCount,
+                                       .featureFlags = FormatFeatureFlags::fromInt(props.drmFormatModifierTilingFeatures)
                                    };
                                });
     }

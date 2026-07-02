@@ -29,10 +29,10 @@ public:
     {
     }
 
-    bool isValid() const noexcept { return m_generation != 0; }
+    [[nodiscard]] bool isValid() const noexcept { return m_generation != 0; }
 
-    uint32_t index() const noexcept { return m_index; }
-    uint32_t generation() const noexcept { return m_generation; }
+    [[nodiscard]] uint32_t index() const noexcept { return m_index; }
+    [[nodiscard]] uint32_t generation() const noexcept { return m_generation; }
 
 protected:
     explicit Handle(uint32_t index, uint32_t generation)

@@ -161,7 +161,7 @@ PresentResult VulkanQueue::present(const PresentOptions &options)
     std::vector<VkSemaphore> presentVkWaitSemaphores;
     presentVkWaitSemaphores.reserve(waitSemaphoreCount);
     for (uint32_t i = 0; i < waitSemaphoreCount; ++i) {
-        auto vulkanSemaphore = vulkanResourceManager->getGpuSemaphore(options.waitSemaphores.at(i));
+        auto *vulkanSemaphore = vulkanResourceManager->getGpuSemaphore(options.waitSemaphores.at(i));
         if (vulkanSemaphore)
             presentVkWaitSemaphores.push_back(vulkanSemaphore->semaphore);
     }
@@ -172,7 +172,7 @@ PresentResult VulkanQueue::present(const PresentOptions &options)
     swapchains.reserve(swapchainCount);
     imageIndices.reserve(swapchainCount);
     for (uint32_t i = 0; i < swapchainCount; ++i) {
-        auto vulkanSwapchain = vulkanResourceManager->getSwapchain(options.swapchainInfos.at(i).swapchain);
+        auto *vulkanSwapchain = vulkanResourceManager->getSwapchain(options.swapchainInfos.at(i).swapchain);
         if (vulkanSwapchain) {
             swapchains.push_back(vulkanSwapchain->swapchain);
             imageIndices.push_back(options.swapchainInfos.at(i).imageIndex);

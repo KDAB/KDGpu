@@ -11,6 +11,7 @@
 #pragma once
 
 #include <KDGpu/gpu_core.h>
+#include <KDGpu/handle.h>
 
 #include <vector>
 

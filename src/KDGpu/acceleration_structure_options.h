@@ -10,7 +10,6 @@
 
 #pragma once
 
-#include <span>
 #include <array>
 
 #include <KDGpu/gpu_core.h>

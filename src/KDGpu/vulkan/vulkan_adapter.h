@@ -38,14 +38,14 @@ struct KDGPU_EXPORT VulkanAdapter {
                            VulkanResourceManager *_vulkanResourceManager,
                            const Handle<Instance_t> &_instanceHandle);
 
-    std::vector<Extension> extensions() const;
-    AdapterProperties queryAdapterProperties();
-    AdapterFeatures queryAdapterFeatures();
-    AdapterSwapchainProperties querySwapchainProperties(const Handle<Surface_t> &surfaceHandle);
-    std::vector<AdapterQueueType> queryQueueTypes();
-    bool supportsPresentation(const Handle<Surface_t> surfaceHandle, uint32_t queueTypeIndex);
-    FormatProperties formatProperties(Format format) const;
-    std::vector<DrmFormatModifierProperties> drmFormatModifierProperties(Format format) const;
+    [[nodiscard]] std::vector<Extension> extensions() const;
+    [[nodiscard]] AdapterProperties queryAdapterProperties() const;
+    [[nodiscard]] AdapterFeatures queryAdapterFeatures();
+    [[nodiscard]] AdapterSwapchainProperties querySwapchainProperties(const Handle<Surface_t> &surfaceHandle) const;
+    [[nodiscard]] std::vector<AdapterQueueType> queryQueueTypes();
+    [[nodiscard]] bool supportsPresentation(const Handle<Surface_t> &surfaceHandle, uint32_t queueTypeIndex) const;
+    [[nodiscard]] FormatProperties formatProperties(Format format) const;
+    [[nodiscard]] std::vector<DrmFormatModifierProperties> drmFormatModifierProperties(Format format) const;
 
     VkPhysicalDevice physicalDevice{ VK_NULL_HANDLE };
     VulkanResourceManager *vulkanResourceManager{ nullptr };

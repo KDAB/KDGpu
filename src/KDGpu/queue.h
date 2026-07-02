@@ -93,7 +93,7 @@ struct SubmitOptions {
 */
 struct SwapchainPresentInfo {
     RequiredHandle<Swapchain_t> swapchain;
-    uint32_t imageIndex;
+    uint32_t imageIndex{};
 };
 
 /**
@@ -242,21 +242,21 @@ public:
     Queue();
     ~Queue();
 
-    const Handle<Queue_t> &handle() const noexcept { return m_queue; }
-    bool isValid() const noexcept { return m_queue.isValid(); }
+    [[nodiscard]] const Handle<Queue_t> &handle() const noexcept { return m_queue; }
+    [[nodiscard]] bool isValid() const noexcept { return m_queue.isValid(); }
 
-    operator Handle<Queue_t>() const noexcept { return m_queue; }
+    [[nodiscard]] [[nodiscard]] operator Handle<Queue_t>() const noexcept { return m_queue; }
 
-    QueueFlags flags() const noexcept { return m_flags; }
-    uint32_t timestampValidBits() const noexcept { return m_timestampValidBits; }
-    Extent3D minImageTransferGranularity() const noexcept { return m_minImageTransferGranularity; }
-    uint32_t queueTypeIndex() const noexcept { return m_queueTypeIndex; }
+    [[nodiscard]] QueueFlags flags() const noexcept { return m_flags; }
+    [[nodiscard]] uint32_t timestampValidBits() const noexcept { return m_timestampValidBits; }
+    [[nodiscard]] Extent3D minImageTransferGranularity() const noexcept { return m_minImageTransferGranularity; }
+    [[nodiscard]] uint32_t queueTypeIndex() const noexcept { return m_queueTypeIndex; }
 
     void waitUntilIdle();
     void submit(const SubmitOptions &options);
 
     PresentResult present(const PresentOptions &options);
-    std::vector<PresentResult> lastPerSwapchainPresentResults() const;
+    [[nodiscard]] std::vector<PresentResult> lastPerSwapchainPresentResults() const;
 
     void waitForUploadBufferData(const WaitForBufferUploadOptions &options);
     UploadStagingBuffer uploadBufferData(const BufferUploadOptions &options);
@@ -270,9 +270,9 @@ private:
     Handle<Device_t> m_device;
     Handle<Queue_t> m_queue;
     QueueFlags m_flags;
-    uint32_t m_timestampValidBits;
+    uint32_t m_timestampValidBits{ 0 };
     Extent3D m_minImageTransferGranularity;
-    uint32_t m_queueTypeIndex;
+    uint32_t m_queueTypeIndex{ 0 };
 
     friend class Device;
     friend class VulkanGraphicsApi;

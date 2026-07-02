@@ -13,6 +13,8 @@
 #include <KDGpu/gpu_core.h>
 
 #include <vector>
+#include <string_view>
+#include <cstdint>
 
 namespace KDGpu {
 
@@ -29,10 +31,10 @@ struct TextureOptions {
     TextureUsageFlags usage;
     MemoryUsage memoryUsage;
     SharingMode sharingMode{ SharingMode::Exclusive };
-    std::vector<uint32_t> queueTypeIndices{};
+    std::vector<uint32_t> queueTypeIndices;
     TextureLayout initialLayout{ TextureLayout::Undefined };
     ExternalMemoryHandleTypeFlags externalMemoryHandleType{ ExternalMemoryHandleTypeFlagBits::None };
-    std::vector<uint64_t> drmFormatModifiers{};
+    std::vector<uint64_t> drmFormatModifiers;
     TextureCreateFlags createFlags;
     // TODO: TextureFlags flags;
 };

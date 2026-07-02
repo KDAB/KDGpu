@@ -589,7 +589,7 @@ void VulkanCommandRecorder::buildAccelerationStructures(const BuildAccelerationS
                     std::vector<VkAccelerationStructureInstanceKHR> array;
                     array.reserve(arg.data.size());
                     for (const auto &element : arg.data) {
-                        auto structure = vulkanResourceManager->getAccelerationStructure(element.accelerationStructure);
+                        auto *structure = vulkanResourceManager->getAccelerationStructure(element.accelerationStructure);
 
                         VkAccelerationStructureDeviceAddressInfoKHR deviceAddressInfoKhr = {};
                         deviceAddressInfoKhr.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR;

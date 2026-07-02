@@ -240,7 +240,7 @@ void HelloTriangleRt::createAccelerationStructures()
                 },
         });
 
-        // Pro Tip: If you don't want to spend days wondering why you have not hits...
+        // Pro Tip: If you don't want to spend days wondering why you have no hits...
         // => Make sure you wait for the bottomLevelAS to have been built prior to building the topLevelAS
         commandRecorder.memoryBarrier(MemoryBarrierOptions{
                 .srcStages = PipelineStageFlags(PipelineStageFlagBit::AccelerationStructureBuildBit),

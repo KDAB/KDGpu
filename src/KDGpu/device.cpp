@@ -34,10 +34,7 @@ namespace KDGpu {
     @brief Returns the queues available on the device
  */
 
-Device::Device()
-    : m_api(nullptr)
-{
-}
+Device::Device() = default;
 
 Device::Device(Adapter *adapter, GraphicsApi *api, const DeviceOptions &options)
     : m_api(api)
@@ -47,7 +44,7 @@ Device::Device(Adapter *adapter, GraphicsApi *api, const DeviceOptions &options)
     // queues requested by the device creation.
     std::vector<QueueRequest> queueRequests;
     m_device = m_api->resourceManager()->createDevice(adapter->handle(), options, queueRequests);
-    auto apiDevice = m_api->resourceManager()->getDevice(m_device);
+    auto *apiDevice = m_api->resourceManager()->getDevice(m_device);
 
     // To fetch the queues from the device we pass in the actual set of queue requests so that
     // we can match up the queues to the queue family indices and other properties
@@ -96,7 +93,7 @@ const Adapter *Device::adapter() const
  */
 void Device::waitUntilIdle()
 {
-    auto apiDevice = m_api->resourceManager()->getDevice(m_device);
+    auto *apiDevice = m_api->resourceManager()->getDevice(m_device);
     apiDevice->waitUntilIdle();
 }
 

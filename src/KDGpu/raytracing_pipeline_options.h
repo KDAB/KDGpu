@@ -15,6 +15,9 @@
 #include <KDGpu/graphics_pipeline_options.h>
 
 #include <optional>
+#include <cstdint>
+#include <string_view>
+#include <vector>
 
 namespace KDGpu {
 
@@ -23,7 +26,7 @@ struct ShaderModule_t;
 struct PipelineCache_t;
 
 struct RayTracingShaderGroupOptions {
-    RayTracingShaderGroupType type;
+    RayTracingShaderGroupType type{ RayTracingShaderGroupType::General };
     // clang-format off
     // indices into the RayTracingPipelineOptions::shaderStages vector
     std::optional<uint32_t> generalShaderIndex;      // Only set if type == General

@@ -45,9 +45,7 @@ namespace KDGpu {
     @fn Queue::isValid()
     @brief Convenience function to check whether the Queue is actually referencing a valid API specific resource
  */
-Queue::Queue()
-{
-}
+Queue::Queue() = default;
 
 Queue::Queue(GraphicsApi *api, const Handle<Device_t> &device, const QueueDescription &description)
     : m_api(api)
@@ -69,7 +67,7 @@ Queue::~Queue()
  */
 void Queue::waitUntilIdle()
 {
-    auto apiQueue = m_api->resourceManager()->getQueue(m_queue);
+    auto *apiQueue = m_api->resourceManager()->getQueue(m_queue);
     apiQueue->waitUntilIdle();
 }
 
@@ -78,7 +76,7 @@ void Queue::waitUntilIdle()
  */
 void Queue::submit(const SubmitOptions &options)
 {
-    auto apiQueue = m_api->resourceManager()->getQueue(m_queue);
+    auto *apiQueue = m_api->resourceManager()->getQueue(m_queue);
     apiQueue->submit(options);
 }
 
@@ -87,13 +85,13 @@ void Queue::submit(const SubmitOptions &options)
  */
 PresentResult Queue::present(const PresentOptions &options)
 {
-    auto apiQueue = m_api->resourceManager()->getQueue(m_queue);
+    auto *apiQueue = m_api->resourceManager()->getQueue(m_queue);
     return apiQueue->present(options);
 }
 
 std::vector<PresentResult> Queue::lastPerSwapchainPresentResults() const
 {
-    auto apiQueue = m_api->resourceManager()->getQueue(m_queue);
+    auto *apiQueue = m_api->resourceManager()->getQueue(m_queue);
     return apiQueue->lastPerSwapchainPresentResults();
 }
 

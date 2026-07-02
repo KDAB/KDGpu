@@ -30,7 +30,7 @@ namespace KDGpu {
     if (!selectedAdapter)
         return;
 
-    auto queueTypes = selectedAdapter->queueTypes();
+    const auto& queueTypes = selectedAdapter->queueTypes();
     const bool hasGraphicsAndCompute = queueTypes[0].supportsFeature(QueueFlags(QueueFlagBits::GraphicsBit) | QueueFlags(QueueFlagBits::ComputeBit));
     const bool supportsPresentation = selectedAdapter->supportsPresentation(surface, 0);
 
@@ -60,7 +60,7 @@ Adapter::Adapter(GraphicsApi *api, const Handle<Adapter_t> &adapter)
     : m_api(api)
     , m_adapter(adapter)
 {
-    auto apiAdapter = m_api->resourceManager()->getAdapter(m_adapter);
+    auto *apiAdapter = m_api->resourceManager()->getAdapter(m_adapter);
     m_features = apiAdapter->queryAdapterFeatures();
     m_properties = apiAdapter->queryAdapterProperties();
     m_queueTypes = apiAdapter->queryQueueTypes();
@@ -72,7 +72,7 @@ Adapter::~Adapter()
         m_api->resourceManager()->removeAdapter(m_adapter);
 }
 
-Adapter::Adapter(Adapter &&other)
+Adapter::Adapter(Adapter &&other) noexcept
 {
     m_api = std::exchange(other.m_api, nullptr);
     m_adapter = std::exchange(other.m_adapter, {});
@@ -81,7 +81,7 @@ Adapter::Adapter(Adapter &&other)
     m_queueTypes = std::exchange(other.m_queueTypes, {});
 }
 
-Adapter &Adapter::operator=(Adapter &&other)
+Adapter &Adapter::operator=(Adapter &&other) noexcept
 {
     if (this != &other) {
         if (isValid())
@@ -98,7 +98,7 @@ Adapter &Adapter::operator=(Adapter &&other)
 
 std::vector<Extension> Adapter::extensions() const
 {
-    auto apiAdapter = m_api->resourceManager()->getAdapter(m_adapter);
+    auto *apiAdapter = m_api->resourceManager()->getAdapter(m_adapter);
     return apiAdapter->extensions();
 }
 
@@ -131,7 +131,7 @@ std::span<AdapterQueueType> Adapter::queueTypes() const
  */
 AdapterSwapchainProperties Adapter::swapchainProperties(const Handle<Surface_t> &surface) const
 {
-    auto apiAdapter = m_api->resourceManager()->getAdapter(m_adapter);
+    auto *apiAdapter = m_api->resourceManager()->getAdapter(m_adapter);
     return apiAdapter->querySwapchainProperties(surface);
 }
 
@@ -140,7 +140,7 @@ AdapterSwapchainProperties Adapter::swapchainProperties(const Handle<Surface_t> 
  */
 bool Adapter::supportsPresentation(const Handle<Surface_t> &surface, uint32_t queueTypeIndex) const noexcept
 {
-    auto apiAdapter = m_api->resourceManager()->getAdapter(m_adapter);
+    auto *apiAdapter = m_api->resourceManager()->getAdapter(m_adapter);
     return apiAdapter->supportsPresentation(surface, queueTypeIndex);
 }
 
@@ -149,7 +149,7 @@ bool Adapter::supportsPresentation(const Handle<Surface_t> &surface, uint32_t qu
  */
 FormatProperties Adapter::formatProperties(Format format) const
 {
-    auto apiAdapter = m_api->resourceManager()->getAdapter(m_adapter);
+    auto *apiAdapter = m_api->resourceManager()->getAdapter(m_adapter);
     return apiAdapter->formatProperties(format);
 }
 
@@ -192,7 +192,7 @@ bool Adapter::supportsBlitting(Format format, TextureTiling tiling) const
 
 std::vector<DrmFormatModifierProperties> Adapter::drmFormatModifierProperties(Format format) const
 {
-    auto apiAdapter = m_api->resourceManager()->getAdapter(m_adapter);
+    auto *apiAdapter = m_api->resourceManager()->getAdapter(m_adapter);
     return apiAdapter->drmFormatModifierProperties(format);
 }
 

@@ -133,10 +133,10 @@ public:
     ~Adapter();
 
     //! \brief Move constructor transfers ownership of the adapter handle
-    Adapter(Adapter &&);
+    Adapter(Adapter &&) noexcept;
 
     //! \brief Move assignment transfers ownership of the adapter handle
-    Adapter &operator=(Adapter &&);
+    Adapter &operator=(Adapter &&) noexcept;
 
     //! \brief Copy constructor deleted - adapters cannot be copied
     Adapter(const Adapter &) = delete;

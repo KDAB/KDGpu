@@ -69,7 +69,7 @@ FenceStatus Fence::status() const
 
 HandleOrFD Fence::externalFenceHandle() const
 {
-    auto apiFence = m_api->resourceManager()->getFence(m_fence);
+    auto *apiFence = m_api->resourceManager()->getFence(m_fence);
     return apiFence->externalFenceHandle();
 }
 

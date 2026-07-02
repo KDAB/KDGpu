@@ -55,7 +55,7 @@ TimestampQueryRecorder &TimestampQueryRecorder::operator=(TimestampQueryRecorder
 
 TimestampIndex TimestampQueryRecorder::writeTimestamp(PipelineStageFlags flags)
 {
-    auto apiTimestampRecorder = m_api->resourceManager()->getTimestampQueryRecorder(m_timestampQueryRecorder);
+    auto *apiTimestampRecorder = m_api->resourceManager()->getTimestampQueryRecorder(m_timestampQueryRecorder);
     return apiTimestampRecorder->writeTimestamp(flags);
 }
 
@@ -66,14 +66,14 @@ float TimestampQueryRecorder::timestampPeriod() const
 
 void TimestampQueryRecorder::reset()
 {
-    auto apiTimestampRecorder = m_api->resourceManager()->getTimestampQueryRecorder(m_timestampQueryRecorder);
+    auto *apiTimestampRecorder = m_api->resourceManager()->getTimestampQueryRecorder(m_timestampQueryRecorder);
     apiTimestampRecorder->reset();
     m_lastResults = {};
 }
 
 std::vector<uint64_t> TimestampQueryRecorder::queryResults()
 {
-    auto apiTimestampRecorder = m_api->resourceManager()->getTimestampQueryRecorder(m_timestampQueryRecorder);
+    auto *apiTimestampRecorder = m_api->resourceManager()->getTimestampQueryRecorder(m_timestampQueryRecorder);
     m_lastResults = apiTimestampRecorder->queryResults();
     return m_lastResults;
 }
@@ -81,7 +81,7 @@ std::vector<uint64_t> TimestampQueryRecorder::queryResults()
 uint64_t TimestampQueryRecorder::nsInterval(TimestampIndex begin, TimestampIndex end)
 {
     if (m_lastResults.empty())
-        queryResults();
+        std::ignore = queryResults();
 
     if (begin < m_lastResults.size() && end < m_lastResults.size())
         return (m_lastResults[end] - m_lastResults[begin]) * uint64_t(m_timestampPeriod);

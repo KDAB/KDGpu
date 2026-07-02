@@ -39,8 +39,8 @@ struct KDGPU_EXPORT VulkanBuffer {
 
     void *map();
     void unmap();
-    void invalidate();
-    void flush();
+    void invalidate() const;
+    void flush() const;
     MemoryHandle externalMemoryHandle() const;
     BufferDeviceAddress bufferDeviceAddress() const;
 

@@ -1,5 +1,37 @@
 ---
-Checks: "clang-diagnostic-*,clang-analyzer-*,-clang-analyzer-alpha*,*,-*trailing-return-type,-google-*,-cppcoreguidelines-*,-readability-else-after-return,-readability-implicit-bool-cast,-llvmlibc-*,-llvm-include-order,-readability-named-parameter,-readabilty-namespace-comments,-llvm-namespace-comment,-clang-analyzer-alpha.core.CastToStruct,-modernize-use-override,-modernize-use-bool-literals,-clang-analyzer-cplusplus.NewDeleteLeaks,-clang-analyzer-alpha.deadcode.UnreachableCode,-modernize-use-default,-clang-analyzer-core.CallAndMessage,-modernize-pass-by-value,-clang-analyzer-core.NonNullParamChecker,-modernize-raw-string-literal,-modernize-use-using,-modernize-loop-convert,-modernize-use-emplace,-modernize-return-braced-init-list,-modernize-use-default-member-init,-modernize-use-equals-default,-fuchsia-*,-hicpp-*,-altera-unroll-loops,-readability-uppercase-literal-suffix,-readability-magic-numbers,-readability-identifier-length,-boost-use-ranges,-readability-implicit-bool-conversions,-readability-implicit-bool-conversion,-altera-struct-pack-align"
+Checks: |-
+  *,
+  -misc-include-cleaner
+  -misc-non-private-member-variables-in-classes,
+  -portability-avoid-pragma-once,
+  -cppcoreguidelines-pro-type-union-access,
+  -cppcoreguidelines-non-private-member-variables-in-classes,
+  -clang-analyzer-alpha*,
+  -*-trailing-return-type,
+  -google-*,
+  -llvmlibc-*,
+  -llvm-include-order,
+  -llvm-header-guard,
+  -llvm-namespace-comment,
+  -clang-analyzer-alpha.core.CastToStruct,
+  -clang-analyzer-cplusplus.NewDeleteLeaks,
+  -clang-analyzer-alpha.deadcode.UnreachableCode,
+  -clang-analyzer-core.CallAndMessage,
+  -clang-analyzer-core.NonNullParamChecker,
+  -modernize-loop-convert,
+  -fuchsia-*,
+  -hicpp-*,
+  -altera-unroll-loops,
+  -altera-struct-pack-align,
+  -boost-use-ranges,
+  -readability-named-parameter,
+  -readability-namespace-comments,
+  -readability-uppercase-literal-suffix,
+  -readability-magic-numbers,
+  -readability-identifier-length,
+  -readability-implicit-bool-conversions,
+  -readability-implicit-bool-conversion
+
 WarningsAsErrors: ""
 HeaderFilterRegex: ".*" # Show warnings from all non-system headers
 ExcludeHeaderFilterRegex: 'vulkan/.*\.h$|vk_.*\.h$|.*vulkan.*\.h$'

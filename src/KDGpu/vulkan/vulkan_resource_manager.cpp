@@ -155,6 +155,7 @@ template<typename VulkanHandleType>
 inline uint64_t vulkanHandleToUint64(VulkanHandleType handle)
 {
     // For opaque Vulkan handles, reinterpret through uintptr_t for platform independence
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
     return static_cast<uint64_t>(reinterpret_cast<uintptr_t>(handle));
 }
 
@@ -167,14 +168,6 @@ inline uint64_t vulkanHandleToUint64<uint64_t>(uint64_t handle)
 
 } // namespace
 namespace KDGpu {
-
-VulkanResourceManager::VulkanResourceManager()
-{
-}
-
-VulkanResourceManager::~VulkanResourceManager()
-{
-}
 
 Handle<Instance_t> VulkanResourceManager::createInstance(const InstanceOptions &options)
 {
@@ -280,6 +273,7 @@ Handle<Instance_t> VulkanResourceManager::createInstance(const InstanceOptions &
 
     // Now create the debug utils logger for ourselves (using the same callback as the instance)
     if (shouldRegisterDebugCallback) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
         auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(vulkanInstance.instance, "vkCreateDebugUtilsMessengerEXT");
         if (func != nullptr) {
             if (func(vulkanInstance.instance, &debugUtilsCreateInfo, nullptr, &vulkanInstance.debugMessenger) != VK_SUCCESS)
@@ -307,6 +301,7 @@ void VulkanResourceManager::deleteInstance(const Handle<Instance_t> &handle)
 
         // Destroy debug logger if we have one
         if (instance->debugMessenger) {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
             auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance->instance, "vkDestroyDebugUtilsMessengerEXT");
             if (func != nullptr)
                 func(instance->instance, instance->debugMessenger, nullptr);
@@ -341,8 +336,9 @@ std::vector<Extension> VulkanResourceManager::getInstanceExtensions()
     extensions.reserve(extensionCount);
     for (const auto &vkExtension : vkExtensions) {
         extensions.emplace_back(Extension{
-                .name = vkExtension.extensionName,
-                .version = vkExtension.specVersion });
+                .name = std::string(std::string_view(vkExtension.extensionName)),
+                .version = vkExtension.specVersion,
+        });
     }
 
     return extensions;
@@ -392,6 +388,7 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     // have a lot of them and some of them are optional.
     VkBaseOutStructure *chainCurrent{ nullptr };
     auto addToChain = [&chainCurrent](auto *next) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
         auto *n = reinterpret_cast<VkBaseOutStructure *>(next);
         chainCurrent->pNext = n;
         chainCurrent = n;
@@ -399,15 +396,13 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
 
     queueRequests = options.queues;
     if (queueRequests.empty()) {
-        QueueRequest queueRequest = {
-            .queueTypeIndex = 0,
-            .count = 1,
-            .priorities = { 1.0f }
-        };
-        queueRequests.emplace_back(queueRequest);
+        queueRequests.emplace_back(QueueRequest{
+                .queueTypeIndex = 0,
+                .count = 1,
+                .priorities = { 1.0f } });
     }
 
-    uint32_t queueRequestCount = queueRequests.size();
+    const uint32_t queueRequestCount = queueRequests.size();
     std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
     queueCreateInfos.reserve(queueRequestCount);
     for (uint32_t i = 0; i < queueRequestCount; ++i) {
@@ -488,7 +483,7 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     physicalDeviceFeatures2.features = deviceFeatures;
 
     // Start the chain
-    chainCurrent = reinterpret_cast<VkBaseOutStructure *>(&physicalDeviceFeatures2);
+    chainCurrent = reinterpret_cast<VkBaseOutStructure *>(&physicalDeviceFeatures2); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
 
     // Allows to use std430 for uniform buffers which gives much nicer packing of data
     VkPhysicalDeviceUniformBufferStandardLayoutFeatures stdLayoutFeatures = {};
@@ -988,8 +983,8 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
     }
 #endif
 
-    VkImage vkImage;
-    VmaAllocation vmaAllocation;
+    VkImage vkImage{ VK_NULL_HANDLE };
+    VmaAllocation vmaAllocation{ VK_NULL_HANDLE };
 
     if (auto result = vmaCreateImage(allocator, &createInfo, &allocInfo, &vkImage, &vmaAllocation, nullptr); result != VK_SUCCESS) {
         SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating image: {}", result);
@@ -1108,7 +1103,7 @@ Handle<TextureView_t> VulkanResourceManager::createTextureView(const Handle<Devi
     assert(!options.yCbCrConversion.isValid());
 #endif
 
-    VkImageView imageView;
+    VkImageView imageView{ VK_NULL_HANDLE };
     if (auto result = vkCreateImageView(vulkanDevice->device, &createInfo, nullptr, &imageView); result != VK_SUCCESS) {
         SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating image view: {}", result);
         return {};
@@ -1182,8 +1177,8 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
         allocInfo.flags = VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
     }
 
-    VkBuffer vkBuffer;
-    VmaAllocation vmaAllocation;
+    VkBuffer vkBuffer{ VK_NULL_HANDLE };
+    VmaAllocation vmaAllocation{ VK_NULL_HANDLE };
 
     if (auto result = vmaCreateBuffer(allocator, &createInfo, &allocInfo, &vkBuffer, &vmaAllocation, nullptr); result != VK_SUCCESS) {
         SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating buffer: {}", result);
@@ -1251,7 +1246,7 @@ Handle<ShaderModule_t> VulkanResourceManager::createShaderModule(const Handle<De
     createInfo.codeSize = code.size() * sizeof(uint32_t);
     createInfo.pCode = code.data();
 
-    VkShaderModule vkShaderModule;
+    VkShaderModule vkShaderModule{ VK_NULL_HANDLE };
     if (auto result = vkCreateShaderModule(vulkanDevice->device, &createInfo, nullptr, &vkShaderModule); result != VK_SUCCESS) {
         SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating shader module: {}", result);
         return {};
@@ -1388,7 +1383,7 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
             if (subpassDescription.depthAttachmentReference->layout != TextureLayout::MaxEnum)
                 depthAttachment.layout = textureLayoutToVkImageLayout(subpassDescription.depthAttachmentReference->layout);
             else
-                depthAttachment.layout = textureLayoutToVkImageLayout(options.attachments[depthAttachment.attachment].finalLayout);
+                depthAttachment.layout = textureLayoutToVkImageLayout(options.attachments.at(depthAttachment.attachment).finalLayout);
 
             depthReferenceArray.push_back(depthAttachment);
             vkSubpass.pDepthStencilAttachment = &depthReferenceArray.back();
@@ -1401,7 +1396,7 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
                 if (subpassDescription.depthAttachmentReference->layout != TextureLayout::MaxEnum)
                     depthResolveAttachment.layout = textureLayoutToVkImageLayout(subpassDescription.depthResolveAttachmentReference->layout);
                 else
-                    depthResolveAttachment.layout = textureLayoutToVkImageLayout(options.attachments[depthResolveAttachment.attachment].finalLayout);
+                    depthResolveAttachment.layout = textureLayoutToVkImageLayout(options.attachments.at(depthResolveAttachment.attachment).finalLayout);
 
                 depthResolveReferenceArray.push_back(depthResolveAttachment);
 
@@ -1431,7 +1426,7 @@ Handle<RenderPass_t> VulkanResourceManager::createRenderPass(const Handle<Device
                 if (subpassDescription.inputAttachmentReference[j].layout != TextureLayout::MaxEnum)
                     reference.layout = referenceLayoutFromInputLayout(subpassDescription.inputAttachmentReference[j].layout);
                 else
-                    reference.layout = referenceLayoutFromInputLayout(options.attachments[reference.attachment].finalLayout);
+                    reference.layout = referenceLayoutFromInputLayout(options.attachments.at(reference.attachment).finalLayout);
 
                 if (!isMultiviewEnabled) {
                     const AttachmentReference &attachmentReference = subpassDescription.inputAttachmentReference[j];
@@ -1861,8 +1856,11 @@ Handle<GraphicsPipeline_t> VulkanResourceManager::createGraphicsPipeline(const H
     pipelineInfo.pDynamicState = &dynamicStateInfo;
     pipelineInfo.layout = vulkanPipelineLayout->pipelineLayout;
 
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
     VkBaseOutStructure *chainCurrent = reinterpret_cast<VkBaseOutStructure *>(&pipelineInfo);
+
     auto addToChain = [&chainCurrent](auto *next) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
         auto *n = reinterpret_cast<VkBaseOutStructure *>(next);
         chainCurrent->pNext = n;
         chainCurrent = n;
@@ -2066,7 +2064,7 @@ Handle<ComputePipeline_t> VulkanResourceManager::createComputePipeline(const Han
 
     VkPipelineCache vkPipelineCache = VK_NULL_HANDLE;
     if (options.pipelineCache.isValid()) {
-        VulkanPipelineCache *pipelineCache = getPipelineCache(options.pipelineCache);
+        const VulkanPipelineCache *pipelineCache = getPipelineCache(options.pipelineCache);
         assert(pipelineCache != nullptr);
         vkPipelineCache = pipelineCache->pipelineCache;
     }
@@ -2091,8 +2089,8 @@ Handle<ComputePipeline_t> VulkanResourceManager::createComputePipeline(const Han
 }
 void VulkanResourceManager::deleteComputePipeline(const Handle<ComputePipeline_t> &handle)
 {
-    VulkanComputePipeline *vulkanPipeline = m_computePipelines.get(handle);
-    VulkanDevice *vulkanDevice = m_devices.get(vulkanPipeline->deviceHandle);
+    const VulkanComputePipeline *vulkanPipeline = m_computePipelines.get(handle);
+    const VulkanDevice *vulkanDevice = m_devices.get(vulkanPipeline->deviceHandle);
 
     vkDestroyPipeline(vulkanDevice->device, vulkanPipeline->pipeline, nullptr);
 
@@ -2111,7 +2109,7 @@ Handle<RayTracingPipeline_t> VulkanResourceManager::createRayTracingPipeline(con
     VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
 
     // Fetch the specified pipeline layout
-    VulkanPipelineLayout *vulkanPipelineLayout = getPipelineLayout(options.layout);
+    const VulkanPipelineLayout *vulkanPipelineLayout = getPipelineLayout(options.layout);
     if (!vulkanPipelineLayout) {
         SPDLOG_LOGGER_ERROR(Logger::logger(), "Invalid pipeline layout requested");
         return {};
@@ -2232,11 +2230,14 @@ VulkanRayTracingPipeline *VulkanResourceManager::getRayTracingPipeline(const Han
     return m_rayTracingPipelines.get(handle);
 }
 
+namespace {
+
 template<typename SemaphoreOptionType>
 std::pair<VkSemaphore, HandleOrFD> createSemaphore(VulkanDevice *vulkanDevice, const SemaphoreOptionType &options)
 {
     VkBaseOutStructure *chainCurrent{ nullptr };
     auto addToChain = [&chainCurrent](auto *next) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
         auto *n = reinterpret_cast<VkBaseOutStructure *>(next);
         chainCurrent->pNext = n;
         chainCurrent = n;
@@ -2246,7 +2247,7 @@ std::pair<VkSemaphore, HandleOrFD> createSemaphore(VulkanDevice *vulkanDevice, c
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
     // Start the chain
-    chainCurrent = reinterpret_cast<VkBaseOutStructure *>(&semaphoreInfo);
+    chainCurrent = reinterpret_cast<VkBaseOutStructure *>(&semaphoreInfo); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
 
     VkExportSemaphoreCreateInfo exportSemaphoreCreateInfo = {};
     if (options.externalSemaphoreHandleType != ExternalSemaphoreHandleTypeFlagBits::None) {
@@ -2312,6 +2313,8 @@ std::pair<VkSemaphore, HandleOrFD> createSemaphore(VulkanDevice *vulkanDevice, c
 
     return { vkSemaphore, externalSemaphoreHandle };
 }
+
+} // namespace
 
 Handle<GpuSemaphore_t> VulkanResourceManager::createGpuSemaphore(const Handle<Device_t> &deviceHandle, const GpuSemaphoreOptions &options)
 {
@@ -2507,7 +2510,8 @@ Handle<BindGroupPool_t> VulkanResourceManager::createBindGroupPool(const Handle<
     VulkanDevice *vulkanDevice = m_devices.get(deviceHandle);
 
     std::vector<VkDescriptorPoolSize> poolSizes;
-    poolSizes.reserve(9);
+    constexpr size_t maxPoolSizeCount = 9;
+    poolSizes.reserve(maxPoolSizeCount);
     if (options.uniformBufferCount > 0)
         poolSizes.push_back({ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, options.uniformBufferCount });
     if (options.dynamicUniformBufferCount > 0)
@@ -2747,7 +2751,7 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
     // Maybe update in the future since a complex renderpass with subpass could exceed that? maybe 50?
     constexpr size_t MaxAttachmentCount = 20;
     assert((2 * options.attachments.size()) + 1 <= MaxAttachmentCount);
-    std::array<VkClearValue, MaxAttachmentCount> vkClearValues;
+    std::array<VkClearValue, MaxAttachmentCount> vkClearValues{};
     size_t clearIdx = 0;
 
     const bool isAnyOfTheAttachmentsToBeCleared = std::ranges::any_of(vulkanRenderPass->attachmentDescriptions.begin(),
@@ -2764,21 +2768,21 @@ Handle<RenderPassCommandRecorder_t> VulkanResourceManager::createRenderPassComma
             vkClearValue.color.uint32[1] = arg.clearValue.uint32[1];
             vkClearValue.color.uint32[2] = arg.clearValue.uint32[2];
             vkClearValue.color.uint32[3] = arg.clearValue.uint32[3];
-            vkClearValues[clearIdx++] = vkClearValue;
+            vkClearValues.at(clearIdx++) = vkClearValue;
 
             // Include clear color again if using a resolve view. Must match number of attachments.
             if (attachment.resolveView.isValid())
-                vkClearValues[clearIdx++] = vkClearValue;
+                vkClearValues.at(clearIdx++) = vkClearValue;
         } else if (attachment.depth.has_value()) {
             auto arg = attachment.depth.value();
             VkClearValue vkClearValue = {};
             vkClearValue.depthStencil.depth = arg.clearValue.depthClearValue;
             vkClearValue.depthStencil.stencil = arg.clearValue.stencilClearValue;
-            vkClearValues[clearIdx++] = vkClearValue;
+            vkClearValues.at(clearIdx++) = vkClearValue;
 
             // Include depth clear again if using a Depth Resolve view. Must match number of attachments.
             if (attachment.resolveView.isValid()) {
-                vkClearValues[clearIdx++] = vkClearValue;
+                vkClearValues.at(clearIdx++) = vkClearValue;
                 attachmentKey.addAttachmentView(attachment.resolveView);
             }
         }
@@ -3198,7 +3202,7 @@ Handle<TimestampQueryRecorder_t> VulkanResourceManager::createTimestampQueryReco
     if (vulkanDevice->timestampQueryPool == VK_NULL_HANDLE) {
         VkQueryPoolCreateInfo poolCreateInfo = {};
         poolCreateInfo.sType = VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO;
-        poolCreateInfo.queryCount = 1024;
+        poolCreateInfo.queryCount = 1024; // NOLINT(cppcoreguidelines-avoid-magic-numbers)
         poolCreateInfo.queryType = VK_QUERY_TYPE_TIMESTAMP;
         vkCreateQueryPool(vulkanDevice->device, &poolCreateInfo, nullptr, &vulkanDevice->timestampQueryPool);
     }
@@ -3211,7 +3215,7 @@ Handle<TimestampQueryRecorder_t> VulkanResourceManager::createTimestampQueryReco
     for (size_t i = 0, m = m_timestampQueryBuckets.size(); i < m; ++i) {
         const TimestampQueryBucket &b = m_timestampQueryBuckets[i];
         if (startQueryIndex + options.queryCount <= b.start) {
-            m_timestampQueryBuckets.insert(m_timestampQueryBuckets.begin() + i, { startQueryIndex, options.queryCount });
+            m_timestampQueryBuckets.insert(m_timestampQueryBuckets.begin() + static_cast<std::ptrdiff_t>(i), { .start = startQueryIndex, .count = options.queryCount });
             addBucketToEnd = false;
             break;
         }
@@ -3983,7 +3987,7 @@ std::string VulkanResourceManager::getMemoryStats(const Handle<Device_t> &device
     for (const auto &[memoryHandleType, externalAllocator] : vulkanDevice->externalAllocators) {
         // Check if we have allocations in any of the heaps, otherwise don't build statistics
         const auto hasAllocations = [externalAllocator] {
-            std::array<VmaBudget, VK_MAX_MEMORY_HEAPS> budgets;
+            std::array<VmaBudget, VK_MAX_MEMORY_HEAPS> budgets{};
             vmaGetHeapBudgets(externalAllocator, budgets.data());
             return std::any_of(budgets.begin(), budgets.end(), [](const VmaBudget &budget) {
                 return budget.statistics.allocationCount > 0;
@@ -4002,11 +4006,11 @@ std::string VulkanResourceManager::getMemoryStats(const Handle<Device_t> &device
 
 KDGpu::Format VulkanResourceManager::formatFromTextureView(const Handle<KDGpu::TextureView_t> &viewHandle) const
 {
-    VulkanTextureView *view = getTextureView(viewHandle);
+    const VulkanTextureView *view = getTextureView(viewHandle);
     if (!view) {
         return KDGpu::Format::UNDEFINED;
     }
-    VulkanTexture *texture = getTexture(view->textureHandle);
+    const VulkanTexture *texture = getTexture(view->textureHandle);
     if (!texture) {
         return KDGpu::Format::UNDEFINED;
     }
@@ -4026,7 +4030,7 @@ bool VulkanResourceManager::fillShaderStageInfos(const std::vector<ShaderStage> 
     for (uint32_t i = 0; i < shaderCount; ++i) {
         const auto &shaderStage = stages.at(i);
 
-        VkPipelineShaderStageCreateInfo shaderInfo = {};
+        VkPipelineShaderStageCreateInfo shaderInfo{};
         shaderInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         shaderInfo.stage = shaderStageFlagBitsToVkShaderStageFlagBits(shaderStage.stage);
 
@@ -4094,7 +4098,7 @@ std::vector<std::string> VulkanResourceManager::getAvailableLayers()
     std::vector<std::string> layers;
     layers.reserve(layerCount);
     for (const auto &vkExtension : vkLayers) {
-        layers.push_back(vkExtension.layerName);
+        layers.emplace_back(vkExtension.layerName);
     }
 
     return layers;

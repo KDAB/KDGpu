@@ -28,7 +28,7 @@
 #include <KDGpu/device_options.h>
 #include <KDGpu/queue_description.h>
 
-#if defined(KDGPU_PLATFORM_WIN32)
+#ifdef KDGPU_PLATFORM_WIN32
 struct VkSemaphoreGetWin32HandleInfoKHR;
 struct VkFenceGetWin32HandleInfoKHR;
 #endif
@@ -60,6 +60,7 @@ struct KDGPU_EXPORT VulkanDevice {
                           const Handle<Adapter_t> &_adapterHandle,
                           const AdapterFeatures &requestedFeatures,
                           bool _isOwned = true) noexcept;
+    ~VulkanDevice();
 
     // Non Copyable
     VulkanDevice(VulkanDevice &) noexcept = delete;
@@ -89,7 +90,7 @@ struct KDGPU_EXPORT VulkanDevice {
     VmaAllocator allocator{ VK_NULL_HANDLE };
     struct MemoryHandleTypeAndAllocator {
         ExternalMemoryHandleTypeFlags externalMemoryHandleType;
-        VmaAllocator allocator;
+        VmaAllocator allocator{ VK_NULL_HANDLE };
     };
     std::vector<MemoryHandleTypeAndAllocator> externalAllocators;
     std::vector<QueueDescription> queueDescriptions;
@@ -109,7 +110,7 @@ struct KDGPU_EXPORT VulkanDevice {
     PFN_vkCmdPipelineBarrier2KHR vkCmdPipelineBarrier2{ nullptr };
 #endif
 
-#if defined(KDGPU_PLATFORM_WIN32)
+#ifdef KDGPU_PLATFORM_WIN32
     // We can't check for VK_KHR_external_semaphore_win32 or VK_KHR_external_fence_win32 here
     // Because we can't include vulkan_win32.h here since it needs windows.h which
     // we need to include with WIN32_LEAN_AND_MEAN and NOMINMAX (see vulkanconfig.cpp)

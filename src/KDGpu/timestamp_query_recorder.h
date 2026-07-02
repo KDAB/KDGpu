@@ -38,18 +38,18 @@ public:
     TimestampQueryRecorder(const TimestampQueryRecorder &) = delete;
     TimestampQueryRecorder &operator=(const TimestampQueryRecorder &) = delete;
 
-    const Handle<TimestampQueryRecorder_t> &handle() const noexcept { return m_timestampQueryRecorder; }
-    bool isValid() const noexcept { return m_timestampQueryRecorder.isValid(); }
+    [[nodiscard]] const Handle<TimestampQueryRecorder_t> &handle() const noexcept { return m_timestampQueryRecorder; }
+    [[nodiscard]] bool isValid() const noexcept { return m_timestampQueryRecorder.isValid(); }
 
     operator Handle<TimestampQueryRecorder_t>() const noexcept { return m_timestampQueryRecorder; }
 
     TimestampIndex writeTimestamp(PipelineStageFlags flags);
-    float timestampPeriod() const;
+    [[nodiscard]] float timestampPeriod() const;
 
     void reset();
-    std::vector<uint64_t> queryResults();
+    [[nodiscard]] std::vector<uint64_t> queryResults();
 
-    uint64_t nsInterval(TimestampIndex begin, TimestampIndex end);
+    [[nodiscard]] uint64_t nsInterval(TimestampIndex begin, TimestampIndex end);
 
 private:
     explicit TimestampQueryRecorder(GraphicsApi *api,
@@ -60,7 +60,7 @@ private:
     Handle<Device_t> m_device;
     Handle<TimestampQueryRecorder_t> m_timestampQueryRecorder;
     std::vector<uint64_t> m_lastResults;
-    float m_timestampPeriod;
+    float m_timestampPeriod{ 1.0f };
 
     friend class CommandRecorder;
 };

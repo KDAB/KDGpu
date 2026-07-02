@@ -60,14 +60,14 @@ Texture::~Texture()
 
 TextureView Texture::createView(const TextureViewOptions &options) const
 {
-    auto textureViewHandle = m_api->resourceManager()->createTextureView(m_device, m_texture, options);
+    auto const textureViewHandle = m_api->resourceManager()->createTextureView(m_device, m_texture, options);
     return TextureView(m_api, textureViewHandle);
 }
 
 void *Texture::map()
 {
     if (!m_mapped && isValid()) {
-        auto apiTexture = m_api->resourceManager()->getTexture(m_texture);
+        auto *apiTexture = m_api->resourceManager()->getTexture(m_texture);
         m_mapped = apiTexture->map();
     }
     return m_mapped;
@@ -77,14 +77,14 @@ void Texture::unmap()
 {
     if (!m_mapped)
         return;
-    auto apiTexture = m_api->resourceManager()->getTexture(m_texture);
+    auto *apiTexture = m_api->resourceManager()->getTexture(m_texture);
     apiTexture->unmap();
     m_mapped = nullptr;
 }
 
 SubresourceLayout Texture::getSubresourceLayout(const TextureSubresource &subresource) const
 {
-    auto apiTexture = m_api->resourceManager()->getTexture(m_texture);
+    auto *apiTexture = m_api->resourceManager()->getTexture(m_texture);
     return apiTexture->getSubresourceLayout(subresource);
 }
 
@@ -100,7 +100,7 @@ bool Texture::generateMipMaps(Device &device, Queue &transferQueue, const Handle
     CommandRecorder commandRecorder = device.createCommandRecorder();
 
     // Transition source to TransferSrcOptimal
-    if (oldLayout != TextureLayout::TransferSrcOptimal)
+    if (oldLayout != TextureLayout::TransferSrcOptimal) {
         commandRecorder.textureMemoryBarrier(TextureMemoryBarrierOptions{
                 .srcStages = PipelineStageFlagBit::TransferBit,
                 .srcMask = AccessFlagBit::None,
@@ -115,12 +115,15 @@ bool Texture::generateMipMaps(Device &device, Queue &transferQueue, const Handle
                         .levelCount = 1,
                 },
         });
+    }
 
     // when copying from ourselves, no need to copy from level 0 to 0
     uint32_t startingMipLevel = 1;
-    if (sourceTexture != this->handle())
+    if (sourceTexture != this->handle()) {
         // when copying from another texture, level 0 also needs to be updated
         startingMipLevel = 0;
+    }
+
     for (uint32_t mipLevel = startingMipLevel; mipLevel < options.mipLevels; ++mipLevel) {
 
         // Transition miplevel to TransforDstOptimal
@@ -181,7 +184,7 @@ bool Texture::generateMipMaps(Device &device, Queue &transferQueue, const Handle
         });
 
         // Transition miplevel to newLayout
-        if (newLayout != TextureLayout::TransferDstOptimal && newLayout != TextureLayout::Undefined)
+        if (newLayout != TextureLayout::TransferDstOptimal && newLayout != TextureLayout::Undefined) {
             commandRecorder.textureMemoryBarrier(TextureMemoryBarrierOptions{
                     .srcStages = PipelineStageFlagBit::TransferBit,
                     .srcMask = AccessFlagBit::TransferWriteBit,
@@ -196,10 +199,11 @@ bool Texture::generateMipMaps(Device &device, Queue &transferQueue, const Handle
                             .levelCount = 1,
                     },
             });
+        }
     }
 
     // Transition source texture to newLayout
-    if (newLayout != TextureLayout::TransferSrcOptimal && newLayout != TextureLayout::Undefined)
+    if (newLayout != TextureLayout::TransferSrcOptimal && newLayout != TextureLayout::Undefined) {
         commandRecorder.textureMemoryBarrier(TextureMemoryBarrierOptions{
                 .srcStages = PipelineStageFlagBit::TransferBit,
                 .srcMask = AccessFlagBit::TransferReadBit,
@@ -214,6 +218,7 @@ bool Texture::generateMipMaps(Device &device, Queue &transferQueue, const Handle
                         .levelCount = 1,
                 },
         });
+    }
 
     CommandBuffer commandBuffer = commandRecorder.finish();
 
