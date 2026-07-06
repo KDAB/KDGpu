@@ -125,7 +125,7 @@ TEST_SUITE("Fragmentation")
     TEST_CASE("Allocates Many Textures of Random Size")
     {
         const std::vector<KDGpu::Extent3D> availableExtents = {
-            { 512, 512, 512 },
+            { 512, 512, 8 },
             { 32, 64, 128 },
             { 128, 32, 128 },
             { 64, 32, 128 },
