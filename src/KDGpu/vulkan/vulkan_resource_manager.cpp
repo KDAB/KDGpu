@@ -274,9 +274,9 @@ Handle<Instance_t> VulkanResourceManager::createInstance(const InstanceOptions &
     // Now create the debug utils logger for ourselves (using the same callback as the instance)
     if (shouldRegisterDebugCallback) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
-        auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(vulkanInstance.instance, "vkCreateDebugUtilsMessengerEXT");
-        if (func != nullptr) {
-            if (func(vulkanInstance.instance, &debugUtilsCreateInfo, nullptr, &vulkanInstance.debugMessenger) != VK_SUCCESS)
+        const auto vkCreateDebugUtilsMessengerEXT = PFN_vkCreateDebugUtilsMessengerEXT(vkGetInstanceProcAddr(vulkanInstance.instance, "vkCreateDebugUtilsMessengerEXT"));
+        if (vkCreateDebugUtilsMessengerEXT != nullptr) {
+            if (vkCreateDebugUtilsMessengerEXT(vulkanInstance.instance, &debugUtilsCreateInfo, nullptr, &vulkanInstance.debugMessenger) != VK_SUCCESS)
                 vulkanInstance.debugMessenger = VK_NULL_HANDLE;
         }
     }
@@ -302,9 +302,11 @@ void VulkanResourceManager::deleteInstance(const Handle<Instance_t> &handle)
         // Destroy debug logger if we have one
         if (instance->debugMessenger) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
-            auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance->instance, "vkDestroyDebugUtilsMessengerEXT");
-            if (func != nullptr)
-                func(instance->instance, instance->debugMessenger, nullptr);
+            const auto vkDestroyDebugUtilsMessengerEXT = PFN_vkDestroyDebugUtilsMessengerEXT(vkGetInstanceProcAddr(instance->instance, "vkDestroyDebugUtilsMessengerEXT"));
+            if (vkDestroyDebugUtilsMessengerEXT != nullptr) {
+                vkDestroyDebugUtilsMessengerEXT(instance->instance, instance->debugMessenger, nullptr);
+                instance->debugMessenger = VK_NULL_HANDLE;
+            }
         }
 
         vkDestroyInstance(instance->instance, nullptr);
