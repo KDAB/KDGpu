@@ -988,9 +988,48 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
     VkImage vkImage{ VK_NULL_HANDLE };
     VmaAllocation vmaAllocation{ VK_NULL_HANDLE };
 
-    if (auto result = vmaCreateImage(allocator, &createInfo, &allocInfo, &vkImage, &vmaAllocation, nullptr); result != VK_SUCCESS) {
-        SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating image: {}", result);
-        return {};
+    // Does memory come from a provided memory handle?
+    if (options.importMemoryHandle.handle.index() > 0) {
+
+        if (options.externalMemoryHandleType != options.importMemoryHandle.handleType) {
+            SPDLOG_LOGGER_ERROR(Logger::logger(), "externalMemoryHandleType should match importMemoryHandle.handleType when creating image from handle");
+            return {};
+        }
+
+        if (holdsValidMemoryHandleTypeForPlatorm(options.importMemoryHandle.handleType)) {
+#if VK_KHR_external_memory_fd
+            VkImportMemoryFdInfoKHR importMemoryFdInfo{};
+            importMemoryFdInfo.sType = VK_STRUCTURE_TYPE_IMPORT_MEMORY_FD_INFO_KHR;
+            importMemoryFdInfo.handleType = externalMemoryHandleTypeToVkExternalMemoryHandleType(options.importMemoryHandle.handleType);
+            importMemoryFdInfo.fd = std::get<int>(options.importMemoryHandle.handle);
+
+            // We can't use vmaCreateImage when memory is imported but vmaCreateDedicatedImage
+            if (auto result = vmaCreateDedicatedImage(allocator, &createInfo, &allocInfo, &importMemoryFdInfo, &vkImage, &vmaAllocation, nullptr); result != VK_SUCCESS) {
+                SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating image: {}", result);
+                return {};
+            }
+#elif VK_KHR_external_memory_win32
+            VkImportMemoryWin32HandleInfoKHR importMemoryWin32HandleInfo{};
+            importMemoryWin32HandleInfo.sType = VK_STRUCTURE_TYPE_IMPORT_MEMORY_WIN32_HANDLE_INFO_KHR;
+            importMemoryWin32HandleInfo.handleType = externalMemoryHandleTypeToVkExternalMemoryHandleType(options.importMemoryHandle.handleType);
+            importMemoryWin32HandleInfo.handle = std::get<HANDLE>(options.importMemoryHandle.handle);
+
+            // We can't use vmaCreateImage when memory is imported but vmaCreateDedicatedImage
+            if (auto result = vmaCreateDedicatedImage(allocator, &createInfo, &allocInfo, &importMemoryWin32HandleInfo, &vkImage, &vmaAllocation, nullptr); result != VK_SUCCESS) {
+                SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating image: {}", result);
+                return {};
+            }
+#else
+            assert(false);
+#endif
+        }
+
+    } else {
+        // Regular case where we want vma to allocate memory for the image
+        if (auto result = vmaCreateImage(allocator, &createInfo, &allocInfo, &vkImage, &vmaAllocation, nullptr); result != VK_SUCCESS) {
+            SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating image: {}", result);
+            return {};
+        }
     }
 
     VulkanAdapter *adapter = getAdapter(vulkanDevice->adapterHandle);
@@ -1182,9 +1221,48 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
     VkBuffer vkBuffer{ VK_NULL_HANDLE };
     VmaAllocation vmaAllocation{ VK_NULL_HANDLE };
 
-    if (auto result = vmaCreateBuffer(allocator, &createInfo, &allocInfo, &vkBuffer, &vmaAllocation, nullptr); result != VK_SUCCESS) {
-        SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating buffer: {}", result);
-        return {};
+    // Does memory come from a provided memory handle?
+    if (options.importMemoryHandle.handle.index() > 0) {
+
+        if (options.externalMemoryHandleType != options.importMemoryHandle.handleType) {
+            SPDLOG_LOGGER_ERROR(Logger::logger(), "externalMemoryHandleType should match importMemoryHandle.handleType when creating buffer from handle");
+            return {};
+        }
+
+        if (holdsValidMemoryHandleTypeForPlatorm(options.importMemoryHandle.handleType)) {
+#if VK_KHR_external_memory_fd
+            VkImportMemoryFdInfoKHR importMemoryFdInfo{};
+            importMemoryFdInfo.sType = VK_STRUCTURE_TYPE_IMPORT_MEMORY_FD_INFO_KHR;
+            importMemoryFdInfo.handleType = externalMemoryHandleTypeToVkExternalMemoryHandleType(options.importMemoryHandle.handleType);
+            importMemoryFdInfo.fd = std::get<int>(options.importMemoryHandle.handle);
+
+            // We can't use vmaCreateBuffer when memory is imported but vmaCreateDedicatedBuffer
+            if (auto result = vmaCreateDedicatedBuffer(allocator, &createInfo, &allocInfo, &importMemoryFdInfo, &vkBuffer, &vmaAllocation, nullptr); result != VK_SUCCESS) {
+                SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating buffer: {}", result);
+                return {};
+            }
+#elif VK_KHR_external_memory_win32
+            VkImportMemoryWin32HandleInfoKHR importMemoryWin32HandleInfo{};
+            importMemoryWin32HandleInfo.sType = VK_STRUCTURE_TYPE_IMPORT_MEMORY_WIN32_HANDLE_INFO_KHR;
+            importMemoryWin32HandleInfo.handleType = externalMemoryHandleTypeToVkExternalMemoryHandleType(options.importMemoryHandle.handleType);
+            importMemoryWin32HandleInfo.handle = std::get<HANDLE>(options.importMemoryHandle.handle);
+
+            // We can't use vmaCreateBuffer when memory is imported but vmaCreateDedicatedBuffer
+            if (auto result = vmaCreateDedicatedBuffer(allocator, &createInfo, &allocInfo, &importMemoryWin32HandleInfo, &vkBuffer, &vmaAllocation, nullptr); result != VK_SUCCESS) {
+                SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating buffer: {}", result);
+                return {};
+            }
+#else
+            assert(false);
+#endif
+        }
+
+    } else {
+        // Regular case where we want vma to allocate memory for the buffer
+        if (auto result = vmaCreateBuffer(allocator, &createInfo, &allocInfo, &vkBuffer, &vmaAllocation, nullptr); result != VK_SUCCESS) {
+            SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating buffer: {}", result);
+            return {};
+        }
     }
 
     VulkanAdapter *adapter = getAdapter(vulkanDevice->adapterHandle);
@@ -4106,26 +4184,42 @@ std::vector<std::string> VulkanResourceManager::getAvailableLayers()
     return layers;
 }
 
+bool VulkanResourceManager::holdsValidMemoryHandleTypeForPlatorm(ExternalMemoryHandleTypeFlags handleType)
+{
+    constexpr std::array handleTypes{
+#if !defined(KDGPU_PLATFORM_WIN32) // UNIX
+        ExternalMemoryHandleTypeFlagBits::OpaqueFD,
+#if VK_EXT_external_memory_dma_buf
+        ExternalMemoryHandleTypeFlagBits::DmaBuf,
+#endif
+#else // KDGPU_PLATFORM_WIN32
+        ExternalMemoryHandleTypeFlagBits::OpaqueWin32,
+        ExternalMemoryHandleTypeFlagBits::OpaqueWin32Kmt,
+        ExternalMemoryHandleTypeFlagBits::D3D11Texture,
+        ExternalMemoryHandleTypeFlagBits::D3D11TextureKmt,
+        ExternalMemoryHandleTypeFlagBits::D3D12Heap,
+        ExternalMemoryHandleTypeFlagBits::D3D12Resource,
+#endif
+    };
+
+    return testIfContainsAnyFlags<ExternalMemoryHandleTypeFlagBits>(handleType, handleTypes);
+}
+
 MemoryHandle VulkanResourceManager::retrieveExternalMemoryHandle(VulkanInstance *instance,
                                                                  VulkanDevice *vulkanDevice,
                                                                  const VmaAllocationInfo &allocationInfo,
                                                                  ExternalMemoryHandleTypeFlags handleType)
 {
     MemoryHandle memoryHandle{
+        .handleType = handleType,
         .allocationSize = allocationInfo.size,
         .allocationOffset = allocationInfo.offset,
     };
-#if !defined(KDGPU_PLATFORM_WIN32)
-    constexpr std::array handleTypes{
-        ExternalMemoryHandleTypeFlagBits::OpaqueFD,
-#if VK_EXT_external_memory_dma_buf
-        ExternalMemoryHandleTypeFlagBits::DmaBuf,
-#endif
-    };
-    if (testIfContainsAnyFlags<ExternalMemoryHandleTypeFlagBits>(handleType, handleTypes)) {
+
+    if (holdsValidMemoryHandleTypeForPlatorm(handleType)) {
 #if VK_KHR_external_memory_fd
         if (instance->vkGetMemoryFdKHR) {
-            VkMemoryGetFdInfoKHR vkMemoryGetFdInfoKHR = {
+            const VkMemoryGetFdInfoKHR vkMemoryGetFdInfoKHR = {
                 .sType = VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR,
                 .pNext = nullptr,
                 .memory = allocationInfo.deviceMemory,
@@ -4134,26 +4228,11 @@ MemoryHandle VulkanResourceManager::retrieveExternalMemoryHandle(VulkanInstance 
             int fd{};
             instance->vkGetMemoryFdKHR(vulkanDevice->device, &vkMemoryGetFdInfoKHR, &fd);
             memoryHandle.handle = fd;
+            return memoryHandle;
         }
-#else
-        assert(false);
-#endif // VK_KHR_external_memory_fd
-    }
-
-#else // KDGPU_PLATFORM_WIN32
-    constexpr std::array handleTypes{
-        ExternalMemoryHandleTypeFlagBits::OpaqueWin32,
-        ExternalMemoryHandleTypeFlagBits::OpaqueWin32Kmt,
-        ExternalMemoryHandleTypeFlagBits::D3D11Texture,
-        ExternalMemoryHandleTypeFlagBits::D3D11TextureKmt,
-        ExternalMemoryHandleTypeFlagBits::D3D12Heap,
-        ExternalMemoryHandleTypeFlagBits::D3D12Resource,
-    };
-
-    if (testIfContainsAnyFlags<ExternalMemoryHandleTypeFlagBits>(handleType, handleTypes)) {
-#if VK_KHR_external_memory_win32
+#elif VK_KHR_external_memory_win32
         if (instance->vkGetMemoryWin32HandleKHR) {
-            VkMemoryGetWin32HandleInfoKHR vkGetWin32HandleInfoKHR = {
+            const VkMemoryGetWin32HandleInfoKHR vkGetWin32HandleInfoKHR = {
                 .sType = VK_STRUCTURE_TYPE_MEMORY_GET_WIN32_HANDLE_INFO_KHR,
                 .pNext = nullptr,
                 .memory = allocationInfo.deviceMemory,
@@ -4162,20 +4241,14 @@ MemoryHandle VulkanResourceManager::retrieveExternalMemoryHandle(VulkanInstance 
             HANDLE winHandle{};
             instance->vkGetMemoryWin32HandleKHR(vulkanDevice->device, &vkGetWin32HandleInfoKHR, &winHandle);
             memoryHandle.handle = winHandle;
+            return memoryHandle;
         }
 #else
         assert(false);
-#endif // VK_KHR_external_memory_win32
+#endif
     }
-
-#endif // KDGPU_PLATFORM_WIN32
-
-    else {
-        assert(false); // Unsupported Handle Type
-    }
-
-    return memoryHandle;
-} // namespace KDGpu
+    return {};
+}
 
 } // namespace KDGpu
 

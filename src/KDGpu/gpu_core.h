@@ -59,14 +59,6 @@ using BufferDeviceAddress = uint64_t;
 
 using HandleOrFD = std::variant<std::monostate, int, HANDLE>;
 
-struct MemoryHandle {
-    HandleOrFD handle;
-    DeviceSize allocationSize{ 0 };
-    DeviceSize allocationOffset{ 0 };
-
-    friend bool operator==(const MemoryHandle &, const MemoryHandle &) = default;
-};
-
 struct Extension {
     std::string name;
     uint32_t version{ 0 };
@@ -1202,6 +1194,15 @@ enum class ExternalMemoryHandleTypeFlagBits : uint32_t {
     ScreenBufferQnx = 0x00004000,
 };
 using ExternalMemoryHandleTypeFlags = KDGpu::Flags<ExternalMemoryHandleTypeFlagBits>;
+
+struct MemoryHandle {
+    HandleOrFD handle;
+    ExternalMemoryHandleTypeFlags handleType{ ExternalMemoryHandleTypeFlagBits::None };
+    DeviceSize allocationSize{ 0 };
+    DeviceSize allocationOffset{ 0 };
+
+    friend bool operator==(const MemoryHandle &, const MemoryHandle &) = default;
+};
 
 enum class ResolveModeFlagBits : uint32_t {
     None = 0,

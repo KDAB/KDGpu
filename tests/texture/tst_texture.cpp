@@ -62,7 +62,7 @@ TEST_SUITE("Texture")
         }
 
 #if defined(KDGPU_PLATFORM_LINUX)
-        SUBCASE("A constructed Texture from a Vulkan API with external FD")
+        SUBCASE("A constructed Texture from a Vulkan API which exposes external FD")
         {
             // GIVEN
             const TextureOptions textureOptions = {
@@ -76,7 +76,7 @@ TEST_SUITE("Texture")
             };
 
             // WHEN
-            Texture t = device.createTexture(textureOptions);
+            const Texture t = device.createTexture(textureOptions);
 
             // THEN
             CHECK(t.isValid());
@@ -84,8 +84,53 @@ TEST_SUITE("Texture")
             CHECK(std::get<int>(externalHandleOrFD.handle) > -1);
             CHECK(externalHandleOrFD.allocationSize > 0);
         }
+
+        SUBCASE("A constructed Texture from a Vulkan API from an imported external FD")
+        {
+            // GIVEN
+            const TextureOptions exportedTextureOptions = {
+                .type = TextureType::TextureType2D,
+                .format = Format::R8G8B8A8_SNORM,
+                .extent = { 512, 512, 1 },
+                .mipLevels = 1,
+                .usage = TextureUsageFlagBits::SampledBit,
+                .memoryUsage = MemoryUsage::GpuOnly,
+                .externalMemoryHandleType = ExternalMemoryHandleTypeFlagBits::OpaqueFD,
+            };
+
+            // WHEN
+            const Texture exportedTexture = device.createTexture(exportedTextureOptions);
+
+            // THEN
+            CHECK(exportedTexture.isValid());
+            const MemoryHandle externalHandleOrFD = exportedTexture.externalMemoryHandle();
+            CHECK(std::get<int>(externalHandleOrFD.handle) > -1);
+            CHECK(externalHandleOrFD.allocationSize > 0);
+
+            // WHEN
+            const TextureOptions importedTextureOptions = {
+                .type = TextureType::TextureType2D,
+                .format = Format::R8G8B8A8_SNORM,
+                .extent = { 512, 512, 1 },
+                .mipLevels = 1,
+                .usage = TextureUsageFlagBits::SampledBit,
+                .memoryUsage = MemoryUsage::GpuOnly,
+                .externalMemoryHandleType = ExternalMemoryHandleTypeFlagBits::OpaqueFD, // Must match the externalHandleOrFD
+                .importMemoryHandle = externalHandleOrFD,
+            };
+
+            const Texture importedTexture = device.createTexture(importedTextureOptions);
+
+            // THEN
+            CHECK(importedTexture.isValid());
+            const MemoryHandle externalHandleOrFD2 = importedTexture.externalMemoryHandle();
+            CHECK(std::get<int>(externalHandleOrFD2.handle) > -1); // Handle might not be the same as the imported one
+            CHECK(externalHandleOrFD.handleType == externalHandleOrFD2.handleType);
+            CHECK(externalHandleOrFD.allocationOffset == externalHandleOrFD2.allocationOffset);
+            CHECK(externalHandleOrFD.allocationSize == externalHandleOrFD2.allocationSize);
+        }
 #elif defined(KDGPU_PLATFORM_WIN32)
-        SUBCASE("A constructed Texture from a Vulkan API with external Handle")
+        SUBCASE("A constructed Texture from a Vulkan API which exposes external Handle")
         {
             // GIVEN
             const TextureOptions textureOptions = {
@@ -99,13 +144,58 @@ TEST_SUITE("Texture")
             };
 
             // WHEN
-            Texture t = device.createTexture(textureOptions);
+            const Texture t = device.createTexture(textureOptions);
 
             // THEN
             CHECK(t.isValid());
             const MemoryHandle externalHandleOrFD = t.externalMemoryHandle();
             CHECK(std::get<HANDLE>(externalHandleOrFD.handle) != nullptr);
             CHECK(externalHandleOrFD.allocationSize > 0);
+        }
+
+        SUBCASE("A constructed Texture from a Vulkan API from an imported external Handle")
+        {
+            // GIVEN
+            const TextureOptions exportedTextureOptions = {
+                .type = TextureType::TextureType2D,
+                .format = Format::R8G8B8A8_SNORM,
+                .extent = { 512, 512, 1 },
+                .mipLevels = 1,
+                .usage = TextureUsageFlagBits::SampledBit,
+                .memoryUsage = MemoryUsage::GpuOnly,
+                .externalMemoryHandleType = ExternalMemoryHandleTypeFlagBits::OpaqueWin32,
+            };
+
+            // WHEN
+            const Texture exportedTexture = device.createTexture(exportedTextureOptions);
+
+            // THEN
+            CHECK(exportedTexture.isValid());
+            const MemoryHandle externalHandleOrFD = exportedTexture.externalMemoryHandle();
+            CHECK(std::get<HANDLE>(externalHandleOrFD.handle) != nullptr);
+            CHECK(externalHandleOrFD.allocationSize > 0);
+
+            // WHEN
+            const TextureOptions importedTextureOptions = {
+                .type = TextureType::TextureType2D,
+                .format = Format::R8G8B8A8_SNORM,
+                .extent = { 512, 512, 1 },
+                .mipLevels = 1,
+                .usage = TextureUsageFlagBits::SampledBit,
+                .memoryUsage = MemoryUsage::GpuOnly,
+                .externalMemoryHandleType = ExternalMemoryHandleTypeFlagBits::OpaqueWin32, // Must match the externalHandleOrFD
+                .importMemoryHandle = externalHandleOrFD,
+            };
+
+            const Texture importedTexture = device.createTexture(importedTextureOptions);
+
+            // THEN
+            CHECK(importedTexture.isValid());
+            const MemoryHandle externalHandleOrFD2 = importedTexture.externalMemoryHandle();
+            CHECK(std::get<HANDLE>(externalHandleOrFD2.handle) != nullptr); // Handle might not be the same as the imported one
+            CHECK(externalHandleOrFD.handleType == externalHandleOrFD2.handleType);
+            CHECK(externalHandleOrFD.allocationOffset == externalHandleOrFD2.allocationOffset);
+            CHECK(externalHandleOrFD.allocationSize == externalHandleOrFD2.allocationSize);
         }
 #endif
     }

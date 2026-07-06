@@ -8,7 +8,10 @@
     "dependencies": [
         "kdutils",
         "spdlog",
-        "vulkan-memory-allocator",
+        {
+            "name": "vulkan-memory-allocator",
+            "version>=": "3.4.0"
+        },
         {
             "name": "pkgconf",
             "host": true

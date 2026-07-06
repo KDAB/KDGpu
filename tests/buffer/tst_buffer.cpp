@@ -84,7 +84,7 @@ TEST_SUITE("Buffer")
         }
 
 #if defined(KDGPU_PLATFORM_LINUX)
-        SUBCASE("A constructed Buffer from a Vulkan API with external FD")
+        SUBCASE("A constructed Buffer from a Vulkan API which exposes external FD")
         {
             // GIVEN
             const BufferOptions bufferOptions = {
@@ -95,7 +95,7 @@ TEST_SUITE("Buffer")
             };
 
             // WHEN
-            Buffer b = device.createBuffer(bufferOptions);
+            const Buffer b = device.createBuffer(bufferOptions);
 
             // THEN
             CHECK(b.isValid());
@@ -103,8 +103,47 @@ TEST_SUITE("Buffer")
             CHECK(std::get<int>(externalHandleOrFD.handle) > -1);
             CHECK(externalHandleOrFD.allocationSize > 0);
         }
+
+        SUBCASE("A constructed Buffer from a Vulkan API from an imported external FD")
+        {
+            // GIVEN
+            const BufferOptions exportedBufferOptions = {
+                .size = 4 * sizeof(float),
+                .usage = BufferUsageFlagBits::VertexBufferBit,
+                .memoryUsage = MemoryUsage::CpuToGpu,
+                .externalMemoryHandleType = ExternalMemoryHandleTypeFlagBits::OpaqueFD,
+            };
+
+            // WHEN
+            const Buffer exportedBuffer = device.createBuffer(exportedBufferOptions);
+
+            // THEN
+            CHECK(exportedBuffer.isValid());
+            const MemoryHandle externalHandleOrFD = exportedBuffer.externalMemoryHandle();
+            CHECK(std::get<int>(externalHandleOrFD.handle) > -1);
+            CHECK(externalHandleOrFD.allocationSize > 0);
+
+            // WHEN
+            const BufferOptions importedBufferOptions = {
+                .size = 4 * sizeof(float),
+                .usage = BufferUsageFlagBits::VertexBufferBit,
+                .memoryUsage = MemoryUsage::CpuToGpu,
+                .externalMemoryHandleType = ExternalMemoryHandleTypeFlagBits::OpaqueFD, // Must match the externalHandleOrFD
+                .importMemoryHandle = externalHandleOrFD,
+            };
+
+            const Buffer importedBuffer = device.createBuffer(importedBufferOptions);
+
+            // THEN
+            CHECK(importedBuffer.isValid());
+            const MemoryHandle externalHandleOrFD2 = importedBuffer.externalMemoryHandle();
+            CHECK(std::get<int>(externalHandleOrFD2.handle) > -1); // Handle might not be the same as the imported one
+            CHECK(externalHandleOrFD.handleType == externalHandleOrFD2.handleType);
+            CHECK(externalHandleOrFD.allocationOffset == externalHandleOrFD2.allocationOffset);
+            CHECK(externalHandleOrFD.allocationSize == externalHandleOrFD2.allocationSize);
+        }
 #elif defined(KDGPU_PLATFORM_WIN32)
-        SUBCASE("A constructed Buffer from a Vulkan API with external Handle")
+        SUBCASE("A constructed Buffer from a Vulkan API which exposes external Handle")
         {
             // GIVEN
             const BufferOptions bufferOptions = {
@@ -122,6 +161,45 @@ TEST_SUITE("Buffer")
             const MemoryHandle externalHandleOrFD = b.externalMemoryHandle();
             CHECK(std::get<HANDLE>(externalHandleOrFD.handle) != nullptr);
             CHECK(externalHandleOrFD.allocationSize > 0);
+        }
+
+        SUBCASE("A constructed Buffer from a Vulkan API from an imported external Handle")
+        {
+            // GIVEN
+            const BufferOptions exportedBufferOptions = {
+                .size = 4 * sizeof(float),
+                .usage = BufferUsageFlagBits::VertexBufferBit,
+                .memoryUsage = MemoryUsage::CpuToGpu,
+                .externalMemoryHandleType = ExternalMemoryHandleTypeFlagBits::OpaqueWin32,
+            };
+
+            // WHEN
+            const Buffer exportedBuffer = device.createBuffer(exportedBufferOptions);
+
+            // THEN
+            CHECK(exportedBuffer.isValid());
+            const MemoryHandle externalHandleOrFD = exportedBuffer.externalMemoryHandle();
+            CHECK(std::get<HANDLE>(externalHandleOrFD.handle) != nullptr);
+            CHECK(externalHandleOrFD.allocationSize > 0);
+
+            // WHEN
+            const BufferOptions importedBufferOptions = {
+                .size = 4 * sizeof(float),
+                .usage = BufferUsageFlagBits::VertexBufferBit,
+                .memoryUsage = MemoryUsage::CpuToGpu,
+                .externalMemoryHandleType = ExternalMemoryHandleTypeFlagBits::OpaqueWin32, // Must match the externalHandleOrFD
+                .importMemoryHandle = externalHandleOrFD,
+            };
+
+            const Buffer importedBuffer = device.createBuffer(importedBufferOptions);
+
+            // THEN
+            CHECK(importedBuffer.isValid());
+            const MemoryHandle externalHandleOrFD2 = importedBuffer.externalMemoryHandle();
+            CHECK(std::get<HANDLE>(externalHandleOrFD2.handle) != nullptr); // Handle might not be the same as the imported one
+            CHECK(externalHandleOrFD.handleType == externalHandleOrFD2.handleType);
+            CHECK(externalHandleOrFD.allocationOffset == externalHandleOrFD2.allocationOffset);
+            CHECK(externalHandleOrFD.allocationSize == externalHandleOrFD2.allocationSize);
         }
 #endif
     }

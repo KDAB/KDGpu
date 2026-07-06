@@ -26,6 +26,7 @@ struct BufferOptions {
     SharingMode sharingMode{ SharingMode::Exclusive };
     std::vector<uint32_t> queueTypeIndices;
     ExternalMemoryHandleTypeFlags externalMemoryHandleType{ ExternalMemoryHandleTypeFlagBits::None };
+    MemoryHandle importMemoryHandle;
 };
 
 } // namespace KDGpu
