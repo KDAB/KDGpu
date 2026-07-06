@@ -254,7 +254,11 @@ endif()
 
 if(${KDGPU_BUILD_IN_STRICT_MODE})
     target_compile_definitions(KDGpu PUBLIC KDGPU_STRICT_MODE)
-    target_compile_options(KDGpu PRIVATE -Wall -Wpedantic)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
+        target_compile_options(KDGpu PRIVATE -Wall -Wpedantic)
+    elseif(MSVC)
+        target_compile_options(KDGpu PRIVATE /W4 /permissive-)
+    endif()
 endif()
 
 # Require >=C++20 for us and downstream projects
