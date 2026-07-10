@@ -286,6 +286,28 @@ public:
     std::vector<DrmFormatModifierProperties> drmFormatModifierProperties(Format format) const;
 
     /*!
+        \brief Queries external fences properties for a given handle type
+        \param fenceHandleType Fence handle type to query
+        \return ExternalFenceProperties
+
+        Use to query whether a specific handle type can be used for importing or exporting a fence. Useful for interops and multi process use.
+
+        \sa ExternalFenceProperties
+    */
+    ExternalFenceProperties externalFenceProperties(ExternalFenceHandleTypeFlagBits fenceHandleType) const;
+
+    /*!
+        \brief Queries external semaphore properties for a given handle type
+        \param fenceHandleType Semaphore handle type to query
+        \return ExternalSemaphoreProperties
+
+        Use to query whether a specific handle type can be used for importing or exporting a semaphore. Useful for interops and multi process use.
+
+        \sa ExternalSemaphoreProperties
+    */
+    ExternalSemaphoreProperties externalSemaphoreProperties(ExternalSemaphoreHandleTypeFlagBits semaphoreHandleType) const;
+
+    /*!
         \brief Creates a logical device from this adapter
         \param options Device creation options (queue families, features, extensions)
         \return Created device

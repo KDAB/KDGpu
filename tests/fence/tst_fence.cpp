@@ -28,6 +28,16 @@ TEST_SUITE("Fence")
     Adapter *discreteGPUAdapter = instance.selectAdapter(AdapterDeviceType::Default);
     Device device = discreteGPUAdapter->createDevice();
 
+#if defined(KDGPU_PLATFORM_LINUX)
+    const ExternalFenceProperties externalFenceProperties = discreteGPUAdapter->externalFenceProperties(ExternalFenceHandleTypeFlagBits::OpaqueFD);
+#elif defined(KDGPU_PLATFORM_WIN32)
+    const ExternalFenceProperties externalFenceProperties = discreteGPUAdapter->externalFenceProperties(ExternalFenceHandleTypeFlagBits::OpaqueWin32);
+#else
+    const ExternalFenceProperties externalFenceProperties;
+#endif
+    const bool supportsFenceExport = externalFenceProperties.externalFenceFeatures.testFlag(KDGpu::ExternalFenceFeatureFlagBits::Exportable);
+    const bool supportsFenceImport = externalFenceProperties.externalFenceFeatures.testFlag(KDGpu::ExternalFenceFeatureFlagBits::Importable);
+
     TEST_CASE("Construction")
     {
         SUBCASE("A default constructed Fence is invalid")
@@ -49,39 +59,6 @@ TEST_SUITE("Fence")
             // THEN
             CHECK(s.isValid());
         }
-#if defined(KDGPU_PLATFORM_LINUX)
-        SUBCASE("A constructed Fence from a Vulkan API with external FD")
-        {
-            // GIVEN
-            const FenceOptions fenceOptions{
-                .externalFenceHandleType = ExternalFenceHandleTypeFlagBits::OpaqueFD,
-            };
-
-            // WHEN
-            Fence s = device.createFence(fenceOptions);
-
-            // THEN
-            CHECK(s.isValid());
-            const HandleOrFD externalHandleOrFD = s.externalFenceHandle();
-            CHECK(std::get<int>(externalHandleOrFD) > -1);
-        }
-#elif defined(KDGPU_PLATFORM_WIN32)
-        SUBCASE("A constructed Fence from a Vulkan API with external Handle")
-        {
-            // GIVEN
-            const FenceOptions fenceOptions{
-                .externalFenceHandleType = ExternalFenceHandleTypeFlagBits::OpaqueWin32,
-            };
-
-            // WHEN
-            Fence s = device.createFence(fenceOptions);
-
-            // THEN
-            CHECK(s.isValid());
-            const HandleOrFD externalHandleOrFD = s.externalFenceHandle();
-            CHECK(std::get<HANDLE>(externalHandleOrFD) != nullptr);
-        }
-#endif
 
         SUBCASE("Move constructor & move assignment")
         {
@@ -108,6 +85,180 @@ TEST_SUITE("Fence")
             CHECK(!s2.isValid());
             CHECK(s3.handle() == s2Handle);
         }
+    }
+
+    TEST_CASE("Export" * doctest::skip(!supportsFenceExport))
+    {
+#if defined(KDGPU_PLATFORM_LINUX)
+        SUBCASE("A constructed Fence from a Vulkan API with external FD")
+        {
+            // GIVEN
+            const ExternalFenceProperties fenceProperties = discreteGPUAdapter->externalFenceProperties(ExternalFenceHandleTypeFlagBits::OpaqueFD);
+
+            // THEN
+            REQUIRE(fenceProperties.externalFenceFeatures.testFlag(KDGpu::ExternalFenceFeatureFlagBits::Exportable));
+
+            // WHEN
+            const FenceOptions fenceOptions{
+                .externalFenceHandleType = ExternalFenceHandleTypeFlagBits::OpaqueFD,
+            };
+
+            const Fence s = device.createFence(fenceOptions);
+
+            // THEN
+            CHECK(s.isValid());
+            const HandleOrFD externalHandleOrFD = s.externalFenceHandle();
+            CHECK(std::get<int>(externalHandleOrFD) > -1);
+        }
+#elif defined(KDGPU_PLATFORM_WIN32)
+        SUBCASE("A constructed Fence from a Vulkan API with external Handle")
+        {
+            // GIVEN
+            const ExternalFenceProperties fenceProperties = discreteGPUAdapter->externalFenceProperties(ExternalFenceHandleTypeFlagBits::OpaqueWin32);
+
+            // THEN
+            REQUIRE(fenceProperties.externalFenceFeatures.testFlag(KDGpu::ExternalFenceFeatureFlagBits::Exportable));
+
+            // WHEN
+            const FenceOptions fenceOptions{
+                .externalFenceHandleType = ExternalFenceHandleTypeFlagBits::OpaqueWin32,
+            };
+
+            const Fence s = device.createFence(fenceOptions);
+
+            // THEN
+            CHECK(s.isValid());
+            const HandleOrFD externalHandleOrFD = s.externalFenceHandle();
+            CHECK(std::get<HANDLE>(externalHandleOrFD) != nullptr);
+        }
+#endif
+    }
+
+    TEST_CASE("Import" * doctest::skip(!supportsFenceImport))
+    {
+#if defined(KDGPU_PLATFORM_LINUX)
+        SUBCASE("A constructed Fence from a Vulkan API from an imported external FD")
+        {
+            // GIVEN
+            const ExternalFenceProperties fenceProperties = discreteGPUAdapter->externalFenceProperties(ExternalFenceHandleTypeFlagBits::OpaqueFD);
+
+            // THEN
+            REQUIRE(fenceProperties.externalFenceFeatures.testFlag(KDGpu::ExternalFenceFeatureFlagBits::Exportable));
+            REQUIRE(fenceProperties.externalFenceFeatures.testFlag(KDGpu::ExternalFenceFeatureFlagBits::Importable));
+
+            {
+                // WHEN
+                const FenceOptions fenceOptions{
+                    .externalFenceHandleType = ExternalFenceHandleTypeFlagBits::OpaqueFD,
+                };
+
+                const Fence s = device.createFence(fenceOptions);
+
+                // THEN
+                CHECK(s.isValid());
+                const HandleOrFD externalHandleOrFD = s.externalFenceHandle();
+                CHECK(std::get<int>(externalHandleOrFD) > -1);
+
+                // WHEN
+                const FenceOptions importedFenceOptions{
+                    .importFenceHandle = externalHandleOrFD,
+                    .importFenceHandleType = ExternalFenceHandleTypeFlagBits::OpaqueFD,
+                    .importTransference = ImportFenceTransferenceTypeFlagsBits::Temporary,
+                };
+
+                const Fence importedFence = device.createFence(importedFenceOptions);
+
+                // THEN
+                CHECK(importedFence.isValid());
+            }
+            {
+                // WHEN
+                const FenceOptions fenceOptions{
+                    .externalFenceHandleType = ExternalFenceHandleTypeFlagBits::OpaqueFD,
+                };
+
+                const Fence s = device.createFence(fenceOptions);
+
+                // THEN
+                CHECK(s.isValid());
+                const HandleOrFD externalHandleOrFD = s.externalFenceHandle();
+                CHECK(std::get<int>(externalHandleOrFD) > -1);
+
+                // WHEN
+                const FenceOptions importedFenceOptions{
+                    .importFenceHandle = externalHandleOrFD,
+                    .importFenceHandleType = ExternalFenceHandleTypeFlagBits::OpaqueFD,
+                    .importTransference = ImportFenceTransferenceTypeFlagsBits::Permanent,
+                };
+
+                const Fence importedFence = device.createFence(importedFenceOptions);
+
+                // THEN
+                CHECK(importedFence.isValid());
+            }
+        }
+#elif defined(KDGPU_PLATFORM_WIN32)
+        SUBCASE("A constructed Fence from a Vulkan API from an imported external Handle")
+        {
+            // GIVEN
+            const ExternalFenceProperties fenceProperties = discreteGPUAdapter->externalFenceProperties(ExternalFenceHandleTypeFlagBits::OpaqueWin32);
+
+            // THEN
+            REQUIRE(fenceProperties.externalFenceFeatures.testFlag(KDGpu::ExternalFenceFeatureFlagBits::Exportable));
+            REQUIRE(fenceProperties.externalFenceFeatures.testFlag(KDGpu::ExternalFenceFeatureFlagBits::Importable));
+
+            {
+                // WHEN
+                const FenceOptions fenceOptions{
+                    .externalFenceHandleType = ExternalFenceHandleTypeFlagBits::OpaqueWin32,
+                };
+
+                const Fence s = device.createFence(fenceOptions);
+
+                // THEN
+                CHECK(s.isValid());
+                const HandleOrFD externalHandleOrFD = s.externalFenceHandle();
+                CHECK(std::get<HANDLE>(externalHandleOrFD) != nullptr);
+
+                // WHEN
+                const FenceOptions importedFenceOptions{
+                    .importFenceHandle = externalHandleOrFD,
+                    .importFenceHandleType = ExternalFenceHandleTypeFlagBits::OpaqueWin32,
+                    .importTransference = ImportFenceTransferenceTypeFlagsBits::Temporary,
+                };
+
+                const Fence importedFence = device.createFence(importedFenceOptions);
+
+                // THEN
+                CHECK(importedFence.isValid());
+            }
+            {
+                // WHEN
+                const FenceOptions fenceOptions{
+                    .externalFenceHandleType = ExternalFenceHandleTypeFlagBits::OpaqueWin32,
+                };
+
+                const Fence s = device.createFence(fenceOptions);
+
+                // THEN
+                CHECK(s.isValid());
+                const HandleOrFD externalHandleOrFD = s.externalFenceHandle();
+                CHECK(std::get<HANDLE>(externalHandleOrFD) != nullptr);
+
+                // WHEN
+                const FenceOptions importedFenceOptions{
+                    .importFenceHandle = externalHandleOrFD,
+                    .importFenceHandleType = ExternalFenceHandleTypeFlagBits::OpaqueWin32,
+                    .importTransference = ImportFenceTransferenceTypeFlagsBits::Permanent,
+                };
+
+                const Fence importedFence = device.createFence(importedFenceOptions);
+
+                // THEN
+                CHECK(importedFence.isValid());
+            }
+        }
+#endif
     }
 
     TEST_CASE("Destruction")

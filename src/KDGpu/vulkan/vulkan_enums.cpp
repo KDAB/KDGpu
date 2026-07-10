@@ -340,14 +340,29 @@ VkCommandBufferLevel commandBufferLevelToVkCommandBufferLevel(CommandBufferLevel
     return static_cast<VkCommandBufferLevel>(static_cast<uint32_t>(level));
 }
 
-ExternalSemaphoreHandleTypeFlags vkExternalSemaphoreHandleTypeToExternalSemaphoreHandleType(VkExternalSemaphoreHandleTypeFlagBits handleFlags)
+ExternalSemaphoreHandleTypeFlags vkExternalSemaphoreHandleTypeToExternalSemaphoreHandleType(VkExternalSemaphoreHandleTypeFlags handleFlags)
 {
     return ExternalSemaphoreHandleTypeFlags::fromInt(static_cast<uint32_t>(handleFlags));
 }
 
-VkExternalSemaphoreHandleTypeFlagBits externalSemaphoreHandleTypeToVkExternalSemaphoreHandleType(ExternalSemaphoreHandleTypeFlags handleFlags)
+VkExternalSemaphoreHandleTypeFlags externalSemaphoreHandleTypeFlagsToVkExternalSemaphoreHandleTypeFlags(ExternalSemaphoreHandleTypeFlags handleFlags)
 {
     return static_cast<VkExternalSemaphoreHandleTypeFlagBits>(static_cast<uint32_t>(handleFlags.toInt()));
+}
+
+VkExternalSemaphoreHandleTypeFlagBits externalSemaphoreHandleTypeFlagBitToVkExternalSemaphoreHandleTypeFlagBit(ExternalSemaphoreHandleTypeFlagBits handleFlags)
+{
+    return static_cast<VkExternalSemaphoreHandleTypeFlagBits>(static_cast<uint32_t>(handleFlags));
+}
+
+ExternalSemaphoreFeatureFlags vkExternalSemaphoreFeatureFlagsToExternalSemaphoreFeatureFlags(VkExternalSemaphoreFeatureFlags featureFlags)
+{
+    return ExternalSemaphoreFeatureFlags::fromInt(static_cast<uint32_t>(featureFlags));
+}
+
+VkExternalSemaphoreFeatureFlags externalSemaphoreFeatureFlagsToVkExternalSemaphoreFeatureFlags(ExternalSemaphoreFeatureFlags featureFlags)
+{
+    return static_cast<VkExternalSemaphoreFeatureFlags>(static_cast<uint32_t>(featureFlags.toInt()));
 }
 
 ExternalMemoryHandleTypeFlags vkExternalMemoryHandleTypeToExternalMemoryHandleType(VkExternalMemoryHandleTypeFlagBits handleFlags)
@@ -360,14 +375,59 @@ VkExternalMemoryHandleTypeFlagBits externalMemoryHandleTypeToVkExternalMemoryHan
     return static_cast<VkExternalMemoryHandleTypeFlagBits>(static_cast<uint32_t>(handleFlags.toInt()));
 }
 
-ExternalFenceHandleTypeFlags vkExternalFenceHandleTypeToExternalFenceHandleType(VkExternalFenceHandleTypeFlagBits handleFlags)
+ExternalMemoryFeatureFlags vkExternalMemoryFeatureFlagsToExternalMemoryFeatureFlags(VkExternalMemoryFeatureFlags featureFlags)
+{
+    return ExternalMemoryFeatureFlags::fromInt(static_cast<uint32_t>(featureFlags));
+}
+
+VkExternalMemoryFeatureFlags externalMemoryFeatureFlagBitsToVkExternalMemoryFeatureFlags(ExternalMemoryFeatureFlags featureFlags)
+{
+    return static_cast<VkExternalMemoryFeatureFlags>(static_cast<uint32_t>(featureFlags.toInt()));
+}
+
+ExternalFenceHandleTypeFlags vkExternalFenceHandleTypeToExternalFenceHandleType(VkExternalFenceHandleTypeFlags handleFlags)
 {
     return ExternalFenceHandleTypeFlags::fromInt(static_cast<uint32_t>(handleFlags));
 }
 
-VkExternalFenceHandleTypeFlagBits externalFenceHandleTypeToVkExternalFenceHandleType(ExternalFenceHandleTypeFlags handleFlags)
+VkExternalFenceHandleTypeFlagBits externalFenceHandleTypeFlagBitsToVkExternalFenceHandleTypeFlagBits(ExternalFenceHandleTypeFlagBits handleFlags)
+{
+    return static_cast<VkExternalFenceHandleTypeFlagBits>(static_cast<uint32_t>(handleFlags));
+}
+
+VkExternalFenceHandleTypeFlags externalFenceHandleTypeFlagsToVkExternalFenceHandleTypeFlags(ExternalFenceHandleTypeFlags handleFlags)
 {
     return static_cast<VkExternalFenceHandleTypeFlagBits>(static_cast<uint32_t>(handleFlags.toInt()));
+}
+
+ExternalFenceFeatureFlags vkExternalFenceFeatureFlagsToExternalFenceFeatureFlags(VkExternalFenceFeatureFlags featureFlags)
+{
+    return ExternalFenceFeatureFlags::fromInt(static_cast<uint32_t>(featureFlags));
+}
+
+VkExternalFenceFeatureFlags externalFenceFeatureFlagsToVkExternalFenceFeatureFlags(ExternalFenceFeatureFlags featureFlags)
+{
+    return static_cast<VkExternalFenceFeatureFlags>(static_cast<uint32_t>(featureFlags.toInt()));
+}
+
+ImportFenceTransferenceTypeFlags vkFenceImportFlagsToFenceImportFlags(VkFenceImportFlags importFlags)
+{
+    return ImportFenceTransferenceTypeFlags::fromInt(static_cast<uint32_t>(importFlags));
+}
+
+VkFenceImportFlags fenceImportFlagsToVkFenceImportFlags(ImportFenceTransferenceTypeFlags importFlags)
+{
+    return static_cast<VkFenceImportFlags>(static_cast<uint32_t>(importFlags.toInt()));
+}
+
+ImportSemaphoreTransferenceTypeFlags vkSemaphoreImportFlagsToSemaphoreImportFlags(VkSemaphoreImportFlags importFlags)
+{
+    return ImportSemaphoreTransferenceTypeFlags::fromInt(static_cast<uint32_t>(importFlags));
+}
+
+VkSemaphoreImportFlags semaphoreImportFlagsToVkSemaphoreImportFlags(ImportSemaphoreTransferenceTypeFlags importFlags)
+{
+    return static_cast<VkSemaphoreImportFlags>(static_cast<uint32_t>(importFlags.toInt()));
 }
 
 ResolveModeFlagBits vkResolveModeToResolveMode(VkResolveModeFlagBits resolveFlag)

@@ -136,19 +136,23 @@ VulkanDevice::VulkanDevice(VkDevice _device,
 #endif
 
 #if VK_KHR_external_semaphore_fd
-    vkGetSemaphoreFdKHR = (PFN_vkGetSemaphoreFdKHR)vkGetDeviceProcAddr(device, "vkGetSemaphoreFdKHR");
+    vkGetSemaphoreFdKHR = PFN_vkGetSemaphoreFdKHR(vkGetDeviceProcAddr(device, "vkGetSemaphoreFdKHR"));
+    vkImportSemaphoreFdKHR = PFN_vkImportSemaphoreFdKHR(vkGetDeviceProcAddr(device, "vkImportSemaphoreFdKHR"));
 #endif
 
 #if VK_KHR_external_fence_fd
-    vkGetFenceFdKHR = (PFN_vkGetFenceFdKHR)vkGetDeviceProcAddr(device, "vkGetFenceFdKHR");
+    vkGetFenceFdKHR = PFN_vkGetFenceFdKHR(vkGetDeviceProcAddr(device, "vkGetFenceFdKHR"));
+    vkImportFenceFdKHR = PFN_vkImportFenceFdKHR(vkGetDeviceProcAddr(device, "vkImportFenceFdKHR"));
 #endif
 
 #if VK_KHR_external_semaphore_win32
     vkGetSemaphoreWin32HandleKHR = (PFN_vkGetSemaphoreWin32HandleKHR)vkGetDeviceProcAddr(device, "vkGetSemaphoreWin32HandleKHR");
+    vkImportSemaphoreWin32HandleKHR = (PFN_vkImportSemaphoreWin32HandleKHR)vkGetDeviceProcAddr(device, "vkImportSemaphoreWin32HandleKHR");
 #endif
 
 #if VK_KHR_external_fence_win32
     vkGetFenceWin32HandleKHR = (PFN_vkGetFenceWin32HandleKHR)vkGetDeviceProcAddr(device, "vkGetFenceWin32HandleKHR");
+    vkImportFenceWin32HandleKHR = (PFN_vkImportFenceWin32HandleKHR)vkGetDeviceProcAddr(device, "vkImportFenceWin32HandleKHR");
 #endif
 
     // If we request the extension version of renderpass2, then use that. Otherwise fall back to the core 1.2 version.

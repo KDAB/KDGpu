@@ -27,6 +27,9 @@ struct TimelineSemaphoreOptions {
     std::string_view label;
     ExternalSemaphoreHandleTypeFlags externalSemaphoreHandleType{ ExternalSemaphoreHandleTypeFlagBits::None };
     uint64_t initialValue{ 0 };
+    HandleOrFD importSemaphoreHandle;
+    ExternalSemaphoreHandleTypeFlagBits importSemaphoreHandleType{ ExternalSemaphoreHandleTypeFlagBits::None };
+    ImportSemaphoreTransferenceTypeFlags importTransference{ ImportSemaphoreTransferenceTypeFlagsBits::Permanent };
 };
 
 /*!

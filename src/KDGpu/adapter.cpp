@@ -196,4 +196,16 @@ std::vector<DrmFormatModifierProperties> Adapter::drmFormatModifierProperties(Fo
     return apiAdapter->drmFormatModifierProperties(format);
 }
 
+ExternalFenceProperties Adapter::externalFenceProperties(ExternalFenceHandleTypeFlagBits fenceHandleType) const
+{
+    auto *apiAdapter = m_api->resourceManager()->getAdapter(m_adapter);
+    return apiAdapter->externalFenceProperties(fenceHandleType);
+}
+
+ExternalSemaphoreProperties Adapter::externalSemaphoreProperties(ExternalSemaphoreHandleTypeFlagBits semaphoreHandleType) const
+{
+    auto *apiAdapter = m_api->resourceManager()->getAdapter(m_adapter);
+    return apiAdapter->externalSemaphorePoperties(semaphoreHandleType);
+}
+
 } // namespace KDGpu

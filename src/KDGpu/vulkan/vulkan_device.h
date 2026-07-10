@@ -116,15 +116,21 @@ struct KDGPU_EXPORT VulkanDevice {
     // we need to include with WIN32_LEAN_AND_MEAN and NOMINMAX (see vulkanconfig.cpp)
     using PFN_vkGetSemaphoreWin32HandleKHR = VkResult(VKAPI_PTR *)(VkDevice, const VkSemaphoreGetWin32HandleInfoKHR *, HANDLE *);
     PFN_vkGetSemaphoreWin32HandleKHR vkGetSemaphoreWin32HandleKHR{ nullptr };
+    using PFN_vkImportSemaphoreWin32HandleKHR = VkResult(VKAPI_PTR *)(VkDevice, const VkImportSemaphoreWin32HandleInfoKHR *);
+    PFN_vkImportSemaphoreWin32HandleKHR vkImportSemaphoreWin32HandleKHR;
     using PFN_vkGetFenceWin32HandleKHR = VkResult(VKAPI_PTR *)(VkDevice, const VkFenceGetWin32HandleInfoKHR *, HANDLE *);
     PFN_vkGetFenceWin32HandleKHR vkGetFenceWin32HandleKHR{ nullptr };
+    using PFN_vkImportFenceWin32HandleKHR = VkResult(VKAPI_PTR *)(VkDevice, const VkImportFenceWin32HandleInfoKHR *);
+    PFN_vkImportFenceWin32HandleKHR vkImportFenceWin32HandleKHR{ nullptr };
 #endif
 
 #if VK_KHR_external_semaphore_fd
     PFN_vkGetSemaphoreFdKHR vkGetSemaphoreFdKHR{ nullptr };
+    PFN_vkImportSemaphoreFdKHR vkImportSemaphoreFdKHR{ nullptr };
 #endif
 #if VK_KHR_external_fence_fd
     PFN_vkGetFenceFdKHR vkGetFenceFdKHR{ nullptr };
+    PFN_vkImportFenceFdKHR vkImportFenceFdKHR{ nullptr };
 #endif
 
     PFN_vkCreateRenderPass2 vkCreateRenderPass2{ nullptr };

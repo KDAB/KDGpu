@@ -46,6 +46,8 @@ struct KDGPU_EXPORT VulkanAdapter {
     [[nodiscard]] bool supportsPresentation(const Handle<Surface_t> &surfaceHandle, uint32_t queueTypeIndex) const;
     [[nodiscard]] FormatProperties formatProperties(Format format) const;
     [[nodiscard]] std::vector<DrmFormatModifierProperties> drmFormatModifierProperties(Format format) const;
+    [[nodiscard]] ExternalFenceProperties externalFenceProperties(ExternalFenceHandleTypeFlagBits fenceHandleType) const;
+    [[nodiscard]] ExternalSemaphoreProperties externalSemaphorePoperties(ExternalSemaphoreHandleTypeFlagBits semaphoreHandleType) const;
 
     VkPhysicalDevice physicalDevice{ VK_NULL_HANDLE };
     VulkanResourceManager *vulkanResourceManager{ nullptr };

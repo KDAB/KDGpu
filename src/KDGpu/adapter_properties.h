@@ -259,6 +259,57 @@ struct PushBindGroupProperties {
 /**
     @headerfile adapter_properties.h <KDGpu/adapter_properties.h>
  */
+struct ExternalSemaphoreProperties {
+    /// A bitmask of `ExternalSemaphoreHandleTypeFlagBits` specifying which types of
+    /// imported external memory the semaphore can be exported from.
+    ExternalSemaphoreHandleTypeFlags exportFromImportedHandleTypes;
+
+    /// A bitmask of `ExternalSemaphoreHandleTypeFlagBits` specifying which types of
+    /// external semaphore handles are compatible with this semaphore handle type.
+    ExternalSemaphoreHandleTypeFlags compatibleHandleTypes;
+
+    /// A bitmask of `ExternalSemaphoreFeatureFlagBits` describing the features of
+    /// the external semaphore such as whether it is importable or exportable.
+    ExternalSemaphoreFeatureFlags externalSemaphoreFeatures;
+};
+
+/**
+    @headerfile adapter_properties.h <KDGpu/adapter_properties.h>
+ */
+struct ExternalMemoryProperties {
+    /// A bitmask of `ExternalMemoryHandleTypeFlagBits` specifying which types of
+    /// imported external memory the memory can be exported from.
+    ExternalMemoryHandleTypeFlags exportFromImportedHandleTypes;
+
+    /// A bitmask of `ExternalMemoryHandleTypeFlagBits` specifying which types of
+    /// external memory handles are compatible with this memory handle type.
+    ExternalMemoryHandleTypeFlags compatibleHandleTypes;
+
+    /// A bitmask of `ExternalMemoryFeatureFlagBits` describing the features of
+    /// the external memory, such as dedicated allocations or dedicated image support.
+    ExternalMemoryFeatureFlags externalMemoryFeatures;
+};
+
+/**
+    @headerfile adapter_properties.h <KDGpu/adapter_properties.h>
+ */
+struct ExternalFenceProperties {
+    /// A bitmask of `ExternalFenceHandleTypeFlagBits` specifying which types of
+    /// imported external memory the fence can be exported from.
+    ExternalFenceHandleTypeFlags exportFromImportedHandleTypes;
+
+    /// A bitmask of `ExternalFenceHandleTypeFlagBits` specifying which types of
+    /// external fence handles are compatible with this fence handle type.
+    ExternalFenceHandleTypeFlags compatibleHandleTypes;
+
+    /// A bitmask of `ExternalFenceFeatureFlagBits` describing the features of
+    /// the external fence such as whether it is importable or exportable.
+    ExternalFenceFeatureFlags externalFenceFeatures;
+};
+
+/**
+    @headerfile adapter_properties.h <KDGpu/adapter_properties.h>
+ */
 struct AdapterProperties {
     uint32_t apiVersion{ 0 };
     uint32_t driverVersion{ 0 };

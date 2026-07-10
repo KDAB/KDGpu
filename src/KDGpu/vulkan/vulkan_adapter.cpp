@@ -13,6 +13,7 @@
 #include <KDGpu/vulkan/vulkan_enums.h>
 #include <KDGpu/vulkan/vulkan_resource_manager.h>
 #include <KDGpu/vulkan/vulkan_surface.h>
+#include <KDGpu/vulkan/vulkan_formatters.h>
 
 #include <algorithm>
 
@@ -347,7 +348,7 @@ AdapterProperties VulkanAdapter::queryAdapterProperties() const
 #if VK_KHR_push_descriptor
         .pushBindGroupProperties = {
                 .maxPushBindGroups = pushDescriptorProperties.maxPushDescriptors,
-        }
+        },
 #endif
     };
     return properties;
@@ -750,6 +751,44 @@ std::vector<DrmFormatModifierProperties> VulkanAdapter::drmFormatModifierPropert
 #endif
 
     return modifierProperties;
+}
+
+ExternalFenceProperties VulkanAdapter::externalFenceProperties(ExternalFenceHandleTypeFlagBits fenceHandleType) const
+{
+    const VkPhysicalDeviceExternalFenceInfo externalFenceInfo{
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_FENCE_INFO,
+        .pNext = nullptr,
+        .handleType = externalFenceHandleTypeFlagBitsToVkExternalFenceHandleTypeFlagBits(fenceHandleType),
+    };
+
+    VkExternalFenceProperties externalFenceProperties{};
+    externalFenceProperties.sType = VK_STRUCTURE_TYPE_EXTERNAL_FENCE_PROPERTIES;
+    vkGetPhysicalDeviceExternalFenceProperties(physicalDevice, &externalFenceInfo, &externalFenceProperties);
+
+    return ExternalFenceProperties{
+        .exportFromImportedHandleTypes = vkExternalFenceHandleTypeToExternalFenceHandleType(externalFenceProperties.exportFromImportedHandleTypes),
+        .compatibleHandleTypes = vkExternalFenceHandleTypeToExternalFenceHandleType(externalFenceProperties.compatibleHandleTypes),
+        .externalFenceFeatures = vkExternalFenceFeatureFlagsToExternalFenceFeatureFlags(externalFenceProperties.externalFenceFeatures),
+    };
+}
+
+ExternalSemaphoreProperties VulkanAdapter::externalSemaphorePoperties(ExternalSemaphoreHandleTypeFlagBits semaphoreHandleType) const
+{
+    const VkPhysicalDeviceExternalSemaphoreInfo externalSemaphoreInfo{
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_SEMAPHORE_INFO,
+        .pNext = nullptr,
+        .handleType = externalSemaphoreHandleTypeFlagBitToVkExternalSemaphoreHandleTypeFlagBit(semaphoreHandleType),
+    };
+
+    VkExternalSemaphoreProperties externalSemaphoreProperties{};
+    externalSemaphoreProperties.sType = VK_STRUCTURE_TYPE_EXTERNAL_SEMAPHORE_PROPERTIES;
+    vkGetPhysicalDeviceExternalSemaphoreProperties(physicalDevice, &externalSemaphoreInfo, &externalSemaphoreProperties);
+
+    return ExternalSemaphoreProperties{
+        .exportFromImportedHandleTypes = vkExternalSemaphoreHandleTypeToExternalSemaphoreHandleType(externalSemaphoreProperties.exportFromImportedHandleTypes),
+        .compatibleHandleTypes = vkExternalSemaphoreHandleTypeToExternalSemaphoreHandleType(externalSemaphoreProperties.compatibleHandleTypes),
+        .externalSemaphoreFeatures = vkExternalSemaphoreFeatureFlagsToExternalSemaphoreFeatureFlags(externalSemaphoreProperties.externalSemaphoreFeatures),
+    };
 }
 
 } // namespace KDGpu

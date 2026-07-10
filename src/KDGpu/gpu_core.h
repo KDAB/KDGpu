@@ -1167,6 +1167,20 @@ enum class ExternalSemaphoreHandleTypeFlagBits : uint32_t {
 };
 using ExternalSemaphoreHandleTypeFlags = KDGpu::Flags<ExternalSemaphoreHandleTypeFlagBits>;
 
+enum class ExternalSemaphoreFeatureFlagBits : uint32_t {
+    None = 0,
+    Exportable = 0x00000001,
+    Importable = 0x00000002,
+    MaxEnum = 0x7FFFFFFF
+};
+using ExternalSemaphoreFeatureFlags = KDGpu::Flags<ExternalSemaphoreFeatureFlagBits>;
+
+enum class ImportSemaphoreTransferenceTypeFlagsBits : uint32_t {
+    Permanent = 0,
+    Temporary = 0x00000001,
+};
+using ImportSemaphoreTransferenceTypeFlags = KDGpu::Flags<ImportSemaphoreTransferenceTypeFlagsBits>;
+
 enum class ExternalFenceHandleTypeFlagBits : uint32_t {
     None = 0,
     OpaqueFD = 0x00000001,
@@ -1175,6 +1189,20 @@ enum class ExternalFenceHandleTypeFlagBits : uint32_t {
     SyncFD = 0x00000008,
 };
 using ExternalFenceHandleTypeFlags = KDGpu::Flags<ExternalFenceHandleTypeFlagBits>;
+
+enum class ExternalFenceFeatureFlagBits : uint32_t {
+    None = 0,
+    Exportable = 0x00000001,
+    Importable = 0x00000002,
+    MaxEnum = 0x7FFFFFFF
+};
+using ExternalFenceFeatureFlags = KDGpu::Flags<ExternalFenceFeatureFlagBits>;
+
+enum class ImportFenceTransferenceTypeFlagsBits : uint32_t {
+    Permanent = 0,
+    Temporary = 0x00000001,
+};
+using ImportFenceTransferenceTypeFlags = KDGpu::Flags<ImportFenceTransferenceTypeFlagsBits>;
 
 enum class ExternalMemoryHandleTypeFlagBits : uint32_t {
     None = 0,
@@ -1194,6 +1222,15 @@ enum class ExternalMemoryHandleTypeFlagBits : uint32_t {
     ScreenBufferQnx = 0x00004000,
 };
 using ExternalMemoryHandleTypeFlags = KDGpu::Flags<ExternalMemoryHandleTypeFlagBits>;
+
+enum class ExternalMemoryFeatureFlagBits : uint32_t {
+    None = 0,
+    DedicatedOnly = 0x00000001,
+    Exportable = 0x00000002,
+    Importable = 0x00000003,
+    MaxEnum = 0x7FFFFFFF
+};
+using ExternalMemoryFeatureFlags = KDGpu::Flags<ExternalMemoryFeatureFlagBits>;
 
 struct MemoryHandle {
     HandleOrFD handle;
@@ -1341,6 +1378,11 @@ OPERATORS_FOR_FLAGS(KDGpu::AccessFlags)
 OPERATORS_FOR_FLAGS(KDGpu::PipelineStageFlags)
 OPERATORS_FOR_FLAGS(KDGpu::FormatFeatureFlags)
 OPERATORS_FOR_FLAGS(KDGpu::ExternalSemaphoreHandleTypeFlags)
+OPERATORS_FOR_FLAGS(KDGpu::ExternalSemaphoreFeatureFlags)
+OPERATORS_FOR_FLAGS(KDGpu::ImportSemaphoreTransferenceTypeFlags)
+OPERATORS_FOR_FLAGS(KDGpu::ExternalFenceHandleTypeFlags)
+OPERATORS_FOR_FLAGS(KDGpu::ExternalFenceFeatureFlags)
+OPERATORS_FOR_FLAGS(KDGpu::ImportFenceTransferenceTypeFlags)
 OPERATORS_FOR_FLAGS(KDGpu::ExternalMemoryHandleTypeFlags)
 OPERATORS_FOR_FLAGS(KDGpu::ResolveModeFlags)
 OPERATORS_FOR_FLAGS(KDGpu::StencilFaceFlags)

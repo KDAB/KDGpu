@@ -2333,7 +2333,7 @@ std::pair<VkSemaphore, HandleOrFD> createSemaphore(VulkanDevice *vulkanDevice, c
     if (options.externalSemaphoreHandleType != ExternalSemaphoreHandleTypeFlagBits::None) {
         exportSemaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO;
         exportSemaphoreCreateInfo.pNext = nullptr;
-        exportSemaphoreCreateInfo.handleTypes = externalSemaphoreHandleTypeToVkExternalSemaphoreHandleType(options.externalSemaphoreHandleType);
+        exportSemaphoreCreateInfo.handleTypes = externalSemaphoreHandleTypeFlagsToVkExternalSemaphoreHandleTypeFlags(options.externalSemaphoreHandleType);
         addToChain(&exportSemaphoreCreateInfo);
     }
 
@@ -2354,6 +2354,50 @@ std::pair<VkSemaphore, HandleOrFD> createSemaphore(VulkanDevice *vulkanDevice, c
     if (auto result = vkCreateSemaphore(vulkanDevice->device, &semaphoreInfo, nullptr, &vkSemaphore); result != VK_SUCCESS) {
         SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating semaphore: {}", result);
         return {};
+    }
+
+    if (options.importSemaphoreHandle.index() > 0) {
+
+#if VK_KHR_external_semaphore_fd
+        if (vulkanDevice->vkImportSemaphoreFdKHR) {
+            const VkImportSemaphoreFdInfoKHR importSemaphoreFdInfo{
+                .sType = VK_STRUCTURE_TYPE_IMPORT_SEMAPHORE_FD_INFO_KHR,
+                .pNext = nullptr,
+                .semaphore = vkSemaphore,
+                .flags = semaphoreImportFlagsToVkSemaphoreImportFlags(options.importTransference),
+                .handleType = externalSemaphoreHandleTypeFlagBitToVkExternalSemaphoreHandleTypeFlagBit(options.importSemaphoreHandleType),
+                .fd = std::get<int>(options.importSemaphoreHandle),
+            };
+
+            if (auto result = vulkanDevice->vkImportSemaphoreFdKHR(vulkanDevice->device, &importSemaphoreFdInfo); result != VK_SUCCESS) {
+                SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when importing semaphore handle: {}", result);
+                return {};
+            }
+        } else {
+            assert(false);
+        }
+#elif VK_KHR_external_fence_win32
+        if (vulkanDevice->vkImportSemaphoreWin32HandleKHR) {
+            const VkImportSemaphoreWin32HandleInfoKHR importSemaphoreHandleInfo{
+                .sType = VK_STRUCTURE_TYPE_IMPORT_SEMAPHORE_WIN32_HANDLE_INFO_KHR,
+                .pNext = nullptr,
+                .semaphore = vkSemaphore,
+                .flags = semaphoreImportFlagsToVkSemaphoreImportFlags(options.importTransference),
+                .handleType = externalSemaphoreHandleTypeFlagBitToVkExternalSemaphoreHandleTypeFlagBit(options.importSemaphoreHandleType),
+                .handle = std::get<HANDLE>(options.importSemaphoreHandle),
+                .name = nullptr,
+            };
+
+            if (auto result = vulkanDevice->vkImportSemaphoreWin32HandleKHR(vulkanDevice->device, &importSemaphoreHandleInfo); result != VK_SUCCESS) {
+                SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when importing semaphore handle: {}", result);
+                return {};
+            }
+        } else {
+            assert(false);
+        }
+#else
+        assert(false);
+#endif
     }
 
     HandleOrFD externalSemaphoreHandle{};
@@ -3771,7 +3815,7 @@ Handle<Fence_t> VulkanResourceManager::createFence(const Handle<Device_t> &devic
     if (options.externalFenceHandleType != ExternalFenceHandleTypeFlagBits::None) {
         exportFenceCreateInfo.sType = VK_STRUCTURE_TYPE_EXPORT_FENCE_CREATE_INFO;
         exportFenceCreateInfo.pNext = nullptr;
-        exportFenceCreateInfo.handleTypes = externalFenceHandleTypeToVkExternalFenceHandleType(options.externalFenceHandleType);
+        exportFenceCreateInfo.handleTypes = externalFenceHandleTypeFlagsToVkExternalFenceHandleTypeFlags(options.externalFenceHandleType);
         fenceInfo.pNext = &exportFenceCreateInfo;
     }
 
@@ -3779,6 +3823,49 @@ Handle<Fence_t> VulkanResourceManager::createFence(const Handle<Device_t> &devic
     if (auto result = vkCreateFence(vulkanDevice->device, &fenceInfo, nullptr, &vkFence); result != VK_SUCCESS) {
         SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating fence: {}", result);
         return {};
+    }
+
+    if (options.importFenceHandle.index() > 0) {
+
+#if VK_KHR_external_fence_fd
+        if (vulkanDevice->vkImportFenceFdKHR) {
+            const VkImportFenceFdInfoKHR importFenceFdInfo{
+                .sType = VK_STRUCTURE_TYPE_IMPORT_FENCE_FD_INFO_KHR,
+                .pNext = nullptr,
+                .fence = vkFence,
+                .flags = fenceImportFlagsToVkFenceImportFlags(options.importTransference),
+                .handleType = externalFenceHandleTypeFlagBitsToVkExternalFenceHandleTypeFlagBits(options.importFenceHandleType),
+                .fd = std::get<int>(options.importFenceHandle),
+            };
+
+            if (auto result = vulkanDevice->vkImportFenceFdKHR(vulkanDevice->device, &importFenceFdInfo); result != VK_SUCCESS) {
+                SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when importing fence handle: {}", result);
+                return {};
+            }
+        } else {
+            assert(false);
+        }
+#elif VK_KHR_external_fence_win32
+        if (vulkanDevice->vkImportFenceWin32HandleKHR) {
+            const VkImportFenceWin32HandleInfoKHR importFenceWin32Handle{
+                .sType = VK_STRUCTURE_TYPE_IMPORT_FENCE_WIN32_HANDLE_INFO_KHR,
+                .pNext = nullptr,
+                .fence = vkFence,
+                .flags = fenceImportFlagsToVkFenceImportFlags(options.importTransference),
+                .handleType = externalFenceHandleTypeFlagBitsToVkExternalFenceHandleTypeFlagBits(options.importFenceHandleType),
+                .handle = std::get<HANDLE>(options.importFenceHandle),
+            };
+
+            if (auto result = vulkanDevice->vkImportFenceWin32HandleKHR(vulkanDevice->device, &importFenceWin32Handle); result != VK_SUCCESS) {
+                SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when importing fence handle: {}", result);
+                return {};
+            }
+        } else {
+            assert(false);
+        }
+#else
+        assert(false);
+#endif
     }
 
     HandleOrFD externalFenceHandle{};

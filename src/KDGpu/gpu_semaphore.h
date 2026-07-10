@@ -24,6 +24,9 @@ struct GpuSemaphoreOptions {
     /// \note The caller is responsible for ensuring the string referenced by \c label outlives this options object.
     std::string_view label;
     ExternalSemaphoreHandleTypeFlags externalSemaphoreHandleType{ ExternalSemaphoreHandleTypeFlagBits::None };
+    HandleOrFD importSemaphoreHandle;
+    ExternalSemaphoreHandleTypeFlagBits importSemaphoreHandleType{ ExternalSemaphoreHandleTypeFlagBits::None };
+    ImportSemaphoreTransferenceTypeFlags importTransference{ ImportSemaphoreTransferenceTypeFlagsBits::Permanent };
 };
 
 /*!

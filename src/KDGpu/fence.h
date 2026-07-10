@@ -25,6 +25,9 @@ struct FenceOptions {
     std::string_view label;
     bool createSignalled{ true };
     ExternalFenceHandleTypeFlags externalFenceHandleType{ ExternalFenceHandleTypeFlagBits::None };
+    HandleOrFD importFenceHandle;
+    ExternalFenceHandleTypeFlagBits importFenceHandleType{ ExternalFenceHandleTypeFlagBits::None };
+    ImportFenceTransferenceTypeFlags importTransference{ ImportFenceTransferenceTypeFlagsBits::Permanent };
 };
 
 /*!
