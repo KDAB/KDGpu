@@ -215,10 +215,19 @@ Adapter *Instance::selectAdapter(AdapterDeviceType deviceType) const
     if (deviceType == KDGpu::AdapterDeviceType::Default) {
         lookupTypes.push_back(AdapterDeviceType::DiscreteGpu);
         lookupTypes.push_back(AdapterDeviceType::IntegratedGpu);
+        lookupTypes.push_back(AdapterDeviceType::VirtualGpu);
+        lookupTypes.push_back(AdapterDeviceType::Cpu);
+        lookupTypes.push_back(AdapterDeviceType::Other);
     } else {
         lookupTypes.push_back(deviceType);
     }
     std::vector<Adapter *> adaptersList = adapters();
+
+    for (const Adapter *adapter : adaptersList) {
+        const AdapterProperties &properties = adapter->properties();
+        SPDLOG_WARN("Adapter {} deviceType: {}", properties.deviceName, adapterDeviceTypeToString(properties.deviceType));
+    }
+
     for (auto t : lookupTypes) {
         for (Adapter *adapter : adaptersList) {
             const AdapterProperties &properties = adapter->properties();
