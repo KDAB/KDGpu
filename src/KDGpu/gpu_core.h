@@ -1234,7 +1234,7 @@ using ExternalMemoryFeatureFlags = KDGpu::Flags<ExternalMemoryFeatureFlagBits>;
 
 struct MemoryHandle {
     HandleOrFD handle;
-    ExternalMemoryHandleTypeFlags handleType{ ExternalMemoryHandleTypeFlagBits::None };
+    ExternalMemoryHandleTypeFlagBits handleType{ ExternalMemoryHandleTypeFlagBits::None };
     DeviceSize allocationSize{ 0 };
     DeviceSize allocationOffset{ 0 };
 

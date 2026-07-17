@@ -33,7 +33,7 @@ struct TextureOptions {
     SharingMode sharingMode{ SharingMode::Exclusive };
     std::vector<uint32_t> queueTypeIndices;
     TextureLayout initialLayout{ TextureLayout::Undefined };
-    ExternalMemoryHandleTypeFlags externalMemoryHandleType{ ExternalMemoryHandleTypeFlagBits::None };
+    ExternalMemoryHandleTypeFlagBits externalMemoryHandleType{ ExternalMemoryHandleTypeFlagBits::None };
     std::vector<uint64_t> drmFormatModifiers;
     TextureCreateFlags createFlags;
     MemoryHandle importMemoryHandle;

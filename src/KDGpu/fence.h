@@ -24,7 +24,7 @@ struct FenceOptions {
     /// \note The caller is responsible for ensuring the string referenced by \c label outlives this options object.
     std::string_view label;
     bool createSignalled{ true };
-    ExternalFenceHandleTypeFlags externalFenceHandleType{ ExternalFenceHandleTypeFlagBits::None };
+    ExternalFenceHandleTypeFlagBits externalFenceHandleType{ ExternalFenceHandleTypeFlagBits::None };
     HandleOrFD importFenceHandle;
     ExternalFenceHandleTypeFlagBits importFenceHandleType{ ExternalFenceHandleTypeFlagBits::None };
     ImportFenceTransferenceTypeFlags importTransference{ ImportFenceTransferenceTypeFlagsBits::Permanent };

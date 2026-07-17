@@ -25,7 +25,7 @@ struct BufferOptions {
     MemoryUsage memoryUsage;
     SharingMode sharingMode{ SharingMode::Exclusive };
     std::vector<uint32_t> queueTypeIndices;
-    ExternalMemoryHandleTypeFlags externalMemoryHandleType{ ExternalMemoryHandleTypeFlagBits::None };
+    ExternalMemoryHandleTypeFlagBits externalMemoryHandleType{ ExternalMemoryHandleTypeFlagBits::None };
     MemoryHandle importMemoryHandle;
 };
 

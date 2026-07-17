@@ -167,7 +167,102 @@ inline uint64_t vulkanHandleToUint64<uint64_t>(uint64_t handle)
 }
 
 } // namespace
+
 namespace KDGpu {
+
+namespace {
+
+bool isWin32SemaphoreHandleType(ExternalSemaphoreHandleTypeFlagBits type)
+{
+    switch (type) {
+    case ExternalSemaphoreHandleTypeFlagBits::OpaqueWin32:
+    case ExternalSemaphoreHandleTypeFlagBits::D3D12Fence:
+    case ExternalSemaphoreHandleTypeFlagBits::OpaqueWin32Kmt:
+        return true;
+    default:
+        return false;
+    }
+}
+
+bool isFdSemaphoreHandleType(ExternalSemaphoreHandleTypeFlagBits type)
+{
+    switch (type) {
+    case ExternalSemaphoreHandleTypeFlagBits::OpaqueFD:
+    case ExternalSemaphoreHandleTypeFlagBits::SyncFD:
+        return true;
+    default:
+        return false;
+    }
+}
+
+bool isWin32FenceHandleType(ExternalFenceHandleTypeFlagBits type)
+{
+    switch (type) {
+    case ExternalFenceHandleTypeFlagBits::OpaqueWin32:
+    case ExternalFenceHandleTypeFlagBits::OpaqueWin32Kmt:
+        return true;
+    default:
+        return false;
+    }
+}
+
+bool isFdFenceHandleType(ExternalFenceHandleTypeFlagBits type)
+{
+    switch (type) {
+    case ExternalFenceHandleTypeFlagBits::OpaqueFD:
+    case ExternalFenceHandleTypeFlagBits::SyncFD:
+        return true;
+    default:
+        return false;
+    }
+}
+
+bool isWin32MemoryHandleType(ExternalMemoryHandleTypeFlagBits type)
+{
+    switch (type) {
+    case ExternalMemoryHandleTypeFlagBits::OpaqueWin32:
+    case ExternalMemoryHandleTypeFlagBits::D3D12Heap:
+    case ExternalMemoryHandleTypeFlagBits::D3D12Resource:
+    case ExternalMemoryHandleTypeFlagBits::OpaqueWin32Kmt:
+    case ExternalMemoryHandleTypeFlagBits::D3D11Texture:
+    case ExternalMemoryHandleTypeFlagBits::D3D11TextureKmt:
+        return true;
+    default:
+        return false;
+    }
+}
+
+bool isFdMemoryHandleType(ExternalMemoryHandleTypeFlagBits type)
+{
+    switch (type) {
+    case ExternalMemoryHandleTypeFlagBits::OpaqueFD:
+    case ExternalMemoryHandleTypeFlagBits::DmaBuf:
+        return true;
+    default:
+        return false;
+    }
+}
+
+bool holdsValidMemoryHandleTypeForPlatform(ExternalMemoryHandleTypeFlags handleType)
+{
+    constexpr std::array handleTypes{
+#if !defined(KDGPU_PLATFORM_WIN32) // UNIX
+        ExternalMemoryHandleTypeFlagBits::OpaqueFD,
+        ExternalMemoryHandleTypeFlagBits::DmaBuf,
+#else // KDGPU_PLATFORM_WIN32
+        ExternalMemoryHandleTypeFlagBits::OpaqueWin32,
+        ExternalMemoryHandleTypeFlagBits::OpaqueWin32Kmt,
+        ExternalMemoryHandleTypeFlagBits::D3D11Texture,
+        ExternalMemoryHandleTypeFlagBits::D3D11TextureKmt,
+        ExternalMemoryHandleTypeFlagBits::D3D12Heap,
+        ExternalMemoryHandleTypeFlagBits::D3D12Resource,
+#endif
+    };
+
+    return testIfContainsAnyFlags<ExternalMemoryHandleTypeFlagBits>(handleType, handleTypes);
+}
+
+} // namespace
 
 Handle<Instance_t> VulkanResourceManager::createInstance(const InstanceOptions &options)
 {
@@ -996,34 +1091,42 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
             return {};
         }
 
-        if (holdsValidMemoryHandleTypeForPlatorm(options.importMemoryHandle.handleType)) {
+        if (holdsValidMemoryHandleTypeForPlatform(options.importMemoryHandle.handleType)) {
+            if (isFdMemoryHandleType(options.importMemoryHandle.handleType)) {
 #if VK_KHR_external_memory_fd
-            VkImportMemoryFdInfoKHR importMemoryFdInfo{};
-            importMemoryFdInfo.sType = VK_STRUCTURE_TYPE_IMPORT_MEMORY_FD_INFO_KHR;
-            importMemoryFdInfo.handleType = externalMemoryHandleTypeToVkExternalMemoryHandleType(options.importMemoryHandle.handleType);
-            importMemoryFdInfo.fd = std::get<int>(options.importMemoryHandle.handle);
+                VkImportMemoryFdInfoKHR importMemoryFdInfo{};
+                importMemoryFdInfo.sType = VK_STRUCTURE_TYPE_IMPORT_MEMORY_FD_INFO_KHR;
+                importMemoryFdInfo.handleType = externalMemoryHandleTypeToVkExternalMemoryHandleType(options.importMemoryHandle.handleType);
+                importMemoryFdInfo.fd = std::get<int>(options.importMemoryHandle.handle);
 
-            // We can't use vmaCreateImage when memory is imported but vmaCreateDedicatedImage
-            if (auto result = vmaCreateDedicatedImage(allocator, &createInfo, &allocInfo, &importMemoryFdInfo, &vkImage, &vmaAllocation, nullptr); result != VK_SUCCESS) {
-                SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating image: {}", result);
-                return {};
-            }
-#elif VK_KHR_external_memory_win32
-            VkImportMemoryWin32HandleInfoKHR importMemoryWin32HandleInfo{};
-            importMemoryWin32HandleInfo.sType = VK_STRUCTURE_TYPE_IMPORT_MEMORY_WIN32_HANDLE_INFO_KHR;
-            importMemoryWin32HandleInfo.handleType = externalMemoryHandleTypeToVkExternalMemoryHandleType(options.importMemoryHandle.handleType);
-            importMemoryWin32HandleInfo.handle = std::get<HANDLE>(options.importMemoryHandle.handle);
-
-            // We can't use vmaCreateImage when memory is imported but vmaCreateDedicatedImage
-            if (auto result = vmaCreateDedicatedImage(allocator, &createInfo, &allocInfo, &importMemoryWin32HandleInfo, &vkImage, &vmaAllocation, nullptr); result != VK_SUCCESS) {
-                SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating image: {}", result);
-                return {};
-            }
+                // We can't use vmaCreateImage when memory is imported but vmaCreateDedicatedImage
+                if (auto result = vmaCreateDedicatedImage(allocator, &createInfo, &allocInfo, &importMemoryFdInfo, &vkImage, &vmaAllocation, nullptr); result != VK_SUCCESS) {
+                    SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating image: {}", result);
+                    return {};
+                }
 #else
-            assert(false);
+                assert(false);
 #endif
-        }
+            } else if (isWin32MemoryHandleType(options.importMemoryHandle.handleType)) {
+#if VK_KHR_external_memory_win32
+                VkImportMemoryWin32HandleInfoKHR importMemoryWin32HandleInfo{};
+                importMemoryWin32HandleInfo.sType = VK_STRUCTURE_TYPE_IMPORT_MEMORY_WIN32_HANDLE_INFO_KHR;
+                importMemoryWin32HandleInfo.handleType = externalMemoryHandleTypeToVkExternalMemoryHandleType(options.importMemoryHandle.handleType);
+                importMemoryWin32HandleInfo.handle = std::get<HANDLE>(options.importMemoryHandle.handle);
 
+                // We can't use vmaCreateImage when memory is imported but vmaCreateDedicatedImage
+                if (auto result = vmaCreateDedicatedImage(allocator, &createInfo, &allocInfo, &importMemoryWin32HandleInfo, &vkImage, &vmaAllocation, nullptr); result != VK_SUCCESS) {
+                    SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating image: {}", result);
+                    return {};
+                }
+#else
+                assert(false);
+#endif
+            }
+        } else {
+            SPDLOG_LOGGER_ERROR(Logger::logger(), "Unsupported external memory handle type: {}", static_cast<uint32_t>(options.importMemoryHandle.handleType));
+            return {};
+        }
     } else {
         // Regular case where we want vma to allocate memory for the image
         if (auto result = vmaCreateImage(allocator, &createInfo, &allocInfo, &vkImage, &vmaAllocation, nullptr); result != VK_SUCCESS) {
@@ -1229,34 +1332,42 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
             return {};
         }
 
-        if (holdsValidMemoryHandleTypeForPlatorm(options.importMemoryHandle.handleType)) {
+        if (holdsValidMemoryHandleTypeForPlatform(options.importMemoryHandle.handleType)) {
+            if (isFdMemoryHandleType(options.importMemoryHandle.handleType)) {
 #if VK_KHR_external_memory_fd
-            VkImportMemoryFdInfoKHR importMemoryFdInfo{};
-            importMemoryFdInfo.sType = VK_STRUCTURE_TYPE_IMPORT_MEMORY_FD_INFO_KHR;
-            importMemoryFdInfo.handleType = externalMemoryHandleTypeToVkExternalMemoryHandleType(options.importMemoryHandle.handleType);
-            importMemoryFdInfo.fd = std::get<int>(options.importMemoryHandle.handle);
+                VkImportMemoryFdInfoKHR importMemoryFdInfo{};
+                importMemoryFdInfo.sType = VK_STRUCTURE_TYPE_IMPORT_MEMORY_FD_INFO_KHR;
+                importMemoryFdInfo.handleType = externalMemoryHandleTypeToVkExternalMemoryHandleType(options.importMemoryHandle.handleType);
+                importMemoryFdInfo.fd = std::get<int>(options.importMemoryHandle.handle);
 
-            // We can't use vmaCreateBuffer when memory is imported but vmaCreateDedicatedBuffer
-            if (auto result = vmaCreateDedicatedBuffer(allocator, &createInfo, &allocInfo, &importMemoryFdInfo, &vkBuffer, &vmaAllocation, nullptr); result != VK_SUCCESS) {
-                SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating buffer: {}", result);
-                return {};
-            }
-#elif VK_KHR_external_memory_win32
-            VkImportMemoryWin32HandleInfoKHR importMemoryWin32HandleInfo{};
-            importMemoryWin32HandleInfo.sType = VK_STRUCTURE_TYPE_IMPORT_MEMORY_WIN32_HANDLE_INFO_KHR;
-            importMemoryWin32HandleInfo.handleType = externalMemoryHandleTypeToVkExternalMemoryHandleType(options.importMemoryHandle.handleType);
-            importMemoryWin32HandleInfo.handle = std::get<HANDLE>(options.importMemoryHandle.handle);
-
-            // We can't use vmaCreateBuffer when memory is imported but vmaCreateDedicatedBuffer
-            if (auto result = vmaCreateDedicatedBuffer(allocator, &createInfo, &allocInfo, &importMemoryWin32HandleInfo, &vkBuffer, &vmaAllocation, nullptr); result != VK_SUCCESS) {
-                SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating buffer: {}", result);
-                return {};
-            }
+                // We can't use vmaCreateBuffer when memory is imported but vmaCreateDedicatedBuffer
+                if (auto result = vmaCreateDedicatedBuffer(allocator, &createInfo, &allocInfo, &importMemoryFdInfo, &vkBuffer, &vmaAllocation, nullptr); result != VK_SUCCESS) {
+                    SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating buffer: {}", result);
+                    return {};
+                }
 #else
-            assert(false);
+                assert(false);
 #endif
-        }
+            } else if (isWin32MemoryHandleType(options.importMemoryHandle.handleType)) {
+#if VK_KHR_external_memory_win32
+                VkImportMemoryWin32HandleInfoKHR importMemoryWin32HandleInfo{};
+                importMemoryWin32HandleInfo.sType = VK_STRUCTURE_TYPE_IMPORT_MEMORY_WIN32_HANDLE_INFO_KHR;
+                importMemoryWin32HandleInfo.handleType = externalMemoryHandleTypeToVkExternalMemoryHandleType(options.importMemoryHandle.handleType);
+                importMemoryWin32HandleInfo.handle = std::get<HANDLE>(options.importMemoryHandle.handle);
 
+                // We can't use vmaCreateBuffer when memory is imported but vmaCreateDedicatedBuffer
+                if (auto result = vmaCreateDedicatedBuffer(allocator, &createInfo, &allocInfo, &importMemoryWin32HandleInfo, &vkBuffer, &vmaAllocation, nullptr); result != VK_SUCCESS) {
+                    SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when creating buffer: {}", result);
+                    return {};
+                }
+#else
+                assert(false);
+#endif
+            }
+        } else {
+            SPDLOG_LOGGER_ERROR(Logger::logger(), "Unsupported external memory handle type: {}", static_cast<uint32_t>(options.importMemoryHandle.handleType));
+            return {};
+        }
     } else {
         // Regular case where we want vma to allocate memory for the buffer
         if (auto result = vmaCreateBuffer(allocator, &createInfo, &allocInfo, &vkBuffer, &vmaAllocation, nullptr); result != VK_SUCCESS) {
@@ -2357,82 +2468,99 @@ std::pair<VkSemaphore, HandleOrFD> createSemaphore(VulkanDevice *vulkanDevice, c
     }
 
     if (options.importSemaphoreHandle.index() > 0) {
-
+        if (isFdSemaphoreHandleType(options.importSemaphoreHandleType)) {
 #if VK_KHR_external_semaphore_fd
-        if (vulkanDevice->vkImportSemaphoreFdKHR) {
-            const VkImportSemaphoreFdInfoKHR importSemaphoreFdInfo{
-                .sType = VK_STRUCTURE_TYPE_IMPORT_SEMAPHORE_FD_INFO_KHR,
-                .pNext = nullptr,
-                .semaphore = vkSemaphore,
-                .flags = semaphoreImportFlagsToVkSemaphoreImportFlags(options.importTransference),
-                .handleType = externalSemaphoreHandleTypeFlagBitToVkExternalSemaphoreHandleTypeFlagBit(options.importSemaphoreHandleType),
-                .fd = std::get<int>(options.importSemaphoreHandle),
-            };
+            if (vulkanDevice->vkImportSemaphoreFdKHR) {
+                const VkImportSemaphoreFdInfoKHR importSemaphoreFdInfo{
+                    .sType = VK_STRUCTURE_TYPE_IMPORT_SEMAPHORE_FD_INFO_KHR,
+                    .pNext = nullptr,
+                    .semaphore = vkSemaphore,
+                    .flags = semaphoreImportFlagsToVkSemaphoreImportFlags(options.importTransference),
+                    .handleType = externalSemaphoreHandleTypeFlagBitToVkExternalSemaphoreHandleTypeFlagBit(options.importSemaphoreHandleType),
+                    .fd = std::get<int>(options.importSemaphoreHandle),
+                };
 
-            if (auto result = vulkanDevice->vkImportSemaphoreFdKHR(vulkanDevice->device, &importSemaphoreFdInfo); result != VK_SUCCESS) {
-                SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when importing semaphore handle: {}", result);
-                return {};
+                if (auto result = vulkanDevice->vkImportSemaphoreFdKHR(vulkanDevice->device, &importSemaphoreFdInfo); result != VK_SUCCESS) {
+                    SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when importing semaphore handle: {}", result);
+                    vkDestroySemaphore(vulkanDevice->device, vkSemaphore, nullptr);
+                    return {};
+                }
+            } else {
+                assert(false);
             }
-        } else {
-            assert(false);
-        }
-#elif VK_KHR_external_fence_win32
-        if (vulkanDevice->vkImportSemaphoreWin32HandleKHR) {
-            const VkImportSemaphoreWin32HandleInfoKHR importSemaphoreHandleInfo{
-                .sType = VK_STRUCTURE_TYPE_IMPORT_SEMAPHORE_WIN32_HANDLE_INFO_KHR,
-                .pNext = nullptr,
-                .semaphore = vkSemaphore,
-                .flags = semaphoreImportFlagsToVkSemaphoreImportFlags(options.importTransference),
-                .handleType = externalSemaphoreHandleTypeFlagBitToVkExternalSemaphoreHandleTypeFlagBit(options.importSemaphoreHandleType),
-                .handle = std::get<HANDLE>(options.importSemaphoreHandle),
-                .name = nullptr,
-            };
-
-            if (auto result = vulkanDevice->vkImportSemaphoreWin32HandleKHR(vulkanDevice->device, &importSemaphoreHandleInfo); result != VK_SUCCESS) {
-                SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when importing semaphore handle: {}", result);
-                return {};
-            }
-        } else {
-            assert(false);
-        }
 #else
-        assert(false);
+            assert(false);
 #endif
+        } else if (isWin32SemaphoreHandleType(options.importSemaphoreHandleType)) {
+#if VK_KHR_external_fence_win32
+            if (vulkanDevice->vkImportSemaphoreWin32HandleKHR) {
+                const VkImportSemaphoreWin32HandleInfoKHR importSemaphoreHandleInfo{
+                    .sType = VK_STRUCTURE_TYPE_IMPORT_SEMAPHORE_WIN32_HANDLE_INFO_KHR,
+                    .pNext = nullptr,
+                    .semaphore = vkSemaphore,
+                    .flags = semaphoreImportFlagsToVkSemaphoreImportFlags(options.importTransference),
+                    .handleType = externalSemaphoreHandleTypeFlagBitToVkExternalSemaphoreHandleTypeFlagBit(options.importSemaphoreHandleType),
+                    .handle = std::get<HANDLE>(options.importSemaphoreHandle),
+                    .name = nullptr,
+                };
+
+                if (auto result = vulkanDevice->vkImportSemaphoreWin32HandleKHR(vulkanDevice->device, &importSemaphoreHandleInfo); result != VK_SUCCESS) {
+                    SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when importing semaphore handle: {}", result);
+                    vkDestroySemaphore(vulkanDevice->device, vkSemaphore, nullptr);
+                    return {};
+                }
+            } else {
+                assert(false);
+            }
+#else
+            assert(false);
+#endif
+        } else {
+            SPDLOG_LOGGER_ERROR(Logger::logger(), "Invalid import semaphore handle type: {}", static_cast<uint32_t>(options.importSemaphoreHandleType));
+        }
     }
 
     HandleOrFD externalSemaphoreHandle{};
-    if (options.externalSemaphoreHandleType == ExternalSemaphoreHandleTypeFlagBits::OpaqueFD) {
+    if (options.externalSemaphoreHandleType != ExternalSemaphoreHandleTypeFlagBits::None) {
+        if (isFdSemaphoreHandleType(options.externalSemaphoreHandleType)) {
 #if VK_KHR_external_semaphore_fd
-        if (vulkanDevice->vkGetSemaphoreFdKHR) {
-            VkSemaphoreGetFdInfoKHR vulkanSemaphoreGetFdInfoKHR = {
-                .sType = VK_STRUCTURE_TYPE_SEMAPHORE_GET_FD_INFO_KHR,
-                .pNext = nullptr,
-                .semaphore = vkSemaphore,
-                .handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT_KHR
-            };
-            int fd{};
-            vulkanDevice->vkGetSemaphoreFdKHR(vulkanDevice->device, &vulkanSemaphoreGetFdInfoKHR, &fd);
-            externalSemaphoreHandle = fd;
-        }
+            if (vulkanDevice->vkGetSemaphoreFdKHR) {
+                VkSemaphoreGetFdInfoKHR vulkanSemaphoreGetFdInfoKHR = {
+                    .sType = VK_STRUCTURE_TYPE_SEMAPHORE_GET_FD_INFO_KHR,
+                    .pNext = nullptr,
+                    .semaphore = vkSemaphore,
+                    .handleType = externalSemaphoreHandleTypeFlagBitToVkExternalSemaphoreHandleTypeFlagBit(options.externalSemaphoreHandleType),
+                };
+                int fd{};
+                vulkanDevice->vkGetSemaphoreFdKHR(vulkanDevice->device, &vulkanSemaphoreGetFdInfoKHR, &fd);
+                externalSemaphoreHandle = fd;
+            } else {
+                assert(false);
+            }
 #else
-        assert(false);
+            assert(false);
 #endif
-    } else if (options.externalSemaphoreHandleType == ExternalSemaphoreHandleTypeFlagBits::OpaqueWin32) {
-#if VK_KHR_external_fence_win32
-        if (vulkanDevice->vkGetSemaphoreWin32HandleKHR) {
-            VkSemaphoreGetWin32HandleInfoKHR vulkanSemaphoreGetHandleInfoKHR = {
-                .sType = VK_STRUCTURE_TYPE_SEMAPHORE_GET_WIN32_HANDLE_INFO_KHR,
-                .pNext = nullptr,
-                .semaphore = vkSemaphore,
-                .handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT
-            };
-            HANDLE winHandle{};
-            vulkanDevice->vkGetSemaphoreWin32HandleKHR(vulkanDevice->device, &vulkanSemaphoreGetHandleInfoKHR, &winHandle);
-            externalSemaphoreHandle = winHandle;
-        }
+        } else if (isWin32SemaphoreHandleType(options.externalSemaphoreHandleType)) {
+#if VK_KHR_external_semaphore_win32
+            if (vulkanDevice->vkGetSemaphoreWin32HandleKHR) {
+                VkSemaphoreGetWin32HandleInfoKHR vulkanSemaphoreGetHandleInfoKHR = {
+                    .sType = VK_STRUCTURE_TYPE_SEMAPHORE_GET_WIN32_HANDLE_INFO_KHR,
+                    .pNext = nullptr,
+                    .semaphore = vkSemaphore,
+                    .handleType = externalSemaphoreHandleTypeFlagBitToVkExternalSemaphoreHandleTypeFlagBit(options.externalSemaphoreHandleType),
+                };
+                HANDLE winHandle{};
+                vulkanDevice->vkGetSemaphoreWin32HandleKHR(vulkanDevice->device, &vulkanSemaphoreGetHandleInfoKHR, &winHandle);
+                externalSemaphoreHandle = winHandle;
+            } else {
+                assert(false);
+            }
 #else
-        assert(false);
+            assert(false);
 #endif
+        } else {
+            SPDLOG_LOGGER_ERROR(Logger::logger(), "Invalid external semaphore handle type: {}", static_cast<uint32_t>(options.externalSemaphoreHandleType));
+        }
     }
 
     return { vkSemaphore, externalSemaphoreHandle };
@@ -3826,81 +3954,95 @@ Handle<Fence_t> VulkanResourceManager::createFence(const Handle<Device_t> &devic
     }
 
     if (options.importFenceHandle.index() > 0) {
-
+        if (isFdFenceHandleType(options.importFenceHandleType)) {
 #if VK_KHR_external_fence_fd
-        if (vulkanDevice->vkImportFenceFdKHR) {
-            const VkImportFenceFdInfoKHR importFenceFdInfo{
-                .sType = VK_STRUCTURE_TYPE_IMPORT_FENCE_FD_INFO_KHR,
-                .pNext = nullptr,
-                .fence = vkFence,
-                .flags = fenceImportFlagsToVkFenceImportFlags(options.importTransference),
-                .handleType = externalFenceHandleTypeFlagBitsToVkExternalFenceHandleTypeFlagBits(options.importFenceHandleType),
-                .fd = std::get<int>(options.importFenceHandle),
-            };
+            if (vulkanDevice->vkImportFenceFdKHR) {
+                const VkImportFenceFdInfoKHR importFenceFdInfo{
+                    .sType = VK_STRUCTURE_TYPE_IMPORT_FENCE_FD_INFO_KHR,
+                    .pNext = nullptr,
+                    .fence = vkFence,
+                    .flags = fenceImportFlagsToVkFenceImportFlags(options.importTransference),
+                    .handleType = externalFenceHandleTypeFlagBitsToVkExternalFenceHandleTypeFlagBits(options.importFenceHandleType),
+                    .fd = std::get<int>(options.importFenceHandle),
+                };
 
-            if (auto result = vulkanDevice->vkImportFenceFdKHR(vulkanDevice->device, &importFenceFdInfo); result != VK_SUCCESS) {
-                SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when importing fence handle: {}", result);
-                return {};
+                if (auto result = vulkanDevice->vkImportFenceFdKHR(vulkanDevice->device, &importFenceFdInfo); result != VK_SUCCESS) {
+                    SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when importing fence handle: {}", result);
+                    vkDestroyFence(vulkanDevice->device, vkFence, nullptr);
+                    return {};
+                }
+            } else {
+                assert(false);
             }
-        } else {
-            assert(false);
-        }
-#elif VK_KHR_external_fence_win32
-        if (vulkanDevice->vkImportFenceWin32HandleKHR) {
-            const VkImportFenceWin32HandleInfoKHR importFenceWin32Handle{
-                .sType = VK_STRUCTURE_TYPE_IMPORT_FENCE_WIN32_HANDLE_INFO_KHR,
-                .pNext = nullptr,
-                .fence = vkFence,
-                .flags = fenceImportFlagsToVkFenceImportFlags(options.importTransference),
-                .handleType = externalFenceHandleTypeFlagBitsToVkExternalFenceHandleTypeFlagBits(options.importFenceHandleType),
-                .handle = std::get<HANDLE>(options.importFenceHandle),
-            };
-
-            if (auto result = vulkanDevice->vkImportFenceWin32HandleKHR(vulkanDevice->device, &importFenceWin32Handle); result != VK_SUCCESS) {
-                SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when importing fence handle: {}", result);
-                return {};
-            }
-        } else {
-            assert(false);
-        }
 #else
-        assert(false);
+            assert(false);
 #endif
+        } else if (isWin32FenceHandleType(options.importFenceHandleType)) {
+#if VK_KHR_external_fence_win32
+            if (vulkanDevice->vkImportFenceWin32HandleKHR) {
+                const VkImportFenceWin32HandleInfoKHR importFenceWin32Handle{
+                    .sType = VK_STRUCTURE_TYPE_IMPORT_FENCE_WIN32_HANDLE_INFO_KHR,
+                    .pNext = nullptr,
+                    .fence = vkFence,
+                    .flags = fenceImportFlagsToVkFenceImportFlags(options.importTransference),
+                    .handleType = externalFenceHandleTypeFlagBitsToVkExternalFenceHandleTypeFlagBits(options.importFenceHandleType),
+                    .handle = std::get<HANDLE>(options.importFenceHandle),
+                };
+
+                if (auto result = vulkanDevice->vkImportFenceWin32HandleKHR(vulkanDevice->device, &importFenceWin32Handle); result != VK_SUCCESS) {
+                    SPDLOG_LOGGER_ERROR(Logger::logger(), "Error when importing fence handle: {}", result);
+                    vkDestroyFence(vulkanDevice->device, vkFence, nullptr);
+                    return {};
+                }
+            }
+#else
+            assert(false);
+#endif
+        } else {
+            SPDLOG_LOGGER_ERROR(Logger::logger(), "Invalid fence handle type for import: {}", static_cast<int>(options.importFenceHandleType));
+            vkDestroyFence(vulkanDevice->device, vkFence, nullptr);
+            return {};
+        }
     }
 
     HandleOrFD externalFenceHandle{};
-    if (options.externalFenceHandleType == ExternalFenceHandleTypeFlagBits::OpaqueFD) {
+    if (options.externalFenceHandleType != ExternalFenceHandleTypeFlagBits::None) {
+        if (isFdFenceHandleType(options.externalFenceHandleType)) {
 #if VK_KHR_external_fence_fd
-        if (vulkanDevice->vkGetFenceFdKHR) {
-            VkFenceGetFdInfoKHR vulkanFenceGetFdInfoKHR = {
-                .sType = VK_STRUCTURE_TYPE_FENCE_GET_FD_INFO_KHR,
-                .pNext = nullptr,
-                .fence = vkFence,
-                .handleType = VK_EXTERNAL_FENCE_HANDLE_TYPE_OPAQUE_FD_BIT
-            };
-            int fd{};
-            vulkanDevice->vkGetFenceFdKHR(vulkanDevice->device, &vulkanFenceGetFdInfoKHR, &fd);
-            externalFenceHandle = fd;
-        }
+            if (vulkanDevice->vkGetFenceFdKHR) {
+                VkFenceGetFdInfoKHR vulkanFenceGetFdInfoKHR = {
+                    .sType = VK_STRUCTURE_TYPE_FENCE_GET_FD_INFO_KHR,
+                    .pNext = nullptr,
+                    .fence = vkFence,
+                    .handleType = externalFenceHandleTypeFlagBitsToVkExternalFenceHandleTypeFlagBits(options.externalFenceHandleType)
+                };
+                int fd{};
+                vulkanDevice->vkGetFenceFdKHR(vulkanDevice->device, &vulkanFenceGetFdInfoKHR, &fd);
+                externalFenceHandle = fd;
+            }
 #else
-        assert(false);
+            assert(false);
 #endif
-    } else if (options.externalFenceHandleType == ExternalFenceHandleTypeFlagBits::OpaqueWin32) {
+        } else if (isWin32FenceHandleType(options.externalFenceHandleType)) {
 #if VK_KHR_external_fence_win32
-        if (vulkanDevice->vkGetFenceWin32HandleKHR) {
-            VkFenceGetWin32HandleInfoKHR vulkanFenceGetHandleInfoKHR = {
-                .sType = VK_STRUCTURE_TYPE_FENCE_GET_WIN32_HANDLE_INFO_KHR,
-                .pNext = nullptr,
-                .fence = vkFence,
-                .handleType = VK_EXTERNAL_FENCE_HANDLE_TYPE_OPAQUE_WIN32_BIT
-            };
-            HANDLE winHandle{};
-            vulkanDevice->vkGetFenceWin32HandleKHR(vulkanDevice->device, &vulkanFenceGetHandleInfoKHR, &winHandle);
-            externalFenceHandle = winHandle;
-        }
+            if (vulkanDevice->vkGetFenceWin32HandleKHR) {
+                VkFenceGetWin32HandleInfoKHR vulkanFenceGetHandleInfoKHR = {
+                    .sType = VK_STRUCTURE_TYPE_FENCE_GET_WIN32_HANDLE_INFO_KHR,
+                    .pNext = nullptr,
+                    .fence = vkFence,
+                    .handleType = externalFenceHandleTypeFlagBitsToVkExternalFenceHandleTypeFlagBits(options.externalFenceHandleType)
+                };
+                HANDLE winHandle{};
+                vulkanDevice->vkGetFenceWin32HandleKHR(vulkanDevice->device, &vulkanFenceGetHandleInfoKHR, &winHandle);
+                externalFenceHandle = winHandle;
+            }
 #else
-        assert(false);
+            assert(false);
 #endif
+        } else {
+            SPDLOG_LOGGER_ERROR(Logger::logger(), "Invalid fence handle type for export: {}", static_cast<int>(options.externalFenceHandleType));
+            return {};
+        }
     }
 
     setObjectName(vulkanDevice, VK_OBJECT_TYPE_FENCE, vulkanHandleToUint64(vkFence), options.label);
@@ -4271,31 +4413,10 @@ std::vector<std::string> VulkanResourceManager::getAvailableLayers()
     return layers;
 }
 
-bool VulkanResourceManager::holdsValidMemoryHandleTypeForPlatorm(ExternalMemoryHandleTypeFlags handleType)
-{
-    constexpr std::array handleTypes{
-#if !defined(KDGPU_PLATFORM_WIN32) // UNIX
-        ExternalMemoryHandleTypeFlagBits::OpaqueFD,
-#if VK_EXT_external_memory_dma_buf
-        ExternalMemoryHandleTypeFlagBits::DmaBuf,
-#endif
-#else // KDGPU_PLATFORM_WIN32
-        ExternalMemoryHandleTypeFlagBits::OpaqueWin32,
-        ExternalMemoryHandleTypeFlagBits::OpaqueWin32Kmt,
-        ExternalMemoryHandleTypeFlagBits::D3D11Texture,
-        ExternalMemoryHandleTypeFlagBits::D3D11TextureKmt,
-        ExternalMemoryHandleTypeFlagBits::D3D12Heap,
-        ExternalMemoryHandleTypeFlagBits::D3D12Resource,
-#endif
-    };
-
-    return testIfContainsAnyFlags<ExternalMemoryHandleTypeFlagBits>(handleType, handleTypes);
-}
-
 MemoryHandle VulkanResourceManager::retrieveExternalMemoryHandle(VulkanInstance *instance,
                                                                  VulkanDevice *vulkanDevice,
                                                                  const VmaAllocationInfo &allocationInfo,
-                                                                 ExternalMemoryHandleTypeFlags handleType)
+                                                                 ExternalMemoryHandleTypeFlagBits handleType)
 {
     MemoryHandle memoryHandle{
         .handleType = handleType,
@@ -4303,36 +4424,42 @@ MemoryHandle VulkanResourceManager::retrieveExternalMemoryHandle(VulkanInstance 
         .allocationOffset = allocationInfo.offset,
     };
 
-    if (holdsValidMemoryHandleTypeForPlatorm(handleType)) {
+    if (holdsValidMemoryHandleTypeForPlatform(handleType)) {
+        if (isFdMemoryHandleType(handleType)) {
 #if VK_KHR_external_memory_fd
-        if (instance->vkGetMemoryFdKHR) {
-            const VkMemoryGetFdInfoKHR vkMemoryGetFdInfoKHR = {
-                .sType = VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR,
-                .pNext = nullptr,
-                .memory = allocationInfo.deviceMemory,
-                .handleType = externalMemoryHandleTypeToVkExternalMemoryHandleType(handleType)
-            };
-            int fd{};
-            instance->vkGetMemoryFdKHR(vulkanDevice->device, &vkMemoryGetFdInfoKHR, &fd);
-            memoryHandle.handle = fd;
-            return memoryHandle;
-        }
-#elif VK_KHR_external_memory_win32
-        if (instance->vkGetMemoryWin32HandleKHR) {
-            const VkMemoryGetWin32HandleInfoKHR vkGetWin32HandleInfoKHR = {
-                .sType = VK_STRUCTURE_TYPE_MEMORY_GET_WIN32_HANDLE_INFO_KHR,
-                .pNext = nullptr,
-                .memory = allocationInfo.deviceMemory,
-                .handleType = externalMemoryHandleTypeToVkExternalMemoryHandleType(handleType)
-            };
-            HANDLE winHandle{};
-            instance->vkGetMemoryWin32HandleKHR(vulkanDevice->device, &vkGetWin32HandleInfoKHR, &winHandle);
-            memoryHandle.handle = winHandle;
-            return memoryHandle;
-        }
+            if (instance->vkGetMemoryFdKHR) {
+                const VkMemoryGetFdInfoKHR vkMemoryGetFdInfoKHR = {
+                    .sType = VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR,
+                    .pNext = nullptr,
+                    .memory = allocationInfo.deviceMemory,
+                    .handleType = externalMemoryHandleTypeToVkExternalMemoryHandleType(handleType)
+                };
+                int fd{};
+                instance->vkGetMemoryFdKHR(vulkanDevice->device, &vkMemoryGetFdInfoKHR, &fd);
+                memoryHandle.handle = fd;
+                return memoryHandle;
+            }
 #else
-        assert(false);
+            assert(false);
 #endif
+        } else if (isWin32MemoryHandleType(handleType)) {
+#if VK_KHR_external_memory_win32
+            if (instance->vkGetMemoryWin32HandleKHR) {
+                const VkMemoryGetWin32HandleInfoKHR vkGetWin32HandleInfoKHR = {
+                    .sType = VK_STRUCTURE_TYPE_MEMORY_GET_WIN32_HANDLE_INFO_KHR,
+                    .pNext = nullptr,
+                    .memory = allocationInfo.deviceMemory,
+                    .handleType = externalMemoryHandleTypeToVkExternalMemoryHandleType(handleType)
+                };
+                HANDLE winHandle{};
+                instance->vkGetMemoryWin32HandleKHR(vulkanDevice->device, &vkGetWin32HandleInfoKHR, &winHandle);
+                memoryHandle.handle = winHandle;
+                return memoryHandle;
+            }
+#else
+            assert(false);
+#endif
+        }
     }
     return {};
 }

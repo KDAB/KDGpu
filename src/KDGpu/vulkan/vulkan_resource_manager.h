@@ -273,8 +273,7 @@ private:
     [[nodiscard]] static MemoryHandle retrieveExternalMemoryHandle(VulkanInstance *instance,
                                                                    VulkanDevice *vulkanDevice,
                                                                    const VmaAllocationInfo &allocationInfo,
-                                                                   ExternalMemoryHandleTypeFlags handleType);
-    [[nodiscard]] static bool holdsValidMemoryHandleTypeForPlatorm(ExternalMemoryHandleTypeFlags handleType);
+                                                                   ExternalMemoryHandleTypeFlagBits handleType);
 
     // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
     Pool<VulkanInstance, Instance_t> m_instances{ 1 };

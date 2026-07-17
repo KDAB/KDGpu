@@ -25,7 +25,7 @@ struct TimelineSemaphore_t;
 struct TimelineSemaphoreOptions {
     /// \note The caller is responsible for ensuring the string referenced by \c label outlives this options object.
     std::string_view label;
-    ExternalSemaphoreHandleTypeFlags externalSemaphoreHandleType{ ExternalSemaphoreHandleTypeFlagBits::None };
+    ExternalSemaphoreHandleTypeFlagBits externalSemaphoreHandleType{ ExternalSemaphoreHandleTypeFlagBits::None };
     uint64_t initialValue{ 0 };
     HandleOrFD importSemaphoreHandle;
     ExternalSemaphoreHandleTypeFlagBits importSemaphoreHandleType{ ExternalSemaphoreHandleTypeFlagBits::None };
