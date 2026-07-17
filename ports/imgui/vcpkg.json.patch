@@ -1,6 +1,6 @@
---- /home/lemire_p/work/toy-renderer/ports/../vcpkg/ports/imgui/vcpkg.json	2026-01-12 08:36:36.814495303 +0100
-+++ /home/lemire_p/work/toy-renderer/ports/imgui/vcpkg.json	2026-06-29 09:29:31.944102622 +0200
-@@ -133,10 +133,7 @@
+--- /home/lemire_p/work/kdgpu/ports/../vcpkg/ports/imgui/vcpkg.json	2026-07-17 09:32:09.883839608 +0200
++++ /home/lemire_p/work/kdgpu/ports/imgui/vcpkg.json	2026-07-17 09:48:09.032084229 +0200
+@@ -134,10 +134,7 @@
        ]
      },
      "vulkan-binding": {

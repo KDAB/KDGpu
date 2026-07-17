@@ -16,6 +16,7 @@
 #include <KDUtils/dir.h>
 
 #include <cstdlib>
+#include <cstring>
 
 namespace KDGpuExample {
 
