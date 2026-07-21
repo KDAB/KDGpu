@@ -32,7 +32,7 @@ if(KDGPU_LARGE_ASSETS)
 endif()
 
 # Add a DEBUG define on DEBUG builds
-add_compile_options("$<$<CONFIG:DEBUG>:-DDEBUG>")
+add_compile_options("$<$<CONFIG:DEBUG>:-DKDGPU_DEBUG>")
 
 if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT APPLE)
    OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND NOT APPLE)
