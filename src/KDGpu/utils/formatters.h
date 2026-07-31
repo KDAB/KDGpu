@@ -13,6 +13,7 @@
 #include <KDGpu/gpu_core.h>
 #include <KDGpu/handle.h>
 #include <KDGpu/kdgpu_export.h>
+#include <KDGpu/adapter_swapchain_properties.h>
 
 #include <KDGpu/utils/logging.h>
 
