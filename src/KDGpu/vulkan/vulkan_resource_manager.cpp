@@ -1157,6 +1157,7 @@ Handle<Texture_t> VulkanResourceManager::createTexture(const Handle<Device_t> &d
 #endif
 
     setObjectName(vulkanDevice, VK_OBJECT_TYPE_IMAGE, vulkanHandleToUint64(vkImage), options.label);
+    setAllocationName(allocator, vmaAllocation, options.label);
 
     const auto vulkanTextureHandle = m_textures.emplace(VulkanTexture(
             vkImage,
@@ -1397,6 +1398,7 @@ Handle<Buffer_t> VulkanResourceManager::createBuffer(const Handle<Device_t> &dev
     }
 
     setObjectName(vulkanDevice, VK_OBJECT_TYPE_BUFFER, vulkanHandleToUint64(vkBuffer), options.label);
+    setAllocationName(allocator, vmaAllocation, options.label);
 
     const auto vulkanBufferHandle = m_buffers.emplace(VulkanBuffer(vkBuffer, vmaAllocation, allocator, this, deviceHandle, memoryHandle, bufferDeviceAddress));
 
@@ -4080,6 +4082,15 @@ void VulkanResourceManager::setObjectName(VulkanDevice *device, VkObjectType typ
     };
     device->vkSetDebugUtilsObjectNameEXT(device->device, &nameInfo);
 #endif
+}
+
+void VulkanResourceManager::setAllocationName(const VmaAllocator &allocator, const VmaAllocation &allocation, std::string_view name)
+{
+    if (name.empty()) {
+        return;
+    }
+    const std::string allocationName = std::string(name) + "_allocation";
+    vmaSetAllocationName(allocator, allocation, allocationName.c_str());
 }
 
 Handle<AccelerationStructure_t> VulkanResourceManager::createAccelerationStructure(const Handle<Device_t> &deviceHandle, const AccelerationStructureOptions &options)

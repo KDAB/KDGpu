@@ -267,6 +267,7 @@ private:
     void deleteFramebuffer(const Handle<Framebuffer_t> &handle);
 
     static void setObjectName(VulkanDevice *device, VkObjectType type, uint64_t handle, std::string_view name);
+    static void setAllocationName(const VmaAllocator &allocator, const VmaAllocation &allocation, std::string_view name);
 
     [[nodiscard]] static std::vector<std::string> getAvailableLayers();
 

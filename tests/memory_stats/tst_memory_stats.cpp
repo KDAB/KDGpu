@@ -37,12 +37,13 @@ TEST_SUITE("MemoryStats")
         {
             // GIVEN
             const TextureOptions textureOptions = {
+                .label = "MyTexture",
                 .type = TextureType::TextureType2D,
                 .format = Format::R8G8B8A8_SNORM,
                 .extent = { 512, 512, 1 },
                 .mipLevels = 1,
                 .usage = TextureUsageFlagBits::SampledBit,
-                .memoryUsage = MemoryUsage::GpuOnly
+                .memoryUsage = MemoryUsage::GpuOnly,
             };
 
             // WHEN
@@ -65,6 +66,7 @@ TEST_SUITE("MemoryStats")
         {
             // GIVEN
             const TextureOptions textureOptions = {
+                .label = "MyTextureExternalFD",
                 .type = TextureType::TextureType2D,
                 .format = Format::R8G8B8A8_SNORM,
                 .extent = { 512, 512, 1 },
@@ -96,6 +98,7 @@ TEST_SUITE("MemoryStats")
         {
             // GIVEN
             const TextureOptions textureOptions = {
+                .label = "MyTextureExternalHandle",
                 .type = TextureType::TextureType2D,
                 .format = Format::R8G8B8A8_SNORM,
                 .extent = { 512, 512, 1 },
