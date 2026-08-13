@@ -249,7 +249,8 @@ private:
     Handle<Framebuffer_t> createFramebuffer(const Handle<Device_t> &deviceHandle,
                                             const VulkanFramebufferKey &frameBufferKey);
 
-    void setObjectName(VulkanDevice *device, const VkObjectType type, const uint64_t handle, const std::string_view name);
+    static void setObjectName(VulkanDevice *device, const VkObjectType type, const uint64_t handle, const std::string_view name);
+    static void setAllocationName(const VmaAllocator &allocator, const VmaAllocation &allocation, std::string_view name);
 
     void deleteFramebuffer(const Handle<Framebuffer_t> &handle);
 
