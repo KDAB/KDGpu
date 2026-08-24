@@ -59,7 +59,8 @@ public:
     Queue createQueueFromExistingVkQueue(VkQueue vkQueue, const QueueFlags queueFlags);
     Device createDeviceFromExistingVkDevice(Adapter *adapter,
                                             VkDevice vkDevice,
-                                            std::vector<Queue> &&queues);
+                                            std::vector<Queue> &&queues,
+                                            std::span<const char *const> enabledExtensions = {});
     VkImage vkImageFromTexture(const Handle<Texture_t> textureH) const;
     Texture createTextureFromExistingVkImage(const Handle<Device_t> &deviceHandle, const TextureOptions &options, VkImage vkImage);
 

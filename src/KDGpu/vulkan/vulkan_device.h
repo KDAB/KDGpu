@@ -59,6 +59,7 @@ struct KDGPU_EXPORT VulkanDevice {
                           VulkanResourceManager *_vulkanResourceManager,
                           const Handle<Adapter_t> &_adapterHandle,
                           const AdapterFeatures &requestedFeatures,
+                          bool _memoryBudgetExtensionEnabled,
                           bool _isOwned = true) noexcept;
 
     // Non Copyable
@@ -74,6 +75,7 @@ struct KDGPU_EXPORT VulkanDevice {
                                             std::span<AdapterQueueType> queueTypes);
 
     void waitUntilIdle();
+    void setFrameIndex(uint32_t frameIndex);
 
     VmaAllocator getOrCreateExternalMemoryAllocator(ExternalMemoryHandleTypeFlags externalMemoryHandleType);
     VmaAllocator createMemoryAllocator(ExternalMemoryHandleTypeFlags externalMemoryHandleType = ExternalMemoryHandleTypeFlagBits::None) const;
@@ -85,6 +87,8 @@ struct KDGPU_EXPORT VulkanDevice {
 
     VulkanResourceManager *vulkanResourceManager{ nullptr };
     Handle<Adapter_t> adapterHandle;
+    bool memoryBudgetExtensionEnabled{ false };
+    uint32_t frameIndex{ 0 };
     VmaAllocator allocator{ VK_NULL_HANDLE };
     struct MemoryHandleTypeAndAllocator {
         ExternalMemoryHandleTypeFlags externalMemoryHandleType;

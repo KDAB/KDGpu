@@ -78,7 +78,22 @@ public:
 
     void waitUntilIdle();
 
-    const Adapter *adapter() const;
+    /**
+     * @brief Returns the frame index currently used by the device's memory allocators.
+     *
+     * The frame index is used by VMA when tracking allocations across frames.
+     */
+    [[nodiscard]] uint32_t frameIndex() const;
+
+    /**
+     * @brief Sets the frame index used by the device's memory allocators.
+     *
+     * This updates all existing allocators. Allocators created subsequently use the
+     * new frame index as well.
+     */
+    void setFrameIndex(uint32_t frameIndex);
+
+    [[nodiscard]] const Adapter *adapter() const;
 
     Swapchain createSwapchain(const SwapchainOptions &options);
     Texture createTexture(const TextureOptions &options);

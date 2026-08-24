@@ -33,6 +33,59 @@ TEST_SUITE("MemoryStats")
 
     TEST_CASE("Vulkan Memory Stats")
     {
+        SUBCASE("Stats with VK_EXT_memory_budget")
+        {
+            // GIVEN
+            const auto extensions = discreteGPUAdapter->extensions();
+            const bool supportsMemoryBudget = std::any_of(extensions.cbegin(), extensions.cend(), [](const Extension &extension) {
+                return extension.name == VK_EXT_MEMORY_BUDGET_EXTENSION_NAME;
+            });
+
+            // THEN
+            if (!supportsMemoryBudget) {
+                MESSAGE("VK_EXT_memory_budget is not supported by the selected adapter");
+                return;
+            }
+            Device budgetDevice = discreteGPUAdapter->createDevice(DeviceOptions{
+                    .extensions = { VK_EXT_MEMORY_BUDGET_EXTENSION_NAME } });
+            REQUIRE(budgetDevice.isValid());
+
+            // WHEN
+            Texture t1 = budgetDevice.createTexture(TextureOptions{
+                    .label = "MemoryBudgetTexture",
+                    .type = TextureType::TextureType2D,
+                    .format = Format::R8G8B8A8_SNORM,
+                    .extent = { 512, 512, 1 },
+                    .mipLevels = 1,
+                    .usage = TextureUsageFlagBits::SampledBit,
+                    .memoryUsage = MemoryUsage::GpuOnly,
+            });
+
+            // THEN
+            REQUIRE(t1.isValid());
+            const auto statsF0 = api->getMemoryStats(budgetDevice);
+            CHECK(!statsF0.empty());
+            SPDLOG_WARN("Stats Frame 0: {}", statsF0);
+
+            // WHEN
+            budgetDevice.setFrameIndex(1);
+            Texture t2 = budgetDevice.createTexture(TextureOptions{
+                    .label = "MemoryBudgetTexture2",
+                    .type = TextureType::TextureType2D,
+                    .format = Format::R8G8B8A8_SNORM,
+                    .extent = { 512, 512, 1 },
+                    .mipLevels = 1,
+                    .usage = TextureUsageFlagBits::SampledBit,
+                    .memoryUsage = MemoryUsage::GpuOnly,
+            });
+
+            // THEN
+            REQUIRE(t2.isValid());
+            const auto statsF1 = api->getMemoryStats(budgetDevice);
+            CHECK(!statsF1.empty());
+            SPDLOG_WARN("Stats Frame 1: {}", statsF1);
+        }
+
         SUBCASE("Stats for a Texture")
         {
             // GIVEN
