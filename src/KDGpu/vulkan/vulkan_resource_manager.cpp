@@ -851,16 +851,39 @@ Handle<Device_t> VulkanResourceManager::createDevice(const Handle<Adapter_t> &ad
     if (result != VK_SUCCESS)
         throw std::runtime_error(std::string{ "Failed to create a logical device: " } + getResultAsString(result));
 
-    const auto deviceHandle = m_devices.emplace(vkDevice, apiVersion, this, adapterHandle, options.requestedFeatures);
+    bool memoryBudgetExtensionEnabled = false;
+#if VK_EXT_memory_budget
+    memoryBudgetExtensionEnabled = hasExtension(requestedDeviceExtensions, VK_EXT_MEMORY_BUDGET_EXTENSION_NAME);
+#endif
+    const auto deviceHandle = m_devices.emplace(vkDevice,
+                                                 apiVersion,
+                                                 this,
+                                                 adapterHandle,
+                                                 options.requestedFeatures,
+                                                 memoryBudgetExtensionEnabled);
 
     return deviceHandle;
 }
 
-Handle<Device_t> VulkanResourceManager::createDeviceFromExistingVkDevice(const Handle<Adapter_t> &adapterHandle, VkDevice vkDevice)
+Handle<Device_t> VulkanResourceManager::createDeviceFromExistingVkDevice(const Handle<Adapter_t> &adapterHandle,
+                                                                          VkDevice vkDevice,
+                                                                          std::span<const char *const> enabledExtensions)
 {
     VulkanAdapter *adapter = getAdapter(adapterHandle);
     assert(adapter != nullptr);
-    const auto deviceHandle = m_devices.emplace(vkDevice, VK_API_VERSION_1_2, this, adapterHandle, adapter->queryAdapterFeatures(), false);
+    bool memoryBudgetExtensionEnabled = false;
+#if VK_EXT_memory_budget
+    memoryBudgetExtensionEnabled = std::ranges::any_of(enabledExtensions, [](const char *extension) {
+        return strcmp(extension, VK_EXT_MEMORY_BUDGET_EXTENSION_NAME) == 0;
+    });
+#endif
+    const auto deviceHandle = m_devices.emplace(vkDevice,
+                                                 VK_API_VERSION_1_2,
+                                                 this,
+                                                 adapterHandle,
+                                                 adapter->queryAdapterFeatures(),
+                                                 memoryBudgetExtensionEnabled,
+                                                 false);
 
     return deviceHandle;
 }

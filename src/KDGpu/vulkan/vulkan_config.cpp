@@ -168,6 +168,9 @@ std::vector<const char *> getDefaultRequestedDeviceExtensions()
 #if VK_KHR_timeline_semaphore
         VK_KHR_TIMELINE_SEMAPHORE_EXTENSION_NAME,
 #endif
+#if VK_EXT_memory_budget
+        VK_EXT_MEMORY_BUDGET_EXTENSION_NAME,
+#endif
     };
 
     return extensions;

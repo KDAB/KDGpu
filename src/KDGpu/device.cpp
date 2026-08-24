@@ -97,6 +97,18 @@ void Device::waitUntilIdle()
     apiDevice->waitUntilIdle();
 }
 
+uint32_t Device::frameIndex() const
+{
+    const auto *apiDevice = m_api->resourceManager()->getDevice(m_device);
+    return apiDevice->frameIndex;
+}
+
+void Device::setFrameIndex(uint32_t frameIndex)
+{
+    auto *apiDevice = m_api->resourceManager()->getDevice(m_device);
+    apiDevice->setFrameIndex(frameIndex);
+}
+
 Swapchain Device::createSwapchain(const SwapchainOptions &options)
 {
     return Swapchain(m_api, m_device, options);

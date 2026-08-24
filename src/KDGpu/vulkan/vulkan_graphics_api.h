@@ -59,7 +59,8 @@ public:
     Queue createQueueFromExistingVkQueue(VkQueue vkQueue, const QueueFlags queueFlags);
     Device createDeviceFromExistingVkDevice(Adapter *adapter,
                                             VkDevice vkDevice,
-                                            std::vector<Queue> &&queues);
+                                            std::vector<Queue> &&queues,
+                                            std::span<const char *const> enabledExtensions = {});
     VkInstance vkInstanceFromInstance(const Handle<Instance_t> &instanceH) const;
     VkPhysicalDevice vkPhysicalDeviceFromAdapter(const Handle<Adapter_t> &adapterH) const;
     VkDevice vkDeviceFromDevice(const Handle<Device_t> &deviceH) const;

@@ -67,12 +67,13 @@ Queue VulkanGraphicsApi::createQueueFromExistingVkQueue(VkQueue vkQueue, const Q
 
 Device VulkanGraphicsApi::createDeviceFromExistingVkDevice(Adapter *adapter,
                                                            VkDevice vkDevice,
-                                                           std::vector<Queue> &&queues)
+                                                           std::vector<Queue> &&queues,
+                                                           std::span<const char *const> enabledExtensions)
 {
     Device device;
     device.m_api = this;
     device.m_adapter = adapter;
-    device.m_device = m_vulkanResourceManager.createDeviceFromExistingVkDevice(adapter->handle(), vkDevice);
+    device.m_device = m_vulkanResourceManager.createDeviceFromExistingVkDevice(adapter->handle(), vkDevice, enabledExtensions);
     device.m_queues = std::move(queues);
 
     // Note: we can't know what queues the VkDevice was create with, we assume createQueueFromExistingVkQueue

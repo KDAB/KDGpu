@@ -34,12 +34,14 @@ VulkanDevice::VulkanDevice(VkDevice _device,
                            VulkanResourceManager *_vulkanResourceManager,
                            const Handle<Adapter_t> &_adapterHandle,
                            const AdapterFeatures &_requestedFeatures,
+                           bool _memoryBudgetExtensionEnabled,
                            bool _isOwned) noexcept
     : device(_device)
     , apiVersion(_apiVersion)
     , requestedFeatures(_requestedFeatures)
     , vulkanResourceManager(_vulkanResourceManager)
     , adapterHandle(_adapterHandle)
+    , memoryBudgetExtensionEnabled(_memoryBudgetExtensionEnabled)
     , allocator(createMemoryAllocator())
     , isOwned(_isOwned)
 {
@@ -262,6 +264,14 @@ void VulkanDevice::waitUntilIdle() const
     vkDeviceWaitIdle(device);
 }
 
+void VulkanDevice::setFrameIndex(uint32_t frameIndex)
+{
+    this->frameIndex = frameIndex;
+    vmaSetCurrentFrameIndex(allocator, this->frameIndex);
+    for (const auto &externalAllocator : externalAllocators)
+        vmaSetCurrentFrameIndex(externalAllocator.allocator, frameIndex);
+}
+
 VmaAllocator VulkanDevice::getOrCreateExternalMemoryAllocator(ExternalMemoryHandleTypeFlags externalMemoryHandleType)
 {
     VmaAllocator allocator = VK_NULL_HANDLE;
@@ -288,7 +298,10 @@ VmaAllocator VulkanDevice::createMemoryAllocator(ExternalMemoryHandleTypeFlags e
     allocatorInfo.physicalDevice = vulkanAdapter->physicalDevice;
     allocatorInfo.device = device;
     if (requestedFeatures.bufferDeviceAddress)
-        allocatorInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
+        allocatorInfo.flags |= VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
+
+    if (memoryBudgetExtensionEnabled)
+        allocatorInfo.flags |= VMA_ALLOCATOR_CREATE_EXT_MEMORY_BUDGET_BIT;
 
     std::vector<VkExternalMemoryHandleTypeFlags> externalMemoryHandleTypes;
     if (externalMemoryHandleType != ExternalMemoryHandleTypeFlagBits::None) {
@@ -301,6 +314,8 @@ VmaAllocator VulkanDevice::createMemoryAllocator(ExternalMemoryHandleTypeFlags e
     VmaAllocator allocator = VK_NULL_HANDLE;
     if (vmaCreateAllocator(&allocatorInfo, &allocator) != VK_SUCCESS)
         SPDLOG_LOGGER_CRITICAL(Logger::logger(), "Failed to create Vulkan external memory allocator!");
+
+    vmaSetCurrentFrameIndex(allocator, frameIndex);
 
     return allocator;
 }
