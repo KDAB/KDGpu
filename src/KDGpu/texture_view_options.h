@@ -24,6 +24,12 @@ struct TextureViewOptions {
     Format format{ Format::UNDEFINED };
     TextureSubresourceRange range{};
     OptionalHandle<YCbCrConversion_t> yCbCrConversion;
+    ComponentMapping components{
+        .r = ComponentSwizzle::Identity,
+        .g = ComponentSwizzle::Identity,
+        .b = ComponentSwizzle::Identity,
+        .a = ComponentSwizzle::Identity,
+    };
 };
 
 } // namespace KDGpu

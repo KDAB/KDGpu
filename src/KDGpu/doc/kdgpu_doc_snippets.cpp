@@ -250,6 +250,17 @@ void textureview_examples(KDGpu::Device &device)
     });
     //! [textureview_default]
 
+    //! [textureview_components]
+    KDGpu::TextureView remappedView = texture1.createView(KDGpu::TextureViewOptions{
+            .components = {
+                    .r = KDGpu::ComponentSwizzle::B,
+                    .g = KDGpu::ComponentSwizzle::G,
+                    .b = KDGpu::ComponentSwizzle::R,
+                    .a = KDGpu::ComponentSwizzle::One,
+            },
+    });
+    //! [textureview_components]
+
     //! [textureview_mip_level]
     // Create view for mip level 2 only
     KDGpu::TextureView mipView = texture1.createView(KDGpu::TextureViewOptions{

@@ -65,6 +65,47 @@ TEST_SUITE("TextureView")
             // THEN
             CHECK(tv.isValid());
         }
+
+        SUBCASE("A constructed Texture from a Vulkan API with Component Remapping")
+        {
+            // GIVEN
+            const TextureOptions textureOptions = {
+                .type = TextureType::TextureType2D,
+                .format = Format::R8G8B8A8_SNORM,
+                .extent = { 512, 512, 1 },
+                .mipLevels = 1,
+                .usage = TextureUsageFlagBits::SampledBit | TextureUsageFlagBits::ColorAttachmentBit,
+                .memoryUsage = MemoryUsage::GpuOnly,
+            };
+
+            // WHEN
+            Texture t = device.createTexture(textureOptions);
+
+            // THEN
+            CHECK(t.isValid());
+
+            // WHEN
+            TextureView tv = t.createView(TextureViewOptions{
+                    .components = {
+                            .r = ComponentSwizzle::B,
+                            .g = ComponentSwizzle::G,
+                            .b = ComponentSwizzle::R,
+                            .a = ComponentSwizzle::A,
+                    },
+            });
+
+            // THEN
+            CHECK(tv.isValid());
+        }
+    }
+
+    TEST_CASE("Component mapping defaults")
+    {
+        const TextureViewOptions options;
+        CHECK(options.components.r == ComponentSwizzle::Identity);
+        CHECK(options.components.g == ComponentSwizzle::Identity);
+        CHECK(options.components.b == ComponentSwizzle::Identity);
+        CHECK(options.components.a == ComponentSwizzle::Identity);
     }
 
     TEST_CASE("Destruction")

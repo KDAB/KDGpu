@@ -1228,6 +1228,12 @@ Handle<TextureView_t> VulkanResourceManager::createTextureView(const Handle<Devi
     createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     createInfo.image = vulkanTexture->image;
     createInfo.viewType = viewTypeToVkImageViewType(options.viewType);
+    createInfo.components = VkComponentMapping{
+        .r = componentSwizzleToVkComponentSwizzle(options.components.r),
+        .g = componentSwizzleToVkComponentSwizzle(options.components.g),
+        .b = componentSwizzleToVkComponentSwizzle(options.components.b),
+        .a = componentSwizzleToVkComponentSwizzle(options.components.a),
+    };
 
     // Specify the format. If none specified, default to the source texture's format
     if (options.format == Format::UNDEFINED) {

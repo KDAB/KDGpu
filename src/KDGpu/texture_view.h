@@ -33,6 +33,7 @@ struct TextureView_t;
     <b>Key features:</b>
     - View specific mip levels or array layers
     - Reinterpret texture format
+    - Remap sampled color components without changing texture data
     - Access specific aspects (color, depth, stencil)
     - Required for binding textures to pipelines
     .
@@ -46,6 +47,18 @@ struct TextureView_t;
     <b>Creating a default texture view:</b>
 
     \snippet kdgpu_doc_snippets.cpp textureview_default
+
+    <b>Remapping sampled components:</b>
+
+    Each field in TextureViewOptions::components selects the source for that output channel.
+    Identity preserves the corresponding channel; Zero and One supply constant values.
+    Remapping affects shader reads through this view, not the underlying texture data.
+
+    \snippet kdgpu_doc_snippets.cpp textureview_components
+
+    Vulkan requires identity mappings for views used as framebuffer attachments or storage images,
+    and for views with a YCbCr conversion. For YCbCr remapping, use YCbCrConversionOptions::components
+    instead. These restrictions apply to the view's use, not merely the parent texture's usage flags.
 
     <b>Viewing a specific mip level:</b>
 
